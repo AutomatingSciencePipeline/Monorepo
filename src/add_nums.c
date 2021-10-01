@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-// simple file for testing experimental pipeline
+// simple "experiment" for testing experimental pipeline
 
 int main(int argc, char *argv[]){
     FILE *f = fopen("results.csv", "w");
