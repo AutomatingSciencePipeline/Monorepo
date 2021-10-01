@@ -12,7 +12,6 @@ varList = config['VARIABLES']['VarList']
 args = [expName]
 args.extend(json.loads(varList))
 args = map(str, args)
-print(args)
 
 subprocess.run(args)
 
