@@ -1,18 +1,9 @@
-import configparser
 import subprocess
-import json
 
-#parses the config file sent by the front end and the enters variables as arguments to the "experiment" exe file sent
+#this program will recieve the experiment file and config files from the front end, then run the experiment and return the results to the database
 
 expName = 'add_nums'
 configName = 'config.ini'
-config = configparser.ConfigParser()
-config.read(configName)
-varList = config['VARIABLES']['VarList']
-args = [expName]
-args.extend(json.loads(varList))
-args = map(str, args)
-
-subprocess.run(args)
+subprocess.run(expName + ' ' + configName)
 
 
