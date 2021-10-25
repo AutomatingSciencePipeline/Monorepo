@@ -35,6 +35,7 @@ def main():
             exit()
 
     data = stdout_data[0]
+    print(f'Data returned by mapper as follows:\n{data}')
      
 
 
