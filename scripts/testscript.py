@@ -15,6 +15,8 @@ def main():
     values = generate_conf(number)
     print(f'Data generation complete. Config file written to ./config.ini')
     
+    print(f'Feeding generated data into test mapping script.')
+
 
      
 
