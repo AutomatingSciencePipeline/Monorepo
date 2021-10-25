@@ -1,0 +1,34 @@
+body {
+    background: #a4f0fa;
+}
+
+.navbar {
+    background-color: #cf3ac3;
+    color: #a4f0fa;
+}
+#fab {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    background: #cf3ac3;
+    color: #a4f0fa;
+    z-index: 999;
+}
+#fab:active {
+    transform: translateY(2px);
+    opacity: 0.8;
+}
+.card {
+    margin: 10px 0;
+}
+#listPage .card-title,
+#listPage .card-text {
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+    text-overflow: ellipsis;
+}
+
+.page-container {
+    margin-top: 75px;
+}
