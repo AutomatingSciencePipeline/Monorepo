@@ -40,16 +40,6 @@ def main():
     print(f'Feeding generated data into test mapping script.')
     payload = '\n'.join('{}'.format(i) for i in values)
     print(f'Payload as follows:\n{payload}')
-    print('Opening subprocess')
-
-    with Popen(['python','varmeanmapper.py'], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
-        try:
-            stdout_data = p.communicate(input=payload)
-            print(stdout_data)
-        except Exception as e:
-            print('FATAL')
-            print(e)
-            exit()
 
     mapper_out = communicate('varmeanmapper.py',payload)
     reducer_out = communicate('varmeanreducer.py',mapper_out)
