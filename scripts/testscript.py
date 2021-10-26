@@ -1,11 +1,14 @@
 import sys, os
+import re
 from subprocess import Popen, PIPE, STDOUT
 from numpy import random
 import argparse,configparser,json
 
 parser = argparse.ArgumentParser(description="Run test script for the GLADOS System for a variance calculation.\nGenerates random numbers using python, and populates config file for an executable.")
 parser.add_argument('--N', dest='count',type=int,help='Number of values generated randomly')
+parser.add_argument('--nitr', dest='itercount',type=int,help='Number of mapper iterations to perform for reduction')
 parser.add_argument('--override', dest='override',default=False, help="Override existing config.ini")
+parser.add_argument('--clean',dest='clean',default=False,help="clean existing configs for jobs")
 
 config = configparser.ConfigParser()
 config.sections()
@@ -14,6 +17,11 @@ def main():
     args = parser.parse_args()
     number = args.count
     override = not not args.override
+    clean = not not args.clean
+
+    if clean:
+
+        exit()
 
     print(f'Generating random numbers from input.')
     generate_conf(number,override)
@@ -34,8 +42,8 @@ def main():
             print(e)
             exit()
 
-    data = stdout_data[0]
-    print(f'Data returned by mapper as follows:\n{data}')
+    mapper_out = communicate('varmeanmapper.py',payload)
+    reducer_out = communicate('varmeanreducer.py',mapper_out)
      
 
 
@@ -55,6 +63,21 @@ def generate_conf(number : int, ov : bool):
         else:
             os.remove('config.init')
             return generate_conf(number,False)
+
+def communicate(process, payload):
+    print(f'initiating communication and process at {process}')
+    with Popen(['python',process], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+        try:
+            stdout_data = p.communicate(input=payload)
+            print(f'data returned from pipe is {stdout_data[0]}')
+            if not stdout_data[1]:
+                print(f'errors returned from pipe is {stdout_data[1]}')
+        except Exception as e:
+            print('FATAL')
+            print(e)
+            exit()
+
+    return stdout_data[0] if stdout_data else None
 
 
 if __name__=="__main__":
