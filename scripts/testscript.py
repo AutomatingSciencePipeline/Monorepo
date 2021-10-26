@@ -16,11 +16,20 @@ config.sections()
 def main():
     args = parser.parse_args()
     number = args.count
+    iter_count = args.itercount
     override = not not args.override
     clean = not not args.clean
 
     if clean:
-
+        files = os.listdir()
+        files = [file for file in files if re.search("\.init$", file)]
+        try:
+            for file in files: os.remove(file)
+        except Exception as e:
+            print('FATAL')
+            print(e)
+            exit()
+        print(files)
         exit()
 
     print(f'Generating random numbers from input.')
@@ -50,7 +59,7 @@ def main():
 
 
 
-def generate_conf(number : int, ov : bool):
+def generate_conf(number : int, ov : bool) -> type(None):
     vals = random.random(number)
     print(f'Placing random numbers into config.ini if file does not exist.')
     try:
@@ -64,7 +73,7 @@ def generate_conf(number : int, ov : bool):
             os.remove('config.init')
             return generate_conf(number,False)
 
-def communicate(process, payload):
+def communicate(process:str, payload: list[str]) -> list[str]:
     print(f'initiating communication and process at {process}')
     with Popen(['python',process], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
         try:
