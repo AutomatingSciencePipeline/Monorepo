@@ -7,54 +7,29 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
   <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
   <link rel="stylesheet" href="styles/main.css">
-  <title>Movie Quotes</title>
+  <title>Parameters</title>
 </head>
 
 <body>
   <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">Movie Quotes</a>
+    <a class="navbar-brand" href="#">Fill in parameters</a>
   </nav>
-  <div id="listPage" class="container page-container">
+  <div id="parametersPage" class="container page-container">
     
-    <div id="quotesListContainer">
+    <div id="parameterContainer">
       
     
     </div>
     
 
   </div>
-  <button id = "fab" type="button" class="btn btn-info bmd-btn-fab" data-toggle="modal" data-target="#addQuoteDialog">
+
+  <div class="justify-content-center align-items-center d-flex">
+    <button id="paramSubmit" type="button" class="btn-primary">Submit</button>
+  </div>
+  <button id = "fab" type="button" class="btn btn-info bmd-btn-fab" data-toggle="modal" data-target="#addInputRow">
     <i class="material-icons">add</i>
   </button>
-  <!-- Button trigger modal -->
-
-
-<!-- Modal -->
-<div class="modal fade" id="addQuoteDialog" tabindex="-1" role="dialog" aria-labelledby="Add quote dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Movie Quote</h5>
-      </div>
-      <div class="modal-body">
-
-          <div class="form-group">
-            <label for="formGroupExampleInput">Quote</label>
-            <input type="text" class="form-control" id="inputQuote" placeholder="Quote input">
-          </div>
-          <div class="form-group">
-            <label for="formGroupExampleInput2">Movie</label>
-            <input type="text" class="form-control" id="inputMovie" placeholder="Movie input">
-          </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
-        <button type="button" id="submitAddQuote" class="btn btn-primary">CREATE</button>
-      </div>
-    </div>
-  </div>
-</div>
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
   <script src="scripts/bootstrap-material-design.js"></script>
