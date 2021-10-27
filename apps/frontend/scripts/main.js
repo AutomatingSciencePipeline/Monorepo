@@ -21,9 +21,8 @@ rhit.InitialPageController = class {
 		// };
 		document.querySelector("#initSubmit").addEventListener("click", (event) => {
 			console.log("pog");
-			var x = document.querySelector("#typeNumber");
-			console.log(x.value);
-			window.location.href = `/parameters.html?int=${x.value}`;
+			var x = document.querySelector("#typeNumber").value;
+			window.location.assign('parameters.html?int='+x);
 		});
 
 	}
@@ -33,6 +32,31 @@ rhit.InitialPageController = class {
 rhit.ParameterPageController = class {
 	constructor(int) {
 		this.int = int;
+
+		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
+	// 		var dict = {"one" : [15, 4.5],
+    // "two" : [34, 3.3],
+    // "three" : [67, 5.0],
+    // "four" : [32, 4.1]};
+
+			for(let i = 0; i < this.int; i++) {
+				console.log("#paramName"+i);				
+				var param = {"paramName" : document.querySelector("#paramName"+i).value,
+								"default" : document.querySelector("#defaultValue"+i).value,
+								"min" : document.querySelector("#minValue"+i).value,
+								"max" : document.querySelector("#maxValue"+i).value,
+								"increment" : document.querySelector("#incValue"+i).value};
+
+				var paramstring = JSON.stringify(param);
+				this.
+				download(paramstring, 'param'+i+'.json', 'json');
+			}
+		});
+
+		document.querySelector("#fab").addEventListener("click", (event => {
+			var x = parseInt(this.int, 10) + 1;
+			window.location.assign('parameters.html?int='+x);
+		}))
 
 		this.updateList();
 		
@@ -61,25 +85,33 @@ rhit.ParameterPageController = class {
 	_createCard(int) {
 		return htmlToElement(`<div class="row">
 		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
-			<input type="text" id="typeText parameterName${int}" class="form-control" />
+			<input type="text" id="paramName${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="typeNumber defaultValue${int}" class="form-control" />
+		  <input type="number" id="defaultValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="typeNumber minValue${int}" class="form-control" />
+		  <input type="number" id="minValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="typeNumber maxValue${int}" class="form-control" />
+		  <input type="number" id="maxValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="typeNumber incValue${int}" class="form-control" />
+		  <input type="number" id="incValue${int}" class="form-control" />
 		</div>
 	  </div>`);
+	}
+
+	download(content, fileName, contentType) {
+		var a = document.createElement("a");
+		var file = new Blob([content], {type: contentType});
+		a.href = URL.createObjectURL(file);
+		a.download = fileName;
+		a.click();
 	}
 }
 rhit.ParameterManager = class {
