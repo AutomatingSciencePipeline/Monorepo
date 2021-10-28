@@ -16,7 +16,7 @@ config.sections()
 def main():
     args = parser.parse_args()
     number = args.count
-    iter_count = args.itercount
+    itrcount = args.itercount
     override = not not args.override
     clean = not not args.clean
 
@@ -33,27 +33,30 @@ def main():
         exit()
 
     print(f'Generating random numbers from input.')
-    generate_conf(number,override)
-    print(f'Data generation complete. Config file written to ./config.ini\nReading from config.ini')
-    config.read('config.init')
-    values = map(float,json.loads(config.get("DEFAULT","nums")))
-    print(f'Feeding generated data into test mapping script.')
-    payload = '\n'.join('{}'.format(i) for i in values)
-    print(f'Payload as follows:\n{payload}')
+    if itrcount:
+        for i in range(itrcount):
+            generate_conf(number,override,i)
+    else:
+        generate_conf(number,override,i)
 
-    mapper_out = communicate('varmeanmapper.py',payload)
-    reducer_out = communicate('varmeanreducer.py',mapper_out)
+    print(f'Data generation complete. Config file/s written to ./config(rangeof itercount).ini\nReading from config.ini')
+    vvalues = [read_conf(value) for value in range(itrcount)]
+    payloads = ['\n'.join('{}'.format(i) for i in values) for values in vvalues]
+    mapper_outs = [communicate('varmeanmapper.py', payload) for payload in payloads]
+    print(f'Communications complete, initiated pipes with {len(payloads)} processes and gathered outputs for reduction successfully.')
+
+    reduce_in = ''.join(mapper_outs)
+    reducer_out = communicate('varmeanreducer.py',reduce_in)
+
+def read_conf(itr : int) -> list[float]:
+    config.read(f'config{itr}.init')
+    return list(map(float,json.loads(config.get("DEFAULT","nums"))))
      
-
-
-
-
-
-def generate_conf(number : int, ov : bool) -> type(None):
+def generate_conf(number : int, ov : bool, itr : int) -> type(None):
     vals = random.random(number)
     print(f'Placing random numbers into config.ini if file does not exist.')
     try:
-        f = open('config.init','x')
+        f = open(f'config{itr}.init','x')
         f.write(f'[DEFAULT]\nnums=[{",".join(map(str,vals))}]')
     except Exception as e:
         if not ov:
