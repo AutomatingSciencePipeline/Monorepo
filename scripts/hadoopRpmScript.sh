@@ -145,6 +145,7 @@ $HADOOP_PREFIX/bin/hdfs dfs -cat output/*
 #~C
 #-L 8088:127.0.0.1 8088
 
+#set up the environment variables TBD 
 
 :<<EOF
 # restart
