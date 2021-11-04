@@ -38,6 +38,7 @@ rhit.ParameterPageController = class {
     // "two" : [34, 3.3],
     // "three" : [67, 5.0],
     // "four" : [32, 4.1]};
+			var array = [];
 
 			for(let i = 0; i < this.int; i++) {
 				console.log("#paramName"+i);				
@@ -46,11 +47,36 @@ rhit.ParameterPageController = class {
 								"min" : document.querySelector("#minValue"+i).value,
 								"max" : document.querySelector("#maxValue"+i).value,
 								"increment" : document.querySelector("#incValue"+i).value};
+				
 
-				var paramstring = JSON.stringify(param);
-				this.
-				download(paramstring, 'param'+i+'.json', 'json');
+				array.push(param);
 			}
+			const params = {"experimentName" : "TEST",
+							"user" : "Williae2",
+							"parameters" : array,
+							"script" : document.querySelector("#execute").value};
+			var executable = JSON.stringify(params);
+			//this.download(executable, 'exp.json', 'json');
+
+			// Creating a XHR object
+            let xhr = new XMLHttpRequest();
+            let url = "localhost:3000";
+        
+            // open a connection
+            xhr.open("POST", url, true);
+  
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+  
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Print received data from server
+                    result.innerHTML = this.responseText;
+                }
+            };
+
+			xhr.send(executable);
 		});
 
 		document.querySelector("#fab").addEventListener("click", (event => {
@@ -74,7 +100,7 @@ rhit.ParameterPageController = class {
 			newList.appendChild(newCard);
 		}
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Executable Script/Command</div>'));
-		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="typeText parameterName${int}" class="form-control" /></div>'));
+		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="execute" class="form-control" /></div>'));
 
 		const oldList = document.querySelector("#parameterContainer");
 		oldList.removeAttribute("id");
