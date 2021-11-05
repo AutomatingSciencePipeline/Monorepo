@@ -58,6 +58,7 @@ rhit.ParameterPageController = class {
 			const params = {
 				"experimentName": "TEST",
 				"user": "Williae2",
+				"nIter" : document.querySelector("#iter").value,
 				"parameters": array,
 				//"script": document.querySelector("#execute").value
 			};
@@ -99,7 +100,7 @@ rhit.ParameterPageController = class {
 
 	updateList() {
 		const newList = htmlToElement('<div id="parameterContainer"></div>');
-		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'))
+		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Size Iteration</div></div>'))
 		for (let i = 0; i < this.int; i++) {
 			const newCard = this._createCard(i);
 			newCard.onclick = (event) => {
@@ -107,8 +108,12 @@ rhit.ParameterPageController = class {
 			}
 			newList.appendChild(newCard);
 		}
+		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Number Iterations</div>'));
+		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="number" id="iter" class="form-control" /></div>'));
+
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Executable Script/Command</div>'));
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="execute" class="form-control" /></div>'));
+
 
 		const oldList = document.querySelector("#parameterContainer");
 		oldList.removeAttribute("id");
@@ -137,6 +142,7 @@ rhit.ParameterPageController = class {
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
 		  <input type="number" id="incValue${int}" class="form-control" />
 		</div>
+
 	  </div>`);
 	}
 
