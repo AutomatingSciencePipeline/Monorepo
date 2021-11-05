@@ -13,11 +13,11 @@ class Experiment(Resource):
         return (f'Experiment{args.eid}' if args.eid else 'All experiments'),200
 
     def post(self):
-        args =  [('eid',False), ('name',False),('vars',True)]
+        args =  [('eid',False), ('user',True),('experimentName',False),('parameters',True)]
         parser, args= init_request_parser(args)
         # integrate with DB middleware
         return {
-            'message': f'Okay. Data for {args["name"] if args["name"] else "new experiment"} has been added',
+            'message': f'Okay. Data for {args["experimentName"] if args["experimentName"] else "new experiment"} instantiated by {args["user"]} has been received',
             'data': args
         }, 200
 
