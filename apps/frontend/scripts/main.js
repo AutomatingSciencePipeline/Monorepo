@@ -1,17 +1,17 @@
-
 var rhit = rhit || {};
 
 //Save
 
 rhit.initialPage = null;
 rhit.parametersPage = null;
+
 function htmlToElement(html) {
 	var template = document.createElement('template');
 	html = html.trim();
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
-   
+
 
 
 rhit.InitialPageController = class {
@@ -22,7 +22,7 @@ rhit.InitialPageController = class {
 		document.querySelector("#initSubmit").addEventListener("click", (event) => {
 			console.log("pog");
 			var x = document.querySelector("#typeNumber").value;
-			window.location.assign('parameters.html?int='+x);
+			window.location.assign('parameters.html?int=' + x);
 		});
 
 	}
@@ -34,65 +34,73 @@ rhit.ParameterPageController = class {
 		this.int = int;
 
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
-	// 		var dict = {"one" : [15, 4.5],
-    // "two" : [34, 3.3],
-    // "three" : [67, 5.0],
-    // "four" : [32, 4.1]};
+			// 		var dict = {"one" : [15, 4.5],
+			// "two" : [34, 3.3],
+			// "three" : [67, 5.0],
+			// "four" : [32, 4.1]};
 			var array = [];
 
-			for(let i = 0; i < this.int; i++) {
-				console.log("#paramName"+i);				
-				var param = {"paramName" : document.querySelector("#paramName"+i).value,
-								"default" : document.querySelector("#defaultValue"+i).value,
-								"min" : document.querySelector("#minValue"+i).value,
-								"max" : document.querySelector("#maxValue"+i).value,
-								"increment" : document.querySelector("#incValue"+i).value};
-				
+			for (let i = 0; i < this.int; i++) {
+				console.log("#paramName" + i);
+				var paramName = document.querySelector('#paramName' + i).value;
+				var param = {
+					"paramName" : paramName,
+					"values" :
+					[document.querySelector("#defaultValue" + i).value,
+					document.querySelector("#minValue" + i).value,
+					document.querySelector("#maxValue" + i).value,
+					document.querySelector("#incValue" + i).value]
+				};
+
 
 				array.push(param);
 			}
-			const params = {"experimentName" : "TEST",
-							"user" : "Williae2",
-							"parameters" : array,
-							"script" : document.querySelector("#execute").value};
+			const params = {
+				"experimentName": "TEST",
+				"user": "Williae2",
+				"parameters": array,
+				//"script": document.querySelector("#execute").value
+			};
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
 
 			// Creating a XHR object
-            let xhr = new XMLHttpRequest();
-            let url = "localhost:3000";
-        
-            // open a connection
-            xhr.open("POST", url, true);
-  
-            // Set the request header i.e. which type of content you are sending
-            xhr.setRequestHeader("Content-Type", "application/json");
-  
-            // Create a state change callback
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Print received data from server
-                    result.innerHTML = this.responseText;
-                }
-            };
+			let xhr = new XMLHttpRequest();
+			let url = "localhost:3000";
+
+			console.log(executable);
+
+			// open a connection
+			xhr.open("POST", url, true);
+
+			// Set the request header i.e. which type of content you are sending
+			xhr.setRequestHeader("Content-Type", "application/json");
+
+			// Create a state change callback
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					// Print received data from server
+					result.innerHTML = this.responseText;
+				}
+			};
 
 			xhr.send(executable);
 		});
 
 		document.querySelector("#fab").addEventListener("click", (event => {
 			var x = parseInt(this.int, 10) + 1;
-			window.location.assign('parameters.html?int='+x);
+			window.location.assign('parameters.html?int=' + x);
 		}))
 
 		this.updateList();
-		
+
 
 	}
 
-	updateList(){
+	updateList() {
 		const newList = htmlToElement('<div id="parameterContainer"></div>');
 		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'))
-		for(let i = 0; i < this.int; i++) {
+		for (let i = 0; i < this.int; i++) {
 			const newCard = this._createCard(i);
 			newCard.onclick = (event) => {
 				console.log(`You clicked on ${i}`);
@@ -134,25 +142,26 @@ rhit.ParameterPageController = class {
 
 	download(content, fileName, contentType) {
 		var a = document.createElement("a");
-		var file = new Blob([content], {type: contentType});
+		var file = new Blob([content], {
+			type: contentType
+		});
 		a.href = URL.createObjectURL(file);
 		a.download = fileName;
 		a.click();
 	}
 }
 rhit.ParameterManager = class {
-	constructor() {
-	}
+	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
 	}
 	stopListening() {
-	  this._unsubscribe();
+		this._unsubscribe();
 	}
 
 }
-   
-   
+
+
 
 // rhit.InitialPageManager = class {
 // 	constructor() {
@@ -195,32 +204,32 @@ rhit.ParameterManager = class {
 // 			docSnapshot.id,
 // 			docSnapshot.get(rhit.FB_KEY_QUOTE),
 // 			docSnapshot.get(rhit.FB_KEY_MOVIE),
-			
+
 // 		)
 // 		return mq;
 // 	}
 //    }
-   
+
 /* Main */
 /** function and class syntax examples */
 rhit.main = function () {
 	console.log("Ready");
-	if(document.querySelector("#initialPage")) {
+	if (document.querySelector("#initialPage")) {
 		console.log("You are on the initial page");
 		//rhit.intialPageManager = new rhit.InitialPageManager();
 		new rhit.InitialPageController();
 
 	}
 
-	if(document.querySelector("#parametersPage")) {
+	if (document.querySelector("#parametersPage")) {
 		console.log("You are on the parameters page");
 		// mqid = rhit.storage.getMovieQuoteId();
 		const queryString = window.location.search;
 		const urlParams = new URLSearchParams(queryString);
 		const int = urlParams.get("int");
 		console.log(`Detail page for ${int}`);
-		if(!int) {
-			window.location.href="/";
+		if (!int) {
+			window.location.href = "/";
 		}
 		new rhit.ParameterPageController(int);
 	}
