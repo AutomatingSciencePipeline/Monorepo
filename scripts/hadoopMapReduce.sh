@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-UBUNTU_VERSION="14.04"
+
 
 mkdirs(){
 #lxc delete hadoop-master --force
