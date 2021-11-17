@@ -74,7 +74,7 @@ rhit.ParameterPageController = class {
 				cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
-			fetch(`${url}experiment?user=${params.user}?parameters`, {
+			fetch(`${url}experiment?user=${params.user}&parameters=${params.parameters}&experimentName=${params.experimentName}`, {
 				method: 'POST',
 				mode: 'no-cors',
 			body: executable}).then(data => {

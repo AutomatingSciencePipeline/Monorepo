@@ -3,8 +3,16 @@ from flask_restful import Resource,Api,reqparse
 import json
 import os
 from subprocess import Popen, PIPE, STDOUT, run
+import sys
+
+
+# insert at 1, 0 is the script path (or '' in REPL)
+sys.path.insert(1, '/Monorepo/services/dbmigrations')
+
+import db_modules.py
 
 app = Flask(__name__)
+InitDatabases()
 api = Api(app)
 
 class Experiment(Resource):
@@ -18,6 +26,8 @@ class Experiment(Resource):
         args =  [('eid',False), ('user',False),('experimentName',False),('parameters',False)]
         parser, args= init_request_parser(args)
         # integrate with DB middleware
+        int id = CreateExperiment(args["experimentName"], "INITIALIZED", args["user"], 1)
+        print(FindMaria(id))
         print(f'{args}') 
         run(['python', '../../scripts/testscript.py', '--clean', '1'])
         run(['python', '../../scripts/testscript.py', '--N', '100', '--nitr', '10', '--override', '1'])
