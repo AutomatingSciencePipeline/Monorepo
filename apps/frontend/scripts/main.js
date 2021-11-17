@@ -58,34 +58,44 @@ rhit.ParameterPageController = class {
 			const params = {
 				"experimentName": "TEST",
 				"user": "Williae2",
-				"nIter" : document.querySelector("#iter").value,
-				"parameters": array,
+//				"nIter" : document.querySelector("#iter").value,
+				"parameters": "genAutor",
 				//"script": document.querySelector("#execute").value
 			};
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
 
 			// Creating a XHR object
-			let xhr = new XMLHttpRequest();
-			let url = "localhost:3000";
+			//let xhr = new XMLHttpRequest();
+			//let url = "https://194.195.213.242:5000/experiment";
+			let url = "http://localhost:5000/";
+			fetch(`${url}`, {
+				mode: 'no-cors',
+				cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
+			fetch(`${url}experiment?user=${params.user}?parameters`, {
+				method: 'POST',
+				mode: 'no-cors',
+			body: executable}).then(data => {
+					console.log(data)
+				}).catch(err => console.log(err))
 
 			// open a connection
-			xhr.open("POST", url, true);
-
-			// Set the request header i.e. which type of content you are sending
-			xhr.setRequestHeader("Content-Type", "application/json");
-
-			// Create a state change callback
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState === 4 && xhr.status === 200) {
-					// Print received data from server
-					result.innerHTML = this.responseText;
-				}
-			};
-
-			xhr.send(executable);
+//			xhr.open("POST", url, true);
+//
+//			// Set the request header i.e. which type of content you are sending
+//			xhr.setRequestHeader("Content-Type", "application/json");
+//
+//			// Create a state change callback
+//			xhr.onreadystatechange = function () {
+//				if (xhr.readyState === 4 && xhr.status === 200) {
+//					// Print received data from server
+//					result.innerHTML = this.responseText;
+//				}
+//			};
+//
+//			xhr.send(executable);
 		});
 
 		document.querySelector("#fab").addEventListener("click", (event => {

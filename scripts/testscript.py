@@ -47,6 +47,7 @@ def main():
 
     reduce_in = ''.join(mapper_outs)
     reducer_out = communicate('varmeanreducer.py',reduce_in)
+    print(reducer_out)
 
 def read_conf(itr : int) -> list[float]:
     config.read(f'config{itr}.init')
