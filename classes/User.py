@@ -5,4 +5,4 @@ class User:
         self.password = password
     def hashPassowrd(password):
         return hashlib.sha256(str.encode(password)).hexdigest()
-    
+    #need to figure out how to add it
