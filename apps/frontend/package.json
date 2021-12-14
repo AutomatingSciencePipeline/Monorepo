@@ -1,0 +1,29 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend Package",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GLADOSPipeline/Monorepo.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Elijah Williams",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GLADOSPipeline/Monorepo/issues"
+  },
+  "homepage": "https://github.com/GLADOSPipeline/Monorepo#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsdom": "^19.0.0"
+  }
+}
