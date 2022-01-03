@@ -1,7 +1,4 @@
-// const jsdom = require("jsdom");
-// const { JSDOM } = jsdom;
 
-// const dom = new JSDOM();
 
 //Save
 
@@ -12,7 +9,6 @@ function htmlToElement(html) {
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
-
 function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
 	const parsedDef = parseInt(defaultVal);
 	const parsedMin = parseInt(minVal);
@@ -41,36 +37,20 @@ function checkUser(username, password) {
 }
  
 
-function experimentParamsJSON(numParams, experimentName, user){
+function experimentParamsJSON(paramsArr, experimentName, user){
 
-	var array = [];
-
-			for (let i = 0; i < numParams; i++) {
-				console.log("#paramName" + i);
-				var paramName = document.querySelector('#paramName' + i).value;
-				var defVal = document.querySelector("#defaultValue" + i).value
-				var minVal = document.querySelector("#minValue" + i).value
-				var maxVal = document.querySelector("#maxValue" + i).value
-				var incVal = document.querySelector("#incValue" + i).value
-				var param = paramJSON(paramName, defVal, minVal, maxVal, incVal);
-
-
-				array.push(param);
-			}
 			const params = {
 				"experimentName": experimentName,
 				"user": user,
-				"parameters": array,
+				"parameters": paramsArr,
 			};
 	return params;
 
 }
 
 
-// module.exports.paramJSON = paramJSON;
-// module.exports.experimentParamsJSON = experimentParamsJSON;
-// module.exports.createUser = createUser;
-// module.exports.checkUser = checkUser;
+
+
 
 LoginPageController = class {
 	constructor() {
@@ -110,7 +90,7 @@ InitialPageController = class {
 		document.querySelector("#initSubmit").addEventListener("click", (event) => {
 			console.log("pog");
 			var x = document.querySelector("#typeNumber").value;
-			window.location.assign('parameters?int=' + x);
+			location.assign('parameters?int=' + x);
 		});
 
 	}
@@ -126,7 +106,21 @@ ParameterPageController = class {
 			// "two" : [34, 3.3],
 			// "three" : [67, 5.0],
 			// "four" : [32, 4.1]};
-			var params = experimentParamsJSON(this.int, "POG", "Williae2");S
+			var array = [];
+
+			for (let i = 0; i < this.int; i++) {
+				console.log("#paramName" + i);
+				var paramName = dom.window.document.querySelector('#paramName' + i).value;
+				var defVal = dom.window.document.querySelector("#defaultValue" + i).value
+				var minVal = dom.window.document.querySelector("#minValue" + i).value
+				var maxVal = dom.window.document.querySelector("#maxValue" + i).value
+				var incVal = dom.window.document.querySelector("#incValue" + i).value
+				var param = paramJSON(paramName, defVal, minVal, maxVal, incVal);
+
+
+				array.push(param);
+			}
+			var params = experimentParamsJSON(array, "POG", "Williae2");
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
 
@@ -139,7 +133,7 @@ ParameterPageController = class {
 				cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
-			fetch(`${url}experiment?user=${params.user}&parameters=${params.parameters}&experimentName=${params.experimentName}`, {
+			fetch(`${url}`, {
 				method: 'POST',
 				mode: 'no-cors',
 			body: executable}).then(data => {
@@ -244,7 +238,7 @@ main = function () {
 	if (document.querySelector("#initialPage")) {
 		console.log("You are on the initial page");
 		//rhit.intialPageManager = new rhit.InitialPageManager();
-		const queryString = window.location.search;
+		const queryString = location.search;
 		const urlParams = new URLSearchParams(queryString);
 		const user = urlParams.get("user");
 		console.log(`Detail page for ${user}`);
