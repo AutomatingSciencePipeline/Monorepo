@@ -8,72 +8,64 @@ IPC_FIFO_RECV = 'GLADOS_PROD_A'
 IPC_FIFO_SEND = 'GLADOS_PROD_B'
 
 
-"JOB: [DIRECTORY]"
-# directory :: [hyperparams.json, experiment.bin, metadata, sub/[run]*] 
-
-'''
-x = [1,2,4,5]
-lr = [0.001,0.01,0.1]
-
-in::[x=1,lr=0.001] >> mapper1 -> out::[..vals..] >> reducer [ csv {x=1,lr=0.001}
-in::[x=1,lr=0.001] >> mapper2 -> out::[..vals..] >> reducer
-in::[x=1,lr=0.001] >> mapper3 -> out::[..vals..] >> reducer
-in::[x=1,lr=0.001] >> mapper4 -> out::[..vals..] >> reducer ]
-
-'''
-
+#"JOB: [DIRECTORY]"
+## directory :: [hyperparams.json, experiment.bin, metadata, sub/[run]*] 
+#
+#'''
+#x = [1,2,4,5]
+#lr = [0.001,0.01,0.1]
+#
+#in::[x=1,lr=0.001] >> mapper1 -> out::[..vals..] >> reducer [ csv {x=1,lr=0.001}
+#in::[x=1,lr=0.001] >> mapper2 -> out::[..vals..] >> reducer
+#in::[x=1,lr=0.001] >> mapper3 -> out::[..vals..] >> reducer
+#in::[x=1,lr=0.001] >> mapper4 -> out::[..vals..] >> reducer ]
+#
+#'''
+#
 
 class GLB():
+
     def __init__(self, n_workers=None):
         logging.debug(f'Initializing global GLB recv pipe...')
-        os.mkfifo(IPC_FIFO_RECV)
+        os.mkfifo(f'../apps/frontend/{IPC_FIFO_RECV}')
         try: 
-            self.fifo_r = os.open(IPC_FIFO_RECV, os.O_RDONLY | os.O_NONBLOCK) # pipe is open
+            self.fifo_r = os.open(f'../apps/frontend/{IPC_FIFO_RECV}', os.O_RDONLY | os.O_NONBLOCK) # pipe is open
             logging.debug('RECV pipe successfully opened.')
             while True:
                 try:
-                    self.fifo_s = os.open(IPC_FIFO_SEND, os.O_WRONLY)
-                    loggging.debug('SEND pipe has been successfully located.')
+                    self.fifo_s = os.open(f'../apps/frontend/{IPC_FIFO_SEND}', os.O_WRONLY)
+                    logging.debug('SEND pipe has been successfully located.')
                     break
                 except:
                     pass
             try:
                 self.poll = select.poll()
-                self.poll.register(fifo_s, select.POLLIN)
+                self.poll.register(self.fifo_s, select.POLLIN)
             except Exception as e:
-                loggging.critical(f'FATAL: Pipe: {IPC_FIFO_SEND} failed registration with exception: {e}');
-#            finally:
-#                os.close(self.fifo_s)
+                logging.critical(f'FATAL: Pipe: {IPC_FIFO_SEND} failed registration with exception: {e}');
         except Exception as e:
-            loggging.critical(f'FATAL: Pipe: {IPC_FIFO_RECV} failed creation with exception: {e}');
+            logging.critical(f'FATAL: Pipe: {IPC_FIFO_RECV} failed creation with exception: {e}');
             exit(2)
-#        finally: 
-#            os.remove(IPC_FIFO_RECV)
-#            os.remove(IPC_FIFO_SEND)
             
-        # intialize pool resouces here.
         logging.info('Initilized Global Load Balancer.')
+
     def run(self):
         try:
             while True:
                 if (self.fifo_r, select.POLLIN) in self.poll.poll(1000):
-                    msg = self._recv_msg(self.fifo_r)
-                    msg = self._proc_msg(msg)
+                    msg = self.recv_msg(self.fifo_r)
+                    msg = self.proc_msg(msg)
                     os.write(self.fifo_s)
-                    logger.info(f'[RECV Event]:\tMsg: {msg.decode("utf-8")}')
+                    logging.info(f'[RECV Event]:\tMsg: {msg.decode("utf-8")}')
+        except Exception as e:
+            logging.critical(f'FATAL: Pipe: {IPC_FIFO_RECV} failed with exception: {e}');
+            exit(2)
 
-    
-    def _recv_msg(self,fifo):
+    def recv_msg(self,fifo):
         return os.read(fifo, 24)
 
-    def _proc_msg(self,msg):
+    def proc_msg(self,msg):
         return msg
-
-
-if __name__=='__main__':
-    glb = GLB()
-    glb.run()
-
 #def global():
 #    while True:
 #        if jobalert():
@@ -158,3 +150,7 @@ if __name__=='__main__':
 #
 #if __name__=="__main__":
 #    main()
+if __name__=='__main__':
+    logging.getLogger().setLevel(logging.DEBUG)
+    glb = GLB()
+    glb.run()
