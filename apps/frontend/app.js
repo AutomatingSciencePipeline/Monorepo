@@ -71,9 +71,9 @@ function main() {
 		console.log('Ready to write')
 
 		setInterval(() => {
+			console.log('-----   Send packet   -----');
 			fifoWs.write(`ALERT: New Experiment pog at /exploc/experiment_pog`);
 			if (submit) {		
-				console.log('-----   Send packet   -----');
 				submit = false;
 			}
 		}, 1000); // Write data at 1 second interval
