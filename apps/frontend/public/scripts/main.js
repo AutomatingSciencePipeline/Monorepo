@@ -110,11 +110,11 @@ ParameterPageController = class {
 
 			for (let i = 0; i < this.int; i++) {
 				console.log("#paramName" + i);
-				var paramName = dom.window.document.querySelector('#paramName' + i).value;
-				var defVal = dom.window.document.querySelector("#defaultValue" + i).value
-				var minVal = dom.window.document.querySelector("#minValue" + i).value
-				var maxVal = dom.window.document.querySelector("#maxValue" + i).value
-				var incVal = dom.window.document.querySelector("#incValue" + i).value
+				var paramName = document.querySelector('#paramName' + i).value;
+				var defVal = document.querySelector("#defaultValue" + i).value
+				var minVal = document.querySelector("#minValue" + i).value
+				var maxVal = document.querySelector("#maxValue" + i).value
+				var incVal = document.querySelector("#incValue" + i).value
 				var param = paramJSON(paramName, defVal, minVal, maxVal, incVal);
 
 

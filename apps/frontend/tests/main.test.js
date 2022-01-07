@@ -41,7 +41,7 @@ test('This makes sure the previous test does not give a false positive', () => {
 test('This tests to see if an experiment with more than one parameter works', () => {
     expect(main.experimentParamsJSON([{'paramName' : "john",
     'values' : [10, 1, 20, 1]}, {'paramName' : "generation",
-    'values' : [1, 10, .3, 1.2]}], "TestExperiment","JohnB")).not.toEqual(
+    'values' : [1, 10, .3, 1.2]}], "TestExperiment","JohnD")).toEqual(
         {'experimentName': "TestExperiment",
         'user': "JohnD",
         'parameters': [{'paramName' : "john",
@@ -62,5 +62,8 @@ test('This tests to see the already registered user', () => {
 });
 test('This tests to create a new user with an already registered username', () => {
     expect(main.createUser("johnD", "password")).toEqual(false);
+});
+test('This tests to see if the function detects incorrect passwords', () => {
+    expect(main.checkUser("johnD", "bassword")).toEqual(false);
 });
 
