@@ -90,7 +90,7 @@ InitialPageController = class {
 		document.querySelector("#initSubmit").addEventListener("click", (event) => {
 			console.log("pog");
 			var x = document.querySelector("#typeNumber").value;
-			location.assign('parameters?int=' + x);
+			location.assign('parameters?int=' + x +'&user=' + this.user);
 		});
 
 	}
@@ -98,8 +98,9 @@ InitialPageController = class {
 
 
 ParameterPageController = class {
-	constructor(int) {
+	constructor(int, user) {
 		this.int = int;
+		this.user = user;
 
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
 			// 		var dict = {"one" : [15, 4.5],
@@ -120,7 +121,8 @@ ParameterPageController = class {
 
 				array.push(param);
 			}
-			var params = experimentParamsJSON(array, "POG", "Williae2");
+			var name = document.querySelector('#expName').value;
+			var params = experimentParamsJSON(array, name, this.user);
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
 
@@ -133,10 +135,13 @@ ParameterPageController = class {
 				cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
+
 			fetch(`${url}`, {
 				method: 'POST',
-				mode: 'no-cors',
-			body: executable}).then(data => {
+				headers : {
+					"Content-Type" : 'application/json'
+				},
+				body: executable}).then(data => {
 					console.log(data)
 				}).catch(err => console.log(err))
 
@@ -177,8 +182,9 @@ ParameterPageController = class {
 			}
 			newList.appendChild(newCard);
 		}
-		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Number Iterations</div>'));
-		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="number" id="iter" class="form-control" /></div>'));
+		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
+		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
+
 
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Executable Script/Command</div>'));
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="execute" class="form-control" /></div>'));
@@ -255,11 +261,12 @@ main = function () {
 		const queryString = window.location.search;
 		const urlParams = new URLSearchParams(queryString);
 		const int = urlParams.get("int");
+		const user = urlParams.get("user");
 		console.log(`Detail page for ${int}`);
-		if (!int) {
+		if (!int||!user) {
 			window.location.href = "/index";
 		}
-		new ParameterPageController(int);
+		new ParameterPageController(int, user);
 	}
 
 	// const ref = firebase.firestore().collection("MovieQuotes");
