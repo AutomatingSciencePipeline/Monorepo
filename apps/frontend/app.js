@@ -56,8 +56,8 @@ app.listen(port, () => { //server starts listening for any attempts from a clien
 });
 
 function main() {
-	const path_a = 'pipe_a';
-	const path_b = 'pipe_b';
+	const path_a = 'GLADOS_PROD_A';
+	const path_b = 'GLADOS_PROD_A';
 	let fifo_b = spawn('mkfifo', [path_b]); // Create Pipe B
 	fifo_b.on('exit', function (status) {
 		console.log('Created Pipe B');
