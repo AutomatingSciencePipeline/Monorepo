@@ -18,6 +18,17 @@ app.get('/parameters', (req, res) => {
 app.get('/favicon.ico', (req, res) => {
     res.sendFile(__dirname + 'favicon.ico');
 });
+
+app.post('/api/launchexp/', (req,res) => {
+    let name = req.body.experimentName;
+    let uid = req.body.user;
+    let baseParams = req.body.parameters;
+    // instantiate experiment on DB, recv ID.
+    // as soon as id is here, create working directory under /exploc/experiemnt_[id]
+    // announce to daemon that new experiment is online
+    //
+})
+
 //Comment out the next method before testing
 app.listen(port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`); 
@@ -63,7 +74,9 @@ app.listen(port, () => {            //server starts listening for any attempts f
 
 // }
 
+
 // module.exports.paramJSON = paramJSON;
 // module.exports.experimentParamsJSON = experimentParamsJSON;
 // module.exports.createUser = createUser;
 // module.exports.checkUser = checkUser;
+
