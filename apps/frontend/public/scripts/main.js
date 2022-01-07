@@ -37,12 +37,14 @@ function checkUser(username, password) {
 }
  
 
-function experimentParamsJSON(paramsArr, experimentName, user){
+function experimentParamsJSON(paramsArr, experimentName, user, experiment){
 
 			const params = {
 				"experimentName": experimentName,
 				"user": user,
 				"parameters": paramsArr,
+				"file" : experiment,
+				"submit" : true  //this is only here for demo, is not permanent
 			};
 	return params;
 
@@ -122,7 +124,8 @@ ParameterPageController = class {
 				array.push(param);
 			}
 			var name = document.querySelector('#expName').value;
-			var params = experimentParamsJSON(array, name, this.user);
+			var experiment = document.querySelector('execute').value;
+			var params = experimentParamsJSON(array, name, this.user, experiment);
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
 

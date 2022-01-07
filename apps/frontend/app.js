@@ -1,38 +1,90 @@
 const express = require('express'); //Import the express dependency
-const app = express();              //Instantiate an express app, the main work horse of this server
-const port = 5000;                  //Save the port number where your server will be listening
+const fs = require('fs');
+const {
+	spawn,
+	fork
+} = require('child_process');
+const app = express(); //Instantiate an express app, the main work horse of this server
+const port = 5000; //Save the port number where your server will be listening
+var submit = false;
+var expname = null;
+var filepath = "";
+
+
+main();
+
+
+
 
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
 app.use('/styles', express.static(__dirname + 'public/styles'));
 app.use('/scripts', express.static(__dirname + 'public/scripts'));
-app.get('/', (req, res) => {      
-    res.sendFile(__dirname + '/html/loginpage.html');      
+app.get('/', (req, res) => {
+	res.sendFile(__dirname + '/html/loginpage.html');
 });
-app.get('/index', (req, res) => {       
-    res.sendFile(__dirname + '/html/index.html');      
+app.get('/index', (req, res) => {
+	res.sendFile(__dirname + '/html/index.html');
 });
 app.get('/parameters', (req, res) => {
-    res.sendFile(__dirname + '/html/parameters.html');
+	res.sendFile(__dirname + '/html/parameters.html');
 });
 app.get('/favicon.ico', (req, res) => {
-    res.sendFile(__dirname + 'favicon.ico');
+	res.sendFile(__dirname + 'favicon.ico');
 });
 
-app.post('/api/launchexp/', (req,res) => {
-    let name = req.body.experimentName;
-    let uid = req.body.user;
-    let baseParams = req.body.parameters;
-    // instantiate experiment on DB, recv ID.
-    // as soon as id is here, create working directory under /exploc/experiemnt_[id]
-    // announce to daemon that new experiment is online
-    //
+app.post('/api/launchexp/', (req, res) => {
+	expname = req.body.experimentName;
+	submit = req.body.submit;
+	// instantiate experiment on DB, recv ID.
+	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
+	fs.writeFile(`/exploc/experiment_${req.body}`, content, err => {
+		if (err) {
+			console.error(err)
+			return
+		}
+		//file written successfully
+	})
+	// announce to daemon that new experiment is online
+	//
+
 })
 
 //Comment out the next method before testing
-app.listen(port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
-    console.log(`Now listening on port ${port}`); 
+app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
+	console.log(`Now listening on port ${port}`);
 });
+
+function main() {
+	const path_a = 'pipe_a';
+	const path_b = 'pipe_b';
+	let fifo_b = spawn('mkfifo', [path_b]); // Create Pipe B
+	fifo_b.on('exit', function (status) {
+		console.log('Created Pipe B');
+
+		const fd = fs.openSync(path_b, 'r+');
+		let fifoRs = fs.createReadStream(null, {
+			fd
+		});
+		let fifoWs = fs.createWriteStream(path_a);
+
+		console.log('Ready to write')
+
+		setInterval(() => {
+			if (submit) {		
+				console.log('-----   Send packet   -----');
+				fifoWs.write(`ALERT: New Experiment ${expname} at /exploc/experiment_${expname}`);
+				submit = false;
+			}
+		}, 1000); // Write data at 1 second interval
+
+		fifoRs.on('data', data => {
+			console.log('----- Received packet -----');
+			console.log(data.toString());
+		});
+	});
+
+}
 
 
 //Place functions to be tested below, there should be a copy here and in main
@@ -62,15 +114,17 @@ app.listen(port, () => {            //server starts listening for any attempts f
 // function checkUser(username, password) {
 
 // }
- 
 
-// function experimentParamsJSON(paramsArr, experimentName, user){
-// 			const params = {
-// 				"experimentName": experimentName,
-// 				"user": user,
-// 				"parameters": paramsArr,
-// 			};
-// 	return params;
+
+// function experimentParamsJSON(paramsArr, experimentName, user, experiment){
+
+// 	const params = {
+// 		"experimentName": experimentName,
+// 		"user": user,
+// 		"parameters": paramsArr,
+// 		"file" : experiment
+// 	};
+// return params;
 
 // }
 
@@ -79,4 +133,3 @@ app.listen(port, () => {            //server starts listening for any attempts f
 // module.exports.experimentParamsJSON = experimentParamsJSON;
 // module.exports.createUser = createUser;
 // module.exports.checkUser = checkUser;
-
