@@ -99,8 +99,10 @@ def experiment_resolve(future):
     pass
 
 def mapper(params):
-    ### Run experiment
-    pass
+    try: 
+        return params["func"](*params["params"])
+    except Exception as e:
+        return "error in experiment"
 
 def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
