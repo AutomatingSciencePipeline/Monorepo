@@ -11,7 +11,7 @@ var expname = null;
 var filepath = "";
 
 
-//main();
+main();
 
 
 
@@ -75,10 +75,10 @@ function main() {
 		console.log('Ready to write')
 
 		setInterval(() => {
-			console.log('-----   Send packet   -----');
-			fifoWs.write(`ALERT: New Experiment pog at /exploc/experiment_pog`);
 			if (submit) {		
 				submit = false;
+				console.log('-----   Send packet   -----');
+				fifoWs.write(__dirname + `/exploc/experiment_${expname}`);
 			}
 		}, 1000); // Write data at 1 second interval
 
