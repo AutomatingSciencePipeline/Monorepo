@@ -11,7 +11,7 @@ var expname = null;
 var filepath = "";
 
 
-main();
+//main();
 
 
 
@@ -38,7 +38,7 @@ app.post('/api/launchexp/', (req, res) => {
 	submit = req.body.submit;
 	// instantiate experiment on DB, recv ID.
 	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
-	fs.writeFile(`/exploc/experiment_${req.body}`, content, err => {
+	fs.writeFile(`/exploc/experiment_${expname}`, req.body, err => {
 		if (err) {
 			console.error(err)
 			return

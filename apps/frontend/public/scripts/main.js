@@ -124,7 +124,7 @@ ParameterPageController = class {
 				array.push(param);
 			}
 			var name = document.querySelector('#expName').value;
-			var experiment = document.querySelector('execute').value;
+			var experiment = document.querySelector('#execute').value;
 			var params = experimentParamsJSON(array, name, this.user, experiment);
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
