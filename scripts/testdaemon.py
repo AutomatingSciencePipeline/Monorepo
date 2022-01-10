@@ -3,7 +3,9 @@ import re
 from subprocess import Popen, PIPE, STDOUT
 import select
 import logging
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+import importlib
+import requests
 
 
 IPC_FIFO_RECV = 'GLADOS_PROD_A'
@@ -43,21 +45,29 @@ def GLB_RUN(n_workers=None):
             poll = select.poll()
             poll.register(fifo_s, select.POLLIN)
             try:
-                with ThreadPoolExecutor(max_workers=n_workers) as executor:
+                ## we use processes for separate experiments for true parallelism
+                with ProcessPoolExecutor(max_workers=n_workers) as executor:
                     while True:
                         if (fifo_r, select.POLLIN) in poll.poll(1000):
                             msg = recv_msg(fifo_r)
                             executor.submit(experiment_event, msg).add_done_callback(experiment_resolve)
-                        os.write(fifo_s)
-                        logging.info(f'[RECV Event]:\tMsg: {msg.decode("utf-8")}')
+                         #os.write(fifo_s)
+#                        logging.info(f'[RECV Event]:\tMsg: {msg.decode("utf-8")}')
             except Exception as e:
-                logging.critical(f'FATAL: Pipe: {IPC_FIFO_RECV} failed with exception: {e}');
+                logging.critical(f'Pipe: {IPC_FIFO_RECV} failed with exception: {e}');
                 exit(2)
+            finally:
+                poll.unregister(fifo_s)
         except Exception as e:
-            logging.critical(f'FATAL: Pipe: {IPC_FIFO_SEND} failed registration with exception: {e}');
+            logging.critical(f'Pipe: {IPC_FIFO_SEND} failed registration with exception: {e}');
+        finally:
+            os.close(fifo_s)
     except Exception as e:
-        logging.critical(f'FATAL: Pipe: {IPC_FIFO_RECV} failed creation with exception: {e}');
+        logging.critical(f'Pipe: {IPC_FIFO_RECV} failed creation with exception: {e}');
         exit(2)
+    finally:
+        os.remove(f'../apps/frontend/{IPC_FIFO_RECV}')
+        os.remove(f'../apps/frontend/{IPC_FIFO_SEND}')
         
 #    logging.info('Initilized Global Load Balancer.')
 
@@ -66,13 +76,34 @@ def recv_msg(fifo):
     return os.read(fifo, 24)
 
 def proc_msg(msg):
+    ## process incoming message pipe
     return msg
 
 
 def experiment_event(msg):
+    params = proc_msg(msg)
+    # within each experiment, we use threads
+    sys.cwd = params['directory']
+    hyperparams_iter = gen_configs(params['hyperparams'])
+    ## process stuff and make API call to inform of the experiment's commencement
+    with ThreadPoolExecutor as executor:
+        result_futures = list(map(lambda x: executor.submit(mapper, x), params['hyperparams']))
+        for future in as_completed(result_futures):
+            ## try except to add 
+            ## 
+            pass
+        
+    
+def experiment_resolve(future):
+    ### Make API call to inform of completion of experiment
     pass
 
-def experiment_resolve(future):
+def mapper(params):
+    ### Run experiment
+    pass
+
+def gen_configs(hyperparams):
+    ### Generate hyperparameter configurations
     pass
     
 if __name__=='__main__':
