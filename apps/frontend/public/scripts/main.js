@@ -132,21 +132,19 @@ ParameterPageController = class {
 			// Creating a XHR object
 			//let xhr = new XMLHttpRequest();
 			//let url = "https://194.195.213.242:5000/experiment";
-			let url = "http://localhost:5000/";
-			fetch(`${url}`, {
-				mode: 'no-cors',
-				cache: 'no-cache'}).then(data=>{console.log(data)})
+			let url = "http://localhost:5005/parameters";
+			// fetch(`/`, {
+			// 	mode: 'no-cors',
+			// 	cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
 
-			fetch(`${url}`, {
+			fetch(`/parameters`, {
 				method: 'POST',
 				headers : {
 					"Content-Type" : 'application/json'
 				},
-				body: executable}).then(data => {
-					console.log(data)
-				}).catch(err => console.log(err))
+				body: executable}).catch(err => console.log(err))
 
 			// open a connection
 //			xhr.open("POST", url, true);

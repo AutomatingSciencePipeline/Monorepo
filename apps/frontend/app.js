@@ -18,6 +18,7 @@ var filepath = "";
 
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
+app.use(express.json());
 app.use('/styles', express.static(__dirname + 'public/styles'));
 app.use('/scripts', express.static(__dirname + 'public/scripts'));
 app.get('/', (req, res) => {
@@ -30,15 +31,18 @@ app.get('/parameters', (req, res) => {
 	res.sendFile(__dirname + '/html/parameters.html');
 });
 app.get('/favicon.ico', (req, res) => {
-	res.sendFile(__dirname + 'favicon.ico');
+	res.sendFile(__dirname + '/favicon.ico');
 });
 
-app.post('/api/launchexp/', (req, res) => {
+app.post('/parameters', (req, res) => {	
 	expname = req.body.experimentName;
+	console.log(expname);
+
 	submit = req.body.submit;
+	console.log(submit);
 	// instantiate experiment on DB, recv ID.
 	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
-	fs.writeFile(`/exploc/experiment_${expname}`, req.body, err => {
+	fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
 		if (err) {
 			console.error(err)
 			return
