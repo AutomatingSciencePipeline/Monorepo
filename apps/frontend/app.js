@@ -11,7 +11,7 @@ var expname = null;
 var filepath = "";
 
 
-main();
+//main();
 
 
 
@@ -93,10 +93,10 @@ function main() {
 
 //Place functions to be tested below, there should be a copy here and in main
 // function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-// 	const parsedDef = parseInt(defaultVal);
-// 	const parsedMin = parseInt(minVal);
-// 	const parsedMax = parseInt(maxVal);
-// 	const parsedInc = parseInt(incrementVal);
+// 	const parsedDef = parseFloat(defaultVal);
+	// const parsedMin = parseFloat(minVal);
+	// const parsedMax = parseFloat(maxVal);
+	// const parsedInc = parseFloat(incrementVal);
 // 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
 // 		throw new TypeError();
 // 	}
