@@ -11,9 +11,6 @@ var expname = null;
 var filepath = "";
 
 
-//main();
-
-
 
 
 //Idiomatic expression in express to route and respond to a client request
@@ -65,36 +62,7 @@ app.listen(port, () => { //server starts listening for any attempts from a clien
 	console.log(`Now listening on port ${port}`);
 });
 
-function main() {
-	const path_a = 'GLADOS_PROD_A';
-	const path_b = 'GLADOS_PROD_A';
-	let fifo_b = spawn('mkfifo', [path_b]); // Create Pipe B
-	fifo_b.on('exit', function (status) {
-		console.log('Created Pipe B');
 
-		const fd = fs.openSync(path_b, 'r+');
-		let fifoRs = fs.createReadStream(null, {
-			fd
-		});
-		let fifoWs = fs.createWriteStream(path_a);
-
-		console.log('Ready to write')
-
-		setInterval(() => {
-			if (submit) {		
-				submit = false;
-				console.log('-----   Send packet   -----');
-				fifoWs.write(__dirname + `/exploc/experiment_${expname}`);
-			}
-		}, 1000); // Write data at 1 second interval
-
-		fifoRs.on('data', data => {
-			console.log('----- Received packet -----');
-			console.log(data.toString());
-		});
-	});
-
-}
 
 
 //Place functions to be tested below, there should be a copy here and in main
