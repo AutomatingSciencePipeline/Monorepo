@@ -43,8 +43,7 @@ function experimentParamsJSON(paramsArr, experimentName, user, experiment){
 				"experimentName": experimentName,
 				"user": user,
 				"parameters": paramsArr,
-				"file" : experiment,
-				"submit" : true  //this is only here for demo, is not permanent
+				"file" : experiment
 			};
 	return params;
 

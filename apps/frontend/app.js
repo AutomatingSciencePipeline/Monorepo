@@ -11,9 +11,6 @@ var expname = null;
 var filepath = "";
 
 
-//main();
-
-
 
 
 //Idiomatic expression in express to route and respond to a client request
@@ -38,57 +35,34 @@ app.post('/parameters', (req, res) => {
 	expname = req.body.experimentName;
 	console.log(expname);
 
+	var json = req.body;
+
 	submit = req.body.submit;
-	console.log(submit);
+	console.log(__dirname + `/exploc/experiment_${expname}`);
 	// instantiate experiment on DB, recv ID.
 	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
-	fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
-		if (err) {
-			console.error(err)
-			return
-		}
-		//file written successfully
+	// fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
+	// 	if (err) {
+	// 		console.error(err)
+	// 		return
+	// 	}
+	// 	//file written successfully
+	// })
+
+	app.post(`/experiment`,(req, res) => {
+		res.send(json);
+		})
 	})
 	// announce to daemon that new experiment is online
 	//
 
-})
 
 //Comment out the next method before testing
 app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
 	console.log(`Now listening on port ${port}`);
 });
 
-function main() {
-	const path_a = 'GLADOS_PROD_A';
-	const path_b = 'GLADOS_PROD_A';
-	let fifo_b = spawn('mkfifo', [path_b]); // Create Pipe B
-	fifo_b.on('exit', function (status) {
-		console.log('Created Pipe B');
 
-		const fd = fs.openSync(path_b, 'r+');
-		let fifoRs = fs.createReadStream(null, {
-			fd
-		});
-		let fifoWs = fs.createWriteStream(path_a);
-
-		console.log('Ready to write')
-
-		setInterval(() => {
-			if (submit) {		
-				submit = false;
-				console.log('-----   Send packet   -----');
-				fifoWs.write(__dirname + `/exploc/experiment_${expname}`);
-			}
-		}, 1000); // Write data at 1 second interval
-
-		fifoRs.on('data', data => {
-			console.log('----- Received packet -----');
-			console.log(data.toString());
-		});
-	});
-
-}
 
 
 //Place functions to be tested below, there should be a copy here and in main
