@@ -38,21 +38,27 @@ app.post('/parameters', (req, res) => {
 	expname = req.body.experimentName;
 	console.log(expname);
 
+	var json = req.body;
+
 	submit = req.body.submit;
-	console.log(submit);
+	console.log(__dirname + `/exploc/experiment_${expname}`);
 	// instantiate experiment on DB, recv ID.
 	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
-	fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
-		if (err) {
-			console.error(err)
-			return
-		}
-		//file written successfully
+	// fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
+	// 	if (err) {
+	// 		console.error(err)
+	// 		return
+	// 	}
+	// 	//file written successfully
+	// })
+
+	app.post(`/experiment`,(req, res) => {
+		res.send(json);
+		})
 	})
 	// announce to daemon that new experiment is online
 	//
 
-})
 
 //Comment out the next method before testing
 app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
