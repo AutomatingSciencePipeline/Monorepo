@@ -6,10 +6,16 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 import importlib
 import requests
+from flask import Flask, jsonify, request
+import numpy as np
+import itertools
+import csv
 
 
 IPC_FIFO_RECV = 'GLADOS_PROD_A'
 IPC_FIFO_SEND = 'GLADOS_PROD_B'
+app = Flask(__name__)
+app.config['DEBUG'] = True
 
 
 #"JOB: [DIRECTORY]"
@@ -28,49 +34,78 @@ IPC_FIFO_SEND = 'GLADOS_PROD_B'
 #
 
 
-def GLB_RUN(n_workers=None):
-    logging.debug(f'Initializing global GLB recv pipe...')
-    os.mkfifo(f'../apps/frontend/{IPC_FIFO_RECV}')
-    try: 
-        fifo_r = os.open(f'../apps/frontend/{IPC_FIFO_RECV}', os.O_RDONLY | os.O_NONBLOCK) # pipe is open
-        logging.debug('RECV pipe successfully opened.')
-        while True:
-            try:
-                fifo_s = os.open(f'../apps/frontend/{IPC_FIFO_SEND}', os.O_WRONLY)
-                logging.debug('SEND pipe has been successfully located.')
-                break
-            except:
-                pass
-        try:
-            poll = select.poll()
-            poll.register(fifo_s, select.POLLIN)
-            try:
-                ## we use processes for separate experiments for true parallelism
-                with ProcessPoolExecutor(max_workers=n_workers) as executor:
-                    while True:
-                        if (fifo_r, select.POLLIN) in poll.poll(1000):
-                            msg = recv_msg(fifo_r)
-                            executor.submit(experiment_event, msg).add_done_callback(experiment_resolve)
-                         #os.write(fifo_s)
-#                        logging.info(f'[RECV Event]:\tMsg: {msg.decode("utf-8")}')
-            except Exception as e:
-                logging.critical(f'Pipe: {IPC_FIFO_RECV} failed with exception: {e}');
-                exit(2)
-            finally:
-                poll.unregister(fifo_s)
-        except Exception as e:
-            logging.critical(f'Pipe: {IPC_FIFO_SEND} failed registration with exception: {e}');
-        finally:
-            os.close(fifo_s)
-    except Exception as e:
-        logging.critical(f'Pipe: {IPC_FIFO_RECV} failed creation with exception: {e}');
-        exit(2)
-    finally:
-        os.remove(f'../apps/frontend/{IPC_FIFO_RECV}')
-        os.remove(f'../apps/frontend/{IPC_FIFO_SEND}')
-        
-#    logging.info('Initilized Global Load Balancer.')
 
+@app.post("/experiment")
+def recv_experiment():
+    if request.is_json():
+        exp = request.get_json()
+        GlobalLoadBalancer.submit_experiment(exp)
+class GLB(object):
+    def __init__(self, n_workers=None):
+        self.e_status = {}
+        self.e = ProcessPoolExecutor(n_workers)
+        self.f = ThreadPoolExecutor(n_workers)
+        logging.debug(f'GLB: {n_workers} workers initialized. Awaiting requests...')
+        
+    def submit_experiment(self, msg):
+        self.e_status[msg['id']] = 'INIT'
+        msg['func'] = add_nums
+        logging.info(f'Experiment {msg["id"]} by {msg["user"]} submitted.')
+        self.e.submit(experiment_event, msg).add_done_callback(experiment_resolve)
+    
+    def update_experiment_status(self, id, status):
+        self.e_status[id] = status
+        
+
+def experiment_event(msg):
+    params = proc_msg(msg)
+    # within each experiment, we use threads
+    os.chdir(f'exps')
+    os.mkdir(f'{params["id"]}')
+    os.chdir(f'{params["id"]}')
+    param_iter = gen_configs(params['hyperparams'])
+    func = params['func']
+    ## process stuff and make API call to inform of the experiment's commencement
+    results = []
+    dead = 0
+    print(params['id'])
+    with ThreadPoolExecutor(1) as executor:
+        #print(param_iter)        
+        result_futures = list(map(lambda x: executor.submit(mapper, {'func':func,'params':x}), param_iter))
+        for future in as_completed(result_futures):
+            try:
+                results.append(future.result())
+            except ValueError as e:
+                ### write temporary state of problems
+                print(e)
+                results.append(e.args[1] + [0])
+                dead+=1
+    ## process stuff and make API call to inform of the experiment's completion
+    ### write results to a csv file named experiment_id.csv
+    with open(f'result.csv', 'w') as csvfile:
+        header = [k['paramName'] for k in params['hyperparams']]
+        header.append('result')
+        writer = csv.writer(csvfile)
+        writer.writerow(header)
+        writer.writerows(results)
+    
+    return params['id'],1.-float(dead)/len(results),results
+    
+
+        
+                
+
+
+def gen_configs(hyperparams):
+    ### Generate hyperparameter configurations
+    #print(hyperparams)
+    params_raw = [k['values'] for i,k in enumerate(hyperparams)]
+    #print(params_raw)
+    params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
+    return list(itertools.product(*params_raw))
+    
+    
+        
 
 def recv_msg(fifo):
     return os.read(fifo, 24)
@@ -79,36 +114,34 @@ def proc_msg(msg):
     ## process incoming message pipe
     return msg
 
-
-def experiment_event(msg):
-    params = proc_msg(msg)
-    # within each experiment, we use threads
-    sys.cwd = params['directory']
-    hyperparams_iter = gen_configs(params['hyperparams'])
-    ## process stuff and make API call to inform of the experiment's commencement
-    with ThreadPoolExecutor as executor:
-        result_futures = list(map(lambda x: executor.submit(mapper, x), params['hyperparams']))
-        for future in as_completed(result_futures):
-            ## try except to add 
-            ## 
-            pass
-        
-    
 def experiment_resolve(future):
     ### Make API call to inform of completion of experiment
-    pass
+    print(future.result())
+    id, prog, results = future.result()
+    GlobalLoadBalancer.update_experiment_status(id, 'DONE')
+    logging.info(f'[EXP COMPLETE]:\tExperiment {id} completed with {prog} success rate.')
 
 def mapper(params):
+    #print(params)
     try: 
-        return params["func"](*params["params"])
+        return list(params['params']) + [params['func'](*params['params'])]
     except Exception as e:
-        return "error in experiment"
-
-def gen_configs(hyperparams):
-    ### Generate hyperparameter configurations
-    pass
+        raise ValueError(f'Mapper failed with exception: {e} and params:', params)
+    
+def add_nums(x,y):
+    ## for testing purposes.
+    return x+y
     
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
-    glb = GLB()
-    glb.run()
+    GlobalLoadBalancer = GLB(1)
+    hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
+    msg_test = {
+        'id' : 'XVZ01',
+        'user' : 'elijah',
+        'func' : add_nums,
+        'hyperparams' : hyperparams
+    }
+    GlobalLoadBalancer.submit_experiment(msg_test)
+    app.run()
+    
