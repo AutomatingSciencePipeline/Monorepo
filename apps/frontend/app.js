@@ -1,4 +1,5 @@
 const express = require('express'); //Import the express dependency
+const fetch = require('node-fetch')
 const fs = require('fs');
 const {
 	spawn,
@@ -49,10 +50,12 @@ app.post('/parameters', (req, res) => {
 	// 	//file written successfully
 	// })
 
-	app.post(`/experiment`,(req, res) => {
-		res.send(json);
-		})
-	})
+	fetch(`http://localhost:5000`, {
+		method: 'POST',
+		headers : {
+			"Content-Type" : 'application/json'
+		},
+		body: json}).catch(err => console.log(err))
 	// announce to daemon that new experiment is online
 	//
 
