@@ -32,85 +32,87 @@ app.get('/favicon.ico', (req, res) => {
 	res.sendFile(__dirname + '/favicon.ico');
 });
 
-app.post('/parameters', (req, res) => {	
-	expname = req.body.experimentName;
-	console.log(expname);
+app.post('/parameters', (req, res) => {
+			expname = req.body.experimentName;
+			console.log(expname);
 
-	var json = req.body;
+			var json = req.body;
 
-	submit = req.body.submit;
-	console.log(__dirname + `/exploc/experiment_${expname}`);
-	// instantiate experiment on DB, recv ID.
-	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
-	// fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
-	// 	if (err) {
-	// 		console.error(err)
-	// 		return
-	// 	}
-	// 	//file written successfully
-	// })
+			// submit = req.body.submit;
+			// console.log(__dirname + `/exploc/experiment_${expname}`);
+			// instantiate experiment on DB, recv ID.
+			// as soon as id is here, create working directory under /exploc/experiemnt_[id]
+			// fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
+			// 	if (err) {
+			// 		console.error(err)
+			// 		return
+			// 	}
+			// 	//file written successfully
+			// })
 
-	fetch(`http://localhost:5000`, {
-		method: 'POST',
-		headers : {
-			"Content-Type" : 'application/json'
-		},
-		body: json}).catch(err => console.log(err))
-	// announce to daemon that new experiment is online
-	//
-
-
-//Comment out the next method before testing
-app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
-	console.log(`Now listening on port ${port}`);
-});
+			fetch(`http://localhost:5000`, {
+					method: 'POST',
+					body: JSON.stringify(json),
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}).then(res => res.json())
+				.then(json => console.log(json));
+			// announce to daemon that new experiment is online
+			//
 
 
+			//Comment out the next method before testing
+			app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
+				console.log(`Now listening on port ${port}`);
+			});
 
 
-//Place functions to be tested below, there should be a copy here and in main
-// function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-// 	const parsedDef = parseFloat(defaultVal);
-	// const parsedMin = parseFloat(minVal);
-	// const parsedMax = parseFloat(maxVal);
-	// const parsedInc = parseFloat(incrementVal);
-// 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
-// 		throw new TypeError();
-// 	}
-// 	var param = {
-// 		"paramName" : paramName,
-// 		"values" :
-// 		[defaultVal,
-// 		minVal,
-// 		maxVal,
-// 		incrementVal]
-// 	}
-// 	return param;
-// }
-
-// function createUser(username, password) {
-
-// }
-
-// function checkUser(username, password) {
-
-// }
 
 
-// function experimentParamsJSON(paramsArr, experimentName, user, experiment){
+			//Place functions to be tested below, there should be a copy here and in main
+			// function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
+			// 	const parsedDef = parseFloat(defaultVal);
+			// const parsedMin = parseFloat(minVal);
+			// const parsedMax = parseFloat(maxVal);
+			// const parsedInc = parseFloat(incrementVal);
+			// 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+			// 		throw new TypeError();
+			// 	}
+			// 	var param = {
+			// 		"paramName" : paramName,
+			// 		"values" :
+			// 		[defaultVal,
+			// 		minVal,
+			// 		maxVal,
+			// 		incrementVal]
+			// 	}
+			// 	return param;
+			// }
 
-// 	const params = {
-// 		"experimentName": experimentName,
-// 		"user": user,
-// 		"parameters": paramsArr,
-// 		"file" : experiment
-// 	};
-// return params;
+			// function createUser(username, password) {
 
-// }
+			// }
+
+			// function checkUser(username, password) {
+
+			// }
 
 
-// module.exports.paramJSON = paramJSON;
-// module.exports.experimentParamsJSON = experimentParamsJSON;
-// module.exports.createUser = createUser;
-// module.exports.checkUser = checkUser;
+			// function experimentParamsJSON(paramsArr, experimentName, user, experiment){
+
+			// 	const params = {
+			// 		"experimentName": experimentName,
+			// 		"user": user,
+			// 		"parameters": paramsArr,
+			// 		"file" : experiment
+			// 	};
+			// return params;
+
+			// }
+
+
+			// module.exports.paramJSON = paramJSON;
+			// module.exports.experimentParamsJSON = experimentParamsJSON;
+			// module.exports.createUser = createUser;
+			// module.exports.checkUser = checkUser;
