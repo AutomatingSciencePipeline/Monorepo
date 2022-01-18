@@ -144,6 +144,31 @@ def initilize_work_space():
     os.chdir('GLADOS_HOME')
 
 
+def communicate(process, payload):
+    with Popen([process] + payload, stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+        try:
+            stdout_data = p.communicate()
+            if not stdout_data:
+                raise UnresponsiveBinaryException(f'{process} is unresponsive.')
+            if stdout_data[1]:
+                print(f'errors returned from pipe is {stdout_data[1]}')
+                raise FailedIterationException(f'Iteration has failed with error {stdout_data[1]}')
+        except Exception as e:
+            raise PipeFailureException(f'Error communicating with process: {e}')
+
+    return stdout_data[0]
+
+### TYPES 
+
+class FailedIterationException(Exception):
+    pass
+
+class PipeFailureException(Exception):
+    pass
+
+class UnresponsiveBinaryException(Exception):
+    pass
+
 ### EXPERIMENTAL ARTIFACTS
 
 def add_nums(x,y):
@@ -163,8 +188,9 @@ if __name__=='__main__':
     }
     # GlobalLoadBalancer.submit_experiment(msg_test)
     # app.run()
-    blablabla = gen_configs(msg_test['hyperparams'])
-    write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
+    #blablabla = gen_configs(msg_test['hyperparams'])
+    #write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
+    communicate('./add_nums.py', ['1','2'])
     
 '''
 ### plot postprocessing / native support ###
