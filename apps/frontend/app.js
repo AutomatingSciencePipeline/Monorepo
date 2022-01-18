@@ -42,7 +42,7 @@ app.post('/parameters', (req, res) => {
 	expname = req.body.experimentName;
 	console.log(expname);
 
-	var json = JSON.parse(req.body);
+	var json = req.body;
 	json["fileName"] = fileName;
 
 	// submit = req.body.submit;

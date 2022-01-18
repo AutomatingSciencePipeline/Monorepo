@@ -124,7 +124,6 @@ ParameterPageController = class {
 			}
 			var name = document.querySelector('#expName').value;
 			var verbose = document.querySelector('#verboseBool').checked;
-			var experiment = document.querySelector('#execute').value;
 			var params = experimentParamsJSON(array, name, this.user, verbose);
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
