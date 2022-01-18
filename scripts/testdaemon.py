@@ -26,7 +26,6 @@ def recv_experiment():
     GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
 
-
 ### GLB
 class GLB(object):
 
@@ -54,14 +53,18 @@ def experiment_event(msg):
     os.mkdir(f'{params["id"]}')
     os.chdir(f'{params["id"]}')
     param_iter = gen_configs(params['parameters'])
+    ## we submit experiment configuration writing to a thread pool if verbose
+    if params['verbose']:
+        os.mkdir('configs')
+        with ThreadPoolExecutor(1) as e:
+            e.submit(write_configs, param_iter, [obs['paramName'] for obs in params['parameters']])
+    
     func = params['func']
     ## process stuff and make API call to inform of the experiment's commencement
     results = []
     dead = 0
-    #print(params['id'])
     with ThreadPoolExecutor(1) as executor:
-        #print(param_iter)        
-        result_futures = list(map(lambda x: executor.submit(mapper, {'func':func,'params':x}), param_iter))
+        result_futures = list(map(lambda x: executor.submit(mapper, {'iter':x[0],'func':func,'params':x[1]}), param_iter))
         for future in as_completed(result_futures):
             try:
                 results.append(future.result())
@@ -97,9 +100,21 @@ def mapper(params):
 
 def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
-    params_raw = [k['values'] for i,k in enumerate(hyperparams)]
+    params_raw = [k['values'] for k in hyperparams]
     params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
-    return list(itertools.product(*params_raw))
+    return list(enumerate(list(itertools.product(*params_raw))))
+
+def write_configs(raw, headers):
+    dicts = [{headers[i]:np_uncode(x[1][i]) for i in range(len(x[1]))} for x in raw]
+    jsons = [json.dumps(x) for x in dicts]
+    i = 0
+    for iter in raw:
+        i+=1
+        if i > 10:
+            return
+        with open(f'configs/config_{iter[0]}.json', 'w+') as f:
+            f.write(jsons[iter[0]])
+        
 
 def proc_msg(msg):
     ## for now, this function is hardcoding some things, but it's no biggie
@@ -113,19 +128,21 @@ def proc_msg(msg):
     del rm['experimentName']
     return rm
 
-    
+def np_uncode(x):
+    if isinstance(x,np.integer):
+        return int(x)
+    if isinstance(x,np.floating):
+        return float(x)
 
 def initilize_work_space():
-    if os.path.exists('GLADOS_HOME'):
-        os.chdir('GLADOS_HOME')
-        if not os.path.exists('exps'):
-            os.mdkir('exps')
-        if not os.path.existS('res'):
-            os.mkdir('res')
-    else: 
+    names = ['exps','res','incoming']
+    if not os.path.exists('GLADOS_HOME'):
         os.mkdir('GLADOS_HOME')
-        os.mkdir('GLADOS_HOME/exps')
-        os.mkdir('GLADOS_HOME/res')
+    for name in names:
+        if not os.path.exists(f'GLADOS_HOME/{name}'):
+            os.mkdir(f'GLADOS_HOME/{name}')
+    os.chdir('GLADOS_HOME')
+
 
 ### EXPERIMENTAL ARTIFACTS
 
@@ -133,20 +150,21 @@ def add_nums(x,y):
     ## for testing purposes.
     return x+y
 
-
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     initilize_work_space()
     GlobalLoadBalancer = GLB(1)
     hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
-    # msg_test = {
-    #     'id' : 'XVZ01',
-    #     'user' : 'elijah',
-    #     'func' : add_nums,
-    #     'hyperparams' : hyperparams
-    # }
+    msg_test = {
+        'id' : 'XVZ01',
+        'user' : 'elijah',
+        'func' : add_nums,
+        'hyperparams' : hyperparams
+    }
     # GlobalLoadBalancer.submit_experiment(msg_test)
-    app.run()
+    # app.run()
+    #blablabla = gen_configs(msg_test['hyperparams'])
+    #write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
     
 '''
 ### plot postprocessing / native support ###
