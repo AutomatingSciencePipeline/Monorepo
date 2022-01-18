@@ -21,6 +21,7 @@ body {
 .card {
     margin: 10px 0;
 }
+.hide { position:absolute; top:-1px; left:-1px; width:1px; height:1px; }
 #listPage .card-title,
 #listPage .card-text {
     white-space: nowrap;

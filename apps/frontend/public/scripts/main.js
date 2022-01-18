@@ -140,6 +140,7 @@ ParameterPageController = class {
 
 			console.log(executable);
 
+
 			fetch(`/parameters`, {
 				method: 'POST',
 				headers : {
@@ -176,7 +177,7 @@ ParameterPageController = class {
 
 	updateList() {
 		const newList = htmlToElement('<div id="parameterContainer"></div>');
-		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Size Iteration</div></div>'))
+		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'))
 		for (let i = 0; i < this.int; i++) {
 			const newCard = this._createCard(i);
 			newCard.onclick = (event) => {
@@ -186,10 +187,6 @@ ParameterPageController = class {
 		}
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
-
-
-		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Executable Script/Command</div>'));
-		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="execute" class="form-control" /></div>'));
 
 
 		const oldList = document.querySelector("#parameterContainer");

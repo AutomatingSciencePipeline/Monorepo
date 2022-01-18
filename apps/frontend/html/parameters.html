@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="styles/main.css">
   <title>Parameters</title>
 </head>
-
+<iframe name="hiddenFrame" class="hide"></iframe>
 <body>
   <nav class="navbar navbar-dark fixed-top">
     <a class="navbar-brand" href="#">Fill in parameters</a>
@@ -23,9 +23,20 @@
 
 
   </div>
+  
+  <div class="justify-content-center align-items-center d-flex"><div>Upload Experiment</div></div>
+  <div class="justify-content-center align-items-center d-flex">
+    
+    <form action="fileupload" method="post" enctype="multipart/form-data" target="hiddenFrame">
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <input type="file" id="experimentFile" name="filetoupload"><br>
+      <input type="submit" value="Submit Experiment File">
+    </form>
+  </div>
+  
 
   <div class="justify-content-center align-items-center d-flex">
-    <button id="paramSubmit" type="button" class="btn-primary">Submit</button>
+    <button id="paramSubmit" type="button" class="btn-primary">Begin Experiment</button>
   </div>
 
   <div class="justify-content-right align-items-center d-flex">

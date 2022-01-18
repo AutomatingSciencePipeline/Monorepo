@@ -24,6 +24,7 @@
   "homepage": "https://github.com/GLADOSPipeline/Monorepo#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "formidable": "^2.0.1",
     "jsdom": "^19.0.0",
     "node-fetch": "2.0"
   }
