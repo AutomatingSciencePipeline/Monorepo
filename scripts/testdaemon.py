@@ -10,6 +10,7 @@ from flask import Flask, jsonify, request
 import numpy as np
 import itertools
 import csv
+import json
 
 
 IPC_FIFO_RECV = 'GLADOS_PROD_A'
@@ -39,8 +40,9 @@ app.config['DEBUG'] = True
 def recv_experiment():
     if request.is_json():
         exp = request.get_json()
-        GlobalLoadBalancer.submit_experiment(exp)
+        GlobalLoadBalancer.submit_experiment(json.loads(exp))
 class GLB(object):
+
     def __init__(self, n_workers=None):
         self.e_status = {}
         self.e = ProcessPoolExecutor(n_workers)
@@ -52,6 +54,7 @@ class GLB(object):
         msg['func'] = add_nums
         logging.info(f'Experiment {msg["id"]} by {msg["user"]} submitted.')
         self.e.submit(experiment_event, msg).add_done_callback(experiment_resolve)
+        
     
     def update_experiment_status(self, id, status):
         self.e_status[id] = status
@@ -68,7 +71,7 @@ def experiment_event(msg):
     ## process stuff and make API call to inform of the experiment's commencement
     results = []
     dead = 0
-    print(params['id'])
+    #print(params['id'])
     with ThreadPoolExecutor(1) as executor:
         #print(param_iter)        
         result_futures = list(map(lambda x: executor.submit(mapper, {'func':func,'params':x}), param_iter))
@@ -77,7 +80,7 @@ def experiment_event(msg):
                 results.append(future.result())
             except ValueError as e:
                 ### write temporary state of problems
-                print(e)
+                #print(e)
                 results.append(e.args[1] + [0])
                 dead+=1
     ## process stuff and make API call to inform of the experiment's completion
@@ -98,9 +101,7 @@ def experiment_event(msg):
 
 def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
-    #print(hyperparams)
     params_raw = [k['values'] for i,k in enumerate(hyperparams)]
-    #print(params_raw)
     params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
     return list(itertools.product(*params_raw))
     
@@ -116,13 +117,11 @@ def proc_msg(msg):
 
 def experiment_resolve(future):
     ### Make API call to inform of completion of experiment
-    print(future.result())
     id, prog, results = future.result()
     GlobalLoadBalancer.update_experiment_status(id, 'DONE')
     logging.info(f'[EXP COMPLETE]:\tExperiment {id} completed with {prog} success rate.')
 
 def mapper(params):
-    #print(params)
     try: 
         return list(params['params']) + [params['func'](*params['params'])]
     except Exception as e:
@@ -143,5 +142,19 @@ if __name__=='__main__':
         'hyperparams' : hyperparams
     }
     GlobalLoadBalancer.submit_experiment(msg_test)
-    app.run()
+    #app.run()
     
+
+### plot postprocessing / native support ###
+### gen intermediate plots live ###
+### [debug mode]: switch to not write configuration
+### intermediate checks: every n iterations, restrict param space based on provided code
+### MPI
+
+##: Future:
+'''
+1. refined front-end >> integrate with the db and crud 
+2.  > modularity:
+    > distribution across the network >> MPI 
+3. stitch the system together
+'''
