@@ -1,10 +1,6 @@
 const express = require('express'); //Import the express dependency
-const fetch = require('node-fetch')
+const fetch = require('node-fetch');
 const fs = require('fs');
-const {
-	spawn,
-	fork
-} = require('child_process');
 const app = express(); //Instantiate an express app, the main work horse of this server
 const port = 5005; //Save the port number where your server will be listening
 var submit = false;
