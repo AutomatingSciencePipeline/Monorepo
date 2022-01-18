@@ -188,6 +188,8 @@ ParameterPageController = class {
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
 
+		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment File Name</div>'))
+		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="execute" class="form-control" /></div>'));
 
 		const oldList = document.querySelector("#parameterContainer");
 		oldList.removeAttribute("id");
