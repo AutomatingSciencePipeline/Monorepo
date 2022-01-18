@@ -37,13 +37,12 @@ function checkUser(username, password) {
 }
  
 
-function experimentParamsJSON(paramsArr, experimentName, user, experiment, verboseBool){
+function experimentParamsJSON(paramsArr, experimentName, user, verboseBool){
 
 			const params = {
 				"experimentName": experimentName,
 				"user": user,
 				"parameters": paramsArr,
-				"file" : experiment,
 				"verbose" : verboseBool
 			};
 	return params;
@@ -126,7 +125,7 @@ ParameterPageController = class {
 			var name = document.querySelector('#expName').value;
 			var verbose = document.querySelector('#verboseBool').checked;
 			var experiment = document.querySelector('#execute').value;
-			var params = experimentParamsJSON(array, name, this.user, experiment, verbose);
+			var params = experimentParamsJSON(array, name, this.user, verbose);
 			var executable = JSON.stringify(params);
 			//this.download(executable, 'exp.json', 'json');
 
@@ -187,9 +186,6 @@ ParameterPageController = class {
 		}
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
-
-		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment File Name</div>'))
-		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="execute" class="form-control" /></div>'));
 
 		const oldList = document.querySelector("#parameterContainer");
 		oldList.removeAttribute("id");
