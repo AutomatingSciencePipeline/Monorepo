@@ -64,7 +64,7 @@ def experiment_event(msg):
     results = []
     dead = 0
     with ThreadPoolExecutor(1) as executor:
-        result_futures = list(map(lambda x: executor.submit(mapper, {'iter':x[0],'func':func,'params':x[1]}), param_iter))
+        result_futures = list(map(lambda x: executor.submit(mapper, {'iter':x[0],'func':func,'params':x[1]}), list(param_iter)))
         for future in as_completed(result_futures):
             try:
                 results.append(future.result())
@@ -102,18 +102,18 @@ def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
     params_raw = [k['values'] for k in hyperparams]
     params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
-    return list(enumerate(list(itertools.product(*params_raw))))
+    return enumerate(list(itertools.product(*params_raw)))
 
 def write_configs(raw, headers):
-    dicts = [{headers[i]:np_uncode(x[1][i]) for i in range(len(x[1]))} for x in raw]
+    dicts = [{headers[i]:np_uncode(x[i]) for i in range(len(x))} for _,x in copy.deepcopy(raw)]
+    print(dicts)
     jsons = [json.dumps(x) for x in dicts]
-    i = 0
-    for iter in raw:
-        i+=1
-        if i > 10:
-            return
-        with open(f'configs/config_{iter[0]}.json', 'w+') as f:
-            f.write(jsons[iter[0]])
+    print(jsons)
+    for i,x in copy.deepcopy(raw):
+        print(i)
+        with open(f'configs/config_{i}.json', 'w+') as f:
+            print(i)
+            f.write(jsons[i])
         
 
 def proc_msg(msg):
@@ -163,8 +163,8 @@ if __name__=='__main__':
     }
     # GlobalLoadBalancer.submit_experiment(msg_test)
     # app.run()
-    #blablabla = gen_configs(msg_test['hyperparams'])
-    #write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
+    blablabla = gen_configs(msg_test['hyperparams'])
+    write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
     
 '''
 ### plot postprocessing / native support ###
