@@ -17,31 +17,17 @@ import json
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
-
-#"JOB: [DIRECTORY]"
-## directory :: [hyperparams.json, experiment.bin, metadata, sub/[run]*] 
-#
-#'''
-#x = [1,2,4,5]
-#lr = [0.001,0.01,0.1]
-#
-#in::[x=1,lr=0.001] >> mapper1 -> out::[..vals..] >> reducer [ csv {x=1,lr=0.001}
-#in::[x=1,lr=0.001] >> mapper2 -> out::[..vals..] >> reducer
-#in::[x=1,lr=0.001] >> mapper3 -> out::[..vals..] >> reducer
-#in::[x=1,lr=0.001] >> mapper4 -> out::[..vals..] >> reducer ]
-#
-#'''
-#
-
-
+### FLASK API ENDPOINTS
 
 @app.post("/experiment")
 def recv_experiment():
     exp = request.get_json()
     exp = proc_msg(exp)
-    print(exp)
     GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
+
+
+### GLB
 class GLB(object):
 
     def __init__(self, n_workers=None):
@@ -81,9 +67,9 @@ def experiment_event(msg):
                 results.append(future.result())
             except ValueError as e:
                 ### write temporary state of problems
-                #print(e)
                 results.append(e.args[1] + [0])
                 dead+=1
+    
     ## process stuff and make API call to inform of the experiment's completion
     ### write results to a csv file named experiment_id.csv
     with open(f'result.csv', 'w') as csvfile:
@@ -94,29 +80,6 @@ def experiment_event(msg):
         writer.writerows(results)
     
     return params['id'],1.-float(dead)/len(results),results
-
-
-def gen_configs(hyperparams):
-    ### Generate hyperparameter configurations
-    params_raw = [k['values'] for i,k in enumerate(hyperparams)]
-    params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
-    return list(itertools.product(*params_raw))
-    
-def recv_msg(fifo):
-    return os.read(fifo, 24)
-
-def proc_msg(msg):
-    ## for now, this function is hardcoding some things, but it's no biggie
-    rm = copy.deepcopy(msg)
-    for obj in rm['parameters']:
-        obj['values'] = [float(x) for x in obj['values']]
-        obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
-
-    rm['func'] = add_nums
-    rm['id'] = rm['experimentName']
-    del rm['experimentName']
-    print(rm)
-    return rm
 
 def experiment_resolve(future):
     ### Make API call to inform of completion of experiment
@@ -129,15 +92,32 @@ def mapper(params):
         return list(params['params']) + [params['func'](*params['params'])]
     except Exception as e:
         raise ValueError(f'Mapper failed with exception: {e} and params:', params)
-    
-def add_nums(x,y):
-    ## for testing purposes.
-    return x+y
 
+### UTILS
+
+def gen_configs(hyperparams):
+    ### Generate hyperparameter configurations
+    params_raw = [k['values'] for i,k in enumerate(hyperparams)]
+    params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
+    return list(itertools.product(*params_raw))
+
+def proc_msg(msg):
+    ## for now, this function is hardcoding some things, but it's no biggie
+    rm = copy.deepcopy(msg)
+    for obj in rm['parameters']:
+        obj['values'] = [float(x) for x in obj['values']]
+        obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
+
+    rm['func'] = add_nums
+    rm['id'] = rm['experimentName']
+    del rm['experimentName']
+    return rm
+
+    
 
 def initilize_work_space():
     if os.path.exists('GLADOS_HOME'):
-        os.chdir(os.environ['GLADOS_HOME'])
+        os.chdir('GLADOS_HOME')
         if not os.path.exists('exps'):
             os.mdkir('exps')
         if not os.path.existS('res'):
@@ -146,8 +126,14 @@ def initilize_work_space():
         os.mkdir('GLADOS_HOME')
         os.mkdir('GLADOS_HOME/exps')
         os.mkdir('GLADOS_HOME/res')
-        
-    
+
+### EXPERIMENTAL ARTIFACTS
+
+def add_nums(x,y):
+    ## for testing purposes.
+    return x+y
+
+
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     initilize_work_space()
