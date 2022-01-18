@@ -40,7 +40,10 @@ app.config['DEBUG'] = True
 def recv_experiment():
     if request.is_json():
         exp = request.get_json()
-        GlobalLoadBalancer.submit_experiment(json.loads(exp))
+        print(exp)
+        exp = json.loads(exp)
+        exp["func"] = add_nums
+        GlobalLoadBalancer.submit_experiment(exp)
 class GLB(object):
 
     def __init__(self, n_workers=None):
@@ -135,14 +138,14 @@ if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     GlobalLoadBalancer = GLB(1)
     hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
-    msg_test = {
-        'id' : 'XVZ01',
-        'user' : 'elijah',
-        'func' : add_nums,
-        'hyperparams' : hyperparams
-    }
-    GlobalLoadBalancer.submit_experiment(msg_test)
-    #app.run()
+    # msg_test = {
+    #     'id' : 'XVZ01',
+    #     'user' : 'elijah',
+    #     'func' : add_nums,
+    #     'hyperparams' : hyperparams
+    # }
+    # GlobalLoadBalancer.submit_experiment(msg_test)
+    app.run()
     
 
 ### plot postprocessing / native support ###
