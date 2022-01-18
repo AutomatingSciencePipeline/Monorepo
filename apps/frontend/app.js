@@ -61,7 +61,7 @@ app.post('/parameters', (req, res) => {
 			// announce to daemon that new experiment is online
 			//
 
-
+			});
 			//Comment out the next method before testing
 			app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
 				console.log(`Now listening on port ${port}`);
