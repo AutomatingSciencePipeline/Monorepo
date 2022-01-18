@@ -10,11 +10,10 @@ from flask import Flask, jsonify, request
 import numpy as np
 import itertools
 import csv
+import copy
 import json
 
 
-IPC_FIFO_RECV = 'GLADOS_PROD_A'
-IPC_FIFO_SEND = 'GLADOS_PROD_B'
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
@@ -38,12 +37,11 @@ app.config['DEBUG'] = True
 
 @app.post("/experiment")
 def recv_experiment():
-    if request.is_json():
-        exp = request.get_json()
-        print(exp)
-        exp = json.loads(exp)
-        exp["func"] = add_nums
-        GlobalLoadBalancer.submit_experiment(exp)
+    exp = request.get_json()
+    exp = proc_msg(exp)
+    print(exp)
+    GlobalLoadBalancer.submit_experiment(exp)
+    return 'OK'
 class GLB(object):
 
     def __init__(self, n_workers=None):
@@ -64,12 +62,12 @@ class GLB(object):
         
 
 def experiment_event(msg):
-    params = proc_msg(msg)
+    params = msg
     # within each experiment, we use threads
     os.chdir(f'exps')
     os.mkdir(f'{params["id"]}')
     os.chdir(f'{params["id"]}')
-    param_iter = gen_configs(params['hyperparams'])
+    param_iter = gen_configs(params['parameters'])
     func = params['func']
     ## process stuff and make API call to inform of the experiment's commencement
     results = []
@@ -89,17 +87,13 @@ def experiment_event(msg):
     ## process stuff and make API call to inform of the experiment's completion
     ### write results to a csv file named experiment_id.csv
     with open(f'result.csv', 'w') as csvfile:
-        header = [k['paramName'] for k in params['hyperparams']]
+        header = [k['paramName'] for k in params['parameters']]
         header.append('result')
         writer = csv.writer(csvfile)
         writer.writerow(header)
         writer.writerows(results)
     
     return params['id'],1.-float(dead)/len(results),results
-    
-
-        
-                
 
 
 def gen_configs(hyperparams):
@@ -108,15 +102,21 @@ def gen_configs(hyperparams):
     params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
     return list(itertools.product(*params_raw))
     
-    
-        
-
 def recv_msg(fifo):
     return os.read(fifo, 24)
 
 def proc_msg(msg):
-    ## process incoming message pipe
-    return msg
+    ## for now, this function is hardcoding some things, but it's no biggie
+    rm = copy.deepcopy(msg)
+    for obj in rm['parameters']:
+        obj['values'] = [float(x) for x in obj['values']]
+        obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
+
+    rm['func'] = add_nums
+    rm['id'] = rm['experimentName']
+    del rm['experimentName']
+    print(rm)
+    return rm
 
 def experiment_resolve(future):
     ### Make API call to inform of completion of experiment
@@ -133,9 +133,24 @@ def mapper(params):
 def add_nums(x,y):
     ## for testing purposes.
     return x+y
+
+
+def initilize_work_space():
+    if os.path.exists('GLADOS_HOME'):
+        os.chdir(os.environ['GLADOS_HOME'])
+        if not os.path.exists('exps'):
+            os.mdkir('exps')
+        if not os.path.existS('res'):
+            os.mkdir('res')
+    else: 
+        os.mkdir('GLADOS_HOME')
+        os.mkdir('GLADOS_HOME/exps')
+        os.mkdir('GLADOS_HOME/res')
+        
     
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
+    initilize_work_space()
     GlobalLoadBalancer = GLB(1)
     hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
     # msg_test = {
@@ -147,15 +162,13 @@ if __name__=='__main__':
     # GlobalLoadBalancer.submit_experiment(msg_test)
     app.run()
     
-
+'''
 ### plot postprocessing / native support ###
 ### gen intermediate plots live ###
 ### [debug mode]: switch to not write configuration
 ### intermediate checks: every n iterations, restrict param space based on provided code
 ### MPI
 
-##: Future:
-'''
 1. refined front-end >> integrate with the db and crud 
 2.  > modularity:
     > distribution across the network >> MPI 

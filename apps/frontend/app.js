@@ -5,10 +5,7 @@ const app = express(); //Instantiate an express app, the main work horse of this
 const port = 5005; //Save the port number where your server will be listening
 var submit = false;
 var expname = null;
-var filepath = "";
-
-
-
+var filepath = '';
 
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
@@ -29,86 +26,83 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 app.post('/parameters', (req, res) => {
-			expname = req.body.experimentName;
-			console.log(expname);
+	expname = req.body.experimentName;
+	console.log(expname);
 
-			var json = req.body;
+	var json = req.body;
 
-			// submit = req.body.submit;
-			// console.log(__dirname + `/exploc/experiment_${expname}`);
-			// instantiate experiment on DB, recv ID.
-			// as soon as id is here, create working directory under /exploc/experiemnt_[id]
-			// fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
-			// 	if (err) {
-			// 		console.error(err)
-			// 		return
-			// 	}
-			// 	//file written successfully
-			// })
+	// submit = req.body.submit;
+	// console.log(__dirname + `/exploc/experiment_${expname}`);
+	// instantiate experiment on DB, recv ID.
+	// as soon as id is here, create working directory under /exploc/experiemnt_[id]
+	// fs.writeFile(__dirname + `/exploc/experiment_${expname}`, JSON.stringify(req.body), err => {
+	// 	if (err) {
+	// 		console.error(err)
+	// 		return
+	// 	}
+	// 	//file written successfully
+	// })
+	console.log(json);
+	fetch(`http://127.0.0.1:5000/experiment`, {
+		method: 'POST',
+		body: JSON.stringify(json),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
+		.then((res) => res.json())
+		.catch((error) => console.error('Error:', error));
+	//		.then((json) => console.log(json));
+	// announce to daemon that new experiment is online
+	//
+});
+//Comment out the next method before testing
+app.listen(port, () => {
+	//server starts listening for any attempts from a client to connect at port: {port}
+	console.log(`Now listening on port ${port}`);
+});
 
-			fetch(`http://localhost:5000`, {
-					method: 'POST',
-					body: JSON.stringify(json),
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				}).then(res => res.json())
-				.then(json => console.log(json));
-			// announce to daemon that new experiment is online
-			//
+//Place functions to be tested below, there should be a copy here and in main
+// function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
+// 	const parsedDef = parseFloat(defaultVal);
+// const parsedMin = parseFloat(minVal);
+// const parsedMax = parseFloat(maxVal);
+// const parsedInc = parseFloat(incrementVal);
+// 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+// 		throw new TypeError();
+// 	}
+// 	var param = {
+// 		"paramName" : paramName,
+// 		"values" :
+// 		[defaultVal,
+// 		minVal,
+// 		maxVal,
+// 		incrementVal]
+// 	}
+// 	return param;
+// }
 
-			});
-			//Comment out the next method before testing
-			app.listen(port, () => { //server starts listening for any attempts from a client to connect at port: {port}
-				console.log(`Now listening on port ${port}`);
-			});
+// function createUser(username, password) {
 
+// }
 
+// function checkUser(username, password) {
 
+// }
 
-			//Place functions to be tested below, there should be a copy here and in main
-			// function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-			// 	const parsedDef = parseFloat(defaultVal);
-			// const parsedMin = parseFloat(minVal);
-			// const parsedMax = parseFloat(maxVal);
-			// const parsedInc = parseFloat(incrementVal);
-			// 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
-			// 		throw new TypeError();
-			// 	}
-			// 	var param = {
-			// 		"paramName" : paramName,
-			// 		"values" :
-			// 		[defaultVal,
-			// 		minVal,
-			// 		maxVal,
-			// 		incrementVal]
-			// 	}
-			// 	return param;
-			// }
+// function experimentParamsJSON(paramsArr, experimentName, user, experiment){
 
-			// function createUser(username, password) {
+// 	const params = {
+// 		"experimentName": experimentName,
+// 		"user": user,
+// 		"parameters": paramsArr,
+// 		"file" : experiment
+// 	};
+// return params;
 
-			// }
+// }
 
-			// function checkUser(username, password) {
-
-			// }
-
-
-			// function experimentParamsJSON(paramsArr, experimentName, user, experiment){
-
-			// 	const params = {
-			// 		"experimentName": experimentName,
-			// 		"user": user,
-			// 		"parameters": paramsArr,
-			// 		"file" : experiment
-			// 	};
-			// return params;
-
-			// }
-
-
-			// module.exports.paramJSON = paramJSON;
-			// module.exports.experimentParamsJSON = experimentParamsJSON;
-			// module.exports.createUser = createUser;
-			// module.exports.checkUser = checkUser;
+// module.exports.paramJSON = paramJSON;
+// module.exports.experimentParamsJSON = experimentParamsJSON;
+// module.exports.createUser = createUser;
+// module.exports.checkUser = checkUser;
