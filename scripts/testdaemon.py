@@ -67,17 +67,21 @@ def experiment_event(msg):
     ## process stuff and make API call to inform of the experiment's commencement
     results = []
     dead = 0
+    i = 0
     with ThreadPoolExecutor(1) as executor:
         result_futures = list(map(lambda x: executor.submit(mapper, {'filename': params['fileName'],'iter':x[0],'func':func,'params':x[1]}), list(param_iter)))
         for future in as_completed(result_futures):
             try:
                 res = future.result()
                 results.append({'iter': res[0], 'params': res[1], 'result': res[2]})
+                if i % 10 == 0:
+                    logging.info(f'{i} iterations completed.')
             except Exception as e:
                 ### write temporary state of problems
                 print(e)
                 results.append({'iter': 0, 'params': [0], 'result': 'FAILED'})
                 dead+=1
+            i+=1
     
     ## process stuff and make API call to inform of the experiment's completion
     ### write results to a csv file named experiment_id.csv

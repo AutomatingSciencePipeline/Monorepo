@@ -28,13 +28,15 @@ app.get('/favicon.ico', (req, res) => {
 app.post('/fileupload', (req, res) => {
 	var form = new formidable.IncomingForm();
 	form.parse(req, function (err, fields, files) {
-		console.log("we got a file!");
+		console.log('we got a file!');
 		var oldpath = files.filetoupload.filepath;
-		var newpath = '../../scripts/GLADOS_HOME/incoming/' + files.filetoupload.originalFilename;
+		var newpath =
+			'../../scripts/GLADOS_HOME/incoming/' +
+			files.filetoupload.originalFilename;
 		fileName = files.filetoupload.originalFilename;
 		fs.rename(oldpath, newpath, function (err) {
 			if (err) throw err;
-			res.redirect('/parameters')
+			res.redirect('/parameters');
 		});
 	});
 });
@@ -43,7 +45,7 @@ app.post('/parameters', (req, res) => {
 	console.log(expname);
 
 	var json = req.body;
-	json["fileName"] = fileName;
+	json['fileName'] = fileName;
 
 	// submit = req.body.submit;
 	// console.log(__dirname + `/exploc/experiment_${expname}`);
@@ -58,12 +60,12 @@ app.post('/parameters', (req, res) => {
 	// })
 	console.log(json);
 	fetch(`http://127.0.0.1:5000/experiment`, {
-			method: 'POST',
-			body: JSON.stringify(json),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
+		method: 'POST',
+		body: JSON.stringify(json),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
 		.then((res) => res.json())
 		.catch((error) => console.error('Error:', error));
 	//		.then((json) => console.log(json));

@@ -1,3 +1,5 @@
+#!/opt/homebrew/bin/python3
+
 import random
 import copy
 import sys
@@ -62,11 +64,11 @@ def chromSort(chrom):
 def main():
     args = sys.argv[1:]
     #takes in 5 arguments: generations, population, genome length, mutation rate, and seed
-    generations = int(args[0])
-    population = int(args[1])
-    genomelength = int(args[2])
+    generations = int(float(args[0]))
+    population = int(float(args[1]))
+    genomelength = int(float(args[2]))
     mutationrate = float(args[3])
-    seed = int(args[4])
+    seed = int(float(args[4]))
     random.seed(seed)
     #generate initial population
     chroms = generateChroms(population, genomelength)
