@@ -1,7 +1,9 @@
-
-
 //Save
-
+var integerParams = 0;
+var floatParams = 0;
+var arrayParams = 0;
+var booleParams = 0;
+var fileParams = 0;
 
 function htmlToElement(html) {
 	var template = document.createElement('template');
@@ -9,21 +11,22 @@ function htmlToElement(html) {
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
+
 function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
 	const parsedDef = parseFloat(defaultVal);
 	const parsedMin = parseFloat(minVal);
 	const parsedMax = parseFloat(maxVal);
 	const parsedInc = parseFloat(incrementVal);
-	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+	if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
 		throw new TypeError();
 	}
 	var param = {
-		"paramName" : paramName,
-		"values" :
-		[defaultVal,
-		minVal,
-		maxVal,
-		incrementVal]
+		"paramName": paramName,
+		"values": [defaultVal,
+			minVal,
+			maxVal,
+			incrementVal
+		]
 	}
 	return param;
 }
@@ -35,16 +38,16 @@ function createUser(username, password) {
 function checkUser(username, password) {
 
 }
- 
 
-function experimentParamsJSON(paramsArr, experimentName, user, verboseBool){
 
-			const params = {
-				"experimentName": experimentName,
-				"user": user,
-				"parameters": paramsArr,
-				"verbose" : verboseBool
-			};
+function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
+
+	const params = {
+		"experimentName": experimentName,
+		"user": user,
+		"parameters": paramsArr,
+		"verbose": verboseBool
+	};
 	return params;
 
 }
@@ -64,7 +67,7 @@ LoginPageController = class {
 		document.querySelector("#login").addEventListener("click", (event) => {
 			var username = document.querySelector("#username").value;
 			var password = document.querySelector("#password").value;
-			window.location.assign('index?user=' + username);
+			window.location.assign('parameters?user=' + username);
 		});
 	}
 
@@ -80,28 +83,14 @@ LoginManager = class {
 	}
 
 }
-InitialPageController = class {
-	constructor(user) {
 
-		this.user = user;
-		console.log(user + " is logged in");
-		// document.querySelectorAll("#submitAddQuote").onclick = (event) => {
-		// 	console.log("submit");
-		// };
-		document.querySelector("#initSubmit").addEventListener("click", (event) => {
-			console.log("pog");
-			var x = document.querySelector("#typeNumber").value;
-			location.assign('parameters?int=' + x +'&user=' + this.user);
-		});
 
-	}
-}
 
 
 ParameterPageController = class {
-	constructor(int, user) {
-		this.int = int;
+	constructor(user) {
 		this.user = user;
+		this.int = 0;
 
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
 			// 		var dict = {"one" : [15, 4.5],
@@ -141,80 +130,235 @@ ParameterPageController = class {
 
 			fetch(`/parameters`, {
 				method: 'POST',
-				headers : {
-					"Content-Type" : 'application/json'
+				headers: {
+					"Content-Type": 'application/json'
 				},
-				body: executable}).catch(err => console.log(err))
+				body: executable
+			}).catch(err => console.log(err))
 
 			// open a connection
-//			xhr.open("POST", url, true);
-//
-//			// Set the request header i.e. which type of content you are sending
-//			xhr.setRequestHeader("Content-Type", "application/json");
-//
-//			// Create a state change callback
-//			xhr.onreadystatechange = function () {
-//				if (xhr.readyState === 4 && xhr.status === 200) {
-//					// Print received data from server
-//					result.innerHTML = this.responseText;
-//				}
-//			};
-//
-//			xhr.send(executable);
+			//			xhr.open("POST", url, true);
+			//
+			//			// Set the request header i.e. which type of content you are sending
+			//			xhr.setRequestHeader("Content-Type", "application/json");
+			//
+			//			// Create a state change callback
+			//			xhr.onreadystatechange = function () {
+			//				if (xhr.readyState === 4 && xhr.status === 200) {
+			//					// Print received data from server
+			//					result.innerHTML = this.responseText;
+			//				}
+			//			};
+			//
+			//			xhr.send(executable);
 		});
-
-		document.querySelector("#fab").addEventListener("click", (event => {
-			var x = parseInt(this.int, 10) + 1;
-			window.location.assign('parameters.html?int=' + x);
-		}))
-
-		this.updateList();
+		document.querySelector("#addIntegerBtn").addEventListener("click", (event) => {
+			this.updateList(0);
+		})
+		document.querySelector("#addFloatBtn").addEventListener("click", (event) => {
+			this.updateList(1);
+		})
+		document.querySelector("#addArrayBtn").addEventListener("click", (event) => {
+			this.updateList(2);
+		})
+		document.querySelector("#addBooleanBtn").addEventListener("click", (event) => {
+			this.updateList(3);
+		})
+		document.querySelector("#addFileBtn").addEventListener("click", (event) => {
+			this.updateList(4);
+		})
 
 
 	}
 
-	updateList() {
-		const newList = htmlToElement('<div id="parameterContainer"></div>');
-		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'))
-		for (let i = 0; i < this.int; i++) {
-			const newCard = this._createCard(i);
-			newCard.onclick = (event) => {
-				console.log(`You clicked on ${i}`);
+	updateList(type) {
+		var newList;
+		var id;
+		if (type == 0) {
+			this.int = this.int + 1;
+			integerParams = integerParams + 1;
+			//Integer
+			//
+			//
+			newList = htmlToElement('<div id="integerContainer"></div>');
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Integer Parameters</div></div>'));
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+			id = "#integerContainer";
+			for (var i = 0; i < integerParams; i++) {
+				const newCard = this._createCard(0, i);
+				newList.appendChild(newCard);
 			}
-			newList.appendChild(newCard);
-		}
-		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
-		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
+			var oldList = document.querySelector(id);
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.append(newList);
+		} else if (type == 1) {
+			this.int = this.int + 1;
+			floatParams = floatParams + 1;
 
-		const oldList = document.querySelector("#parameterContainer");
+			//		Float
+			//
+			//
+			newList = htmlToElement('<div id="floatContainer"></div>');
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Float Parameters</div></div>'));
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+			id = "#floatContainer";
+			for (var i = 0; i < floatParams; i++) {
+				const newCard = this._createCard(1, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.append(newList);
+		} else if (type == 2) {
+			this.int = this.int + 1;
+			arrayParams = arrayParams + 1;
+
+			//		Array
+			//
+			//
+			newList = htmlToElement('<div id="arrayContainer"></div>');
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Array Parameters</div></div>'));
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">Values</div></div>'));
+			id = "#arrayContainer";
+			for (var i = 0; i < arrayParams; i++) {
+				const newCard = this._createCard(2, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.append(newList);
+		} else if (type == 3) {
+			this.int = this.int + 1;
+			booleParams = booleParams + 1;
+
+			//		Boolean
+			//
+			//
+			newList = htmlToElement('<div id="booleContainer"></div>');
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Boolean Parameters</div></div>'));
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Value</div></div>'));
+			id = "#booleContainer";
+			for (var i = 0; i < booleParams; i++) {
+				const newCard = this._createCard(2, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.append(newList);
+		} else if (type == 4) {
+			this.int = this.int + 1;
+			fileParams = fileParams + 1;
+			// File
+			//
+			//
+			newList = htmlToElement('<div id="fileContainer"></div>');
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">File Parameters</div></div>'));
+			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">File path</div></div>'));
+			id = "#fileContainer";
+			for (var i = 0; i < fileParams; i++) {
+				const newCard = this._createCard(2, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.append(newList);
+		}
+
+
+		newList = htmlToElement('<div id="experimentName"></div>');
+		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
+		id = "#experimentName";
+		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
+		oldList = document.querySelector(id);
 		oldList.removeAttribute("id");
 		oldList.hidden = true;
-
 		oldList.parentElement.append(newList);
+
 	}
-	_createCard(int) {
-		return htmlToElement(`<div class="row">
+	_createCard(type, int) {
+		if (type == 0) {
+			return htmlToElement(`<div class="row">
 		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
-			<input type="text" id="paramName${int}" class="form-control" />
+			<input type="text" id="integerParamName${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="defaultValue${int}" class="form-control" />
+		  <input type="number" id="integerDefaultValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="minValue${int}" class="form-control" />
+		  <input type="number" id="integerMinValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="maxValue${int}" class="form-control" />
+		  <input type="number" id="integerMaxValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="incValue${int}" class="form-control" />
+		  <input type="number" id="integerIncValue${int}" class="form-control" />
 		</div>
 
 	  </div>`);
+		} else if (type == 1) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="floatParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatDefaultValue${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatMinValue${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatMaxValue${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatIncValue${int}" class="form-control" />
+		</div>
+
+	  </div>`);
+		} else if (type == 2) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="arrayParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="text" id="arrayValues${int}" class="form-control" />
+		</div>
+	  </div>`);
+		} else if (type == 3) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="booleParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="text" id="booleValue${int}" class="form-control" />
+		</div>
+	  </div>`);
+		} else if (type == 4) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="fileParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="file" id="filePath${int}" class="form-control" />
+		</div>
+	  </div>`);
+		}
+
 	}
 }
 ParameterManager = class {
@@ -232,23 +376,10 @@ ParameterManager = class {
 /** function and class syntax examples */
 main = function () {
 	console.log("Ready");
-	if(document.querySelector("#loginPage")) {
+	if (document.querySelector("#loginPage")) {
 		console.log("You are on the login page");
 
 		new LoginPageController();
-	}
-	if (document.querySelector("#initialPage")) {
-		console.log("You are on the initial page");
-		//rhit.intialPageManager = new rhit.InitialPageManager();
-		const queryString = location.search;
-		const urlParams = new URLSearchParams(queryString);
-		const user = urlParams.get("user");
-		console.log(`Detail page for ${user}`);
-		if (!user) {
-			window.location.href = "/";
-		}
-		new InitialPageController(user);
-
 	}
 
 	if (document.querySelector("#parametersPage")) {
@@ -256,13 +387,12 @@ main = function () {
 		// mqid = rhit.storage.getMovieQuoteId();
 		const queryString = window.location.search;
 		const urlParams = new URLSearchParams(queryString);
-		const int = urlParams.get("int");
 		const user = urlParams.get("user");
-		console.log(`Detail page for ${int}`);
-		if (!int||!user) {
-			window.location.href = "/index";
+		console.log(`Detail page for ${user}`);
+		if (!user) {
+			window.location.href = "/";
 		}
-		new ParameterPageController(int, user);
+		new ParameterPageController(user);
 	}
 
 	// const ref = firebase.firestore().collection("MovieQuotes");
@@ -281,4 +411,3 @@ main = function () {
 };
 
 main();
-

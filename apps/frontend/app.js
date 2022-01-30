@@ -16,9 +16,6 @@ app.use('/scripts', express.static(__dirname + 'public/scripts'));
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/html/loginpage.html');
 });
-app.get('/index', (req, res) => {
-	res.sendFile(__dirname + '/html/index.html');
-});
 app.get('/parameters', (req, res) => {
 	res.sendFile(__dirname + '/html/parameters.html');
 });
