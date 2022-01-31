@@ -74,21 +74,38 @@ app.listen(port, () => {
 });
 
 //Place functions to be tested below, there should be a copy here and in main
-// function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-// 	const parsedDef = parseFloat(defaultVal);
-// const parsedMin = parseFloat(minVal);
-// const parsedMax = parseFloat(maxVal);
-// const parsedInc = parseFloat(incrementVal);
-// 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
-// 		throw new TypeError();
+// function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, type) {
+
+// 	var parsedDef;
+// 	var parsedMin;
+// 	var parsedMax;
+// 	var parsedInc;
+// 	if (type == "float") {
+// 		parsedDef = parseFloat(defaultVal);
+// 		parsedMin = parseFloat(minVal);
+// 		parsedMax = parseFloat(maxVal);
+// 		parsedInc = parseFloat(incrementVal);
+// 		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+// 			throw new TypeError();
+// 		}
+// 	} else if (type == "int") {
+// 		parsedDef = parseInt(defaultVal);
+// 		parsedMin = parseInt(minVal);
+// 		parsedMax = parseInt(maxVal);
+// 		parsedInc = parseInt(incrementVal);
+// 		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+// 			throw new TypeError();
+// 		}
 // 	}
+
 // 	var param = {
-// 		"paramName" : paramName,
-// 		"values" :
-// 		[defaultVal,
-// 		minVal,
-// 		maxVal,
-// 		incrementVal]
+// 		"paramName": paramName,
+// 		"values": [defaultVal,
+// 			minVal,
+// 			maxVal,
+// 			incrementVal
+// 		],
+// 		"type" : type
 // 	}
 // 	return param;
 // }
@@ -110,6 +127,24 @@ app.listen(port, () => {
 // 		"file" : experiment
 // 	};
 // return params;
+
+// }
+// function paramJSONSingleVal(paramName, val, type) {
+// 	var parsedVal;
+// 	if(type == "array") {
+// 		parsedVal = JSON.parse(val);
+// 	} else if(type == "boolean") {
+// 		parsedVal = (val === 'true');
+// 	} else if(type == "file") {
+// 		parsedVal = val;
+// 	}
+// 	var param = {
+// 		"paramName": paramName,
+// 		"value": parsedVal,
+// 		"type" : type
+// 	}
+// 	return param;
+
 
 // }
 

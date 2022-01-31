@@ -11,22 +11,57 @@ function htmlToElement(html) {
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
-
-function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-	const parsedDef = parseFloat(defaultVal);
-	const parsedMin = parseFloat(minVal);
-	const parsedMax = parseFloat(maxVal);
-	const parsedInc = parseFloat(incrementVal);
-	if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
-		throw new TypeError();
+function paramJSONSingleVal(paramName, val, type) {
+	var parsedVal;
+	if(type == "array") {
+		parsedVal = JSON.parse(val);
+	} else if(type == "boolean") {
+		parsedVal = (val === 'true');
+	} else if(type == "file") {
+		parsedVal = val;
 	}
+	var param = {
+		"paramName": paramName,
+		"value": parsedVal,
+		"type" : type
+	}
+	return param;
+
+
+}
+
+function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, type) {
+
+	var parsedDef;
+	var parsedMin;
+	var parsedMax;
+	var parsedInc;
+	if (type == "float") {
+		parsedDef = parseFloat(defaultVal);
+		parsedMin = parseFloat(minVal);
+		parsedMax = parseFloat(maxVal);
+		parsedInc = parseFloat(incrementVal);
+		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+			throw new TypeError();
+		}
+	} else if (type == "int") {
+		parsedDef = parseInt(defaultVal);
+		parsedMin = parseInt(minVal);
+		parsedMax = parseInt(maxVal);
+		parsedInc = parseInt(incrementVal);
+		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+			throw new TypeError();
+		}
+	}
+
 	var param = {
 		"paramName": paramName,
 		"values": [defaultVal,
 			minVal,
 			maxVal,
 			incrementVal
-		]
+		],
+		"type" : type
 	}
 	return param;
 }
@@ -99,15 +134,48 @@ ParameterPageController = class {
 			// "four" : [32, 4.1]};
 			var array = [];
 
-			for (let i = 0; i < this.int; i++) {
-				console.log("#paramName" + i);
-				var paramName = document.querySelector('#paramName' + i).value;
-				var defVal = document.querySelector("#defaultValue" + i).value
-				var minVal = document.querySelector("#minValue" + i).value
-				var maxVal = document.querySelector("#maxValue" + i).value
-				var incVal = document.querySelector("#incValue" + i).value
-				var param = paramJSON(paramName, defVal, minVal, maxVal, incVal);
+			for (let i = 0; i < integerParams; i++) {
+				console.log("#integerParamName" + i);
+				var paramName = document.querySelector('#integerParamName' + i).value;
+				var defVal = document.querySelector("#integerDefaultValue" + i).value
+				var minVal = document.querySelector("#integerMinValue" + i).value
+				var maxVal = document.querySelector("#integerMaxValue" + i).value
+				var incVal = document.querySelector("#integerIncValue" + i).value
+				var param = paramJSONMultVals(paramName, defVal, minVal, maxVal, incVal, "integer");
 
+
+				array.push(param);
+			}
+			for (let i = 0; i < floatParams; i++) {
+				console.log("#floatParamName" + i);
+				var paramName = document.querySelector('#floatParamName' + i).value;
+				var defVal = document.querySelector("#floatDefaultValue" + i).value
+				var minVal = document.querySelector("#floatMinValue" + i).value
+				var maxVal = document.querySelector("#floatMaxValue" + i).value
+				var incVal = document.querySelector("#floatIncValue" + i).value
+				var param = paramJSONMultVals(paramName, defVal, minVal, maxVal, incVal, "float");
+
+
+				array.push(param);
+			}
+			for(let i = 0; i < arrayParams; i++) {
+				var paramName = document.querySelector('#arrayParamName' + i).value;
+				var val = document.querySelector('#arrayValues'+i).value;
+				var param = paramJSONSingleVal(paramName, val, "array");
+
+				array.push(param);
+			}
+			for(let i = 0; i < booleParams; i++) {
+				var paramName = document.querySelector('#booleParamName' + i).value;
+				var val = document.querySelector('#booleValue'+i).value;
+				var param = paramJSONSingleVal(paramName, val, "boolean");
+
+				array.push(param);
+			}
+			for(let i = 0; i < arrayParams; i++) {
+				var paramName = document.querySelector('#fileParamName' + i).value;
+				var val = document.querySelector('#filePath'+i).value;
+				var param = paramJSONSingleVal(paramName, val, "file");
 
 				array.push(param);
 			}
@@ -242,7 +310,7 @@ ParameterPageController = class {
 			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Value</div></div>'));
 			id = "#booleContainer";
 			for (var i = 0; i < booleParams; i++) {
-				const newCard = this._createCard(2, i);
+				const newCard = this._createCard(3, i);
 				newList.appendChild(newCard);
 			}
 			oldList = document.querySelector(id);
@@ -260,7 +328,7 @@ ParameterPageController = class {
 			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">File path</div></div>'));
 			id = "#fileContainer";
 			for (var i = 0; i < fileParams; i++) {
-				const newCard = this._createCard(2, i);
+				const newCard = this._createCard(4, i);
 				newList.appendChild(newCard);
 			}
 			oldList = document.querySelector(id);
@@ -354,7 +422,7 @@ ParameterPageController = class {
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="file" id="filePath${int}" class="form-control" />
+		  <input type="text" id="filePath${int}" class="form-control" />
 		</div>
 	  </div>`);
 		}
