@@ -11,19 +11,20 @@ function htmlToElement(html) {
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
+
 function paramJSONSingleVal(paramName, val, type) {
 	var parsedVal;
-	if(type == "array") {
+	if (type == "array") {
 		parsedVal = JSON.parse(val);
-	} else if(type == "boolean") {
+	} else if (type == "boolean") {
 		parsedVal = (val === 'true');
-	} else if(type == "file") {
+	} else if (type == "file") {
 		parsedVal = val;
 	}
 	var param = {
 		"paramName": paramName,
 		"value": parsedVal,
-		"type" : type
+		"type": type
 	}
 	return param;
 
@@ -61,7 +62,7 @@ function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, 
 			maxVal,
 			incrementVal
 		],
-		"type" : type
+		"type": type
 	}
 	return param;
 }
@@ -158,23 +159,23 @@ ParameterPageController = class {
 
 				array.push(param);
 			}
-			for(let i = 0; i < arrayParams; i++) {
+			for (let i = 0; i < arrayParams; i++) {
 				var paramName = document.querySelector('#arrayParamName' + i).value;
-				var val = document.querySelector('#arrayValues'+i).value;
+				var val = document.querySelector('#arrayValues' + i).value;
 				var param = paramJSONSingleVal(paramName, val, "array");
 
 				array.push(param);
 			}
-			for(let i = 0; i < booleParams; i++) {
+			for (let i = 0; i < booleParams; i++) {
 				var paramName = document.querySelector('#booleParamName' + i).value;
-				var val = document.querySelector('#booleValue'+i).value;
+				var val = document.querySelector('#booleValue' + i).value;
 				var param = paramJSONSingleVal(paramName, val, "boolean");
 
 				array.push(param);
 			}
-			for(let i = 0; i < arrayParams; i++) {
+			for (let i = 0; i < arrayParams; i++) {
 				var paramName = document.querySelector('#fileParamName' + i).value;
-				var val = document.querySelector('#filePath'+i).value;
+				var val = document.querySelector('#filePath' + i).value;
 				var param = paramJSONSingleVal(paramName, val, "file");
 
 				array.push(param);
@@ -221,20 +222,65 @@ ParameterPageController = class {
 			//			xhr.send(executable);
 		});
 		document.querySelector("#addIntegerBtn").addEventListener("click", (event) => {
+
 			this.updateList(0);
+
 		})
 		document.querySelector("#addFloatBtn").addEventListener("click", (event) => {
+
 			this.updateList(1);
+
 		})
 		document.querySelector("#addArrayBtn").addEventListener("click", (event) => {
+
 			this.updateList(2);
+
 		})
 		document.querySelector("#addBooleanBtn").addEventListener("click", (event) => {
 			this.updateList(3);
+
 		})
 		document.querySelector("#addFileBtn").addEventListener("click", (event) => {
 			this.updateList(4);
+
 		})
+		document.querySelector("#remIntegerBtn").addEventListener("click", (event) => {
+			integerParams = integerParams - 2;
+			console.log("integer");
+			this.int = this.int - 2;
+			this.updateList(0);
+		})
+		document.querySelector("#remFileBtn").addEventListener("click", (event) => {
+			fileParams = fileParams - 2;
+			console.log("file");
+			this.int = this.int - 2;
+			this.updateList(4);
+		})
+		document.querySelector("#remBooleanBtn").addEventListener("click", (event) => {
+			booleParams = booleParams - 2;
+			console.log("boole");
+			this.int = this.int - 2;
+			this.updateList(3);
+		})
+		document.querySelector("#remArrayBtn").addEventListener("click", (event) => {
+			arrayParams = arrayParams - 2;
+			console.log("array");
+			this.int = this.int - 2;
+			this.updateList(2);
+		})
+		document.querySelector("#remFloatBtn").addEventListener("click", (event) => {
+			floatParams = floatParams - 2;
+			console.log("float");
+			this.int = this.int - 2;
+			this.updateList(1);
+		})
+
+
+
+
+
+
+
 
 
 	}
@@ -249,8 +295,11 @@ ParameterPageController = class {
 			//
 			//
 			newList = htmlToElement('<div id="integerContainer"></div>');
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Integer Parameters</div></div>'));
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+			if (integerParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Integer Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+
+			}
 			id = "#integerContainer";
 			for (var i = 0; i < integerParams; i++) {
 				const newCard = this._createCard(0, i);
@@ -268,8 +317,10 @@ ParameterPageController = class {
 			//
 			//
 			newList = htmlToElement('<div id="floatContainer"></div>');
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Float Parameters</div></div>'));
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+			if (floatParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Float Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+			}
 			id = "#floatContainer";
 			for (var i = 0; i < floatParams; i++) {
 				const newCard = this._createCard(1, i);
@@ -286,9 +337,12 @@ ParameterPageController = class {
 			//		Array
 			//
 			//
+
 			newList = htmlToElement('<div id="arrayContainer"></div>');
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Array Parameters</div></div>'));
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">Values</div></div>'));
+			if (arrayParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Array Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">Values</div></div>'));
+			}
 			id = "#arrayContainer";
 			for (var i = 0; i < arrayParams; i++) {
 				const newCard = this._createCard(2, i);
@@ -306,8 +360,10 @@ ParameterPageController = class {
 			//
 			//
 			newList = htmlToElement('<div id="booleContainer"></div>');
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Boolean Parameters</div></div>'));
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Value</div></div>'));
+			if (booleParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Boolean Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Value</div></div>'));
+			}
 			id = "#booleContainer";
 			for (var i = 0; i < booleParams; i++) {
 				const newCard = this._createCard(3, i);
@@ -324,8 +380,10 @@ ParameterPageController = class {
 			//
 			//
 			newList = htmlToElement('<div id="fileContainer"></div>');
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">File Parameters</div></div>'));
-			newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">File path</div></div>'));
+			if (fileParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">File Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">File path</div></div>'));
+			}
 			id = "#fileContainer";
 			for (var i = 0; i < fileParams; i++) {
 				const newCard = this._createCard(4, i);
