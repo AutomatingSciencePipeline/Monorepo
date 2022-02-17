@@ -4,25 +4,24 @@ const fs = require('fs');
 var formidable = require('formidable');
 const app = express(); //Instantiate an express app, the main work horse of this server
 const port = 5005; //Save the port number where your server will be listening
-var submit = false;
-var expname = null;
-var fileName = '';
-var iteration = 0; //Pavani test
-
 
 //const supaCreateClient = require('@supabase/supabase-js')
 //const suppy = require('@supabase')
-const supGoTrue = require('@supabase/gotrue-js')
-const supPost = require('@supabase/postgrest-js')
-const supRealTime = require('@supabase/realtime-js')
-const supStorage= require('@supabase/storage-js')
-const supBigBase= require('@supabase/supabase-js')
-// Create a single supabase client for interacting with your database 
+const supGoTrue = require('@supabase/gotrue-js');
+const supPost = require('@supabase/postgrest-js');
+const supRealTime = require('@supabase/realtime-js');
+const supStorage = require('@supabase/storage-js');
+const supBigBase = require('@supabase/supabase-js');
+// Create a single supabase client for interacting with your database
 
 //SUPABASE
- var SUPABASE_URL = 'http://localhost:3000'
- var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDQ5ODc2MDAsCiAgICAiZXhwIjogMTgwMjc1NDAwMAp9.eMfl9FG32Q6lfdYXi8A4IcWc6PbwuYFNunBPad8rFaM'
- var supabase = supBigBase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const SUPABASE_URL = 'http://localhost:8000';
+const SUPABASE_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
+const supabase = supBigBase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+	fetch: fetch.bind(globalThis),
+});
+console.log(supabase);
 //window.userToken = null
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
@@ -60,7 +59,7 @@ app.post('/parameters', (req, res) => {
 	expname = req.body.experimentName;
 	console.log(expname);
 
-	var json = req.body;
+	console.log(req.body);
 	json['fileName'] = fileName;
 
 	// submit = req.body.submit;
@@ -74,7 +73,6 @@ app.post('/parameters', (req, res) => {
 	// 	}
 	// 	//file written successfully
 	// })
-	console.log(json);
 	fetch(`http://127.0.0.1:5000/experiment`, {
 		method: 'POST',
 		body: JSON.stringify(json),
@@ -89,54 +87,67 @@ app.post('/parameters', (req, res) => {
 	//
 });
 
-app.post('/createuser', (req, res) => {  //need help with this 
-	console.log("we are in creating user")
-	console.log("iteration :")
-	console.log(iteration)
-	console.log(req.body.email)
-	console.log(req.body.password)
-	var email= req.body.email
-	var password = req.body.password
-	console.log("failing here")
-	console.log("parsing the validate user")
-	//var par = JSON.parse(req)
-	//console.log(req)
-	supabase.auth.signUp({
-		email: email,
-		password: password,
-	  })
+app.post('/createuser', async (req, res) => {
+	//need help with this
+	console.log(req.body.email);
+	console.log(req.body.password);
+	const email = req.body.email;
+	const password = req.body.password;
+	await supabase.auth
+		.signUp({
+			email: email,
+			password: password,
+		})
+		.then((user) => {
+			console.log('user created');
+			console.log(user);
+			console.log(user.id);
+			console.log(user.email);
+			console.log(user.password);
+			console.log(user.createdAt);
+			console.log(user.updatedAt);
+			console.log(user.lastLogin);
+			console.log(user.lastLoginIp);
+			console.log(user.lastLoginAt);
+			console.log(user.lastLoginAtIp);
+		})
+		.catch((error) => {
+			console.log('error');
+			console.log(error);
+		});
 	// supabase.auth
-    // .signUp({email, password}) //{ email, password }
-    // .then((response) => {
-    //   response.error ? alert(response.error.message) : setToken(response)
-    // })
-    // .catch((err) => {
-    //   alert(err)
-    // })
-	iteration = iteration + 1; 
-	
+	// .signUp({email, password}) //{ email, password }
+	// .then((response) => {
+	//   response.error ? alert(response.error.message) : setToken(response)
+	// })
+	// .catch((err) => {
+	//   alert(err)
+	// })
+	iteration = iteration + 1;
+
 	//window.location.assign('parameters?user=' + req.body.name);
 });
 const fetchUserDetails = () => {
-	alert(JSON.stringify(supabase.auth.user()))
-  }
-app.post('/validateuser', (req, res) => {  //need help with this 
-	console.log("we are in validate user")
-	console.log(req.body.email)
-	console.log(req.body.password)
-	var email = req.body.email
-	var password = req.body.password
-	console.log("parsing the validate user")
-	console.log(JSON.parse(req))
-	//supasbase 
-	 supabase.auth
-    .signIn({ email, password })
-    .then((response) => {
-      response.error ? alert(response.error.message) : setToken(response)
-    })
-    .catch((err) => {
-      alert(err.response.text)
-    })
+	alert(JSON.stringify(supabase.auth.user()));
+};
+app.post('/validateuser', (req, res) => {
+	//need help with this
+	console.log('we are in validate user');
+	console.log(req.body.email);
+	console.log(req.body.password);
+	var email = req.body.email;
+	var password = req.body.password;
+	console.log('parsing the validate user');
+	console.log(JSON.parse(req));
+	//supasbase
+	supabase.auth
+		.signIn({ email, password })
+		.then((response) => {
+			response.error ? alert(response.error.message) : setToken(response);
+		})
+		.catch((err) => {
+			alert(err.response.text);
+		});
 	//window.location.assign('parameters?user=' + req.body.name);
 });
 //Comment out the next method before testing
