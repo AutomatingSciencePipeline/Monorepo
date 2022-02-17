@@ -9,14 +9,20 @@ var expname = null;
 var fileName = '';
 var iteration = 0; //Pavani test
 
+
 //const supaCreateClient = require('@supabase/supabase-js')
-import { createClient } from '../node_modules/@supabase/supabase-js'
+//const suppy = require('@supabase')
+const supGoTrue = require('@supabase/gotrue-js')
+const supPost = require('@supabase/postgrest-js')
+const supRealTime = require('@supabase/realtime-js')
+const supStorage= require('@supabase/storage-js')
+const supBigBase= require('@supabase/supabase-js')
 // Create a single supabase client for interacting with your database 
 
 //SUPABASE
  var SUPABASE_URL = 'http://localhost:3000'
  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDQ5ODc2MDAsCiAgICAiZXhwIjogMTgwMjc1NDAwMAp9.eMfl9FG32Q6lfdYXi8A4IcWc6PbwuYFNunBPad8rFaM'
- var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+ var supabase = supBigBase.createClient(SUPABASE_URL, SUPABASE_KEY)
 //window.userToken = null
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
@@ -89,16 +95,24 @@ app.post('/createuser', (req, res) => {  //need help with this
 	console.log(iteration)
 	console.log(req.body.name)
 	console.log(req.body.password)
-	// var email= req.body.name
-	// var password = req.body.password
-	// supabase.auth
-    // .signUp({ email, password })
-    // .then((response) => {
-    //   response.error ? alert(response.error.message) : setToken(response)
-    // })
-    // .catch((err) => {
-    //   alert(err)
-    // })
+	var email= req.body.name
+	var password = req.body.password
+	console.log("failing here")
+	console.log("parsing the validate user")
+	var par = JSON.parse(req)
+	console.log(par.name)
+	supabase.auth.signUp({
+		email: email,
+		password: '1234',
+	  })
+	supabase.auth
+    .signUp({email, password}) //{ email, password }
+    .then((response) => {
+      response.error ? alert(response.error.message) : setToken(response)
+    })
+    .catch((err) => {
+      alert(err)
+    })
 	iteration = iteration + 1; 
 	
 	//window.location.assign('parameters?user=' + req.body.name);
@@ -112,7 +126,8 @@ app.post('/validateuser', (req, res) => {  //need help with this
 	console.log(req.body.password)
 	var email = req.body.name
 	var password = req.body.password
-
+	console.log("parsing the validate user")
+	console.log(JSON.parse(req))
 	//supasbase 
 	 supabase.auth
     .signIn({ email, password })

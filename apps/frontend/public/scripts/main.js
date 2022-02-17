@@ -51,7 +51,7 @@ function experimentParamsJSON(paramsArr, experimentName, user, verboseBool){
 
 function loginQueryJSON (username, password){
 	const userProfile = {
-		"name" : username, 
+		"email" : username, 
 		"password" : password
 	}
 
