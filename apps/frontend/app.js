@@ -93,26 +93,26 @@ app.post('/createuser', (req, res) => {  //need help with this
 	console.log("we are in creating user")
 	console.log("iteration :")
 	console.log(iteration)
-	console.log(req.body.name)
+	console.log(req.body.email)
 	console.log(req.body.password)
-	var email= req.body.name
+	var email= req.body.email
 	var password = req.body.password
 	console.log("failing here")
 	console.log("parsing the validate user")
-	var par = JSON.parse(req)
-	console.log(par.name)
+	//var par = JSON.parse(req)
+	//console.log(req)
 	supabase.auth.signUp({
 		email: email,
-		password: '1234',
+		password: password,
 	  })
-	supabase.auth
-    .signUp({email, password}) //{ email, password }
-    .then((response) => {
-      response.error ? alert(response.error.message) : setToken(response)
-    })
-    .catch((err) => {
-      alert(err)
-    })
+	// supabase.auth
+    // .signUp({email, password}) //{ email, password }
+    // .then((response) => {
+    //   response.error ? alert(response.error.message) : setToken(response)
+    // })
+    // .catch((err) => {
+    //   alert(err)
+    // })
 	iteration = iteration + 1; 
 	
 	//window.location.assign('parameters?user=' + req.body.name);
@@ -122,9 +122,9 @@ const fetchUserDetails = () => {
   }
 app.post('/validateuser', (req, res) => {  //need help with this 
 	console.log("we are in validate user")
-	console.log(req.body.name)
+	console.log(req.body.email)
 	console.log(req.body.password)
-	var email = req.body.name
+	var email = req.body.email
 	var password = req.body.password
 	console.log("parsing the validate user")
 	console.log(JSON.parse(req))
