@@ -123,7 +123,7 @@ app.post('/createuser', async (req, res) => {
 	// .catch((err) => {
 	//   alert(err)
 	// })
-	iteration = iteration + 1;
+	//iteration = iteration + 1;
 
 	//window.location.assign('parameters?user=' + req.body.name);
 });
