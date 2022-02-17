@@ -7,6 +7,7 @@ const port = 5005; //Save the port number where your server will be listening
 var submit = false;
 var expname = null;
 var fileName = '';
+var iteration = 0; //Pavani test
 
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
@@ -71,6 +72,26 @@ app.post('/parameters', (req, res) => {
 	//		.then((json) => console.log(json));
 	// announce to daemon that new experiment is online
 	//
+});
+
+app.post('/createuser', (req, res) => {  //need help with this 
+	console.log("we are in creating user")
+	console.log("iteration :")
+	console.log(iteration)
+	console.log(req.body.name)
+	console.log(req.body.password)
+	
+	iteration = iteration + 1; 
+	
+	//window.location.assign('parameters?user=' + req.body.name);
+});
+
+app.post('/validateuser', (req, res) => {  //need help with this 
+	console.log("we are in validate user")
+	console.log(req.body.name)
+	console.log(req.body.password)
+
+	//window.location.assign('parameters?user=' + req.body.name);
 });
 //Comment out the next method before testing
 app.listen(port, () => {

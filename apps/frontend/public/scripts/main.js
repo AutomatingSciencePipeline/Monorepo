@@ -49,22 +49,50 @@ function experimentParamsJSON(paramsArr, experimentName, user, verboseBool){
 
 }
 
+function loginQueryJSON (username, password){
+	const userProfile = {
+		"name" : username, 
+		"password" : password
+	}
 
+	return userProfile
+}
 
 
 
 LoginPageController = class {
 	constructor() {
+		//this is for creating a user 
 		document.querySelector("#submitCreateUser").addEventListener("click", (event) => {
 			var username = document.querySelector("#newUsername").value;
 			var password = document.querySelector("#newPassword").value;
 			console.log("new user created!", username, password);
+			console.log(" i am in the fetch")
+
+			var params = loginQueryJSON(username, password);
+			var profile = JSON.stringify(params);
+			
+			fetch(`/createuser`, {
+				method: 'POST',
+				headers : {
+					"Content-Type" : 'application/json'
+				},
+				body: profile}).catch(err => console.log(err)) //TODO: 
 		});
 
+		//adding a user 
 		document.querySelector("#login").addEventListener("click", (event) => {
 			var username = document.querySelector("#username").value;
 			var password = document.querySelector("#password").value;
+			var params = loginQueryJSON(username, password);
+			var profile = JSON.stringify(params);
 			window.location.assign('index?user=' + username);
+			fetch(`/validateuser`, {
+				method: 'POST',
+				headers : {
+					"Content-Type" : 'application/json'
+				},
+				body: profile}).catch(err => console.log(err))
 		});
 	}
 
