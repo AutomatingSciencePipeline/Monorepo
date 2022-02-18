@@ -98,13 +98,32 @@ LoginPageController = class {
 			var password = document.querySelector("#password").value;
 			var params = loginQueryJSON(username, password);
 			var profile = JSON.stringify(params);
-			window.location.assign('index?user=' + username);
+			//
 			fetch(`/validateuser`, {
 				method: 'POST',
 				headers : {
 					"Content-Type" : 'application/json'
 				},
-				body: profile}).catch(err => console.log(err))
+				body: profile}).then((response) => {
+					console.log("front end validate")
+					//console.log(response.json())
+					response.json().then((data) => {
+						console.log("inside data")
+						console.log(data.boolean)
+						if(data.boolean){
+							window.location.assign('index?user=' + username)
+						}
+						//
+					})
+					//console.log("res bool")
+					//console.log(res.boolean)
+					//if(res.boolean){
+						
+					//}
+
+					
+
+				}).catch(err => console.log(err))
 		});
 	}
 
