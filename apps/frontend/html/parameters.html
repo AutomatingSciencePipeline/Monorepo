@@ -10,47 +10,90 @@
   <title>Parameters</title>
 </head>
 <iframe name="hiddenFrame" class="hide"></iframe>
+
 <body>
   <nav class="navbar navbar-dark fixed-top">
     <a class="navbar-brand" href="#">Fill in parameters</a>
   </nav>
+  
   <div id="parametersPage" class="container page-container">
+    <div id = "buttonContainer" class="container-sm">
+      <div>
+        <button type="button" id="addIntegerBtn" class="btn-primary">+ Integer</button>
+        <button type="button" id="addFloatBtn" class="btn-primary">+ Float</button>
+        <button type="button" id="addArrayBtn" class="btn-primary">+ Array</button>
+        <button type="button" id="addBooleanBtn" class="btn-primary">+ Boolean</button>
+        <button type="button" id="addFileBtn" class="btn-primary">+ File</button></div>
+      <div>
+        <button type="button" id="remIntegerBtn" class="btn-primary">- Integer</button>
+        <button type="button" id="remFloatBtn" class="btn-primary">- Float</button>
+        <button type="button" id="remArrayBtn" class="btn-primary">- Array</button>
+        <button type="button" id="remBooleanBtn" class="btn-primary">- Boolean</button>
+        <button type="button" id="remFileBtn" class="btn-primary">- File</button></div>
+      
+    </div>
 
-    <div id="parameterContainer">
+    <div id="integerContainer">
+
+
+
+    </div>
+    <div id="floatContainer">
+
+
+
+    </div>
+    <div id="arrayContainer">
+
+
+
+    </div>
+    <div id="booleContainer">
+
+
+
+    </div>
+    <div id="fileContainer">
+
+    </div>
+    <div id="experimentName">
 
 
     </div>
 
 
   </div>
-  
-  <div class="justify-content-center align-items-center d-flex"><div>Upload Experiment</div></div>
+
   <div class="justify-content-center align-items-center d-flex">
-    
+    <div>Upload Experiment</div>
+  </div>
+  <div class="justify-content-center align-items-center d-flex">
+
+  </div>
+
+
+  <div class="justify-content-center align-items-center d-flex">
     <form action="fileupload" method="post" enctype="multipart/form-data" target="hiddenFrame">
       <input type="hidden" name="next" value="{{ request.path }}">
       <input type="file" id="experimentFile" name="filetoupload"><br>
-      <input type="submit" value="Submit Experiment File">
+      <input type="submit" id = "paramSubmit" value="Begin Experiment">
     </form>
-  </div>
-  
-
-  <div class="justify-content-center align-items-center d-flex">
-    <button id="paramSubmit" type="button" class="btn-primary">Begin Experiment</button>
+    <!-- <button id="paramSubmit" type="button" class="btn-primary">Begin Experiment</button> -->
   </div>
 
   <div class="justify-content-right align-items-center d-flex">
     <input type="checkbox" id="verboseBool">
     <label for="verboseBool">Verbose</label>
   </div>
-  <button id = "fab" type="button" class="btn btn-info bmd-btn-fab">
-    <i class="material-icons">add</i>
-  </button>
+  
+  
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
   <script src="scripts/bootstrap-material-design.js"></script>
-  <script>$("body").bootstrapMaterialDesign();</script>
+  <script>
+    $("body").bootstrapMaterialDesign();
+  </script>
   <script src="scripts/main.js"></script>
 </body>
 
-</html> 
+</html>

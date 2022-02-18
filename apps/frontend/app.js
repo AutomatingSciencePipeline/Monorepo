@@ -32,9 +32,6 @@ app.use('/scripts', express.static(__dirname + 'public/scripts'));
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/html/loginpage.html');
 });
-app.get('/index', (req, res) => {
-	res.sendFile(__dirname + '/html/index.html');
-});
 app.get('/parameters', (req, res) => {
 	res.sendFile(__dirname + '/html/parameters.html');
 });
@@ -172,21 +169,38 @@ app.listen(port, () => {
 });
 
 //Place functions to be tested below, there should be a copy here and in main
-// function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-// 	const parsedDef = parseFloat(defaultVal);
-// const parsedMin = parseFloat(minVal);
-// const parsedMax = parseFloat(maxVal);
-// const parsedInc = parseFloat(incrementVal);
-// 	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
-// 		throw new TypeError();
+// function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, type) {
+
+// 	var parsedDef;
+// 	var parsedMin;
+// 	var parsedMax;
+// 	var parsedInc;
+// 	if (type == "float") {
+// 		parsedDef = Number(defaultVal);
+// 		parsedMin = Number(minVal);
+// 		parsedMax = Number(maxVal);
+// 		parsedInc = Number(incrementVal);
+// 		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+// 			throw new TypeError();
+// 		}
+// 	} else if (type == "integer") {
+// 		parsedDef = Number(defaultVal);
+// 		parsedMin = Number(minVal);
+// 		parsedMax = Number(maxVal);
+// 		parsedInc = Number(incrementVal);
+// 		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+// 			throw new TypeError();
+// 		}
 // 	}
+
 // 	var param = {
-// 		"paramName" : paramName,
-// 		"values" :
-// 		[defaultVal,
-// 		minVal,
-// 		maxVal,
-// 		incrementVal]
+// 		"paramName": paramName,
+// 		"values": [defaultVal,
+// 			minVal,
+// 			maxVal,
+// 			incrementVal
+// 		],
+// 		"type": type
 // 	}
 // 	return param;
 // }
@@ -199,19 +213,43 @@ app.listen(port, () => {
 
 // }
 
-// function experimentParamsJSON(paramsArr, experimentName, user, experiment){
+// function experimentParamsJSON(paramsArr, experimentName, user, experiment) {
 
 // 	const params = {
 // 		"experimentName": experimentName,
 // 		"user": user,
 // 		"parameters": paramsArr,
-// 		"file" : experiment
+// 		"file": experiment
 // 	};
-// return params;
+// 	return params;
 
 // }
 
-// module.exports.paramJSON = paramJSON;
+// function paramJSONSingleVal(paramName, val, type) {
+// 	var parsedVal;
+// 	if (type == "array") {
+// 		parsedVal = JSON.parse(val);
+// 	} else if (type == "boolean") {
+// 		if(val == "true") {
+// 			parsedVal = true;
+// 		}else {
+// 			parsedVal = false;
+// 		}
+// 	} else if (type == "file") {
+// 		parsedVal = val;
+// 	}
+// 	var param = {
+// 		"paramName": paramName,
+// 		"value": parsedVal,
+// 		"type": type
+// 	}
+// 	return param;
+
+
+// }
+
+// module.exports.paramJSONMultVals = paramJSONMultVals;
+// module.exports.paramJSONSingleVal = paramJSONSingleVal;
 // module.exports.experimentParamsJSON = experimentParamsJSON;
 // module.exports.createUser = createUser;
 // module.exports.checkUser = checkUser;
