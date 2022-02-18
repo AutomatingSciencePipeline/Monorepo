@@ -88,22 +88,83 @@ function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
 
 }
 
+function loginQueryJSON (username, password){
+	const userProfile = {
+		"email" : username, 
+		"password" : password
+	}
+
+	return userProfile
+}
 
 
-
-
+function ValidateEmail(email) 
+{
+ if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+  {
+	  console.log("invalid email")
+    return (true)
+  }
+    alert("You have entered an invalid email address!")
+	console.log("invalid email")
+    return (false)
+}
 LoginPageController = class {
 	constructor() {
+		//this is for creating a user 
 		document.querySelector("#submitCreateUser").addEventListener("click", (event) => {
 			var username = document.querySelector("#newUsername").value;
 			var password = document.querySelector("#newPassword").value;
 			console.log("new user created!", username, password);
+			console.log(" i am in the fetch")
+			if(ValidateEmail(username)==false){
+				return;
+			}
+			var params = loginQueryJSON(username, password);
+			var profile = JSON.stringify(params);
+			
+			fetch(`/createuser`, {
+				method: 'POST',
+				headers : {
+					"Content-Type" : 'application/json'
+				},
+				body: profile}).catch(err => console.log(err)) //TODO: 
 		});
 
+		//adding a user 
 		document.querySelector("#login").addEventListener("click", (event) => {
 			var username = document.querySelector("#username").value;
 			var password = document.querySelector("#password").value;
-			window.location.assign('parameters?user=' + username);
+
+			var params = loginQueryJSON(username, password);
+			var profile = JSON.stringify(params);
+			//
+			fetch(`/validateuser`, {
+				method: 'POST',
+				headers : {
+					"Content-Type" : 'application/json'
+				},
+				body: profile}).then((response) => {
+					console.log("front end validate")
+					//console.log(response.json())
+					response.json().then((data) => {
+						console.log("inside data")
+						console.log(data.boolean)
+						if(data.boolean){
+							window.location.assign('index?user=' + username)
+						}
+						//
+					})
+					//console.log("res bool")
+					//console.log(res.boolean)
+					//if(res.boolean){
+						
+					//}
+
+					
+
+				}).catch(err => console.log(err))
+
 		});
 	}
 

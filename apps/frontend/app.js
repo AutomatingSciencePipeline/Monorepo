@@ -4,10 +4,26 @@ const fs = require('fs');
 var formidable = require('formidable');
 const app = express(); //Instantiate an express app, the main work horse of this server
 const port = 5005; //Save the port number where your server will be listening
-var submit = false;
-var expname = null;
-var fileName = '';
 
+//const supaCreateClient = require('@supabase/supabase-js')
+//const suppy = require('@supabase')
+const supGoTrue = require('@supabase/gotrue-js');
+const supPost = require('@supabase/postgrest-js');
+const supRealTime = require('@supabase/realtime-js');
+const supStorage = require('@supabase/storage-js');
+const supBigBase = require('@supabase/supabase-js');
+const { error } = require('console');
+// Create a single supabase client for interacting with your database
+
+//SUPABASE
+const SUPABASE_URL = 'http://localhost:8000';
+const SUPABASE_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
+const supabase = supBigBase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+	fetch: fetch.bind(globalThis),
+});
+console.log(supabase);
+//window.userToken = null
 //Idiomatic expression in express to route and respond to a client request
 app.use(express.static('public'));
 app.use(express.json());
@@ -25,13 +41,15 @@ app.get('/favicon.ico', (req, res) => {
 app.post('/fileupload', (req, res) => {
 	var form = new formidable.IncomingForm();
 	form.parse(req, function (err, fields, files) {
-		console.log("we got a file!");
+		console.log('we got a file!');
 		var oldpath = files.filetoupload.filepath;
-		var newpath = '../../scripts/GLADOS_HOME/incoming/' + files.filetoupload.originalFilename;
+		var newpath =
+			'../../scripts/GLADOS_HOME/incoming/' +
+			files.filetoupload.originalFilename;
 		fileName = files.filetoupload.originalFilename;
 		fs.rename(oldpath, newpath, function (err) {
 			if (err) throw err;
-			res.redirect('/parameters')
+			res.redirect('/parameters');
 		});
 	});
 });
@@ -39,8 +57,8 @@ app.post('/parameters', (req, res) => {
 	expname = req.body.experimentName;
 	console.log(expname);
 
-	var json = req.body;
-	json["fileName"] = fileName;
+	console.log(req.body);
+	json['fileName'] = fileName;
 
 	// submit = req.body.submit;
 	// console.log(__dirname + `/exploc/experiment_${expname}`);
@@ -53,19 +71,96 @@ app.post('/parameters', (req, res) => {
 	// 	}
 	// 	//file written successfully
 	// })
-	console.log(json);
 	fetch(`http://127.0.0.1:5000/experiment`, {
-			method: 'POST',
-			body: JSON.stringify(json),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
+		method: 'POST',
+		body: JSON.stringify(json),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
 		.then((res) => res.json())
 		.catch((error) => console.error('Error:', error));
 	//		.then((json) => console.log(json));
 	// announce to daemon that new experiment is online
 	//
+});
+
+app.post('/createuser', async (req, res) => {
+	//need help with this
+	console.log(req.body.email);
+	console.log(req.body.password);
+	const email = req.body.email;
+	const password = req.body.password;
+	await supabase.auth
+		.signUp({
+			email: email,
+			password: password,
+		})
+		.then((user) => {
+			console.log('user created');
+			console.log(user);
+			console.log(user.id);
+			console.log(user.email);
+			console.log(user.password);
+			console.log(user.createdAt);
+			console.log(user.updatedAt);
+			console.log(user.lastLogin);
+			console.log(user.lastLoginIp);
+			console.log(user.lastLoginAt);
+			console.log(user.lastLoginAtIp);
+		})
+		.catch((error) => {
+			console.log('error');
+			console.log(error);
+		});
+	// supabase.auth
+	// .signUp({email, password}) //{ email, password }
+	// .then((response) => {
+	//   response.error ? alert(response.error.message) : setToken(response)
+	// })
+	// .catch((err) => {
+	//   alert(err)
+	// })
+	//iteration = iteration + 1;
+
+	//window.location.assign('parameters?user=' + req.body.name);
+});
+const fetchUserDetails = () => {
+	alert(JSON.stringify(supabase.auth.user()));
+};
+app.post('/validateuser', (req, res) => {
+	//need help with this
+	console.log('we are in validate user');
+	console.log(req.body.email);
+	console.log(req.body.password);
+	var email = req.body.email;
+	var password = req.body.password;
+	console.log('parsing the validate user');
+	//console.log(JSON.parse(req));
+	//supasbase
+	supabase.auth
+		.signIn({ 
+			email: email,
+			password: password,
+		 })
+		.then((response) => {
+			if(response.data==null){
+				res.json({boolean : false})
+			}
+			else{
+			console.log("inside login")
+			console.log(response)
+			res.json({boolean : true})
+			}
+
+			//window.location.assign('index?user=' + email);
+			//response.error ? alert(response.error.message) : setToken(response);
+		})
+		.catch((error) => {
+			//alert(err.response.text);
+			console.log(error)
+		});
+	//window.location.assign('parameters?user=' + req.body.name);
 });
 //Comment out the next method before testing
 app.listen(port, () => {
