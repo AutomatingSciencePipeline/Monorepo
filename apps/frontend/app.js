@@ -12,6 +12,7 @@ const supPost = require('@supabase/postgrest-js');
 const supRealTime = require('@supabase/realtime-js');
 const supStorage = require('@supabase/storage-js');
 const supBigBase = require('@supabase/supabase-js');
+const { error } = require('console');
 // Create a single supabase client for interacting with your database
 
 //SUPABASE
@@ -113,9 +114,6 @@ app.post('/createuser', async (req, res) => {
 	// })
 	// .catch((err) => {
 	//   alert(err)
-	// })
-
-	//window.location.assign('parameters?user=' + req.body.name);
 });
 const fetchUserDetails = () => {
 	alert(JSON.stringify(supabase.auth.user()));
@@ -128,15 +126,28 @@ app.post('/validateuser', (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 	console.log('parsing the validate user');
-	console.log(JSON.parse(req));
+	//console.log(JSON.parse(req));
 	//supasbase
 	supabase.auth
-		.signIn({ email, password })
-		.then((response) => {
-			response.error ? alert(response.error.message) : setToken(response);
+		.signIn({
+			email: email,
+			password: password,
 		})
-		.catch((err) => {
-			alert(err.response.text);
+		.then((response) => {
+			if (response.data == null) {
+				res.json({ boolean: false });
+			} else {
+				console.log('inside login');
+				console.log(response);
+				res.json({ boolean: true });
+			}
+
+			//window.location.assign('index?user=' + email);
+			//response.error ? alert(response.error.message) : setToken(response);
+		})
+		.catch((error) => {
+			//alert(err.response.text);
+			console.log(error);
 		});
 	//window.location.assign('parameters?user=' + req.body.name);
 });

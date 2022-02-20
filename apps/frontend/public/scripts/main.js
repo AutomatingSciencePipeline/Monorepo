@@ -59,7 +59,17 @@ function loginQueryJSON (username, password){
 }
 
 
-
+function ValidateEmail(email) 
+{
+ if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+  {
+	  console.log("invalid email")
+    return (true)
+  }
+    alert("You have entered an invalid email address!")
+	console.log("invalid email")
+    return (false)
+}
 LoginPageController = class {
 	constructor() {
 		//this is for creating a user 
@@ -68,7 +78,9 @@ LoginPageController = class {
 			var password = document.querySelector("#newPassword").value;
 			console.log("new user created!", username, password);
 			console.log(" i am in the fetch")
-
+			if(ValidateEmail(username)==false){
+				return;
+			}
 			var params = loginQueryJSON(username, password);
 			var profile = JSON.stringify(params);
 			
@@ -86,13 +98,32 @@ LoginPageController = class {
 			var password = document.querySelector("#password").value;
 			var params = loginQueryJSON(username, password);
 			var profile = JSON.stringify(params);
-			window.location.assign('index?user=' + username);
+			//
 			fetch(`/validateuser`, {
 				method: 'POST',
 				headers : {
 					"Content-Type" : 'application/json'
 				},
-				body: profile}).catch(err => console.log(err))
+				body: profile}).then((response) => {
+					console.log("front end validate")
+					//console.log(response.json())
+					response.json().then((data) => {
+						console.log("inside data")
+						console.log(data.boolean)
+						if(data.boolean){
+							window.location.assign('index?user=' + username)
+						}
+						//
+					})
+					//console.log("res bool")
+					//console.log(res.boolean)
+					//if(res.boolean){
+						
+					//}
+
+					
+
+				}).catch(err => console.log(err))
 		});
 	}
 
