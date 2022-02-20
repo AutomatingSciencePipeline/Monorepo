@@ -15,13 +15,6 @@ const supBigBase = require('@supabase/supabase-js');
 const { error } = require('console');
 // Create a single supabase client for interacting with your database
 
-//SUPABASE
-const SUPABASE_URL = 'http://localhost:8000';
-const SUPABASE_KEY =
-	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
-const supabase = supBigBase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-	fetch: fetch.bind(globalThis),
-});
 console.log(supabase);
 //window.userToken = null
 //Idiomatic expression in express to route and respond to a client request
@@ -107,13 +100,6 @@ app.post('/createuser', async (req, res) => {
 			console.log('error');
 			console.log(error);
 		});
-	// supabase.auth
-	// .signUp({email, password}) //{ email, password }
-	// .then((response) => {
-	//   response.error ? alert(response.error.message) : setToken(response)
-	// })
-	// .catch((err) => {
-	//   alert(err)
 });
 const fetchUserDetails = () => {
 	alert(JSON.stringify(supabase.auth.user()));
