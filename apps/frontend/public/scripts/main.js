@@ -1,16 +1,47 @@
 //Save
-
 var glados = glados || {};
-glados.supabase = null;
+const SUPABASE_URL = 'http://localhost:8000';
+const SUPABASE_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
+var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-glados.SupabaseManager = class {
+glados.SupaAuthManager = class {
 	constructor() {
 		this._user = null;
 	}
-	beginListening(callback) {}
-	signIn(email, password) {}
+	beginListening(callback) {
+		supabase.auth.onAuthStateChange((event, session) => {
+			if (event == 'SIGNED_IN') {
+				this._user = session.user;
+				callback();
+			} else if (event == 'SIGNED_OUT') {
+			}
+		});
+	}
+	signUp(email, password) {
+		supabase.auth
+			.signUp({ email, password })
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	signIn(email, password) {
+		supabase.auth
+			.signin({ email, password })
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
 	signOut() {}
-	get uid() {}
+	get uid() {
+		return !!this._user.uid;
+	}
 	get isSignedIn() {}
 };
 
@@ -80,7 +111,7 @@ glados.LoginPageController = class {
 			.addEventListener('click', (event) => {
 				const username = document.querySelector('#newUsername').value;
 				const password = document.querySelector('#newPassword').value;
-				await createLoginUser(username, password);
+				glados.supaAuth.signUp(username, password);
 			});
 
 		//adding a user
@@ -287,12 +318,16 @@ glados.ParameterManager = class {
 /** function and class syntax examples */
 glados.main = function () {
 	console.log('Ready');
-	const SUPABASE_URL = 'http://localhost:8000';
-	const SUPABASE_KEY =
-		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
-	glados.supabase = supBigBase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-		fetch: fetch.bind(globalThis),
+
+	glados.supaAuth = new glados.SupaAuthManager();
+	glados.supaAuth.beginListening(() => {
+		console.log('AUTH IS NOW LISTENING');
 	});
+
+	if (document.querySelector('#loginPage')) {
+		glados.loginPageController = new glados.LoginPageController();
+	}
+
 	if (document.querySelector('#initialPage')) {
 		console.log('You are on the initial page');
 		//rhit.intialPageManager = new rhit.InitialPageManager();
@@ -303,7 +338,7 @@ glados.main = function () {
 		if (!user) {
 			window.location.href = '/';
 		}
-		glados.InitialPageController = new glados.InitialPageController(user);
+		glados.initialPageController = new glados.InitialPageController(user);
 	}
 
 	if (document.querySelector('#parametersPage')) {
@@ -317,7 +352,7 @@ glados.main = function () {
 		if (!int || !user) {
 			window.location.href = '/index';
 		}
-		glados.ParameterPageController = new glados.ParameterPageController(
+		glados.parameterPageController = new glados.ParameterPageController(
 			int,
 			user
 		);
@@ -337,4 +372,4 @@ glados.main = function () {
 	// })
 };
 
-main();
+glados.main();

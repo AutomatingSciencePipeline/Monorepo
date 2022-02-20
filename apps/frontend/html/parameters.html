@@ -1,56 +1,64 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
+		/>
+		<link rel="stylesheet" href="styles/bootstrap-material-design.min.css" />
+		<link rel="stylesheet" href="styles/main.css" />
+		<title>Parameters</title>
+	</head>
+	<iframe name="hiddenFrame" class="hide"></iframe>
+	<body>
+		<nav class="navbar navbar-dark fixed-top">
+			<a class="navbar-brand" href="#">Fill in parameters</a>
+		</nav>
+		<div id="parametersPage" class="container page-container">
+			<div id="parameterContainer"></div>
+		</div>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-  <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
-  <link rel="stylesheet" href="styles/main.css">
-  <title>Parameters</title>
-</head>
-<iframe name="hiddenFrame" class="hide"></iframe>
-<body>
-  <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">Fill in parameters</a>
-  </nav>
-  <div id="parametersPage" class="container page-container">
+		<div class="justify-content-center align-items-center d-flex">
+			<div>Upload Experiment</div>
+		</div>
+		<div class="justify-content-center align-items-center d-flex">
+			<form
+				action="fileupload"
+				method="post"
+				enctype="multipart/form-data"
+				target="hiddenFrame"
+			>
+				<input type="hidden" name="next" value="{{ request.path }}" />
+				<input type="file" id="experimentFile" name="filetoupload" /><br />
+				<input type="submit" value="Submit Experiment File" />
+			</form>
+		</div>
 
-    <div id="parameterContainer">
+		<div class="justify-content-center align-items-center d-flex">
+			<button id="paramSubmit" type="button" class="btn-primary">
+				Begin Experiment
+			</button>
+		</div>
 
-
-    </div>
-
-
-  </div>
-  
-  <div class="justify-content-center align-items-center d-flex"><div>Upload Experiment</div></div>
-  <div class="justify-content-center align-items-center d-flex">
-    
-    <form action="fileupload" method="post" enctype="multipart/form-data" target="hiddenFrame">
-      <input type="hidden" name="next" value="{{ request.path }}">
-      <input type="file" id="experimentFile" name="filetoupload"><br>
-      <input type="submit" value="Submit Experiment File">
-    </form>
-  </div>
-  
-
-  <div class="justify-content-center align-items-center d-flex">
-    <button id="paramSubmit" type="button" class="btn-primary">Begin Experiment</button>
-  </div>
-
-  <div class="justify-content-right align-items-center d-flex">
-    <input type="checkbox" id="verboseBool">
-    <label for="verboseBool">Verbose</label>
-  </div>
-  <button id = "fab" type="button" class="btn btn-info bmd-btn-fab">
-    <i class="material-icons">add</i>
-  </button>
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/popper.js"></script>
-  <script src="scripts/bootstrap-material-design.js"></script>
-  <script>$("body").bootstrapMaterialDesign();</script>
-  <script src="scripts/main.js"></script>
-</body>
-
-</html> 
+		<div class="justify-content-right align-items-center d-flex">
+			<input type="checkbox" id="verboseBool" />
+			<label for="verboseBool">Verbose</label>
+		</div>
+		<button id="fab" type="button" class="btn btn-info bmd-btn-fab">
+			<i class="material-icons">add</i>
+		</button>
+		<script src="scripts/jquery.min.js"></script>
+		<script src="scripts/popper.js"></script>
+		<script src="scripts/bootstrap-material-design.js"></script>
+		<script>
+			$('body').bootstrapMaterialDesign();
+		</script>
+		<script src="https://unpkg.com/@supabase/supabase-js"></script>
+		<script src="scripts/main.js"></script>
+	</body>
+</html>
