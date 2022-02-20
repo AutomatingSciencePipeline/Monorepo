@@ -119,16 +119,16 @@ glados.LoginPageController = class {
 	}
 };
 
-LoginManager = class {
-	constructor() {}
-	beginListening(changeListener) {
-		changeListener();
-	}
-	stopListening() {
-		this._unsubscribe();
-	}
-};
-InitialPageController = class {
+// LoginManager = class {
+// 	constructor() {}
+// 	beginListening(changeListener) {
+// 		changeListener();
+// 	}
+// 	stopListening() {
+// 		this._unsubscribe();
+// 	}
+// };
+glados.InitialPageController = class {
 	constructor(user) {
 		this.user = user;
 		console.log(user + ' is logged in');
@@ -143,7 +143,7 @@ InitialPageController = class {
 	}
 };
 
-ParameterPageController = class {
+glados.ParameterPageController = class {
 	constructor(int, user) {
 		this.int = int;
 		this.user = user;
@@ -273,7 +273,7 @@ ParameterPageController = class {
 	  </div>`);
 	}
 };
-ParameterManager = class {
+glados.ParameterManager = class {
 	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
@@ -303,7 +303,7 @@ glados.main = function () {
 		if (!user) {
 			window.location.href = '/';
 		}
-		new InitialPageController(user);
+		glados.InitialPageController = new glados.InitialPageController(user);
 	}
 
 	if (document.querySelector('#parametersPage')) {
@@ -317,7 +317,10 @@ glados.main = function () {
 		if (!int || !user) {
 			window.location.href = '/index';
 		}
-		new ParameterPageController(int, user);
+		glados.ParameterPageController = new glados.ParameterPageController(
+			int,
+			user
+		);
 	}
 
 	// const ref = firebase.firestore().collection("MovieQuotes");
