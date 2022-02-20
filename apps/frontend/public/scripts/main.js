@@ -40,9 +40,11 @@ glados.SupaAuthManager = class {
 	}
 	signOut() {}
 	get uid() {
-		return !!this._user.uid;
+		return this._user.uid;
 	}
-	get isSignedIn() {}
+	get isSignedIn() {
+		return !!this._user;
+	}
 };
 
 function htmlToElement(html) {
