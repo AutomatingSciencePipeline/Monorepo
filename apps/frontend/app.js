@@ -101,15 +101,6 @@ app.post('/createuser', async (req, res) => {
 		.then((user) => {
 			console.log('user created');
 			console.log(user);
-			console.log(user.id);
-			console.log(user.email);
-			console.log(user.password);
-			console.log(user.createdAt);
-			console.log(user.updatedAt);
-			console.log(user.lastLogin);
-			console.log(user.lastLoginIp);
-			console.log(user.lastLoginAt);
-			console.log(user.lastLoginAtIp);
 		})
 		.catch((error) => {
 			console.log('error');
@@ -123,7 +114,6 @@ app.post('/createuser', async (req, res) => {
 	// .catch((err) => {
 	//   alert(err)
 	// })
-	iteration = iteration + 1;
 
 	//window.location.assign('parameters?user=' + req.body.name);
 });
