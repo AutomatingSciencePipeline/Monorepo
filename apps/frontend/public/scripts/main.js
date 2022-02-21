@@ -15,14 +15,19 @@ glados.SupaAuthManager = class {
 				this._user = session.user;
 				callback();
 			} else if (event == 'SIGNED_OUT') {
+				window.location.assign('/');
 			}
 		});
 	}
 	signUp(email, password) {
 		supabase.auth
-			.signUp({ email, password })
+			.signUp({
+				email,
+				password
+			})
 			.then((response) => {
 				console.log(response);
+				this.signIn(email, password);
 			})
 			.catch((err) => {
 				console.log(err);
@@ -30,9 +35,13 @@ glados.SupaAuthManager = class {
 	}
 	signIn(email, password) {
 		supabase.auth
-			.signin({ email, password })
+			.signIn({
+				email,
+				password
+			})
 			.then((response) => {
 				console.log(response);
+				window.location.assign('index?user=' + email);
 			})
 			.catch((err) => {
 				console.log(err);
@@ -53,6 +62,7 @@ function htmlToElement(html) {
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
+
 function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
 	const parsedDef = parseFloat(defaultVal);
 	const parsedMin = parseFloat(minVal);
@@ -73,10 +83,6 @@ function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
 	return param;
 }
 
-function createUser(username, password) {}
-
-function checkUser(username, password) {}
-
 function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
 	const params = {
 		experimentName: experimentName,
@@ -85,15 +91,6 @@ function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
 		verbose: verboseBool,
 	};
 	return params;
-}
-
-function loginQueryJSON(username, password) {
-	const userProfile = {
-		email: username,
-		password: password,
-	};
-
-	return userProfile;
 }
 
 function ValidateEmail(email) {
@@ -113,41 +110,18 @@ glados.LoginPageController = class {
 			.addEventListener('click', (event) => {
 				const username = document.querySelector('#newUsername').value;
 				const password = document.querySelector('#newPassword').value;
-				glados.supaAuth.signUp(username, password);
+				const pw = document.querySelector('#confirmPass').value;
+				if (password === pw) {
+					glados.supaAuth.signUp(username, password);
+				}
 			});
 
 		//adding a user
 		document.querySelector('#login').addEventListener('click', (event) => {
 			var username = document.querySelector('#username').value;
 			var password = document.querySelector('#password').value;
-			var params = loginQueryJSON(username, password);
-			var profile = JSON.stringify(params);
+			glados.supaAuth.signIn(username, password);
 			//
-			fetch(`/validateuser`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: profile,
-			})
-				.then((response) => {
-					console.log('front end validate');
-					//console.log(response.json())
-					response.json().then((data) => {
-						console.log('inside data');
-						console.log(data.boolean);
-						if (data.boolean) {
-							window.location.assign('index?user=' + username);
-						}
-						//
-					});
-					//console.log("res bool")
-					//console.log(res.boolean)
-					//if(res.boolean){
-
-					//}
-				})
-				.catch((err) => console.log(err));
 		});
 	}
 };

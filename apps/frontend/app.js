@@ -79,69 +79,10 @@ app.post('/parameters', (req, res) => {
 	//
 });
 
-app.post('/createuser', async (req, res) => {
-	//need help with this
-	console.log(req.body.email);
-	console.log(req.body.password);
-	const email = req.body.email;
-	const password = req.body.password;
-	await supabase.auth
-		.signUp({
-			email: email,
-			password: password,
-		})
-		.then((user) => {
-			console.log('user created');
-			console.log(user);
-		})
-		.catch((error) => {
-			console.log('error');
-			console.log(error);
-		});
-	// supabase.auth
-	// .signUp({email, password}) //{ email, password }
-	// .then((response) => {
-	//   response.error ? alert(response.error.message) : setToken(response)
-	// })
-	// .catch((err) => {
-	//   alert(err)
-});
 const fetchUserDetails = () => {
 	alert(JSON.stringify(supabase.auth.user()));
 };
-app.post('/validateuser', (req, res) => {
-	//need help with this
-	console.log('we are in validate user');
-	console.log(req.body.email);
-	console.log(req.body.password);
-	var email = req.body.email;
-	var password = req.body.password;
-	console.log('parsing the validate user');
-	//console.log(JSON.parse(req));
-	//supasbase
-	supabase.auth
-		.signIn({
-			email: email,
-			password: password,
-		})
-		.then((response) => {
-			if (response.data == null) {
-				res.json({ boolean: false });
-			} else {
-				console.log('inside login');
-				console.log(response);
-				res.json({ boolean: true });
-			}
 
-			//window.location.assign('index?user=' + email);
-			//response.error ? alert(response.error.message) : setToken(response);
-		})
-		.catch((error) => {
-			//alert(err.response.text);
-			console.log(error);
-		});
-	//window.location.assign('parameters?user=' + req.body.name);
-});
 //Comment out the next method before testing
 app.listen(port, () => {
 	//server starts listening for any attempts from a client to connect at port: {port}
