@@ -30,7 +30,7 @@ glados.SupaAuthManager = class {
 	}
 	signIn(email, password) {
 		supabase.auth
-			.signin({ email, password })
+			.signIn({ email, password })
 			.then((response) => {
 				console.log(response);
 			})
@@ -38,7 +38,10 @@ glados.SupaAuthManager = class {
 				console.log(err);
 			});
 	}
-	signOut() {}
+	signOut() {
+		this._user = null;
+		supabase.auth.singOut();
+	}
 	get uid() {
 		return this._user.uid;
 	}
