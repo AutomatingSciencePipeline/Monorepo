@@ -3,7 +3,6 @@ var integerParams = 0;
 var floatParams = 0;
 var arrayParams = 0;
 var booleParams = 0;
-var fileParams = 0;
 var glados = glados || {};
 const SUPABASE_URL = 'http://localhost:8000';
 const SUPABASE_KEY =
@@ -138,13 +137,6 @@ function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, 
 	return param;
 }
 
-function createUser(username, password) {
-
-}
-
-function checkUser(username, password) {
-
-}
 
 
 function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
@@ -209,10 +201,14 @@ LoginManager = class {
 
 
 
-ParameterPageController = class {
+glados.ParameterPageController = class {
 	constructor(user) {
 		this.user = user;
 		this.int = 0;
+
+		document.querySelector('#menuSignOut').addEventListener("click", (event) =>{
+			glados.supaAuth.signOut();
+		})
 
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
 			// 		var dict = {"one" : [15, 4.5],
@@ -256,13 +252,6 @@ ParameterPageController = class {
 				var paramName = document.querySelector('#booleParamName' + i).value;
 				var val = document.querySelector('#booleValue' + i).value;
 				var param = paramJSONSingleVal(paramName, val, "boolean");
-
-				array.push(param);
-			}
-			for (let i = 0; i < arrayParams; i++) {
-				var paramName = document.querySelector('#fileParamName' + i).value;
-				var val = document.querySelector('#filePath' + i).value;
-				var param = paramJSONSingleVal(paramName, val, "file");
 
 				array.push(param);
 			}
@@ -326,21 +315,11 @@ ParameterPageController = class {
 			this.updateList(3);
 
 		})
-		document.querySelector("#addFileBtn").addEventListener("click", (event) => {
-			this.updateList(4);
-
-		})
 		document.querySelector("#remIntegerBtn").addEventListener("click", (event) => {
 			integerParams = integerParams - 2;
 			console.log("integer");
 			this.int = this.int - 2;
 			this.updateList(0);
-		})
-		document.querySelector("#remFileBtn").addEventListener("click", (event) => {
-			fileParams = fileParams - 2;
-			console.log("file");
-			this.int = this.int - 2;
-			this.updateList(4);
 		})
 		document.querySelector("#remBooleanBtn").addEventListener("click", (event) => {
 			booleParams = booleParams - 2;
@@ -453,26 +432,6 @@ ParameterPageController = class {
 			id = "#booleContainer";
 			for (var i = 0; i < booleParams; i++) {
 				const newCard = this._createCard(3, i);
-				newList.appendChild(newCard);
-			}
-			oldList = document.querySelector(id);
-			oldList.removeAttribute("id");
-			oldList.hidden = true;
-			oldList.parentElement.append(newList);
-		} else if (type == 4) {
-			this.int = this.int + 1;
-			fileParams = fileParams + 1;
-			// File
-			//
-			//
-			newList = htmlToElement('<div id="fileContainer"></div>');
-			if (fileParams != 0) {
-				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">File Parameters</div></div>'));
-				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">File path</div></div>'));
-			}
-			id = "#fileContainer";
-			for (var i = 0; i < fileParams; i++) {
-				const newCard = this._createCard(4, i);
 				newList.appendChild(newCard);
 			}
 			oldList = document.querySelector(id);
@@ -606,10 +565,7 @@ glados.main = function () {
 		if (!user) {
 			window.location.href = '/';
 		}
-		glados.parameterPageController = new glados.ParameterPageController(
-			int,
-			user
-		);
+		glados.parameterPageController = new glados.ParameterPageController(user);
 	}
 
 	// const ref = firebase.firestore().collection("MovieQuotes");
