@@ -1,12 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+	<iframe name="hiddenFrame" class="hide"></iframe>
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-  <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
-  <link rel="stylesheet" href="styles/main.css">
+  <link	rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
+  <link rel="stylesheet" href="styles/bootstrap-material-design.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/main.css" />
   <title>Parameters</title>
 </head>
 <iframe name="hiddenFrame" class="hide"></iframe>
@@ -14,6 +16,9 @@
 <body>
   <nav class="navbar navbar-dark fixed-top">
     <a class="navbar-brand" href="#">Fill in parameters</a>
+	<button type="button" class="btn btn-default btn-sm" id="menuSignOut">
+		<i class="material-icons">login</i> Log out
+	</button>
   </nav>
   
   <div id="parametersPage" class="container page-container">
@@ -23,13 +28,11 @@
         <button type="button" id="addFloatBtn" class="btn-primary">+ Float</button>
         <button type="button" id="addArrayBtn" class="btn-primary">+ Array</button>
         <button type="button" id="addBooleanBtn" class="btn-primary">+ Boolean</button>
-        <button type="button" id="addFileBtn" class="btn-primary">+ File</button></div>
       <div>
         <button type="button" id="remIntegerBtn" class="btn-primary">- Integer</button>
         <button type="button" id="remFloatBtn" class="btn-primary">- Float</button>
         <button type="button" id="remArrayBtn" class="btn-primary">- Array</button>
         <button type="button" id="remBooleanBtn" class="btn-primary">- Boolean</button>
-        <button type="button" id="remFileBtn" class="btn-primary">- File</button></div>
       
     </div>
 
