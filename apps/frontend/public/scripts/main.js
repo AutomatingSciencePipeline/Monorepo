@@ -15,7 +15,7 @@ glados.SupaAuthManager = class {
 				this._user = session.user;
 				callback();
 			} else if (event == 'SIGNED_OUT') {
-				window.location.assign('/');
+
 			}
 		});
 	}
@@ -27,7 +27,12 @@ glados.SupaAuthManager = class {
 			})
 			.then((response) => {
 				console.log(response);
-				this.signIn(email, password);
+				if (response.error == null) {
+					this.signIn(email, password);
+				} else {
+					alert("Account creation failed. Be sure to use the correct email format and password must be more than 6 characters.");
+				}
+
 			})
 			.catch((err) => {
 				console.log(err);
@@ -40,14 +45,23 @@ glados.SupaAuthManager = class {
 				password
 			})
 			.then((response) => {
-				console.log(response);
-				window.location.assign('index?user=' + email);
+				if (response.error == null) {
+					window.location.assign('index?user=' + email);
+				}
 			})
 			.catch((err) => {
 				console.log(err);
 			});
 	}
-	signOut() {}
+	signOut() {
+		supabase.auth
+			.signOut()
+			.then((response) => {
+				if (response.error == null) {
+					window.location.assign('/');
+				}
+			})
+	}
 	get uid() {
 		return this._user.uid;
 	}
@@ -113,6 +127,8 @@ glados.LoginPageController = class {
 				const pw = document.querySelector('#confirmPass').value;
 				if (password === pw) {
 					glados.supaAuth.signUp(username, password);
+				} else {
+					alert("Passwords did not match");
 				}
 			});
 
@@ -147,6 +163,9 @@ glados.InitialPageController = class {
 			var x = document.querySelector('#typeNumber').value;
 			location.assign('parameters?int=' + x + '&user=' + this.user);
 		});
+		document.querySelector('#menuSignOut').addEventListener('click', (event) => {
+			glados.supaAuth.signOut();
+		})
 	}
 };
 
@@ -154,7 +173,9 @@ glados.ParameterPageController = class {
 	constructor(int, user) {
 		this.int = int;
 		this.user = user;
-
+		document.querySelector('#menuSignOut').addEventListener('click', (event) => {
+			glados.supaAuth.signOut();
+		})
 		document
 			.querySelector('#paramSubmit')
 			.addEventListener('click', (event) => {
