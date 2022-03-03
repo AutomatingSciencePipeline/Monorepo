@@ -90,7 +90,7 @@ def main():
             newchroms.append(chrom0)
         #newly copied and mutated chromosomes become current generation   
         chroms = newchroms
-    print(chroms[0].fitness)
+    print(float(chroms[0].fitness))
     return 0
 
         
