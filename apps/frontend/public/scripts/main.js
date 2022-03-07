@@ -3,6 +3,7 @@ var integerParams = 0;
 var floatParams = 0;
 var arrayParams = 0;
 var booleParams = 0;
+
 var glados = glados || {};
 const SUPABASE_URL = 'http://localhost:8000';
 const SUPABASE_KEY =
@@ -88,9 +89,7 @@ function paramJSONSingleVal(paramName, val, type) {
 		parsedVal = JSON.parse(val);
 	} else if (type == "boolean") {
 		parsedVal = (val === 'true');
-	} else if (type == "file") {
-		parsedVal = val;
-	}
+	} 
 	var param = {
 		"paramName": paramName,
 		"value": parsedVal,
@@ -490,16 +489,6 @@ glados.ParameterPageController = class {
 		  <input type="text" id="booleValue${int}" class="form-control" />
 		</div>
 	  </div>`);
-		} else if (type == 4) {
-			return htmlToElement(`<div class="row">
-		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
-			<input type="text" id="fileParamName${int}" class="form-control" />
-		</div>
-
-		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="text" id="filePath${int}" class="form-control" />
-		</div>
-	  </div>`);
 		}
 
 	}
@@ -515,7 +504,6 @@ glados.ParameterManager = class {
 };
 
 /* Main */
-/** function and class syntax examples */
 glados.main = function () {
 	console.log('Ready');
 
