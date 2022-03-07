@@ -6,13 +6,6 @@ const app = express(); //Instantiate an express app, the main work horse of this
 const port = 5005; //Save the port number where your server will be listening
 
 const supaCreateClient = require('@supabase/supabase-js');
-// const supGoTrue = require('@supabase/gotrue-js');
-// const supPost = require('@supabase/postgrest-js');
-// const supRealTime = require('@supabase/realtime-js');
-// const supStorage = require('@supabase/storage-js');
-// const supBigBase = require('@supabase/supabase-js');
-// const { error } = require('console');
-// Create a single supabase client for interacting with your database
 
 //window.userToken = null
 //Idiomatic expression in express to route and respond to a client request
@@ -76,9 +69,6 @@ app.post('/parameters', (req, res) => {
 	//
 });
 
-const fetchUserDetails = () => {
-	alert(JSON.stringify(supabase.auth.user()));
-};
 
 //Comment out the next method before testing
 app.listen(port, () => {

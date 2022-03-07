@@ -187,7 +187,7 @@ glados.LoginPageController = class {
 
 
 
-LoginManager = class {
+glados.LoginManager = class {
 	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
@@ -211,10 +211,6 @@ glados.ParameterPageController = class {
 		})
 
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
-			// 		var dict = {"one" : [15, 4.5],
-			// "two" : [34, 3.3],
-			// "three" : [67, 5.0],
-			// "four" : [32, 4.1]};
 			var array = [];
 
 			for (let i = 0; i < integerParams; i++) {
@@ -259,15 +255,6 @@ glados.ParameterPageController = class {
 			var verbose = document.querySelector('#verboseBool').checked;
 			var params = experimentParamsJSON(array, name, this.user, verbose);
 			var executable = JSON.stringify(params);
-			//this.download(executable, 'exp.json', 'json');
-
-			// Creating a XHR object
-			//let xhr = new XMLHttpRequest();
-			//let url = "https://194.195.213.242:5000/experiment";
-			let url = "http://localhost:5005/parameters";
-			// fetch(`/`, {
-			// 	mode: 'no-cors',
-			// 	cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
 
@@ -280,21 +267,6 @@ glados.ParameterPageController = class {
 				body: executable
 			}).catch(err => console.log(err))
 
-			// open a connection
-			//			xhr.open("POST", url, true);
-			//
-			//			// Set the request header i.e. which type of content you are sending
-			//			xhr.setRequestHeader("Content-Type", "application/json");
-			//
-			//			// Create a state change callback
-			//			xhr.onreadystatechange = function () {
-			//				if (xhr.readyState === 4 && xhr.status === 200) {
-			//					// Print received data from server
-			//					result.innerHTML = this.responseText;
-			//				}
-			//			};
-			//
-			//			xhr.send(executable);
 		});
 		document.querySelector("#addIntegerBtn").addEventListener("click", (event) => {
 
@@ -567,19 +539,6 @@ glados.main = function () {
 		}
 		glados.parameterPageController = new glados.ParameterPageController(user);
 	}
-
-	// const ref = firebase.firestore().collection("MovieQuotes");
-	// ref.onSnapshot((querySnap) => {
-
-	// 	querySnap.forEach((doc) => {
-	// 		console.log(doc.data());
-	// 	})
-	// })
-	// ref.add({
-	// 	quote: "popping off",
-	// 	movie: "GamerPogchamp"
-
-	// })
 };
 
 glados.main();
