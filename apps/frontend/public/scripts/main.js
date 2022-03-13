@@ -1,9 +1,80 @@
-//Save
+
 var integerParams = 0;
 var floatParams = 0;
 var arrayParams = 0;
 var booleParams = 0;
-var fileParams = 0;
+
+var glados = glados || {};
+const SUPABASE_URL = 'http://localhost:8000';
+const SUPABASE_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
+var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+glados.SupaAuthManager = class {
+	constructor() {
+		this._user = null;
+	}
+	beginListening(callback) {
+		supabase.auth.onAuthStateChange((event, session) => {
+			if (event == 'SIGNED_IN') {
+				this._user = session.user;
+				callback();
+			} else if (event == 'SIGNED_OUT') {
+
+			}
+		});
+	}
+	signUp(email, password) {
+		supabase.auth
+			.signUp({
+				email,
+				password,
+			})
+			.then((response) => {
+				console.log(response);
+				if (response.error == null) {
+					this.signIn(email, password);
+				} else {
+					alert("Account creation failed. Be sure to use the correct email format and password must be more than 6 characters.");
+				}
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	signIn(email, password) {
+		supabase.auth
+			.signIn({
+				email,
+				password,
+			})
+			.then((response) => {
+				if (response.error == null) {
+					window.location.assign('parameters?user=' + email);
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	signOut() {
+		supabase.auth
+			.signOut()
+			.then((response) => {
+				if (response.error == null) {
+					window.location.assign('/');
+				}
+			})
+
+	}
+	get uid() {
+		return this._user.uid;
+	}
+	get isSignedIn() {
+		return !!this._user;
+	}
+};
 
 function htmlToElement(html) {
 	var template = document.createElement('template');
@@ -18,9 +89,7 @@ function paramJSONSingleVal(paramName, val, type) {
 		parsedVal = JSON.parse(val);
 	} else if (type == "boolean") {
 		parsedVal = (val === 'true');
-	} else if (type == "file") {
-		parsedVal = val;
-	}
+	} 
 	var param = {
 		"paramName": paramName,
 		"value": parsedVal,
@@ -67,13 +136,6 @@ function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, 
 	return param;
 }
 
-function createUser(username, password) {
-
-}
-
-function checkUser(username, password) {
-
-}
 
 
 function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
@@ -85,92 +147,46 @@ function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
 		"verbose": verboseBool
 	};
 	return params;
-
 }
 
-function loginQueryJSON (username, password){
-	const userProfile = {
-		"email" : username, 
-		"password" : password
+function ValidateEmail(email) {
+	if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+		console.log('invalid email');
+		return true;
 	}
-
-	return userProfile
+	alert('You have entered an invalid email address!');
+	console.log('invalid email');
+	return false;
 }
-
-
-function ValidateEmail(email) 
-{
- if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
-  {
-	  console.log("invalid email")
-    return (true)
-  }
-    alert("You have entered an invalid email address!")
-	console.log("invalid email")
-    return (false)
-}
-LoginPageController = class {
+glados.LoginPageController = class {
 	constructor() {
-		//this is for creating a user 
-		document.querySelector("#submitCreateUser").addEventListener("click", (event) => {
-			var username = document.querySelector("#newUsername").value;
-			var password = document.querySelector("#newPassword").value;
-			console.log("new user created!", username, password);
-			console.log(" i am in the fetch")
-			if(ValidateEmail(username)==false){
-				return;
-			}
-			var params = loginQueryJSON(username, password);
-			var profile = JSON.stringify(params);
-			
-			fetch(`/createuser`, {
-				method: 'POST',
-				headers : {
-					"Content-Type" : 'application/json'
-				},
-				body: profile}).catch(err => console.log(err)) //TODO: 
-		});
+		//this is for creating a user
+		document
+			.querySelector('#submitCreateUser')
+			.addEventListener('click', (event) => {
+				const username = document.querySelector('#newUsername').value;
+				const password = document.querySelector('#newPassword').value;
+				const pw = document.querySelector('#confirmPass').value;
+				if (password === pw) {
+					glados.supaAuth.signUp(username, password);
+				} else {
+					alert("Passwords did not match");
+				}
+			});
 
-		//adding a user 
-		document.querySelector("#login").addEventListener("click", (event) => {
-			var username = document.querySelector("#username").value;
-			var password = document.querySelector("#password").value;
-
-			var params = loginQueryJSON(username, password);
-			var profile = JSON.stringify(params);
+		//adding a user
+		document.querySelector('#login').addEventListener('click', (event) => {
+			var username = document.querySelector('#username').value;
+			var password = document.querySelector('#password').value;
+			glados.supaAuth.signIn(username, password);
 			//
-			fetch(`/validateuser`, {
-				method: 'POST',
-				headers : {
-					"Content-Type" : 'application/json'
-				},
-				body: profile}).then((response) => {
-					console.log("front end validate")
-					//console.log(response.json())
-					response.json().then((data) => {
-						console.log("inside data")
-						console.log(data.boolean)
-						if(data.boolean){
-							window.location.assign('index?user=' + username)
-						}
-						//
-					})
-					//console.log("res bool")
-					//console.log(res.boolean)
-					//if(res.boolean){
-						
-					//}
-
-					
-
-				}).catch(err => console.log(err))
-
 		});
 	}
+};
 
-}
 
-LoginManager = class {
+
+glados.LoginManager = class {
 	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
@@ -184,16 +200,16 @@ LoginManager = class {
 
 
 
-ParameterPageController = class {
+glados.ParameterPageController = class {
 	constructor(user) {
 		this.user = user;
 		this.int = 0;
 
+		document.querySelector('#menuSignOut').addEventListener("click", (event) =>{
+			glados.supaAuth.signOut();
+		})
+
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
-			// 		var dict = {"one" : [15, 4.5],
-			// "two" : [34, 3.3],
-			// "three" : [67, 5.0],
-			// "four" : [32, 4.1]};
 			var array = [];
 
 			for (let i = 0; i < integerParams; i++) {
@@ -234,26 +250,10 @@ ParameterPageController = class {
 
 				array.push(param);
 			}
-			for (let i = 0; i < arrayParams; i++) {
-				var paramName = document.querySelector('#fileParamName' + i).value;
-				var val = document.querySelector('#filePath' + i).value;
-				var param = paramJSONSingleVal(paramName, val, "file");
-
-				array.push(param);
-			}
 			var name = document.querySelector('#expName').value;
 			var verbose = document.querySelector('#verboseBool').checked;
 			var params = experimentParamsJSON(array, name, this.user, verbose);
 			var executable = JSON.stringify(params);
-			//this.download(executable, 'exp.json', 'json');
-
-			// Creating a XHR object
-			//let xhr = new XMLHttpRequest();
-			//let url = "https://194.195.213.242:5000/experiment";
-			let url = "http://localhost:5005/parameters";
-			// fetch(`/`, {
-			// 	mode: 'no-cors',
-			// 	cache: 'no-cache'}).then(data=>{console.log(data)})
 
 			console.log(executable);
 
@@ -266,21 +266,6 @@ ParameterPageController = class {
 				body: executable
 			}).catch(err => console.log(err))
 
-			// open a connection
-			//			xhr.open("POST", url, true);
-			//
-			//			// Set the request header i.e. which type of content you are sending
-			//			xhr.setRequestHeader("Content-Type", "application/json");
-			//
-			//			// Create a state change callback
-			//			xhr.onreadystatechange = function () {
-			//				if (xhr.readyState === 4 && xhr.status === 200) {
-			//					// Print received data from server
-			//					result.innerHTML = this.responseText;
-			//				}
-			//			};
-			//
-			//			xhr.send(executable);
 		});
 		document.querySelector("#addIntegerBtn").addEventListener("click", (event) => {
 
@@ -301,21 +286,11 @@ ParameterPageController = class {
 			this.updateList(3);
 
 		})
-		document.querySelector("#addFileBtn").addEventListener("click", (event) => {
-			this.updateList(4);
-
-		})
 		document.querySelector("#remIntegerBtn").addEventListener("click", (event) => {
 			integerParams = integerParams - 2;
 			console.log("integer");
 			this.int = this.int - 2;
 			this.updateList(0);
-		})
-		document.querySelector("#remFileBtn").addEventListener("click", (event) => {
-			fileParams = fileParams - 2;
-			console.log("file");
-			this.int = this.int - 2;
-			this.updateList(4);
 		})
 		document.querySelector("#remBooleanBtn").addEventListener("click", (event) => {
 			booleParams = booleParams - 2;
@@ -434,26 +409,6 @@ ParameterPageController = class {
 			oldList.removeAttribute("id");
 			oldList.hidden = true;
 			oldList.parentElement.append(newList);
-		} else if (type == 4) {
-			this.int = this.int + 1;
-			fileParams = fileParams + 1;
-			// File
-			//
-			//
-			newList = htmlToElement('<div id="fileContainer"></div>');
-			if (fileParams != 0) {
-				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">File Parameters</div></div>'));
-				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">File path</div></div>'));
-			}
-			id = "#fileContainer";
-			for (var i = 0; i < fileParams; i++) {
-				const newCard = this._createCard(4, i);
-				newList.appendChild(newCard);
-			}
-			oldList = document.querySelector(id);
-			oldList.removeAttribute("id");
-			oldList.hidden = true;
-			oldList.parentElement.append(newList);
 		}
 
 
@@ -534,21 +489,11 @@ ParameterPageController = class {
 		  <input type="text" id="booleValue${int}" class="form-control" />
 		</div>
 	  </div>`);
-		} else if (type == 4) {
-			return htmlToElement(`<div class="row">
-		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
-			<input type="text" id="fileParamName${int}" class="form-control" />
-		</div>
-
-		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="text" id="filePath${int}" class="form-control" />
-		</div>
-	  </div>`);
 		}
 
 	}
-}
-ParameterManager = class {
+};
+glados.ParameterManager = class {
 	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
@@ -556,45 +501,32 @@ ParameterManager = class {
 	stopListening() {
 		this._unsubscribe();
 	}
-
-}
+};
 
 /* Main */
-/** function and class syntax examples */
-main = function () {
-	console.log("Ready");
-	if (document.querySelector("#loginPage")) {
-		console.log("You are on the login page");
+glados.main = function () {
+	console.log('Ready');
 
-		new LoginPageController();
+	glados.supaAuth = new glados.SupaAuthManager();
+	glados.supaAuth.beginListening(() => {
+		console.log('AUTH IS NOW LISTENING');
+	});
+
+	if (document.querySelector('#loginPage')) {
+		glados.loginPageController = new glados.LoginPageController();
 	}
 
-	if (document.querySelector("#parametersPage")) {
-		console.log("You are on the parameters page");
+	if (document.querySelector('#parametersPage')) {
+		console.log('You are on the parameters page');
 		// mqid = rhit.storage.getMovieQuoteId();
 		const queryString = window.location.search;
 		const urlParams = new URLSearchParams(queryString);
-		const user = urlParams.get("user");
-		console.log(`Detail page for ${user}`);
+		const user = urlParams.get('user');
 		if (!user) {
-			window.location.href = "/";
+			window.location.href = '/';
 		}
-		new ParameterPageController(user);
+		glados.parameterPageController = new glados.ParameterPageController(user);
 	}
-
-	// const ref = firebase.firestore().collection("MovieQuotes");
-	// ref.onSnapshot((querySnap) => {
-
-	// 	querySnap.forEach((doc) => {
-	// 		console.log(doc.data());
-	// 	})
-	// })
-	// ref.add({
-	// 	quote: "popping off",
-	// 	movie: "GamerPogchamp"
-
-	// })
-
 };
 
-main();
+glados.main();
