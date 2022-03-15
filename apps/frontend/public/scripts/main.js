@@ -219,6 +219,7 @@ glados.ParameterPageController = class {
 				var minVal = document.querySelector("#integerMinValue" + i).value
 				var maxVal = document.querySelector("#integerMaxValue" + i).value
 				var incVal = document.querySelector("#integerIncValue" + i).value
+				console.log(defVal, minVal, maxVal, incVal);
 				var param = paramJSONMultVals(paramName, defVal, minVal, maxVal, incVal, "integer");
 
 
@@ -231,6 +232,7 @@ glados.ParameterPageController = class {
 				var minVal = document.querySelector("#floatMinValue" + i).value
 				var maxVal = document.querySelector("#floatMaxValue" + i).value
 				var incVal = document.querySelector("#floatIncValue" + i).value
+				console.log(defVal, minVal, maxVal, incVal);
 				var param = paramJSONMultVals(paramName, defVal, minVal, maxVal, incVal, "float");
 
 
@@ -251,6 +253,7 @@ glados.ParameterPageController = class {
 				array.push(param);
 			}
 			var name = document.querySelector('#expName').value;
+			console.log(name);
 			var verbose = document.querySelector('#verboseBool').checked;
 			var params = experimentParamsJSON(array, name, this.user, verbose);
 			var executable = JSON.stringify(params);
@@ -342,9 +345,8 @@ glados.ParameterPageController = class {
 				newList.appendChild(newCard);
 			}
 			var oldList = document.querySelector(id);
-			oldList.removeAttribute("id");
-			oldList.hidden = true;
 			oldList.parentElement.append(newList);
+			oldList.remove();
 		} else if (type == 1) {
 			this.int = this.int + 1;
 			floatParams = floatParams + 1;
@@ -363,9 +365,8 @@ glados.ParameterPageController = class {
 				newList.appendChild(newCard);
 			}
 			oldList = document.querySelector(id);
-			oldList.removeAttribute("id");
-			oldList.hidden = true;
 			oldList.parentElement.append(newList);
+			oldList.remove();
 		} else if (type == 2) {
 			this.int = this.int + 1;
 			arrayParams = arrayParams + 1;
@@ -385,9 +386,8 @@ glados.ParameterPageController = class {
 				newList.appendChild(newCard);
 			}
 			oldList = document.querySelector(id);
-			oldList.removeAttribute("id");
-			oldList.hidden = true;
 			oldList.parentElement.append(newList);
+			oldList.remove();
 		} else if (type == 3) {
 			this.int = this.int + 1;
 			booleParams = booleParams + 1;
@@ -406,9 +406,8 @@ glados.ParameterPageController = class {
 				newList.appendChild(newCard);
 			}
 			oldList = document.querySelector(id);
-			oldList.removeAttribute("id");
-			oldList.hidden = true;
 			oldList.parentElement.append(newList);
+			oldList.remove();
 		}
 
 
@@ -417,9 +416,8 @@ glados.ParameterPageController = class {
 		id = "#experimentName";
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
 		oldList = document.querySelector(id);
-		oldList.removeAttribute("id");
-		oldList.hidden = true;
 		oldList.parentElement.append(newList);
+		oldList.remove();
 
 	}
 	_createCard(type, int) {
