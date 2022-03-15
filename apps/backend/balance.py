@@ -4,9 +4,8 @@ from subprocess import Popen, PIPE, STDOUT
 import select
 import logging
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-import importlib
-import requests
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import numpy as np
 import collections
 import itertools
@@ -21,6 +20,7 @@ import stat
 
 app = Flask(__name__)
 app.config['DEBUG'] = False
+CORS(app)
 
 ### FLASK API ENDPOINTS
 
@@ -34,7 +34,7 @@ def recv_experiment():
 ### GLB
 class GLB(object):
 
-    def __init__(self, n_workers=None):
+    def __init__(self, n_workers=1):
         self.e_status = {}
         self.e = ProcessPoolExecutor(n_workers)
         self.f = ThreadPoolExecutor(n_workers)
@@ -171,13 +171,13 @@ def flatten(x):
         return [x]
 
 def initilize_work_space():
-    names = ['exps','res','incoming']
-    if not os.path.exists('GLADOS_HOME'):
-        os.mkdir('GLADOS_HOME')
-    for name in names:
-        if not os.path.exists(f'GLADOS_HOME/{name}'):
-            os.mkdir(f'GLADOS_HOME/{name}')
-    os.chdir('GLADOS_HOME')
+    # names = ['exps','res','incoming']
+    # if not os.path.exists('GLADOS_HOME'):
+    #     os.mkdir('/appdata/GLADOS_HOME')
+    # for name in names:
+    #     if not os.path.exists(f'/appdata/GLADOS_HOME/{name}'):
+    #         os.mkdir(f'/appdata/GLADOS_HOME/{name}')
+    os.chdir('/app/GLADOS_HOME')
 
 
 def communicate(process, payload):
@@ -206,21 +206,18 @@ class UnresponsiveBinaryException(Exception):
 
 ### EXPERIMENTAL ARTIFACTS
 
-def add_nums(x,y):
-    ## for testing purposes.
-    return x+y
 
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     initilize_work_space()
     GlobalLoadBalancer = GLB(1)
-    hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
-    msg_test = {
-        'id' : 'XVZ01',
-        'user' : 'elijah',
-        'func' : add_nums,
-        'hyperparams' : hyperparams
-    }
+    # hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
+    # msg_test = {
+    #     'id' : 'XVZ01',
+    #     'user' : 'elijah',
+    #     'func' : add_nums,
+    #     'hyperparams' : hyperparams
+    # }
     # GlobalLoadBalancer.submit_experiment(msg_test)
     app.run()
     #blablabla = gen_configs(msg_test['hyperparams'])

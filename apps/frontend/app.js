@@ -1,11 +1,13 @@
 const express = require('express'); //Import the express dependency
 const fetch = require('node-fetch');
+var http = require('http');
 const fs = require('fs');
 var formidable = require('formidable');
 const app = express(); //Instantiate an express app, the main work horse of this server
 const port = 5005; //Save the port number where your server will be listening
 
 const supaCreateClient = require('@supabase/supabase-js');
+var filename = "";
 
 //window.userToken = null
 //Idiomatic expression in express to route and respond to a client request
@@ -28,10 +30,11 @@ app.post('/fileupload', (req, res) => {
 		console.log('we got a file!');
 		var oldpath = files.filetoupload.filepath;
 		var newpath =
-			'../../scripts/GLADOS_HOME/incoming/' +
+			'/app/GLADOS_HOME/incoming/' +
 			files.filetoupload.originalFilename;
-		fileName = files.filetoupload.originalFilename;
-		fs.rename(oldpath, newpath, function (err) {
+			console.log(newpath);
+		filename = files.filetoupload.originalFilename;
+		fs.copyFile(oldpath, newpath, function (err) {
 			if (err) throw err;
 			res.redirect('/parameters');
 		});
@@ -41,8 +44,10 @@ app.post('/parameters', (req, res) => {
 	expname = req.body.experimentName;
 	console.log(expname);
 
-	console.log(req.body);
-	json['fileName'] = fileName;
+	var json = req.body;
+	json['filename'] = filename;
+
+	console.log(json);
 
 	// submit = req.body.submit;
 	// console.log(__dirname + `/exploc/experiment_${expname}`);
@@ -55,15 +60,34 @@ app.post('/parameters', (req, res) => {
 	// 	}
 	// 	//file written successfully
 	// })
-	fetch(`http://127.0.0.1:5000/experiment`, {
+	var post_options = {
+		host: 'app-backend',
+		port: '5000',
 		method: 'POST',
-		body: JSON.stringify(json),
+		path: '/experiment',
 		headers: {
-			'Content-Type': 'application/json',
-		},
-	})
-		.then((res) => res.json())
-		.catch((error) => console.error('Error:', error));
+			'Content-Type': 'application/json'
+		}
+	};
+	var post_req = http.request(post_options, function(res) {
+		res.setEncoding('utf8');
+		res.on('data', function (chunk) {
+			console.log('Response: ' + chunk);
+		});
+	});
+
+	post_req.write(JSON.stringify(json));
+  	post_req.end();
+
+	// fetch(`backend:5000/experiment`, {
+	// 	method: 'POST',
+	// 	body: JSON.stringify(json),
+	// 	headers: {
+	// 		'Content-Type': 'application/json',
+	// 	},
+	// })
+	// 	.then((res) => res.json())
+	// 	.catch((error) => console.error('Error:', error));
 	//		.then((json) => console.log(json));
 	// announce to daemon that new experiment is online
 	//
