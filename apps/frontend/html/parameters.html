@@ -80,7 +80,8 @@
     <form action="fileupload" method="post" enctype="multipart/form-data" target="hiddenFrame">
       <input type="hidden" name="next" value="{{ request.path }}">
       <input type="file" id="experimentFile" name="filetoupload"><br>
-      <input type="submit" id = "paramSubmit" value="Begin Experiment">
+      <input type="submit" id="submitExpFile" class="btn-primary" value="Upload Experiment File">
+      <button type="button" id = "paramSubmit" class="btn-primary">Begin Experiment</button>
     </form>
     <!-- <button id="paramSubmit" type="button" class="btn-primary">Begin Experiment</button> -->
   </div>
