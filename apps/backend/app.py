@@ -1,5 +1,7 @@
+
 import sys, os, stat
 import shutil
+
 import re
 from subprocess import Popen, PIPE, STDOUT
 import select
@@ -20,7 +22,8 @@ import stat
 # parser.add_argument('--N', dest='nworkers',type=int,help='Number of thread / process workers to use.')
 
 app = Flask(__name__)
-app.config['DEBUG'] = True
+
+app.config['DEBUG'] = False
 CORS(app)
 
 ### FLASK API ENDPOINTS
@@ -51,6 +54,7 @@ class GLB(object):
     def update_experiment_status(self, id, status):
         self.e_status[id] = status
 GlobalLoadBalancer = GLB(1)        
+
 
 def experiment_event(msg):
     params = msg
@@ -133,8 +137,19 @@ def mapper(params):
 
 def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
-    params_raw = [k['values'] for k in hyperparams]
-    params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
+
+    params_raw = []
+    for param in hyperparams:
+        if param['type'] == "int" or param['type'] == "float":
+            params_raw.append(np.arange(param['values'][0],param['values'][1]+param['values'][2],param['values'][2]))
+        elif param['type'] == "array":
+            params_raw.append(param['value'])
+        elif param['type'] == "boolean":
+            params_raw.append([param['value']])
+
+    # params_raw = [k['values'] for k in hyperparams]
+    # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
+
     return enumerate(list(itertools.product(*params_raw)))
 
 def write_configs(raw, headers):
@@ -149,8 +164,16 @@ def proc_msg(msg):
     ## for now, this function is hardcoding some things, but it's no biggie
     rm = copy.deepcopy(msg)
     for obj in rm['parameters']:
-        obj['values'] = [float(x) for x in obj['values']]
-        obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
+
+        if obj['type'] == "int" or obj['type'] == "float":
+            obj['values'] = [float(x) for x in obj['values']]
+            obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
+        elif obj['type'] == "array":
+            obj['value'] = [float(x) for x in obj['value']]
+            obj['value'] = [x for i,x in enumerate(obj['value']) if i > 0]
+        elif obj['type'] == "boolean":
+            obj['value'] = bool(obj['value'])
+
 
     rm['func'] = add_nums
     rm['id'] = rm['experimentName']
@@ -211,6 +234,7 @@ class UnresponsiveBinaryException(Exception):
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     initilize_work_space()
+
     # hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
     # msg_test = {
     #     'id' : 'XVZ01',
@@ -235,7 +259,9 @@ if __name__=='__main__':
 2.  > modularity:
     > distribution across the network >> MPI 
 3. stitch the system together
+
 '''
 
 def add_nums(x, y):
     return x+y
+

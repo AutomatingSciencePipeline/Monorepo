@@ -52,6 +52,8 @@ glados.SupaAuthManager = class {
 			.then((response) => {
 				if (response.error == null) {
 					window.location.assign('parameters?user=' + email);
+				} else {
+					alert("Login failed. Please use a correct username and password.");
 				}
 			})
 			.catch((err) => {
