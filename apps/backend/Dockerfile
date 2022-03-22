@@ -27,4 +27,6 @@ COPY . /app
 USER root
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+
 CMD ["flask", "run", "--host=0.0.0.0", "-p", "5050"]
+

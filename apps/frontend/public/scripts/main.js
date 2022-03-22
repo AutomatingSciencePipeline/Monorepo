@@ -140,13 +140,14 @@ function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, 
 
 
 
-function experimentParamsJSON(paramsArr, experimentName, user, verboseBool) {
+function experimentParamsJSON(paramsArr, experimentName, user, verboseBool, fn) {
 
 	const params = {
 		"experimentName": experimentName,
 		"user": user,
 		"parameters": paramsArr,
-		"verbose": verboseBool
+		"verbose": verboseBool,
+		"fileName": fn
 	};
 	return params;
 }
@@ -257,7 +258,9 @@ glados.ParameterPageController = class {
 			var name = document.querySelector('#expName').value;
 			console.log(name);
 			var verbose = document.querySelector('#verboseBool').checked;
-			var params = experimentParamsJSON(array, name, this.user, verbose);
+			var filename = document.querySelector('#experimentFile').value.replace('C:\\fakepath\\', '');
+			console.log(filename)
+			var params = experimentParamsJSON(array, name, this.user, verbose, filename);
 			var executable = JSON.stringify(params);
 
 			console.log(executable);

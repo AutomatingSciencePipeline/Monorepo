@@ -1,4 +1,7 @@
-import sys, os
+
+import sys, os, stat
+import shutil
+
 import re
 from subprocess import Popen, PIPE, STDOUT
 import select
@@ -19,6 +22,7 @@ import stat
 # parser.add_argument('--N', dest='nworkers',type=int,help='Number of thread / process workers to use.')
 
 app = Flask(__name__)
+
 app.config['DEBUG'] = False
 CORS(app)
 
@@ -49,17 +53,18 @@ class GLB(object):
     
     def update_experiment_status(self, id, status):
         self.e_status[id] = status
-        
+GlobalLoadBalancer = GLB(1)        
+
 
 def experiment_event(msg):
     params = msg
     # within each experiment, we use threads
     # if not os.path.exists(params['fileName']):
     #     raise
-    os.chmod(f'incoming/{params["fileName"]}', 0o777)
-    os.mkdir(f'exps/{params["id"]}')
-    os.rename(f'incoming/{params["fileName"]}', f'exps/{params["id"]}/{params["fileName"]}')
-    os.chdir(f'exps/{params["id"]}')
+    os.chmod(f'GLADOS_HOME/incoming/{params["fileName"]}', 0o777)
+    os.mkdir(f'GLADOS_HOME/exps/{params["id"]}')
+    shutil.move(f'GLADOS_HOME/incoming/{params["fileName"]}', f'GLADOS_HOME/exps/{params["id"]}/{params["fileName"]}')
+    os.chdir(f'GLADOS_HOME/exps/{params["id"]}')
     param_iter = gen_configs(params['parameters'])
     ## we submit experiment configuration writing to a thread pool if verbose
     if params['verbose']:
@@ -132,6 +137,7 @@ def mapper(params):
 
 def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
+
     params_raw = []
     for param in hyperparams:
         if param['type'] == "int" or param['type'] == "float":
@@ -143,6 +149,7 @@ def gen_configs(hyperparams):
 
     # params_raw = [k['values'] for k in hyperparams]
     # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
+
     return enumerate(list(itertools.product(*params_raw)))
 
 def write_configs(raw, headers):
@@ -157,6 +164,7 @@ def proc_msg(msg):
     ## for now, this function is hardcoding some things, but it's no biggie
     rm = copy.deepcopy(msg)
     for obj in rm['parameters']:
+
         if obj['type'] == "int" or obj['type'] == "float":
             obj['values'] = [float(x) for x in obj['values']]
             obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
@@ -165,6 +173,7 @@ def proc_msg(msg):
             obj['value'] = [x for i,x in enumerate(obj['value']) if i > 0]
         elif obj['type'] == "boolean":
             obj['value'] = bool(obj['value'])
+
 
     rm['func'] = add_nums
     rm['id'] = rm['experimentName']
@@ -225,7 +234,7 @@ class UnresponsiveBinaryException(Exception):
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     initilize_work_space()
-    GlobalLoadBalancer = GLB(1)
+
     # hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
     # msg_test = {
     #     'id' : 'XVZ01',
@@ -250,4 +259,9 @@ if __name__=='__main__':
 2.  > modularity:
     > distribution across the network >> MPI 
 3. stitch the system together
+
 '''
+
+def add_nums(x, y):
+    return x+y
+
