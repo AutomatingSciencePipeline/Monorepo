@@ -23,7 +23,7 @@ import stat
 
 app = Flask(__name__)
 
-app.config['DEBUG'] = False
+app.config['DEBUG'] = True
 CORS(app)
 
 ### FLASK API ENDPOINTS
@@ -46,7 +46,6 @@ class GLB(object):
         
     def submit_experiment(self, msg):
         self.e_status[msg['id']] = 'INIT'
-        msg['func'] = add_nums
         logging.info(f'Experiment {msg["id"]} by {msg["user"]} submitted.')
         self.e.submit(experiment_event, msg).add_done_callback(experiment_resolve)
         
@@ -72,13 +71,12 @@ def experiment_event(msg):
         with ThreadPoolExecutor(1) as e:
             e.submit(write_configs, param_iter, [obs['paramName'] for obs in params['parameters']])
     
-    func = params['func']
     ## process stuff and make API call to inform of the experiment's commencement
     results = []
     dead = 0
     i = 0
     with ThreadPoolExecutor(1) as executor:
-        result_futures = list(map(lambda x: executor.submit(mapper, {'filename': params['fileName'],'iter':x[0],'func':func,'params':x[1]}), list(param_iter)))
+        result_futures = list(map(lambda x: executor.submit(mapper, {'filename': params['fileName'],'iter':x[0],'params':x[1]}), list(param_iter)))
         for future in as_completed(result_futures):
             try:
                 res = future.result()
@@ -139,18 +137,56 @@ def gen_configs(hyperparams):
     ### Generate hyperparameter configurations
 
     params_raw = []
+    temp = []
     for param in hyperparams:
-        if param['type'] == "int" or param['type'] == "float":
-            params_raw.append(np.arange(param['values'][0],param['values'][1]+param['values'][2],param['values'][2]))
+        if param['type'] == "integer" or param['type'] == "float":
+            for param2 in hyperparams:
+                if not param['paramName'] == param2["paramName"]:
+                    if param2['type'] == "float" or param2['type'] == "integer":
+                        temp.append([param2['values'][0]])
+                    elif param2['type'] == "array":
+                        temp.append(param2['value'])
+                    elif param2['type'] == "boolean":
+                        if param2['value'] == "True":
+                            temp.append([True])
+                        else:
+                            temp.append([''])
+                else:
+                    temp.append(np.arange(param['values'][1],param['values'][2]+param['values'][3],param['values'][3]))
+            app.logger.info(f'After integer, temp is {temp}')
+            concat_arrays(params_raw, list(itertools.product(*temp)))
+            app.logger.info(f'Params raw after integer is {params_raw}')
+            temp = []
         elif param['type'] == "array":
-            params_raw.append(param['value'])
-        elif param['type'] == "boolean":
-            params_raw.append([param['value']])
+            for param2 in hyperparams:
+                if not param['paramName'] == param2["paramName"]:
+                    if param2['type'] == "float" or param2['type'] == "integer":
+                        temp.append([param2['values'][0]])
+                    elif param2['type'] == "array":
+                        temp.append(param2['value'])
+                    elif param2['type'] == "boolean":
+                        if param2['value'] == "True":
+                            temp.append([True])
+                        else:
+                            temp.append([False])
+                else:
+                    temp.append(param2['value'])
+            app.logger.info(f'After array, temp is {temp}')
+            concat_arrays(params_raw, list(itertools.product(*temp)))
+            app.logger.info(f'Params raw after array is {params_raw}')
+            temp = []
+            app.logger.info(f'After boolean, temp is {temp}')
+            concat_arrays(params_raw, list(itertools.product(*temp)))
+            app.logger.info(f'Params raw after boolean is {params_raw}')
+            temp = []
 
     # params_raw = [k['values'] for k in hyperparams]
-    # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw]
+    # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw
 
-    return enumerate(list(itertools.product(*params_raw)))
+    return enumerate(list(params_raw))
+def concat_arrays(arr1, arr2):
+    for x in arr2:
+        arr1.append(x)
 
 def write_configs(raw, headers):
     dicts = [{headers[i]:np_uncode(x[i]) for i in range(len(x))} for _,x in copy.deepcopy(raw)]
@@ -164,18 +200,15 @@ def proc_msg(msg):
     ## for now, this function is hardcoding some things, but it's no biggie
     rm = copy.deepcopy(msg)
     for obj in rm['parameters']:
-
-        if obj['type'] == "int" or obj['type'] == "float":
+        if obj['type'] == "integer" or obj['type'] == "float":
             obj['values'] = [float(x) for x in obj['values']]
-            obj['values'] = [x for i,x in enumerate(obj['values']) if i > 0]
+            obj['values'] = [x for i,x in enumerate(obj['values']) if i >= 0]
         elif obj['type'] == "array":
             obj['value'] = [float(x) for x in obj['value']]
-            obj['value'] = [x for i,x in enumerate(obj['value']) if i > 0]
+            obj['value'] = [x for i,x in enumerate(obj['value']) if i >= 0]
         elif obj['type'] == "boolean":
             obj['value'] = bool(obj['value'])
 
-
-    rm['func'] = add_nums
     rm['id'] = rm['experimentName']
     del rm['experimentName']
     return rm
@@ -243,7 +276,7 @@ if __name__=='__main__':
     #     'hyperparams' : hyperparams
     # }
     # GlobalLoadBalancer.submit_experiment(msg_test)
-    app.run()
+    app.run(debug = True)
     #blablabla = gen_configs(msg_test['hyperparams'])
     #write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
     #communicate('./add_nums.py', ['1','2'])
@@ -262,6 +295,4 @@ if __name__=='__main__':
 
 '''
 
-def add_nums(x, y):
-    return x+y
 
