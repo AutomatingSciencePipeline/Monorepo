@@ -115,7 +115,8 @@ def experiment_resolve(future):
         
     id, prog, results = future.result()
     GlobalLoadBalancer.update_experiment_status(id, 'DONE')
-    logging.info(f'[EXP COMPLETE]:\tExperiment {id} completed with {prog} success rate.')
+    app.logger.info(f'[EXP COMPLETE]:\tExperiment {id} completed with {prog} success rate.')
+    app.logger.info(f'THIS IS A DEBUG MESSAGE. CURRENT PATH IS{os.getcwd()}')
 
 def mapper(params):
     #try: 
@@ -147,7 +148,8 @@ def gen_configs(hyperparams):
                     elif param2['type'] == "array":
                         temp.append(param2['value'])
                     elif param2['type'] == "boolean":
-                        if param2['value'] == "True":
+                        app.logger.info(f'The boolean is {param2["value"]}')
+                        if param2['value']:
                             temp.append([True])
                         else:
                             temp.append([''])
@@ -165,7 +167,7 @@ def gen_configs(hyperparams):
                     elif param2['type'] == "array":
                         temp.append(param2['value'])
                     elif param2['type'] == "boolean":
-                        if param2['value'] == "True":
+                        if param2['value']:
                             temp.append([True])
                         else:
                             temp.append([False])
@@ -174,10 +176,6 @@ def gen_configs(hyperparams):
             app.logger.info(f'After array, temp is {temp}')
             concat_arrays(params_raw, list(itertools.product(*temp)))
             app.logger.info(f'Params raw after array is {params_raw}')
-            temp = []
-            app.logger.info(f'After boolean, temp is {temp}')
-            concat_arrays(params_raw, list(itertools.product(*temp)))
-            app.logger.info(f'Params raw after boolean is {params_raw}')
             temp = []
 
     # params_raw = [k['values'] for k in hyperparams]
