@@ -1,7 +1,82 @@
 
+var integerParams = 0;
+var floatParams = 0;
+var arrayParams = 0;
+var booleParams = 0;
 
-//Save
+var glados = glados || {};
+const SUPABASE_URL = 'http://localhost:8000';
+const SUPABASE_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2NDUwNzQwMDAsCiAgICAiZXhwIjogMTgwMjg0MDQwMAp9.rsAJes09D0KQ_DU_NCyFtOHlu3cSrMaKsFCPVb6pf1M';
+var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+glados.SupaAuthManager = class {
+	constructor() {
+		this._user = null;
+	}
+	beginListening(callback) {
+		supabase.auth.onAuthStateChange((event, session) => {
+			if (event == 'SIGNED_IN') {
+				this._user = session.user;
+				callback();
+			} else if (event == 'SIGNED_OUT') {
+
+			}
+		});
+	}
+	signUp(email, password) {
+		supabase.auth
+			.signUp({
+				email,
+				password,
+			})
+			.then((response) => {
+				console.log(response);
+				if (response.error == null) {
+					this.signIn(email, password);
+				} else {
+					alert("Account creation failed. Be sure to use the correct email format and password must be more than 6 characters.");
+				}
+
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	signIn(email, password) {
+		supabase.auth
+			.signIn({
+				email,
+				password,
+			})
+			.then((response) => {
+				if (response.error == null) {
+					window.location.assign('parameters?user=' + email);
+				} else {
+					alert("Login failed. Please use a correct username and password.");
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+	signOut() {
+		supabase.auth
+			.signOut()
+			.then((response) => {
+				if (response.error == null) {
+					window.location.assign('/');
+				}
+			})
+
+	}
+	get uid() {
+		return this._user.uid;
+	}
+	get isSignedIn() {
+		return !!this._user;
+	}
+};
 
 function htmlToElement(html) {
 	var template = document.createElement('template');
@@ -9,68 +84,112 @@ function htmlToElement(html) {
 	template.innerHTML = html;
 	return template.content.firstChild;
 }
-function paramJSON(paramName, defaultVal, minVal, maxVal, incrementVal) {
-	const parsedDef = parseFloat(defaultVal);
-	const parsedMin = parseFloat(minVal);
-	const parsedMax = parseFloat(maxVal);
-	const parsedInc = parseFloat(incrementVal);
-	if(isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
-		throw new TypeError();
-	}
+
+function paramJSONSingleVal(paramName, val, type) {
+	var parsedVal;
+	if (type == "array") {
+		parsedVal = JSON.parse(val);
+	} else if (type == "boolean") {
+		parsedVal = (val === 'true');
+	} 
 	var param = {
-		"paramName" : paramName,
-		"values" :
-		[defaultVal,
-		minVal,
-		maxVal,
-		incrementVal]
+		"paramName": paramName,
+		"value": parsedVal,
+		"type": type
+	}
+	return param;
+
+
+}
+
+function paramJSONMultVals(paramName, defaultVal, minVal, maxVal, incrementVal, type) {
+
+	var parsedDef;
+	var parsedMin;
+	var parsedMax;
+	var parsedInc;
+	if (type == "float") {
+		parsedDef = parseFloat(defaultVal);
+		parsedMin = parseFloat(minVal);
+		parsedMax = parseFloat(maxVal);
+		parsedInc = parseFloat(incrementVal);
+		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+			throw new TypeError();
+		}
+	} else if (type == "int") {
+		parsedDef = parseInt(defaultVal);
+		parsedMin = parseInt(minVal);
+		parsedMax = parseInt(maxVal);
+		parsedInc = parseInt(incrementVal);
+		if (isNaN(parsedDef) || isNaN(parsedMin) || isNaN(parsedMax) || isNaN(parsedInc)) {
+			throw new TypeError();
+		}
+	}
+
+	var param = {
+		"paramName": paramName,
+		"values": [defaultVal,
+			minVal,
+			maxVal,
+			incrementVal
+		],
+		"type": type
 	}
 	return param;
 }
 
-function createUser(username, password) {
 
-}
 
-function checkUser(username, password) {
+function experimentParamsJSON(paramsArr, experimentName, user, verboseBool, fn) {
 
-}
- 
-
-function experimentParamsJSON(paramsArr, experimentName, user, verboseBool){
-
-			const params = {
-				"experimentName": experimentName,
-				"user": user,
-				"parameters": paramsArr,
-				"verbose" : verboseBool
-			};
+	const params = {
+		"experimentName": experimentName,
+		"user": user,
+		"parameters": paramsArr,
+		"verbose": verboseBool,
+		"fileName": fn
+	};
 	return params;
-
 }
 
-
-
-
-
-LoginPageController = class {
+function ValidateEmail(email) {
+	if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+		console.log('invalid email');
+		return true;
+	}
+	alert('You have entered an invalid email address!');
+	console.log('invalid email');
+	return false;
+}
+glados.LoginPageController = class {
 	constructor() {
-		document.querySelector("#submitCreateUser").addEventListener("click", (event) => {
-			var username = document.querySelector("#newUsername").value;
-			var password = document.querySelector("#newPassword").value;
-			console.log("new user created!", username, password);
-		});
+		//this is for creating a user
+		document
+			.querySelector('#submitCreateUser')
+			.addEventListener('click', (event) => {
+				const username = document.querySelector('#newUsername').value;
+				const password = document.querySelector('#newPassword').value;
+				const pw = document.querySelector('#confirmPass').value;
+				if (password === pw) {
+					glados.supaAuth.signUp(username, password);
+				} else {
+					alert("Passwords did not match");
+				}
+			});
 
-		document.querySelector("#login").addEventListener("click", (event) => {
-			var username = document.querySelector("#username").value;
-			var password = document.querySelector("#password").value;
-			window.location.assign('index?user=' + username);
+		//adding a user
+		document.querySelector('#login').addEventListener('click', (event) => {
+			var username = document.querySelector('#username').value;
+			var password = document.querySelector('#password').value;
+			glados.supaAuth.signIn(username, password);
+			//
 		});
 	}
+};
 
-}
 
-LoginManager = class {
+
+glados.LoginManager = class {
 	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
@@ -80,144 +199,304 @@ LoginManager = class {
 	}
 
 }
-InitialPageController = class {
+
+
+
+
+glados.ParameterPageController = class {
 	constructor(user) {
-
 		this.user = user;
-		console.log(user + " is logged in");
-		// document.querySelectorAll("#submitAddQuote").onclick = (event) => {
-		// 	console.log("submit");
-		// };
-		document.querySelector("#initSubmit").addEventListener("click", (event) => {
-			console.log("pog");
-			var x = document.querySelector("#typeNumber").value;
-			location.assign('parameters?int=' + x +'&user=' + this.user);
-		});
+		this.int = 0;
 
-	}
-}
-
-
-ParameterPageController = class {
-	constructor(int, user) {
-		this.int = int;
-		this.user = user;
+		document.querySelector('#menuSignOut').addEventListener("click", (event) =>{
+			glados.supaAuth.signOut();
+		})
 
 		document.querySelector("#paramSubmit").addEventListener("click", (event) => {
-			// 		var dict = {"one" : [15, 4.5],
-			// "two" : [34, 3.3],
-			// "three" : [67, 5.0],
-			// "four" : [32, 4.1]};
 			var array = [];
 
-			for (let i = 0; i < this.int; i++) {
-				console.log("#paramName" + i);
-				var paramName = document.querySelector('#paramName' + i).value;
-				var defVal = document.querySelector("#defaultValue" + i).value
-				var minVal = document.querySelector("#minValue" + i).value
-				var maxVal = document.querySelector("#maxValue" + i).value
-				var incVal = document.querySelector("#incValue" + i).value
-				var param = paramJSON(paramName, defVal, minVal, maxVal, incVal);
+			for (let i = 0; i < integerParams; i++) {
+				console.log("#integerParamName" + i);
+				var paramName = document.querySelector('#integerParamName' + i).value;
+				var defVal = document.querySelector("#integerDefaultValue" + i).value
+				var minVal = document.querySelector("#integerMinValue" + i).value
+				var maxVal = document.querySelector("#integerMaxValue" + i).value
+				var incVal = document.querySelector("#integerIncValue" + i).value
+				console.log(defVal, minVal, maxVal, incVal);
+				var param = paramJSONMultVals(paramName, defVal, minVal, maxVal, incVal, "integer");
 
 
 				array.push(param);
 			}
-			var name = document.querySelector('#expName').value;
-			var verbose = document.querySelector('#verboseBool').checked;
-			var params = experimentParamsJSON(array, name, this.user, verbose);
-			var executable = JSON.stringify(params);
-			//this.download(executable, 'exp.json', 'json');
+			for (let i = 0; i < floatParams; i++) {
+				console.log("#floatParamName" + i);
+				var paramName = document.querySelector('#floatParamName' + i).value;
+				var defVal = document.querySelector("#floatDefaultValue" + i).value
+				var minVal = document.querySelector("#floatMinValue" + i).value
+				var maxVal = document.querySelector("#floatMaxValue" + i).value
+				var incVal = document.querySelector("#floatIncValue" + i).value
+				console.log(defVal, minVal, maxVal, incVal);
+				var param = paramJSONMultVals(paramName, defVal, minVal, maxVal, incVal, "float");
 
-			// Creating a XHR object
-			//let xhr = new XMLHttpRequest();
-			//let url = "https://194.195.213.242:5000/experiment";
-			let url = "http://localhost:5005/parameters";
-			// fetch(`/`, {
-			// 	mode: 'no-cors',
-			// 	cache: 'no-cache'}).then(data=>{console.log(data)})
+
+				array.push(param);
+			}
+			for (let i = 0; i < arrayParams; i++) {
+				var paramName = document.querySelector('#arrayParamName' + i).value;
+				var val = document.querySelector('#arrayValues' + i).value;
+				var param = paramJSONSingleVal(paramName, val, "array");
+
+				array.push(param);
+			}
+			for (let i = 0; i < booleParams; i++) {
+				var paramName = document.querySelector('#booleParamName' + i).value;
+				var val = document.querySelector('#booleValue' + i).value;
+				var param = paramJSONSingleVal(paramName, val, "boolean");
+
+				array.push(param);
+			}
+			var name = document.querySelector('#expName').value;
+			console.log(name);
+			var verbose = document.querySelector('#verboseBool').checked;
+			var filename = document.querySelector('#experimentFile').value.replace('C:\\fakepath\\', '');
+			console.log(filename)
+			var params = experimentParamsJSON(array, name, this.user, verbose, filename);
+			var executable = JSON.stringify(params);
 
 			console.log(executable);
 
 
 			fetch(`/parameters`, {
 				method: 'POST',
-				headers : {
-					"Content-Type" : 'application/json'
+				headers: {
+					"Content-Type": 'application/json'
 				},
-				body: executable}).catch(err => console.log(err))
+				body: executable
+			}).catch(err => console.log(err))
 
-			// open a connection
-//			xhr.open("POST", url, true);
-//
-//			// Set the request header i.e. which type of content you are sending
-//			xhr.setRequestHeader("Content-Type", "application/json");
-//
-//			// Create a state change callback
-//			xhr.onreadystatechange = function () {
-//				if (xhr.readyState === 4 && xhr.status === 200) {
-//					// Print received data from server
-//					result.innerHTML = this.responseText;
-//				}
-//			};
-//
-//			xhr.send(executable);
 		});
+		document.querySelector("#addIntegerBtn").addEventListener("click", (event) => {
 
-		document.querySelector("#fab").addEventListener("click", (event => {
-			var x = parseInt(this.int, 10) + 1;
-			window.location.assign('parameters.html?int=' + x);
-		}))
+			this.updateList(0);
 
-		this.updateList();
+		})
+		document.querySelector("#addFloatBtn").addEventListener("click", (event) => {
+
+			this.updateList(1);
+
+		})
+		document.querySelector("#addArrayBtn").addEventListener("click", (event) => {
+
+			this.updateList(2);
+
+		})
+		document.querySelector("#addBooleanBtn").addEventListener("click", (event) => {
+			this.updateList(3);
+
+		})
+		document.querySelector("#remIntegerBtn").addEventListener("click", (event) => {
+			integerParams = integerParams - 2;
+			console.log("integer");
+			this.int = this.int - 2;
+			this.updateList(0);
+		})
+		document.querySelector("#remBooleanBtn").addEventListener("click", (event) => {
+			booleParams = booleParams - 2;
+			console.log("boole");
+			this.int = this.int - 2;
+			this.updateList(3);
+		})
+		document.querySelector("#remArrayBtn").addEventListener("click", (event) => {
+			arrayParams = arrayParams - 2;
+			console.log("array");
+			this.int = this.int - 2;
+			this.updateList(2);
+		})
+		document.querySelector("#remFloatBtn").addEventListener("click", (event) => {
+			floatParams = floatParams - 2;
+			console.log("float");
+			this.int = this.int - 2;
+			this.updateList(1);
+		})
+
+
+
+
+
+
+
 
 
 	}
 
-	updateList() {
-		const newList = htmlToElement('<div id="parameterContainer"></div>');
-		newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'))
-		for (let i = 0; i < this.int; i++) {
-			const newCard = this._createCard(i);
-			newCard.onclick = (event) => {
-				console.log(`You clicked on ${i}`);
+	updateList(type) {
+		var newList;
+		var id;
+		if (type == 0) {
+			this.int = this.int + 1;
+			integerParams = integerParams + 1;
+			//Integer
+			//
+			//
+			newList = htmlToElement('<div id="integerContainer"></div>');
+			if (integerParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Integer Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+
 			}
-			newList.appendChild(newCard);
+			id = "#integerContainer";
+			for (var i = 0; i < integerParams; i++) {
+				const newCard = this._createCard(0, i);
+				newList.appendChild(newCard);
+			}
+			var oldList = document.querySelector(id);
+			oldList.parentElement.append(newList);
+			oldList.remove();
+		} else if (type == 1) {
+			this.int = this.int + 1;
+			floatParams = floatParams + 1;
+
+			//		Float
+			//
+			//
+			newList = htmlToElement('<div id="floatContainer"></div>');
+			if (floatParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Float Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Default Value</div> <div class= "col-2">Min Value</div> <div class= "col-2">Max Value</div> <div class= "col-2">Increment Value</div></div>'));
+			}
+			id = "#floatContainer";
+			for (var i = 0; i < floatParams; i++) {
+				const newCard = this._createCard(1, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.parentElement.append(newList);
+			oldList.remove();
+		} else if (type == 2) {
+			this.int = this.int + 1;
+			arrayParams = arrayParams + 1;
+
+			//		Array
+			//
+			//
+
+			newList = htmlToElement('<div id="arrayContainer"></div>');
+			if (arrayParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Array Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-8">Values</div></div>'));
+			}
+			id = "#arrayContainer";
+			for (var i = 0; i < arrayParams; i++) {
+				const newCard = this._createCard(2, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.parentElement.append(newList);
+			oldList.remove();
+		} else if (type == 3) {
+			this.int = this.int + 1;
+			booleParams = booleParams + 1;
+
+			//		Boolean
+			//
+			//
+			newList = htmlToElement('<div id="booleContainer"></div>');
+			if (booleParams != 0) {
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Boolean Parameters</div></div>'));
+				newList.appendChild(htmlToElement('<div class="row"> <div class= "col-3">Parameter Name</div> <div class= "col-2">Value</div></div>'));
+			}
+			id = "#booleContainer";
+			for (var i = 0; i < booleParams; i++) {
+				const newCard = this._createCard(3, i);
+				newList.appendChild(newCard);
+			}
+			oldList = document.querySelector(id);
+			oldList.parentElement.append(newList);
+			oldList.remove();
 		}
+
+
+		newList = htmlToElement('<div id="experimentName"></div>');
 		newList.appendChild(htmlToElement('<div class="justify-content-center align-items-center">Experiment Name</div>'))
+		id = "#experimentName";
 		newList.appendChild(htmlToElement('<div class="form-outline justify-content-center align-items-center d-flex"><input type="text" id="expName" class="form-control" /></div>'));
-
-		const oldList = document.querySelector("#parameterContainer");
-		oldList.removeAttribute("id");
-		oldList.hidden = true;
-
+		oldList = document.querySelector(id);
 		oldList.parentElement.append(newList);
+		oldList.remove();
+
 	}
-	_createCard(int) {
-		return htmlToElement(`<div class="row">
+	_createCard(type, int) {
+		if (type == 0) {
+			return htmlToElement(`<div class="row">
 		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
-			<input type="text" id="paramName${int}" class="form-control" />
+			<input type="text" id="integerParamName${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="defaultValue${int}" class="form-control" />
+		  <input type="number" id="integerDefaultValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="minValue${int}" class="form-control" />
+		  <input type="number" id="integerMinValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="maxValue${int}" class="form-control" />
+		  <input type="number" id="integerMaxValue${int}" class="form-control" />
 		</div>
 
 		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
-		  <input type="number" id="incValue${int}" class="form-control" />
+		  <input type="number" id="integerIncValue${int}" class="form-control" />
 		</div>
 
 	  </div>`);
+		} else if (type == 1) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="floatParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatDefaultValue${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatMinValue${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatMaxValue${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="number" id="floatIncValue${int}" class="form-control" />
+		</div>
+
+	  </div>`);
+		} else if (type == 2) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="arrayParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="text" id="arrayValues${int}" class="form-control" />
+		</div>
+	  </div>`);
+		} else if (type == 3) {
+			return htmlToElement(`<div class="row">
+		<div class="col-3 form-outline justify-content-center align-items-center d-flex">
+			<input type="text" id="booleParamName${int}" class="form-control" />
+		</div>
+
+		<div class="col-2 form-outline justify-content-center align-items-center d-flex">
+		  <input type="text" id="booleValue${int}" class="form-control" />
+		</div>
+	  </div>`);
+		}
+
 	}
-}
-ParameterManager = class {
+};
+glados.ParameterManager = class {
 	constructor() {}
 	beginListening(changeListener) {
 		changeListener();
@@ -225,60 +504,32 @@ ParameterManager = class {
 	stopListening() {
 		this._unsubscribe();
 	}
-
-}
+};
 
 /* Main */
-/** function and class syntax examples */
-main = function () {
-	console.log("Ready");
-	if(document.querySelector("#loginPage")) {
-		console.log("You are on the login page");
+glados.main = function () {
+	console.log('Ready');
 
-		new LoginPageController();
-	}
-	if (document.querySelector("#initialPage")) {
-		console.log("You are on the initial page");
-		//rhit.intialPageManager = new rhit.InitialPageManager();
-		const queryString = location.search;
-		const urlParams = new URLSearchParams(queryString);
-		const user = urlParams.get("user");
-		console.log(`Detail page for ${user}`);
-		if (!user) {
-			window.location.href = "/";
-		}
-		new InitialPageController(user);
+	glados.supaAuth = new glados.SupaAuthManager();
+	glados.supaAuth.beginListening(() => {
+		console.log('AUTH IS NOW LISTENING');
+	});
 
+	if (document.querySelector('#loginPage')) {
+		glados.loginPageController = new glados.LoginPageController();
 	}
 
-	if (document.querySelector("#parametersPage")) {
-		console.log("You are on the parameters page");
+	if (document.querySelector('#parametersPage')) {
+		console.log('You are on the parameters page');
 		// mqid = rhit.storage.getMovieQuoteId();
 		const queryString = window.location.search;
 		const urlParams = new URLSearchParams(queryString);
-		const int = urlParams.get("int");
-		const user = urlParams.get("user");
-		console.log(`Detail page for ${int}`);
-		if (!int||!user) {
-			window.location.href = "/index";
+		const user = urlParams.get('user');
+		if (!user) {
+			window.location.href = '/';
 		}
-		new ParameterPageController(int, user);
+		glados.parameterPageController = new glados.ParameterPageController(user);
 	}
-
-	// const ref = firebase.firestore().collection("MovieQuotes");
-	// ref.onSnapshot((querySnap) => {
-
-	// 	querySnap.forEach((doc) => {
-	// 		console.log(doc.data());
-	// 	})
-	// })
-	// ref.add({
-	// 	quote: "popping off",
-	// 	movie: "GamerPogchamp"
-
-	// })
-
 };
 
-main();
-
+glados.main();

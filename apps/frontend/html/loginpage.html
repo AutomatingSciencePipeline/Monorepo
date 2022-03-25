@@ -4,6 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
   <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
   <link rel="stylesheet" href="styles/main.css">
@@ -20,10 +22,10 @@
       Please Log in
     </div>
       <div class="form-outline justify-content-center align-items-center d-flex">
-        <input type="text" placeholder="Username" id="username" class="form-control" />
+        <input type="text" placeholder="Email" id="username" class="form-control" />
     </div>
     <div class="form-outline justify-content-center align-items-center d-flex">
-        <input type="text" placeholder="Password" id="password" class="form-control" />
+        <input type="password" placeholder="Password" id="password" class="form-control" />
     </div>
     
 
@@ -52,12 +54,16 @@
         <div class="modal-body">
   
             <div class="form-group">
-              <label for="formGroupExampleInput">Username</label>
-              <input type="text" class="form-control" id="newUsername" placeholder="Username">
+              <label for="formGroupExampleInput">Email</label>
+              <input type="text" class="form-control" id="newUsername" placeholder="Email">
             </div>
             <div class="form-group">
               <label for="formGroupExampleInput2">Password</label>
-              <input type="text" class="form-control" id="newPassword" placeholder="Password">
+              <input type="password" class="form-control" id="newPassword" placeholder="Password">
+            </div>
+            <div class="form-group">
+              <label for="formGroupExampleInput3">Confirm Password</label>
+              <input type="password" class="form-control" id="confirmPass" placeholder="Confirm Password">
             </div>
   
         </div>

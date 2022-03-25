@@ -1,15 +1,12 @@
-#!/usr/bin/env python3
+#!/opt/homebrew/bin/python3
+
 import sys 
 
 def main():
     args = sys.argv[1:]
     x = float(args[0])
     y = float(args[1])
-    boo = bool(args[2])
-    if(boo):
-        print(x+y)
-    else:
-        print(x-y)
+    print(x+y)
     return 0
 
 
