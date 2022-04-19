@@ -1,0 +1,11 @@
+name: Docker-Compose-Actions-Workflow
+on: 
+  schedule:
+  - cron: '18 6 * * *'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the stack
+        run: docker-compose up -d --build
