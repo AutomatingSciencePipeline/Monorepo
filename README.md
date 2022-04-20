@@ -3,6 +3,9 @@
 GLADOS is an open sourced student-driven project geared towards building a high-performance modular computational pipeline for running big data experiments in a parallel fashion.
 
 ## User Guide
+
+This user guide is meant to assist first time users in running an experiment. There are some systems that need to be installed, like Docker. In terms of dependencies that need to be installed, there should be none or you need to make sure you are able to use the languages Javascript and Python. 
+
 ### Docker installation
 
 In order to install docker, follow the link provided to the docker documents.
