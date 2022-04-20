@@ -1,0 +1,5 @@
+name: Tests
+
+on: [push, pull_request]
+
+#to run the junit tests
