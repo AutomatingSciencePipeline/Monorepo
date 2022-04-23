@@ -2,7 +2,7 @@ from ast import Assert
 import pytest
 import unittest
 import app
-
+import json
 # def test_gen_configs(self):
 #     sample_json =  { [{ paramName: 'x', values: [1,0,4,1], type: 'integer' }, { paramName: 'y', value: [6,5,9,1], type: 'integer' }, { paramName: 'add', value: true, type: 'boolean' }] }
 #     result = app.gen_configs(sample_json)
