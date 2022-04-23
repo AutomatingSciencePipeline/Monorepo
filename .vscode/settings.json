@@ -2,6 +2,6 @@
     "python.testing.pytestArgs": [
         "apps"
     ],
-    "python.testing.unittestEnabled": true,
+    "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true
 }
