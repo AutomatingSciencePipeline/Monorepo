@@ -182,7 +182,7 @@ def gen_configs(hyperparams):
     # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw
 
     return enumerate(list(params_raw))
-def concat_arrays(arr1, arr2):
+def concat_arrays(arr1, arr2): #test 
     for x in arr2:
         arr1.append(x)
 
@@ -211,7 +211,7 @@ def proc_msg(msg):
     del rm['experimentName']
     return rm
 
-def np_uncode(x):
+def np_uncode(x): #test 
     if isinstance(x,np.integer):
         return int(x)
     if isinstance(x,np.floating):
@@ -219,7 +219,7 @@ def np_uncode(x):
 
 
 
-def flatten(x):
+def flatten(x): #test right now 
     if isinstance(x, collections.Iterable):
         return [a for i in x for a in flatten(i)]
     else:
@@ -249,7 +249,10 @@ def communicate(process, payload):
     return float(stdout_data[0])
 
 ### TYPES 
-
+sample_json =  [{ 'paramName': 'x', 'values': [1,0,4,1], 'type': 'integer' }, { 'paramName': 'y', 'value': [6,5,9,1], 'type': 'integer' }, { 'paramName': 'add', 'value': 'true' , 'type': 'boolean' }]
+sons = [json.dumps(x) for x in sample_json] 
+result = gen_configs(sons)
+print(result)
 class FailedIterationException(Exception):
     pass
 
