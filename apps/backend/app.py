@@ -182,6 +182,7 @@ def gen_configs(hyperparams):
     # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw
 
     return enumerate(list(params_raw))
+    
 def concat_arrays(arr1, arr2): #test 
     for x in arr2:
         arr1.append(x)
