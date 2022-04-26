@@ -2,7 +2,7 @@ import pytest
 import unittest
 import app
 import json
-
+pytest_plugins = ["docker_compose"]
 
 class Test_TestAppBackend(unittest.TestCase):
     def test_gen_config(self):
