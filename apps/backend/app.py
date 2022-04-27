@@ -250,10 +250,6 @@ def communicate(process, payload):
     return float(stdout_data[0])
 
 ### TYPES 
-sample_json =  [{ 'paramName': 'x', 'values': [1,0,4,1], 'type': 'integer' }, { 'paramName': 'y', 'value': [6,5,9,1], 'type': 'integer' }, { 'paramName': 'add', 'value': 'true' , 'type': 'boolean' }]
-sons = [json.dumps(x) for x in sample_json] 
-result = gen_configs(sons)
-print(result)
 class FailedIterationException(Exception):
     pass
 
