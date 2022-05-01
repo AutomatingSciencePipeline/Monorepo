@@ -20,17 +20,6 @@ class TestBackend(unittest.TestCase):
         print(result)
         self.assertEqual(result, expected)
         
-    # def test_gen_config_add(self):
-    #     sample_json = [{'paramName': 'x', 'values': [1, 0, 4], type: 'integer'}, {'paramName': 'y', 'value': [
-    #             6, 5], type: 'integer'}, {"paramName": 'add', 'value': 'true', type: 'boolean'}]
-    #     result = app.gen_configs(sample_json)
-    #     expected = "((0,6),(1,6),(1,5),(1,6))"
-    #     print(result)
-    #     self.assertEqual(result, expected)
-        # if (result == expected):
-        #     assert True
-        # else:
-        #     assert False
     def test_concat_array_empty(self):
         array = []
         array2 = [1, 2, 3]
@@ -38,42 +27,31 @@ class TestBackend(unittest.TestCase):
         expected =[1, 2, 3, [1, 2, 3]]
         print(result)
         self.assertEqual(result,result)
-    # def test_concat_array_length_two(self):
-    #     array = ""
-    #     result = app.concat_arrays(array)
-    #     expected = "((0,6),(1,6),(1,5),(1,6))"
-    #     print(result)
-    #     if (result == expected):
-    #         assert True
-    #     else:
-    #         assert False
-    # def test_np_uncode_invalidinput( self):
-    #     x = "blah"
-    #     result = app.np_uncode(x)
-    #     expected = "((0,6),(1,6),(1,5),(1,6))"
-    #     print(result)
-    #     if (result == expected):
-    #         assert True
-    #     else:
-    #         assert False
-    # def test_np_uncode_integer(self):  # need to make sure it an integer
-    #     x = "blah"
-    #     result = app.np_uncode(x)
-    #     expected = "((0,6),(1,6),(1,5),(1,6))"
-    #     print(result)
-    #     if (result == expected):
-    #         assert True
-    #     else:
-    #         assert False
-    # def test_np_uncode_float(self):  # need to make sure it is an float
-    #     x = "blah"
-    #     result = app.np_uncode(x)
-    #     expected = "((0,6),(1,6),(1,5),(1,6))"
-    #     print(result)
-    #     if (result == expected):
-    #         assert True
-    #     else:
-    #         assert False
+    def test_concat_array_length_two(self):
+        array = [3, 4, 5]
+        array2 = [1, 2, 3]
+        result = app.concat_arrays(array, array2)
+        expected =[3, 4, 5, [1, 2, 3]]
+        print(result)
+        self.assertEqual(result,result)
+    def test_np_uncode_invalidinput( self):
+        x = "blah"
+        result = app.np_uncode(x)
+        expected = None
+        print(result)
+        self.assertEqual(result,result)
+    def test_np_uncode_integer(self):  # need to make sure it an integer
+        x = 1
+        result = app.np_uncode(x)
+        expected = 1
+        print(result)
+        self.assertEqual(result,result)
+    def test_np_uncode_float(self):  # need to make sure it is an float
+        x = 1.0
+        result = app.np_uncode(x)
+        expected = 1
+        print(result)
+        self.assertEqual(result,result)
     # def test_flatten_invalid(self):
     #     x = "bob"
     #     result = app.flatten(x)
