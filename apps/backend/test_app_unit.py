@@ -21,7 +21,7 @@ class TestBackend(unittest.TestCase):
         self.assertEqual(result, expected)
         
     # def test_gen_config_add(self):
-    #     sample_json = [{'paramName': 'x', 'values': [1, 0, 4, 1], type: 'integer'}, {'paramName': 'y', 'value': [
+    #     sample_json = [{'paramName': 'x', 'values': [1, 0, 4], type: 'integer'}, {'paramName': 'y', 'value': [
     #             6, 5], type: 'integer'}, {"paramName": 'add', 'value': 'true', type: 'boolean'}]
     #     result = app.gen_configs(sample_json)
     #     expected = "((0,6),(1,6),(1,5),(1,6))"
@@ -31,15 +31,13 @@ class TestBackend(unittest.TestCase):
         #     assert True
         # else:
         #     assert False
-    # def test_concat_array_empty(self):
-    #     array = ""
-    #     result = app.concat_arrays(array)
-    #     expected = "((0,6),(1,6),(1,5),(1,6))"
-    #     print(result)
-    #     if (result == expected):
-    #         assert True
-    #     else:
-    #         assert False
+    def test_concat_array_empty(self):
+        array = []
+        array2 = [1, 2, 3]
+        result = app.concat_arrays(array, array2)
+        expected =[1, 2, 3, [1, 2, 3]]
+        print(result)
+        self.assertEqual(result,result)
     # def test_concat_array_length_two(self):
     #     array = ""
     #     result = app.concat_arrays(array)
