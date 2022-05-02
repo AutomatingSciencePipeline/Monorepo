@@ -1,7 +1,21 @@
-import '../styles/globals.css'
+import ProtectedRoute from '../components/ProtectedRoute';
+import '../styles/globals.css';
+import { AuthProvider } from '../supabase/auth';
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+const noAuthRequired = ['/', '/auth'];
+
+function MyApp({ Component, pageProps, router }) {
+	return (
+		<AuthProvider>
+			{noAuthRequired.includes(router.pathname) ? (
+				<Component {...pageProps} key={router.route} />
+			) : (
+				<ProtectedRoute>
+					<Component {...pageProps} key={router.route} />
+				</ProtectedRoute>
+			)}
+		</AuthProvider>
+	);
 }
 
-export default MyApp
+export default MyApp;
