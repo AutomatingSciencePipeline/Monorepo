@@ -14,7 +14,6 @@ const Auth = () => {
 	});
 
 	const { authService } = useAuth();
-
 	const router = useRouter();
 
 	return (
@@ -63,8 +62,6 @@ const Auth = () => {
 								<div className='mt-1'>
 									<input
 										{...form.getInputProps('email')}
-										// id='email'
-										// name='email'
 										type='email'
 										autoComplete='email'
 										required

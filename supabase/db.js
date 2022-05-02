@@ -18,7 +18,6 @@ export const submitExperiment = async (values, user) => {
 			throw error;
 		} else {
 			return data;
-			// console.log('experiment submitted with data ', data);
 		}
 	} catch (error) {
 		console.log('error', error);

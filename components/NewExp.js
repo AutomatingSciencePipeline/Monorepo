@@ -1,31 +1,16 @@
-import { Fragment, useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Dialog, Transition, Popover } from '@headlessui/react';
+import { Fragment, useState, useLayoutEffect } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { Upload, X, File } from 'tabler-icons-react';
 import { Toggle } from './utils';
 
 import Parameter from './Parameter';
-import { Code, Group, Text } from '@mantine/core';
+import { Code } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
 
-const navigation = [
-	{ name: 'Product', href: '#' },
-	{ name: 'Features', href: '#' },
-	{ name: 'Marketplace', href: '#' },
-	{ name: 'Company', href: '#' },
-];
 import { submitExperiment } from '../supabase/db';
-
-// TODO
-// yup.addMethod(yup.object, 'uniqueProp', (propName, msg) => {
-// 	return yup.test('unique', msg, (value) => {
-// 		if (!value || !value[propName]) {
-// 			return true;
-// 		}
-// 	});
-// });
 
 const Steps = ({ steps }) => {
 	return (
@@ -65,10 +50,7 @@ const InputSection = ({ header, ...props }) => {
 	return (
 		<div className='space-y-1 px-4 sm:grid sm:grid-cols-5 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5'>
 			<div>
-				<label
-					// htmlFor='project-name'
-					className='block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2'
-				>
+				<label className='block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2'>
 					{' '}
 					{header}{' '}
 				</label>
@@ -82,7 +64,6 @@ const InformationStep = ({ form, ...props }) => {
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>
-				{/* <div className='space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 				<InputSection header={'Name'}>
 					<div className='sm:col-span-4'>
 						<input
@@ -96,8 +77,6 @@ const InformationStep = ({ form, ...props }) => {
 				<InputSection header={'Description'}>
 					<div className='sm:col-span-4'>
 						<textarea
-							// id='project-description'
-							// name='project-description'
 							{...form.getInputProps('description')}
 							rows={3}
 							className='block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
@@ -135,7 +114,7 @@ const InformationStep = ({ form, ...props }) => {
 					</div>
 				</InputSection>
 
-				<div className='flex-0 p-4 h-full grow-0'>
+				<div className={'flex-0 p-4 h-full grow-0'}>
 					<DragDropContext
 						onDragEnd={({ destination, source }) => {
 							form.reorderListItem('parameters', {
@@ -156,7 +135,6 @@ const InformationStep = ({ form, ...props }) => {
 							>
 								{(provided) => (
 									<div {...provided.droppableProps} ref={provided.innerRef}>
-										{/* {fields} */}
 										{props.children}
 										{provided.placeholder}
 									</div>
@@ -173,7 +151,6 @@ const InformationStep = ({ form, ...props }) => {
 const ConfirmationStep = ({ form, ...props }) => {
 	return (
 		<div className='h-full overflow-y-scroll flex-0 grow-0 my-4 pl-4 rounded-md flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
-			{/* Please confirm */}
 			<Code
 				// className='overflow-y-scroll max-h-full' block
 				className='h-full'
@@ -201,12 +178,7 @@ const DispatchStep = ({ form, ...props }) => {
 			return <UploadIcon status={status} />;
 		}
 		return (
-			<div
-				className={`flex flex-col justify-center items-center space-y-6`}
-				// position='center'
-				// spacing='xl'
-				// style={{ minHeight: 220, pointerEvents: 'none' }}
-			>
+			<div className={`flex flex-col justify-center items-center space-y-6`}>
 				<UploadIcon status={status} />
 				<div>
 					<Text size='xl' inline>
@@ -226,7 +198,6 @@ const DispatchStep = ({ form, ...props }) => {
 			onReject={(file) => console.log('NOPE, file rejected', file)}
 			multiple={false}
 			maxSize={3 * 1024 ** 2}
-			// accept=''
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 		>
 			{(status) => dropzoneKids(status)}
@@ -269,7 +240,6 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 		<Transition.Root show={open} as={Fragment}>
 			<Dialog
 				as='div'
-				// className='fixed inset-0 max-h-min'
 				className='fixed inset-0 overflow-hidden'
 				onClose={() => setFormState(0)}
 			>
@@ -287,34 +257,26 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 							leaveTo='translate-x-full'
 						>
 							<div className='pointer-events-auto w-screen max-w-2xl'>
-								{/* <form className='flex h-full flex-col overflow-y-scroll bg-white shadow-xl'> */}
 								<form
 									className='flex h-full flex-col bg-white shadow-xl'
-									onSubmit={form.onSubmit(
-										async (values) => {
-											try {
-												const { data } = await submitExperiment(values, user);
-												await fetch(`/api/experiments/${data.id}`, {
-													method: 'POST',
-													headers: new Headers({
-														'Content-Type': 'application/json',
-													}),
-													credentials: 'same-origin',
-												});
-											} catch (e) {
-												console.log(e);
-											}
-											setStatus(1);
-											setFormState(2);
+									onSubmit={form.onSubmit(async (values) => {
+										try {
+											const { data } = await submitExperiment(values, user);
+											await fetch(`/api/experiments/${data.id}`, {
+												method: 'POST',
+												headers: new Headers({
+													'Content-Type': 'application/json',
+												}),
+												credentials: 'same-origin',
+											});
+										} catch (e) {
+											console.log(e);
 										}
-
-										// setStatus(1);
-										// setFormState(2);
-										// })
-									)}
+										setStatus(1);
+										setFormState(2);
+									})}
 								>
 									<div className='flex flex-col'>
-										{/* Header */}
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
 												<Steps
@@ -347,8 +309,6 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 												<input
 													type='number'
 													placeholder={'N Workers'}
-													// name='experiment-name'
-													// id='experiment-name'
 													className='rounded-md  border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 													required
 													{...form.getInputProps('nWorkers')}
@@ -383,7 +343,6 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 															type: 'button',
 															onClick: () => setStatus(status + 1),
 													  })}
-												// onClick={() => setStatus(status + 1)}
 											>
 												{status === 2 ? 'Dispatch' : 'Next'}
 											</button>
