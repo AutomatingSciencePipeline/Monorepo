@@ -1,5 +1,5 @@
 import { Fragment, useState, useLayoutEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, Text } from '@headlessui/react';
 import { Upload, X, File } from 'tabler-icons-react';
 import { Toggle } from './utils';
 
@@ -10,7 +10,7 @@ import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
 
-import { submitExperiment } from '../supabase/db';
+import { submitExperiment, uploadExec } from '../supabase/db';
 
 const Steps = ({ steps }) => {
 	return (
@@ -162,45 +162,49 @@ const ConfirmationStep = ({ form, ...props }) => {
 		</div>
 	);
 };
-
-const DispatchStep = ({ form, ...props }) => {
-	const UploadIcon = ({ status }) => {
-		if (status.accepted) {
-			return <Upload size={80} />;
-		} else if (status.rejected) {
-			return <X size={80} />;
-		}
-		return <File size={80} />;
-	};
-
-	const dropzoneKids = (status) => {
-		if (status.accepted) {
-			return <UploadIcon status={status} />;
-		}
-		return (
-			<div className={`flex flex-col justify-center items-center space-y-6`}>
-				<UploadIcon status={status} />
-				<div>
-					<Text size='xl' inline>
-						Upload your project executable.
-					</Text>
-					<Text size='sm' color='dimmed' inline mt={7}>
-						Let's revolutionize science!
-					</Text>
-				</div>
+const DropzoneKids = ({ status }) => {
+	if (status.accepted) {
+		return <UploadIcon className={'bg-green-500'} status={status} />;
+	}
+	return (
+		<div className={`flex flex-col justify-center items-center space-y-6`}>
+			<UploadIcon status={status} />
+			<div>
+				{/* <Text size='xl' inline>
+					Upload your project executable.
+				</Text>
+				<Text size='sm' color='dimmed' inline mt={7}>
+					Let's revolutionize science!
+				</Text> */}
+				infuiewfn
 			</div>
-		);
-	};
+		</div>
+	);
+};
+const UploadIcon = ({ status }) => {
+	if (status.accepted) {
+		return <Upload size={80} />;
+	} else if (status.rejected) {
+		return <X size={80} />;
+	}
+	return <File size={80} />;
+};
 
+const DispatchStep = ({ id, ...props }) => {
 	return (
 		<Dropzone
-			onDrop={(file) => console.log('OKAY, file dropped', file)}
+			onDrop={(file) => {
+				console.log('OKAY, file dropped', file);
+				uploadExec(id, file).then((res) => {
+					console.log(res);
+				});
+			}}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
 			multiple={false}
 			maxSize={3 * 1024 ** 2}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 		>
-			{(status) => dropzoneKids(status)}
+			{(status) => <DropzoneKids status={status} />}
 		</Dropzone>
 	);
 };
@@ -222,8 +226,8 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 	});
 
 	const [open, setOpen] = useState(true);
-
 	const [status, setStatus] = useState(0);
+	const [id, setId] = useState(null);
 
 	useLayoutEffect(() => {
 		if (formState === 0) {
@@ -261,19 +265,21 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									className='flex h-full flex-col bg-white shadow-xl'
 									onSubmit={form.onSubmit(async (values) => {
 										try {
-											const { data } = await submitExperiment(values, user);
-											await fetch(`/api/experiments/${data.id}`, {
-												method: 'POST',
-												headers: new Headers({
-													'Content-Type': 'application/json',
-												}),
-												credentials: 'same-origin',
+											submitExperiment(values, user).then(({ data }) => {
+												setId(data.id);
+												// fetch(`/api/experiments/${data.id}`, {
+												// 	method: 'POST',
+												// 	headers: new Headers({
+												// 		'Content-Type': 'application/json',
+												// 	}),
+												// 	credentials: 'same-origin',
+												// });
 											});
 										} catch (e) {
 											console.log(e);
 										}
-										setStatus(1);
-										setFormState(2);
+										// setStatus(2);
+										// setFormState(2);
 									})}
 								>
 									<div className='flex flex-col'>
@@ -300,7 +306,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									) : status === 1 ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form={form} />
+										<DispatchStep id={id} />
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>

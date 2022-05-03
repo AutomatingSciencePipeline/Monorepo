@@ -1,7 +1,6 @@
 import NewExp from './NewExp';
-import supabase from '../supabase/client';
 import { useAuth } from '../supabase/auth';
-import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import {
@@ -35,7 +34,6 @@ const projects = [
 		starred: true,
 		active: true,
 	},
-	// More projects...
 ];
 const activityItems = [
 	{
@@ -43,7 +41,6 @@ const activityItems = [
 		environment: '__rh_PROD_hintonD',
 		time: '3h',
 	},
-	// More items...
 ];
 
 const selfie =
