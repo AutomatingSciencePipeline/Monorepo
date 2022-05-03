@@ -195,7 +195,13 @@ const DispatchStep = ({ id, ...props }) => {
 		<Dropzone
 			onDrop={(file) => {
 				console.log('OKAY, file dropped', file);
-				uploadExec(id, file).then((res) => {
+                // fetch(`/api/experiments/${id}`,{
+                //     method: 'POST',
+                //     headers: new Headers({ 'Content-Type': 'application/json'}),
+                //     credentials: 'same-origin',
+                //     body: file
+                // })
+				uploadExec(id, file[0]).then((res) => {
 					console.log(res);
 				});
 			}}
@@ -263,10 +269,11 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 							<div className='pointer-events-auto w-screen max-w-2xl'>
 								<form
 									className='flex h-full flex-col bg-white shadow-xl'
-									onSubmit={form.onSubmit(async (values) => {
-										try {
+									onSubmit={form.onSubmit((values) => {
+										// try {
 											submitExperiment(values, user).then(({ data }) => {
-												setId(data.id);
+                                                console.log(data[0].id)
+												setId(data[0].id);
 												// fetch(`/api/experiments/${data.id}`, {
 												// 	method: 'POST',
 												// 	headers: new Headers({
@@ -274,10 +281,13 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 												// 	}),
 												// 	credentials: 'same-origin',
 												// });
-											});
-										} catch (e) {
-											console.log(e);
-										}
+											}).then(() => {
+                                                console.log(id)
+                                            });
+										// } catch (e) {
+											// console.log(e);
+										// }
+                                        // console.log(id);
 										// setStatus(2);
 										// setFormState(2);
 									})}

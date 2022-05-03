@@ -11,16 +11,14 @@ const AuthContext = createContext({});
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
-	const [session, setSession] = useState(null);
+	const [user, setUser] = useState(supabase.auth.user() || null);
 	const [loading, setLoading] = useState(false);
 	console.log(user);
 	useEffect(() => {
-		const { data } = supabase.auth.onAuthStateChange((event, session) => {
+		const { data: authListener} = supabase.auth.onAuthStateChange((event, session) => {
 			handleAuthChange(event, session);
 			if (session) {
 				setUser(session.user);
-				setSession(session);
 			} else {
 				setUser(null);
 			}
@@ -28,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 		});
 
 		return () => {
-			data.unsubscribe();
+		    authListener.unsubscribe();
 		};
 	}, []);
 
@@ -59,7 +57,6 @@ export const AuthProvider = ({ children }) => {
 				provider: 'google',
 			});
 		},
-		// can add additional providers later
 		signOut: async () => {
 			return supabase.auth.signOut();
 		},

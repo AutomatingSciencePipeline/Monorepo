@@ -1,4 +1,5 @@
 import supabase from './client';
+import admin from './admin';
 
 export const submitExperiment = async (values, user) => {
 	console.log('Making submission');
@@ -25,14 +26,14 @@ export const uploadExec = async (id, file) => {
 	try {
 		const filePath = `EXP_${id}/${file.name}`;
 
-		const { error, ...rest } = await supabase.storage
-			.from('executables')
+		const { error, data } = await supabase.storage
+			.from('experiment_files')
 			.upload(filePath, file);
-
+        
 		if (error) {
 			throw error;
 		} else {
-			return rest;
+			return data;
 		}
 	} catch (error) {
 		alert(error.message);

@@ -1,11 +1,14 @@
 import Dash from '../components/Dashboard';
 import supabase from '../supabase/client';
 const Dashboard = ({ user, experiments }) => {
+    console.log(user)
+    console.log(experiments);
 	return <Dash user={user} experiments={experiments} />;
 };
 
 export async function getServerSideProps({ req }) {
 	const { user } = await supabase.auth.api.getUserByCookie(req);
+    console.log('getssp user',user)
 
 	const { data, error } = await supabase
 		.from('experiments')
