@@ -32,9 +32,13 @@ CORS(app)
 
 ### FLASK API ENDPOINTS
 
+{experiment: {id: '', key: str}}
+
 @app.post("/experiment")
 def recv_experiment():
     exp = request.get_json()
+    # app.logging.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
+    print(f'ALERT: EXPERIMENT RECV EVENT: {exp}')
     exp = proc_msg(exp)
     GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
@@ -65,7 +69,6 @@ def experiment_event(msg):
     # within each experiment, we use threads
     # if not os.path.exists(params['fileName']):
     #     raise
-    data = supabase.table("experiments").select("*").eq("id", params).execute();
     dataUPD = supabase.table("experiments").update({"status": "DISPATCHED"}).eq("id", data['id']).execute()
     os.chmod(f'GLADOS_HOME/incoming/{data["fileName"]}', 0o777)
     os.mkdir(f'GLADOS_HOME/exps/{data["id"]}')
@@ -200,7 +203,7 @@ def gen_configs(hyperparams):
             concat_arrays(params_raw, list(itertools.product(*temp)))
             temp = []
 
-    # params_raw = [k['values'] for k in hyperparams]
+    # params_raw = [k['values'] for k in hyperparamsfor obj in rm['parameters']:]
     # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw
     app.logger.info(f'DEBUG: params_raw is equal to {params_raw}')
     return enumerate(list(params_raw))
@@ -223,7 +226,11 @@ def write_configs(raw, headers):
 
 def proc_msg(msg):
     ## for now, this function is hardcoding some things, but it's no biggie
-    rm = copy.deepcopy(msg)
+    payload = msg['experiment']
+    print(payload)
+    eid = payload['id']
+    ekey = payload['key']
+    data = json.loads(supabase.table("experiments").select("*").eq("id", eid).execute());
     for obj in rm['parameters']:
         if obj['type'] == "integer" or obj['type'] == "float":
             obj['values'] = [float(x) for x in obj['values']]

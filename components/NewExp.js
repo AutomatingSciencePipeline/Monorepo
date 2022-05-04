@@ -193,17 +193,19 @@ const UploadIcon = ({ status }) => {
 const DispatchStep = ({ id, ...props }) => {
 	return (
 		<Dropzone
-			onDrop={(file) => {
-				console.log('OKAY, file dropped', file);
-                // fetch(`/api/experiments/${id}`,{
-                //     method: 'POST',
-                //     headers: new Headers({ 'Content-Type': 'application/json'}),
-                //     credentials: 'same-origin',
-                //     body: file
-                // })
-				uploadExec(id, file[0]).then((res) => {
-					console.log(res);
-				});
+			onDrop={async (file) => {
+				const {Key} = await uploadExec(id, file[0])
+                if (!Key) {
+                    throw new Error('Upload failed')
+                } else {
+                    console.log(Key);
+                    fetch(`/api/experiments/${id}`,{
+                        method: 'POST',
+                        headers: new Headers({ 'Content-Type': 'application/json'}),
+                        credentials: 'same-origin',
+                        body: JSON.stringify({key: Key})
+                    })
+                }
 			}}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
 			multiple={false}
