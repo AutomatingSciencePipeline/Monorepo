@@ -7,3 +7,6 @@ const logger = pino({
 		translateTime: 'SYS:standard',
 	},
 });
+
+
+export default logger;
