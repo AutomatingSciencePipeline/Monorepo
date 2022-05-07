@@ -19,6 +19,15 @@ import copy
 import json
 import argparse
 import stat
+from supabase import create_client, Client
+
+print(os.environ)
+url: str = os.environ.get("SUPA_URL")
+key: str = os.environ.get("ANON_KEY")
+supabase = create_client(url, key)
+# random_email: str = "3hf82fijf92@supamail.com"
+# random_password: str = "fqj13bnf2hiu23h"
+# user = supabase.auth.sign_in(email=random_email, password=random_password)
 
 # parser = argparse.ArgumentParser(description="Initialize GLADOS Global Load Balancer.")
 # parser.add_argument('--N', dest='nworkers',type=int,help='Number of thread / process workers to use.')
@@ -31,9 +40,11 @@ CORS(app)
 # FLASK API ENDPOINTS
 
 
+
 @app.post("/experiment")
 def recv_experiment():
     exp = request.get_json()
+    app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
     exp = proc_msg(exp)
     GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
@@ -57,6 +68,7 @@ class GLB(object):
             experiment_resolve)
 
     def update_experiment_status(self, id, status):
+        dataUPD = supabase.table("experiments").update({"status": "COMPLETE"}).eq("id", id).execute()
         self.e_status[id] = status
 
 
@@ -64,10 +76,11 @@ GlobalLoadBalancer = GLB(1)
 
 
 def experiment_event(msg):
-    params = msg
+    data,params = msg,msg['params']
     # within each experiment, we use threads
     # if not os.path.exists(params['fileName']):
     #     raise
+<<<<<<< HEAD
     os.chmod(f'GLADOS_HOME/incoming/{params["fileName"]}', 0o777)
     os.mkdir(f'GLADOS_HOME/exps/{params["id"]}')
     shutil.move(f'GLADOS_HOME/incoming/{params["fileName"]}',
@@ -88,6 +101,36 @@ def experiment_event(msg):
     with ThreadPoolExecutor(1) as executor:
         result_futures = list(map(lambda x: executor.submit(mapper, {
                               'filename': params['fileName'], 'iter': x[0], 'params': x[1]}), list(param_iter)))
+=======
+    dataUPD = supabase.table("experiments").update({"status": "DISPATCHED"}).eq("id", data['id']).execute()
+
+    ## download file from supabase a
+    # response  = supabase.storage.
+    
+    
+    os.chmod(f'GLADOS_HOME/incoming/{data["fileName"]}', 0o777)
+    os.mkdir(f'GLADOS_HOME/exps/{data["id"]}')
+    shutil.move(f'GLADOS_HOME/incoming/{data["fileName"]}', f'GLADOS_HOME/exps/{data["id"]}/{data["fileName"]}')
+    os.chdir(f'GLADOS_HOME/exps/{data["id"]}')
+    parameters = json.loads(data['parameters'])
+    param_iter = gen_configs(parameters)
+    totalExp = len(list(param_iter))
+    ## we submit experiment configuration writing to a thread pool if verbose
+    if data['verbose']:
+        os.mkdir('configs')
+        with ThreadPoolExecutor(data['n_workers']) as e:
+            e.submit(write_configs, param_iter, [obs['paramName'] for obs in data['parameters']])
+    
+    ## process stuff and make API call to inform of the experiment's commencement
+    results = []
+    dead = 0
+    i = 0
+    cp = int(totalExp *.1)
+    percent = 0
+    dataUPD = supabase.table("experiments").update({"status": "RUNNING"}).eq("id", data['id']).execute()
+    with ThreadPoolExecutor(data["n_workers"]) as executor:
+        result_futures = list(map(lambda x: executor.submit(mapper, {'filename': data['fileName'],'iter':x[0],'params':x[1]}), list(param_iter)))
+>>>>>>> 1946b9c (update docker & co)
         for future in as_completed(result_futures):
             try:
                 res = future.result()
@@ -99,11 +142,25 @@ def experiment_event(msg):
                 # write temporary state of problems
                 print(e)
                 results.append({'iter': 0, 'params': [0], 'result': 'FAILED'})
+<<<<<<< HEAD
                 dead += 1
             i += 1
 
     # process stuff and make API call to inform of the experiment's completion
     # write results to a csv file named experiment_id.csv
+=======
+                dead+=1
+            i+=1
+            if(i % cp == 0):
+                percent += 10
+                percent_success = int(((i-dead)/totalExp)*100)
+                percent_fail = int((dead/totalExp)*100)
+                dataUPD = supabase.table("experiments").update({"progress": percent, "percent_success": percent_success, "percent_fail" : percent_fail}).eq("id", data['id']).execute()
+    
+    ## process stuff and make API call to inform of the experiment's completion
+    ### write results to a csv file named experiment_id.csv
+    dataUPD = supabase.table("experiments").update({"progress": 100, "percent_success": percent_success, "percent_fail" : percent_fail}).eq("id", data['id']).execute()
+>>>>>>> 1946b9c (update docker & co)
     with open(f'result.csv', 'w') as csvfile:
         header = ['iter']
         header += [k['paramName'] for k in params['parameters']]
@@ -139,9 +196,23 @@ def mapper(params):
     # except Exception as e:
     #   raise Exception(f'Mapper failed with exception: {e} for the iteration with params', params['iter'], params['params'])
     try:
+<<<<<<< HEAD
         # print(params['params'])
         result = communicate(
             f'./{params["filename"]}', list(map(str, list(params['params']))))
+=======
+        #print(params['params'])
+        file = params["filename"]
+        fileMod = file[0:len(file)-5]
+        app.logger.info(f'the last 4 digits are {file[len(file)-5:len(file)]}')
+        #runs jar files (not working)
+        if(file[len(file)-5:len(file)] == ".java"):
+            os.system(f'javac {file}')
+            result = communicate(f'java {fileMod}', list(map(str, list(params['params']))))
+        #runs python files
+        else:
+            result = communicate(f'./{file}', list(map(str, list(params['params']))))
+>>>>>>> 1946b9c (update docker & co)
     except Exception as e:
         raise Exception(f'Mapper failed with exception: {e} for the')
     return params['iter'], list(params['params']), result
@@ -163,17 +234,19 @@ def gen_configs(hyperparams):
                     elif param2['type'] == "array":
                         temp.append(param2['value'])
                     elif param2['type'] == "boolean":
-                        app.logger.info(f'The boolean is {param2["value"]}')
                         if param2['value']:
                             temp.append([True])
                         else:
                             temp.append([''])
                 else:
+<<<<<<< HEAD
                     temp.append(np.arange(
                         param['values'][1], param['values'][2]+param['values'][3], param['values'][3]))
             app.logger.info(f'After integer, temp is {temp}')
+=======
+                    temp.append(np.arange(param['values'][1],param['values'][2]+param['values'][3],param['values'][3]))
+>>>>>>> 1946b9c (update docker & co)
             concat_arrays(params_raw, list(itertools.product(*temp)))
-            app.logger.info(f'Params raw after integer is {params_raw}')
             temp = []
         elif param['type'] == "array":
             for param2 in hyperparams:
@@ -189,14 +262,12 @@ def gen_configs(hyperparams):
                             temp.append([False])
                 else:
                     temp.append(param2['value'])
-            app.logger.info(f'After array, temp is {temp}')
             concat_arrays(params_raw, list(itertools.product(*temp)))
-            app.logger.info(f'Params raw after array is {params_raw}')
             temp = []
 
-    # params_raw = [k['values'] for k in hyperparams]
+    # params_raw = [k['values'] for k in hyperparamsfor obj in rm['parameters']:]
     # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw
-
+    app.logger.info(f'DEBUG: params_raw is equal to {params_raw}')
     return enumerate(list(params_raw))
 
 
@@ -206,8 +277,17 @@ def concat_arrays(arr1, arr2):
 
 
 def write_configs(raw, headers):
+<<<<<<< HEAD
     dicts = [{headers[i]:np_uncode(x[i]) for i in range(len(x))}
              for _, x in copy.deepcopy(raw)]
+=======
+    dicts = []
+    for _,x in copy.deepcopy(raw):
+        temp = {}
+        for i in range(len(x)):
+            temp[headers[i]] = x[i]
+        dicts.append(temp)
+>>>>>>> 1946b9c (update docker & co)
     jsons = [json.dumps(x) for x in dicts]
     for i, _ in copy.deepcopy(raw):
         with open(f'configs/config_{i}.json', 'w+') as f:
@@ -215,20 +295,38 @@ def write_configs(raw, headers):
 
 
 def proc_msg(msg):
+<<<<<<< HEAD
     # for now, this function is hardcoding some things, but it's no biggie
     rm = copy.deepcopy(msg)
     for obj in rm['parameters']:
         if obj['type'] == "integer" or obj['type'] == "float":
             obj['values'] = [float(x) for x in obj['values']]
             obj['values'] = [x for i, x in enumerate(obj['values']) if i >= 0]
+=======
+    ## for now, this function is hardcoding some things, but it's no biggie
+    payload = msg['experiment']
+    id = payload['id']
+    key = payload['key']
+    data = supabase.table("experiments").select("*").eq("id", id).execute()
+    assert len(data.data) > 0, f'Error retrieving experiment {id}'
+    data = data.data[0]
+    # app.logger.info(f'{data[0]}')
+    app.logger.info(f'[DEBUG]:\tData is equal to {data}')
+    # app.logging.info("[DEBUG]: data is equal to {}".format(data))
+    rm = json.loads(data['parameters'])
+    for obj in rm['params']:
+        if obj['type'] == "integer" or obj['type'] == "float":
+            obj['values'] = [float(x) for x in [obj['min'], obj['max'], obj['step']]]
+            obj['values'] = [x for i,x in enumerate(obj['values']) if i >= 0]
+>>>>>>> 1946b9c (update docker & co)
         elif obj['type'] == "array":
             obj['value'] = [float(x) for x in obj['value']]
             obj['value'] = [x for i, x in enumerate(obj['value']) if i >= 0]
         elif obj['type'] == "boolean":
             obj['value'] = bool(obj['value'])
-
-    rm['id'] = rm['experimentName']
-    del rm['experimentName']
+    rm['user'] = data['creator']
+    rm['id'] = data['id']
+    rm['key'] = key
     return rm
 
 
@@ -288,10 +386,14 @@ class UnresponsiveBinaryException(Exception):
 # EXPERIMENTAL ARTIFACTS
 
 
+<<<<<<< HEAD
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
+=======
+if __name__=='__main__':
+    logging.getLogger().setLevel(logging.INFO)
+>>>>>>> 1946b9c (update docker & co)
     initilize_work_space()
-
     # hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
     # msg_test = {
     #     'id' : 'XVZ01',
