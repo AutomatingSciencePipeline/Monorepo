@@ -9,6 +9,7 @@ from subprocess import Popen, PIPE, STDOUT
 import select
 import logging
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from typing_extensions import assert_type
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
@@ -21,7 +22,6 @@ import argparse
 import stat
 from supabase import create_client, Client
 
-print(os.environ)
 url: str = os.environ.get("SUPA_URL")
 key: str = os.environ.get("ANON_KEY")
 supabase = create_client(url, key)
@@ -40,6 +40,20 @@ CORS(app)
 # FLASK API ENDPOINTS
 
 
+
+class DEBUG: 
+    def __init__(self):
+        self.i = 0
+        
+    def __call__(self, arg=None):
+        if not arg: 
+            print(f'CHECKPOINT {self.i}')
+        else: 
+            print(f'CHECKPOINT {self.i}: {arg}')
+        self.i = self.i + 1
+
+debugger = DEBUG()
+debugger()
 
 @app.post("/experiment")
 def recv_experiment():
@@ -68,14 +82,16 @@ class GLB(object):
             experiment_resolve)
 
     def update_experiment_status(self, id, status):
-        dataUPD = supabase.table("experiments").update({"status": "COMPLETE"}).eq("id", id).execute()
         self.e_status[id] = status
 
 
 GlobalLoadBalancer = GLB(1)
 
 
+# def write_binary()
+
 def experiment_event(msg):
+<<<<<<< HEAD
     data,params = msg,msg['params']
     # within each experiment, we use threads
     # if not os.path.exists(params['fileName']):
@@ -102,24 +118,36 @@ def experiment_event(msg):
         result_futures = list(map(lambda x: executor.submit(mapper, {
                               'filename': params['fileName'], 'iter': x[0], 'params': x[1]}), list(param_iter)))
 =======
+=======
+    data = msg
+>>>>>>> d166aa0 (sync changes for next/supabase integration)
     dataUPD = supabase.table("experiments").update({"status": "DISPATCHED"}).eq("id", data['id']).execute()
 
-    ## download file from supabase a
-    # response  = supabase.storage.
-    
-    
-    os.chmod(f'GLADOS_HOME/incoming/{data["fileName"]}', 0o777)
+    path = data['key']
+    binary = supabase.storage().from_('experiment_files').download(path[path.find('/')+1:])
+
     os.mkdir(f'GLADOS_HOME/exps/{data["id"]}')
-    shutil.move(f'GLADOS_HOME/incoming/{data["fileName"]}', f'GLADOS_HOME/exps/{data["id"]}/{data["fileName"]}')
     os.chdir(f'GLADOS_HOME/exps/{data["id"]}')
-    parameters = json.loads(data['parameters'])
+    
+    data["fileName"] = data['key'].split('/')[-1]
+
+    with open(data["fileName"], 'wb') as f:
+        f.write(binary)
+    
+    os.chmod(f'{data["fileName"]}', 0o777)
+
+    # shutil.move(f'GLADOS_HOME/incoming/{data["fileName"]}', f'GLADOS_HOME/exps/{data["id"]}/{data["fileName"]}')
+    parameters = data['params']
+    # parameters = json.loads(data[''])
     param_iter = gen_configs(parameters)
-    totalExp = len(list(param_iter))
+    # debugger('PARAM_ITER')
+    totalExp = len(list(copy.deepcopy(param_iter)))
+    # debugger(list(param_iter))
     ## we submit experiment configuration writing to a thread pool if verbose
     if data['verbose']:
         os.mkdir('configs')
-        with ThreadPoolExecutor(data['n_workers']) as e:
-            e.submit(write_configs, param_iter, [obs['paramName'] for obs in data['parameters']])
+        with ThreadPoolExecutor(1) as e:
+            e.submit(write_configs, param_iter, [obs['paramName'] for obs in data['params']])
     
     ## process stuff and make API call to inform of the experiment's commencement
     results = []
@@ -128,7 +156,12 @@ def experiment_event(msg):
     cp = int(totalExp *.1)
     percent = 0
     dataUPD = supabase.table("experiments").update({"status": "RUNNING"}).eq("id", data['id']).execute()
-    with ThreadPoolExecutor(data["n_workers"]) as executor:
+    percent_fail = 0
+    percent_success = 0
+    
+    debugger()
+    
+    with ThreadPoolExecutor(1) as executor:
         result_futures = list(map(lambda x: executor.submit(mapper, {'filename': data['fileName'],'iter':x[0],'params':x[1]}), list(param_iter)))
 >>>>>>> 1946b9c (update docker & co)
         for future in as_completed(result_futures):
@@ -157,24 +190,40 @@ def experiment_event(msg):
                 percent_fail = int((dead/totalExp)*100)
                 dataUPD = supabase.table("experiments").update({"progress": percent, "percent_success": percent_success, "percent_fail" : percent_fail}).eq("id", data['id']).execute()
     
+<<<<<<< HEAD
     ## process stuff and make API call to inform of the experiment's completion
     ### write results to a csv file named experiment_id.csv
     dataUPD = supabase.table("experiments").update({"progress": 100, "percent_success": percent_success, "percent_fail" : percent_fail}).eq("id", data['id']).execute()
 >>>>>>> 1946b9c (update docker & co)
+=======
+    dataUPD = supabase.table("experiments").update({"progress": 100, "percent_success": percent_success, "percent_fail" : percent_fail, "status": "COMPLETE"}).eq("id", data['id']).execute()
+    # assert len(dataUPD) > 0, "Experiment not found."
+>>>>>>> d166aa0 (sync changes for next/supabase integration)
     with open(f'result.csv', 'w') as csvfile:
         header = ['iter']
-        header += [k['paramName'] for k in params['parameters']]
+        header += [k['paramName'] for k in data['params']]
         header.append('result')
         writer = csv.writer(csvfile)
         writer.writerow(header)
+<<<<<<< HEAD
         # print(results)
         writer.writerows(list(map(lambda x: post(x), results)))
 
     return params['id'], 1.-float(dead)/len(results), results
+=======
+        writer.writerows(list(map(lambda x: post(x), results)))    
+    
+    dest = '/'.join([*data['key'].split('/')[1:-1],'result.csv'])
+    response = supabase.storage().from_('experiment_files').upload(dest, 'result.csv')
+    os.chdir('../../..')
+    return data['id'],(1.-float(dead)/len(results) if len(results) > 0 else 0.),results
+>>>>>>> d166aa0 (sync changes for next/supabase integration)
 
 
 def post(s):
     s = list(s.values())
+
+    debugger(s)
     s = [s[0]] + s[1] + [s[2]]
     return s
 
@@ -191,10 +240,15 @@ def experiment_resolve(future):
 
 
 def mapper(params):
+<<<<<<< HEAD
     # try:
     #   return params['iter'], list(params['params']), [params['func'](*params['params'])]
     # except Exception as e:
     #   raise Exception(f'Mapper failed with exception: {e} for the iteration with params', params['iter'], params['params'])
+=======
+    debugger('MAPPER')
+    debugger(params)
+>>>>>>> d166aa0 (sync changes for next/supabase integration)
     try:
 <<<<<<< HEAD
         # print(params['params'])
@@ -221,19 +275,26 @@ def mapper(params):
 # UTILS
 
 def gen_configs(hyperparams):
+<<<<<<< HEAD
     # Generate hyperparameter configurations
+=======
+    debugger(hyperparams)
+    ### Generate hyperparameter configurations
+>>>>>>> d166aa0 (sync changes for next/supabase integration)
 
     params_raw = []
     temp = []
     for param in hyperparams:
+        debugger(param)
         if param['type'] == "integer" or param['type'] == "float":
             for param2 in hyperparams:
+                debugger(param2)
                 if not param['paramName'] == param2["paramName"]:
                     if param2['type'] == "float" or param2['type'] == "integer":
                         temp.append([param2['values'][0]])
                     elif param2['type'] == "array":
                         temp.append(param2['value'])
-                    elif param2['type'] == "boolean":
+                    elif param2['type'] == "bool":
                         if param2['value']:
                             temp.append([True])
                         else:
@@ -255,7 +316,7 @@ def gen_configs(hyperparams):
                         temp.append([param2['values'][0]])
                     elif param2['type'] == "array":
                         temp.append(param2['value'])
-                    elif param2['type'] == "boolean":
+                    elif param2['type'] == "bool":
                         if param2['value']:
                             temp.append([True])
                         else:
@@ -264,10 +325,9 @@ def gen_configs(hyperparams):
                     temp.append(param2['value'])
             concat_arrays(params_raw, list(itertools.product(*temp)))
             temp = []
+    
+    debugger(params_raw)
 
-    # params_raw = [k['values'] for k in hyperparamsfor obj in rm['parameters']:]
-    # params_raw = [[x for x in np.arange(k[0],k[1]+k[2],k[2])] for k in params_raw
-    app.logger.info(f'DEBUG: params_raw is equal to {params_raw}')
     return enumerate(list(params_raw))
 
 
@@ -316,17 +376,26 @@ def proc_msg(msg):
     rm = json.loads(data['parameters'])
     for obj in rm['params']:
         if obj['type'] == "integer" or obj['type'] == "float":
-            obj['values'] = [float(x) for x in [obj['min'], obj['max'], obj['step']]]
+            obj['values'] = [float(x) for x in [obj['default'],obj['min'], obj['max'], obj['step']]]
             obj['values'] = [x for i,x in enumerate(obj['values']) if i >= 0]
 >>>>>>> 1946b9c (update docker & co)
         elif obj['type'] == "array":
             obj['value'] = [float(x) for x in obj['value']]
+<<<<<<< HEAD
             obj['value'] = [x for i, x in enumerate(obj['value']) if i >= 0]
         elif obj['type'] == "boolean":
             obj['value'] = bool(obj['value'])
+=======
+            obj['value'] = [x for i,x in enumerate(obj['value']) if i >= 0]
+        elif obj['type'] == "bool":
+            obj['value'] = bool(obj['default'])
+        obj['paramName'] = obj['name']
+>>>>>>> d166aa0 (sync changes for next/supabase integration)
     rm['user'] = data['creator']
     rm['id'] = data['id']
     rm['key'] = key
+    rm['verbose'] = data['verbose']
+    debugger(rm)
     return rm
 
 
