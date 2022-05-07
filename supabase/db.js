@@ -22,6 +22,26 @@ export const submitExperiment = async (values, user) => {
 	}
 };
 
+export const subscribeToExp = (id, uid, callback) => {
+    const experiments = supabase
+      .from(`experiments:creator=eq.${uid},id=eq.${id}`)
+      .on('*', payload => {
+        console.log('changes', payload);
+        callback(payload)
+      })
+      .subscribe()
+      
+} 
+
+
+export const listenToNew = (callback) => {
+    const experiments = supabase.from('experiments').on('INSERT',payload=> {
+        console.log(payload)
+        console.log(payload.new);
+        callback(payload.new)
+    }).subscribe()
+}
+
 export const uploadExec = async (id, file) => {
 	try {
 		const filePath = `EXP_${id}/${file.name}`;

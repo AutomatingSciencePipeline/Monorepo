@@ -1,5 +1,6 @@
 import NewExp from './NewExp';
 import { useAuth } from '../supabase/auth';
+import { subscribeToExp, listenToNew } from '../supabase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
@@ -187,6 +188,74 @@ const Navbar = (props) => {
 	);
 };
 
+
+const ExpLog = ({projectinit, uid}) => {
+    
+    const [project, setProject] = useState(projectinit);
+    subscribeToExp(project.id, uid, setProject)
+    return (
+						<div className='flex items-center justify-between space-x-4'>
+							<div className='min-w-0 space-y-3'>
+								<div className='flex items-center space-x-3'>
+									<span
+										className={classNames(
+											 `bg-${{COMPLETE: 'gray', QUEUED: 'yellow', DISPATCHED: 'blue', RUNNING: 'green'}[project['status']]}-100`, 
+											'h-4 w-4 rounded-full flex items-center justify-center'
+										)}
+										aria-hidden='true'
+									>
+										<span
+											className={classNames(
+												 `bg-${{COMPLETE: 'gray', QUEUED: 'yellow', DISPATCHED: 'blue', RUNNING: 'green'}[project['status']]}-400`,
+												'h-2 w-2 rounded-full'
+											)}
+										/>
+									</span>
+
+									<span className='block'>
+										<h2 className='text-sm font-medium'>
+											<a href={project.href}>
+												<span
+													className='absolute inset-0'
+													aria-hidden='true'
+												/>
+												{project.name}{' '}
+												<span className='sr-only'>
+													{project.status !== 'COMPLETE' ? 'Running' : 'Not running'}
+												</span>
+											</a>
+										</h2>
+									</span>
+								</div>
+								<a
+									href={project.repoHref}
+									className='relative group flex items-center space-x-2.5'
+								>
+									<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
+										{project.description}
+									</span>
+								</a>
+							</div>
+							<div className='sm:hidden'>
+								<ChevronRightIcon
+									className='h-5 w-5 text-gray-400'
+									aria-hidden='true'
+								/>
+							</div>
+							<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
+								<p className='flex items-center space-x-4'>    
+									<span className='font-mono text-red-500'>FAIL: {project.percent_fail}</span>
+									<span className='font-mono'>SUCCESS: {project.percent_success}</span>
+								</p>
+								<p className='flex text-gray-500 text-sm space-x-2'>
+									<span>Deployed {new Date(project.created_at).toUTCString()}</span>
+									<span>{project.location}</span>
+								</p>
+							</div>
+						</div> 
+    )
+}
+
 const SearchBar = (props) => {
 	return (
 		<div className='flex basis-1/2 justify-center lg:justify-end'>
@@ -211,7 +280,14 @@ const SearchBar = (props) => {
 	);
 };
 
-export default function Dashboard({ user, experiments }) {
+
+
+
+export default function Dashboard({ user, experimentss }) {
+    const [experiments, setExperiments] = useState(experimentss);
+
+    listenToNew((payload)=> setExperiments([...experiments, payload]))
+
 	const [formState, setFormState] = useState(-1);
 	const [label, setLabel] = useState('New Experiment');
 	useEffect(() => {
@@ -261,7 +337,7 @@ export default function Dashboard({ user, experiments }) {
 														{user.email}
 														{/* Omar Fayoumi */}
 													</div>
-													<a
+													{/* <a
 														href='#'
 														className='group flex items-center space-x-2.5'
 													>
@@ -280,7 +356,7 @@ export default function Dashboard({ user, experiments }) {
 														<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium'>
 															derelections
 														</span>
-													</a>
+													</a> */}
 												</div>
 											</div>
 											{/* Action buttons */}
@@ -402,13 +478,80 @@ export default function Dashboard({ user, experiments }) {
 								role='list'
 								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 							>
-								{projects.map((project) => (
+								{experiments.map((project) => (
+									<li
+										key={project.id}
+										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+									>
+                                        <ExpLog projectinit={project}/>
+										{/* <div className='flex items-center justify-between space-x-4'>
+											<div className='min-w-0 space-y-3'>
+												<div className='flex items-center space-x-3'>
+													<span
+														className={classNames(
+															 `bg-${{COMPLETE: 'gray', QUEUED: 'yellow', DISPATCHED: 'blue', RUNNING: 'green'}[project.status]}-100`, 
+															'h-4 w-4 rounded-full flex items-center justify-center'
+														)}
+														aria-hidden='true'
+													>
+														<span
+															className={classNames(
+																 `bg-${{COMPLETE: 'gray', QUEUED: 'yellow', DISPATCHED: 'blue', RUNNING: 'green'}[project.status]}-400`,
+																'h-2 w-2 rounded-full'
+															)}
+														/>
+													</span>
+
+													<span className='block'>
+														<h2 className='text-sm font-medium'>
+															<a href={project.href}>
+																<span
+																	className='absolute inset-0'
+																	aria-hidden='true'
+																/>
+																{project.name}{' '}
+																<span className='sr-only'>
+																	{project.status !== 'COMPLETE' ? 'Running' : 'Not running'}
+																</span>
+															</a>
+														</h2>
+													</span>
+												</div>
+												<a
+													href={project.repoHref}
+													className='relative group flex items-center space-x-2.5'
+												>
+													<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
+														{project.description}
+													</span>
+												</a>
+											</div>
+											<div className='sm:hidden'>
+												<ChevronRightIcon
+													className='h-5 w-5 text-gray-400'
+													aria-hidden='true'
+												/>
+											</div>
+											<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
+												<p className='flex items-center space-x-4'>
+             
+													<span className='font-mono text-red-500'>FAIL: {project.percent_fail}</span>
+													<span className='font-mono'>SUCCESS: {project.percent_success}</span>
+												</p>
+												<p className='flex text-gray-500 text-sm space-x-2'>
+													<span>Deployed {new Date(project.created_at).toUTCString()}</span>
+													<span>{project.location}</span>
+												</p>
+											</div>
+										</div> */}
+									</li>
+								))}
+								{/* {projects.map((project) => (
 									<li
 										key={project.repo}
 										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
 									>
 										<div className='flex items-center justify-between space-x-4'>
-											{/* Repo name and link */}
 											<div className='min-w-0 space-y-3'>
 												<div className='flex items-center space-x-3'>
 													<span
@@ -472,12 +615,6 @@ export default function Dashboard({ user, experiments }) {
 											</div>
 											<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 												<p className='flex items-center space-x-4'>
-													{/* <a
-														href={project.siteHref}
-														className='relative text-sm text-gray-500 hover:text-gray-900 font-medium'
-													>
-														Visit site
-													</a> */}
 													<button
 														type='button'
 														className='relative bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
@@ -508,7 +645,7 @@ export default function Dashboard({ user, experiments }) {
 											</div>
 										</div>
 									</li>
-								))}
+								))} */}
 							</ul>
 						</div>
 					</div>

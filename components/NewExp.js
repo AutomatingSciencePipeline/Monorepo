@@ -1,10 +1,10 @@
 import { Fragment, useState, useLayoutEffect } from 'react';
-import { Dialog, Transition, Text } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import { Upload, X, File } from 'tabler-icons-react';
 import { Toggle } from './utils';
 
 import Parameter from './Parameter';
-import { Code } from '@mantine/core';
+import { Code, Text } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
@@ -162,7 +162,8 @@ const ConfirmationStep = ({ form, ...props }) => {
 		</div>
 	);
 };
-const DropzoneKids = ({ status }) => {
+const dropzoneKids = (status) => {
+    console.log(status);
 	if (status.accepted) {
 		return <UploadIcon className={'bg-green-500'} status={status} />;
 	}
@@ -170,13 +171,12 @@ const DropzoneKids = ({ status }) => {
 		<div className={`flex flex-col justify-center items-center space-y-6`}>
 			<UploadIcon status={status} />
 			<div>
-				{/* <Text size='xl' inline>
+				<Text size='xl' inline>
 					Upload your project executable.
 				</Text>
 				<Text size='sm' color='dimmed' inline mt={7}>
 					Let's revolutionize science!
-				</Text> */}
-				infuiewfn
+				</Text>
 			</div>
 		</div>
 	);
@@ -212,7 +212,7 @@ const DispatchStep = ({ id, ...props }) => {
 			maxSize={3 * 1024 ** 2}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 		>
-			{(status) => <DropzoneKids status={status} />}
+			{(status) =>  dropzoneKids(status)}
 		</Dropzone>
 	);
 };
@@ -223,7 +223,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 			parameters: formList([]),
 			name: '',
 			description: '',
-			verbose: false,
+			verbose: true,
 			nWorkers: 1,
 		},
 		schema: joiResolver(experimentSchema),
@@ -276,13 +276,6 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 											submitExperiment(values, user).then(({ data }) => {
                                                 console.log(data[0].id)
 												setId(data[0].id);
-												// fetch(`/api/experiments/${data.id}`, {
-												// 	method: 'POST',
-												// 	headers: new Headers({
-												// 		'Content-Type': 'application/json',
-												// 	}),
-												// 	credentials: 'same-origin',
-												// });
 											}).then(() => {
                                                 console.log(id)
                                             });
@@ -290,7 +283,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 											// console.log(e);
 										// }
                                         // console.log(id);
-										// setStatus(2);
+										// setStatus(2)};
 										// setFormState(2);
 									})}
 								>
@@ -356,7 +349,11 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 											<button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												{...(status === 2
-													? { type: 'submit' }
+													? { type: 'submit', onClick: () => {
+                                                        setFormState(-1)
+                                                        setStatus(0)
+                                                    }}
+													// ? { type: 'submit' }
 													: {
 															type: 'button',
 															onClick: () => setStatus(status + 1),

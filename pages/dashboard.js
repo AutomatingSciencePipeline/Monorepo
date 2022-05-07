@@ -3,7 +3,7 @@ import supabase from '../supabase/client';
 const Dashboard = ({ user, experiments }) => {
     console.log(user)
     console.log(experiments);
-	return <Dash user={user} experiments={experiments} />;
+	return <Dash user={user} experimentss={experiments} />;
 };
 
 export async function getServerSideProps({ req }) {
