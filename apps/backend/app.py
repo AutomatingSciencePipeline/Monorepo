@@ -1,7 +1,5 @@
 
-import sys
-import os
-import stat
+import sys, os, stat
 import shutil
 
 import re
@@ -37,8 +35,7 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 CORS(app)
 
-# FLASK API ENDPOINTS
-
+### FLASK API ENDPOINTS
 
 
 class DEBUG: 
@@ -63,64 +60,30 @@ def recv_experiment():
     GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
 
-# GLB
-
-
+### GLB
 class GLB(object):
 
     def __init__(self, n_workers=1):
         self.e_status = {}
         self.e = ProcessPoolExecutor(n_workers)
         self.f = ThreadPoolExecutor(n_workers)
-        logging.debug(
-            f'GLB: {n_workers} workers initialized. Awaiting requests...')
-
+        logging.debug(f'GLB: {n_workers} workers initialized. Awaiting requests...')
+        
     def submit_experiment(self, msg):
         self.e_status[msg['id']] = 'INIT'
         logging.info(f'Experiment {msg["id"]} by {msg["user"]} submitted.')
-        self.e.submit(experiment_event, msg).add_done_callback(
-            experiment_resolve)
-
+        self.e.submit(experiment_event, msg).add_done_callback(experiment_resolve)
+        
+    
     def update_experiment_status(self, id, status):
         self.e_status[id] = status
-
-
-GlobalLoadBalancer = GLB(1)
+GlobalLoadBalancer = GLB(1)        
 
 
 # def write_binary()
 
 def experiment_event(msg):
-<<<<<<< HEAD
-    data,params = msg,msg['params']
-    # within each experiment, we use threads
-    # if not os.path.exists(params['fileName']):
-    #     raise
-<<<<<<< HEAD
-    os.chmod(f'GLADOS_HOME/incoming/{params["fileName"]}', 0o777)
-    os.mkdir(f'GLADOS_HOME/exps/{params["id"]}')
-    shutil.move(f'GLADOS_HOME/incoming/{params["fileName"]}',
-                f'GLADOS_HOME/exps/{params["id"]}/{params["fileName"]}')
-    os.chdir(f'GLADOS_HOME/exps/{params["id"]}')
-    param_iter = gen_configs(params['parameters'])
-    # we submit experiment configuration writing to a thread pool if verbose
-    if params['verbose']:
-        os.mkdir('configs')
-        with ThreadPoolExecutor(1) as e:
-            e.submit(write_configs, param_iter, [
-                     obs['paramName'] for obs in params['parameters']])
-
-    # process stuff and make API call to inform of the experiment's commencement
-    results = []
-    dead = 0
-    i = 0
-    with ThreadPoolExecutor(1) as executor:
-        result_futures = list(map(lambda x: executor.submit(mapper, {
-                              'filename': params['fileName'], 'iter': x[0], 'params': x[1]}), list(param_iter)))
-=======
-=======
     data = msg
->>>>>>> d166aa0 (sync changes for next/supabase integration)
     dataUPD = supabase.table("experiments").update({"status": "DISPATCHED"}).eq("id", data['id']).execute()
 
     path = data['key']
@@ -163,25 +126,16 @@ def experiment_event(msg):
     
     with ThreadPoolExecutor(1) as executor:
         result_futures = list(map(lambda x: executor.submit(mapper, {'filename': data['fileName'],'iter':x[0],'params':x[1]}), list(param_iter)))
->>>>>>> 1946b9c (update docker & co)
         for future in as_completed(result_futures):
             try:
                 res = future.result()
-                results.append(
-                    {'iter': res[0], 'params': res[1], 'result': res[2]})
+                results.append({'iter': res[0], 'params': res[1], 'result': res[2]})
                 if i % 10 == 0:
                     logging.info(f'{i} iterations completed.')
             except Exception as e:
-                # write temporary state of problems
+                ### write temporary state of problems
                 print(e)
                 results.append({'iter': 0, 'params': [0], 'result': 'FAILED'})
-<<<<<<< HEAD
-                dead += 1
-            i += 1
-
-    # process stuff and make API call to inform of the experiment's completion
-    # write results to a csv file named experiment_id.csv
-=======
                 dead+=1
             i+=1
             if(i % cp == 0):
@@ -190,34 +144,20 @@ def experiment_event(msg):
                 percent_fail = int((dead/totalExp)*100)
                 dataUPD = supabase.table("experiments").update({"progress": percent, "percent_success": percent_success, "percent_fail" : percent_fail}).eq("id", data['id']).execute()
     
-<<<<<<< HEAD
-    ## process stuff and make API call to inform of the experiment's completion
-    ### write results to a csv file named experiment_id.csv
-    dataUPD = supabase.table("experiments").update({"progress": 100, "percent_success": percent_success, "percent_fail" : percent_fail}).eq("id", data['id']).execute()
->>>>>>> 1946b9c (update docker & co)
-=======
     dataUPD = supabase.table("experiments").update({"progress": 100, "percent_success": percent_success, "percent_fail" : percent_fail, "status": "COMPLETE"}).eq("id", data['id']).execute()
     # assert len(dataUPD) > 0, "Experiment not found."
->>>>>>> d166aa0 (sync changes for next/supabase integration)
     with open(f'result.csv', 'w') as csvfile:
         header = ['iter']
         header += [k['paramName'] for k in data['params']]
         header.append('result')
         writer = csv.writer(csvfile)
         writer.writerow(header)
-<<<<<<< HEAD
-        # print(results)
-        writer.writerows(list(map(lambda x: post(x), results)))
-
-    return params['id'], 1.-float(dead)/len(results), results
-=======
         writer.writerows(list(map(lambda x: post(x), results)))    
     
     dest = '/'.join([*data['key'].split('/')[1:-1],'result.csv'])
     response = supabase.storage().from_('experiment_files').upload(dest, 'result.csv')
     os.chdir('../../..')
     return data['id'],(1.-float(dead)/len(results) if len(results) > 0 else 0.),results
->>>>>>> d166aa0 (sync changes for next/supabase integration)
 
 
 def post(s):
@@ -227,34 +167,19 @@ def post(s):
     s = [s[0]] + s[1] + [s[2]]
     return s
 
-
 def experiment_resolve(future):
-    # Make API call to inform of completion of experiment
+    ### Make API call to inform of completion of experiment
     # if future.exception():
-
+        
     id, prog, results = future.result()
     GlobalLoadBalancer.update_experiment_status(id, 'DONE')
-    app.logger.info(
-        f'[EXP COMPLETE]:\tExperiment {id} completed with {prog} success rate.')
+    app.logger.info(f'[EXP COMPLETE]:\tExperiment {id} completed with {prog} success rate.')
     app.logger.info(f'THIS IS A DEBUG MESSAGE. CURRENT PATH IS{os.getcwd()}')
 
-
 def mapper(params):
-<<<<<<< HEAD
-    # try:
-    #   return params['iter'], list(params['params']), [params['func'](*params['params'])]
-    # except Exception as e:
-    #   raise Exception(f'Mapper failed with exception: {e} for the iteration with params', params['iter'], params['params'])
-=======
     debugger('MAPPER')
     debugger(params)
->>>>>>> d166aa0 (sync changes for next/supabase integration)
     try:
-<<<<<<< HEAD
-        # print(params['params'])
-        result = communicate(
-            f'./{params["filename"]}', list(map(str, list(params['params']))))
-=======
         #print(params['params'])
         file = params["filename"]
         fileMod = file[0:len(file)-5]
@@ -266,21 +191,17 @@ def mapper(params):
         #runs python files
         else:
             result = communicate(f'./{file}', list(map(str, list(params['params']))))
->>>>>>> 1946b9c (update docker & co)
     except Exception as e:
         raise Exception(f'Mapper failed with exception: {e} for the')
     return params['iter'], list(params['params']), result
+    
+    
 
-
-# UTILS
+### UTILS
 
 def gen_configs(hyperparams):
-<<<<<<< HEAD
-    # Generate hyperparameter configurations
-=======
     debugger(hyperparams)
     ### Generate hyperparameter configurations
->>>>>>> d166aa0 (sync changes for next/supabase integration)
 
     params_raw = []
     temp = []
@@ -300,13 +221,7 @@ def gen_configs(hyperparams):
                         else:
                             temp.append([''])
                 else:
-<<<<<<< HEAD
-                    temp.append(np.arange(
-                        param['values'][1], param['values'][2]+param['values'][3], param['values'][3]))
-            app.logger.info(f'After integer, temp is {temp}')
-=======
                     temp.append(np.arange(param['values'][1],param['values'][2]+param['values'][3],param['values'][3]))
->>>>>>> 1946b9c (update docker & co)
             concat_arrays(params_raw, list(itertools.product(*temp)))
             temp = []
         elif param['type'] == "array":
@@ -329,40 +244,24 @@ def gen_configs(hyperparams):
     debugger(params_raw)
 
     return enumerate(list(params_raw))
-
-
 def concat_arrays(arr1, arr2):
     for x in arr2:
         arr1.append(x)
 
-
 def write_configs(raw, headers):
-<<<<<<< HEAD
-    dicts = [{headers[i]:np_uncode(x[i]) for i in range(len(x))}
-             for _, x in copy.deepcopy(raw)]
-=======
     dicts = []
     for _,x in copy.deepcopy(raw):
         temp = {}
         for i in range(len(x)):
             temp[headers[i]] = x[i]
         dicts.append(temp)
->>>>>>> 1946b9c (update docker & co)
     jsons = [json.dumps(x) for x in dicts]
-    for i, _ in copy.deepcopy(raw):
+    for i,_ in copy.deepcopy(raw):
         with open(f'configs/config_{i}.json', 'w+') as f:
             f.write(jsons[i])
-
+        
 
 def proc_msg(msg):
-<<<<<<< HEAD
-    # for now, this function is hardcoding some things, but it's no biggie
-    rm = copy.deepcopy(msg)
-    for obj in rm['parameters']:
-        if obj['type'] == "integer" or obj['type'] == "float":
-            obj['values'] = [float(x) for x in obj['values']]
-            obj['values'] = [x for i, x in enumerate(obj['values']) if i >= 0]
-=======
     ## for now, this function is hardcoding some things, but it's no biggie
     payload = msg['experiment']
     id = payload['id']
@@ -378,19 +277,12 @@ def proc_msg(msg):
         if obj['type'] == "integer" or obj['type'] == "float":
             obj['values'] = [float(x) for x in [obj['default'],obj['min'], obj['max'], obj['step']]]
             obj['values'] = [x for i,x in enumerate(obj['values']) if i >= 0]
->>>>>>> 1946b9c (update docker & co)
         elif obj['type'] == "array":
             obj['value'] = [float(x) for x in obj['value']]
-<<<<<<< HEAD
-            obj['value'] = [x for i, x in enumerate(obj['value']) if i >= 0]
-        elif obj['type'] == "boolean":
-            obj['value'] = bool(obj['value'])
-=======
             obj['value'] = [x for i,x in enumerate(obj['value']) if i >= 0]
         elif obj['type'] == "bool":
             obj['value'] = bool(obj['default'])
         obj['paramName'] = obj['name']
->>>>>>> d166aa0 (sync changes for next/supabase integration)
     rm['user'] = data['creator']
     rm['id'] = data['id']
     rm['key'] = key
@@ -398,12 +290,12 @@ def proc_msg(msg):
     debugger(rm)
     return rm
 
-
 def np_uncode(x):
-    if isinstance(x, np.integer):
+    if isinstance(x,np.integer):
         return int(x)
-    if isinstance(x, np.floating):
+    if isinstance(x,np.floating):
         return float(x)
+
 
 
 def flatten(x):
@@ -411,7 +303,6 @@ def flatten(x):
         return [a for i in x for a in flatten(i)]
     else:
         return [x]
-
 
 def initilize_work_space():
     # names = ['exps','res','incoming']
@@ -424,44 +315,34 @@ def initilize_work_space():
 
 
 def communicate(process, payload):
-    with Popen([process] + payload, stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as p:
+    with Popen([process] + payload, stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
         try:
             stdout_data = p.communicate()
-            # if not stdout_data:
+            #if not stdout_data:
             #    raise UnresponsiveBinaryException(f'{process} is unresponsive.')
             if stdout_data[1]:
                 print(f'errors returned from pipe is {stdout_data[1]}')
-                raise FailedIterationException(
-                    f'Iteration has failed with error {stdout_data[1]}')
+                raise FailedIterationException(f'Iteration has failed with error {stdout_data[1]}')
         except Exception as e:
-            raise PipeFailureException(
-                f'Error communicating with process: {e}')
+            raise PipeFailureException(f'Error communicating with process: {e}')
     return float(stdout_data[0])
 
-# TYPES
-
+### TYPES 
 
 class FailedIterationException(Exception):
     pass
 
-
 class PipeFailureException(Exception):
     pass
-
 
 class UnresponsiveBinaryException(Exception):
     pass
 
-# EXPERIMENTAL ARTIFACTS
+### EXPERIMENTAL ARTIFACTS
 
 
-<<<<<<< HEAD
-if __name__ == '__main__':
-    logging.getLogger().setLevel(logging.DEBUG)
-=======
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.INFO)
->>>>>>> 1946b9c (update docker & co)
     initilize_work_space()
     # hyperparams = [{'paramName':'x','values':[0,10,0.1]},{'paramName':'y','values':[5,100,5]}]
     # msg_test = {
@@ -471,11 +352,11 @@ if __name__=='__main__':
     #     'hyperparams' : hyperparams
     # }
     # GlobalLoadBalancer.submit_experiment(msg_test)
-    app.run(debug=True)
+    app.run(debug = True)
     #blablabla = gen_configs(msg_test['hyperparams'])
     #write_configs(blablabla, [obs['paramName'] for obs in msg_test['hyperparams']])
     #communicate('./add_nums.py', ['1','2'])
-
+    
 '''
 ### plot postprocessing / native support ###
 ### gen intermediate plots live ###
@@ -489,3 +370,5 @@ if __name__=='__main__':
 3. stitch the system together
 
 '''
+
+
