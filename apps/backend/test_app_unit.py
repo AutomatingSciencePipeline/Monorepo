@@ -50,6 +50,12 @@ class TestBackend(unittest.TestCase):
         expected = None
         print(result)
         self.assertEqual(result,expected)
+    # def test_flatten_invalid(self):  # need to make sure it is an float
+    #     x = "blah"
+    #     result = app.np_uncode(x)
+    #     expected = 1
+    #     print(result)
+    #     self.assertEqual(result,expected)
     # def test_np_uncode_integer(self):  # need to make sure it an integer
     #     x = 1
     #     result = app.np_uncode(x)
