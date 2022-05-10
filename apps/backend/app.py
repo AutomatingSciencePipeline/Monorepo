@@ -20,9 +20,12 @@ import argparse
 import stat
 from supabase import create_client, Client
 
-# url: str = os.environ.get("SUPA_URL")
-# key: str = os.environ.get("ANON_KEY")
-#supabase = create_client(url, key)
+
+
+url: str = os.environ.get("SUPA_URL")
+key: str = os.environ.get("ANON_KEY")
+supabase = create_client(url, key)
+
 # random_email: str = "3hf82fijf92@supamail.com"
 # random_password: str = "fqj13bnf2hiu23h"
 # user = supabase.auth.sign_in(email=random_email, password=random_password)
