@@ -22,7 +22,7 @@ from supabase import create_client, Client
 
 
 
-url: str = os.environ.get("SUPA_URL")
+url: str = os.environ.get("SITE_URL")
 key: str = os.environ.get("ANON_KEY")
 supabase = create_client(url, key)
 
