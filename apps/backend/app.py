@@ -20,9 +20,12 @@ import argparse
 import stat
 from supabase import create_client, Client
 
-url: str = os.environ.get("SUPA_URL")
+
+
+url: str = os.environ.get("SITE_URL")
 key: str = os.environ.get("ANON_KEY")
 supabase = create_client(url, key)
+
 # random_email: str = "3hf82fijf92@supamail.com"
 # random_password: str = "fqj13bnf2hiu23h"
 # user = supabase.auth.sign_in(email=random_email, password=random_password) help
@@ -244,7 +247,8 @@ def gen_configs(hyperparams):
     debugger(params_raw)
 
     return enumerate(list(params_raw))
-def concat_arrays(arr1, arr2):
+    
+def concat_arrays(arr1, arr2): #test 
     for x in arr2:
         arr1.append(x)
 
@@ -290,7 +294,7 @@ def proc_msg(msg):
     debugger(rm)
     return rm
 
-def np_uncode(x):
+def np_uncode(x): #test 
     if isinstance(x,np.integer):
         return int(x)
     if isinstance(x,np.floating):
@@ -298,7 +302,7 @@ def np_uncode(x):
 
 
 
-def flatten(x):
+def flatten(x): #test right now 
     if isinstance(x, collections.Iterable):
         return [a for i in x for a in flatten(i)]
     else:
@@ -328,7 +332,6 @@ def communicate(process, payload):
     return float(stdout_data[0])
 
 ### TYPES 
-
 class FailedIterationException(Exception):
     pass
 
