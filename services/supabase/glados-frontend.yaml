@@ -1,0 +1,36 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-frontend-service
+spec:
+  selector:
+    app: app-frontend
+  ports:
+  - protocol: "TCP"
+    port: 5005
+    targetPort: 5005
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-frontend
+spec:
+  selector:
+    matchLabels:
+      app: app-frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app-frontend
+    spec:
+      containers:
+      - name: glados-frontend
+        image: glados-frontend
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5005
