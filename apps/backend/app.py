@@ -21,10 +21,10 @@ import stat
 from supabase import create_client, Client
 
 
-
 url: str = os.environ.get("SITE_URL")
 key: str = os.environ.get("ANON_KEY")
 supabase = create_client(url, key)
+
 
 # random_email: str = "3hf82fijf92@supamail.com"
 # random_password: str = "fqj13bnf2hiu23h"
