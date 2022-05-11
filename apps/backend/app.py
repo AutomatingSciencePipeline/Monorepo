@@ -25,7 +25,7 @@ key: str = os.environ.get("ANON_KEY")
 supabase = create_client(url, key)
 # random_email: str = "3hf82fijf92@supamail.com"
 # random_password: str = "fqj13bnf2hiu23h"
-# user = supabase.auth.sign_in(email=random_email, password=random_password)
+# user = supabase.auth.sign_in(email=random_email, password=random_password) help
 
 # parser = argparse.ArgumentParser(description="Initialize GLADOS Global Load Balancer.")
 # parser.add_argument('--N', dest='nworkers',type=int,help='Number of thread / process workers to use.')
