@@ -77,10 +77,11 @@ debugger()
 
 @app.post("/experiment")
 def recv_experiment():
-    exp = request.get_json()
-    app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
-    exp = proc_msg(exp)
-    GlobalLoadBalancer.submit_experiment(exp)
+    app.logger.info(f'recieved {request.get_json()}')
+    # exp = request.get_json()
+    # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
+    # exp = proc_msg(exp)
+    # GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
 
 ### GLB
