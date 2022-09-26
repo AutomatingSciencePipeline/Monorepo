@@ -1,7 +1,24 @@
 import supabase from './client';
 import admin from './admin';
-const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
-const { getFirestore, Timestamp, FieldValue } = require('firebase-admin/firestore');
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
+const firebaseConfig = {
+	apiKey: "AIzaSyDj-Y8FFq2C80ZSVUVAWd3eqcmSzXMHXus",
+	authDomain: "gladosbase.firebaseapp.com",
+	databaseURL: "https://gladosbase-default-rtdb.firebaseio.com",
+	projectId: "gladosbase",
+	storageBucket: "gladosbase.appspot.com",
+	messagingSenderId: "431843551362",
+	appId: "1:431843551362:web:0bb28196e90f31a194ec9b"
+  };
+// Initialize Firebase
+const app = initializeApp(firebaseConfig,"backend");
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 
 export const submitExperiment = async (values, user) => {
