@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "NODE_OPTIONS='--inspect' next dev",
+		"dev": "cross-env NODE_OPTIONS='--inspect' next dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint"
@@ -21,6 +21,7 @@
 		"@mantine/modals": "^4.1.4",
 		"@mantine/notifications": "^4.1.4",
 		"@mantine/spotlight": "^4.1.4",
+		"@prisma/client": "^3.13.0",
 		"@supabase/supabase-js": "^1.35.2",
 		"@testing-library/jest-dom": "^5.16.4",
 		"@testing-library/react": "^13.1.1",
@@ -28,6 +29,7 @@
 		"axios": "^0.26.1",
 		"classnames": "^2.3.1",
 		"dayjs": "^1.11.1",
+		"firebase-admin": "^11.0.1",
 		"joi": "^17.6.0",
 		"next": "12.1.5",
 		"pino": "^7.11.0",
@@ -42,8 +44,11 @@
 		"@heroicons/react": "^1.0.6",
 		"@tailwindcss/forms": "^0.5.0",
 		"autoprefixer": "^10.4.4",
+		"cross-env": "^7.0.3",
 		"eslint": "8.14.0",
 		"eslint-config-next": "12.1.5",
+		"firebase-admin": "^11.0.1",
+		"fs": "0.0.1-security",
 		"postcss": "^8.4.12",
 		"prisma": "^3.13.0",
 		"tailwindcss": "^3.0.24"

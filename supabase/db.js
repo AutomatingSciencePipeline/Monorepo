@@ -1,5 +1,8 @@
 import supabase from './client';
 import admin from './admin';
+const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
+const { getFirestore, Timestamp, FieldValue } = require('firebase-admin/firestore');
+
 
 export const submitExperiment = async (values, user) => {
 	console.log('Making submission');
