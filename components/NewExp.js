@@ -9,6 +9,7 @@ import { Dropzone } from '@mantine/dropzone';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
+import {v4 as uuid4} from 'uuid'
 
 // import { submitExperiment, uploadExec } from '../supabase/db';
 import { submitExperiment, uploadExec } from '../firebase/db';
@@ -245,7 +246,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 	});
 
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
-		return <Parameter form={form} type={type} index={index} {...rest} />;
+		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);
@@ -313,7 +314,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									<div className='flex flex-col'>
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
-												<Steps
+												<Steps 
 													steps={['Parameters', 'Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
