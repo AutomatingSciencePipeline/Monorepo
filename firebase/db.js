@@ -62,12 +62,15 @@ export const uploadExec = async (id, file) => {
 	const fileRef = ref(storage, "experiment"+id)
 	uploadBytes(fileRef, file).then((snapshot) => {
 		console.log("Uploaded file for experiment " + id)
-		const experimentRef = doc(db, "Expermints", id)
+		const experimentRef = doc(db,"Experiments",id)
 		updateDoc(experimentRef,{
 			file: "experiment"+id
-		})
+		}).catch(error => console.log(error))
 		return id
-	}).catch(error => null)
+	}).catch(error =>{
+		console.log(error)
+		null
+	} )
 
 	// try {
 	// 	const filePath = `EXP_${id}/${file.name}`;
