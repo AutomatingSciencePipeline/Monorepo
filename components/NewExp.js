@@ -295,11 +295,11 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 								<form
 									className='flex h-full flex-col bg-white shadow-xl'
 									onSubmit={form.onSubmit((values) => {
-										console.log("Submitting Experiment!!!")
-										submitExperiment(values,user).then( (expId) =>{
-											console.log(expId)
-											setId(expId)
-										})
+										// console.log("Submitting Experiment!!!")
+										// submitExperiment(values,user).then( (expId) =>{
+										// 	console.log(expId)
+										// 	setId(expId)
+										// })
 										
 
 
