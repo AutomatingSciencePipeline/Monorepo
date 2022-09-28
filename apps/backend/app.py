@@ -19,6 +19,8 @@ import json
 import argparse
 import stat
 from supabase import create_client, Client
+
+import time
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
@@ -35,7 +37,6 @@ cred = credentials.Certificate({"type": "service_account",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-rq0e8%40gladosbase.iam.gserviceaccount.com",
     "storageBucket":"gladosbase.appspot.com"})
-
 app = firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -77,7 +78,26 @@ debugger()
 
 @app.post("/experiment")
 def recv_experiment():
-    app.logger.info(f'recieved {request.get_json()}')
+    time.sleep(1)
+    data = request.get_json()
+    app.logger.info(data)
+    experiments = db.collection('Experiments')
+
+    id = data['experiment']['id']
+    app.logger.info(f'recieved {id}')
+    expRef = experiments.document(id)
+    experiment = expRef.get().to_dict()
+    app.logger.info(f"Experiment info {experiment}")
+
+    app.logger.info(f'Downloading file for {id}')
+    filepath = experiment['file']
+    app.logger.info(f"downloading {filepath} to GLADOS_HOME/exps/{filepath}")
+
+    os.chdir('ExperimentFiles')
+    # os.chdir('GLADOS_HOME/exps')
+    filedata = bucket.blob(filepath)
+    filedata.download_to_filename(filepath)
+
     # exp = request.get_json()
     # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
     # exp = proc_msg(exp)

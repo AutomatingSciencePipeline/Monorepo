@@ -171,6 +171,7 @@ services:
           - ./app/GLADOS_HOME/incoming:/app/GLADOS_HOME/incoming
           - ./app/GLADOS_HOME/exps:/app/GLADOS_HOME/exps
           - ./app/GLADOS_HOME/rec:/app/GLADOS_HOME/rec
+          - ./app/ExperimentFiles:/app/ExperimentFiles
       # networks:
       # - some-net
       restart: always
