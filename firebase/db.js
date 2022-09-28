@@ -66,10 +66,10 @@ export const uploadExec = async (id, file) => {
 		updateDoc(experimentRef,{
 			file: "experiment"+id
 		}).catch(error => console.log(error))
-		return id
+		return true
 	}).catch(error =>{
 		console.log(error)
-		null
+		return false
 	} )
 
 	// try {

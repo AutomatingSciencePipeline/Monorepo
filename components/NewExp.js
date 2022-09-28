@@ -192,23 +192,30 @@ const UploadIcon = ({ status }) => {
 	return <File size={80} />;
 };
 
-const DispatchStep = ({ id, ...props }) => {
+const DispatchStep = ({ id, form, user, ...props }) => {
 	return (
 		<Dropzone
 			onDrop={async (file) => {
-				console.log(`Uploading file for ${id}`)
-				const expId = uploadExec(id, file[0]);
-				if (expId == null) {
-					throw new Error('Upload failed')
-				} else{
-					console.log("Handing experiment " + id + " to the backend")
-					fetch(`/api/experiments/${id}`,{
-						method: 'POST',
-						headers: new Headers({ 'Content-Type': 'application/json'}),
-                        credentials: 'same-origin',
-                        body: JSON.stringify({id: expId})
-					})
-				}
+				// console.log()
+				console.log("Submitting Experiment!!!")
+				submitExperiment(form.values,user).then( (expId) =>{
+					console.log(expId)
+
+					console.log(`Uploading file for ${expId}`)
+					const res = uploadExec(expId, file[0]);
+					if (res == null) {
+						throw new Error('Upload failed')
+					} else{
+						console.log("Handing experiment " + expId + " to the backend")
+						fetch(`/api/experiments/${expId}`,{
+							method: 'POST',
+							headers: new Headers({ 'Content-Type': 'application/json'}),
+							credentials: 'same-origin',
+							body: JSON.stringify({id: expId})
+						})
+					}
+				}).catch( error => console.log(error))
+				
 
 				// const {Key} = await uploadExec(id, file[0])
                 // if (!Key) {
@@ -335,7 +342,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									) : status === 1 ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep id={id} />
+										<DispatchStep user = {user} form = {form} id={id} />
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
