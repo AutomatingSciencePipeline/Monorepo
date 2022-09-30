@@ -20,6 +20,27 @@ import argparse
 import stat
 from supabase import create_client, Client
 
+import time
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore, storage
+
+
+cred = credentials.Certificate({"type": "service_account",
+    "project_id": "gladosbase",
+    "private_key_id": "d1b3043ccc9d008bf541e61c492c343a1dcec098",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgyWPyztFeVD+T\nhFM80dt53OF74U1pIP++f6IO17RKvRM7xAXAOQw87yypppxhHJqcdU//vmM8kY5w\nyeL7JfVbOhuH/mRHneOSBIUOZrZPPZwTs6BMB+KL1yGsqLI4xa9T11CYOIbl0dhx\nbUfKZKa28mK7LoRP6zTs2+l64mKXPTahEELcv6gvRkmcj0JyV/MZq6Dv5upioWw6\nSAvy2eAu71el80HakE4XN3xn45ftl04JL9dbKaQGmpiNXPLiw8Q3gQkPoMLjyheO\nxsQloY/wHVEHkD+T50Ulf4UWJlYFEvmsT13RUJ8AhicArxsqcn3n6oOXiQNe1F5I\nVu5vjWtJAgMBAAECggEACybwzmdzLOtjxf32fohRRGZyQtMFmSI7btmAMm6acBkl\nb36pBfRHAaZ2tvUqEU/INwwpfnP0gt/XLQJJwrD3L8rL3E7EIpYEUe1Lk8xCvqQH\nsnOh7YgZ+ehT6vt/8hFfF+3+JnK8Q44+qJ5jbXm1+Qg+mhxPu9HU981IiFgRrcrq\nMOaOggxORn0ifu6UXZlOr7oykNOvZQNtQyyQMR+zHv2sOxtWRpxB/izwhfsBAOmr\nSKbxnftNyVLyodhUn8HSzxKswW2APgJ9hhwGkyPFeOxSpMWwPeBbIVGRdjj5FIBS\nRBvYM+9vtiNZhFTPfmq3n3CutVxKAefehcF+fFf5MQKBgQDisdZCCTeWXc3AqnpV\nN6JTAtWvUIQ+sGBdHfK+4m6qRDW49HyACPTUONL5mWT0XDpLtx//ZawYqSu8pXkQ\n8c6+EvzpO9FYpSbT7RTYW0VyGujlLE3vymIseumbRqN1YrA0LY2BS2ZTo3jMIa1m\nuAfkaAFqixyOBJ1t5heV2U74kQKBgQC1kmoyA5ovjTRc7fApmV6++Hc+LaiQE0WR\n7nNz5hvqUg1GUJCtTtXWMQr9UQ1V1SymKpkwEMCyBuwwnNBAIMKIAq8eXUgk2nhn\nhYiEXEKOVLhSMsW8V+LSshQrVYtg5lbCvVAsWh7GPrNO2eQ2EFdLXu7s6C7pD4QQ\nN6uRgVhjOQKBgDtRp6wd91K8dwOMWHiGF067dijq27//rSeQl52FaMnbEWe1agKi\n1VXXDLXNgtJCc+quH4xYEYFeexhhAF4DuEKae12Yjn4wsQlRh1vZ/kEOc5TMVBSE\nE85p10kPYeRsj4kHxnhnv33xT8Gyqkovq7kD0iMMBcvPv1YrmE5Yz8ZRAoGADrvQ\nzjooms80fo34PQfq/kgfNPZzhS1rKcpVqAP2I++AkEIdW1LYW0cjgya+lEZ2Fw3B\n3HqfiFKze8Zdx7Zg0rSVDTu4jPUFbDETwNnTtMT/J/xiu0PObhZxOIr6gmRuieLe\nzJqLgL65wh5APHra+oy7ipHUrKjLqJ072NTMHVECgYEAyrOUssJkAbRZGu22xGlb\nmUehlknvA6bZP5cZ6I3uws2ndPvPNvMS990aBTWLbhsIII45fFikQObrKAh1cpS7\nGxyjQssyiE1a0tpCGAGKn0fHXIHiqj+IQzk7OSsC+jtlvWHtaAQzWt8qJOB/FJCh\nWmv9Kj+m02+/S8laWtlWzJ0=\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-rq0e8@gladosbase.iam.gserviceaccount.com",
+    "client_id": "110253347083564610954",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-rq0e8%40gladosbase.iam.gserviceaccount.com",
+    "storageBucket":"gladosbase.appspot.com"})
+app = firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+bucket = storage.bucket("gladosbase.appspot.com")
 
 url: str = os.environ.get("SUPA_URL")
 key: str = os.environ.get("ANON_KEY")
@@ -57,10 +78,30 @@ debugger()
 
 @app.post("/experiment")
 def recv_experiment():
-    exp = request.get_json()
-    app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
-    exp = proc_msg(exp)
-    GlobalLoadBalancer.submit_experiment(exp)
+    time.sleep(1)
+    data = request.get_json()
+    app.logger.info(data)
+    experiments = db.collection('Experiments')
+
+    id = data['experiment']['id']
+    app.logger.info(f'recieved {id}')
+    expRef = experiments.document(id)
+    experiment = expRef.get().to_dict()
+    app.logger.info(f"Experiment info {experiment}")
+
+    app.logger.info(f'Downloading file for {id}')
+    filepath = experiment['file']
+    app.logger.info(f"downloading {filepath} to GLADOS_HOME/exps/{filepath}")
+
+    os.chdir('ExperimentFiles')
+    # os.chdir('GLADOS_HOME/exps')
+    filedata = bucket.blob(filepath)
+    filedata.download_to_filename(filepath)
+
+    # exp = request.get_json()
+    # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
+    # exp = proc_msg(exp)
+    # GlobalLoadBalancer.submit_experiment(exp)
     return 'OK'
 
 ### GLB
