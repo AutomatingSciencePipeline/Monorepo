@@ -47,6 +47,7 @@
 		"autoprefixer": "^10.4.4",
 		"cross-env": "^7.0.3",
 		"eslint": "8.14.0",
+		"eslint-config-google": "^0.14.0",
 		"eslint-config-next": "12.1.5",
 		"postcss": "^8.4.12",
 		"prisma": "^3.13.0",
