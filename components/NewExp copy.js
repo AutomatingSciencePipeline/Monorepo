@@ -9,7 +9,6 @@ import { Dropzone } from '@mantine/dropzone';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
-import {v4 as uuid4} from 'uuid'
 
 // import { submitExperiment, uploadExec } from '../supabase/db';
 import { submitExperiment, uploadExec } from '../firebase/db';
@@ -192,30 +191,23 @@ const UploadIcon = ({ status }) => {
 	return <File size={80} />;
 };
 
-const DispatchStep = ({ id, form, user, ...props }) => {
+const DispatchStep = ({ id, ...props }) => {
 	return (
 		<Dropzone
 			onDrop={async (file) => {
-				// console.log()
-				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values,user).then( (expId) =>{
-					console.log(expId)
-
-					console.log(`Uploading file for ${expId}`)
-					const res = uploadExec(expId, file[0]);
-					if (res == null) {
-						throw new Error('Upload failed')
-					} else{
-						console.log("Handing experiment " + expId + " to the backend")
-						fetch(`/api/experiments/${expId}`,{
-							method: 'POST',
-							headers: new Headers({ 'Content-Type': 'application/json'}),
-							credentials: 'same-origin',
-							body: JSON.stringify({id: expId})
-						})
-					}
-				}).catch( error => console.log(error))
-				
+				console.log(`Uploading file for ${id}`)
+				const expId = uploadExec(id, file[0]);
+				if (expId == null) {
+					throw new Error('Upload failed')
+				} else{
+					console.log("Handing experiment " + id + " to the backend")
+					fetch(`/api/experiments/${id}`,{
+						method: 'POST',
+						headers: new Headers({ 'Content-Type': 'application/json'}),
+                        credentials: 'same-origin',
+                        body: JSON.stringify({id: expId})
+					})
+				}
 
 				// const {Key} = await uploadExec(id, file[0])
                 // if (!Key) {
@@ -253,7 +245,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 	});
 
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
-		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
+		return <Parameter form={form} type={type} index={index} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);
@@ -295,11 +287,11 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 								<form
 									className='flex h-full flex-col bg-white shadow-xl'
 									onSubmit={form.onSubmit((values) => {
-										// console.log("Submitting Experiment!!!")
-										// submitExperiment(values,user).then( (expId) =>{
-										// 	console.log(expId)
-										// 	setId(expId)
-										// })
+										console.log("Submitting Experiment!!!")
+										submitExperiment(values,user).then( (expId) =>{
+											console.log(expId)
+											setId(expId)
+										})
 										
 
 
@@ -321,7 +313,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									<div className='flex flex-col'>
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
-												<Steps 
+												<Steps
 													steps={['Parameters', 'Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
@@ -342,7 +334,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									) : status === 1 ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep user = {user} form = {form} id={id} />
+										<DispatchStep id={id} />
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
