@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model experiments {
+  id              BigInt             @id @default(autoincrement())
+  created_at      DateTime?          @default(now()) @db.Timestamptz(6)
+  name            String
+  description     String
+  parameters      Json               @db.Json
+  verbose         Boolean            @default(false)
+  n_workers       BigInt             @default(1)
+  status          experiment_status? @default(QUEUED)
+  progress        BigInt?            @default(0)
+  percent_success BigInt?
+  percent_fail    BigInt?
+  creator         String?            @db.Uuid
+}
+
+enum experiment_status {
+  QUEUED
+  DISPATCHED
+  RUNNING
+  COMPLETE
+}
