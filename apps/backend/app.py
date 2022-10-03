@@ -1,4 +1,5 @@
 
+from distutils.command.config import config
 import sys, os, stat
 import shutil
 
@@ -24,7 +25,7 @@ import time
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
-
+import configparser
 
 cred = credentials.Certificate({"type": "service_account",
     "project_id": "gladosbase",
@@ -97,15 +98,19 @@ def recv_experiment():
 
     app.logger.info(f'Downloading file for {id}')
     filepath = experiment['file']
-    app.logger.info(f"downloading {filepath} to GLADOS_HOME/exps/{filepath}")
+    app.logger.info(f"downloading {filepath} to ExperimentFiles/{filepath}")
 
-    os.chdir('ExperimentFiles')
+    os.makedirs(f'ExperimentFiles/{id}')
+    os.chdir(f'ExperimentFiles/{id}')
     # os.chdir('GLADOS_HOME/exps')
     filedata = bucket.blob(filepath)
     filedata.download_to_filename(filepath)
 
-    res = proc_msg(experiment)
-    log(gen_configs(res['params']))
+    gen_configs2(json.loads(experiment['params'])['params'])
+
+    os.chdir('../..')
+    # res = proc_msg(experiment)
+    # log(gen_configs(res['params']))
     # exp = request.get_json()
     # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
     # exp = proc_msg(exp)
@@ -250,6 +255,22 @@ def mapper(params):
     
 
 ### UTILS
+
+def gen_configs2(hyperparams):
+    config = {}
+    filenum = 0
+    for i in range(len(hyperparams)):
+        log(hyperparams[i])
+        # cur = hyperparams[i]
+        # config[cur['name']] = cur['default']
+        # for var in hyperparams:
+        #     if cur['name'] != var['name']:
+        #         if cur['type'] == 'integer':
+        #             for val in range(var['min'],var['max'],var['step']):
+
+                
+
+
 
 def gen_configs(hyperparams):
     debugger(hyperparams)
