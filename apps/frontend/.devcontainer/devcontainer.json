@@ -36,6 +36,11 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
+	"runArgs": [
+		// Names the container something consistent on the docker host instead of random junk
+		"--name", "glados-frontend-devcontainer"
+	],
+
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "bash .devcontainer/devcontainer-additional-startup.sh",
 
