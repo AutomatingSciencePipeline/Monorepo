@@ -59,6 +59,11 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 CORS(app)
 
+### I'm bad at remembering app.logger.info so I'm making a helper function
+
+def log(toLog):
+    app.logger.info(toLog)
+
 ### FLASK API ENDPOINTS
 
 
@@ -87,6 +92,7 @@ def recv_experiment():
     app.logger.info(f'recieved {id}')
     expRef = experiments.document(id)
     experiment = expRef.get().to_dict()
+    experiment['id'] = id
     app.logger.info(f"Experiment info {experiment}")
 
     app.logger.info(f'Downloading file for {id}')
@@ -98,6 +104,8 @@ def recv_experiment():
     filedata = bucket.blob(filepath)
     filedata.download_to_filename(filepath)
 
+    res = proc_msg(experiment)
+    log(gen_configs(res['params']))
     # exp = request.get_json()
     # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
     # exp = proc_msg(exp)
@@ -307,17 +315,11 @@ def write_configs(raw, headers):
         
 
 def proc_msg(msg):
-    ## for now, this function is hardcoding some things, but it's no biggie
-    payload = msg['experiment']
-    id = payload['id']
-    key = payload['key']
-    data = supabase.table("experiments").select("*").eq("id", id).execute()
-    assert len(data.data) > 0, f'Error retrieving experiment {id}'
-    data = data.data[0]
-    # app.logger.info(f'{data[0]}')
-    app.logger.info(f'[DEBUG]:\tData is equal to {data}')
-    # app.logging.info("[DEBUG]: data is equal to {}".format(data))
-    rm = json.loads(data['parameters'])
+
+    id = msg["id"]
+    filepath = msg['file']
+
+    rm = json.loads(msg['params'])
     for obj in rm['params']:
         if obj['type'] == "integer" or obj['type'] == "float":
             obj['values'] = [float(x) for x in [obj['default'],obj['min'], obj['max'], obj['step']]]
@@ -328,12 +330,43 @@ def proc_msg(msg):
         elif obj['type'] == "bool":
             obj['value'] = bool(obj['default'])
         obj['paramName'] = obj['name']
-    rm['user'] = data['creator']
-    rm['id'] = data['id']
+    rm['user'] = msg['creator']
+    rm['id'] = msg['id']
     rm['key'] = key
-    rm['verbose'] = data['verbose']
-    debugger(rm)
+    rm['verbose'] = msg['verbose']
+
+    log(rm)
+    # debugger(rm)
     return rm
+
+
+    ## for now, this function is hardcoding some things, but it's no biggie
+    # payload = msg['experiment']
+    # id = payload['id']
+    # key = payload['key']
+    # data = supabase.table("experiments").select("*").eq("id", id).execute()
+    # assert len(data.data) > 0, f'Error retrieving experiment {id}'
+    # data = data.data[0]
+    # # app.logger.info(f'{data[0]}')
+    # app.logger.info(f'[DEBUG]:\tData is equal to {data}')
+    # # app.logging.info("[DEBUG]: data is equal to {}".format(data))
+    # rm = json.loads(data['parameters'])
+    # for obj in rm['params']:
+    #     if obj['type'] == "integer" or obj['type'] == "float":
+    #         obj['values'] = [float(x) for x in [obj['default'],obj['min'], obj['max'], obj['step']]]
+    #         obj['values'] = [x for i,x in enumerate(obj['values']) if i >= 0]
+    #     elif obj['type'] == "array":
+    #         obj['value'] = [float(x) for x in obj['value']]
+    #         obj['value'] = [x for i,x in enumerate(obj['value']) if i >= 0]
+    #     elif obj['type'] == "bool":
+    #         obj['value'] = bool(obj['default'])
+    #     obj['paramName'] = obj['name']
+    # rm['user'] = data['creator']
+    # rm['id'] = data['id']
+    # rm['key'] = key
+    # rm['verbose'] = data['verbose']
+    # debugger(rm)
+    # return rm
 
 def np_uncode(x): #test 
     if isinstance(x,np.integer):
