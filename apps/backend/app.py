@@ -255,21 +255,53 @@ def mapper(params):
     
 
 ### UTILS
+def frange(start, stop, step=None):
+    if step == None:
+        step = 1.0
+    count = 0
+    while True:
+        temp = float(start + count * step)
+        if temp >= stop:
+            break
+        yield temp
+        count += 1
+
+def gen_list(otherVar, paramspos):
+    if otherVar['type'] == 'integer':
+        paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(otherVar['step']))])
+    if otherVar['type'] == 'float':
+        paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(otherVar['step']))])
+    if otherVar['type'] == 'string':
+        paramspos.append([(otherVar['name'],otherVar['default'])])
+    if otherVar['type'] == 'boolean':
+        paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
 def gen_configs2(hyperparams):
-    config = {}
-    filenum = 0
-    for i in range(len(hyperparams)):
-        log(hyperparams[i])
-        # cur = hyperparams[i]
-        # config[cur['name']] = cur['default']
-        # for var in hyperparams:
-        #     if cur['name'] != var['name']:
-        #         if cur['type'] == 'integer':
-        #             for val in range(var['min'],var['max'],var['step']):
+    os.mkdir('configFiles')
+    os.chdir('configFiles')
+    configNum = 0
+    for defaultVar in hyperparams:
+        if defaultVar['type'] == 'string':
+            continue
+        paramspos = []
+        default = [(defaultVar['name'],defaultVar['default'])]
+        paramspos.append(default)
+        for otherVar in hyperparams:
+            if otherVar['name'] != defaultVar['name']:
+                gen_list(otherVar,paramspos)
 
-                
-
+        perms = list(itertools.product(*paramspos))
+        for perm in perms:
+            config = configparser.ConfigParser()
+            res = {}
+            for var in perm:
+                res[var[0]] = var[1]
+            config['DEFAULT'] = res
+            with open(f'{configNum}.ini', 'w') as configFile:
+                config.write(configFile)
+                configFile.close()
+            configNum += 1
+        os.chdir('../')
 
 
 def gen_configs(hyperparams):
