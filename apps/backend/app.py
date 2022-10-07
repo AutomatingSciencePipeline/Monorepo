@@ -100,7 +100,7 @@ def recv_experiment():
 
     app.logger.info(f'Downloading file for {id}')
     filepath = experiment['file']
-    app.logger.info(f"downloading {filepath} to ExperimentFiles/{filepath}")
+    app.logger.info(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
 
     os.makedirs(f'ExperimentFiles/{id}')
     os.chdir(f'ExperimentFiles/{id}')
@@ -108,7 +108,8 @@ def recv_experiment():
     filedata = bucket.blob(filepath)
     filedata.download_to_filename(filepath)
 
-    gen_configs2(json.loads(experiment['params'])['params'])
+    app.logger.info(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
+    gen_configs(json.loads(experiment['params'])['params']) 
 
     os.chdir('../..')
     # res = proc_msg(experiment)
@@ -278,7 +279,7 @@ def gen_list(otherVar, paramspos):
     if otherVar['type'] == 'boolean':
         paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
-def gen_configs2(hyperparams):
+def gen_configs(hyperparams):
     os.mkdir('configFiles')
     os.chdir('configFiles')
     configNum = 0
@@ -306,51 +307,51 @@ def gen_configs2(hyperparams):
         os.chdir('..')
 
 
-def gen_configs(hyperparams):
-    debugger(hyperparams)
-    ### Generate hyperparameter configurations
+# def gen_configs(hyperparams):
+#     debugger(hyperparams)
+#     ### Generate hyperparameter configurations
 
-    params_raw = []
-    temp = []
-    for param in hyperparams:
-        debugger(param)
-        if param['type'] == "integer" or param['type'] == "float":
-            for param2 in hyperparams:
-                debugger(param2)
-                if not param['paramName'] == param2["paramName"]:
-                    if param2['type'] == "float" or param2['type'] == "integer":
-                        temp.append([param2['values'][0]])
-                    elif param2['type'] == "array":
-                        temp.append(param2['value'])
-                    elif param2['type'] == "bool":
-                        if param2['value']:
-                            temp.append([True])
-                        else:
-                            temp.append([''])
-                else:
-                    temp.append(np.arange(param['values'][1],param['values'][2]+param['values'][3],param['values'][3]))
-            concat_arrays(params_raw, list(itertools.product(*temp)))
-            temp = []
-        elif param['type'] == "array":
-            for param2 in hyperparams:
-                if not param['paramName'] == param2["paramName"]:
-                    if param2['type'] == "float" or param2['type'] == "integer":
-                        temp.append([param2['values'][0]])
-                    elif param2['type'] == "array":
-                        temp.append(param2['value'])
-                    elif param2['type'] == "bool":
-                        if param2['value']:
-                            temp.append([True])
-                        else:
-                            temp.append([False])
-                else:
-                    temp.append(param2['value'])
-            concat_arrays(params_raw, list(itertools.product(*temp)))
-            temp = []
+#     params_raw = []
+#     temp = []
+#     for param in hyperparams:
+#         debugger(param)
+#         if param['type'] == "integer" or param['type'] == "float":
+#             for param2 in hyperparams:
+#                 debugger(param2)
+#                 if not param['paramName'] == param2["paramName"]:
+#                     if param2['type'] == "float" or param2['type'] == "integer":
+#                         temp.append([param2['values'][0]])
+#                     elif param2['type'] == "array":
+#                         temp.append(param2['value'])
+#                     elif param2['type'] == "bool":
+#                         if param2['value']:
+#                             temp.append([True])
+#                         else:
+#                             temp.append([''])
+#                 else:
+#                     temp.append(np.arange(param['values'][1],param['values'][2]+param['values'][3],param['values'][3]))
+#             concat_arrays(params_raw, list(itertools.product(*temp)))
+#             temp = []
+#         elif param['type'] == "array":
+#             for param2 in hyperparams:
+#                 if not param['paramName'] == param2["paramName"]:
+#                     if param2['type'] == "float" or param2['type'] == "integer":
+#                         temp.append([param2['values'][0]])
+#                     elif param2['type'] == "array":
+#                         temp.append(param2['value'])
+#                     elif param2['type'] == "bool":
+#                         if param2['value']:
+#                             temp.append([True])
+#                         else:
+#                             temp.append([False])
+#                 else:
+#                     temp.append(param2['value'])
+#             concat_arrays(params_raw, list(itertools.product(*temp)))
+#             temp = []
     
-    debugger(params_raw)
+#     debugger(params_raw)
 
-    return enumerate(list(params_raw))
+#     return enumerate(list(params_raw))
     
 def concat_arrays(arr1, arr2): #test 
     for x in arr2:
