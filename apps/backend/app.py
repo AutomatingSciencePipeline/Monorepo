@@ -111,6 +111,10 @@ def recv_experiment():
     app.logger.info(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
     gen_configs(json.loads(experiment['params'])['params']) 
 
+    # os.chmod(filepath, 0o777)
+    res = run_experiment(filepath,f'configFiles/{0}.ini')
+    app.logger.info(f"result from running first experiment: {res}")
+
     os.chdir('../..')
     # res = proc_msg(experiment)
     # log(gen_configs(res['params']))
@@ -258,6 +262,19 @@ def mapper(params):
     
 
 ### UTILS
+def run_experiment(experiment_path, config_path):
+    #make sure that the cwd is ExperimentsFiles/{ExperimentId}
+    app.logger.info(f"Current director {os.getcwd()}")
+    with Popen(["python",experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+        try:
+            data = p.communicate()
+            if data[1]:
+                app.logger.info(f'errors returned from pipe is {data[1]}')
+        except Exception as e:
+            app.logger.info(e)
+        app.logger.info(f"data: {data[0]}")
+        return(data[0])
+
 def frange(start, stop, step=None):
     if step == None:
         step = 1.0
@@ -276,7 +293,7 @@ def gen_list(otherVar, paramspos):
         paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(otherVar['step']))])
     if otherVar['type'] == 'string':
         paramspos.append([(otherVar['name'],otherVar['default'])])
-    if otherVar['type'] == 'boolean':
+    if otherVar['type'] == 'bool':
         paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
 def gen_configs(hyperparams):
@@ -304,7 +321,7 @@ def gen_configs(hyperparams):
                 config.write(configFile)
                 configFile.close()
             configNum += 1
-        os.chdir('..')
+    os.chdir('..')
 
 
 # def gen_configs(hyperparams):
