@@ -83,7 +83,6 @@ class DEBUG:
 
 debugger = DEBUG()
 debugger()
-
 @app.post("/experiment")
 def recv_experiment():
     time.sleep(1)
@@ -98,22 +97,32 @@ def recv_experiment():
     experiment['id'] = id
     app.logger.info(f"Experiment info {experiment}")
 
+    os.makedirs(f'ExperimentFiles/{id}')
+    os.chdir(f'ExperimentFiles/{id}')
     app.logger.info(f'Downloading file for {id}')
     filepath = experiment['file']
     app.logger.info(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
-
-    os.makedirs(f'ExperimentFiles/{id}')
-    os.chdir(f'ExperimentFiles/{id}')
-    # os.chdir('GLADOS_HOME/exps')
     filedata = bucket.blob(filepath)
     filedata.download_to_filename(filepath)
 
     app.logger.info(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
-    gen_configs(json.loads(experiment['params'])['params']) 
+    expToRun = gen_configs(json.loads(experiment['params'])['params']) 
 
-    # os.chmod(filepath, 0o777)
-    res = run_experiment(filepath,f'configFiles/{0}.ini')
-    app.logger.info(f"result from running first experiment: {res}")
+    app.logger.info(f"Running Experiment {id}")
+    with open('results.csv', 'w') as expResults:
+        writer = csv.writer(expResults)
+        writer.writerow(["Experiment Run", "Result"])
+        firstRun = run_experiment(filepath,f'configFiles/{0}.ini')
+        if firstRun == "ERROR":
+            writer.writerow([0,"Error"])
+            app.logger.info("Experiment {id} ran into an error while running aborting")
+        else:
+            app.logger.info(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
+            writer.writerow(["0",firstRun])
+            for i in range(1,expToRun):
+                writer.writerow([i, run_experiment(filepath,f'configFiles/{i}.ini')])
+            app.logger.info(f"Finished running Experiment {id} exiting")
+            
 
     os.chdir('../..')
     # res = proc_msg(experiment)
@@ -264,16 +273,19 @@ def mapper(params):
 ### UTILS
 def run_experiment(experiment_path, config_path):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
-    app.logger.info(f"Current director {os.getcwd()}")
+    # app.logger.info(f"Current directory {os.getcwd()}")
     with Popen(["python",experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
         try:
             data = p.communicate()
             if data[1]:
                 app.logger.info(f'errors returned from pipe is {data[1]}')
+                return "ERROR"
         except Exception as e:
             app.logger.info(e)
-        app.logger.info(f"data: {data[0]}")
-        return(data[0])
+            return "ERROR"
+        result = data[0].split('\n')[0]
+        app.logger.info(f"result data: {result}")
+        return(result)
 
 def frange(start, stop, step=None):
     if step == None:
@@ -322,54 +334,9 @@ def gen_configs(hyperparams):
                 configFile.close()
             configNum += 1
     os.chdir('..')
+    return configNum - 1
 
 
-# def gen_configs(hyperparams):
-#     debugger(hyperparams)
-#     ### Generate hyperparameter configurations
-
-#     params_raw = []
-#     temp = []
-#     for param in hyperparams:
-#         debugger(param)
-#         if param['type'] == "integer" or param['type'] == "float":
-#             for param2 in hyperparams:
-#                 debugger(param2)
-#                 if not param['paramName'] == param2["paramName"]:
-#                     if param2['type'] == "float" or param2['type'] == "integer":
-#                         temp.append([param2['values'][0]])
-#                     elif param2['type'] == "array":
-#                         temp.append(param2['value'])
-#                     elif param2['type'] == "bool":
-#                         if param2['value']:
-#                             temp.append([True])
-#                         else:
-#                             temp.append([''])
-#                 else:
-#                     temp.append(np.arange(param['values'][1],param['values'][2]+param['values'][3],param['values'][3]))
-#             concat_arrays(params_raw, list(itertools.product(*temp)))
-#             temp = []
-#         elif param['type'] == "array":
-#             for param2 in hyperparams:
-#                 if not param['paramName'] == param2["paramName"]:
-#                     if param2['type'] == "float" or param2['type'] == "integer":
-#                         temp.append([param2['values'][0]])
-#                     elif param2['type'] == "array":
-#                         temp.append(param2['value'])
-#                     elif param2['type'] == "bool":
-#                         if param2['value']:
-#                             temp.append([True])
-#                         else:
-#                             temp.append([False])
-#                 else:
-#                     temp.append(param2['value'])
-#             concat_arrays(params_raw, list(itertools.product(*temp)))
-#             temp = []
-    
-#     debugger(params_raw)
-
-#     return enumerate(list(params_raw))
-    
 def concat_arrays(arr1, arr2): #test 
     for x in arr2:
         arr1.append(x)
@@ -411,35 +378,6 @@ def proc_msg(msg):
     log(rm)
     # debugger(rm)
     return rm
-
-
-    ## for now, this function is hardcoding some things, but it's no biggie
-    # payload = msg['experiment']
-    # id = payload['id']
-    # key = payload['key']
-    # data = supabase.table("experiments").select("*").eq("id", id).execute()
-    # assert len(data.data) > 0, f'Error retrieving experiment {id}'
-    # data = data.data[0]
-    # # app.logger.info(f'{data[0]}')
-    # app.logger.info(f'[DEBUG]:\tData is equal to {data}')
-    # # app.logging.info("[DEBUG]: data is equal to {}".format(data))
-    # rm = json.loads(data['parameters'])
-    # for obj in rm['params']:
-    #     if obj['type'] == "integer" or obj['type'] == "float":
-    #         obj['values'] = [float(x) for x in [obj['default'],obj['min'], obj['max'], obj['step']]]
-    #         obj['values'] = [x for i,x in enumerate(obj['values']) if i >= 0]
-    #     elif obj['type'] == "array":
-    #         obj['value'] = [float(x) for x in obj['value']]
-    #         obj['value'] = [x for i,x in enumerate(obj['value']) if i >= 0]
-    #     elif obj['type'] == "bool":
-    #         obj['value'] = bool(obj['default'])
-    #     obj['paramName'] = obj['name']
-    # rm['user'] = data['creator']
-    # rm['id'] = data['id']
-    # rm['key'] = key
-    # rm['verbose'] = data['verbose']
-    # debugger(rm)
-    # return rm
 
 def np_uncode(x): #test 
     if isinstance(x,np.integer):
