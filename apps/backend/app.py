@@ -83,10 +83,22 @@ class DEBUG:
 
 debugger = DEBUG()
 debugger()
+
+runner = ProcessPoolExecutor(1)
+
 @app.post("/experiment")
 def recv_experiment():
+    runner.submit(run_batch,request.get_json())
+    # res = proc_msg(experiment)
+    # log(gen_configs(res['params']))
+    # exp = request.get_json()
+    # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
+    # exp = proc_msg(exp)
+    # GlobalLoadBalancer.submit_experiment(exp)
+    return 'OK'
+
+def run_batch(data):
     time.sleep(1)
-    data = request.get_json()
     app.logger.info(data)
     experiments = db.collection('Experiments')
 
@@ -122,16 +134,7 @@ def recv_experiment():
             for i in range(1,expToRun):
                 writer.writerow([i, run_experiment(filepath,f'configFiles/{i}.ini')])
             app.logger.info(f"Finished running Experiment {id} exiting")
-            
-
     os.chdir('../..')
-    # res = proc_msg(experiment)
-    # log(gen_configs(res['params']))
-    # exp = request.get_json()
-    # app.logger.info(f'[EXP RECEIVED]:\tExperiment {exp} received.')
-    # exp = proc_msg(exp)
-    # GlobalLoadBalancer.submit_experiment(exp)
-    return 'OK'
 
 ### GLB
 class GLB(object):
