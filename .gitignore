@@ -2,3 +2,5 @@ node_modules
 GLADOS_HOME
 __pycache__
 .github
+services/supabase/.env
+.env
