@@ -4,3 +4,4 @@ volumes/storage
 app
 .env
 test.http
+services/supabase/.env
