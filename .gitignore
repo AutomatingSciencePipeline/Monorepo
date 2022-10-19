@@ -1,4 +1,2 @@
-node_modules
-GLADOS_HOME
-__pycache__
-.github
+.DS_Store
+.env
