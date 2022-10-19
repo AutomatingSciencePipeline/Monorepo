@@ -13,6 +13,9 @@ import {
 	SortAscendingIcon,
 	StarIcon,
 } from '@heroicons/react/solid';
+import {
+	CheckBadgeIcon
+} from '@heroicons/react/solid';
 import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
 import { Logo } from './utils';
 import classNames from 'classnames';
