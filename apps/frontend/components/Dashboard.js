@@ -13,7 +13,7 @@ import {
 	BarsArrowUpIcon,
 	StarIcon
 
-} from 'heroiconsv2/24/solid';
+} from '@heroicons/react/24/solid';
 import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
 import { Logo } from './utils';
 import classNames from 'classnames';

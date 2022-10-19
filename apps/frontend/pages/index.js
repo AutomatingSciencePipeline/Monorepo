@@ -5,8 +5,8 @@ import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import { Fragment } from 'react';
 import { Popover, Transition } from '@headlessui/react';
-import { Bars3Icon } from 'heroiconsv2/24/outline';
-import { ChevronRightIcon } from 'heroiconsv2/24/solid';
+import { Bars3Icon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
 import {
 	AiOutlineGoogle,
