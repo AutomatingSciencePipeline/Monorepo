@@ -5,17 +5,15 @@ import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import {
-	BadgeCheckIcon,
+	CheckBadgeIcon,
 	ChevronDownIcon,
 	ChevronRightIcon,
-	CollectionIcon,
-	SearchIcon,
-	SortAscendingIcon,
-	StarIcon,
-} from '@heroicons/react/solid';
-import {
-	CheckBadgeIcon
-} from '@heroicons/react/solid';
+	RectangleStackIcon,
+	MagnifyingGlassIcon,
+	BarsArrowUpIcon,
+	StarIcon
+
+} from 'heroiconsv2/24/solid';
 import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
 import { Logo } from './utils';
 import classNames from 'classnames';
@@ -268,7 +266,7 @@ const SearchBar = (props) => {
 				</label>
 				<div className='relative text-blue-200 focus-within:text-gray-400'>
 					<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-						<SearchIcon className='h-5 w-5' aria-hidden='true' />
+						<MagnifyingGlassIcon className='h-5 w-5' aria-hidden='true' />
 					</div>
 					<input
 						id='search'
@@ -385,7 +383,7 @@ export default function Dashboard({ user, experimentss }) {
 										{/* Meta info */}
 										<div className='flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6'>
 											<div className='flex items-center space-x-2'>
-												<BadgeCheckIcon
+												<CheckBadgeIcon
 													className='h-5 w-5 text-gray-400'
 													aria-hidden='true'
 												/>
@@ -394,7 +392,7 @@ export default function Dashboard({ user, experimentss }) {
 												</span>
 											</div>
 											<div className='flex items-center space-x-2'>
-												<CollectionIcon
+												<RectangleStackIcon
 													className='h-5 w-5 text-gray-400'
 													aria-hidden='true'
 												/>
@@ -415,7 +413,7 @@ export default function Dashboard({ user, experimentss }) {
 									<h1 className='flex-1 text-lg font-medium'>Projects</h1>
 									<Menu as='div' className='relative'>
 										<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
-											<SortAscendingIcon
+											<BarsArrowUpIcon
 												className='mr-3 h-5 w-5 text-gray-400'
 												aria-hidden='true'
 											/>

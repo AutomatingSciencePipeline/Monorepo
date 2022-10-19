@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { Switch, ActionIcon, Center } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
-import { TrashIcon as Trash } from '@heroicons/react/solid';
+import { TrashIcon as Trash } from 'heroiconsv2/24/solid';
 
 const Parameter = ({ form, type, index, ...rest }) => {
 	const remains = {
