@@ -16,6 +16,7 @@
 		"@heroicons/react": "^2.0.12",
 		"@mantine/core": "^4.2.12",
 		"@mantine/dropzone": "^4.2.12",
+		"@mantine/hooks": "^4.2.12",
 		"@mantine/form": "^4.2.12",
 		"@prisma/client": "^3.13.0",
 		"@supabase/supabase-js": "^1.35.7",
