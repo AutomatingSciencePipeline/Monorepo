@@ -134,6 +134,7 @@ def run_batch(data):
             for i in range(1,expToRun):
                 writer.writerow([i, run_experiment(filepath,f'configFiles/{i}.ini')])
             app.logger.info(f"Finished running Experiment {id} exiting")
+    expRef.update({'finished':True})
     os.chdir('../..')
 
 ### GLB

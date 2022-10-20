@@ -1,6 +1,7 @@
 import NewExp from './NewExp';
 import { useAuth } from '../supabase/auth';
-import { subscribeToExp, listenToNew } from '../supabase/db';
+// import { listenToNew } from '../supabase/db';
+import { subscribeToExp, listenToExperiments } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
@@ -190,9 +191,9 @@ const Navbar = (props) => {
 
 
 const ExpLog = ({projectinit, uid}) => {
-    
     const [project, setProject] = useState(projectinit);
-    subscribeToExp(project.id, uid, setProject)
+    // subscribeToExp(project.id, uid, setProject)
+	subscribeToExp(project['expId'],setProject)
     return (
 						<div className='flex items-center justify-between space-x-4'>
 							<div className='min-w-0 space-y-3'>
@@ -286,7 +287,8 @@ const SearchBar = (props) => {
 export default function Dashboard({ user, experimentss }) {
     const [experiments, setExperiments] = useState(experimentss);
 
-    listenToNew((payload)=> setExperiments([...experiments, payload]))
+    // listenToNew((payload)=> setExperiments([...experiments, payload]))
+	listenToExperiments(user.id,(newExperimentList)=> setExperiments(newExperimentList))
 
 	const [formState, setFormState] = useState(-1);
 	const [label, setLabel] = useState('New Experiment');

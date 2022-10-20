@@ -166,6 +166,7 @@ services:
         FLASK_DEBUG: null
         ANON_KEY: ${ANON_KEY}
         SUPA_URL: http://supabase-kong:8000
+        creds: ${FIREBASE_KEY}
       volumes:
           - ./app/GLADOS_HOME:/app/GLADOS_HOME
           - ./app/GLADOS_HOME/incoming:/app/GLADOS_HOME/incoming
