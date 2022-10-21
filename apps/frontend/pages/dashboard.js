@@ -46,7 +46,7 @@ export async function getServerSideProps({ req }) {
 	var exps = []
 	queryResults.forEach(doc =>exps.push(doc.data()))
 	console.log(exps)
-	return { props: { user, experiments: exps } };
+	return { props: { user, experiments: JSON.parse(JSON.stringify(exps)) } };
 }
 
 export default Dashboard;

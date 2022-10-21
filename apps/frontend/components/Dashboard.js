@@ -193,12 +193,16 @@ const Navbar = (props) => {
 const ExpLog = ({projectinit, uid}) => {
     const [project, setProject] = useState(projectinit);
     // subscribeToExp(project.id, uid, setProject)
-	subscribeToExp(project['expId'],setProject)
+	useEffect( () => {
+		const unsub = subscribeToExp(project['expId'],setProject)
+		return function cleanup() {unsub()}
+	},[]
+	)
     return (
 						<div className='flex items-center justify-between space-x-4'>
 							<div className='min-w-0 space-y-3'>
 								<div className='flex items-center space-x-3'>
-									<span
+									{/* <span
 										className={classNames(
 											 `bg-${{COMPLETE: 'gray', QUEUED: 'yellow', DISPATCHED: 'blue', RUNNING: 'green'}[project['status']]}-100`, 
 											'h-4 w-4 rounded-full flex items-center justify-center'
@@ -211,7 +215,7 @@ const ExpLog = ({projectinit, uid}) => {
 												'h-2 w-2 rounded-full'
 											)}
 										/>
-									</span>
+									</span> */}
 
 									<span className='block'>
 										<h2 className='text-sm font-medium'>
@@ -245,11 +249,11 @@ const ExpLog = ({projectinit, uid}) => {
 							</div>
 							<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 								<p className='flex items-center space-x-4'>    
-									<span className='font-mono text-red-500'>FAIL: {project.percent_fail}</span>
-									<span className='font-mono'>SUCCESS: {project.percent_success}</span>
+									<span className='font-mono text-red-500'>FAIL: {project['fails']}</span>
+									<span className='font-mono'>SUCCESS: {project['passes']}</span>
 								</p>
 								<p className='flex text-gray-500 text-sm space-x-2'>
-									<span>Deployed {new Date(project.created_at).toUTCString()}</span>
+									<span>Deployed {new Date(project['created']).toString()}</span>
 									<span>{project.location}</span>
 								</p>
 							</div>
@@ -288,7 +292,11 @@ export default function Dashboard({ user, experimentss }) {
     const [experiments, setExperiments] = useState(experimentss);
 
     // listenToNew((payload)=> setExperiments([...experiments, payload]))
-	listenToExperiments(user.id,(newExperimentList)=> setExperiments(newExperimentList))
+	useEffect(() => {
+		const unsub = listenToExperiments(user.id,(newExperimentList)=> setExperiments(newExperimentList))
+		return function cleanup() {unsub()}
+	},[user])
+	
 
 	const [formState, setFormState] = useState(-1);
 	const [label, setLabel] = useState('New Experiment');

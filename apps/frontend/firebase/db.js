@@ -1,7 +1,7 @@
 // import supabase from './client';
 // import admin from './admin';
 import { initializeApp } from "firebase/app";
-import { getFirestore, updateDoc } from "firebase/firestore";
+import { getFirestore, updateDoc, serverTimestamp } from "firebase/firestore";
 import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 
@@ -31,6 +31,9 @@ export const submitExperiment = async (values, user) => {
 			description: values.description,
 			verbose: values.verbose,
 			workers: values.nWorkers,
+			expId: newExperiment.id,
+			finished: false,
+			created: Date.now(),
 			params: JSON.stringify({
 							params: values.parameters,
 						})
@@ -45,9 +48,7 @@ export const uploadExec = async (id, file) => {
 	uploadBytes(fileRef, file).then((snapshot) => {
 		const experimentRef = doc(db,"Experiments",id)
 		updateDoc(experimentRef,{
-			file: "experiment"+id,
-			expId: id,
-			finished: false
+			file: "experiment"+id
 		}).then(() => {
 			console.log("Uploaded file for experiment " + id)
 			return true
@@ -79,11 +80,12 @@ export const subscribeToExp = (id, callback) => {
 	// snapshot.forEach(doc => result.push(doc.data()))
 	// 	callback(result[0])
 	// })
-	onSnapshot(doc(db,"Experiments",id), doc =>{
-		console.log("UPDATED!!!!!!!!!!!!!!!!!!!!",doc.data()['finished'])
+
+
+	const unsubscribe = onSnapshot(doc(db,"Experiments",id), doc =>{
+		console.log(`exp ${id} has been updated: `,doc.data())
 		 callback(doc.data())})
-      
-      
+	return unsubscribe
 } 
 
 
@@ -100,4 +102,5 @@ export const listenToExperiments = (uid, callback) => {
 		snapshot.forEach(doc => result.push(doc.data()))
 		callback(result)
 	})
+	return unsubscribe
 }
