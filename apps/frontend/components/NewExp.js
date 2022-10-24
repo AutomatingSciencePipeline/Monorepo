@@ -237,6 +237,8 @@ const DispatchStep = ({ id, form, user, ...props }) => {
 			{(status) =>  dropzoneKids(status)}
 		</Dropzone>
 	);
+
+	// EXAMPLE MANTINE DROPZONE
 	// const theme = useMantineTheme();
 	// return (
 	//   <Dropzone
@@ -291,6 +293,7 @@ const DispatchStep = ({ id, form, user, ...props }) => {
 	//   </Dropzone>
 	// );
 	
+	// END EXAMPLE MANTINE DROPZONE
 };
 
 const NewExp = ({ user, formState, setFormState, ...rest }) => {
