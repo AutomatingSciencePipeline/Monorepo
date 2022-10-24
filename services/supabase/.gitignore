@@ -3,4 +3,3 @@ volumes/db/init/data.sql
 volumes/storage
 app
 test.http
-services/supabase/.env
