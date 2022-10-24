@@ -4,12 +4,17 @@ import { Upload, X, File } from 'tabler-icons-react';
 import { Toggle } from './utils';
 
 import Parameter from './Parameter';
-import { Code, Text } from '@mantine/core';
+import { Code, Text, useMantineTheme, Group } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
+
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
 import {v4 as uuid4} from 'uuid'
+
+import {
+	CheckBadgeIcon
+} from '@heroicons/react/24/solid';
 
 // import { submitExperiment, uploadExec } from '../supabase/db';
 import { submitExperiment, uploadExec } from '../firebase/db';
@@ -193,51 +198,107 @@ const UploadIcon = ({ status }) => {
 };
 
 const DispatchStep = ({ id, form, user, ...props }) => {
-	return (
-		<Dropzone
-			onDrop={async (file) => {
-				// console.log()
-				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values,user).then( (expId) =>{
-					console.log(expId)
+	// return (
+	// 	<Dropzone
+	// 		onDrop={async (file) => {
+	// 			// console.log()
+	// 			console.log("Submitting Experiment!!!")
+	// 			submitExperiment(form.values,user).then( (expId) =>{
+	// 				console.log(expId)
 
-					console.log(`Uploading file for ${expId}`)
-					const res = uploadExec(expId, file[0]);
-					if (res == null) {
-						throw new Error('Upload failed')
-					} else{
-						console.log("Handing experiment " + expId + " to the backend")
-						fetch(`/api/experiments/${expId}`,{
-							method: 'POST',
-							headers: new Headers({ 'Content-Type': 'application/json'}),
-							credentials: 'same-origin',
-							body: JSON.stringify({id: expId})
-						})
-					}
-				}).catch( error => console.log(error))
+	// 				console.log(`Uploading file for ${expId}`)
+	// 				const res = uploadExec(expId, file[0]);
+	// 				if (res == null) {
+	// 					throw new Error('Upload failed')
+	// 				} else{
+	// 					console.log("Handing experiment " + expId + " to the backend")
+	// 					fetch(`/api/experiments/${expId}`,{
+	// 						method: 'POST',
+	// 						headers: new Headers({ 'Content-Type': 'application/json'}),
+	// 						credentials: 'same-origin',
+	// 						body: JSON.stringify({id: expId})
+	// 					})
+	// 				}
+	// 			}).catch( error => console.log(error))
 				
 
-				// const {Key} = await uploadExec(id, file[0])
-                // if (!Key) {
-                //     throw new Error('Upload failed')
-                // } else {
-                //     console.log(Key);
-                //     fetch(`/api/experiments/${id}`,{
-                //         method: 'POST',
-                //         headers: new Headers({ 'Content-Type': 'application/json'}),
-                //         credentials: 'same-origin',
-                //         body: JSON.stringify({key: Key})
-                //     })
-                // }
-			}}
-			onReject={(file) => console.log('NOPE, file rejected', file)}
-			multiple={false}
-			maxSize={3 * 1024 ** 2}
-			className='flex-1 flex flex-col justify-center m-4 items-center'
-		>
-			{(status) =>  dropzoneKids(status)}
-		</Dropzone>
+	// 			// const {Key} = await uploadExec(id, file[0])
+    //             // if (!Key) {
+    //             //     throw new Error('Upload failed')
+    //             // } else {
+    //             //     console.log(Key);
+    //             //     fetch(`/api/experiments/${id}`,{
+    //             //         method: 'POST',
+    //             //         headers: new Headers({ 'Content-Type': 'application/json'}),
+    //             //         credentials: 'same-origin',
+    //             //         body: JSON.stringify({key: Key})
+    //             //     })
+    //             // }
+	// 		}}
+	// 		onReject={(file) => console.log('NOPE, file rejected', file)}
+	// 		maxSize={3 * 1024 ** 2}
+	// 		className='flex-1 flex flex-col justify-center m-4 items-center'
+	// 		accept={{
+	// 			'text/plain': ['.py', '.java']
+	// 		  }}
+	// 	>
+	// 		{(status) =>  dropzoneKids(status)}
+	// 	</Dropzone>
+	// );
+	const theme = useMantineTheme();
+	return (
+	  <Dropzone
+		onDrop={async (file) => {
+			// console.log()
+			console.log("Submitting Experiment!!!")
+			submitExperiment(form.values,user).then( (expId) =>{
+				console.log(expId)
+
+				console.log(`Uploading file for ${expId}`)
+				const res = uploadExec(expId, file[0]);
+				if (res == null) {
+					throw new Error('Upload failed')
+				} else{
+					console.log("Handing experiment " + expId + " to the backend")
+					fetch(`/api/experiments/${expId}`,{
+						method: 'POST',
+						headers: new Headers({ 'Content-Type': 'application/json'}),
+						credentials: 'same-origin',
+						body: JSON.stringify({id: expId})
+					})
+				}
+			}).catch( error => console.log(error))
+ 		}}
+		onReject={(files) => console.log('rejected files', files)}
+		maxSize={3 * 1024 ** 2}
+		className='flex-1 flex flex-col justify-center m-4 items-center'
+		accept={{
+			'text/plain': ['.java', '.py'],
+		  }}
+	  >
+		<Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
+		  <Dropzone.Accept>
+		  <CheckBadgeIcon
+			className='h-5 w-5 text-gray-400'
+			aria-hidden='true'/>
+		  </Dropzone.Accept>
+		  <Dropzone.Reject>
+		  </Dropzone.Reject>
+		  <Dropzone.Idle>
+		  </Dropzone.Idle>
+  
+		  <div>
+			<Text size="xl" inline>
+			  Drag project file here (.py, .java) or click to select files
+			</Text>
+			<Text size="sm" color="dimmed" inline mt={7}>
+			  Let's revolutionize science!
+			</Text>
+		  </div>
+		</Group>
+	  </Dropzone>
 	);
+	
 };
 
 const NewExp = ({ user, formState, setFormState, ...rest }) => {
