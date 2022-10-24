@@ -1,9 +1,10 @@
 // import supabase from './client';
 // import admin from './admin';
 import { initializeApp } from "firebase/app";
-import { getFirestore, updateDoc } from "firebase/firestore";
-import { collection, setDoc, doc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getFirestore, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { createElement } from "react";
 
 const firebaseConfig = {
 	apiKey: "AIzaSyDj-Y8FFq2C80ZSVUVAWd3eqcmSzXMHXus",
@@ -23,24 +24,6 @@ const storage = getStorage(app);
 
 
 export const submitExperiment = async (values, user) => {
-	// console.log('Making submission');
-	// const { data, error } = await supabase.from('experiments').insert([
-	// 	{
-	// 		creator: user.id,
-	// 		name: values.name,
-	// 		description: values.description,
-	// 		verbose: values.verbose,
-	// 		n_workers: values.nWorkers,
-	// 		parameters: JSON.stringify({
-	// 			params: values.parameters,
-	// 		}),
-	// 	},
-	// ]);
-	// if (error) {
-	// 	throw error;
-	// } else {
-	// 	return { data };
-	// }
 	const newExperiment = doc(experiments)
 
 	setDoc(newExperiment,{
@@ -49,6 +32,9 @@ export const submitExperiment = async (values, user) => {
 			description: values.description,
 			verbose: values.verbose,
 			workers: values.nWorkers,
+			expId: newExperiment.id,
+			finished: false,
+			created: Date.now(),
 			params: JSON.stringify({
 							params: values.parameters,
 						})
@@ -73,43 +59,36 @@ export const uploadExec = async (id, file) => {
 		console.log(error)
 		return false
 	} )
-
-	// try {
-	// 	const filePath = `EXP_${id}/${file.name}`;
-
-	// 	const { error, data } = await supabase.storage
-	// 		.from('experiment_files')
-	// 		.upload(filePath, file);
-        
-	// 	if (error) {
-	// 		throw error;
-	// 	} else {
-	// 		return data;
-	// 	}
-	// } catch (error) {
-	// 	alert(error.message);
-	// } finally {
-	// 	// setUploading(false);
-	// }
 };
 
+export const downloadExp = (event) => {
+	const id = event.target.getAttribute('data-id')
+	console.log(`Downloading results for ${id}`)
+	const fileRef = ref(storage,`results/result${id}.csv`)
+	getDownloadURL(fileRef).then(url => {
+		const anchor = document.createElement('a')
+		anchor.href = url
+		anchor.download = `result${id}.csv`
+		document.body.appendChild(anchor)
+		anchor.click()
+		document.body.removeChild(anchor)
+	}).catch(error => console.log(error))
+} 
 
-export const subscribeToExp = (id, uid, callback) => {
-    const experiments = supabase
-      .from(`experiments:creator=eq.${uid},id=eq.${id}`)
-      .on('*', payload => {
-        console.log('changes', payload);
-        callback(payload)
-      })
-      .subscribe()
-      
+export const subscribeToExp = (id, callback) => {
+	const unsubscribe = onSnapshot(doc(db,"Experiments",id), doc =>{
+		console.log(`exp ${id} has been updated: `,doc.data())
+		 callback(doc.data())})
+	return unsubscribe
 } 
 
 
-export const listenToNew = (callback) => {
-    const experiments = supabase.from('experiments').on('INSERT',payload=> {
-        console.log(payload)
-        console.log(payload.new);
-        callback(payload.new)
-    }).subscribe()
+export const listenToExperiments = (uid, callback) => {
+	const q = query(experiments, where("creator","==",uid))
+	const unsubscribe = onSnapshot(q, (snapshot) => {
+		var result = []
+		snapshot.forEach(doc => result.push(doc.data()))
+		callback(result)
+	})
+	return unsubscribe
 }
