@@ -125,7 +125,6 @@ def run_batch(data):
     with open('results.csv', 'w') as expResults:
         writer = csv.writer(expResults)
         writer.writerow(["Experiment Run", "Result","Parameters"])
-        # writer.writerow(["Experiment Run", "Result"])
         firstRun = run_experiment(filepath,f'configFiles/{0}.ini')
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
