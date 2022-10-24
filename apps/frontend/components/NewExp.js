@@ -237,63 +237,6 @@ const DispatchStep = ({ id, form, user, ...props }) => {
 			{(status) =>  dropzoneKids(status)}
 		</Dropzone>
 	);
-
-	// EXAMPLE MANTINE DROPZONE
-	// const theme = useMantineTheme();
-	// return (
-	//   <Dropzone
-	// 	onDrop={async (file) => {
-	// 		// console.log()
-	// 		console.log("Submitting Experiment!!!")
-	// 		submitExperiment(form.values,user).then( (expId) =>{
-	// 			console.log(expId)
-
-	// 			console.log(`Uploading file for ${expId}`)
-	// 			const res = uploadExec(expId, file[0]);
-	// 			if (res == null) {
-	// 				throw new Error('Upload failed')
-	// 			} else{
-	// 				console.log("Handing experiment " + expId + " to the backend")
-	// 				fetch(`/api/experiments/${expId}`,{
-	// 					method: 'POST',
-	// 					headers: new Headers({ 'Content-Type': 'application/json'}),
-	// 					credentials: 'same-origin',
-	// 					body: JSON.stringify({id: expId})
-	// 				})
-	// 			}
-	// 		}).catch( error => console.log(error))
- 	// 	}}
-	// 	onReject={(files) => console.log('rejected files', files)}
-	// 	maxSize={3 * 1024 ** 2}
-	// 	className='flex-1 flex flex-col justify-center m-4 items-center'
-	// 	accept={{
-	// 		'text/plain': ['.java', '.py'],
-	// 	  }}
-	//   >
-	// 	<Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
-	// 	  <Dropzone.Accept>
-	// 	  <CheckBadgeIcon
-	// 		className='h-5 w-5 text-gray-400'
-	// 		aria-hidden='true'/>
-	// 	  </Dropzone.Accept>
-	// 	  <Dropzone.Reject>
-	// 	  </Dropzone.Reject>
-	// 	  <Dropzone.Idle>
-	// 	  </Dropzone.Idle>
-  
-	// 	  <div>
-	// 		<Text size="xl" inline>
-	// 		  Drag project file here (.py, .java) or click to select files
-	// 		</Text>
-	// 		<Text size="sm" color="dimmed" inline mt={7}>
-	// 		  Let's revolutionize science!
-	// 		</Text>
-	// 	  </div>
-	// 	</Group>
-	//   </Dropzone>
-	// );
-	
-	// END EXAMPLE MANTINE DROPZONE
 };
 
 const NewExp = ({ user, formState, setFormState, ...rest }) => {
