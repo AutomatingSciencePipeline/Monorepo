@@ -162,7 +162,6 @@ const ConfirmationStep = ({ form, ...props }) => {
 	);
 };
 const dropzoneKids = (status) => {
-    // console.log(status);
 	if (status.accepted) {
 		return <UploadIcon className={'bg-green-500'} status={status} />;
 	}

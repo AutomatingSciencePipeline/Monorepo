@@ -133,10 +133,8 @@ def run_batch(data):
         else:
             app.logger.info(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
             writer.writerow(["0",firstRun,get_configs('configFiles/0.ini')])
-            # writer.writerow(["0",firstRun])
             for i in range(1,expToRun):
                 writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini'),get_configs(f'configFiles/{i}.ini')])
-                # writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')])
                 if res != "ERROR":
                     passes +=1
                 else:
@@ -327,11 +325,9 @@ def gen_list(otherVar, paramspos):
         paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
 def get_configs(configfile):
-    # os.chdir('configFiles')
     config = configparser.ConfigParser()
     config.read(configfile)
     res = [f' {key} = {config["DEFAULT"][key]} 'for key in config['DEFAULT'].keys()]
-    # os.chdir('..')
     return res
 
 def gen_configs(hyperparams):

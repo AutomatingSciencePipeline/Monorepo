@@ -1,6 +1,5 @@
 import NewExp from './NewExp';
 import { useAuth } from '../supabase/auth';
-// import { listenToNew } from '../supabase/db';
 import { subscribeToExp, listenToExperiments, downloadExp } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
@@ -178,7 +177,6 @@ const Navbar = (props) => {
 
 const ExpLog = ({projectinit, uid}) => {
     const [project, setProject] = useState(projectinit);
-    // subscribeToExp(project.id, uid, setProject)
 	useEffect( () => {
 		const unsub = subscribeToExp(project['expId'],setProject)
 		return function cleanup() {unsub()}
@@ -260,7 +258,6 @@ const SearchBar = (props) => {
 export default function Dashboard({ user, experimentss }) {
     const [experiments, setExperiments] = useState(experimentss);
 
-    // listenToNew((payload)=> setExperiments([...experiments, payload]))
 	useEffect(() => {
 		const unsub = listenToExperiments(user.id,(newExperimentList)=> setExperiments(newExperimentList))
 		return function cleanup() {unsub()}
