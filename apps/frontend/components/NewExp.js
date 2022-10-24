@@ -10,13 +10,6 @@ import { Dropzone } from '@mantine/dropzone';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
-import {v4 as uuid4} from 'uuid'
-
-import {
-	CheckBadgeIcon
-} from '@heroicons/react/24/solid';
-
-// import { submitExperiment, uploadExec } from '../supabase/db';
 import { submitExperiment, uploadExec } from '../firebase/db';
 let testId = null;
 const Steps = ({ steps }) => {
@@ -170,7 +163,6 @@ const ConfirmationStep = ({ form, ...props }) => {
 	);
 };
 const dropzoneKids = (status) => {
-    console.log(status);
 	if (status.accepted) {
 		return <UploadIcon className={'bg-green-500'} status={status} />;
 	}
