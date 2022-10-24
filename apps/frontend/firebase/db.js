@@ -3,7 +3,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, updateDoc, serverTimestamp } from "firebase/firestore";
 import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { createElement } from "react";
 
 const firebaseConfig = {
 	apiKey: "AIzaSyDj-Y8FFq2C80ZSVUVAWd3eqcmSzXMHXus",
@@ -60,28 +61,21 @@ export const uploadExec = async (id, file) => {
 	} )
 };
 
+export const downloadExp = (event) => {
+	const id = event.target.getAttribute('data-id')
+	console.log(`Downloading results for ${id}`)
+	const fileRef = ref(storage,`results/result${id}.csv`)
+	getDownloadURL(fileRef).then(url => {
+		const anchor = document.createElement('a')
+		anchor.href = url
+		anchor.download = `result${id}.csv`
+		document.body.appendChild(anchor)
+		anchor.click()
+		document.body.removeChild(anchor)
+	}).catch(error => console.log(error))
+} 
 
 export const subscribeToExp = (id, callback) => {
-    // const experiments = supabase
-    //   .from(`experiments:creator=eq.${uid},id=eq.${id}`)
-    //   .on('*', payload => {
-    //     console.log('changes', payload);
-    //     callback(payload)
-    //   })
-    //   .subscribe()
-	// console.log(db)
-	// doc(db,"Experiments",id)
-	// collection(db,"Experiments")
-	// onSnapshot(, doc => callback(doc.data()))
-	// console.log("id!!!!",id)
-	// const q = query(experiments, where("id","==",id))
-	// const unsubscribe = onSnapshot(q, (snapshot) => {
-	// 	var result = []
-	// snapshot.forEach(doc => result.push(doc.data()))
-	// 	callback(result[0])
-	// })
-
-
 	const unsubscribe = onSnapshot(doc(db,"Experiments",id), doc =>{
 		console.log(`exp ${id} has been updated: `,doc.data())
 		 callback(doc.data())})
@@ -90,12 +84,6 @@ export const subscribeToExp = (id, callback) => {
 
 
 export const listenToExperiments = (uid, callback) => {
-    // const experiments = supabase.from('experiments').on('INSERT',payload=> {
-    //     console.log(payload)
-    //     console.log(payload.new);
-    //     callback(payload.new)
-    // }).subscribe()
-
 	const q = query(experiments, where("creator","==",uid))
 	const unsubscribe = onSnapshot(q, (snapshot) => {
 		var result = []

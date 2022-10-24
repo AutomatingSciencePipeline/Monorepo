@@ -124,25 +124,31 @@ def run_batch(data):
     fails = 0
     with open('results.csv', 'w') as expResults:
         writer = csv.writer(expResults)
-        # writer.writerow(["Experiment Run", "Result","Parameters"])
-        writer.writerow(["Experiment Run", "Result"])
+        writer.writerow(["Experiment Run", "Result","Parameters"])
+        # writer.writerow(["Experiment Run", "Result"])
         firstRun = run_experiment(filepath,f'configFiles/{0}.ini')
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             app.logger.info("Experiment {id} ran into an error while running aborting")
         else:
             app.logger.info(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
-            # writer.writerow(["0",firstRun].append(get_configs('configFiles/0.ini')))
-            writer.writerow(["0",firstRun])
+            writer.writerow(["0",firstRun,get_configs('configFiles/0.ini')])
+            # writer.writerow(["0",firstRun])
             for i in range(1,expToRun):
-                # writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')].append(get_configs(f'configFiles/{i}.ini')))
-                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')])
+                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini'),get_configs(f'configFiles/{i}.ini')])
+                # writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')])
                 if res != "ERROR":
                     passes +=1
                 else:
                     fails +=1
-            app.logger.info(f"Finished running Experiment {id} exiting")
+            app.logger.info(f"Finished running Experiments")
+
+    app.logger.info(f'Uploading Results to the frontend')
+    upblob = bucket.blob(f"results/result{id}.csv")
+    upblob.upload_from_filename('results.csv')
+
     expRef.update({'finished':True,'passes':passes,'fails':fails})
+    app.logger.info(f'Exiting experiment {id}')
     os.chdir('../..')
 
 ### GLB
@@ -321,11 +327,11 @@ def gen_list(otherVar, paramspos):
         paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
 def get_configs(configfile):
-    os.chdir('configFiles')
+    # os.chdir('configFiles')
     config = configparser.ConfigParser()
     config.read(configfile)
     res = [f' {key} = {config["DEFAULT"][key]} 'for key in config['DEFAULT'].keys()]
-    os.chdir('..')
+    # os.chdir('..')
     return res
 
 def gen_configs(hyperparams):
