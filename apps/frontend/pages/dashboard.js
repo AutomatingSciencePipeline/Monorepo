@@ -1,5 +1,6 @@
 import Dash from '../components/Dashboard';
-import supabase from '../supabase/client';
+//import supabase from '../supabase/client';
+import firebase from '../firebase/firebaseClient';
 const Dashboard = ({ user, experiments }) => {
     console.log(user)
     console.log(experiments);
@@ -7,10 +8,10 @@ const Dashboard = ({ user, experiments }) => {
 };
 
 export async function getServerSideProps({ req }) {
-	const { user } = await supabase.auth.api.getUserByCookie(req);
+	const { user } = await firebase.auth.api.getUserByCookie(req);
     console.log('getssp user',user)
 
-	const { data, error } = await supabase
+	const { data, error } = await firebase
 		.from('experiments')
 		.select('*')
 		.eq('creator', user.id);

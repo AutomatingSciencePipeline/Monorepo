@@ -1,6 +1,8 @@
 import NewExp from './NewExp';
-import { useAuth } from '../supabase/auth';
-import { subscribeToExp, listenToNew } from '../supabase/db';
+//import { useAuth } from '../supabase/auth';
+//import { subscribeToExp, listenToNew } from '../supabase/db';
+import { useAuth } from '../firebase/fbAuth';
+import { subscribeToExp, listenToNew } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';

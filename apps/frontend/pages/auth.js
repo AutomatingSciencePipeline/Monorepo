@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useAuth } from '../supabase/auth';
+//import { useAuth } from '../supabase/auth';
+import { useAuth } from '../firebase/fbAuth';
 import { useRouter } from 'next/router';
 import { useForm, joiResolver } from '@mantine/form';
 import { signInSchema } from '../utils/validators';
+import { getAuth } from '../firebase/fbAuth';
 
 const Auth = () => {
 	const form = useForm({
@@ -13,7 +15,7 @@ const Auth = () => {
 		schema: joiResolver(signInSchema),
 	});
 
-	const { authService } = useAuth();
+	const { authService } = getAuth();
 	const router = useRouter();
 
 	return (
@@ -36,20 +38,23 @@ const Auth = () => {
 							className='space-y-6'
 							onSubmit={form.onSubmit(async (values) => {
 								const { email, password } = values;
-								try {
+								//try {
+									console.log("authservices: ", authService);
 									const { error } =
 										await authService.signInWithEmailAndPassword(
 											email,
 											password
-										);
+										).then((userCredential) => {
+											const user = userCredential.user;
+										})
 									if (error) {
 										throw error;
 									} else {
 										router.push('/dashboard');
 									}
-								} catch (error) {
-									console.log(error);
-								}
+								//} catch (error) {
+								// 	console.log(error);
+								// }
 							})}
 						>
 							<div>

@@ -16,7 +16,7 @@ import { joiResolver, useForm } from '@mantine/form';
 import Dashboard from '../components/Dashboard';
 import { Logo } from '../components/utils';
 import { signUpSchema } from '../utils/validators';
-import { useAuth } from '../firebase/fbAuth';
+import { useAuth } from '../supabase/auth';
 
 export default function Home() {
 	const signUpForm = useForm({
@@ -124,7 +124,7 @@ function HomePage({ form }) {
 												Institute of Technology, Glados aims to become the
 												premier platform for researchers to share computational
 												resources in performing compute-intensive research
-												experiments. Join now!??????
+												experiments. Join now!
 											</p>
 											<p className='mt-8 text-sm text-white uppercase tracking-wide font-semibold sm:mt-10'>
 												Used by
