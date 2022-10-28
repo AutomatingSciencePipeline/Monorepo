@@ -1,6 +1,5 @@
 import ProtectedRoute from '../components/ProtectedRoute';
 import '../styles/globals.css';
-import { AuthProvider } from '../supabase/auth';
 
 const noAuthRequired = ['/', '/auth'];
 

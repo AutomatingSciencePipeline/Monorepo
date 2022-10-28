@@ -1,5 +1,4 @@
 import Dash from '../components/Dashboard';
-//import supabase from '../supabase/client';
 import firebase from '../firebase/firebaseClient';
 const Dashboard = ({ user, experiments }) => {
     console.log(user)

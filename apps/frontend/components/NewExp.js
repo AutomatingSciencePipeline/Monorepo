@@ -11,7 +11,6 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
 import {v4 as uuid4} from 'uuid'
 
-// import { submitExperiment, uploadExec } from '../supabase/db';
 import { submitExperiment, uploadExec } from '../firebase/db';
 let testId = null;
 const Steps = ({ steps }) => {

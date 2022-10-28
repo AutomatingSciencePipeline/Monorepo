@@ -1,5 +1,3 @@
-// import supabase from './client';
-// import admin from './admin';
 import { initializeApp } from "firebase/app";
 import { getFirestore, updateDoc } from "firebase/firestore";
 import { collection, setDoc, doc } from "firebase/firestore";
