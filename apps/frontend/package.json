@@ -21,8 +21,6 @@
 		"@mantine/modals": "^4.1.4",
 		"@mantine/notifications": "^4.1.4",
 		"@mantine/spotlight": "^4.1.4",
-		"@prisma/client": "^3.13.0",
-		"@supabase/supabase-js": "^1.35.2",
 		"@testing-library/jest-dom": "^5.16.4",
 		"@testing-library/react": "^13.1.1",
 		"@testing-library/user-event": "^13.5.0",
