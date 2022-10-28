@@ -4,15 +4,14 @@ import { Upload, X, File } from 'tabler-icons-react';
 import { Toggle } from './utils';
 
 import Parameter from './Parameter';
-import { Code, Text } from '@mantine/core';
+import { Code, Text, useMantineTheme, Group } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
+
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
-import {v4 as uuid4} from 'uuid'
-
 import { submitExperiment, uploadExec } from '../firebase/db';
-let testId = null;
+
 const Steps = ({ steps }) => {
 	return (
 		<ol className='grow space-y-4 md:flex md:space-y-0 md:space-x-8'>
@@ -164,7 +163,6 @@ const ConfirmationStep = ({ form, ...props }) => {
 	);
 };
 const dropzoneKids = (status) => {
-    console.log(status);
 	if (status.accepted) {
 		return <UploadIcon className={'bg-green-500'} status={status} />;
 	}
@@ -230,9 +228,11 @@ const DispatchStep = ({ id, form, user, ...props }) => {
                 // }
 			}}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
-			multiple={false}
 			maxSize={3 * 1024 ** 2}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
+			accept={{
+				'text/plain': ['.py', '.java']
+			  }}
 		>
 			{(status) =>  dropzoneKids(status)}
 		</Dropzone>

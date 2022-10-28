@@ -1,33 +1,14 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, updateDoc } from "firebase/firestore";
-import { collection, setDoc, doc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { firebaseApp } from "./firebaseClient";
+import { getFirestore, updateDoc } from "firebase/firestore";
+import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 const experiments = collection(db,"Experiments")
-const storage = getStorage(app);
 
 export const submitExperiment = async (values, user) => {
-	// console.log('Making submission');
-	// const { data, error } = await supabase.from('experiments').insert([
-	// 	{
-	// 		creator: user.id,
-	// 		name: values.name,
-	// 		description: values.description,
-	// 		verbose: values.verbose,
-	// 		n_workers: values.nWorkers,
-	// 		parameters: JSON.stringify({
-	// 			params: values.parameters,
-	// 		}),
-	// 	},
-	// ]);
-	// if (error) {
-	// 	throw error;
-	// } else {
-	// 	return { data };
-	// }
 	const newExperiment = doc(experiments)
 
 	setDoc(newExperiment,{
@@ -36,6 +17,9 @@ export const submitExperiment = async (values, user) => {
 			description: values.description,
 			verbose: values.verbose,
 			workers: values.nWorkers,
+			expId: newExperiment.id,
+			finished: false,
+			created: Date.now(),
 			params: JSON.stringify({
 							params: values.parameters,
 						})
@@ -60,32 +44,36 @@ export const uploadExec = async (id, file) => {
 		console.log(error)
 		return false
 	} )
-
-	// try {
-	// 	const filePath = `EXP_${id}/${file.name}`;
-
-	// 	const { error, data } = await supabase.storage
-	// 		.from('experiment_files')
-	// 		.upload(filePath, file);
-        
-	// 	if (error) {
-	// 		throw error;
-	// 	} else {
-	// 		return data;
-	// 	}
-	// } catch (error) {
-	// 	alert(error.message);
-	// } finally {
-	// 	// setUploading(false);
-	// }
 };
 
+export const downloadExp = (event) => {
+	const id = event.target.getAttribute('data-id')
+	console.log(`Downloading results for ${id}`)
+	const fileRef = ref(storage,`results/result${id}.csv`)
+	getDownloadURL(fileRef).then(url => {
+		const anchor = document.createElement('a')
+		anchor.href = url
+		anchor.download = `result${id}.csv`
+		document.body.appendChild(anchor)
+		anchor.click()
+		document.body.removeChild(anchor)
+	}).catch(error => console.log(error))
+}
 
-export const subscribeToExp = (id, uid, callback) => {
-	// TODO used to be supabase subscription to info about one single experiment? seems like a bandaid
-} 
+export const subscribeToExp = (id, callback) => {
+	const unsubscribe = onSnapshot(doc(db,"Experiments",id), doc =>{
+		console.log(`exp ${id} has been updated: `,doc.data())
+		 callback(doc.data())})
+	return unsubscribe
+}
 
 
-export const listenToNew = (callback) => {
-	// TODO used to be supabase fire callback when a new experiment was added to the table
+export const listenToExperiments = (uid, callback) => {
+	const q = query(experiments, where("creator","==",uid))
+	const unsubscribe = onSnapshot(q, (snapshot) => {
+		var result = []
+		snapshot.forEach(doc => result.push(doc.data()))
+		callback(result)
+	})
+	return unsubscribe
 }
