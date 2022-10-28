@@ -125,7 +125,7 @@ function HomePage({ form }) {
 												Institute of Technology, Glados aims to become the
 												premier platform for researchers to share computational
 												resources in performing compute-intensive research
-												experiments. Join now!??????
+												experiments. Join now!
 											</p>
 											<p className='mt-8 text-sm text-white uppercase tracking-wide font-semibold sm:mt-10'>
 												Used by
