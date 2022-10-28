@@ -2,23 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, updateDoc } from "firebase/firestore";
 import { collection, setDoc, doc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { firebaseApp } from "./firebaseClient";
 
-const firebaseConfig = {
-	apiKey: "AIzaSyDj-Y8FFq2C80ZSVUVAWd3eqcmSzXMHXus",
-	authDomain: "gladosbase.firebaseapp.com",
-	databaseURL: "https://gladosbase-default-rtdb.firebaseio.com",
-	projectId: "gladosbase",
-	storageBucket: "gladosbase.appspot.com",
-	messagingSenderId: "431843551362",
-	appId: "1:431843551362:web:0bb28196e90f31a194ec9b"
-  };
-// Initialize Firebase
-const app = initializeApp(firebaseConfig,"backend");
 // Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
+const db = getFirestore(firebaseApp);
 const experiments = collection(db,"Experiments")
 const storage = getStorage(app);
-
 
 export const submitExperiment = async (values, user) => {
 	// console.log('Making submission');
@@ -93,21 +82,10 @@ export const uploadExec = async (id, file) => {
 
 
 export const subscribeToExp = (id, uid, callback) => {
-    const experiments = supabase
-      .from(`experiments:creator=eq.${uid},id=eq.${id}`)
-      .on('*', payload => {
-        console.log('changes', payload);
-        callback(payload)
-      })
-      .subscribe()
-      
+	// TODO used to be supabase subscription to info about one single experiment? seems like a bandaid
 } 
 
 
 export const listenToNew = (callback) => {
-    const experiments = supabase.from('experiments').on('INSERT',payload=> {
-        console.log(payload)
-        console.log(payload.new);
-        callback(payload.new)
-    }).subscribe()
+	// TODO used to be supabase fire callback when a new experiment was added to the table
 }

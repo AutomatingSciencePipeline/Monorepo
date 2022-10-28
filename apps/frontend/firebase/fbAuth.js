@@ -1,69 +1,70 @@
 import React, {
 	useState,
+	useMemo,
 	useEffect,
 	useContext,
 	createContext,
 	useDebugValue,
 } from 'react';
-import firebase from './firebaseClient';
+import { firebaseApp } from './firebaseClient';
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 
 const AuthContext = createContext({});
+
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(firebase.auth.user() || null);
-	const [loading, setLoading] = useState(false);
-	console.log(user);
+	const [auth, _] = useState(getAuth(firebaseApp));
+	const [user, setUser] = useState();
+	useDebugValue('Current User:', user);
+	const [loading, setLoading] = useState(false); // TODO is their loading blocker still a relevant concept for firebase?
+
+	// TODO this duplicates the setting functionality in signInWithEmailAndPassword, but not sure which is best practice now
 	useEffect(() => {
-		const { data: authListener} = firebase.auth.onAuthStateChange((event, session) => {
-			handleAuthChange(event, session);
-			if (session) {
-				setUser(session.user);
-			} else {
-				setUser(null);
-			}
-			setLoading(false);
-		});
+		const unsubscribe = onAuthStateChanged(auth, (newUser) => {
+			console.log("OnAuthStateChanged fired", newUser);
+			setUser(newUser);
+		})
 
+		// can remove this once we're sure it isn't unsubscribing more than needed (does `auth` need to be in useEffect deps and/or state?)
 		return () => {
-		    authListener.unsubscribe();
-		};
-	}, []);
-
-	const handleAuthChange = async (event, session) => {
-		await fetch('/api/auth', {
-			method: 'POST',
-			headers: new Headers({ 'Content-Type': 'application/json' }),
-			credentials: 'same-origin',
-			body: JSON.stringify({
-				event,
-				session,
-			}),
-		});
-	};
+			console.log("ROBDEBUG: Auth Unsubscribe called");
+			unsubscribe();
+		}
+	}, [auth]);
 
 	const authService = {
+		userId: useMemo(() => {
+			const newVal = user?.uid;
+			console.log('userId is now', newVal);
+			return newVal;
+		}, [user]),
+
 		signInWithEmailAndPassword: async (email, password) => {
-			console.log("hello");
-			return await firebase.auth.signIn({ email: email, password: password });
+			return await signInWithEmailAndPassword(auth, email, password)
+			.then((userCredential) => {
+				console.log("sign in success, UserCred is ", userCredential);
+				setUser(userCredential.user);
+			}).catch((error) => {
+				console.error('Firebase sign in error', error);
+				throw error;
+			});
 		},
 		signUpWithEmailAndPassword: async (email, password) => {
-			return firebase.auth.signUp({
-				email: email,
-				password: password,
+			return await createUserWithEmailAndPassword(auth, email, password)
+			.then((userCredential) => {
+				console.log("sign up success, UserCred is ", userCredential);
+			}).catch((error) => {
+				console.error('Firebase sign up error', error);
 			});
 		},
 		signInWithGoogle: async () => {
-			return firebase.auth.signIn({
-				provider: 'google',
-			});
+			console.error("TODO");
 		},
 		signOut: async () => {
-			return supabase.auth.signOut();
+			return await signOut(auth);
 		},
 	};
-
-	useDebugValue(user);
 
 	return (
 		<AuthContext.Provider value={{ user, authService }}>

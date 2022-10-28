@@ -1,25 +1,16 @@
 import Dash from '../components/Dashboard';
-import firebase from '../firebase/firebaseClient';
-const Dashboard = ({ user, experiments }) => {
-    console.log(user)
-    console.log(experiments);
-	return <Dash user={user} experimentss={experiments} />;
+import { useAuth } from '../firebase/fbAuth';
+
+// TODO this used to use server-side props, not an option for firebase unless we use the next lib for it
+
+const Dashboard = () => {
+
+	const { authService } = useAuth();
+	const experiments = []; // TODO get a real experiment list
+
+	return <Dash user={authService.userId} experimentss={experiments} />;
 };
 
-export async function getServerSideProps({ req }) {
-	const { user } = await firebase.auth.api.getUserByCookie(req);
-    console.log('getssp user',user)
 
-	const { data, error } = await firebase
-		.from('experiments')
-		.select('*')
-		.eq('creator', user.id);
-
-	if (error) {
-		console.log(error);
-	}
-
-	return { props: { user, experiments: data } };
-}
 
 export default Dashboard;
