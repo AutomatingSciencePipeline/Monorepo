@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_compl
 from typing_extensions import assert_type
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from httpx import get
 import numpy as np
 import collections
 import itertools
@@ -26,18 +27,6 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 import configparser
-
-# cred = credentials.Certificate({"type": "service_account",
-#     "project_id": "gladosbase",
-#     "private_key_id": "d1b3043ccc9d008bf541e61c492c343a1dcec098",
-#     "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgyWPyztFeVD+T\nhFM80dt53OF74U1pIP++f6IO17RKvRM7xAXAOQw87yypppxhHJqcdU//vmM8kY5w\nyeL7JfVbOhuH/mRHneOSBIUOZrZPPZwTs6BMB+KL1yGsqLI4xa9T11CYOIbl0dhx\nbUfKZKa28mK7LoRP6zTs2+l64mKXPTahEELcv6gvRkmcj0JyV/MZq6Dv5upioWw6\nSAvy2eAu71el80HakE4XN3xn45ftl04JL9dbKaQGmpiNXPLiw8Q3gQkPoMLjyheO\nxsQloY/wHVEHkD+T50Ulf4UWJlYFEvmsT13RUJ8AhicArxsqcn3n6oOXiQNe1F5I\nVu5vjWtJAgMBAAECggEACybwzmdzLOtjxf32fohRRGZyQtMFmSI7btmAMm6acBkl\nb36pBfRHAaZ2tvUqEU/INwwpfnP0gt/XLQJJwrD3L8rL3E7EIpYEUe1Lk8xCvqQH\nsnOh7YgZ+ehT6vt/8hFfF+3+JnK8Q44+qJ5jbXm1+Qg+mhxPu9HU981IiFgRrcrq\nMOaOggxORn0ifu6UXZlOr7oykNOvZQNtQyyQMR+zHv2sOxtWRpxB/izwhfsBAOmr\nSKbxnftNyVLyodhUn8HSzxKswW2APgJ9hhwGkyPFeOxSpMWwPeBbIVGRdjj5FIBS\nRBvYM+9vtiNZhFTPfmq3n3CutVxKAefehcF+fFf5MQKBgQDisdZCCTeWXc3AqnpV\nN6JTAtWvUIQ+sGBdHfK+4m6qRDW49HyACPTUONL5mWT0XDpLtx//ZawYqSu8pXkQ\n8c6+EvzpO9FYpSbT7RTYW0VyGujlLE3vymIseumbRqN1YrA0LY2BS2ZTo3jMIa1m\nuAfkaAFqixyOBJ1t5heV2U74kQKBgQC1kmoyA5ovjTRc7fApmV6++Hc+LaiQE0WR\n7nNz5hvqUg1GUJCtTtXWMQr9UQ1V1SymKpkwEMCyBuwwnNBAIMKIAq8eXUgk2nhn\nhYiEXEKOVLhSMsW8V+LSshQrVYtg5lbCvVAsWh7GPrNO2eQ2EFdLXu7s6C7pD4QQ\nN6uRgVhjOQKBgDtRp6wd91K8dwOMWHiGF067dijq27//rSeQl52FaMnbEWe1agKi\n1VXXDLXNgtJCc+quH4xYEYFeexhhAF4DuEKae12Yjn4wsQlRh1vZ/kEOc5TMVBSE\nE85p10kPYeRsj4kHxnhnv33xT8Gyqkovq7kD0iMMBcvPv1YrmE5Yz8ZRAoGADrvQ\nzjooms80fo34PQfq/kgfNPZzhS1rKcpVqAP2I++AkEIdW1LYW0cjgya+lEZ2Fw3B\n3HqfiFKze8Zdx7Zg0rSVDTu4jPUFbDETwNnTtMT/J/xiu0PObhZxOIr6gmRuieLe\nzJqLgL65wh5APHra+oy7ipHUrKjLqJ072NTMHVECgYEAyrOUssJkAbRZGu22xGlb\nmUehlknvA6bZP5cZ6I3uws2ndPvPNvMS990aBTWLbhsIII45fFikQObrKAh1cpS7\nGxyjQssyiE1a0tpCGAGKn0fHXIHiqj+IQzk7OSsC+jtlvWHtaAQzWt8qJOB/FJCh\nWmv9Kj+m02+/S8laWtlWzJ0=\n-----END PRIVATE KEY-----\n",
-#     "client_email": "firebase-adminsdk-rq0e8@gladosbase.iam.gserviceaccount.com",
-#     "client_id": "110253347083564610954",
-#     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-#     "token_uri": "https://oauth2.googleapis.com/token",
-#     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-#     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-rq0e8%40gladosbase.iam.gserviceaccount.com",
-#     "storageBucket":"gladosbase.appspot.com"})
 cred = credentials.Certificate(json.loads(os.environ.get("creds")))
 
 app = firebase_admin.initialize_app(cred)
@@ -123,17 +112,18 @@ def run_batch(data):
     passes = 0
     fails = 0
     with open('results.csv', 'w') as expResults:
+        paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
-        writer.writerow(["Experiment Run", "Result","Parameters"])
+        writer.writerow(["Experiment Run", "Result"] + paramNames)
         firstRun = run_experiment(filepath,f'configFiles/{0}.ini')
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             app.logger.info("Experiment {id} ran into an error while running aborting")
         else:
             app.logger.info(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
-            writer.writerow(["0",firstRun,get_configs('configFiles/0.ini')])
+            writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun):
-                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini'),get_configs(f'configFiles/{i}.ini')])
+                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 if res != "ERROR":
                     passes +=1
                 else:
@@ -302,6 +292,20 @@ def run_experiment(experiment_path, config_path):
         app.logger.info(f"result data: {result}")
         return(result)
 
+def get_config_paramNames(configfile):
+    config = configparser.ConfigParser()
+    config.read(configfile)
+    res = [key for key in config['DEFAULT'].keys()]
+    res.sort()
+    return res
+
+def get_configs_ordered(configfile,names):
+    config = configparser.ConfigParser()
+    config.read(configfile)
+    res = [config["DEFAULT"][key] for key in names]
+    return res
+
+
 def frange(start, stop, step=None):
     if step == None:
         step = 1.0
@@ -315,19 +319,17 @@ def frange(start, stop, step=None):
 
 def gen_list(otherVar, paramspos):
     if otherVar['type'] == 'integer':
+        if otherVar['max'] == otherVar['min']:
+            otherVar['max'] = int(otherVar['max']) + int(otherVar['step'])
         paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(otherVar['step']))])
-    if otherVar['type'] == 'float':
+    elif otherVar['type'] == 'float':
+        if otherVar['max'] == otherVar['min']:
+             otherVar['max'] = float(otherVar['max']) + float(otherVar['step'])
         paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(otherVar['step']))])
-    if otherVar['type'] == 'string':
+    elif otherVar['type'] == 'string':
         paramspos.append([(otherVar['name'],otherVar['default'])])
-    if otherVar['type'] == 'bool':
-        paramspos.append([(otherVar['name'],val) for val in [True,False]])
-
-def get_configs(configfile):
-    config = configparser.ConfigParser()
-    config.read(configfile)
-    res = [f' {key} = {config["DEFAULT"][key]} 'for key in config['DEFAULT'].keys()]
-    return res
+    elif otherVar['type'] == 'bool':
+        paramspos.append([(otherVar['name'],val) for val in [True,False]])    
 
 def gen_configs(hyperparams):
     os.mkdir('configFiles')
