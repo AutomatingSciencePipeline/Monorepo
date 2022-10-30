@@ -305,13 +305,6 @@ def get_configs_ordered(configfile,names):
     res = [config["DEFAULT"][key] for key in names]
     return res
 
-#Legacy keeping around incase something terrible happens
-# def get_configs(configfile):
-#     config = configparser.ConfigParser()
-#     config.read(configfile)
-#     res = [f' {key} = {config["DEFAULT"][key]} 'for key in config['DEFAULT'].keys()]
-#     res.sort()
-#     return res
 
 def frange(start, stop, step=None):
     if step == None:
@@ -355,9 +348,6 @@ def gen_configs(hyperparams):
         perms = list(itertools.product(*paramspos))
         for perm in perms:
             config = configparser.ConfigParser()
-            # perm = np.array(permTP)
-            # sorted(perm,key=lambda x: x[0])
-            # app.logger.info(perm)
             res = {}
             for var in perm:
                 res[var[0]] = var[1]
