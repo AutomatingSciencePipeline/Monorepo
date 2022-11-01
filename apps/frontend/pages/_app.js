@@ -1,6 +1,6 @@
 import ProtectedRoute from '../components/ProtectedRoute';
 import '../styles/globals.css';
-import { AuthProvider } from '../supabase/auth';
+import { AuthProvider } from '../firebase/fbAuth';
 
 const noAuthRequired = ['/', '/auth'];
 

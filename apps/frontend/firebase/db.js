@@ -1,33 +1,18 @@
-// import supabase from './client';
-// import admin from './admin';
-import { initializeApp } from "firebase/app";
-import { getFirestore, updateDoc, serverTimestamp } from "firebase/firestore";
+import { firebaseApp } from "./firebaseClient";
+import { getFirestore, updateDoc } from "firebase/firestore";
 import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { createElement } from "react";
 
-const firebaseConfig = {
-	apiKey: "AIzaSyDj-Y8FFq2C80ZSVUVAWd3eqcmSzXMHXus",
-	authDomain: "gladosbase.firebaseapp.com",
-	databaseURL: "https://gladosbase-default-rtdb.firebaseio.com",
-	projectId: "gladosbase",
-	storageBucket: "gladosbase.appspot.com",
-	messagingSenderId: "431843551362",
-	appId: "1:431843551362:web:0bb28196e90f31a194ec9b"
-  };
-// Initialize Firebase
-const app = initializeApp(firebaseConfig,"backend");
 // Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
+const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 const experiments = collection(db,"Experiments")
-const storage = getStorage(app);
 
-
-export const submitExperiment = async (values, user) => {
+export const submitExperiment = async (values, userId) => {
 	const newExperiment = doc(experiments)
 
 	setDoc(newExperiment,{
-		creator: user.id,
+		creator: userId,
 			name: values.name,
 			description: values.description,
 			verbose: values.verbose,
@@ -73,14 +58,14 @@ export const downloadExp = (event) => {
 		anchor.click()
 		document.body.removeChild(anchor)
 	}).catch(error => console.log(error))
-} 
+}
 
 export const subscribeToExp = (id, callback) => {
 	const unsubscribe = onSnapshot(doc(db,"Experiments",id), doc =>{
 		console.log(`exp ${id} has been updated: `,doc.data())
 		 callback(doc.data())})
 	return unsubscribe
-} 
+}
 
 
 export const listenToExperiments = (uid, callback) => {

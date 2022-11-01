@@ -1,5 +1,5 @@
 import NewExp from './NewExp';
-import { useAuth } from '../supabase/auth';
+import { useAuth } from '../firebase/fbAuth';
 import { subscribeToExp, listenToExperiments, downloadExp } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
@@ -45,9 +45,6 @@ const activityItems = [
 	},
 ];
 
-const selfie =
-	'https://lh3.googleusercontent.com/pw/AM-JKLUSYx9ZrBlRQR-WboUMFL8kirp80evrurmoriQgWZSuQt2OvJUqm9_4zwjLqcc3ZfAIrG5mbgO7I_CVs0eqqZ5rlnLb3s8gkaKik79qpZz04N4PefGWq-q_ICueUP8XznvHxK71e-3SmQM8882Wi_57jw=w744-h1488-no?authuser=0';
-
 const Navbar = (props) => {
 	const { authService } = useAuth();
 	return (
@@ -86,7 +83,7 @@ const Navbar = (props) => {
 												<span className='sr-only'>Open user menu</span>
 												<img
 													className='h-8 w-8 rounded-full'
-													src={selfie}
+													src={authService.userPhotoUrl}
 													alt=''
 												/>
 											</Menu.Button>
@@ -253,16 +250,16 @@ const SearchBar = (props) => {
 	);
 };
 
-
-
-
-export default function Dashboard({ user, experimentss }) {
-    const [experiments, setExperiments] = useState(experimentss);
+export default function Dashboard() {
+	const { authService } = useAuth();
+    const [experiments, setExperiments] = useState([]);
 
 	useEffect(() => {
-		const unsub = listenToExperiments(user.id,(newExperimentList)=> setExperiments(newExperimentList))
-		return function cleanup() {unsub()}
-	},[user])
+		if (!authService.userId) {
+			return;
+		}
+		return listenToExperiments(authService.userId,(newExperimentList)=> setExperiments(newExperimentList))
+	},[authService.userId])
 	
 
 	const [formState, setFormState] = useState(-1);
@@ -276,7 +273,6 @@ export default function Dashboard({ user, experimentss }) {
 	}, [formState]);
 	return (
 		<>
-			{/*
 			{/* Background color split screen for large screens */}
 			<div
 				className='fixed top-0 left-0 w-1/2 h-full bg-white'
@@ -306,14 +302,13 @@ export default function Dashboard({ user, experimentss }) {
 												<div className='flex-shrink-0 h-12 w-12'>
 													<img
 														className='h-12 w-12 rounded-full'
-														src={selfie}
+														src={authService.userPhotoUrl}
 														alt=''
 													/>
 												</div>
 												<div className='space-y-1'>
 													<div className='text-sm font-medium text-gray-900'>
-														{user.email}
-														{/* Omar Fayoumi */}
+														{ authService.userEmail }
 													</div>
 												</div>
 											</div>
@@ -354,7 +349,7 @@ export default function Dashboard({ user, experimentss }) {
 													aria-hidden='true'
 												/>
 												<span className='text-sm text-gray-500 font-medium'>
-													{experiments.length} project
+													{experiments?.length} project
 												</span>
 											</div>
 										</div>
@@ -436,7 +431,7 @@ export default function Dashboard({ user, experimentss }) {
 								role='list'
 								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 							>
-								{experiments.map((project) => (
+								{experiments?.map((project) => (
 									<li
 										key={project.id}
 										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
@@ -460,7 +455,7 @@ export default function Dashboard({ user, experimentss }) {
 											<div className='flex space-x-3'>
 												<img
 													className='h-6 w-6 rounded-full'
-													src={selfie}
+													src={authService.userPhotoUrl}
 													alt=''
 												/>
 												<div className='flex-1 space-y-1'>
@@ -490,7 +485,6 @@ export default function Dashboard({ user, experimentss }) {
 					<NewExp
 						formState={formState}
 						setFormState={setFormState}
-						user={user}
 					/>
 				</div>
 			</div>

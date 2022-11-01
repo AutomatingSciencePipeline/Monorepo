@@ -11,7 +11,8 @@ import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
 import { submitExperiment, uploadExec } from '../firebase/db';
-let testId = null;
+import { useAuth } from '../firebase/fbAuth';
+
 const Steps = ({ steps }) => {
 	return (
 		<ol className='grow space-y-4 md:flex md:space-y-0 md:space-x-8'>
@@ -189,13 +190,14 @@ const UploadIcon = ({ status }) => {
 	return <File size={80} />;
 };
 
-const DispatchStep = ({ id, form, user, ...props }) => {
+const DispatchStep = ({ id, form, ...props }) => {
+	const { authService } = useAuth();
+
 	return (
 		<Dropzone
 			onDrop={async (file) => {
-				// console.log()
 				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values,user).then( (expId) =>{
+				submitExperiment(form.values, authService.userId).then( (expId) =>{
 					console.log(expId)
 
 					console.log(`Uploading file for ${expId}`)
@@ -239,7 +241,7 @@ const DispatchStep = ({ id, form, user, ...props }) => {
 	);
 };
 
-const NewExp = ({ user, formState, setFormState, ...rest }) => {
+const NewExp = ({ formState, setFormState, ...rest }) => {
 	const form = useForm({
 		initialValues: {
 			parameters: formList([]),
@@ -341,7 +343,7 @@ const NewExp = ({ user, formState, setFormState, ...rest }) => {
 									) : status === 1 ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep user = {user} form = {form} id={id} />
+										<DispatchStep form = {form} id={id} />
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>

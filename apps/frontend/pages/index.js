@@ -14,10 +14,9 @@ import {
 	AiOutlineGithub,
 } from 'react-icons/ai';
 import { joiResolver, useForm } from '@mantine/form';
-import Dashboard from '../components/Dashboard';
 import { Logo } from '../components/utils';
 import { signUpSchema } from '../utils/validators';
-import { useAuth } from '../supabase/auth';
+import { useAuth } from '../firebase/fbAuth';
 
 export default function Home() {
 	const signUpForm = useForm({
