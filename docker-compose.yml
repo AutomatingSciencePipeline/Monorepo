@@ -17,10 +17,6 @@ services:
       environment:
         creds: ${FIREBASE_KEY}
       volumes:
-          - ./apps/backend/GLADOS_HOME:/app/GLADOS_HOME
-          - ./apps/backend/GLADOS_HOME/incoming:/app/GLADOS_HOME/incoming
-          - ./apps/backend/GLADOS_HOME/exps:/app/GLADOS_HOME/exps
-          - ./apps/backend/GLADOS_HOME/rec:/app/GLADOS_HOME/rec
           - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
       restart: always
       ports:
