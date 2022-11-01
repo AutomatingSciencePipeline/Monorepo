@@ -40,6 +40,14 @@ export const AuthProvider = ({ children }) => {
 			return newVal;
 		}, [user]),
 
+		userEmail: useMemo(() => {
+			return user?.email;
+		}, [user]),
+
+		userPhotoUrl: useMemo(() => {
+			return user?.photoURL;
+		}, [user]),
+
 		signInWithEmailAndPassword: async (email, password) => {
 			return await signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {

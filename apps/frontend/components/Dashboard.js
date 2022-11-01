@@ -45,9 +45,6 @@ const activityItems = [
 	},
 ];
 
-const selfie =
-	'https://lh3.googleusercontent.com/pw/AM-JKLUSYx9ZrBlRQR-WboUMFL8kirp80evrurmoriQgWZSuQt2OvJUqm9_4zwjLqcc3ZfAIrG5mbgO7I_CVs0eqqZ5rlnLb3s8gkaKik79qpZz04N4PefGWq-q_ICueUP8XznvHxK71e-3SmQM8882Wi_57jw=w744-h1488-no?authuser=0';
-
 const Navbar = (props) => {
 	const { authService } = useAuth();
 	return (
@@ -86,7 +83,7 @@ const Navbar = (props) => {
 												<span className='sr-only'>Open user menu</span>
 												<img
 													className='h-8 w-8 rounded-full'
-													src={selfie}
+													src={authService.userPhotoUrl}
 													alt=''
 												/>
 											</Menu.Button>
@@ -253,16 +250,16 @@ const SearchBar = (props) => {
 	);
 };
 
-// TODO userid can be obtained from authContext, don't need to prop pass it
-export default function Dashboard({ userId, experimentss }) {
-    const [experiments, setExperiments] = useState(experimentss);
+export default function Dashboard() {
+	const { authService } = useAuth();
+    const [experiments, setExperiments] = useState([]);
 
 	useEffect(() => {
-		if (!userId) {
+		if (!authService.userId) {
 			return;
 		}
-		return listenToExperiments(userId,(newExperimentList)=> setExperiments(newExperimentList))
-	},[userId])
+		return listenToExperiments(authService.userId,(newExperimentList)=> setExperiments(newExperimentList))
+	},[authService.userId])
 	
 
 	const [formState, setFormState] = useState(-1);
@@ -276,7 +273,6 @@ export default function Dashboard({ userId, experimentss }) {
 	}, [formState]);
 	return (
 		<>
-			{/*
 			{/* Background color split screen for large screens */}
 			<div
 				className='fixed top-0 left-0 w-1/2 h-full bg-white'
@@ -306,14 +302,13 @@ export default function Dashboard({ userId, experimentss }) {
 												<div className='flex-shrink-0 h-12 w-12'>
 													<img
 														className='h-12 w-12 rounded-full'
-														src={selfie}
+														src={authService.userPhotoUrl}
 														alt=''
 													/>
 												</div>
 												<div className='space-y-1'>
 													<div className='text-sm font-medium text-gray-900'>
-														{"TODO user email from fbauth"}
-														{/* Omar Fayoumi */}
+														{ authService.userEmail }
 													</div>
 												</div>
 											</div>
@@ -460,7 +455,7 @@ export default function Dashboard({ userId, experimentss }) {
 											<div className='flex space-x-3'>
 												<img
 													className='h-6 w-6 rounded-full'
-													src={selfie}
+													src={authService.userPhotoUrl}
 													alt=''
 												/>
 												<div className='flex-1 space-y-1'>
@@ -490,7 +485,6 @@ export default function Dashboard({ userId, experimentss }) {
 					<NewExp
 						formState={formState}
 						setFormState={setFormState}
-						user={userId}
 					/>
 				</div>
 			</div>

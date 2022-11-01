@@ -8,11 +8,11 @@ const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
 const experiments = collection(db,"Experiments")
 
-export const submitExperiment = async (values, user) => {
+export const submitExperiment = async (values, userId) => {
 	const newExperiment = doc(experiments)
 
 	setDoc(newExperiment,{
-		creator: user.id,
+		creator: userId,
 			name: values.name,
 			description: values.description,
 			verbose: values.verbose,
