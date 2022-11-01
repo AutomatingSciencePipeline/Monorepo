@@ -1,0 +1,5 @@
+# Ignore docker container volume contents
+ExperimentFiles/
+GLADOS_HOME/
+
+# All below this point is uncategorized (categorize them!)
