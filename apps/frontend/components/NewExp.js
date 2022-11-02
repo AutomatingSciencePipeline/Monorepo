@@ -191,13 +191,13 @@ const UploadIcon = ({ status }) => {
 };
 
 const DispatchStep = ({ id, form, ...props }) => {
-	const { authService } = useAuth();
+	const { userId, authService } = useAuth();
 
 	return (
 		<Dropzone
 			onDrop={async (file) => {
 				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values, authService.userId).then( (expId) =>{
+				submitExperiment(form.values, userId).then( (expId) =>{
 					console.log(expId)
 
 					console.log(`Uploading file for ${expId}`)

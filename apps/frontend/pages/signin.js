@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 const defaultSignInText = 'Sign in';
 
-const Auth = () => {
+const SignInPage = () => {
 	const form = useForm({
 		initialValues: {
 			email: '',
@@ -209,4 +209,4 @@ const Auth = () => {
 	);
 };
 
-export default Auth;
+export default SignInPage;

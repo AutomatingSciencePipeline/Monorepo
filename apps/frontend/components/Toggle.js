@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Switch } from '@headlessui/react';
 
 import classNames from 'classnames';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFire } from '@fortawesome/free-solid-svg-icons';
 
 export const Toggle = ({ label, onChange }) => {
 	const [enabled, setEnabled] = useState(false);
@@ -36,6 +34,4 @@ export const Toggle = ({ label, onChange }) => {
 	);
 };
 
-export const Logo = () => {
-	return <FontAwesomeIcon icon={faFire} className={'text-orange-400 h-8'} />;
-};
+

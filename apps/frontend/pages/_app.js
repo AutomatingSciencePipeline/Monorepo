@@ -2,9 +2,9 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import '../styles/globals.css';
 import { AuthProvider } from '../firebase/fbAuth';
 
-const noAuthRequired = ['/', '/auth'];
+const noAuthRequired = ['/', '/signin'];
 
-function MyApp({ Component, pageProps, router }) {
+function GladosApp({ Component, pageProps, router }) {
 	return (
 		<AuthProvider>
 			{noAuthRequired.includes(router.pathname) ? (
@@ -18,4 +18,4 @@ function MyApp({ Component, pageProps, router }) {
 	);
 }
 
-export default MyApp;
+export default GladosApp;

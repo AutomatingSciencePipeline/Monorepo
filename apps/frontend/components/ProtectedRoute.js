@@ -7,7 +7,8 @@ const ProtectedRoute = ({ children }) => {
 	const router = useRouter();
 	useEffect(() => {
 		if (!user) {
-			router.push('/auth');
+			console.log("User is not signed in; redirecting them to /signin");
+			router.push('/signin');
 		}
 	}, [user, router]);
 
