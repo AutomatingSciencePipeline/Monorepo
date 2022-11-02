@@ -1,7 +1,7 @@
 import { Fragment, useState, useLayoutEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Upload, X, File } from 'tabler-icons-react';
-import { Toggle } from './utils';
+import { Toggle } from './Toggle';
 
 import Parameter from './Parameter';
 import { Code, Text, useMantineTheme, Group } from '@mantine/core';
@@ -191,13 +191,13 @@ const UploadIcon = ({ status }) => {
 };
 
 const DispatchStep = ({ id, form, ...props }) => {
-	const { authService } = useAuth();
+	const { userId, authService } = useAuth();
 
 	return (
 		<Dropzone
 			onDrop={async (file) => {
 				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values, authService.userId).then( (expId) =>{
+				submitExperiment(form.values, userId).then( (expId) =>{
 					console.log(expId)
 
 					console.log(`Uploading file for ${expId}`)
