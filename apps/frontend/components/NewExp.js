@@ -1,7 +1,7 @@
 import { Fragment, useState, useLayoutEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Upload, X, File } from 'tabler-icons-react';
-import { Toggle } from './utils';
+import { Toggle } from './Toggle';
 
 import Parameter from './Parameter';
 import { Code, Text, useMantineTheme, Group } from '@mantine/core';
