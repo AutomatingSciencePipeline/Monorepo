@@ -173,56 +173,52 @@ const Navbar = (props) => {
 };
 
 
-const ExpLog = ({projectinit, uid}) => {
+const ExpLog = ({projectinit}) => {
     const [project, setProject] = useState(projectinit);
-	useEffect( () => {
-		const unsub = subscribeToExp(project['expId'],setProject)
-		return function cleanup() {unsub()}
-	},[]
-	)
+	useEffect(() => subscribeToExp(project.expId, setProject),[project])
     return (
-						<div className='flex items-center justify-between space-x-4'>
-							<div className='min-w-0 space-y-3'>
-								<div className='flex items-center space-x-3'>
-									<span className='block'>
-										<h2 className='text-sm font-medium'>
-											{project.name}{' '}
-										</h2>
-									</span>
-								</div>
-								{project['finished'] == true 
-								? <button type = "button" data-id = {project['expId']} 
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-									onClick={downloadExp}>
-										Downlod Results
-								</button> 
-								: ' '}
-								<a
-									href={project.repoHref}
-									className='relative group flex items-center space-x-2.5'
-								>
-									<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
-										{project.description}
-									</span>
-								</a>
-							</div>
-							<div className='sm:hidden'>
-								<ChevronRightIcon
-									className='h-5 w-5 text-gray-400'
-									aria-hidden='true'
-								/>
-							</div>
-							<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
-								<p className='flex items-center space-x-4'>    
-									<span className='font-mono text-red-500'>FAILS: {project['fails']}</span>
-									<span className='font-mono'>SUCCESSES: {project['passes']}</span>
-								</p>
-								<p className='flex text-gray-500 text-sm space-x-2'>
-									<span>Deployed {new Date(project['created']).toString()}</span>
-									<span>{project.location}</span>
-								</p>
-							</div>
-						</div> 
+		<div className='flex items-center justify-between space-x-4'>
+			<div className='min-w-0 space-y-3'>
+				<div className='flex items-center space-x-3'>
+					<span className='block'>
+						<h2 className='text-sm font-medium'>
+							{project.name}{' '}
+						</h2>
+					</span>
+				</div>
+				{project['finished'] == true ?
+				<button type= "button" data-id={project.expId}
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={downloadExp}>
+						Download Results
+				</button> 
+				: ' '}
+				<a
+					href={project.repoHref}
+					className='relative group flex items-center space-x-2.5'
+				>
+					<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
+						{project.description}
+					</span>
+				</a>
+			</div>
+			<div className='sm:hidden'>
+				<ChevronRightIcon
+					className='h-5 w-5 text-gray-400'
+					aria-hidden='true'
+				/>
+			</div>
+			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
+				<p className='flex items-center space-x-4'>    
+					<span className='font-mono text-red-500'>FAILS: {project['fails']}</span>
+					<span className='font-mono'>SUCCESSES: {project['passes']}</span>
+				</p>
+				<p className='flex text-gray-500 text-sm space-x-2'>
+					<span>Deployed {new Date(project['created']).toString()}</span>
+					<span>{project.location}</span>
+				</p>
+			</div>
+		</div> 
     )
 }
 
