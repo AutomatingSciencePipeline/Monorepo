@@ -175,7 +175,7 @@ const Navbar = (props) => {
 
 const ExpLog = ({projectinit}) => {
     const [project, setProject] = useState(projectinit);
-	useEffect(() => subscribeToExp(project.expId, setProject),[project])
+	useEffect(() => subscribeToExp(project.expId, setProject),[])
     return (
 		<div className='flex items-center justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>

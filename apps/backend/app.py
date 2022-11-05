@@ -26,9 +26,9 @@ bucket = storage.bucket("gladosbase.appspot.com")
 app = Flask(__name__)
 CORS(app)
 
-### I'm bad at remembering app.logger.info so I'm making a helper function
+### I'm bad at remembering print so I'm making a helper function
 def log(toLog):
-    app.logger.info(toLog)
+    print(toLog)
 
 ### FLASK API ENDPOINT
 runner = ProcessPoolExecutor(1)
@@ -39,32 +39,32 @@ def recv_experiment():
 
 def run_batch(data):
     time.sleep(1)
-    app.logger.info(data)
+    print(data)
     experiments = db.collection('Experiments')
 
     #Parsing the argument data
     id = data['experiment']['id']
-    app.logger.info(f'recieved {id}')
+    print(f'recieved {id}')
     expRef = experiments.document(id)
     experiment = expRef.get().to_dict()
     experiment['id'] = id
-    app.logger.info(f"Experiment info {experiment}")
+    print(f"Experiment info {experiment}")
 
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{id}')
     os.chdir(f'ExperimentFiles/{id}')
-    app.logger.info(f'Downloading file for {id}')
+    print(f'Downloading file for {id}')
     filepath = experiment['file']
-    app.logger.info(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
+    print(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
     filedata = bucket.blob(filepath)
     filedata.download_to_filename(filepath)
 
     #Generaing Configs from hyperparameters
-    app.logger.info(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
+    print(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
     expToRun = gen_configs(json.loads(experiment['params'])['params']) 
 
     #Running the Experiment
-    app.logger.info(f"Running Experiment {id}")
+    print(f"Running Experiment {id}")
     passes = 0
     fails = 0
     with open('results.csv', 'w') as expResults:
@@ -74,9 +74,9 @@ def run_batch(data):
         firstRun = run_experiment(filepath,f'configFiles/{0}.ini')
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
-            app.logger.info("Experiment {id} ran into an error while running aborting")
+            print("Experiment {id} ran into an error while running aborting")
         else:
-            app.logger.info(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
+            print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
             writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun):
                 writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
@@ -84,33 +84,33 @@ def run_batch(data):
                     passes +=1
                 else:
                     fails +=1
-            app.logger.info(f"Finished running Experiments")
+            print(f"Finished running Experiments")
 
     #Uploading Experiment Results
-    app.logger.info(f'Uploading Results to the frontend')
+    print(f'Uploading Results to the frontend')
     upblob = bucket.blob(f"results/result{id}.csv")
     upblob.upload_from_filename('results.csv')
 
     #Updating Firebase Object
     expRef.update({'finished':True,'passes':passes,'fails':fails})
-    app.logger.info(f'Exiting experiment {id}')
+    print(f'Exiting experiment {id}')
     os.chdir('../..')
 
 ### UTILS
 def run_experiment(experiment_path, config_path):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
-    # app.logger.info(f"Current directory {os.getcwd()}")
+    # print(f"Current directory {os.getcwd()}")
     with Popen(["python",experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
         try:
             data = p.communicate()
             if data[1]:
-                app.logger.info(f'errors returned from pipe is {data[1]}')
+                print(f'errors returned from pipe is {data[1]}')
                 return "ERROR"
         except Exception as e:
-            app.logger.info(e)
+            print(e)
             return "ERROR"
         result = data[0].split('\n')[0]
-        app.logger.info(f"result data: {result}")
+        print(f"result data: {result}")
         return(result)
 
 def get_config_paramNames(configfile):
