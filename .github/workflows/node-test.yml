@@ -21,8 +21,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: cd apps
-      - run: cd frontend
+      - working-directory: ./apps/frontend
       - run: npm install
       - run: npm run dev
       - run: npm test
