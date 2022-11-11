@@ -3,6 +3,7 @@
 import random
 import copy
 import sys
+import configparser
 
 #sample experiment that runs a truncation generational loop with a genome represented by a list of 0s and 1s. fitness is measured by number of 1s
 #in genome. maximum fitness is measured at the given generation number.
@@ -62,13 +63,16 @@ def chromSort(chrom):
 #main generational loop: for each loop, removes least fit half of chromosomes from population. The remaining chromosomes are duplicated to 
 #replace the population. every generation, every bit in the genome of every chromosome has a chance to mutate and flip from a 1 to a 0
 def main():
+    config = configparser.ConfigParser()
     args = sys.argv[1:]
+    configFile = args[0]
+    config.read(configFile)
     #takes in 5 arguments: generations, population, genome length, mutation rate, and seed
-    generations = int(float(args[0]))
-    population = int(float(args[1]))
-    genomelength = int(float(args[2]))
-    mutationrate = float(args[3])
-    seed = int(float(args[4]))
+    generations = int(config["DEFAULT"]["g"])
+    population = int(config["DEFAULT"]["p"])
+    genomelength = int(config["DEFAULT"]["gl"])
+    mutationrate = float(config["DEFAULT"]["mr"])
+    seed = int(config["DEFAULT"]["s"])
     random.seed(seed)
     #generate initial population
     chroms = generateChroms(population, genomelength)
