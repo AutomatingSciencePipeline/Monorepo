@@ -75,7 +75,7 @@ def run_batch(data):
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             print("Experiment {id} ran into an error while running aborting")
-        else:
+        elif expToRun-1 >= 0:
             print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
             writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun):
@@ -84,7 +84,7 @@ def run_batch(data):
                     passes +=1
                 else:
                     fails +=1
-            print(f"Finished running Experiments")
+        print(f"Finished running Experiments")
 
     #Uploading Experiment Results
     print(f'Uploading Results to the frontend')
@@ -150,13 +150,21 @@ def gen_list(otherVar, paramspos):
     elif otherVar['type'] == 'string':
         paramspos.append([(otherVar['name'],otherVar['default'])])
     elif otherVar['type'] == 'bool':
-        paramspos.append([(otherVar['name'],val) for val in [True,False]])    
+        paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
 def gen_configs(hyperparams):
     os.mkdir('configFiles')
     os.chdir('configFiles')
     configNum = 0
-    for defaultVar in hyperparams:
+    consts = {}
+    params = []
+    for param in hyperparams:
+        if (param['type'] =='integer' or param['type'] == 'float') and param['min'] == param['max']:
+            consts[param['name']] = param['min']
+        else:
+            params.append(param)
+
+    for defaultVar in params:
         if defaultVar['type'] == 'string':
             continue
         paramspos = []
@@ -165,13 +173,14 @@ def gen_configs(hyperparams):
         for otherVar in hyperparams:
             if otherVar['name'] != defaultVar['name']:
                 gen_list(otherVar,paramspos)
-
         perms = list(itertools.product(*paramspos))
         for perm in perms:
             config = configparser.ConfigParser()
             res = {}
             for var in perm:
                 res[var[0]] = var[1]
+            for var in consts.keys():
+                res[var] = consts[var]
             config['DEFAULT'] = res
             with open(f'{configNum}.ini', 'w') as configFile:
                 config.write(configFile)
