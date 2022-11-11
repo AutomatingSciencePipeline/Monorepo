@@ -75,7 +75,7 @@ def run_batch(data):
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             print("Experiment {id} ran into an error while running aborting")
-        elif expToRun-1 > -1:
+        elif expToRun-1 >= 0:
             print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
             writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun):
