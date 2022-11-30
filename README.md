@@ -12,7 +12,7 @@ This user guide is meant to assist first time users in setting up a local simula
 
 ## Running an Experiment
 
-Directions for running an experiment (on a local simulated system or the live system) can be found [on the wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/RunningAnExperiment).
+Directions for running an experiment (on a local simulated system or the live system) can be found [on the wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/Running-An-Experiment).
 
 ## Contributing
 
