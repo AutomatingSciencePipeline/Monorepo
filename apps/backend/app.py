@@ -147,7 +147,7 @@ def gen_list(otherVar, paramspos):
                 step = 1
             elif(otherVar['type'] == 'float'):
                 step = 0.1
-    except:
+    except KeyError:
         print('OtherVar did not have type attribute')
     print('after')
 
