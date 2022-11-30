@@ -139,7 +139,6 @@ def frange(start, stop, step=None):
         count += 1
 
 def gen_list(otherVar, paramspos):
-    print('before')
     try:
         step = otherVar['step']
         if step == "":
@@ -149,7 +148,6 @@ def gen_list(otherVar, paramspos):
                 step = 0.1
     except KeyError:
         print('OtherVar did not have type attribute')
-    print('after')
 
     if otherVar['type'] == 'integer':
         if otherVar['max'] == otherVar['min']:
