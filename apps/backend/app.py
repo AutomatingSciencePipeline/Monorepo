@@ -148,7 +148,6 @@ def gen_list(otherVar, paramspos):
                 step = 0.1
     except:
         print('OtherVar did not have type attribute')
-    print('after')
 
     if otherVar['type'] == 'integer':
         if otherVar['max'] == otherVar['min']:
