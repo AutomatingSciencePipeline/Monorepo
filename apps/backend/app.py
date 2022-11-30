@@ -139,7 +139,6 @@ def frange(start, stop, step=None):
         count += 1
 
 def gen_list(otherVar, paramspos):
-    print('before')
     try:
         step = otherVar['step']
         if step == "":
