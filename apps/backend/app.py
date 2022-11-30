@@ -139,14 +139,24 @@ def frange(start, stop, step=None):
         count += 1
 
 def gen_list(otherVar, paramspos):
+    try:
+        step = otherVar['step']
+        if step == "":
+            if(otherVar['type'] == 'integer'):
+                step = 1
+            elif(otherVar['type'] == 'float'):
+                step = 0.1
+    except KeyError:
+        print('OtherVar did not have type attribute')
+
     if otherVar['type'] == 'integer':
         if otherVar['max'] == otherVar['min']:
-            otherVar['max'] = int(otherVar['max']) + int(otherVar['step'])
-        paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(otherVar['step']))])
+            otherVar['max'] = int(otherVar['max']) + int(step)
+        paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(step))])
     elif otherVar['type'] == 'float':
         if otherVar['max'] == otherVar['min']:
-             otherVar['max'] = float(otherVar['max']) + float(otherVar['step'])
-        paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(otherVar['step']))])
+             otherVar['max'] = float(otherVar['max']) + float(step)
+        paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(step))])
     elif otherVar['type'] == 'string':
         paramspos.append([(otherVar['name'],otherVar['default'])])
     elif otherVar['type'] == 'bool':
