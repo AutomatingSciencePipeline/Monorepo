@@ -233,7 +233,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 			maxSize={3 * 1024 ** 2}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 			accept={{
-				'text/plain': ['.py', '.java'],
+				'text/plain': ['.py'],
 				'application/java-archive':['.jar']
 			  }}
 		>
