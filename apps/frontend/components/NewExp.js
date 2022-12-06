@@ -126,7 +126,7 @@ const InformationStep = ({ form, ...props }) => {
 					>
 						<div
 							className='h-full grow-0 max-h-fit mb-4 overflow-y-scroll p-4 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400'
-							style={{ maxHeight: 'calc(100vh - 300px)' }}
+							style={{ maxHeight: '32vh' }}
 						>
 							<Droppable
 								as='div'
