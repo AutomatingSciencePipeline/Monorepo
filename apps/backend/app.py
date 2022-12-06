@@ -15,6 +15,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 import configparser
+import magic
 
 #Firebase Objects
 cred = credentials.Certificate(json.loads(os.environ.get("creds")))
@@ -58,6 +59,16 @@ def run_batch(data):
     print(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
     filedata = bucket.blob(filepath)
     filedata.download_to_filename(filepath)
+    
+    #Deterimining FileType
+    rawfiletype = magic.from_file(filepath)
+    if(rawfiletype.__contains__('Python script')):
+         filetype = 'python'
+    elif(rawfiletype.__contains__('Java archive data (JAR)')):
+        filetype = 'java'
+
+    print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
+
 
     #Generaing Configs from hyperparameters
     print(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
@@ -71,15 +82,15 @@ def run_batch(data):
         paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
         writer.writerow(["Experiment Run", "Result"] + paramNames)
-        firstRun = run_experiment(filepath,f'configFiles/{0}.ini')
+        firstRun = run_experiment(filepath,f'configFiles/{0}.ini',filetype)
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             print("Experiment {id} ran into an error while running aborting")
         elif expToRun-1 >= 0:
             print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
             writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
-            for i in range(1,expToRun):
-                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini')] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+            for i in range(1,expToRun+1):
+                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini',filetype)] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 if res != "ERROR":
                     passes +=1
                 else:
@@ -97,21 +108,27 @@ def run_batch(data):
     os.chdir('../..')
 
 ### UTILS
-def run_experiment(experiment_path, config_path):
+def run_experiment(experiment_path, config_path, filetype):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
-    # print(f"Current directory {os.getcwd()}")
-    with Popen(["python",experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
-        try:
-            data = p.communicate()
-            if data[1]:
-                print(f'errors returned from pipe is {data[1]}')
-                return "ERROR"
-        except Exception as e:
-            print(e)
+    if filetype == 'python':
+        with Popen(['python',experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+            return get_data(p)
+    elif filetype == 'java':
+        with Popen(['java','-jar',experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+            return get_data(p)
+     
+def get_data(p):
+    try:
+        data = p.communicate()
+        if data[1]:
+            print(f'errors returned from pipe is {data[1]}')
             return "ERROR"
-        result = data[0].split('\n')[0]
-        print(f"result data: {result}")
-        return(result)
+    except Exception as e:
+        print(e)
+        return "ERROR"
+    result = data[0].split('\n')[0]
+    print(f"result data: {result}")
+    return(result)
 
 def get_config_paramNames(configfile):
     config = configparser.ConfigParser()
@@ -191,7 +208,7 @@ def gen_configs(hyperparams):
                 res[var[0]] = var[1]
             for var in consts.keys():
                 res[var] = consts[var]
-            config['DEFAULT'] = res
+            config["DEFAULT"] = res
             with open(f'{configNum}.ini', 'w') as configFile:
                 config.write(configFile)
                 configFile.close()
