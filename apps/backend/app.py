@@ -1,5 +1,6 @@
 
 import os
+import shutil
 from subprocess import Popen, PIPE, STDOUT
 import logging
 from concurrent.futures import ProcessPoolExecutor
@@ -49,11 +50,15 @@ def run_batch(data):
     expRef = experiments.document(id)
     experiment = expRef.get().to_dict()
     experiment['id'] = id
+    experimentOutput = experiment['fileOutput']
     print(f"Experiment info {experiment}")
 
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{id}')
     os.chdir(f'ExperimentFiles/{id}')
+    if experimentOutput != '':
+        print('There will be experiment outputs')
+        os.makedirs('ResCsvs')
     print(f'Downloading file for {id}')
     filepath = experiment['file']
     print(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
@@ -88,9 +93,16 @@ def run_batch(data):
             print("Experiment {id} ran into an error while running aborting")
         elif expToRun-1 >= 0:
             print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
+            if experimentOutput != '':
+                add_to_batch(experimentOutput, 0)
+                firstRun = "In ResCsvs"
             writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun+1):
-                writer.writerow([i, res:= run_experiment(filepath,f'configFiles/{i}.ini',filetype)] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+                res = run_experiment(filepath,f'configFiles/{i}.ini',filetype)
+                if experimentOutput != '':
+                    res = 'In ResCsvs'
+                    add_to_batch(experimentOutput, i)
+                writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 if res != "ERROR":
                     passes +=1
                 else:
@@ -101,6 +113,15 @@ def run_batch(data):
     print(f'Uploading Results to the frontend')
     upblob = bucket.blob(f"results/result{id}.csv")
     upblob.upload_from_filename('results.csv')
+
+    if experimentOutput != '':
+        print('Uploading Result Csvs')
+        try:
+            shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
+            upblob = bucket.blob(f"resultsCSV/ResultCsvs{id}.zip")
+            upblob.upload_from_filename('ResultCsvs.zip')
+        except Exception as err:
+            print(err)
 
     #Updating Firebase Object
     expRef.update({'finished':True,'passes':passes,'fails':fails})
@@ -129,6 +150,12 @@ def get_data(p):
     result = data[0].split('\n')[0]
     print(f"result data: {result}")
     return(result)
+
+def add_to_batch(fileOutput, ExpRun):
+    try:
+        shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
+    except Exception as err:
+        print(err)
 
 def get_config_paramNames(configfile):
     config = configparser.ConfigParser()

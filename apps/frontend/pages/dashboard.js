@@ -1,6 +1,6 @@
 import NewExp from '../components/NewExp';
 import { useAuth } from '../firebase/fbAuth';
-import { subscribeToExp, listenToExperiments, downloadExp } from '../firebase/db';
+import { subscribeToExp, listenToExperiments, downloadExp, downloadExpZip} from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
@@ -191,6 +191,13 @@ const ExpLog = ({projectinit}) => {
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={downloadExp}>
 						Download Results
+				</button> 
+				: ' '}
+				{project['finished'] == true && project['fileOutput'] != '' ?
+				<button type= "button" data-id={project.expId}
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={downloadExpZip}>
+						Download Project Zip
 				</button> 
 				: ' '}
 				<a

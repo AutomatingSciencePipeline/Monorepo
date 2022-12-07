@@ -85,6 +85,16 @@ const InformationStep = ({ form, ...props }) => {
 					</div>
 				</InputSection>
 
+				<InputSection header={'File Output'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='text'
+							{...form.getInputProps('fileOutput')}
+							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+						/>
+					</div>
+				</InputSection>
+
 				<InputSection header={'Parameters'}>
 					<div className='sm:col-span-4 inline-flex'>
 						<span className='rounded-l-md text-sm text-white font-bold bg-blue-600  items-center px-4 py-2 border border-transparent'>
@@ -126,7 +136,9 @@ const InformationStep = ({ form, ...props }) => {
 					>
 						<div
 							className='h-full grow-0 max-h-fit mb-4 overflow-y-scroll p-4 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400'
-							style={{ maxHeight: '32vh' }}
+							// style={{ maxHeight: '32vh' }}
+							style={{ maxHeight: '23vh' }}
+
 						>
 							<Droppable
 								as='div'
@@ -248,6 +260,7 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 			parameters: formList([]),
 			name: '',
 			description: '',
+			fileOutput: '',
 			verbose: true,
 			nWorkers: 1,
 		},
