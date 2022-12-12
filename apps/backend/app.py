@@ -28,6 +28,10 @@ bucket = storage.bucket("gladosbase.appspot.com")
 app = Flask(__name__)
 CORS(app)
 
+#Constants
+DEFAULT_STEP_INT = 1
+DEFAULT_STEP_FLOAT = 0.1
+
 ### I'm bad at remembering print so I'm making a helper function
 def log(toLog):
     print(toLog)
@@ -61,7 +65,7 @@ def run_batch(data):
         os.makedirs('ResCsvs')
     print(f'Downloading file for {id}')
     try:
-        filepath = experiment['filee']
+        filepath = experiment['file']
     except Exception as err:
         filepath = f'experiment{id}'
         print(err)
@@ -191,12 +195,12 @@ def frange(start, stop, step=None):
 
 def gen_list(otherVar, paramspos):
     if otherVar['type'] == 'integer':
-        step = 1 if otherVar['step'] == '' else otherVar['step']
+        step = DEFAULT_STEP_INT if otherVar['step'] == '' else otherVar['step']
         if otherVar['max'] == otherVar['min']:
             otherVar['max'] = int(otherVar['max']) + int(step)
         paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(step))])
     elif otherVar['type'] == 'float':
-        step = 0.1 if otherVar['step'] == '' else otherVar['step']
+        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' else otherVar['step']
         if otherVar['max'] == otherVar['min']:
              otherVar['max'] = float(otherVar['max']) + float(step)
         paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(step))])
