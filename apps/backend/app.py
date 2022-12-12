@@ -60,11 +60,18 @@ def run_batch(data):
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {id}')
-    filepath = experiment['file']
+    try:
+        filepath = experiment['filee']
+    except Exception as err:
+        filepath = f'experiment{id}'
+        print(err)
     print(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
-    filedata = bucket.blob(filepath)
-    filedata.download_to_filename(filepath)
-    
+    try:
+        filedata = bucket.blob(filepath)
+        filedata.download_to_filename(filepath)
+    except Exception as err:
+        print(f'Ran into {err} while trying to download experiment')
+
     #Deterimining FileType
     rawfiletype = magic.from_file(filepath)
     if(rawfiletype.__contains__('Python script')):
@@ -90,7 +97,7 @@ def run_batch(data):
         firstRun = run_experiment(filepath,f'configFiles/{0}.ini',filetype)
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
-            print("Experiment {id} ran into an error while running aborting")
+            print(f"Experiment {id} ran into an error while running aborting")
         elif expToRun-1 >= 0:
             print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
             if experimentOutput != '':
@@ -118,7 +125,7 @@ def run_batch(data):
         print('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-            upblob = bucket.blob(f"resultsCSV/ResultCsvs{id}.zip")
+            upblob = bucket.blob(f"results/result{id}.zip")
             upblob.upload_from_filename('ResultCsvs.zip')
         except Exception as err:
             print(err)
@@ -183,21 +190,13 @@ def frange(start, stop, step=None):
         count += 1
 
 def gen_list(otherVar, paramspos):
-    try:
-        step = otherVar['step']
-        if step == "":
-            if(otherVar['type'] == 'integer'):
-                step = 1
-            elif(otherVar['type'] == 'float'):
-                step = 0.1
-    except KeyError:
-        print('OtherVar did not have type attribute')
-
     if otherVar['type'] == 'integer':
+        step = 1 if otherVar['step'] == '' else otherVar['step']
         if otherVar['max'] == otherVar['min']:
             otherVar['max'] = int(otherVar['max']) + int(step)
         paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(step))])
     elif otherVar['type'] == 'float':
+        step = 0.1 if otherVar['step'] == '' else otherVar['step']
         if otherVar['max'] == otherVar['min']:
              otherVar['max'] = float(otherVar['max']) + float(step)
         paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(step))])
@@ -213,21 +212,37 @@ def gen_configs(hyperparams):
     consts = {}
     params = []
     for param in hyperparams:
-        if (param['type'] =='integer' or param['type'] == 'float') and param['min'] == param['max']:
-            consts[param['name']] = param['min']
-        else:
-            params.append(param)
+        try:
+            if (param['type'] =='integer' or param['type'] == 'float') and param['min'] == param['max']:
+                print('param ' + param['name'] + ' has the same min and max value converting to constant')
+                consts[param['name']] = param['min']
+            elif param['type'] == 'string':
+                print('param ' + param['name'] + ' is a string, adding to constants')
+                consts[param['name']] = param['default']
+            else:
+                print('param ' + param['name'] + ' varies, adding to batch')
+                params.append(param)
+        except Exception as err:
+            print(f'{err} during finding constants')
 
     for defaultVar in params:
-        if defaultVar['type'] == 'string':
-            continue
-        paramspos = []
-        default = [(defaultVar['name'],defaultVar['default'])]
-        paramspos.append(default)
+        print(f'Keeping {defaultVar} constant')
+        try:
+            paramspos = []
+            default = [(defaultVar['name'],defaultVar['default'])]
+            paramspos.append(default)
+        except Exception as err:
+            print(f"huh? {err}")
         for otherVar in hyperparams:
             if otherVar['name'] != defaultVar['name']:
-                gen_list(otherVar,paramspos)
-        perms = list(itertools.product(*paramspos))
+                try:
+                    gen_list(otherVar,paramspos)
+                except Exception as err:
+                    print(f'error {err} during list generation')
+        try:
+            perms = list(itertools.product(*paramspos))
+        except Exception as err:
+            print(f"Error {err} while making permutations")
         for perm in perms:
             config = configparser.ConfigParser()
             res = {}
@@ -239,8 +254,10 @@ def gen_configs(hyperparams):
             with open(f'{configNum}.ini', 'w') as configFile:
                 config.write(configFile)
                 configFile.close()
+                print(f"Finished writing config {configNum}")
             configNum += 1
     os.chdir('..')
+    print("Finished generating configs")
     return configNum - 1
 
 if __name__=='__main__':

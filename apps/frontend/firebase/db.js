@@ -64,7 +64,7 @@ export const downloadExp = (event) => {
 export const downloadExpZip = (event) => {
 	const id = event.target.getAttribute('data-id')
 	console.log(`Downloading results for ${id}`)
-	const fileRef = ref(storage,`resultsCSV/ResCsvs${id}.csv`)
+	const fileRef = ref(storage,`results/result${id}.zip`)
 	getDownloadURL(fileRef).then(url => {
 		const anchor = document.createElement('a')
 		anchor.href = url

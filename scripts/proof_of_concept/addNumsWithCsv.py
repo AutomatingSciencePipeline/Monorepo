@@ -11,14 +11,10 @@ def main():
     config.read(configFile)
     x = int(config["DEFAULT"]["x"])
     y = int(config["DEFAULT"]["y"])
-    if random.random() > 0:
-        res = x + y
-    else:
-        res = x - y
     with open('AddNumResult.csv', 'w') as result:
         writer = csv.writer(result)
-        writer.writerow(['result'])
-        writer.writerow([res])
+        writer.writerow(['Addition', 'Subtraction'])
+        writer.writerow([x+y,x-y])
 
 
     print("done")
