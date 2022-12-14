@@ -17,7 +17,6 @@ services:
       creds: ${FIREBASE_KEY}
     volumes:
         - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
-    # restart: always # TODO does having this commented out prevent it from turning back on any time the docker engine restarts?
     # TODO switch to ${BACKEND_PORT}
     ports:
         # TODO does this need to be exposed to host?
