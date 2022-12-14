@@ -1,9 +1,9 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-outside-of-docker-compose
 {
-	"name": "Glados Docker from Docker Compose",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "glados-parent-devcontainer",
+	"name": "Glados Monorepo",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "app-devcontainer",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
 	// Use this environment variable if you need to bind mount your local source code into a new container.
@@ -25,11 +25,13 @@
 			"version": "20.10",
 			"enableNonRootDocker": "true",
 			"moby": "true"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers/features/node:1": {},
-		"ghcr.io/devcontainers/features/python:1": {},
-		"ghcr.io/devcontainers-contrib/features/firebase-cli:1": {}
+		}//,
+		// TODO Extra features disabled for now to reduce container rebuild times
+		// "ghcr.io/devcontainers/features/github-cli:1": {},
+		// TODO specify correct node/python versions to match the app containers?
+		// "ghcr.io/devcontainers/features/node:1": {},
+		// "ghcr.io/devcontainers/features/python:1": {},
+		// "ghcr.io/devcontainers-contrib/features/firebase-cli:1": {}
 	},
 
 	// Configure tool-specific properties.
@@ -41,13 +43,13 @@
 				"ms-azuretools.vscode-docker"
 			]
 		}
-	}
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "docker --version",
+	"postCreateCommand": "bash \"/workspaces/Monorepo/.devcontainer/post-start.sh\""
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"

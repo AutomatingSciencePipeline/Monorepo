@@ -8,6 +8,22 @@ version: '3'
 name: glados-project
 
 services:
+  # TODO move the devcontainer to its own compose file so it doesn't start with production stuff
+  app-devcontainer:
+    build:
+      context: ./.devcontainer
+      dockerfile: ./devcontainer.Dockerfile
+    container_name: glados-devcontainer
+    volumes:
+      # Forwards the local Docker socket to the container.
+      - /var/run/docker.sock:/var/run/docker-host.sock 
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - .:/workspaces/Monorepo:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    entrypoint: /usr/local/share/docker-init.sh
+    command: sleep infinity
+
   app-backend:
     build:
       context: ./apps/backend
