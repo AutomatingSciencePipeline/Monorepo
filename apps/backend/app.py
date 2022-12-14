@@ -102,8 +102,9 @@ def run_batch(data):
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             print(f"Experiment {id} ran into an error while running aborting")
-        elif expToRun-1 >= 0:
-            print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun-1}")
+            fails += 1
+        elif expToRun > 0:
+            print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun}")
             if experimentOutput != '':
                 add_to_batch(experimentOutput, 0)
                 firstRun = "In ResCsvs"
@@ -118,6 +119,7 @@ def run_batch(data):
                     passes +=1
                 else:
                     fails +=1
+        passes += 1
         print(f"Finished running Experiments")
 
     #Uploading Experiment Results
@@ -195,12 +197,12 @@ def frange(start, stop, step=None):
 
 def gen_list(otherVar, paramspos):
     if otherVar['type'] == 'integer':
-        step = DEFAULT_STEP_INT if otherVar['step'] == '' else otherVar['step']
+        step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(otherVar['step']) == 0 else otherVar['step']
         if otherVar['max'] == otherVar['min']:
             otherVar['max'] = int(otherVar['max']) + int(step)
         paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(step))])
     elif otherVar['type'] == 'float':
-        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' else otherVar['step']
+        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' or float(otherVar['step']) == 0 else otherVar['step']
         if otherVar['max'] == otherVar['min']:
              otherVar['max'] = float(otherVar['max']) + float(step)
         paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(step))])
@@ -249,6 +251,7 @@ def gen_configs(hyperparams):
             print(f"Error {err} while making permutations")
         for perm in perms:
             config = configparser.ConfigParser()
+            config.optionxform = str
             res = {}
             for var in perm:
                 res[var[0]] = var[1]
