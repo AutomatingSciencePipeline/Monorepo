@@ -48,7 +48,10 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
+	// Setup swarm on the host machine, since we're using an overlay network, we want to be the swarm host.
+	// Force new cluster flag makes it not complain if we're already a host and rerun.
+	"initializeCommand": "docker swarm init --force-new-cluster",
+	// Run commands inside the container after it is created.
 	"postCreateCommand": "bash \"/workspaces/Monorepo/.devcontainer/post-start.sh\""
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

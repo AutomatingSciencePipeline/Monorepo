@@ -53,3 +53,9 @@ services:
       - 3000:3000
     expose:
       - "3000"
+
+networks:
+  default:
+    driver: overlay
+    attachable: true
+    name: glados-overlay
