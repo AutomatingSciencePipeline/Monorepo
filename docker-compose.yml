@@ -23,3 +23,16 @@ services:
           - 5050:5050
       expose:
           - "5050"
+  app-frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: ./frontend.Dockerfile
+    container_name: glados-frontend
+    volumes:
+      - ./apps/frontend:/home/node/app
+    working_dir: /home/node/app
+    # TODO switch to ${FRONTEND_WEBSERVER_PORT}
+    ports:
+      - 3000:3000
+    expose:
+      - "3000"
