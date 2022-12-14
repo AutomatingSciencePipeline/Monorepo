@@ -45,8 +45,6 @@ services:
       context: ./apps/frontend
       dockerfile: ./frontend.Dockerfile
     container_name: glados-frontend
-    volumes:
-      - ./apps/frontend:/home/node/app
     working_dir: /home/node/app
     # TODO switch to ${FRONTEND_WEBSERVER_PORT}
     ports:
