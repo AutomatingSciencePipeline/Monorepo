@@ -5,7 +5,7 @@ FROM node:14-alpine
 EXPOSE 3000
 
 # Start
-# WORKDIR /home/app/frontend
+WORKDIR /home/node/app
 
 # TODO find a way to toggle between dev and normal npm run (env var?)
 # ENTRYPOINT [ "npm", "run", "start" ]
