@@ -18,6 +18,7 @@ export const submitExperiment = async (values, userId) => {
 			verbose: values.verbose,
 			workers: values.nWorkers,
 			expId: newExperiment.id,
+			fileOutput: values.fileOutput,
 			finished: false,
 			created: Date.now(),
 			params: JSON.stringify({
@@ -50,6 +51,20 @@ export const downloadExp = (event) => {
 	const id = event.target.getAttribute('data-id')
 	console.log(`Downloading results for ${id}`)
 	const fileRef = ref(storage,`results/result${id}.csv`)
+	getDownloadURL(fileRef).then(url => {
+		const anchor = document.createElement('a')
+		anchor.href = url
+		anchor.download = `result${id}.csv`
+		document.body.appendChild(anchor)
+		anchor.click()
+		document.body.removeChild(anchor)
+	}).catch(error => console.log(error))
+}
+
+export const downloadExpZip = (event) => {
+	const id = event.target.getAttribute('data-id')
+	console.log(`Downloading results for ${id}`)
+	const fileRef = ref(storage,`results/result${id}.zip`)
 	getDownloadURL(fileRef).then(url => {
 		const anchor = document.createElement('a')
 		anchor.href = url
