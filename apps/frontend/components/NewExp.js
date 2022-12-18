@@ -89,12 +89,31 @@ const InformationStep = ({ form, ...props }) => {
 					<div className='sm:col-span-4'>
 						<input
 							type='text'
+							placeholder='Filename of the CSV that are created by the experiment'
 							{...form.getInputProps('fileOutput')}
 							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 						/>
 					</div>
 				</InputSection>
+				<InputSection header={'Result Output'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='text'
+							placeholder='Filename of the experiment results'
+							{...form.getInputProps('resultOutput')}
+							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+						/>
+					</div>
+				</InputSection>
+			</Fragment>
+		</div>
+	);
+};
 
+const ParamStep = ({form, ...props}) => {
+	return (
+		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
+			<Fragment>
 				<InputSection header={'Parameters'}>
 					<div className='sm:col-span-4 inline-flex'>
 						<span className='rounded-l-md text-sm text-white font-bold bg-blue-600  items-center px-4 py-2 border border-transparent'>
@@ -136,7 +155,7 @@ const InformationStep = ({ form, ...props }) => {
 					>
 						<div
 							className='h-full grow-0 max-h-fit mb-4 overflow-y-scroll p-4 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400'
-							style={{ maxHeight: '23vh' }}
+							style={{ maxHeight: '60vh' }}
 
 						>
 							<Droppable
@@ -158,7 +177,7 @@ const InformationStep = ({ form, ...props }) => {
 			</Fragment>
 		</div>
 	);
-};
+}
 
 const ConfirmationStep = ({ form, ...props }) => {
 	return (
@@ -225,20 +244,6 @@ const DispatchStep = ({ id, form, ...props }) => {
 						})
 					}
 				}).catch( error => console.log(error))
-				
-
-				// const {Key} = await uploadExec(id, file[0])
-                // if (!Key) {
-                //     throw new Error('Upload failed')
-                // } else {
-                //     console.log(Key);
-                //     fetch(`/api/experiments/${id}`,{
-                //         method: 'POST',
-                //         headers: new Headers({ 'Content-Type': 'application/json'}),
-                //         credentials: 'same-origin',
-                //         body: JSON.stringify({key: Key})
-                //     })
-                // }
 			}}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
 			maxSize={3 * 1024 ** 2}
@@ -260,6 +265,7 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 			name: '',
 			description: '',
 			fileOutput: '',
+			resultOutput: '',
 			verbose: true,
 			nWorkers: 1,
 		},
@@ -309,34 +315,13 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 								<form
 									className='flex h-full flex-col bg-white shadow-xl'
 									onSubmit={form.onSubmit((values) => {
-										// console.log("Submitting Experiment!!!")
-										// submitExperiment(values,user).then( (expId) =>{
-										// 	console.log(expId)
-										// 	setId(expId)
-										// })
-										
-
-
-										// // try {
-										// 	submitExperiment(values, user).then(({ data }) => {
-                                        //         console.log(data[0].id)
-										// 		setId(data[0].id);
-										// 	}).then(() => {
-                                        //         console.log(id)
-                                        //     });
-										// // } catch (e) {
-										// 	// console.log(e);
-										// // }
-                                        // // console.log(id);
-										// // setStatus(2)};
-										// // setFormState(2);
 									})}
 								>
 									<div className='flex flex-col'>
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
 												<Steps 
-													steps={['Parameters', 'Confirmation', 'Dispatch'].map(
+													steps={['Information', 'Parameters', 'Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
 																id: idx + 1,
@@ -352,8 +337,10 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 
 									{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 									{status === 0 ? (
-										<InformationStep form={form}>{fields}</InformationStep>
+										<InformationStep form={form}></InformationStep>
 									) : status === 1 ? (
+										<ParamStep form={form}>{fields}</ParamStep>
+									) : status === 2 ? (
 										<ConfirmationStep form={form} />
 									) : (
 										<DispatchStep form = {form} id={id} />
@@ -393,18 +380,17 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 											</button>
 											<button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-												{...(status === 2
+												{...(status === 3
 													? { type: 'submit', onClick: () => {
                                                         setFormState(-1)
                                                         setStatus(0)
                                                     }}
-													// ? { type: 'submit' }
 													: {
 															type: 'button',
 															onClick: () => setStatus(status + 1),
 													  })}
 											>
-												{status === 2 ? 'Dispatch' : 'Next'}
+												{status === 3 ? 'Dispatch' : 'Next'}
 											</button>
 										</div>
 									</div>
