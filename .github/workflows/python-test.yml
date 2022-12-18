@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r app/backend/tests/requirements.txt
+        pip install -r apps/backend/tests/requirements.txt
         pip install pytest
     - name: Test with pytest
       working-directory: ./apps/backend
