@@ -13,6 +13,14 @@ import { experimentSchema } from '../utils/validators';
 import { submitExperiment, uploadExec } from '../firebase/db';
 import { useAuth } from '../firebase/fbAuth';
 
+const State = {
+	"Home": -1,
+	"Info": 0,
+	"Params": 1,
+	"Confirmation": 2,
+	"Dispatch": 3
+}
+
 const Steps = ({ steps }) => {
 	return (
 		<ol className='grow space-y-4 md:flex md:space-y-0 md:space-x-8'>
@@ -336,11 +344,11 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 									</div>
 
 									{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
-									{status === 0 ? (
+									{status === State.Info ? (
 										<InformationStep form={form}></InformationStep>
-									) : status === 1 ? (
+									) : status === State.Params ? (
 										<ParamStep form={form}>{fields}</ParamStep>
-									) : status === 2 ? (
+									) : status === State.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
 										<DispatchStep form = {form} id={id} />
@@ -367,7 +375,7 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 												type='button'
 												className='rounded-md border w-1/6 border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												onClick={
-													status === 0
+													status === State.Info
 														? () => {
 																setFormState(-1);
 														  }
@@ -376,21 +384,21 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 														  }
 												}
 											>
-												{status === 0 ? 'Cancel' : 'Back'}
+												{status === State.Info ? 'Cancel' : 'Back'}
 											</button>
 											<button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-												{...(status === 3
+												{...(status === State.Dispatch
 													? { type: 'submit', onClick: () => {
                                                         setFormState(-1)
-                                                        setStatus(0)
+                                                        setStatus(State.Info)
                                                     }}
 													: {
 															type: 'button',
 															onClick: () => setStatus(status + 1),
 													  })}
 											>
-												{status === 3 ? 'Dispatch' : 'Next'}
+												{status === State.Dispatch ? 'Dispatch' : 'Next'}
 											</button>
 										</div>
 									</div>
