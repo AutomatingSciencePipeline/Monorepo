@@ -99,7 +99,7 @@ const InformationStep = ({ form, ...props }) => {
 					<div className='sm:col-span-4'>
 						<input
 							type='text'
-							placeholder='Filename of the experiment results'
+							placeholder='Name and extension of the experiment results file'
 							{...form.getInputProps('resultOutput')}
 							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 						/>
