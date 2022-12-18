@@ -10,7 +10,7 @@ const experiments = collection(db,"Experiments")
 
 export const submitExperiment = async (values, userId) => {
 	const newExperiment = doc(experiments)
-	console.log(values);
+	console.log("Experiment submitted. Values:", values);
 	setDoc(newExperiment,{
 		creator: userId,
 			name: values.name,
