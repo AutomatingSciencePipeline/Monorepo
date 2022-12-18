@@ -9,7 +9,7 @@ import requests
 from urllib.parse import urljoin
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-pytest_plugins = ["docker_compose_file"]
+#pytest_plugins = ["docker_compose_file"]
 
 
 @pytest.fixture(scope="function")  # to be module
