@@ -7,6 +7,13 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+#Ths should also get Java 11?
+RUN apt-get update
+RUN apt-get install default-jdk -y
+RUN apt-get install libmagic1 -y
+ARG JAVA_OPTS
+ENV JAVA_OPTS=$JAVA_OPTS
+
 # RUN apt-get update && \
 #       apt-get -y install sudo
 

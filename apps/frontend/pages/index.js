@@ -14,11 +14,11 @@ import {
 	AiOutlineGithub,
 } from 'react-icons/ai';
 import { joiResolver, useForm } from '@mantine/form';
-import { Logo } from '../components/utils';
+import { Logo } from '../components/Logo';
 import { signUpSchema } from '../utils/validators';
 import { useAuth } from '../firebase/fbAuth';
 
-export default function Home() {
+export default function HomePage() {
 	const signUpForm = useForm({
 		initialValues: {
 			email: '',
@@ -27,14 +27,14 @@ export default function Home() {
 		schema: joiResolver(signUpSchema),
 	});
 
-	return <HomePage form={signUpForm} />;
+	return <Home form={signUpForm} />;
 }
 
-// export default function Home() {
-function HomePage({ form }) {
+function Home({ form }) {
 	const router = useRouter();
-	const { user, authService } = useAuth();
-	// if (user) {
+	const { userId, authService } = useAuth();
+
+	// if (userId) {
 	// 	// router.push('/dashboard');
 	// }
 	return (
@@ -84,7 +84,7 @@ function HomePage({ form }) {
 									</div>
 								</div>
 								<div className='hidden md:flex'>
-									<Link href={'/auth'}>
+									<Link href={'/signin'}>
 										<a className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
 											Log in
 										</a>

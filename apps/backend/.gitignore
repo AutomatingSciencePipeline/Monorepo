@@ -1,0 +1,4 @@
+# Ignore docker container volume contents
+ExperimentFiles/
+
+# All below this point is uncategorized (categorize them!)

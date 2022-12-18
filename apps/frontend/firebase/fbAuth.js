@@ -15,23 +15,16 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
 	const [auth, _] = useState(getAuth(firebaseApp));
+
 	const [user, setUser] = useState();
 	useDebugValue('Current User:', user);
 	const [loading, setLoading] = useState(false); // TODO is their loading blocker still a relevant concept for firebase?
 
 	// TODO this duplicates the setting functionality in signInWithEmailAndPassword, but not sure which is best practice now
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (newUser) => {
-			console.log("OnAuthStateChanged fired", newUser);
-			setUser(newUser);
-		})
-
-		// can remove this once we're sure it isn't unsubscribing more than needed (does `auth` need to be in useEffect deps and/or state?)
-		return () => {
-			console.log("ROBDEBUG: Auth Unsubscribe called");
-			unsubscribe();
-		}
-	}, [auth]);
+	useEffect(() => onAuthStateChanged(auth, (newUser) => {
+		console.log("OnAuthStateChanged fired", newUser);
+		setUser(newUser);
+	}), [auth]);
 
 	const authService = {
 		userId: useMemo(() => {
@@ -64,6 +57,7 @@ export const AuthProvider = ({ children }) => {
 				console.log("sign up success, UserCred is ", userCredential);
 			}).catch((error) => {
 				console.error('Firebase sign up error', error);
+				throw error;
 			});
 		},
 		signInWithGoogle: async () => {
@@ -75,7 +69,11 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	return (
-		<AuthContext.Provider value={{ user, authService }}>
+		<AuthContext.Provider value={{
+			user,
+			userId: authService?.userId,
+			authService }
+		}>
 			{loading ? (
 				<div>
 					<h1>Loading...</h1>
