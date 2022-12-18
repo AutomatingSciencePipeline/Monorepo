@@ -1,5 +1,5 @@
 import pytest
-import app
+from app import gen_configs
 import unittest
 import flask 
 import numpy as np
