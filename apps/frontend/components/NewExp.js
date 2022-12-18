@@ -13,12 +13,12 @@ import { experimentSchema } from '../utils/validators';
 import { submitExperiment, uploadExec } from '../firebase/db';
 import { useAuth } from '../firebase/fbAuth';
 
-const State = {
-	"Home": -1,
-	"Info": 0,
-	"Params": 1,
-	"Confirmation": 2,
-	"Dispatch": 3
+export const FormStates = {
+	Closed: -1,
+	Info: 0,
+	Params: 1,
+	Confirmation: 2,
+	Dispatch: 3
 }
 
 const Steps = ({ steps }) => {
@@ -289,9 +289,9 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 	const [id, setId] = useState(null);
 
 	useLayoutEffect(() => {
-		if (formState === 0) {
+		if (formState === FormStates.Info) {
 			setOpen(false);
-		} else if (formState === 1) {
+		} else if (formState === FormStates.Params) {
 			setOpen(true);
 		} else {
 			setOpen(false);
@@ -344,11 +344,11 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 									</div>
 
 									{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
-									{status === State.Info ? (
+									{status === FormStates.Info ? (
 										<InformationStep form={form}></InformationStep>
-									) : status === State.Params ? (
+									) : status === FormStates.Params ? (
 										<ParamStep form={form}>{fields}</ParamStep>
-									) : status === State.Confirmation ? (
+									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
 										<DispatchStep form = {form} id={id} />
@@ -359,7 +359,7 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 											<div className='flex space-x-3 flex-1'>
 												<input
 													type='number'
-													placeholder={'N Workers'}
+													placeholder={'Number of Workers'}
 													className='rounded-md  border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 													required
 													{...form.getInputProps('nWorkers')}
@@ -375,7 +375,7 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 												type='button'
 												className='rounded-md border w-1/6 border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												onClick={
-													status === State.Info
+													status === FormStates.Info
 														? () => {
 																setFormState(-1);
 														  }
@@ -384,21 +384,21 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 														  }
 												}
 											>
-												{status === State.Info ? 'Cancel' : 'Back'}
+												{status === FormStates.Info ? 'Cancel' : 'Back'}
 											</button>
 											<button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-												{...(status === State.Dispatch
+												{...(status === FormStates.Dispatch
 													? { type: 'submit', onClick: () => {
                                                         setFormState(-1)
-                                                        setStatus(State.Info)
+                                                        setStatus(FormStates.Info)
                                                     }}
 													: {
 															type: 'button',
 															onClick: () => setStatus(status + 1),
 													  })}
 											>
-												{status === State.Dispatch ? 'Dispatch' : 'Next'}
+												{status === FormStates.Dispatch ? 'Dispatch' : 'Next'}
 											</button>
 										</div>
 									</div>
