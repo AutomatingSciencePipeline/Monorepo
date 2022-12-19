@@ -55,6 +55,7 @@ def run_batch(data):
     experiment = expRef.get().to_dict()
     experiment['id'] = id
     experimentOutput = experiment['fileOutput']
+    resultOutput = experiment['resultOutput']
     print(f"Experiment info {experiment}")
 
     #Downloading Experiment File
@@ -97,8 +98,11 @@ def run_batch(data):
     with open('results.csv', 'w') as expResults:
         paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
-        writer.writerow(["Experiment Run", "Result"] + paramNames)
         firstRun = run_experiment(filepath,f'configFiles/{0}.ini',filetype)
+        if resultOutput == '': 
+            writer.writerow(["Experiment Run", "Result"] + paramNames)
+        else:
+            writer.writerow(["Experiment Run"] + get_header_results(resultOutput) + paramNames)
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             print(f"Experiment {id} ran into an error while running aborting")
@@ -108,13 +112,19 @@ def run_batch(data):
             if experimentOutput != '':
                 add_to_batch(experimentOutput, 0)
                 firstRun = "In ResCsvs"
-            writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
+            if resultOutput == '':
+                writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
+            else:
+                writer.writerow(["0"] + get_output_results(resultOutput) + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun+1):
                 res = run_experiment(filepath,f'configFiles/{i}.ini',filetype)
                 if experimentOutput != '':
                     res = 'In ResCsvs'
                     add_to_batch(experimentOutput, i)
-                writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+                if resultOutput == '':
+                    writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+                else:
+                    writer.writerow([i] + get_output_results(resultOutput) + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 if res != "ERROR":
                     passes +=1
                 else:
@@ -151,6 +161,21 @@ def run_experiment(experiment_path, config_path, filetype):
         with Popen(['java','-jar',experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
             return get_data(p)
      
+def get_header_results(filename):
+    with open(filename, mode = 'r') as file:
+        reader = csv.reader(file)
+        for line in reader:
+            return line
+
+def get_output_results(filename):
+    with open(filename, mode = 'r') as file:
+        reader = csv.reader(file)
+        i = 0
+        for line in reader:
+            if i == 1:
+                return line
+            i += 1
+
 def get_data(p):
     try:
         data = p.communicate()

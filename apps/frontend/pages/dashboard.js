@@ -1,4 +1,4 @@
-import NewExp from '../components/NewExp';
+import NewExp, { FormStates } from '../components/NewExp';
 import { useAuth } from '../firebase/fbAuth';
 import { subscribeToExp, listenToExperiments, downloadExp, downloadExpZip} from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
@@ -265,10 +265,10 @@ export default function DashboardPage() {
 	},[userId])
 	
 
-	const [formState, setFormState] = useState(-1);
+	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
 	useEffect(() => {
-		if (formState === -1) {
+		if (formState === FormStates.Closed) {
 			setLabel('New Experiment');
 		} else {
 			setLabel('Continue Experiment');
