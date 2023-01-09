@@ -1,4 +1,4 @@
-import { Fragment, useState, useLayoutEffect } from 'react';
+import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Upload, X, File } from 'tabler-icons-react';
 import { Toggle } from './Toggle';
@@ -10,8 +10,12 @@ import { Dropzone } from '@mantine/dropzone';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
-import { submitExperiment, uploadExec } from '../firebase/db';
+import { submitExperiment, uploadExec, getDocById } from '../firebase/db';
 import { useAuth } from '../firebase/fbAuth';
+
+import { firebaseApp } from "../firebase/firebaseClient";
+import { getDoc, getFirestore, doc } from "firebase/firestore";
+
 
 export const FormStates = {
 	Closed: -1,
@@ -267,10 +271,10 @@ const DispatchStep = ({ id, form, ...props }) => {
 };
 
 const NewExp = ({ formState, setFormState, ...rest }) => {
-	const form = useForm({
+	var form = useForm({
 		initialValues: {
 			parameters: formList([]),
-			name: '',
+			name: 'Test',
 			description: '',
 			fileOutput: '',
 			resultOutput: '',
@@ -280,6 +284,34 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 		schema: joiResolver(experimentSchema),
 	});
 
+	if(localStorage.getItem("ID") != null){
+		const db = getFirestore(firebaseApp);
+		getDoc(doc(db, "Experiments", localStorage.getItem("ID"))).then(docSnap => {
+			if (docSnap.exists()) {
+				const expInfo = docSnap.data();
+				const params = JSON.parse(expInfo['params'])['params'];
+				// console.log(params)
+				// useEffect(() => {
+					form.setValues({
+						parameters: formList(params),
+						name: expInfo['name'],
+						description: expInfo['description'],
+						fileOutput: expInfo['fileOutput'],
+						resultOutput: expInfo['resultOutput'],
+						verbose: expInfo['verbose'],
+						nWorkers: expInfo['nWorkers'],
+					})
+					localStorage.removeItem("ID")
+					console.log("Copied!")
+				// })
+				
+			} else {
+			  console.log("No such document!");
+			}
+		})
+	}
+
+	
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
 	});
@@ -377,7 +409,8 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 												onClick={
 													status === FormStates.Info
 														? () => {
-																setFormState(-1);
+															localStorage.removeItem("ID")
+															setFormState(-1);
 														  }
 														: () => {
 																setStatus(status - 1);
@@ -391,6 +424,7 @@ const NewExp = ({ formState, setFormState, ...rest }) => {
 												{...(status === FormStates.Dispatch
 													? { type: 'submit', onClick: () => {
                                                         setFormState(-1)
+														localStorage.removeItem("ID")
                                                         setStatus(FormStates.Info)
                                                     }}
 													: {
