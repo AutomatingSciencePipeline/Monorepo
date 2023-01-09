@@ -271,7 +271,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 };
 
 const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
-	var form = useForm({
+	const form = useForm({
 		initialValues: {
 			parameters: formList([]),
 			name: '',
