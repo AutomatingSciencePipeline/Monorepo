@@ -173,7 +173,7 @@ const Navbar = (props) => {
 };
 
 
-const ExpLog = ({projectinit}) => {
+const ExpLog = ({projectinit, setFormState, setCopyId}) => {
     const [project, setProject] = useState(projectinit);
 	useEffect(() => subscribeToExp(project.expId, setProject),[])
     return (
@@ -200,6 +200,14 @@ const ExpLog = ({projectinit}) => {
 						Download Project Zip
 				</button> 
 				: ' '}
+				<button type= "button" data-id={project.expId}
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={() => {
+						setFormState(1)
+						setCopyId(project.expId)
+					}}>
+					Copy Experiment
+				</button> 
 				<a
 					href={project.repoHref}
 					className='relative group flex items-center space-x-2.5'
@@ -264,7 +272,7 @@ export default function DashboardPage() {
 		return listenToExperiments(userId,(newExperimentList)=> setExperiments(newExperimentList))
 	},[userId])
 	
-
+	const [copyID, setCopyId] = useState(null);
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
 	useEffect(() => {
@@ -439,7 +447,7 @@ export default function DashboardPage() {
 										key={project.id}
 										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
 									>
-                                        <ExpLog projectinit={project}/>
+                                        <ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
 									</li>
 								))}
 							</ul>
@@ -488,6 +496,8 @@ export default function DashboardPage() {
 					<NewExp
 						formState={formState}
 						setFormState={setFormState}
+						copyID = {copyID}
+						setCopyId = {setCopyId}
 					/>
 				</div>
 			</div>

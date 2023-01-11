@@ -1,5 +1,5 @@
 import { firebaseApp } from "./firebaseClient";
-import { getFirestore, updateDoc } from "firebase/firestore";
+import { getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
@@ -47,6 +47,17 @@ export const uploadExec = async (id, file) => {
 		return false
 	} )
 };
+
+export const getDocById = (id) => {
+	getDoc(doc(db, "Experiments", id)).then(docSnap => {
+		if (docSnap.exists()) {
+			return docSnap.data();
+		} else {
+		  console.log("No such document!");
+		}
+	})
+
+}
 
 export const downloadExp = (event) => {
 	const id = event.target.getAttribute('data-id')
