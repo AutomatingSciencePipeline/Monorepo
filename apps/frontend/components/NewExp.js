@@ -283,30 +283,31 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 		},
 		schema: joiResolver(experimentSchema),
 	});
+	useEffect(() => {
+		if (copyID != null) {
+			const db = getFirestore(firebaseApp);
+			getDoc(doc(db, "Experiments", copyID)).then(docSnap => {
+				if (docSnap.exists()) {
+					const expInfo = docSnap.data();
+					const params = JSON.parse(expInfo['params'])['params'];
+					form.setValues({
+						parameters: formList(params),
+						name: expInfo['name'],
+						description: expInfo['description'],
+						fileOutput: expInfo['fileOutput'],
+						resultOutput: expInfo['resultOutput'],
+						verbose: expInfo['verbose'],
+						nWorkers: expInfo['workers'],
+					})
+					setCopyId(null)
+					console.log("Copied!")
 
-	if(copyID != null){
-		const db = getFirestore(firebaseApp);
-		getDoc(doc(db, "Experiments", copyID)).then(docSnap => {
-			if (docSnap.exists()) {
-				const expInfo = docSnap.data();
-				const params = JSON.parse(expInfo['params'])['params'];
-				form.setValues({
-					parameters: formList(params),
-					name: expInfo['name'],
-					description: expInfo['description'],
-					fileOutput: expInfo['fileOutput'],
-					resultOutput: expInfo['resultOutput'],
-					verbose: expInfo['verbose'],
-					nWorkers: expInfo['workers'],
-				})
-				setCopyId(null)
-				console.log("Copied!")
-				
-			} else {
-			  console.log("No such document!");
-			}
-		})
-	}
+				} else {
+					console.log("No such document!");
+				}
+			})
+		}
+	});
 
 	
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
