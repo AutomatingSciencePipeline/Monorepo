@@ -12,7 +12,7 @@ from requests.adapters import HTTPAdapter
 #pytest_plugins = ["docker_compose"]
 
 
-@pytest.fixture(scope="function")  # to be module
+#@pytest.fixture(scope="function")  # to be module
 
 # #this function is a big fat yes
 def test_always_true():
