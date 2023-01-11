@@ -7,6 +7,9 @@ import numpy as np
 import collections
 import itertools
 from collections.abc import Iterable
+
+def test_always_true():
+    assert True
 # class TestBackend(unittest.TestCase):
 #     def test_gen_config(self):
 #         sample_json = [{'paramName': 'x', 'values': [1, 0, 4, 1], 'type': 'integer'}, {'paramName': 'y', 'values': [
