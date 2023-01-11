@@ -8,7 +8,8 @@ on:
 
 permissions:
   contents: read
-
+env:
+  creds: ${{ secrets.FIREBASE_KEY }}
 jobs:
   build:
 
