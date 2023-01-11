@@ -307,7 +307,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 				}
 			})
 		}
-	});
+	}, [copyId]);
 
 	
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
