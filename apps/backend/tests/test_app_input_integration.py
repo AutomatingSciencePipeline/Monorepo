@@ -12,9 +12,11 @@ from requests.adapters import HTTPAdapter
 #pytest_plugins = ["docker_compose"]
 
 
-# @pytest.fixture(scope="function")  # to be module
+@pytest.fixture(scope="function")  # to be module
 
-# #this function is a big fat maybe
+# #this function is a big fat yes
+def always_true():
+    assert True
 # def wait_for_api(function_scoped_container_getter):
 #     """Wait for the api from my_api_service to become responsive"""
 #     # request_session = requests.Session()
