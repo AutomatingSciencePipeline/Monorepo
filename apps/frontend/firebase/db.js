@@ -1,5 +1,5 @@
 import { firebaseApp } from "./firebaseClient";
-import { getFirestore, updateDoc } from "firebase/firestore";
+import { getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { collection, setDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
@@ -10,7 +10,7 @@ const experiments = collection(db,"Experiments")
 
 export const submitExperiment = async (values, userId) => {
 	const newExperiment = doc(experiments)
-
+	console.log("Experiment submitted. Values:", values);
 	setDoc(newExperiment,{
 		creator: userId,
 			name: values.name,
@@ -19,6 +19,7 @@ export const submitExperiment = async (values, userId) => {
 			workers: values.nWorkers,
 			expId: newExperiment.id,
 			fileOutput: values.fileOutput,
+			resultOutput: values.resultOutput,
 			finished: false,
 			created: Date.now(),
 			params: JSON.stringify({
@@ -46,6 +47,17 @@ export const uploadExec = async (id, file) => {
 		return false
 	} )
 };
+
+export const getDocById = (id) => {
+	getDoc(doc(db, "Experiments", id)).then(docSnap => {
+		if (docSnap.exists()) {
+			return docSnap.data();
+		} else {
+		  console.log("No such document!");
+		}
+	})
+
+}
 
 export const downloadExp = (event) => {
 	const id = event.target.getAttribute('data-id')

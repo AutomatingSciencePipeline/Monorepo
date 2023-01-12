@@ -9,11 +9,7 @@ def main():
     config.read(configFile)
     x = int(config["DEFAULT"]["x"])
     y = int(config["DEFAULT"]["y"])
-    boo = bool(config["DEFAULT"]["boo"])
-    if boo:
-        print(x+y)
-    else:
-        print(x-y)
+    print(x+y)
     print("done")
     return 0
 
