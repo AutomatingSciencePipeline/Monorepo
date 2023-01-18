@@ -1,3 +1,4 @@
+#!/bin/bash
 # Sets up the dev machine to have an overlay network for the containers to talk to each other with.
 
 # https://docs.docker.com/network/overlay/#create-an-overlay-network
