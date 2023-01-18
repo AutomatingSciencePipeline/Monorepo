@@ -1,0 +1,31 @@
+{
+    "recommendations": [
+        // General
+        "ms-azuretools.vscode-docker",
+        "medo64.render-crlf",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "jeff-hykin.code-eol",
+        "wmaurer.change-case",
+        "ramyaraoa.show-offset",
+        
+        // Frontend
+        "herrmannplatz.npm-dependency-links",
+        "dbaeumer.vscode-eslint",
+        "christian-kohler.npm-intellisense",
+        "wix.vscode-import-cost",
+        "jock.svg",
+
+        // Backend
+        "KevinRose.vsc-python-indent",
+        "ms-azuretools.vscode-docker",
+
+        // Setup Scripts
+        "timonwong.shellcheck",
+
+        // Docs
+        "DavidAnson.vscode-markdownlint",
+        "bierner.markdown-preview-github-styles"
+    ],
+    "unwantedRecommendations": []
+}
