@@ -35,11 +35,10 @@ const Parameter = ({ form, type, index, ...rest }) => {
 						<Component form={form} type={type} index={index} {...rest} />
 						<ActionIcon
 							color='red'
-							variant='hover'
 							onClick={() => form.removeListItem('parameters', index)}
 							className='ml-2'
 						>
-							<Trash size={12} />
+							<Trash/>
 						</ActionIcon>
 					</div>
 				);

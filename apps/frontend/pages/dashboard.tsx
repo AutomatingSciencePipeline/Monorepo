@@ -462,7 +462,7 @@ export default function DashboardPage() {
 							<div>
 								<ul role='list' className='divide-y divide-gray-200'>
 									{activityItems.map((item) => (
-										<li key={item.commit} className='py-4'>
+										<li className='py-4'>
 											<div className='flex space-x-3'>
 												<img
 													className='h-6 w-6 rounded-full'

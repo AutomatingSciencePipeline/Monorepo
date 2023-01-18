@@ -5,18 +5,25 @@ import React, {
 	useContext,
 	createContext,
 	useDebugValue,
+	FC
 } from 'react';
 import { firebaseApp } from './firebaseClient';
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth'
 
-const AuthContext = createContext({});
+interface AuthContextType {
+	user: User | null;
+	userId: String | null;
+	authService: any;
+  }
+
+const AuthContext = createContext({} as AuthContextType);
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
 	const [auth, _] = useState(getAuth(firebaseApp));
 
-	const [user, setUser] = useState();
+	const [user, setUser] = useState<any>();
 	useDebugValue('Current User:', user);
 	const [loading, setLoading] = useState(false); // TODO is their loading blocker still a relevant concept for firebase?
 
