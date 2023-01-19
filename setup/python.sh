@@ -40,11 +40,19 @@ else
     pyenv global "${PYTHON_VERSION}"
 fi
 
-if python --version | grep "${PYTHON_VERSION}" -q; then
+if python --version | grep "${PYTHON_VERSION}"; then
     echo "✔ Python version selection successful"
 else
-    echo "🛑 Python install does not appear to have succeeded, can't continue!"
-    exit 1
+    echo "⚠ Another python install with the version below seems to be taking precedence?"
+    python --version
+    echo "⚠ Switching system selected python version via pyenv to ${PYTHON_VERSION}"
+    pyenv global "${PYTHON_VERSION}"
+    if python --version | grep "${PYTHON_VERSION}"; then
+        echo "✔ Python version selection successful"
+    else
+        echo "🛑 Failed to change over python version. You probably have to uninstall that other version of python to proceed so pyenv can work."
+        exit 1
+    fi
 fi
 
 # Setup venv
