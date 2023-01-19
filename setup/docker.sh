@@ -9,9 +9,9 @@ else
 
     if [ "$IS_WINDOWS" ]; then
         if test -e "${DOCKER_INSTALLER_LOCATION}"; then
-            echo "▶ Docker Desktop Installer already exists at ${DOCKER_INSTALLER_LOCATION}"
+            echo "▶ Docker Desktop installer already exists at ${DOCKER_INSTALLER_LOCATION}"
         else
-            echo "▶ Downloading Docker Desktop Installer from ${DOCKER_URL}"
+            echo "▶ Downloading Docker Desktop installer from ${DOCKER_URL}"
             echo "▶ and placing it at ${DOCKER_INSTALLER_LOCATION}"
             curl "${DOCKER_URL}" > "${DOCKER_INSTALLER_LOCATION}"
         fi
