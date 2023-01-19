@@ -9,6 +9,8 @@ else
         EXISTING_NODE_VERSION=$(node -v)
         echo "🛑 Node.js is already installed, but not nvm (node version manager). You need to manually uninstall it to ensure that Node does not get confused and try to install packages on the wrong node install. Don't worry, you can use nvm to install the version of node you already have installed (which is ${EXISTING_NODE_VERSION})"
         echo "Docs on how to use nvm to re-install the other Node install: https://heynode.com/tutorial/install-nodejs-locally-nvm/"
+        echo "The node version is located at:"
+        which node
         exit 1
     else
         echo "✔ Node.js is not yet installed. It's safe to proceed with installing nvm."

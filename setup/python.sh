@@ -45,6 +45,7 @@ if python --version | grep "${PYTHON_VERSION}"; then
 else
     echo "⚠ Another python install with the version below seems to be taking precedence?"
     python --version
+    which python
     echo "⚠ Switching system selected python version via pyenv to ${PYTHON_VERSION}"
     pyenv global "${PYTHON_VERSION}"
     if python --version | grep "${PYTHON_VERSION}"; then
