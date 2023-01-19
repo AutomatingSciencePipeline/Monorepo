@@ -1,4 +1,10 @@
 {
+    // Turn off shellcheck warnings about line ending types because git is set to autoconvert
+    "shellcheck.exclude": [
+        "1017"
+    ],
+
+    // From the past team (unclear if they are still needed)
     "python.testing.pytestArgs": [
         "apps"
     ],
