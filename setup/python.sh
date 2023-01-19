@@ -74,5 +74,11 @@ fi
 
 # Install python dependencies
 echo "▶ Installing and updating project python dependencies"
-pip install -U pip
-pip install -r ./apps/backend/requirements.txt
+if ! pip install -U pip; then
+    echo "🛑 Failed to update pip? See above error"
+    exit 1
+fi
+if ! pip install -r ./apps/backend/requirements.txt; then
+    echo "🛑 Failed to install or update backend dependencies, check above error for more details"
+    exit 1
+fi
