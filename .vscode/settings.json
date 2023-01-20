@@ -2,7 +2,10 @@
     // =========================== General =========================
     // Spellcheck forcefully allowed words
     "cSpell.words": [
-        "gladosbase"
+        "glados",
+        "gladosbase",
+        "mouck",
+        "Vmmem"
     ],
     // ======================= Setup Scripts =======================
 

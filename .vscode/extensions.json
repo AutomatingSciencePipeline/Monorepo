@@ -8,6 +8,7 @@
         "medo64.render-crlf",
         "wmaurer.change-case",
         "ramyaraoa.show-offset",
+        "ms-vscode-remote.vscode-remote-extensionpack",
         
         // Frontend
         "herrmannplatz.npm-dependency-links",
