@@ -1,13 +1,27 @@
 {
-    // Turn off shellcheck warnings about line ending types because git is set to autoconvert
-    "shellcheck.exclude": [
-        "1017"
+    // =========================== General =========================
+    // Spellcheck forcefully allowed words
+    "cSpell.words": [
+        "gladosbase"
     ],
+    // ======================= Setup Scripts =======================
+
+    "shellcheck.exclude": [
+        "1017" // Turn off shellcheck warnings about line ending types because git is set to autoconvert
+    ],
+    
+    // ======================= Backend =============================
+
+    // Tell the Python vscode extension to look at the venv's python install before any found on the system
+    // https://github.com/microsoft/vscode-python/wiki/Setting-descriptions#pythondefaultinterpreterpath
+    "python.defaultInterpreterPath": "./apps/backend/.venv/Scripts/python.exe",
+    "python.analysis.typeCheckingMode": "basic",
 
     // From the past team (unclear if they are still needed)
     "python.testing.pytestArgs": [
         "apps"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    
 }

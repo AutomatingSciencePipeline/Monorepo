@@ -1,0 +1,5 @@
+# pylint python linter configuration
+
+[MASTER]
+disable=
+    C0116, # missing-function-docstring

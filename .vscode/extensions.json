@@ -19,6 +19,9 @@
         // Backend
         "KevinRose.vsc-python-indent",
         "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.vscode-pylance",
 
         // Setup Scripts
         "timonwong.shellcheck",
