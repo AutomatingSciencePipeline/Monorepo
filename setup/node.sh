@@ -8,8 +8,9 @@ else
     if command -v node -v; then
         EXISTING_NODE_VERSION=$(node -v)
         echo "🛑 Node.js is already installed, but not nvm (node version manager). You need to manually uninstall it to ensure that Node does not get confused and try to install packages on the wrong node install. Don't worry, you can use nvm to install the version of node you already have installed (which is ${EXISTING_NODE_VERSION})"
+        echo "After this, the script will install node (the version required for this project) again for you."
         echo "Docs on how to use nvm to re-install the other Node install: https://heynode.com/tutorial/install-nodejs-locally-nvm/"
-        echo "The node version is located at:"
+        echo "Your current node install is located at:"
         which node
         exit 1
     else
@@ -48,7 +49,7 @@ fi
 if nvm current | grep "${NODE_VERSION}" -q; then
     echo "✔ nvm already using ${NODE_VERSION}"
 else
-    echo "▶ Using nvm to switch to node ${NODE_VERSION} (you may need to ok an admin prompt)"
+    echo "⚠ Using nvm to switch to node ${NODE_VERSION} (you may need to ok an admin prompt)"
     nvm use "${NODE_VERSION}"
 fi
 
@@ -57,6 +58,7 @@ if grep "${NODE_VERSION}" -q <<< "$FOUND_VERSION" ; then
     echo "✔ Node.js version ${NODE_VERSION} was found on path"
 else
     echo "🛑 Somehow the detected node version (${FOUND_VERSION}) is not what was switched to with nvm (${NODE_VERSION}), do you have another node install that is interfering?"
+    echo "You might need to restart the script again if nvm just installed node for you"
     exit 1
 fi
 
@@ -88,7 +90,7 @@ else
     exit 1
 fi
 
-echo "▶ Installing and updating frontend Node dependencies"
+echo "▶ Installing and updating frontend Node dependencies (this could take a bit)"
 if ! cd apps/frontend; then
     echo "🛑 Failed to change dir to frontend directory?"
     exit 1

@@ -52,6 +52,9 @@ else
         echo "✔ Python version selection successful"
     else
         echo "🛑 Failed to change over python version. You probably have to uninstall that other version of python to proceed so pyenv can work."
+        echo "It is suggested you do so with Windows' 'Add or Remove Programs' tool"
+        echo "After this, the script will install python (the version required for this project) again for you."
+        echo "You can use pyenv to install your old Python version again too if you wish: https://realpython.com/intro-to-pyenv/"
         exit 1
     fi
 fi
@@ -84,7 +87,7 @@ fi
 # Install python dependencies
 echo "▶ Installing and updating project python dependencies"
 if ! pip install -U pip; then
-    echo "🛑 Failed to update pip? See above error"
+    echo "🛑 Failed to update pip? See above error. Try just running the script again if it's a permissions issue"
     exit 1
 fi
 if ! pip install -r ./apps/backend/requirements.txt; then
