@@ -9,6 +9,9 @@ if ! source "${DIR}/setup/variables.sh"; then
     exit 1
 fi
 
+# Create the temp directory so other scripts don't fail to download stuff
+mkdir -p ./setup/temp
+
 unset IS_WINDOWS
 unset IS_UNIX
 
