@@ -24,6 +24,8 @@ FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
 if FIREBASE_CREDENTIALS is None:
     raise AssertionError(
         f"Missing environment variable {ENV_FIREBASE_CREDENTIALS}, do you have an env file set up?")
+else:
+    print("Loaded firebase credentials from environment variables")
 
 #Firebase Objects
 firebaseCredentials = credentials.Certificate(json.loads(FIREBASE_CREDENTIALS))
