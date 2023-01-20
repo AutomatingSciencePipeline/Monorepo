@@ -53,3 +53,7 @@ source "${DIR}/setup/node.sh"
 
 echo "▶ Environment setup/update completed (probably)"
 echo "▶ Before you begin working in Python in each new terminal shell, run \`source .venv/bin/activate\` from the repo root to enter the Virtual Env. You should see \`(venv)\` on your console line when you are in a virtual env. To exit the venv, just close the shell or send the command \`deactivate\`."
+
+if ! test -e ".env"; then
+    echo "⚠ You don't seem to have a .env file - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
+fi
