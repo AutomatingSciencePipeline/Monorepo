@@ -3,6 +3,9 @@
 
 # https://docs.docker.com/network/overlay/#create-an-overlay-network
 
+echo "The project is not currently set up for docker swarm mode, this file is not currently in use. Check the docker-compose file network section for more info"
+exit 1
+
 # Init this machine as the swarm manager -> it can't join a swarm
 docker swarm init
 
