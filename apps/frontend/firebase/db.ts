@@ -100,7 +100,7 @@ export const subscribeToExp = (id, callback) => {
 export const listenToExperiments = (uid, callback) => {
 	const q = query(experiments, where("creator", "==", uid))
 	const unsubscribe = onSnapshot(q, (snapshot) => {
-		var result = []
+		let result: unknown[] = []
 		snapshot.forEach(doc => result.push(doc.data()))
 		callback(result)
 	})

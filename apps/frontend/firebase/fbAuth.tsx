@@ -10,21 +10,29 @@ import React, {
 import { firebaseApp } from './firebaseClient';
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth'
 
-interface AuthContextType {
+export interface AuthContextType {
 	user: User | null;
 	userId: String | null;
-	authService: any;
+	authService; // TODO find a way to make a type for this, ideally without duplicating all the function names
   }
 
-const AuthContext = createContext({} as AuthContextType);
+const AuthContext = createContext<AuthContextType>({
+	user: null,
+	userId: null,
+	authService: null
+});
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
+interface AuthProviderProps {
+	children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [auth, _] = useState(getAuth(firebaseApp));
 
-	const [user, setUser] = useState<any>();
-	useDebugValue('Current User:', user);
+	const [user, setUser] = useState<User | null>(null);
+	useDebugValue(`Current User: ${user}`);
 	const [loading, setLoading] = useState(false); // TODO is their loading blocker still a relevant concept for firebase?
 
 	// TODO this duplicates the setting functionality in signInWithEmailAndPassword, but not sure which is best practice now
@@ -48,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 			return user?.photoURL;
 		}, [user]),
 
-		signInWithEmailAndPassword: async (email, password) => {
+		signInWithEmailAndPassword: async (email: string, password: string) => {
 			return await signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				console.log("sign in success, UserCred is ", userCredential);
@@ -58,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 				throw error;
 			});
 		},
-		signUpWithEmailAndPassword: async (email, password) => {
+		signUpWithEmailAndPassword: async (email: string, password: string) => {
 			return await createUserWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				console.log("sign up success, UserCred is ", userCredential);
@@ -78,7 +86,7 @@ export const AuthProvider = ({ children }) => {
 	return (
 		<AuthContext.Provider value={{
 			user,
-			userId: authService?.userId,
+			userId: authService?.userId || null,
 			authService }
 		}>
 			{loading ? (

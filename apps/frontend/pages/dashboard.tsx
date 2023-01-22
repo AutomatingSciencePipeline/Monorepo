@@ -263,13 +263,13 @@ const SearchBar = (props) => {
 
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
-    const [experiments, setExperiments] = useState([]);
+    const [experiments, setExperiments] = useState([] as unknown[]); // TODO experiment type
 
 	useEffect(() => {
 		if (!userId) {
 			return;
 		}
-		return listenToExperiments(userId,(newExperimentList)=> setExperiments(newExperimentList))
+		return listenToExperiments(userId, (newExperimentList)=> setExperiments(newExperimentList))
 	},[userId])
 	
 	const [copyID, setCopyId] = useState(null);
@@ -442,7 +442,7 @@ export default function DashboardPage() {
 								role='list'
 								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 							>
-								{experiments?.map((project) => (
+								{experiments?.map((project: any) => ( // TODO a type for experiments should alleviate the need for `any` here
 									<li
 										key={project.id}
 										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'

@@ -1,6 +1,6 @@
-import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
+import { Fragment, useState, useLayoutEffect, useEffect, ReactNode } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Upload, X, File } from 'tabler-icons-react';
+import { Upload, X, File, IconProps } from 'tabler-icons-react';
 import { Toggle } from './Toggle';
 
 import Parameter from './Parameter';
@@ -205,11 +205,11 @@ const ConfirmationStep = ({ form, ...props }) => {
 		</div>
 	);
 };
+
 const dropzoneKids = (status) => {
-	if (status.accepted) {
-		return <UploadIcon className={'bg-green-500'} status={status} />;
-	}
-	return (
+	return (status.accepted) ?
+		<UploadIcon className={'bg-green-500'} status={status} />
+	:
 		<div className={`flex flex-col justify-center items-center space-y-6`}>
 			<UploadIcon status={status} />
 			<div>
@@ -221,9 +221,13 @@ const dropzoneKids = (status) => {
 				</Text>
 			</div>
 		</div>
-	);
 };
-const UploadIcon = ({ status }) => {
+
+interface UploadIconProps extends IconProps {
+	status
+}
+
+const UploadIcon: React.FC<UploadIconProps> = ({ status }) => {
 	if (status.accepted) {
 		return <Upload size={80} />;
 	} else if (status.rejected) {
@@ -267,7 +271,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 				'application/java-archive':['.jar']
 			  }}
 		>
-			{(status) =>  dropzoneKids(status)}
+			<>{ (status) => dropzoneKids(status) }</>
 		</Dropzone>
 	);
 };
@@ -275,7 +279,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		initialValues: {
-			parameters: formList([]),
+			parameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			fileOutput: '',
