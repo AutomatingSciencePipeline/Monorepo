@@ -16,6 +16,7 @@
         "christian-kohler.npm-intellisense",
         "wix.vscode-import-cost",
         "jock.svg",
+        "herrmannplatz.npm-dependency-links",
 
         // Backend
         "KevinRose.vsc-python-indent",

@@ -212,7 +212,7 @@ function Home({ form }) {
 																	router.push('/dashboard');
 																}
 															} catch (error) {
-																console.log(error);
+																console.log("Sign up error", error);
 															}
 														})}
 														className='space-y-6'
