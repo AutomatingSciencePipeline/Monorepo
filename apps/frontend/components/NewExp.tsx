@@ -15,6 +15,7 @@ import { useAuth } from '../firebase/fbAuth';
 
 import { firebaseApp } from "../firebase/firebaseClient";
 import { getDoc, getFirestore, doc } from "firebase/firestore";
+import Router from 'next/router';
 
 
 export const FormStates = {
@@ -241,12 +242,10 @@ const DispatchStep = ({ id, form, ...props }) => {
 
 	const onDropFile = async (file) => {
 		console.log("Submitting Experiment!!!")
-		submitExperiment(form.values, userId).then( (expId) =>{
+		submitExperiment(form.values, userId).then(async (expId) =>{
 			console.log(`Uploading file for ${expId}`)
-			const res = uploadExec(expId, file[0]);
+			const res = await uploadExec(expId, file[0]);
 			if (res == null) {
-				throw new Error('Upload failed')
-			} else{
 				console.log("Handing experiment " + expId + " to the backend")
 				fetch(`/api/experiments/${expId}`,{
 					method: 'POST',
@@ -254,6 +253,10 @@ const DispatchStep = ({ id, form, ...props }) => {
 					credentials: 'same-origin',
 					body: JSON.stringify({id: expId})
 				})
+				Router.reload()
+			} else {
+				alert("Failed to upload experiment file to the backend server, is it running?")
+				throw new Error('Upload failed')
 			}
 		}).catch( error => console.log("Error uploading experiment: ", error))
 	}

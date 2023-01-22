@@ -33,7 +33,7 @@ export const submitExperiment = async (values, userId) => {
 
 export const uploadExec = async (id, file) => {
 	const fileRef = ref(storage, "experiment" + id)
-	uploadBytes(fileRef, file).then((snapshot) => {
+	return uploadBytes(fileRef, file).then((snapshot) => {
 		const experimentRef = doc(db, "Experiments", id)
 		updateDoc(experimentRef, {
 			file: "experiment" + id
@@ -41,7 +41,6 @@ export const uploadExec = async (id, file) => {
 			console.log("Uploaded file for experiment " + id)
 			return true
 		}).catch(error => console.log("Upload doc error: ", error))
-		window.location.reload()
 		return true
 	}).catch(error => {
 		console.log("Upload bytes error: ", error)
