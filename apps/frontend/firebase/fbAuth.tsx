@@ -29,16 +29,21 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-	const [auth, _] = useState(getAuth(firebaseApp));
+	const [auth] = useState(getAuth(firebaseApp));
 
 	const [user, setUser] = useState<User | null>(null);
 	useDebugValue(`Current User: ${user}`);
-	const [loading, setLoading] = useState(false); // TODO is their loading blocker still a relevant concept for firebase?
+	const [loading, setLoading] = useState(true);
 
-	// TODO this duplicates the setting functionality in signInWithEmailAndPassword, but not sure which is best practice now
 	useEffect(() => onAuthStateChanged(auth, (newUser) => {
 		console.log("OnAuthStateChanged fired", newUser);
-		setUser(newUser);
+		setLoading(false);
+		if (newUser) {
+			console.log("User is signed in");
+			setUser(newUser);
+		} else {
+			console.log("No user signed in");
+		}
 	}), [auth]);
 
 	const authService = {
@@ -60,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			return await signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				console.log("sign in success, UserCred is ", userCredential);
-				setUser(userCredential.user);
+				// no need to set state because onAuthStateChanged will pick it up
 			}).catch((error) => {
 				console.error('Firebase sign in error', error);
 				throw error;
@@ -91,7 +96,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}>
 			{loading ? (
 				<div>
-					<h1>Loading...</h1>
+					<h1>Authenticating...</h1>
+					<p>If you see this text for more than a few seconds, something is wrong.</p>
 				</div>
 			) : (
 				children
