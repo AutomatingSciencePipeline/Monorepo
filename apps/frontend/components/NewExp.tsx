@@ -254,7 +254,6 @@ const DispatchStep = ({ id, form, ...props }) => {
 					body: JSON.stringify({id: expId})
 				})
 				console.log("Response from backend received", response)
-				Router.reload()
 			} else {
 				alert("Failed to upload experiment file to the backend server, is it running?")
 				throw new Error('Upload failed')
