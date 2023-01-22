@@ -235,28 +235,30 @@ const UploadIcon = ({ status }) => {
 const DispatchStep = ({ id, form, ...props }) => {
 	const { userId, authService } = useAuth();
 
+	const onDropFile = async (file) => {
+		console.log("Submitting Experiment!!!")
+		submitExperiment(form.values, userId).then( (expId) =>{
+			console.log(expId)
+
+			console.log(`Uploading file for ${expId}`)
+			const res = uploadExec(expId, file[0]);
+			if (res == null) {
+				throw new Error('Upload failed')
+			} else{
+				console.log("Handing experiment " + expId + " to the backend")
+				fetch(`/api/experiments/${expId}`,{
+					method: 'POST',
+					headers: new Headers({ 'Content-Type': 'application/json'}),
+					credentials: 'same-origin',
+					body: JSON.stringify({id: expId})
+				})
+			}
+		}).catch( error => console.log(error))
+	}
+
 	return (
 		<Dropzone
-			onDrop={async (file) => {
-				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values, userId).then( (expId) =>{
-					console.log(expId)
-
-					console.log(`Uploading file for ${expId}`)
-					const res = uploadExec(expId, file[0]);
-					if (res == null) {
-						throw new Error('Upload failed')
-					} else{
-						console.log("Handing experiment " + expId + " to the backend")
-						fetch(`/api/experiments/${expId}`,{
-							method: 'POST',
-							headers: new Headers({ 'Content-Type': 'application/json'}),
-							credentials: 'same-origin',
-							body: JSON.stringify({id: expId})
-						})
-					}
-				}).catch( error => console.log(error))
-			}}
+			onDrop={onDropFile}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
 			maxSize={3 * 1024 ** 2}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
