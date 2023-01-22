@@ -5,4 +5,7 @@ ExperimentFiles/
 __pycache__
 .venv
 
+# For running on windows
+dev-windows-set-environment-vars.sh
+
 # All below this point is uncategorized (categorize them!)

@@ -1,0 +1,2 @@
+# libmagic dlls for windows https://pypi.org/project/python-magic/
+python-magic-bin

@@ -1,29 +1,33 @@
-
 import os
 import shutil
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 import logging
 from concurrent.futures import ProcessPoolExecutor
-from flask import Flask, request
-from flask_cors import CORS
-from httpx import get
+import sys
 import itertools
 import csv
 import json
-
 import time
+import configparser
+from flask import Flask, request
+from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
-import configparser
-import magic
+
+
+try:
+    import magic # Crashes on windows if you're missing the 'python-magic-bin' python package
+except ImportError:
+    print("Failed to import the 'magic' package, you're probably missing a system level dependency")
+    sys.exit(1)
+
 
 ENV_FIREBASE_CREDENTIALS = "FIREBASE_CREDENTIALS"
 
 FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
 if FIREBASE_CREDENTIALS is None:
-    raise AssertionError(
-        f"Missing environment variable {ENV_FIREBASE_CREDENTIALS}, do you have an env file set up?")
+    raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS}, do you have an env file set up?")
 else:
     print("Loaded firebase credentials from environment variables")
 

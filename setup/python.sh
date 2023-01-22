@@ -94,3 +94,11 @@ if ! pip install -r ./apps/backend/requirements.txt; then
     echo "🛑 Failed to install or update backend dependencies, check above error for more details"
     exit 1
 fi
+
+if [ "$IS_WINDOWS" ]; then
+    echo "▶ Installing windows-specific python dependencies"
+    if ! pip install -r ./apps/backend/requirements-windows.txt; then
+        echo "🛑 Failed to install or update backend dependencies, check above error for more details"
+        exit 1
+    fi
+fi
