@@ -17,6 +17,7 @@ import {
 import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
 import { Logo } from '../components/Logo';
 import classNames from 'classnames';
+import Router from 'next/router';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -108,6 +109,9 @@ const Navbar = (props) => {
 																		item.name === 'Sign out' &&
 																		authService
 																			.signOut()
+																			.then(() => {
+																				Router.reload()
+																			})
 																			.catch((err) => console.log("Sign out error", err))
 																	);
 																}}
