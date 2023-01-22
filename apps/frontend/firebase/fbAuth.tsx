@@ -5,25 +5,45 @@ import React, {
 	useContext,
 	createContext,
 	useDebugValue,
+	FC
 } from 'react';
 import { firebaseApp } from './firebaseClient';
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth'
 
-const AuthContext = createContext({});
+export interface AuthContextType {
+	user: User | null;
+	userId: String | null;
+	authService; // TODO find a way to make a type for this, ideally without duplicating all the function names
+  }
+
+const AuthContext = createContext<AuthContextType>({
+	user: null,
+	userId: null,
+	authService: null
+});
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
-	const [auth, _] = useState(getAuth(firebaseApp));
+interface AuthProviderProps {
+	children: React.ReactNode;
+}
 
-	const [user, setUser] = useState();
-	useDebugValue('Current User:', user);
-	const [loading, setLoading] = useState(false); // TODO is their loading blocker still a relevant concept for firebase?
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+	const [auth] = useState(getAuth(firebaseApp));
 
-	// TODO this duplicates the setting functionality in signInWithEmailAndPassword, but not sure which is best practice now
+	const [user, setUser] = useState<User | null>(null);
+	useDebugValue(`Current User: ${user}`);
+	const [loading, setLoading] = useState(true);
+
 	useEffect(() => onAuthStateChanged(auth, (newUser) => {
 		console.log("OnAuthStateChanged fired", newUser);
-		setUser(newUser);
+		setLoading(false);
+		if (newUser) {
+			console.log("User is signed in");
+			setUser(newUser);
+		} else {
+			console.log("No user signed in");
+		}
 	}), [auth]);
 
 	const authService = {
@@ -41,17 +61,17 @@ export const AuthProvider = ({ children }) => {
 			return user?.photoURL;
 		}, [user]),
 
-		signInWithEmailAndPassword: async (email, password) => {
+		signInWithEmailAndPassword: async (email: string, password: string) => {
 			return await signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				console.log("sign in success, UserCred is ", userCredential);
-				setUser(userCredential.user);
+				// no need to set state because onAuthStateChanged will pick it up
 			}).catch((error) => {
 				console.error('Firebase sign in error', error);
 				throw error;
 			});
 		},
-		signUpWithEmailAndPassword: async (email, password) => {
+		signUpWithEmailAndPassword: async (email: string, password: string) => {
 			return await createUserWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				console.log("sign up success, UserCred is ", userCredential);
@@ -71,12 +91,13 @@ export const AuthProvider = ({ children }) => {
 	return (
 		<AuthContext.Provider value={{
 			user,
-			userId: authService?.userId,
+			userId: authService?.userId || null,
 			authService }
 		}>
 			{loading ? (
 				<div>
-					<h1>Loading...</h1>
+					<h1>Authenticating...</h1>
+					<p>If you see this text for more than a few seconds, something is wrong.</p>
 				</div>
 			) : (
 				children

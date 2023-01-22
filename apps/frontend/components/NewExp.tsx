@@ -1,6 +1,6 @@
-import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
+import { Fragment, useState, useLayoutEffect, useEffect, ReactNode } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Upload, X, File } from 'tabler-icons-react';
+import { Upload, X, File, IconProps } from 'tabler-icons-react';
 import { Toggle } from './Toggle';
 
 import Parameter from './Parameter';
@@ -15,6 +15,7 @@ import { useAuth } from '../firebase/fbAuth';
 
 import { firebaseApp } from "../firebase/firebaseClient";
 import { getDoc, getFirestore, doc } from "firebase/firestore";
+import Router from 'next/router';
 
 
 export const FormStates = {
@@ -205,11 +206,11 @@ const ConfirmationStep = ({ form, ...props }) => {
 		</div>
 	);
 };
+
 const dropzoneKids = (status) => {
-	if (status.accepted) {
-		return <UploadIcon className={'bg-green-500'} status={status} />;
-	}
-	return (
+	return (status.accepted) ?
+		<UploadIcon className={'bg-green-500'} status={status} />
+	:
 		<div className={`flex flex-col justify-center items-center space-y-6`}>
 			<UploadIcon status={status} />
 			<div>
@@ -221,9 +222,13 @@ const dropzoneKids = (status) => {
 				</Text>
 			</div>
 		</div>
-	);
 };
-const UploadIcon = ({ status }) => {
+
+interface UploadIconProps extends IconProps {
+	status
+}
+
+const UploadIcon: React.FC<UploadIconProps> = ({ status }) => {
 	if (status.accepted) {
 		return <Upload size={80} />;
 	} else if (status.rejected) {
@@ -235,28 +240,30 @@ const UploadIcon = ({ status }) => {
 const DispatchStep = ({ id, form, ...props }) => {
 	const { userId, authService } = useAuth();
 
+	const onDropFile = async (file) => {
+		console.log("Submitting Experiment!!!")
+		submitExperiment(form.values, userId).then(async (expId) =>{
+			console.log(`Uploading file for ${expId}`)
+			const res = await uploadExec(expId, file[0]);
+			if (res) {
+				console.log("Handing experiment " + expId + " to the backend")
+				const response = await fetch(`/api/experiments/${expId}`,{
+					method: 'POST',
+					headers: new Headers({ 'Content-Type': 'application/json'}),
+					credentials: 'same-origin',
+					body: JSON.stringify({id: expId})
+				})
+				console.log("Response from backend received", response)
+			} else {
+				alert("Failed to upload experiment file to the backend server, is it running?")
+				throw new Error('Upload failed')
+			}
+		}).catch( error => console.log("Error uploading experiment: ", error))
+	}
+
 	return (
 		<Dropzone
-			onDrop={async (file) => {
-				console.log("Submitting Experiment!!!")
-				submitExperiment(form.values, userId).then( (expId) =>{
-					console.log(expId)
-
-					console.log(`Uploading file for ${expId}`)
-					const res = uploadExec(expId, file[0]);
-					if (res == null) {
-						throw new Error('Upload failed')
-					} else{
-						console.log("Handing experiment " + expId + " to the backend")
-						fetch(`/api/experiments/${expId}`,{
-							method: 'POST',
-							headers: new Headers({ 'Content-Type': 'application/json'}),
-							credentials: 'same-origin',
-							body: JSON.stringify({id: expId})
-						})
-					}
-				}).catch( error => console.log(error))
-			}}
+			onDrop={onDropFile}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
 			maxSize={3 * 1024 ** 2}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
@@ -265,7 +272,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 				'application/java-archive':['.jar']
 			  }}
 		>
-			{(status) =>  dropzoneKids(status)}
+			<>{ (status) => dropzoneKids(status) }</>
 		</Dropzone>
 	);
 };
@@ -273,7 +280,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		initialValues: {
-			parameters: formList([]),
+			parameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			fileOutput: '',
