@@ -4,7 +4,7 @@
 const handler = (req, res) => {
 	const { id } = req.query;
     const {key} = req.body;
-    console.log(key);
+    console.log("Key from request body is", key);
 
 	fetch('http://localhost:5050/experiment', {
 		method: 'POST',

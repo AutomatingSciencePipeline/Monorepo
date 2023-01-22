@@ -108,7 +108,7 @@ const Navbar = (props) => {
 																		item.name === 'Sign out' &&
 																		authService
 																			.signOut()
-																			.catch((err) => console.log(err))
+																			.catch((err) => console.log("Sign out error", err))
 																	);
 																}}
 																className={classNames(

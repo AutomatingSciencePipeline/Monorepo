@@ -40,11 +40,11 @@ export const uploadExec = async (id, file) => {
 		}).then(() => {
 			console.log("Uploaded file for experiment " + id)
 			return true
-		}).catch(error => console.log(error))
+		}).catch(error => console.log("Upload doc error: ", error))
 		window.location.reload()
 		return true
 	}).catch(error => {
-		console.log(error)
+		console.log("Upload bytes error: ", error)
 		return false
 	})
 };
@@ -71,7 +71,7 @@ export const downloadExp = (event) => {
 		document.body.appendChild(anchor)
 		anchor.click()
 		document.body.removeChild(anchor)
-	}).catch(error => console.log(error))
+	}).catch(error => console.log("Get download url for exp error: ", error))
 }
 
 export const downloadExpZip = (event) => {
@@ -85,7 +85,7 @@ export const downloadExpZip = (event) => {
 		document.body.appendChild(anchor)
 		anchor.click()
 		document.body.removeChild(anchor)
-	}).catch(error => console.log(error))
+	}).catch(error => console.log("Upload download url for zip error: ", error))
 }
 
 export const subscribeToExp = (id, callback) => {

@@ -242,8 +242,6 @@ const DispatchStep = ({ id, form, ...props }) => {
 	const onDropFile = async (file) => {
 		console.log("Submitting Experiment!!!")
 		submitExperiment(form.values, userId).then( (expId) =>{
-			console.log(expId)
-
 			console.log(`Uploading file for ${expId}`)
 			const res = uploadExec(expId, file[0]);
 			if (res == null) {
@@ -257,7 +255,7 @@ const DispatchStep = ({ id, form, ...props }) => {
 					body: JSON.stringify({id: expId})
 				})
 			}
-		}).catch( error => console.log(error))
+		}).catch( error => console.log("Error uploading experiment: ", error))
 	}
 
 	return (
