@@ -33,7 +33,7 @@ export const submitExperiment = async (values, userId) => {
 
 export const uploadExec = async (id, file) => {
 	const fileRef = ref(storage, "experiment" + id)
-	return uploadBytes(fileRef, file).then((snapshot) => {
+	return await uploadBytes(fileRef, file).then((snapshot) => {
 		const experimentRef = doc(db, "Experiments", id)
 		updateDoc(experimentRef, {
 			file: "experiment" + id
@@ -89,7 +89,7 @@ export const downloadExpZip = (event) => {
 
 export const subscribeToExp = (id, callback) => {
 	const unsubscribe = onSnapshot(doc(db, "Experiments", id), doc => {
-		console.log(`exp ${id} has been updated: `, doc.data())
+		console.log(`exp ${id} data updated: `, doc.data())
 		callback(doc.data())
 	})
 	return unsubscribe

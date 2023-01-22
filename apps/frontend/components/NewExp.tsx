@@ -245,14 +245,15 @@ const DispatchStep = ({ id, form, ...props }) => {
 		submitExperiment(form.values, userId).then(async (expId) =>{
 			console.log(`Uploading file for ${expId}`)
 			const res = await uploadExec(expId, file[0]);
-			if (res == null) {
+			if (res) {
 				console.log("Handing experiment " + expId + " to the backend")
-				fetch(`/api/experiments/${expId}`,{
+				const response = await fetch(`/api/experiments/${expId}`,{
 					method: 'POST',
 					headers: new Headers({ 'Content-Type': 'application/json'}),
 					credentials: 'same-origin',
 					body: JSON.stringify({id: expId})
 				})
+				console.log("Response from backend received", response)
 				Router.reload()
 			} else {
 				alert("Failed to upload experiment file to the backend server, is it running?")
