@@ -31,9 +31,9 @@
 			"enableNonRootDocker": "true",
 			"moby": "true"
 		}//,
-		// TODO Extra features disabled for now to reduce container rebuild times
+		// Extra features disabled for now to reduce container rebuild times
 		// "ghcr.io/devcontainers/features/github-cli:1": {},
-		// TODO specify correct node/python versions to match the app containers?
+		// Specify correct node/python versions to match the app containers?
 		// "ghcr.io/devcontainers/features/node:1": {},
 		// "ghcr.io/devcontainers/features/python:1": {},
 		// "ghcr.io/devcontainers-contrib/features/firebase-cli:1": {}

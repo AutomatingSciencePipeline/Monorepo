@@ -19,7 +19,8 @@
         "spaced-comment": "warn",
         "linebreak-style": "off",
         "max-len": [
-            "warn",
+            // disabled because we use tailwind -> className can get really long
+            "off",
             {
                 "code": 150,
                 "ignoreRegExpLiterals": true,

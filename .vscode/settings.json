@@ -7,8 +7,6 @@
         "mouck",
         "Vmmem"
     ],
-    // ======================= Setup Scripts =======================
-
     "shellcheck.exclude": [
         "1017" // Turn off shellcheck warnings about line ending types because git is set to autoconvert
     ],
