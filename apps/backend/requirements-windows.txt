@@ -1,2 +1,4 @@
+# Every listing in this file should have an explanation for why it's here and not regular requirements.txt
+
 # libmagic dlls for windows https://pypi.org/project/python-magic/
 python-magic-bin

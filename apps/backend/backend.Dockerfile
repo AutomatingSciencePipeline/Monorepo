@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update
 
-#Ths should also get Java 11?
+#Ths should also get Java 11? -David
 RUN apt-get install default-jdk -y
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
@@ -38,7 +38,5 @@ USER root
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug 
 
-# Copy in the startup script
-COPY start.sh .
-
-CMD ["bash", "start.sh"]
+# TODO switch to ${BACKEND_PORT}
+CMD ["flask", "run", "--host=0.0.0.0", "-p", "5050"]

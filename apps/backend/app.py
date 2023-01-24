@@ -14,7 +14,7 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
-
+from dotenv import load_dotenv
 
 try:
     import magic # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -22,12 +22,17 @@ except ImportError:
     print("Failed to import the 'magic' package, you're probably missing a system level dependency")
     sys.exit(1)
 
+# Must override so that vscode doesn't incorrectly parse another env file and have bad values
+HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
 
-ENV_FIREBASE_CREDENTIALS = "FIREBASE_CREDENTIALS"
+ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
 
 FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
 if FIREBASE_CREDENTIALS is None:
-    raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS}, do you have an env file set up?")
+    if HAS_DOTENV_FILE:
+        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} in your `.env` file")
+    else:
+        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined")
 else:
     print("Loaded firebase credentials from environment variables")
 

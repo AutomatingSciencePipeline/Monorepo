@@ -103,3 +103,14 @@ if [ "$IS_WINDOWS" ]; then
         exit 1
     fi
 fi
+
+# Copy in the .env file
+echo "▶ Copying/updating .env file from repo root to the Backend directory"
+if ! test -e ".env"; then
+    echo "🛑 You don't seem to have a .env file in the repo root - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
+    exit 1
+fi
+if ! cp -f .env ./apps/backend/.env; then
+    echo "🛑 Failed to copy .env file from repo root to backend?"
+    exit 1
+fi
