@@ -45,7 +45,6 @@ else
     nvm install "${NODE_VERSION}"
 fi
 
-# TODO check what version and if it matches ${NODE_VERSION}
 if nvm current | grep "${NODE_VERSION}" -q; then
     echo "✔ nvm already using ${NODE_VERSION}"
 else
@@ -63,7 +62,7 @@ else
 fi
 
 # TODO pnpm install fails on windows, seems to be because it's launched from inside git bash?
-# we can just use npm for now, but pnpm is more performant
+# we can just use npm for now, but pnpm has better performance
 
 # if command -v pnpm; then
 #     echo "✔ pnpm is installed"
