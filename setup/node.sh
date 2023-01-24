@@ -7,8 +7,10 @@ else
 
     if command -v node -v; then
         EXISTING_NODE_VERSION=$(node -v)
-        echo "🛑 Node.js is already installed, but not nvm (node version manager). You need to manually uninstall it to ensure that Node does not get confused and try to install packages on the wrong node install. Don't worry, you can use nvm to install the version of node you already have installed (which is ${EXISTING_NODE_VERSION})"
+        echo "🛑 Node.js is already installed, but not nvm (node version manager). You need to uninstall your copy of Node to ensure that Node does not get confused and try to install the project's packages for the wrong node install. Don't worry, you can use nvm to install the version of node you already have installed (which is ${EXISTING_NODE_VERSION})"
         echo "After this, the script will install node (the version required for this project) again for you."
+        echo "It is suggested you do so with Windows' 'Add or Remove Programs' tool"
+        echo "More info here: https://codedamn.com/news/nodejs/how-to-uninstall-node-js#Uninstalling_the_Nodejs_in_Windows"
         echo "Docs on how to use nvm to re-install the other Node install: https://heynode.com/tutorial/install-nodejs-locally-nvm/"
         echo "Your current node install is located at:"
         which node

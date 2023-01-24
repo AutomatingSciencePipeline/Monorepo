@@ -53,6 +53,7 @@ else
     else
         echo "🛑 Failed to change over python version. You probably have to uninstall that other version of python to proceed so pyenv can work."
         echo "It is suggested you do so with Windows' 'Add or Remove Programs' tool"
+        echo "More info here: https://stackoverflow.com/questions/3515673/how-to-completely-remove-python-from-a-windows-machine"
         echo "After this, the script will install python (the version required for this project) again for you."
         echo "You can use pyenv to install your old Python version again too if you wish: https://realpython.com/intro-to-pyenv/"
         exit 1
