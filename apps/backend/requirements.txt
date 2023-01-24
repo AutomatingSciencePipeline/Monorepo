@@ -7,3 +7,4 @@ supabase
 firebase-admin
 configparser
 python-magic
+matplotlib

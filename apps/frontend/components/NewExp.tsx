@@ -22,8 +22,9 @@ export const FormStates = {
 	Closed: -1,
 	Info: 0,
 	Params: 1,
-	Confirmation: 2,
-	Dispatch: 3
+	ProcessStep: 2,
+	Confirmation: 3,
+	Dispatch: 4
 }
 
 const Steps = ({ steps }) => {
@@ -192,6 +193,55 @@ const ParamStep = ({form, ...props}) => {
 	);
 }
 
+const PostProcessStep = ({ form, ...props }) => {
+	return (
+		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
+			<Fragment>
+				<InputSection header={'Scatter Plot'}>
+					<div className='sm:col-span-4'>
+						<input 
+							type='checkbox'
+							checked={form.values.scatter}
+							onChange={() => {
+								form.setFieldValue('scatter', !form.values.scatter)
+								if(!form.values.scatter){
+									form.setFieldValue('scatterIndVar','')
+									form.setFieldValue('scatterDepVar','')
+								}
+							}}>
+						</input>
+					</div>
+				</InputSection>
+
+				{form.values.scatter ? 
+				<div>
+					<InputSection header={'Independant Variable'}>
+						<div className='sm:col-span-4'>
+							<input
+								type='text'
+								placeholder=''
+								{...form.getInputProps('scatterIndVar')}
+								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+							/>
+						</div>
+					</InputSection>
+					<InputSection header={'Dependant Variable'}>
+						<div className='sm:col-span-4'>
+							<input
+								type='text'
+								placeholder=''
+								{...form.getInputProps('scatterDepVar')}
+								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+							/>
+						</div>
+					</InputSection>
+				</div>
+					: ''}
+			</Fragment>
+		</div>
+	);
+};
+
 const ConfirmationStep = ({ form, ...props }) => {
 	return (
 		<div className='h-full overflow-y-scroll flex-0 grow-0 my-4 pl-4 rounded-md flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
@@ -285,11 +335,15 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			description: '',
 			fileOutput: '',
 			resultOutput: '',
-			verbose: true,
+			scatterIndVar: '',
+			scatterDepVar: '',
+			verbose: false,
+			scatter: false,
 			nWorkers: 1,
 		},
 		schema: joiResolver(experimentSchema),
 	});
+	
 	useEffect(() => {
 		if (copyID != null) {
 			const db = getFirestore(firebaseApp);
@@ -305,6 +359,9 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 						resultOutput: expInfo['resultOutput'],
 						verbose: expInfo['verbose'],
 						nWorkers: expInfo['workers'],
+						scatter: expInfo['scatter'],
+						scatterIndVar: expInfo['scatterIndVar'],
+						scatterDepVar: expInfo['scatterDepVar'],
 					})
 					setCopyId(null)
 					console.log("Copied!")
@@ -366,7 +423,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
 												<Steps 
-													steps={['Information', 'Parameters', 'Confirmation', 'Dispatch'].map(
+													steps={['Information', 'Parameters', 'Post Process','Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
 																id: idx + 1,
@@ -385,6 +442,8 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 										<InformationStep form={form}></InformationStep>
 									) : status === FormStates.Params ? (
 										<ParamStep form={form}>{fields}</ParamStep>
+									) : status === FormStates.ProcessStep ? (
+										<PostProcessStep form={form}>{fields}</PostProcessStep>
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
@@ -407,6 +466,12 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 														form.setFieldValue('verbose', !form.values.verbose);
 													}}
 												/>
+												{/* <Toggle
+													label={'Add A Scatter Plot'}
+													onChange={() => {
+														form.setFieldValue('scatter', !form.values.scatter);
+													}}
+												/> */}
 											</div>
 											<button
 												type='button'

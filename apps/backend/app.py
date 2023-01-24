@@ -17,6 +17,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore, storage
 import configparser
 import magic
+import plots
 
 #Firebase Objects
 cred = credentials.Certificate(json.loads(os.environ.get("creds")))
@@ -56,12 +57,14 @@ def run_batch(data):
     experiment['id'] = id
     experimentOutput = experiment['fileOutput']
     resultOutput = experiment['resultOutput']
+    scatterPlot = experiment['scatter']
+    postProcess = scatterPlot != ''
     print(f"Experiment info {experiment}")
 
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{id}')
     os.chdir(f'ExperimentFiles/{id}')
-    if experimentOutput != '':
+    if experimentOutput or postProcess != '':
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {id}')
@@ -131,13 +134,21 @@ def run_batch(data):
                     fails +=1
         passes += 1
         print(f"Finished running Experiments")
+    
+    if(postProcess):
+        print("Beginning post processing")
+        if(scatterPlot):
+            print("Creating Scatter Plot")
+            depVar = experiment['scatterDepVar']
+            indVar = experiment['scatterIndVar']
+            plots.scatterPlot(indVar,depVar,'results.csv',id)
 
     #Uploading Experiment Results
     print(f'Uploading Results to the frontend')
     upblob = bucket.blob(f"results/result{id}.csv")
     upblob.upload_from_filename('results.csv')
 
-    if experimentOutput != '':
+    if experimentOutput != '' or postProcess:
         print('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
@@ -291,6 +302,8 @@ def gen_configs(hyperparams):
     os.chdir('..')
     print("Finished generating configs")
     return configNum - 1
+
+
 
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.INFO)
