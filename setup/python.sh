@@ -11,7 +11,7 @@ else
         echo "⚠ pyenv install ran. You need to restart the terminal session you're in so that pyenv is recognized as installed. You may need to restart your computer"
         # Powershell can run this to reload:
         # $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-        exit 1
+        source exit_await_input.sh 1
     fi
 
     if [ "$IS_UNIX" ]; then
@@ -22,7 +22,7 @@ else
         echo "✔ pyenv install successful"
     else
         echo "🛑 pyenv install seems to have failed"
-        exit 1
+        source exit_await_input.sh 1
     fi
 fi
 
@@ -56,7 +56,7 @@ else
         echo "More info here: https://stackoverflow.com/questions/3515673/how-to-completely-remove-python-from-a-windows-machine"
         echo "After this, the script will install python (the version required for this project) again for you."
         echo "You can use pyenv to install your old Python version again too if you wish: https://realpython.com/intro-to-pyenv/"
-        exit 1
+        source exit_await_input.sh 1
     fi
 fi
 
@@ -80,7 +80,7 @@ source "${BACKEND_VENV_PATH}/Scripts/activate"
 # https://stackoverflow.com/questions/15454174/how-can-a-shell-function-know-if-it-is-running-within-a-virtualenv
 if test -z "${VIRTUAL_ENV}"; then
     echo "🛑 Failed to activate venv, so not proceeding to try and install any python packages."
-    exit 1
+    source exit_await_input.sh 1
 else
     echo "✔ Successfully activated venv ${VIRTUAL_ENV}"
 fi
@@ -89,18 +89,18 @@ fi
 echo "▶ Installing and updating project python dependencies"
 if ! pip install -U pip; then
     echo "🛑 Failed to update pip? See above error. Try just running the script again if it's a permissions issue"
-    exit 1
+    source exit_await_input.sh 1
 fi
 if ! pip install -r ./apps/backend/requirements.txt; then
     echo "🛑 Failed to install or update backend dependencies, check above error for more details"
-    exit 1
+    source exit_await_input.sh 1
 fi
 
 if [ "$IS_WINDOWS" ]; then
     echo "▶ Installing windows-specific python dependencies"
     if ! pip install -r ./apps/backend/requirements-windows.txt; then
         echo "🛑 Failed to install or update backend dependencies, check above error for more details"
-        exit 1
+        source exit_await_input.sh 1
     fi
 fi
 
@@ -108,9 +108,9 @@ fi
 echo "▶ Copying/updating .env file from repo root to the Backend directory"
 if ! test -e ".env"; then
     echo "🛑 You don't seem to have a .env file in the repo root - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
-    exit 1
+    source exit_await_input.sh 1
 fi
 if ! cp -f .env ./apps/backend/.env; then
     echo "🛑 Failed to copy .env file from repo root to backend?"
-    exit 1
+    source exit_await_input.sh 1
 fi

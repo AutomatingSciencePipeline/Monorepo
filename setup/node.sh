@@ -14,7 +14,7 @@ else
         echo "Docs on how to use nvm to re-install the other Node install: https://heynode.com/tutorial/install-nodejs-locally-nvm/"
         echo "Your current node install is located at:"
         which node
-        exit 1
+        source exit_await_input.sh 1
     else
         echo "✔ Node.js is not yet installed. It's safe to proceed with installing nvm."
 
@@ -30,7 +30,7 @@ else
             
             echo "⚠ Installing nvm-windows. This may open an admin prompt you have to accept. Afterwards, you'll have to re-run this script in a new shell (or it'll just try to run this installer again)."
             ${NVM_WINDOWS_INSTALLER_LOCATION}
-            exit 1
+            source exit_await_input.sh 1
         fi
 
         if [ "$IS_UNIX" ]; then
@@ -60,7 +60,7 @@ if grep "${NODE_VERSION}" -q <<< "$FOUND_VERSION" ; then
 else
     echo "🛑 Somehow the detected node version (${FOUND_VERSION}) is not what was switched to with nvm (${NODE_VERSION}), do you have another node install that is interfering?"
     echo "You might need to restart the script again if nvm just installed node for you"
-    exit 1
+    source exit_await_input.sh 1
 fi
 
 # TODO pnpm install fails on windows, seems to be because it's launched from inside git bash?
@@ -88,18 +88,18 @@ if command -v npm; then
     echo "✔ npm is installed"
 else
     echo "🛑 npm is somehow not installed, nvm should have handled this for us?"
-    exit 1
+    source exit_await_input.sh 1
 fi
 
 echo "▶ Installing and updating frontend Node dependencies (this could take a bit)"
 if ! cd apps/frontend; then
     echo "🛑 Failed to change dir to frontend directory?"
-    exit 1
+    source exit_await_input.sh 1
 fi
 
 if ! npm install --loglevel=error; then
     echo "🛑 Failed to install or update frontend dependencies via npm, check above error for more details. Consider changing the log level arg (this script has it set to error or higher only)"
-    exit 1
+    source exit_await_input.sh 1
 fi
 
 cd ../..
