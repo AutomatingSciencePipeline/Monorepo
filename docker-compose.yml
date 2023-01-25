@@ -14,7 +14,7 @@ services:
       dockerfile: ./backend.Dockerfile
     container_name: glados-backend
     environment:
-      FIREBASE_CREDENTIALS: ${FIREBASE_KEY}
+      FIREBASE_KEY: ${FIREBASE_KEY}
     volumes:
         - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
     # TODO switch to ${BACKEND_PORT}
