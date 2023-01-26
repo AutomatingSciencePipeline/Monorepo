@@ -83,7 +83,7 @@ def run_batch(data):
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{id}')
     os.chdir(f'ExperimentFiles/{id}')
-    if experimentOutput or postProcess != '':
+    if experimentOutput != '' or postProcess != '':
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {id}')
