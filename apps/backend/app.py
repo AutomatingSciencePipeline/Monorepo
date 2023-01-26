@@ -1,33 +1,50 @@
-
 import os
 import shutil
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 import logging
 from concurrent.futures import ProcessPoolExecutor
-from flask import Flask, request
-from flask_cors import CORS
-from httpx import get
+import sys
 import itertools
 import csv
 import json
-
 import time
+import configparser
+from flask import Flask, request
+from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
-import configparser
-import magic
-import plots
+from dotenv import load_dotenv
+
+try:
+    import magic # Crashes on windows if you're missing the 'python-magic-bin' python package
+except ImportError:
+    print("Failed to import the 'magic' package, you're probably missing a system level dependency")
+    sys.exit(1)
+
+# Must override so that vscode doesn't incorrectly parse another env file and have bad values
+HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
+
+ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
+
+FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
+if FIREBASE_CREDENTIALS is None:
+    if HAS_DOTENV_FILE:
+        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} in your `.env` file")
+    else:
+        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined")
+else:
+    print("Loaded firebase credentials from environment variables")
 
 #Firebase Objects
-cred = credentials.Certificate(json.loads(os.environ.get("creds")))
-app = firebase_admin.initialize_app(cred)
-db = firestore.client()
-bucket = storage.bucket("gladosbase.appspot.com")
+firebaseCredentials = credentials.Certificate(json.loads(FIREBASE_CREDENTIALS))
+firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
+firebaseDb = firestore.client()
+firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 #setting up the app
-app = Flask(__name__)
-CORS(app)
+flaskApp = Flask(__name__)
+CORS(flaskApp)
 
 #Constants
 DEFAULT_STEP_INT = 1
@@ -39,7 +56,7 @@ def log(toLog):
 
 ### FLASK API ENDPOINT
 runner = ProcessPoolExecutor(1)
-@app.post("/experiment")
+@flaskApp.post("/experiment")
 def recv_experiment():
     runner.submit(run_batch,request.get_json())
     return 'OK'
@@ -47,7 +64,7 @@ def recv_experiment():
 def run_batch(data):
     time.sleep(1)
     print(data)
-    experiments = db.collection('Experiments')
+    experiments = firebaseDb.collection('Experiments')
 
     #Parsing the argument data
     id = data['experiment']['id']
@@ -75,7 +92,7 @@ def run_batch(data):
         print(err)
     print(f"downloading {filepath} to ExperimentFiles/{id}/{filepath}")
     try:
-        filedata = bucket.blob(filepath)
+        filedata = firebaseBucket.blob(filepath)
         filedata.download_to_filename(filepath)
     except Exception as err:
         print(f'Ran into {err} while trying to download experiment')
@@ -145,14 +162,14 @@ def run_batch(data):
 
     #Uploading Experiment Results
     print(f'Uploading Results to the frontend')
-    upblob = bucket.blob(f"results/result{id}.csv")
+    upblob = firebaseBucket.blob(f"results/result{id}.csv")
     upblob.upload_from_filename('results.csv')
 
     if experimentOutput != '' or postProcess:
         print('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-            upblob = bucket.blob(f"results/result{id}.zip")
+            upblob = firebaseBucket.blob(f"results/result{id}.zip")
             upblob.upload_from_filename('ResultCsvs.zip')
         except Exception as err:
             print(err)
@@ -308,7 +325,4 @@ def gen_configs(hyperparams):
 if __name__=='__main__':
     logging.getLogger().setLevel(logging.INFO)
     os.chdir('/app/GLADOS_HOME')
-    app.run()
-    
-
-
+    flaskApp.run()

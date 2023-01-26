@@ -291,25 +291,32 @@ const DispatchStep = ({ id, form, ...props }) => {
 	const { userId, authService } = useAuth();
 
 	const onDropFile = async (file) => {
-		console.log("Submitting Experiment!!!")
-		submitExperiment(form.values, userId).then(async (expId) =>{
-			console.log(`Uploading file for ${expId}`)
-			const res = await uploadExec(expId, file[0]);
-			if (res) {
-				console.log("Handing experiment " + expId + " to the backend")
-				const response = await fetch(`/api/experiments/${expId}`,{
+		console.log('Submitting Experiment!!!');
+		submitExperiment(form.values, userId).then(async (expId) => {
+			console.log(`Uploading file for ${expId}`);
+			const uploadResponse = await uploadExec(expId, file[0]);
+			if (uploadResponse) {
+				console.log(`Handing experiment ${expId} to the backend`);
+				const response = await fetch(`/api/experiments/${expId}`, {
 					method: 'POST',
-					headers: new Headers({ 'Content-Type': 'application/json'}),
+					headers: new Headers({ 'Content-Type': 'application/json' }),
 					credentials: 'same-origin',
-					body: JSON.stringify({id: expId})
-				})
-				console.log("Response from backend received", response)
+					body: JSON.stringify({ id: expId }),
+				});
+				if (response.ok) {
+					console.log('Response from backend received', response);
+				} else {
+					const responseText = await response.text();
+					alert(`Upload failed: ${response.status}: ${responseText}`);
+					console.log('Upload failed', responseText, response);
+					throw new Error(`Upload failed: ${response.status}: ${responseText}`);
+				}
 			} else {
-				alert("Failed to upload experiment file to the backend server, is it running?")
-				throw new Error('Upload failed')
+				alert('Failed to upload experiment file to the backend server, is it running?');
+				throw new Error('Upload failed');
 			}
-		}).catch( error => console.log("Error uploading experiment: ", error))
-	}
+		}).catch( (error) => console.log('Error uploading experiment: ', error));
+	};
 
 	return (
 		<Dropzone
