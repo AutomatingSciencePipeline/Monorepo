@@ -3,6 +3,7 @@
 import random
 import copy
 import sys
+import csv
 import configparser
 
 #sample experiment that runs a truncation generational loop with a genome represented by a list of 0s and 1s. fitness is measured by number of 1s
@@ -94,6 +95,10 @@ def main():
             newchroms.append(chrom0)
         #newly copied and mutated chromosomes become current generation   
         chroms = newchroms
+    with open('geneticRes.csv', 'w') as result:
+        writer = csv.writer(result)
+        writer.writerow(['fitness'])
+        writer.writerow([chroms[0].fitness])
     print(chroms[0].fitness)
     return 0
 

@@ -33,8 +33,10 @@ services:
     # TODO switch to ${FRONTEND_WEBSERVER_PORT}
     ports:
       - 3000:3000
+      - 80:80
     expose:
       - "3000"
+      - "80"
 
 networks:
   default:

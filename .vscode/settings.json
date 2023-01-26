@@ -4,7 +4,9 @@
     "cSpell.words": [
         "glados",
         "gladosbase",
+        "matplotlib",
         "mouck",
+        "pyplot",
         "Vmmem"
     ],
     "shellcheck.exclude": [

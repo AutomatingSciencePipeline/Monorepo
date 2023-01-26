@@ -21,6 +21,9 @@ export const submitExperiment = async (values, userId) => {
 		fileOutput: values.fileOutput,
 		resultOutput: values.resultOutput,
 		finished: false,
+		scatter: values.scatter,
+		scatterIndVar: values.scatterIndVar,
+		scatterDepVar: values.scatterDepVar,
 		created: Date.now(),
 		params: JSON.stringify({
 			params: values.parameters,
