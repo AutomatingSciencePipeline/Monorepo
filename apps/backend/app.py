@@ -16,6 +16,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 
+import plots
+
 try:
     import magic # Crashes on windows if you're missing the 'python-magic-bin' python package
 except ImportError:
@@ -154,11 +156,14 @@ def run_batch(data):
     
     if(postProcess):
         print("Beginning post processing")
-        if(scatterPlot):
-            print("Creating Scatter Plot")
-            depVar = experiment['scatterDepVar']
-            indVar = experiment['scatterIndVar']
-            plots.scatterPlot(indVar,depVar,'results.csv',id)
+        try:
+            if(scatterPlot):
+                print("Creating Scatter Plot")
+                depVar = experiment['scatterDepVar']
+                indVar = experiment['scatterIndVar']
+                plots.scatterPlot(indVar,depVar,'results.csv',id)
+        except Exception as err:
+            print(f"error during plot generation: {err}")
 
     #Uploading Experiment Results
     print(f'Uploading Results to the frontend')

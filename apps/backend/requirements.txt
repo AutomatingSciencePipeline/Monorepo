@@ -7,3 +7,4 @@ firebase-admin
 configparser
 python-magic
 python-dotenv
+matplotlib
