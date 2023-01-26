@@ -473,12 +473,6 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 														form.setFieldValue('verbose', !form.values.verbose);
 													}}
 												/>
-												{/* <Toggle
-													label={'Add A Scatter Plot'}
-													onChange={() => {
-														form.setFieldValue('scatter', !form.values.scatter);
-													}}
-												/> */}
 											</div>
 											<button
 												type='button'
