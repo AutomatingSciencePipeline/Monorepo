@@ -1,4 +1,10 @@
+# Mac icons cache
 .DS_Store
+
+# Secure environment files
 .env
-configFiles
-__pycache__
+
+# Temp files from the setup process
+setup/temp/
+
+# All below this point is uncategorized (categorize them!)

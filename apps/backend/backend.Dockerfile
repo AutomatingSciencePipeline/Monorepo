@@ -7,12 +7,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-#Ths should also get Java 11?
 RUN apt-get update
+
+#Ths should also get Java 11? -David
 RUN apt-get install default-jdk -y
-RUN apt-get install libmagic1 -y
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
+
+# For file type identification via bytes
+RUN apt-get install libmagic1 -y
 
 # RUN apt-get update && \
 #       apt-get -y install sudo
@@ -35,5 +38,5 @@ USER root
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug 
 
+# TODO switch to ${BACKEND_PORT}
 CMD ["flask", "run", "--host=0.0.0.0", "-p", "5050"]
-

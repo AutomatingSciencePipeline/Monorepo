@@ -1,0 +1,5 @@
+# Configuration file for shellcheck bash script linter.
+# Also configured by vscode workspace settings, see here https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck
+
+# Allow parsing other referenced files during the check
+external-sources=true
