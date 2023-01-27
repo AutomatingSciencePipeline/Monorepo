@@ -376,7 +376,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 				}
 			});
 		}
-	}, [copyID, form, setCopyId]);
+	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
@@ -396,7 +396,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			setOpen(false);
 			form.reset();
 		}
-	}, [formState, form]);
+	}, [formState]); // TODO adding 'form' causes an update loop
 
 	return (
 		<Transition.Root show={open} as={Fragment}>
