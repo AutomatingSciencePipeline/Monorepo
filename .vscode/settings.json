@@ -2,12 +2,21 @@
     // =========================== General =========================
     // Spellcheck forcefully allowed words
     "cSpell.words": [
+        "eqcm",
         "glados",
         "gladosbase",
         "matplotlib",
         "mouck",
         "pyplot",
-        "Vmmem"
+        "signin",
+        "tabler",
+        "tlds",
+        "Vmmem",
+        "ZSVUVA"
+    ],
+    // Spellcheck forcefully flagged words (please explain why)
+    "cSpell.flagWords": [
+        "Dependent", // in our context, we are always referring to the Dependant Variable
     ],
     "shellcheck.exclude": [
         "1017" // Turn off shellcheck warnings about line ending types because git is set to autoconvert
