@@ -316,7 +316,7 @@ export default function DashboardPage() {
 													<Image
 														className='h-12 w-12 rounded-full'
 														src={authService.userPhotoUrl}
-														alt=''
+														alt='User Photo'
 													/>
 												</div>
 												<div className='space-y-1'>
@@ -473,6 +473,7 @@ export default function DashboardPage() {
 													className='h-6 w-6 rounded-full'
 													src={authService.userPhotoUrl}
 													alt='User Photo'
+													layout='fixed'
 												/>
 												<div className='flex-1 space-y-1'>
 													<div className='flex items-center justify-between'>

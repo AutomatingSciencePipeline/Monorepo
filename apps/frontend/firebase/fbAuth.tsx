@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { firebaseApp } from './firebaseClient';
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
+import noImage from '../images/NoImage.png'
 
 export interface AuthContextType {
 	user: User | null;
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}, [user]),
 
 		userPhotoUrl: useMemo(() => {
-			return user?.photoURL;
+			return user?.photoURL || noImage;
 		}, [user]),
 
 		signInWithEmailAndPassword: async (email: string, password: string) => {

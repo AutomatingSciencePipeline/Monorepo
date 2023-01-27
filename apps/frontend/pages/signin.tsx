@@ -29,6 +29,7 @@ const SignInPage = () => {
 						className='mx-auto h-12 w-auto'
 						src='https://tailwindui.com/img/logos/workflow-mark-blue-600.svg'
 						alt='Workflow'
+						layout='fill'
 					/>
 					<h2 className='mt-6 text-center text-3xl font-extrabold text-white'>
 						Sign in to your account
