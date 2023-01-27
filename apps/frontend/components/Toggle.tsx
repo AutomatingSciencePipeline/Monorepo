@@ -7,7 +7,7 @@ export const Toggle = ({ label, onChange }) => {
 	const [enabled, setEnabled] = useState(false);
 	useEffect(() => {
 		onChange();
-	}, [enabled]);
+	}, [enabled]); // TODO adding onChange causes render loop
 
 	return (
 		<Switch.Group as='div' className='flex items-center'>

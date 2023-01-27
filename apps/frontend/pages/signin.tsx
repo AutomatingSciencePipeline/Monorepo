@@ -3,6 +3,7 @@ import { useForm, joiResolver } from '@mantine/form';
 import { signInSchema } from '../utils/validators';
 import { useAuth } from '../firebase/fbAuth';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const defaultSignInText = 'Sign in';
 
@@ -46,10 +47,10 @@ const SignInPage = () => {
 									email,
 									password
 								).then(() => {
-									console.log('Success, loading dashboard...')
+									console.log('Success, loading dashboard...');
 									router.push('/dashboard');
 								}).catch((error) => {
-									alert("Problem logging in: " + error);
+									alert(`Problem logging in: ${error}`);
 									setSignInButtonText(defaultSignInText);
 									setSignInDisabled(false);
 								});
@@ -117,7 +118,7 @@ const SignInPage = () => {
 									</a>
 								</div> */}
 							</div>
-							
+
 							<div>
 								<button
 									type='submit'

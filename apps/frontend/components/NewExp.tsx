@@ -1,21 +1,20 @@
-import { Fragment, useState, useLayoutEffect, useEffect, ReactNode } from 'react';
+import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Upload, X, File, IconProps } from 'tabler-icons-react';
 import { Toggle } from './Toggle';
 
 import Parameter from './Parameter';
-import { Code, Text, useMantineTheme, Group } from '@mantine/core';
+import { Code, Text } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
 
 import { useForm, formList, joiResolver } from '@mantine/form';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
-import { submitExperiment, uploadExec, getDocById } from '../firebase/db';
+import { submitExperiment, uploadExec } from '../firebase/db';
 import { useAuth } from '../firebase/fbAuth';
 
-import { firebaseApp } from "../firebase/firebaseClient";
-import { getDoc, getFirestore, doc } from "firebase/firestore";
-import Router from 'next/router';
+import { firebaseApp } from '../firebase/firebaseClient';
+import { getDoc, getFirestore, doc } from 'firebase/firestore';
 
 
 export const FormStates = {
@@ -24,8 +23,8 @@ export const FormStates = {
 	Params: 1,
 	ProcessStep: 2,
 	Confirmation: 3,
-	Dispatch: 4
-}
+	Dispatch: 4,
+};
 
 const Steps = ({ steps }) => {
 	return (
@@ -124,7 +123,7 @@ const InformationStep = ({ form, ...props }) => {
 	);
 };
 
-const ParamStep = ({form, ...props}) => {
+const ParamStep = ({ form, ...props }) => {
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>
@@ -137,6 +136,7 @@ const ParamStep = ({form, ...props}) => {
 							{['integer', 'float', 'bool', 'string'].map((type) => (
 								<button
 									type='button'
+									key={`addNew_${type}`}
 									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
 									onClick={() =>
 										form.addListItem('parameters', {
@@ -191,7 +191,7 @@ const ParamStep = ({form, ...props}) => {
 			</Fragment>
 		</div>
 	);
-}
+};
 
 const PostProcessStep = ({ form, ...props }) => {
 	return (
@@ -199,44 +199,44 @@ const PostProcessStep = ({ form, ...props }) => {
 			<Fragment>
 				<InputSection header={'Scatter Plot'}>
 					<div className='sm:col-span-4'>
-						<input 
+						<input
 							type='checkbox'
 							checked={form.values.scatter}
 							onChange={() => {
-								form.setFieldValue('scatter', !form.values.scatter)
-								if(!form.values.scatter){
-									form.setFieldValue('scatterIndVar','')
-									form.setFieldValue('scatterDepVar','')
+								form.setFieldValue('scatter', !form.values.scatter);
+								if (!form.values.scatter) {
+									form.setFieldValue('scatterIndVar', '');
+									form.setFieldValue('scatterDepVar', '');
 								}
 							}}>
 						</input>
 					</div>
 				</InputSection>
 
-				{form.values.scatter ? 
-				<div>
-					<InputSection header={'Independant Variable'}>
-						<div className='sm:col-span-4'>
-							<input
-								type='text'
-								placeholder=''
-								{...form.getInputProps('scatterIndVar')}
-								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-							/>
-						</div>
-					</InputSection>
-					<InputSection header={'Dependant Variable'}>
-						<div className='sm:col-span-4'>
-							<input
-								type='text'
-								placeholder=''
-								{...form.getInputProps('scatterDepVar')}
-								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-							/>
-						</div>
-					</InputSection>
-				</div>
-					: ''}
+				{form.values.scatter ?
+					<div>
+						<InputSection header={'Independent Variable'}>
+							<div className='sm:col-span-4'>
+								<input
+									type='text'
+									placeholder=''
+									{...form.getInputProps('scatterIndVar')}
+									className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+								/>
+							</div>
+						</InputSection>
+						<InputSection header={'Dependant Variable'}>
+							<div className='sm:col-span-4'>
+								<input
+									type='text'
+									placeholder=''
+									{...form.getInputProps('scatterDepVar')}
+									className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+								/>
+							</div>
+						</InputSection>
+					</div> :
+					''}
 			</Fragment>
 		</div>
 	);
@@ -259,19 +259,18 @@ const ConfirmationStep = ({ form, ...props }) => {
 
 const dropzoneKids = (status) => {
 	return (status.accepted) ?
-		<UploadIcon className={'bg-green-500'} status={status} />
-	:
-		<div className={`flex flex-col justify-center items-center space-y-6`}>
+		<UploadIcon className={'bg-green-500'} status={status} />	:
+		<div className={'flex flex-col justify-center items-center space-y-6'}>
 			<UploadIcon status={status} />
 			<div>
 				<Text size='xl' inline>
 					Upload your project executable.
 				</Text>
 				<Text size='sm' color='dimmed' inline mt={7}>
-					Let's revolutionize science!
+					Let%apos;s revolutionize science!
 				</Text>
 			</div>
-		</div>
+		</div>;
 };
 
 interface UploadIconProps extends IconProps {
@@ -315,7 +314,10 @@ const DispatchStep = ({ id, form, ...props }) => {
 				alert('Failed to upload experiment file to the backend server, is it running?');
 				throw new Error('Upload failed');
 			}
-		}).catch( (error) => console.log('Error uploading experiment: ', error));
+		}).catch( (error) => {
+			console.log('Error uploading experiment: ', error);
+			alert(`Error uploading experiment: ${error.message}`);
+		});
 	};
 
 	return (
@@ -326,8 +328,8 @@ const DispatchStep = ({ id, form, ...props }) => {
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 			accept={{
 				'text/plain': ['.py'],
-				'application/java-archive':['.jar']
-			  }}
+				'application/java-archive': ['.jar'],
+			}}
 		>
 			<>{ (status) => dropzoneKids(status) }</>
 		</Dropzone>
@@ -350,11 +352,11 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 		},
 		schema: joiResolver(experimentSchema),
 	});
-	
+
 	useEffect(() => {
 		if (copyID != null) {
 			const db = getFirestore(firebaseApp);
-			getDoc(doc(db, "Experiments", copyID)).then(docSnap => {
+			getDoc(doc(db, 'Experiments', copyID)).then((docSnap) => {
 				if (docSnap.exists()) {
 					const expInfo = docSnap.data();
 					const params = JSON.parse(expInfo['params'])['params'];
@@ -369,18 +371,17 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 						scatter: expInfo['scatter'],
 						scatterIndVar: expInfo['scatterIndVar'],
 						scatterDepVar: expInfo['scatterDepVar'],
-					})
-					setCopyId(null)
-					console.log("Copied!")
-
+					});
+					setCopyId(null);
+					console.log('Copied!');
 				} else {
-					console.log("No such document!");
+					console.log('No such document!');
 				}
-			})
+			});
 		}
-	}, [copyID]);
+	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
-	
+
 	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
 	});
@@ -398,7 +399,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			setOpen(false);
 			form.reset();
 		}
-	}, [formState]);
+	}, [formState]); // TODO adding 'form' causes an update loop
 
 	return (
 		<Transition.Root show={open} as={Fragment}>
@@ -429,8 +430,8 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 									<div className='flex flex-col'>
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
-												<Steps 
-													steps={['Information', 'Parameters', 'Post Process','Confirmation', 'Dispatch'].map(
+												<Steps
+													steps={['Information', 'Parameters', 'Post Process', 'Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
 																id: idx + 1,
@@ -478,30 +479,30 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 												type='button'
 												className='rounded-md border w-1/6 border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												onClick={
-													status === FormStates.Info
-														? () => {
-															localStorage.removeItem("ID")
+													status === FormStates.Info ?
+														() => {
+															localStorage.removeItem('ID');
 															setFormState(-1);
-														  }
-														: () => {
-																setStatus(status - 1);
-														  }
+														} :
+														() => {
+															setStatus(status - 1);
+														}
 												}
 											>
 												{status === FormStates.Info ? 'Cancel' : 'Back'}
 											</button>
 											<button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-												{...(status === FormStates.Dispatch
-													? { type: 'submit', onClick: () => {
-                                                        setFormState(-1)
-														localStorage.removeItem("ID")
-                                                        setStatus(FormStates.Info)
-                                                    }}
-													: {
-															type: 'button',
-															onClick: () => setStatus(status + 1),
-													  })}
+												{...(status === FormStates.Dispatch ?
+													{ type: 'submit', onClick: () => {
+														setFormState(-1);
+														localStorage.removeItem('ID');
+														setStatus(FormStates.Info);
+													} } :
+													{
+														type: 'button',
+														onClick: () => setStatus(status + 1),
+													})}
 											>
 												{status === FormStates.Dispatch ? 'Dispatch' : 'Next'}
 											</button>

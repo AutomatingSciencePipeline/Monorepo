@@ -52,6 +52,8 @@
             {
                 "avoidEscape": true
             }
-        ]
+        ],
+        // we don't really care about the Next.js image optimizations and what they require us to do
+        "@next/next/no-img-element": "off"
     }
 }

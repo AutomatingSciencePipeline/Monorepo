@@ -5,10 +5,10 @@ import React, {
 	useContext,
 	createContext,
 	useDebugValue,
-	FC
 } from 'react';
 import { firebaseApp } from './firebaseClient';
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth'
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
+import noImage from '../images/NoImage.png'
 
 export interface AuthContextType {
 	user: User | null;
@@ -19,7 +19,7 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
 	user: null,
 	userId: null,
-	authService: null
+	authService: null,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -36,13 +36,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => onAuthStateChanged(auth, (newUser) => {
-		console.log("OnAuthStateChanged fired", newUser);
+		console.log('OnAuthStateChanged fired', newUser);
 		setLoading(false);
 		if (newUser) {
-			console.log("User is signed in");
+			console.log('User is signed in');
 			setUser(newUser);
 		} else {
-			console.log("No user signed in");
+			console.log('No user signed in');
 		}
 	}), [auth]);
 
@@ -58,30 +58,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}, [user]),
 
 		userPhotoUrl: useMemo(() => {
-			return user?.photoURL;
+			return user?.photoURL || noImage;
 		}, [user]),
 
 		signInWithEmailAndPassword: async (email: string, password: string) => {
 			return await signInWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				console.log("sign in success, UserCred is ", userCredential);
+				.then((userCredential) => {
+					console.log('sign in success, UserCred is ', userCredential);
 				// no need to set state because onAuthStateChanged will pick it up
-			}).catch((error) => {
-				console.error('Firebase sign in error', error);
-				throw error;
-			});
+				}).catch((error) => {
+					console.error('Firebase sign in error', error);
+					throw error;
+				});
 		},
 		signUpWithEmailAndPassword: async (email: string, password: string) => {
 			return await createUserWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				console.log("sign up success, UserCred is ", userCredential);
-			}).catch((error) => {
-				console.error('Firebase sign up error', error);
-				throw error;
-			});
+				.then((userCredential) => {
+					console.log('sign up success, UserCred is ', userCredential);
+				}).catch((error) => {
+					console.error('Firebase sign up error', error);
+					throw error;
+				});
 		},
 		signInWithGoogle: async () => {
-			console.error("TODO");
+			console.error('TODO');
 		},
 		signOut: async () => {
 			return await signOut(auth);

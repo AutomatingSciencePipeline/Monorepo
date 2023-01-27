@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Dev Install/Update Script 2",
+            "label": "Run Dev Install/Update Script",
             "type": "shell",
             "command": "./dev-install.sh",
             "problemMatcher": "$tsc",
@@ -16,6 +16,12 @@
                 "showReuseMessage": true,
                 "clear": false
             }
+        },
+        {
+            "label": "Docker Compose Up (Attached)",
+            "type": "shell",
+            "command": "docker-compose up --build",
+            "problemMatcher": []
         }
     ]
 }

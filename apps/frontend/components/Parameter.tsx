@@ -53,6 +53,7 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 			{['default', 'min', 'max', 'step'].map((label, i) => {
 				return (
 					<input
+						key={`number_${type}_${label}`}
 						type='number'
 						placeholder={`${label}`}
 						className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
