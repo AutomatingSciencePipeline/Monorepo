@@ -6,12 +6,7 @@ import itertools
 import configparser
 import os
 import json
-# cred = credentials.Certificate("Monorepo/creds.json")
 
-# app = firebase_admin.initialize_app(cred)
-
-# db = firestore.client()
-# bucket = storage.bucket("gladosbase.appspot.com")
 def frange(start, stop, step=None):
     if step == None:
         step = 1.0
