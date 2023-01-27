@@ -7,6 +7,16 @@
 
 const nextConfig = {
 	reactStrictMode: true,
+	images: {
+		// https://nextjs.org/docs/api-reference/next/image#remote-patterns
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'tailwindui.com',
+				pathname: '/img/**'
+			},
+		],
+	}
 };
 
 module.exports = nextConfig;

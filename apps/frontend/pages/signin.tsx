@@ -25,11 +25,10 @@ const SignInPage = () => {
 		<div className='bg-gray-800 h-full'>
 			<div className='min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
 				<div className='sm:mx-auto sm:w-full sm:max-w-md'>
-					<Image
+					<img
 						className='mx-auto h-12 w-auto'
 						src='https://tailwindui.com/img/logos/workflow-mark-blue-600.svg'
 						alt='Workflow'
-						layout='fill'
 					/>
 					<h2 className='mt-6 text-center text-3xl font-extrabold text-white'>
 						Sign in to your account
