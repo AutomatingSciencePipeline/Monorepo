@@ -444,14 +444,17 @@ export default function DashboardPage() {
 								role='list'
 								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 							>
-								{experiments?.map((project: any) => ( // TODO a type for experiments should alleviate the need for `any` here
-									<li
-										key={project.id}
-										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-									>
-										<ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
-									</li>
-								))}
+								{experiments?.map((project: any) => { // TODO a type for experiments should alleviate the need for `any` here
+									console.log('Project for this experiment is', project);
+									return (
+										<li
+											key={project.expId}
+											className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+										>
+											<ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
+										</li>
+									);
+								})}
 							</ul>
 						</div>
 					</div>
