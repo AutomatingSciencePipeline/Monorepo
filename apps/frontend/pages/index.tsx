@@ -1,10 +1,8 @@
 import Head from 'next/head';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
-import { Fragment } from 'react';
-import { Popover, Transition } from '@headlessui/react';
+import { Popover } from '@headlessui/react';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
@@ -38,7 +36,7 @@ function Home({ form }) {
 	// 	// router.push('/dashboard');
 	// }
 	return (
-		<div className={`w-full h-full`}>
+		<div className={'w-full h-full'}>
 			<Head>
 				<title>Glados</title>
 			</Head>
@@ -103,7 +101,7 @@ function Home({ form }) {
 												className='inline-flex items-center text-white bg-gray-900 rounded-full p-1 pr-2 sm:text-base lg:text-sm xl:text-base hover:text-gray-200'
 											>
 												<span className='px-3 py-0.5 text-white text-xs font-semibold leading-5 uppercase tracking-wide bg-blue-500 rounded-full'>
-													We're launching!
+													We&apos;re launching!
 												</span>
 												<span className='ml-4 text-sm'>
 													Visit our repository
@@ -131,8 +129,8 @@ function Home({ form }) {
 											</p>
 											<div className='mt-5 w-full sm:mx-auto sm:max-w-lg lg:ml-0'>
 												{/* <div className='flex flex-wrap items-start justify-between'>
-		                                        TODO: include rose logo and other stuff 
-										</div> */}
+													TODO: include rose logo and other stuff
+												</div> */}
 											</div>
 										</div>
 									</div>
@@ -212,7 +210,7 @@ function Home({ form }) {
 																	router.push('/dashboard');
 																}
 															} catch (error) {
-																console.log("Sign up error", error);
+																console.log('Sign up error', error);
 															}
 														})}
 														className='space-y-6'
@@ -226,8 +224,6 @@ function Home({ form }) {
 															</label>
 															<input
 																type='text'
-																// name='mobile-or-email'
-																// id='mobile-or-email'
 																autoComplete='email'
 																placeholder='Email'
 																required
@@ -241,8 +237,6 @@ function Home({ form }) {
 																Password
 															</label>
 															<input
-																// id='password'
-																// name='password'
 																type='password'
 																placeholder='Password'
 																autoComplete='current-password'
@@ -253,14 +247,12 @@ function Home({ form }) {
 														</div>
 
 														<div>
-															<label htmlFor='rpassword' className='sr-only'>
+															<label htmlFor='passwordRepeat' className='sr-only'>
 																Password Repeated
 															</label>
 															<input
-																// id='rpassword'
-																// name='rpassword'
 																type='password'
-																{...form.getInputProps('rpassword')}
+																{...form.getInputProps('passwordRepeat')}
 																placeholder='Repeat Password'
 																required
 																className='block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md'

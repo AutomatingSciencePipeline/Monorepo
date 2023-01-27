@@ -1,9 +1,8 @@
 import NewExp, { FormStates } from '../components/NewExp';
 import { useAuth } from '../firebase/fbAuth';
-import { subscribeToExp, listenToExperiments, downloadExp, downloadExpZip} from '../firebase/db';
+import { subscribeToExp, listenToExperiments, downloadExp, downloadExpZip } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
-import Link from 'next/link';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -11,13 +10,12 @@ import {
 	RectangleStackIcon,
 	MagnifyingGlassIcon,
 	BarsArrowUpIcon,
-	StarIcon
 
 } from '@heroicons/react/24/solid';
-import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
 import { Logo } from '../components/Logo';
 import classNames from 'classnames';
 import Router from 'next/router';
+import Image from 'next/image';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -82,10 +80,10 @@ const Navbar = (props) => {
 										<div>
 											<Menu.Button className='bg-blue-700 flex text-sm rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-700 focus:ring-white'>
 												<span className='sr-only'>Open user menu</span>
-												<img
+												<Image
 													className='h-8 w-8 rounded-full'
 													src={authService.userPhotoUrl}
-													alt=''
+													alt='User Photo'
 												/>
 											</Menu.Button>
 										</div>
@@ -110,9 +108,9 @@ const Navbar = (props) => {
 																		authService
 																			.signOut()
 																			.then(() => {
-																				Router.reload()
+																				Router.reload();
 																			})
-																			.catch((err) => console.log("Sign out error", err))
+																			.catch((err) => console.log('Sign out error', err))
 																	);
 																}}
 																className={classNames(
@@ -141,9 +139,9 @@ const Navbar = (props) => {
 									as='a'
 									href={item.href}
 									className={classNames(
-										item.current
-											? 'text-white bg-blue-800'
-											: 'text-blue-200 hover:text-blue-100 hover:bg-blue-600',
+										item.current ?
+											'text-white bg-blue-800' :
+											'text-blue-200 hover:text-blue-100 hover:bg-blue-600',
 										'block px-3 py-2 rounded-md text-base font-medium'
 									)}
 									aria-current={item.current ? 'page' : undefined}
@@ -177,10 +175,10 @@ const Navbar = (props) => {
 };
 
 
-const ExpLog = ({projectinit, setFormState, setCopyId}) => {
-    const [project, setProject] = useState(projectinit);
-	useEffect(() => subscribeToExp(project.expId, setProject),[])
-    return (
+const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
+	const [project, setProject] = useState(projectinit);
+	useEffect(() => subscribeToExp(project.expId, setProject), [project]);
+	return (
 		<div className='flex items-center justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>
 				<div className='flex items-center space-x-3'>
@@ -191,27 +189,27 @@ const ExpLog = ({projectinit, setFormState, setCopyId}) => {
 					</span>
 				</div>
 				{project['finished'] == true ?
-				<button type= "button" data-id={project.expId}
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={downloadExp}>
+					<button type= "button" data-id={project.expId}
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						onClick={downloadExp}>
 						Download Results
-				</button> 
-				: ' '}
+					</button> :
+					' '}
 				{project['finished'] == true && (project['fileOutput'] != '' || project['scatter'] != '')?
-				<button type= "button" data-id={project.expId}
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={downloadExpZip}>
+					<button type= "button" data-id={project.expId}
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						onClick={downloadExpZip}>
 						Download Project Zip
-				</button> 
-				: ' '}
+					</button> :
+					' '}
 				<button type= "button" data-id={project.expId}
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={() => {
-						setFormState(1)
-						setCopyId(project.expId)
+						setFormState(1);
+						setCopyId(project.expId);
 					}}>
 					Copy Experiment
-				</button> 
+				</button>
 				<a
 					href={project.repoHref}
 					className='relative group flex items-center space-x-2.5'
@@ -228,7 +226,7 @@ const ExpLog = ({projectinit, setFormState, setCopyId}) => {
 				/>
 			</div>
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
-				<p className='flex items-center space-x-4'>    
+				<p className='flex items-center space-x-4'>
 					<span className='font-mono text-red-500'>FAILS: {project['fails']}</span>
 					<span className='font-mono'>SUCCESSES: {project['passes']}</span>
 				</p>
@@ -237,9 +235,9 @@ const ExpLog = ({projectinit, setFormState, setCopyId}) => {
 					<span>{project.location}</span>
 				</p>
 			</div>
-		</div> 
-    )
-}
+		</div>
+	);
+};
 
 const SearchBar = (props) => {
 	return (
@@ -267,15 +265,15 @@ const SearchBar = (props) => {
 
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
-    const [experiments, setExperiments] = useState([] as unknown[]); // TODO experiment type
+	const [experiments, setExperiments] = useState([] as unknown[]); // TODO experiment type
 
 	useEffect(() => {
 		if (!userId) {
 			return;
 		}
-		return listenToExperiments(userId, (newExperimentList)=> setExperiments(newExperimentList))
-	},[userId])
-	
+		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList));
+	}, [userId]);
+
 	const [copyID, setCopyId] = useState(null);
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
@@ -297,7 +295,7 @@ export default function DashboardPage() {
 				className='fixed top-0 right-0 w-1/2 h-full bg-gray-50'
 				aria-hidden='true'
 			/>
-			
+
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
 				<Navbar />
@@ -315,7 +313,7 @@ export default function DashboardPage() {
 											{/* Profile */}
 											<div className='flex items-center space-x-3'>
 												<div className='flex-shrink-0 h-12 w-12'>
-													<img
+													<Image
 														className='h-12 w-12 rounded-full'
 														src={authService.userPhotoUrl}
 														alt=''
@@ -397,9 +395,9 @@ export default function DashboardPage() {
 														<a
 															href='#'
 															className={classNames(
-																active
-																	? 'bg-gray-100 text-gray-900'
-																	: 'text-gray-700',
+																active ?
+																	'bg-gray-100 text-gray-900' :
+																	'text-gray-700',
 																'block px-4 py-2 text-sm'
 															)}
 														>
@@ -412,9 +410,9 @@ export default function DashboardPage() {
 														<a
 															href='#'
 															className={classNames(
-																active
-																	? 'bg-gray-100 text-gray-900'
-																	: 'text-gray-700',
+																active ?
+																	'bg-gray-100 text-gray-900' :
+																	'text-gray-700',
 																'block px-4 py-2 text-sm'
 															)}
 														>
@@ -427,9 +425,9 @@ export default function DashboardPage() {
 														<a
 															href='#'
 															className={classNames(
-																active
-																	? 'bg-gray-100 text-gray-900'
-																	: 'text-gray-700',
+																active ?
+																	'bg-gray-100 text-gray-900' :
+																	'text-gray-700',
 																'block px-4 py-2 text-sm'
 															)}
 														>
@@ -451,7 +449,7 @@ export default function DashboardPage() {
 										key={project.id}
 										className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
 									>
-                                        <ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
+										<ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
 									</li>
 								))}
 							</ul>
@@ -466,12 +464,15 @@ export default function DashboardPage() {
 							<div>
 								<ul role='list' className='divide-y divide-gray-200'>
 									{activityItems.map((item) => (
-										<li className='py-4'>
+										<li
+											key={`activity_${item.time}_${item.project}_${item.environment}`}
+											className='py-4'
+										>
 											<div className='flex space-x-3'>
-												<img
+												<Image
 													className='h-6 w-6 rounded-full'
 													src={authService.userPhotoUrl}
-													alt=''
+													alt='User Photo'
 												/>
 												<div className='flex-1 space-y-1'>
 													<div className='flex items-center justify-between'>

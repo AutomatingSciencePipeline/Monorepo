@@ -42,7 +42,7 @@ export const signUpSchema = Joi.object().keys({
 		.email({ tlds: { allow: false } })
 		.required(),
 	password: Joi.string().required(),
-	rpassword: Joi.string().required().valid(Joi.ref('password')),
+	passwordRepeat: Joi.string().required().valid(Joi.ref('password')),
 });
 
 export const signInSchema = Joi.object().keys({

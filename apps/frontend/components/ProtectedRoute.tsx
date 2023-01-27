@@ -7,12 +7,12 @@ const ProtectedRoute = ({ children }) => {
 	const router = useRouter();
 	useEffect(() => {
 		if (!user) {
-			console.log("User is not signed in; redirecting them to /signin");
+			console.log('User is not signed in; redirecting them to /signin');
 			router.push('/signin');
 		}
 	}, [user, router]);
 
-	return <>{user ? children : "Not logged in"}</>;
+	return <>{user ? children : 'Not logged in'}</>;
 };
 
 export default ProtectedRoute;
