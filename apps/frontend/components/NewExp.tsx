@@ -314,7 +314,10 @@ const DispatchStep = ({ id, form, ...props }) => {
 				alert('Failed to upload experiment file to the backend server, is it running?');
 				throw new Error('Upload failed');
 			}
-		}).catch( (error) => console.log('Error uploading experiment: ', error));
+		}).catch( (error) => {
+			console.log('Error uploading experiment: ', error);
+			alert(`Error uploading experiment: ${error.message}`);
+		});
 	};
 
 	return (
