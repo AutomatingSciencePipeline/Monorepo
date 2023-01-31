@@ -115,11 +115,12 @@ def run_batch(data):
 
     #Generating Configs from hyperparameters
     print(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
-    expToRun = gen_configs(json.loads(experiment['params'])['params']) 
-    if expToRun == None:
+    configResult =gen_configs(json.loads(experiment['params'])['params'])
+    if configResult == None:
         #TODO return and exit with error
         return "Config Error"
     #Running the Experiment
+    expToRun = configResult[0]
     print(f"Running Experiment {id}")
     passes = 0
     fails = 0
@@ -130,8 +131,7 @@ def run_batch(data):
         if resultOutput == '': 
             writer.writerow(["Experiment Run", "Result"] + paramNames)
         else:
-            output = get_header_results(resultOutput)
-            if output == None:
+            if (output:=get_header_results(resultOutput)) == None:
                 #TODO update and return with error
                 return "Output error 1"
             writer.writerow(["Experiment Run"] + output + paramNames)
@@ -147,8 +147,7 @@ def run_batch(data):
             if resultOutput == '':
                 writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             else:
-                output = get_header_results(resultOutput)
-                if output == None:
+                if (output:=get_output_results(resultOutput)) == None:
                     #TODO update and return with error
                     return "Output error 2"
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
@@ -160,7 +159,7 @@ def run_batch(data):
                 if resultOutput == '':
                     writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 else:
-                    output = get_header_results(resultOutput)
+                    output = get_output_results(resultOutput)
                     if output == None:
                         #TODO update and return with error
                         return "Output error 3"
@@ -287,12 +286,15 @@ def gen_list(otherVar, paramspos):
     elif otherVar['type'] == 'bool':
         paramspos.append([(otherVar['name'],val) for val in [True,False]])
 
+#first return value is the number of experiments that will be ran
+#second return value is a list of configs
 def gen_configs(hyperparams):
     os.mkdir('configFiles')
     os.chdir('configFiles')
     configNum = 0
     consts = {}
     params = []
+    configs = []
     for param in hyperparams:
         try:
             if (param['type'] =='integer' or param['type'] == 'float') and param['min'] == param['max']:
@@ -340,10 +342,11 @@ def gen_configs(hyperparams):
                 config.write(configFile)
                 configFile.close()
                 print(f"Finished writing config {configNum}")
+            configs.append(perm)
             configNum += 1
     os.chdir('..')
     print("Finished generating configs")
-    return configNum - 1
+    return (configNum - 1, configs)
 
 
 
