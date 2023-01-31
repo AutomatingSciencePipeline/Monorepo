@@ -70,7 +70,7 @@ def run_batch(data):
 
     #Parsing the argument data
     id = data['experiment']['id']
-    print(f'recieved {id}')
+    print(f'received {id}')
     expRef = experiments.document(id)
     experiment = expRef.get().to_dict()
     experiment['id'] = id
@@ -99,20 +99,26 @@ def run_batch(data):
     except Exception as err:
         print(f'Ran into {err} while trying to download experiment')
 
-    #Deterimining FileType
+    #Determining FileType
     rawfiletype = magic.from_file(filepath)
+    filetype = 'unknown'
     if(rawfiletype.__contains__('Python script')):
          filetype = 'python'
     elif(rawfiletype.__contains__('Java archive data (JAR)')):
         filetype = 'java'
-
+    
+    if filetype == 'unknown':
+        #TODO return and update with error
+        return "Filetype Unknown"
     print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
 
 
-    #Generaing Configs from hyperparameters
+    #Generating Configs from hyperparameters
     print(f"Generating configs and downloading to ExperimentFiles/{id}/configFiles")
     expToRun = gen_configs(json.loads(experiment['params'])['params']) 
-
+    if expToRun == None:
+        #TODO return and exit with error
+        return "Config Error"
     #Running the Experiment
     print(f"Running Experiment {id}")
     passes = 0
@@ -124,7 +130,11 @@ def run_batch(data):
         if resultOutput == '': 
             writer.writerow(["Experiment Run", "Result"] + paramNames)
         else:
-            writer.writerow(["Experiment Run"] + get_header_results(resultOutput) + paramNames)
+            output = get_header_results(resultOutput)
+            if output == None:
+                #TODO update and return with error
+                return "Output error 1"
+            writer.writerow(["Experiment Run"] + output + paramNames)
         if firstRun == "ERROR":
             writer.writerow([0,"Error"])
             print(f"Experiment {id} ran into an error while running aborting")
@@ -137,7 +147,11 @@ def run_batch(data):
             if resultOutput == '':
                 writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             else:
-                writer.writerow(["0"] + get_output_results(resultOutput) + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
+                output = get_header_results(resultOutput)
+                if output == None:
+                    #TODO update and return with error
+                    return "Output error 2"
+                writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
             for i in range(1,expToRun+1):
                 res = run_experiment(filepath,f'configFiles/{i}.ini',filetype)
                 if experimentOutput != '':
@@ -146,7 +160,11 @@ def run_batch(data):
                 if resultOutput == '':
                     writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 else:
-                    writer.writerow([i] + get_output_results(resultOutput) + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+                    output = get_header_results(resultOutput)
+                    if output == None:
+                        #TODO update and return with error
+                        return "Output error 3"
+                    writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
                 if res != "ERROR":
                     passes +=1
                 else:
@@ -296,7 +314,8 @@ def gen_configs(hyperparams):
             default = [(defaultVar['name'],defaultVar['default'])]
             paramspos.append(default)
         except Exception as err:
-            print(f"huh? {err}")
+            print(f"Some sorta error with accessing default {err}")
+            return None
         for otherVar in hyperparams:
             if otherVar['name'] != defaultVar['name']:
                 try:
@@ -307,9 +326,10 @@ def gen_configs(hyperparams):
             perms = list(itertools.product(*paramspos))
         except Exception as err:
             print(f"Error {err} while making permutations")
+            return None
         for perm in perms:
             config = configparser.ConfigParser()
-            config.optionxform = str
+            config.optionxform = str # type: ignore
             res = {}
             for var in perm:
                 res[var[0]] = var[1]

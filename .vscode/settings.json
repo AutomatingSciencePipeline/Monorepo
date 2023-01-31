@@ -2,15 +2,26 @@
     // =========================== General =========================
     // Spellcheck forcefully allowed words
     "cSpell.words": [
+        "appspot",
+        "configfile",
+        "consts",
+        "dotenv",
         "eqcm",
+        "firestore",
+        "frange",
         "glados",
         "gladosbase",
+        "hyperparameters",
+        "hyperparams",
         "matplotlib",
         "mouck",
+        "paramspos",
         "pyplot",
+        "rawfiletype",
         "signin",
         "tabler",
         "tlds",
+        "upblob",
         "Vmmem",
         "ZSVUVA"
     ],
