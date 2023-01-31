@@ -37,7 +37,14 @@ services:
     expose:
       - "3000"
       - "80"
-
+  app-mongodb:
+    image: mongo
+    container_name: glados-mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
 networks:
   default:
     driver: bridge
