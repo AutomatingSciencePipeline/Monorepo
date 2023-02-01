@@ -40,12 +40,12 @@ services:
   app-mongodb:
     image: mongo
     container_name: glados-mongodb
-    command: use gladosDB
     restart: always
     ports:
       - 27017:27017
     expose:
       - "27017"
+    command: mongosh && use gladosDB
 networks:
   default:
     driver: bridge
