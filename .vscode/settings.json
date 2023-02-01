@@ -21,7 +21,6 @@
         "signin",
         "tabler",
         "tlds",
-        "upblob",
         "Vmmem",
         "ZSVUVA"
     ],
@@ -50,4 +49,5 @@
     "python.formatting.provider": "yapf",
     // Default line length settings often causes it to split logging messages over multiple lines
     "python.formatting.yapfArgs": ["--style", "{based_on_style: pep8, column_limit: 999}"],
+    "python.linting.lintOnSave": true
 }
