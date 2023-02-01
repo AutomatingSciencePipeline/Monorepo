@@ -9,7 +9,7 @@ import csv
 import json
 import time
 import configparser
-from flask import Flask, request
+from flask import Flask, abort, jsonify
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
@@ -59,8 +59,41 @@ runner = ProcessPoolExecutor(1)
 
 @flaskApp.post("/experiment")
 def recv_experiment():
-    runner.submit(run_batch, request.get_json())
+    print("Purposely failing")
+    # runner.submit(run_batch, request.get_json())
+    raise GladosUserError('This message should show up to the end user somehow')
     return 'OK'
+
+
+# TODO switch over relevant exceptions in here to using our custom exceptions instead
+# https://flask.palletsprojects.com/en/2.2.x/errorhandling/#returning-api-errors-as-json
+class CustomFlaskError(Exception):
+    status_code = 500
+
+    def __init__(self, message, status_code=None, payload=None):
+        super().__init__()
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+
+class GladosUserError(CustomFlaskError):
+    status_code = 400
+
+
+class GladosInternalError(CustomFlaskError):
+    status_code = 500
+
+
+@flaskApp.errorhandler(CustomFlaskError)
+def glados_custom_flask_error(error):
+    return jsonify(error.to_dict()), error.status_code
 
 
 def run_batch(data):
@@ -94,8 +127,9 @@ def run_batch(data):
         print(f"No filepath specified so defaulting to {filepath}")
     print(f"Downloading {filepath} to ExperimentFiles/{expId}/{filepath}")
     try:
-        filedata = firebaseBucket.blob(filepath)
-        filedata.download_to_filename(filepath)
+        raise Exception('Testing exception')
+        # filedata = firebaseBucket.blob(filepath)
+        # filedata.download_to_filename(filepath)
     except Exception as err:
         #TODO update w/ error and return
         print(f'Ran into {err} while trying to download experiment')

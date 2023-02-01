@@ -13,6 +13,7 @@
         "gladosbase",
         "hyperparameters",
         "hyperparams",
+        "jsonify",
         "matplotlib",
         "mouck",
         "paramspos",
