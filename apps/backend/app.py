@@ -19,9 +19,11 @@ from dotenv import load_dotenv
 import plots
 
 try:
-    import magic # Crashes on windows if you're missing the 'python-magic-bin' python package
+    import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
 except ImportError:
-    print("Failed to import the 'magic' package, you're probably missing a system level dependency")
+    print(
+        "Failed to import the 'magic' package, you're probably missing a system level dependency"
+    )
     sys.exit(1)
 
 # Must override so that vscode doesn't incorrectly parse another env file and have bad values
@@ -32,9 +34,13 @@ ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
 FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
 if FIREBASE_CREDENTIALS is None:
     if HAS_DOTENV_FILE:
-        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} in your `.env` file")
+        raise AssertionError(
+            f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} in your `.env` file"
+        )
     else:
-        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined")
+        raise AssertionError(
+            f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined"
+        )
 else:
     print("Loaded firebase credentials from environment variables")
 
@@ -54,10 +60,13 @@ DEFAULT_STEP_FLOAT = 0.1
 
 ### FLASK API ENDPOINT
 runner = ProcessPoolExecutor(1)
+
+
 @flaskApp.post("/experiment")
 def recv_experiment():
-    runner.submit(run_batch,request.get_json())
+    runner.submit(run_batch, request.get_json())
     return 'OK'
+
 
 def run_batch(data):
     time.sleep(1)
@@ -103,15 +112,16 @@ def run_batch(data):
         filetype = 'python'
     elif 'Java archive data (JAR)' in rawfiletype:
         filetype = 'java'
-    
+
     if filetype == 'unknown':
         #TODO return and update with error
         return "Filetype Unknown"
     print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
 
-
     #Generating Configs from hyperparameters
-    print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
+    print(
+        f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles"
+    )
     configResult = gen_configs(json.loads(experiment['params'])['params'])
     if configResult is None:
         #TODO return and exit with error
@@ -124,58 +134,68 @@ def run_batch(data):
     with open('results.csv', 'w', encoding="utf8") as expResults:
         paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
-        firstRun = run_experiment(filepath,f'configFiles/{0}.ini',filetype)
-        if resultOutput == '': 
+        firstRun = run_experiment(filepath, f'configFiles/{0}.ini', filetype)
+        if resultOutput == '':
             writer.writerow(["Experiment Run", "Result"] + paramNames)
         else:
-            if (output:=get_header_results(resultOutput)) is None:
+            if (output := get_header_results(resultOutput)) is None:
                 #TODO update and return with error
                 return "Output error 1"
             writer.writerow(["Experiment Run"] + output + paramNames)
         if firstRun == "ERROR":
-            writer.writerow([0,"Error"])
-            print(f"Experiment {expId} ran into an error while running aborting")
+            writer.writerow([0, "Error"])
+            print(
+                f"Experiment {expId} ran into an error while running aborting")
             fails += 1
         elif expToRun > 0:
-            print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun}")
+            print(
+                f"result from running first experiment: {firstRun}\n Continuing now running {expToRun}"
+            )
             if experimentOutput != '':
                 add_to_batch(experimentOutput, 0)
                 firstRun = "In ResCsvs"
             if resultOutput == '':
-                writer.writerow(["0",firstRun] + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
+                writer.writerow(
+                    ["0", firstRun] +
+                    get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             else:
-                if (output:=get_output_results(resultOutput)) is None:
+                if (output := get_output_results(resultOutput)) is None:
                     #TODO update and return with error
                     return "Output error 2"
-                writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini',paramNames))
-            for i in range(1,expToRun+1):
-                res = run_experiment(filepath,f'configFiles/{i}.ini',filetype)
+                writer.writerow(
+                    ["0"] + output +
+                    get_configs_ordered(f'configFiles/{0}.ini', paramNames))
+            for i in range(1, expToRun + 1):
+                res = run_experiment(filepath, f'configFiles/{i}.ini',
+                                     filetype)
                 if experimentOutput != '':
                     res = 'In ResCsvs'
                     add_to_batch(experimentOutput, i)
                 if resultOutput == '':
-                    writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+                    writer.writerow([i, res] + get_configs_ordered(
+                        f'configFiles/{i}.ini', paramNames))
                 else:
                     output = get_output_results(resultOutput)
                     if output is None:
                         #TODO update and return with error
                         return "Output error 3"
-                    writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini',paramNames))
+                    writer.writerow([i] + output + get_configs_ordered(
+                        f'configFiles/{i}.ini', paramNames))
                 if res != "ERROR":
-                    passes +=1
+                    passes += 1
                 else:
-                    fails +=1
+                    fails += 1
         passes += 1
         print("Finished running Experiments")
-    
+
     if postProcess:
         print("Beginning post processing")
         try:
-            if(scatterPlot):
+            if scatterPlot:
                 print("Creating Scatter Plot")
                 depVar = experiment['scatterDepVar']
                 indVar = experiment['scatterIndVar']
-                plots.scatterPlot(indVar,depVar,'results.csv',expId)
+                plots.scatterPlot(indVar, depVar, 'results.csv', expId)
         except KeyError as err:
             print(f"error during plot generation: {err}")
 
@@ -194,34 +214,46 @@ def run_batch(data):
             print(err)
 
     #Updating Firebase Object
-    expRef.update({'finished':True,'passes':passes,'fails':fails})
+    expRef.update({'finished': True, 'passes': passes, 'fails': fails})
     print(f'Exiting experiment {expId}')
     os.chdir('../..')
+
 
 ### UTILS
 def run_experiment(experiment_path, config_path, filetype):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
     if filetype == 'python':
-        with Popen(['python',experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+        with Popen(['python', experiment_path, config_path],
+                   stdout=PIPE,
+                   stdin=PIPE,
+                   stderr=PIPE,
+                   encoding='utf8') as p:
             return get_data(p)
     elif filetype == 'java':
-        with Popen(['java','-jar',experiment_path,config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE,encoding='utf8') as p:
+        with Popen(['java', '-jar', experiment_path, config_path],
+                   stdout=PIPE,
+                   stdin=PIPE,
+                   stderr=PIPE,
+                   encoding='utf8') as p:
             return get_data(p)
-     
+
+
 def get_header_results(filename):
-    with open(filename, mode = 'r', encoding="utf8") as file:
+    with open(filename, mode='r', encoding="utf8") as file:
         reader = csv.reader(file)
         for line in reader:
             return line
 
+
 def get_output_results(filename):
-    with open(filename, mode = 'r', encoding="utf8") as file:
+    with open(filename, mode='r', encoding="utf8") as file:
         reader = csv.reader(file)
         i = 0
         for line in reader:
             if i == 1:
                 return line
             i += 1
+
 
 def get_data(p):
     try:
@@ -234,13 +266,15 @@ def get_data(p):
         return "ERROR"
     result = data[0].split('\n')[0]
     print(f"result data: {result}")
-    return(result)
+    return result
+
 
 def add_to_batch(fileOutput, ExpRun):
     try:
         shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
     except Exception as err:
         print(err)
+
 
 def get_config_paramNames(configfile):
     config = configparser.ConfigParser()
@@ -249,7 +283,8 @@ def get_config_paramNames(configfile):
     res.sort()
     return res
 
-def get_configs_ordered(configfile,names):
+
+def get_configs_ordered(configfile, names):
     config = configparser.ConfigParser()
     config.read(configfile)
     res = [config["DEFAULT"][key] for key in names]
@@ -267,21 +302,27 @@ def frange(start, stop, step=None):
         yield temp
         count += 1
 
+
 def gen_list(otherVar, paramspos):
     if otherVar['type'] == 'integer':
-        step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(otherVar['step']) == 0 else otherVar['step']
+        step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(
+            otherVar['step']) == 0 else otherVar['step']
         if otherVar['max'] == otherVar['min']:
             otherVar['max'] = int(otherVar['max']) + int(step)
-        paramspos.append([(otherVar['name'],i) for i in range(int(otherVar['min']),int(otherVar['max']),int(step))])
+        paramspos.append([(otherVar['name'], i) for i in range(
+            int(otherVar['min']), int(otherVar['max']), int(step))])
     elif otherVar['type'] == 'float':
-        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' or float(otherVar['step']) == 0 else otherVar['step']
+        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' or float(
+            otherVar['step']) == 0 else otherVar['step']
         if otherVar['max'] == otherVar['min']:
             otherVar['max'] = float(otherVar['max']) + float(step)
-        paramspos.append([(otherVar['name'],i) for i in frange(float(otherVar['min']),float(otherVar['max']),float(step))])
+        paramspos.append([(otherVar['name'], i) for i in frange(
+            float(otherVar['min']), float(otherVar['max']), float(step))])
     elif otherVar['type'] == 'string':
-        paramspos.append([(otherVar['name'],otherVar['default'])])
+        paramspos.append([(otherVar['name'], otherVar['default'])])
     elif otherVar['type'] == 'bool':
-        paramspos.append([(otherVar['name'],val) for val in [True,False]])
+        paramspos.append([(otherVar['name'], val) for val in [True, False]])
+
 
 #first return value is the number of experiments that will be ran
 #second return value is a list of configs
@@ -294,11 +335,14 @@ def gen_configs(hyperparams):
     configs = []
     for param in hyperparams:
         try:
-            if (param['type'] =='integer' or param['type'] == 'float') and param['min'] == param['max']:
-                print('param ' + param['name'] + ' has the same min and max value converting to constant')
+            if (param['type'] == 'integer' or param['type']
+                    == 'float') and param['min'] == param['max']:
+                print('param ' + param['name'] +
+                      ' has the same min and max value converting to constant')
                 consts[param['name']] = param['min']
             elif param['type'] == 'string':
-                print('param ' + param['name'] + ' is a string, adding to constants')
+                print('param ' + param['name'] +
+                      ' is a string, adding to constants')
                 consts[param['name']] = param['default']
             else:
                 print('param ' + param['name'] + ' varies, adding to batch')
@@ -310,7 +354,7 @@ def gen_configs(hyperparams):
         print(f'Keeping {defaultVar} constant')
         try:
             paramspos = []
-            default = [(defaultVar['name'],defaultVar['default'])]
+            default = [(defaultVar['name'], defaultVar['default'])]
             paramspos.append(default)
         except KeyError as err:
             print(f"Some sorta error with accessing default {err}")
@@ -318,7 +362,7 @@ def gen_configs(hyperparams):
         for otherVar in hyperparams:
             if otherVar['name'] != defaultVar['name']:
                 try:
-                    gen_list(otherVar,paramspos)
+                    gen_list(otherVar, paramspos)
                 except KeyError as err:
                     print(f'error {err} during list generation')
         try:
@@ -328,7 +372,7 @@ def gen_configs(hyperparams):
             return None
         for perm in perms:
             config = configparser.ConfigParser()
-            config.optionxform = str # type: ignore
+            config.optionxform = str  # type: ignore
             finalConfigRes = {}
             for var in perm:
                 finalConfigRes[var[0]] = var[1]
@@ -346,8 +390,7 @@ def gen_configs(hyperparams):
     return (configNum - 1, configs)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     os.chdir('/app/GLADOS_HOME')
     flaskApp.run()
