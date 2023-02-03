@@ -1,29 +1,29 @@
 import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Upload, X, File, IconProps } from 'tabler-icons-react';
 import { Toggle } from './Toggle';
-
 import Parameter from './Parameter';
-import { Code, Text } from '@mantine/core';
-import { Dropzone } from '@mantine/dropzone';
-
 import { useForm, formList, joiResolver } from '@mantine/form';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { experimentSchema } from '../utils/validators';
-import { submitExperiment, uploadExec } from '../firebase/db';
-import { useAuth } from '../firebase/fbAuth';
 
 import { firebaseApp } from '../firebase/firebaseClient';
 import { getDoc, getFirestore, doc } from 'firebase/firestore';
+
+import { DispatchStep } from './stepComponents/DispatchStep';
+import { InformationStep } from './stepComponents/InformationStep';
+import { ParamStep } from './stepComponents/ParamStep';
+import { PostProcessStep } from './stepComponents/PostProcessStep';
+import { ConfirmationStep } from './stepComponents/ConfirmationStep';
+import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 
 
 export const FormStates = {
 	Closed: -1,
 	Info: 0,
 	Params: 1,
-	ProcessStep: 2,
-	Confirmation: 3,
-	Dispatch: 4,
+	DumbTextArea: 2,
+	ProcessStep: 3,
+	Confirmation: 4,
+	Dispatch: 5,
 };
 
 const Steps = ({ steps }) => {
@@ -60,282 +60,6 @@ const Steps = ({ steps }) => {
 	);
 };
 
-const InputSection = ({ header, ...props }) => {
-	return (
-		<div className='space-y-1 px-4 sm:grid sm:grid-cols-5 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5'>
-			<div>
-				<label className='block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2'>
-					{' '}
-					{header}{' '}
-				</label>
-			</div>
-			{props.children}
-		</div>
-	);
-};
-
-const InformationStep = ({ form, ...props }) => {
-	return (
-		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
-			<Fragment>
-				<InputSection header={'Name'}>
-					<div className='sm:col-span-4'>
-						<input
-							type='text'
-							{...form.getInputProps('name')}
-							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
-					</div>
-				</InputSection>
-
-				<InputSection header={'Description'}>
-					<div className='sm:col-span-4'>
-						<textarea
-							{...form.getInputProps('description')}
-							rows={3}
-							className='block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
-					</div>
-				</InputSection>
-
-				<InputSection header={'File Output'}>
-					<div className='sm:col-span-4'>
-						<input
-							type='text'
-							placeholder='Name and extension of the output CSV file'
-							{...form.getInputProps('fileOutput')}
-							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
-					</div>
-				</InputSection>
-				<InputSection header={'Result Output'}>
-					<div className='sm:col-span-4'>
-						<input
-							type='text'
-							placeholder='Name and extension of the experiment results file'
-							{...form.getInputProps('resultOutput')}
-							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
-					</div>
-				</InputSection>
-			</Fragment>
-		</div>
-	);
-};
-
-const ParamStep = ({ form, ...props }) => {
-	return (
-		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
-			<Fragment>
-				<InputSection header={'Parameters'}>
-					<div className='sm:col-span-4 inline-flex'>
-						<span className='rounded-l-md text-sm text-white font-bold bg-blue-600  items-center px-4 py-2 border border-transparent'>
-							+
-						</span>
-						<span className='relative z-0 inline-flex flex-1 shadow-sm rounded-md'>
-							{['integer', 'float', 'bool', 'string'].map((type) => (
-								<button
-									type='button'
-									key={`addNew_${type}`}
-									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
-									onClick={() =>
-										form.addListItem('parameters', {
-											name: '',
-											default: '',
-											...((type === 'integer' || type === 'float') && {
-												min: '',
-												max: '',
-												step: '',
-											}),
-											type: type,
-										})
-									}
-								>
-									{type}
-								</button>
-							))}
-						</span>
-					</div>
-				</InputSection>
-
-				<div className={'flex-0 p-4 h-full grow-0'}>
-					<DragDropContext
-						onDragEnd={({ destination, source }) => {
-							form.reorderListItem('parameters', {
-								from: source.index,
-								to: destination.index,
-							});
-						}}
-					>
-						<div
-							className='h-full grow-0 max-h-fit mb-4 overflow-y-scroll p-4 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400'
-							style={{ maxHeight: '60vh' }}
-
-						>
-							<Droppable
-								as='div'
-								droppableId='dnd-list'
-								direction='vertical'
-								// className='grow-0'
-							>
-								{(provided) => (
-									<div {...provided.droppableProps} ref={provided.innerRef}>
-										{props.children}
-										{provided.placeholder}
-									</div>
-								)}
-							</Droppable>
-						</div>
-					</DragDropContext>
-				</div>
-			</Fragment>
-		</div>
-	);
-};
-
-const PostProcessStep = ({ form, ...props }) => {
-	return (
-		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
-			<Fragment>
-				<InputSection header={'Scatter Plot'}>
-					<div className='sm:col-span-4'>
-						<input
-							type='checkbox'
-							checked={form.values.scatter}
-							onChange={() => {
-								form.setFieldValue('scatter', !form.values.scatter);
-								if (!form.values.scatter) {
-									form.setFieldValue('scatterIndVar', '');
-									form.setFieldValue('scatterDepVar', '');
-								}
-							}}>
-						</input>
-					</div>
-				</InputSection>
-
-				{form.values.scatter ?
-					<div>
-						<InputSection header={'Independent Variable'}>
-							<div className='sm:col-span-4'>
-								<input
-									type='text'
-									placeholder=''
-									{...form.getInputProps('scatterIndVar')}
-									className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-								/>
-							</div>
-						</InputSection>
-						<InputSection header={'Dependant Variable'}>
-							<div className='sm:col-span-4'>
-								<input
-									type='text'
-									placeholder=''
-									{...form.getInputProps('scatterDepVar')}
-									className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-								/>
-							</div>
-						</InputSection>
-					</div> :
-					''}
-			</Fragment>
-		</div>
-	);
-};
-
-const ConfirmationStep = ({ form, ...props }) => {
-	return (
-		<div className='h-full overflow-y-scroll flex-0 grow-0 my-4 pl-4 rounded-md flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
-			<Code
-				// className='overflow-y-scroll max-h-full' block
-				className='h-full'
-				block
-			>
-				{' '}
-				{JSON.stringify(form.values, null, 2)}
-			</Code>
-		</div>
-	);
-};
-
-const dropzoneKids = (status) => {
-	return (status.accepted) ?
-		<UploadIcon className={'bg-green-500'} status={status} />	:
-		<div className={'flex flex-col justify-center items-center space-y-6'}>
-			<UploadIcon status={status} />
-			<div>
-				<Text size='xl' inline>
-					Upload your project executable.
-				</Text>
-				<Text size='sm' color='dimmed' inline mt={7}>
-					Let%apos;s revolutionize science!
-				</Text>
-			</div>
-		</div>;
-};
-
-interface UploadIconProps extends IconProps {
-	status
-}
-
-const UploadIcon: React.FC<UploadIconProps> = ({ status }) => {
-	if (status.accepted) {
-		return <Upload size={80} />;
-	} else if (status.rejected) {
-		return <X size={80} />;
-	}
-	return <File size={80} />;
-};
-
-const DispatchStep = ({ id, form, ...props }) => {
-	const { userId, authService } = useAuth();
-
-	const onDropFile = async (file) => {
-		console.log('Submitting Experiment!!!');
-		submitExperiment(form.values, userId).then(async (expId) => {
-			console.log(`Uploading file for ${expId}`);
-			const uploadResponse = await uploadExec(expId, file[0]);
-			if (uploadResponse) {
-				console.log(`Handing experiment ${expId} to the backend`);
-				const response = await fetch(`/api/experiments/${expId}`, {
-					method: 'POST',
-					headers: new Headers({ 'Content-Type': 'application/json' }),
-					credentials: 'same-origin',
-					body: JSON.stringify({ id: expId }),
-				});
-				if (response.ok) {
-					console.log('Response from backend received', response);
-				} else {
-					const responseText = await response.text();
-					alert(`Upload failed: ${response.status}: ${responseText}`);
-					console.log('Upload failed', responseText, response);
-					throw new Error(`Upload failed: ${response.status}: ${responseText}`);
-				}
-			} else {
-				alert('Failed to upload experiment file to the backend server, is it running?');
-				throw new Error('Upload failed');
-			}
-		}).catch( (error) => {
-			console.log('Error uploading experiment: ', error);
-			alert(`Error uploading experiment: ${error.message}`);
-		});
-	};
-
-	return (
-		<Dropzone
-			onDrop={onDropFile}
-			onReject={(file) => console.log('NOPE, file rejected', file)}
-			maxSize={3 * 1024 ** 2}
-			className='flex-1 flex flex-col justify-center m-4 items-center'
-			accept={{
-				'text/plain': ['.py'],
-				'application/java-archive': ['.jar'],
-			}}
-		>
-			<>{ (status) => dropzoneKids(status) }</>
-		</Dropzone>
-	);
-};
-
 const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		initialValues: {
@@ -346,6 +70,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			resultOutput: '',
 			scatterIndVar: '',
 			scatterDepVar: '',
+			dumbTextArea: '',
 			verbose: false,
 			scatter: false,
 			nWorkers: 1,
@@ -369,6 +94,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 						verbose: expInfo['verbose'],
 						nWorkers: expInfo['workers'],
 						scatter: expInfo['scatter'],
+						dumbTextArea: '',
 						scatterIndVar: expInfo['scatterIndVar'],
 						scatterDepVar: expInfo['scatterDepVar'],
 					});
@@ -411,7 +137,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 				<div className='absolute inset-0 overflow-hidden'>
 					<Dialog.Overlay className='absolute inset-0' />
 
-					<div className='pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16'>
+					<div className='pointer-events-none fixed inset-y-0 right-0 flex pl-20 sm:pl-16'>
 						<Transition.Child
 							as={Fragment}
 							enter='transform transition ease-in-out duration-500 sm:duration-700'
@@ -421,7 +147,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 							leaveFrom='translate-x-0'
 							leaveTo='translate-x-full'
 						>
-							<div className='pointer-events-auto w-screen max-w-2xl'>
+							<div className='pointer-events-auto w-screen max-w-5xl'>
 								<form
 									className='flex h-full flex-col bg-white shadow-xl'
 									onSubmit={form.onSubmit((values) => {
@@ -431,7 +157,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
 												<Steps
-													steps={['Information', 'Parameters', 'Post Process', 'Confirmation', 'Dispatch'].map(
+													steps={['Information', 'Parameters', 'Dumb Text Area', 'Post Process', 'Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
 																id: idx + 1,
@@ -448,6 +174,8 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 									{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 									{status === FormStates.Info ? (
 										<InformationStep form={form}></InformationStep>
+									) : status === FormStates.DumbTextArea ? (
+										<DumbTextArea form={form}></DumbTextArea>
 									) : status === FormStates.Params ? (
 										<ParamStep form={form}>{fields}</ParamStep>
 									) : status === FormStates.ProcessStep ? (
