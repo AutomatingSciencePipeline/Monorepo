@@ -45,6 +45,8 @@ services:
       - 27017:27017
     expose:
       - "27017"
+    volumes:
+      - ./data/db:/data/db
 networks:
   default:
     driver: bridge
