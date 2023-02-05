@@ -45,7 +45,6 @@ services:
       - 27017:27017
     expose:
       - "27017"
-    command: mongosh && use gladosDB
 networks:
   default:
     driver: bridge
