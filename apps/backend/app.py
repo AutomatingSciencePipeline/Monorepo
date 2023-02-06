@@ -77,6 +77,7 @@ def run_batch(data):
     experimentOutput = experiment['fileOutput']
     resultOutput = experiment['resultOutput']
     scatterPlot = experiment['scatter']
+    dumbTextArea = experiment['consts']
     postProcess = scatterPlot != ''
     print(f"Experiment info: {experiment}")
 
@@ -116,12 +117,13 @@ def run_batch(data):
 
     #Generating Configs from hyperparameters
     print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
-    configResult = gen_configs(json.loads(experiment['params'])['params'])
+    configResult = gen_configs(json.loads(experiment['params'])['params'], dumbTextArea)
     if configResult is None:
         #TODO return and exit with error
         raise Exception("Error generating configs - somehow no configs were produced")
+
     #Running the Experiment
-    expToRun = configResult[0]
+    expToRun = len(configResult) - 1
     print(f"Running Experiment {expId}")
     passes = 0
     fails = 0
@@ -298,13 +300,11 @@ def gen_list(otherVar, paramspos):
         paramspos.append([(otherVar['name'], val) for val in [True, False]])
 
 
-#first return value is the number of experiments that will be ran
-#second return value is a list of configs
-def gen_configs(hyperparams):
+def gen_configs(hyperparams, unparsedConstInfo):
     os.mkdir('configFiles')
     os.chdir('configFiles')
     configIdNumber = 0
-    constants = {}
+    constants = gen_consts(unparsedConstInfo)
     parameters = []
     configs = []
     for param in hyperparams:
@@ -346,8 +346,9 @@ def gen_configs(hyperparams):
             configItems = {}
             for item in thisPermutation:
                 configItems[item[0]] = item[1]
-            for item, value in constants.items():
-                configItems[item] = value
+            configItems.update(constants)
+            # for item, value in constants.items():
+            #     configItems[item] = value
             configs.append(configItems)
             outputConfig["DEFAULT"] = configItems
             with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
@@ -357,7 +358,18 @@ def gen_configs(hyperparams):
             configIdNumber += 1
     os.chdir('..')
     print("Finished generating configs")
-    return (configIdNumber - 1, configs)
+    return configs
+
+
+def gen_consts(toParse: str):
+    res = {}
+    if toParse != '':
+        parsedLst = toParse.split('\n')
+        #Splits each element of the parsed list on = then strips extra white space, programming scheme style! (Sorry Rob)
+        fullyParsed = list(map(lambda unparsedConst: map(lambda ind: ind.strip(), unparsedConst.split('=')), parsedLst))
+        for const, val in fullyParsed:
+            res[const] = val
+    return res
 
 
 if __name__ == '__main__':

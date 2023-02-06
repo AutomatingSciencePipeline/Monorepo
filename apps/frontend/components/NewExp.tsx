@@ -94,11 +94,12 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 						verbose: expInfo['verbose'],
 						nWorkers: expInfo['workers'],
 						scatter: expInfo['scatter'],
-						dumbTextArea: '',
+						dumbTextArea: expInfo['consts'],
 						scatterIndVar: expInfo['scatterIndVar'],
 						scatterDepVar: expInfo['scatterDepVar'],
 					});
 					setCopyId(null);
+					setStatus(FormStates.Info);
 					console.log('Copied!');
 				} else {
 					console.log('No such document!');
