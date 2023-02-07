@@ -16,13 +16,14 @@ jobs:
         node-version: [12.x]
 
     steps:
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - working-directory: ./apps/frontend
-      - run: |
+      - name: Run NPM Test
+        working-directory: ./apps/frontend
+        run: |
           npm install
           npm run dev
           npm test
