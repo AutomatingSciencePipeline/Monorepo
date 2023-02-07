@@ -230,6 +230,14 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 					<span className='font-mono text-red-500'>FAILS: {project['fails']}</span>
 					<span className='font-mono'>SUCCESSES: {project['passes']}</span>
 				</p>
+				{project['finished'] == false && project['estimatedTime'] != 0 ?
+					<p>
+						Expected Time to Run: {Math.round(project['estimatedTime']*100)/100} Minutes
+					</p> : ''
+				}
+				{project['finished'] == false && project['runs'] != 0 ?
+					<p>Experiments To Run: {project['runs']} runs</p> : ''
+				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
 					<span>Deployed {new Date(project['created']).toString()}</span>
 					<span>{project.location}</span>

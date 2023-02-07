@@ -121,16 +121,23 @@ def run_batch(data):
     if configResult is None:
         #TODO return and exit with error
         raise Exception("Error generating configs - somehow no configs were produced")
+    expToRun = len(configResult) - 1
+    
+    #Updating with run information
+    expRef.update({ "runs": expToRun + 1})
 
     #Running the Experiment
-    expToRun = len(configResult) - 1
     print(f"Running Experiment {expId}")
     passes = 0
     fails = 0
     with open('results.csv', 'w', encoding="utf8") as expResults:
         paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
+
+        #Timing the first experiment
+        start = time.time()
         firstRun = run_experiment(filepath, f'configFiles/{0}.ini', filetype)
+        timeTaken = (time.time() - start) / 60
         if resultOutput == '':
             writer.writerow(["Experiment Run", "Result"] + paramNames)
         else:
@@ -143,6 +150,12 @@ def run_batch(data):
             print(f"Experiment {expId} ran into an error while running aborting")
             fails += 1
         elif expToRun > 0:
+            #Running the rest of the experiments
+            #Estimating time for all experiments to run and informing frontend
+            estimatedTime = timeTaken * expToRun
+            print(f"Estimated time to run: {estimatedTime}")
+            expRef.update({'estimatedTime': estimatedTime})
+
             print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun}")
             if experimentOutput != '':
                 add_to_batch(experimentOutput, 0)
