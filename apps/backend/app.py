@@ -347,8 +347,6 @@ def gen_configs(hyperparams, unparsedConstInfo):
             for item in thisPermutation:
                 configItems[item[0]] = item[1]
             configItems.update(constants)
-            # for item, value in constants.items():
-            #     configItems[item] = value
             configs.append(configItems)
             outputConfig["DEFAULT"] = configItems
             with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
