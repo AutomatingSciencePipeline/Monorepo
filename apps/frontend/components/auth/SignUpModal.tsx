@@ -1,6 +1,6 @@
 import { joiResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AiOutlineGithub, AiOutlineGoogle, AiOutlineTwitter } from 'react-icons/ai';
 import { useAuth } from '../../firebase/fbAuth';
 import { signUpSchema } from '../../utils/validators';
@@ -19,6 +19,16 @@ export const SignUpModal = ({ afterSignUp }) => {
 	const { authService } = useAuth();
 	const [buttonDisabled, setButtonDisabled] = useState(false);
 	const [buttonText, setButtonText] = useState(DEFAULT_SIGN_UP_TEXT);
+
+	const formHasError = useMemo(() => {
+		return Object.keys(form.errors).length !== 0;
+	}, [form.errors]);
+
+	useEffect(() => {
+		if (formHasError) {
+			console.log('Form errors', form.errors);
+		}
+	}, [formHasError, form.errors]);
 
 	return <div className='mt-16 sm:mt-24 lg:mt-0 lg:col-span-6'>
 		<div className='bg-white sm:max-w-md sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden'>
@@ -92,8 +102,8 @@ export const SignUpModal = ({ afterSignUp }) => {
 						</p>
 					</div>
 					<form
-						onAbort={() => {
-							console.log('abort');
+						onInvalid={() => {
+							console.log('Form is invalid (this only triggers when Mantine already has a hover tooltip for stuff)');
 						}}
 						onSubmit={form.onSubmit(async (values) => {
 							console.log('Sign in was submitted');
@@ -108,7 +118,9 @@ export const SignUpModal = ({ afterSignUp }) => {
 								afterSignUp();
 							} catch (error) {
 								console.log('Sign up error', error);
-								alert(`Error during sign up: ${error}`);
+								form.setErrors({
+									firebaseError: error?.message,
+								});
 								setButtonText(DEFAULT_SIGN_UP_TEXT);
 								setButtonDisabled(false);
 							}
@@ -164,6 +176,20 @@ export const SignUpModal = ({ afterSignUp }) => {
 							>
 								{buttonText}
 							</button>
+						</div>
+
+						<div className='text-red-500'>
+							{ formHasError ?
+								<ul>
+									{Object.entries(form.errors).map((error) => {
+										return (
+											<li key={error[0]}>
+												{error[1]}
+											</li>
+										);
+									})}
+								</ul> :
+								null}
 						</div>
 					</form>
 				</div>
