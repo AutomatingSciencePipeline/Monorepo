@@ -16,12 +16,15 @@
         "matplotlib",
         "mouck",
         "paramspos",
+        "pipenv",
+        "Pyenv",
         "pyplot",
         "rawfiletype",
         "signin",
         "tabler",
         "tlds",
         "Vmmem",
+        "yapf",
         "ZSVUVA"
     ],
     // Spellcheck forcefully flagged words (please explain why)

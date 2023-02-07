@@ -24,6 +24,7 @@
         "ms-python.python",
         "ms-python.pylint",
         "ms-python.vscode-pylance",
+        "bungcip.better-toml", // Pyenv pipfile is toml
 
         // Setup Scripts
         "timonwong.shellcheck",
