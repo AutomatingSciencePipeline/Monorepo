@@ -176,7 +176,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 					</div>
 					<div className='relative flex justify-center text-sm'>
 						<span className='px-2 bg-white text-gray-500'>
-						Or
+							Already have an account?
 						</span>
 					</div>
 				</div>
