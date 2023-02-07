@@ -11,7 +11,7 @@ else
         echo "⚠ pyenv install ran. You need to restart the terminal session you're in so that pyenv is recognized as installed. You may need to restart your computer"
         # Powershell can run this to reload:
         # $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-        source exit_await_input.sh 1
+        source setup/exit_await_input.sh 1
     fi
 
     if [ "$IS_UNIX" ]; then
