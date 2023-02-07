@@ -158,7 +158,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 										<div className='bg-gray-50 px-4 py-6 sm:px-6'>
 											<div className='flex items-center align-center justify-between space-x-3'>
 												<Steps
-													steps={['Information', 'Parameters', 'Dumb Text Area', 'Post Process', 'Confirmation', 'Dispatch'].map(
+													steps={['Information', 'Parameters', 'User Defined Constants', 'Post Process', 'Confirmation', 'Dispatch'].map(
 														(step, idx) => {
 															return {
 																id: idx + 1,
