@@ -8,3 +8,5 @@ configparser
 python-magic
 python-dotenv
 matplotlib
+yapf
+pylint
