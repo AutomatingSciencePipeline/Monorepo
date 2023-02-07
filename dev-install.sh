@@ -9,6 +9,9 @@ if ! source "${DIR}/setup/variables.sh"; then
     exit 1
 fi
 
+# Load color vars
+source "${DIR}/setup/colors.sh"
+
 # Create the temp directory so other scripts don't fail to download stuff
 mkdir -p ./setup/temp
 
@@ -41,7 +44,8 @@ export IS_WINDOWS
 export IS_UNIX
 
 if ! test -e ".env"; then
-    echo "⚠ You don't seem to have a .env file - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
+    echo -e "${COLOR_Red}🛑 You don't seem to have a .env file - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files ${Color_Off}"
+    source setup/exit_await_input.sh 1
 fi
 
 # Install Docker
@@ -55,6 +59,8 @@ source "${DIR}/setup/node.sh"
 
 # Done (hopefully)
 
-echo "▶ Environment setup/update completed (probably)"
-echo "▶ Before you begin working in Python in each new terminal shell, run \`source .venv/bin/activate\` from the repo root to enter the Virtual Env. You do NOT need to use \`pipenv shell\` like pipenv suggests. You should see \`(venv)\` on your console line when you are in a virtual env. To exit the venv, just close the shell or send the command \`deactivate\`."
+echo -e "${COLOR_Green}"
+echo "✔ Environment setup/update completed (probably)"
+echo "ℹ  Before you begin working in Python in each new terminal shell, run \`source .venv/bin/activate\` from the repo root to enter the Virtual Env. You do NOT need to use \`pipenv shell\` like pipenv suggests. You should see \`(venv)\` on your console line when you are in a virtual env. To exit the venv, just close the shell or send the command \`deactivate\`."
+echo -e "${COLOR_Off}"
 source setup/exit_await_input.sh 0
