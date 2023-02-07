@@ -7,4 +7,6 @@
 # Temp files from the setup process
 setup/temp/
 
+# MongoDB data volume
+data/*
 # All below this point is uncategorized (categorize them!)

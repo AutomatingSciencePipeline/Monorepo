@@ -11,7 +11,7 @@ else
         echo "⚠ pyenv install ran. You need to restart the terminal session you're in so that pyenv is recognized as installed. You may need to restart your computer"
         # Powershell can run this to reload:
         # $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-        source exit_await_input.sh 1
+        source setup/exit_await_input.sh 1
     fi
 
     if [ "$IS_UNIX" ]; then
@@ -22,7 +22,7 @@ else
         echo "✔ pyenv install successful"
     else
         echo "🛑 pyenv install seems to have failed"
-        source exit_await_input.sh 1
+        source setup/exit_await_input.sh 1
     fi
 fi
 
@@ -56,51 +56,26 @@ else
         echo "More info here: https://stackoverflow.com/questions/3515673/how-to-completely-remove-python-from-a-windows-machine"
         echo "After this, the script will install python (the version required for this project) again for you."
         echo "You can use pyenv to install your old Python version again too if you wish: https://realpython.com/intro-to-pyenv/"
-        source exit_await_input.sh 1
+        source setup/exit_await_input.sh 1
     fi
 fi
 
-# Setup venv
-echo "▶ Setting up venv..."
-
-if test -e "${BACKEND_VENV_PATH}"; then
-    echo "✔ .venv already exists (${BACKEND_VENV_PATH})"
-else
-    echo "▶ Creating .venv at ${BACKEND_VENV_PATH}"
-    python -m venv "${BACKEND_VENV_PATH}"
-fi
-
-# Activate venv
-
-# We don't need the linter to analyze the venv activation script
-# shellcheck disable=SC1091
-source "${BACKEND_VENV_PATH}/Scripts/activate"
-
-# check if VIRTUAL_ENV var is empty -> we're not in one
-# https://stackoverflow.com/questions/15454174/how-can-a-shell-function-know-if-it-is-running-within-a-virtualenv
-if test -z "${VIRTUAL_ENV}"; then
-    echo "🛑 Failed to activate venv, so not proceeding to try and install any python packages."
-    source exit_await_input.sh 1
-else
-    echo "✔ Successfully activated venv ${VIRTUAL_ENV}"
-fi
-
-# Install python dependencies
-echo "▶ Installing and updating project python dependencies"
-if ! pip install -U pip; then
+# Ensure Pip is up to date
+echo "▶ Installing/updating pip"
+if ! python -m pip install -U pip; then
     echo "🛑 Failed to update pip? See above error. Try just running the script again if it's a permissions issue"
-    source exit_await_input.sh 1
-fi
-if ! pip install -r ./apps/backend/requirements.txt; then
-    echo "🛑 Failed to install or update backend dependencies, check above error for more details"
-    source exit_await_input.sh 1
+    source setup/exit_await_input.sh 1
 fi
 
-if [ "$IS_WINDOWS" ]; then
-    echo "▶ Installing windows-specific python dependencies"
-    if ! pip install -r ./apps/backend/requirements-windows.txt; then
-        echo "🛑 Failed to install or update backend dependencies, check above error for more details"
-        source exit_await_input.sh 1
+if pipenv --version; then
+    echo "✔ Pipenv is already installed"
+else
+    echo "▶ Installing pipenv"
+    # Not using a --user install because that requires more stuff on PATH on windows
+    # The docs suggesting a user install: https://pipenv.pypa.io/en/latest/install/#pragmatic-installation-of-pipenv
+    if ! pip install pipenv; then
+        echo "🛑 Failed to install pipenv? See above error."
+        source setup/exit_await_input.sh 1
     fi
 fi
 
@@ -108,9 +83,28 @@ fi
 echo "▶ Copying/updating .env file from repo root to the Backend directory"
 if ! test -e ".env"; then
     echo "🛑 You don't seem to have a .env file in the repo root - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
-    source exit_await_input.sh 1
+    source setup/exit_await_input.sh 1
 fi
 if ! cp -f .env ./apps/backend/.env; then
     echo "🛑 Failed to copy .env file from repo root to backend?"
-    source exit_await_input.sh 1
+    source setup/exit_await_input.sh 1
 fi
+
+
+# Make pipenv store the venv inside the repo folder so tooling can expect it to be here on all dev machines
+# https://github.com/pypa/pipenv/issues/746#issuecomment-332752603
+# https://pipenv.pypa.io/en/latest/install/#virtualenv-mapping-caveat
+export PIPENV_VENV_IN_PROJECT=1
+
+# Install python package dependencies (pipenv will also create the venv if it doesn't exist yet)
+if ! cd apps/backend; then
+    echo "🛑 Failed to change dir to backend directory?"
+    source setup/exit_await_input.sh 1
+fi
+
+if ! pipenv install; then
+    echo "🛑 Failed to install or update backend dependencies, check above error for more details"
+    source setup/exit_await_input.sh 1
+fi
+
+cd ../..

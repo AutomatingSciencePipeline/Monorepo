@@ -56,5 +56,5 @@ source "${DIR}/setup/node.sh"
 # Done (hopefully)
 
 echo "▶ Environment setup/update completed (probably)"
-echo "▶ Before you begin working in Python in each new terminal shell, run \`source .venv/bin/activate\` from the repo root to enter the Virtual Env. You should see \`(venv)\` on your console line when you are in a virtual env. To exit the venv, just close the shell or send the command \`deactivate\`."
+echo "▶ Before you begin working in Python in each new terminal shell, run \`source .venv/bin/activate\` from the repo root to enter the Virtual Env. You do NOT need to use \`pipenv shell\` like pipenv suggests. You should see \`(venv)\` on your console line when you are in a virtual env. To exit the venv, just close the shell or send the command \`deactivate\`."
 source setup/exit_await_input.sh 0
