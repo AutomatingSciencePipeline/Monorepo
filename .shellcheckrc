@@ -3,3 +3,6 @@
 
 # Allow parsing other referenced files during the check
 external-sources=true
+
+# This check for other files can't tell if we cwd'd to another folder, so silence it
+disable=1091

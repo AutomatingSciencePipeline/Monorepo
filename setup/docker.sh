@@ -19,12 +19,12 @@ else
         echo "⚠ Installing Docker. This may open an admin prompt you have to accept. Afterwards, you'll have to restart Windows as its GUI will prompt. Then you'll have to re-run this script."
         # https://docs.docker.com/desktop/install/windows-install/#install-from-the-command-line
         ${DOCKER_INSTALLER_LOCATION} install --accept-license --backend=wsl-2
-        source exit_await_input.sh 1
+        source setup/exit_await_input.sh 1
     fi
 
     if [ "$IS_UNIX" ]; then
         echo "🛑 TODO install requesite docker stuff on unix systems"
         # https://docs.docker.com/desktop/faqs/linuxfaqs/#what-is-the-difference-between-docker-desktop-for-linux-and-docker-engine
-        source exit_await_input.sh 1
+        source setup/exit_await_input.sh 1
     fi
 fi

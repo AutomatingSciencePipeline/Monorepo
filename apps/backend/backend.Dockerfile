@@ -20,9 +20,12 @@ RUN apt-get install libmagic1 -y
 # RUN apt-get update && \
 #       apt-get -y install sudo
 
-# Install pip requirements
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+# Install requirements
+RUN pip install pipenv
+COPY Pipfile .
+COPY Pipfile.lock .
+# Args explanation: https://stackoverflow.com/a/49705601
+RUN pipenv install --system --deploy --ignore-pipfile
 
 WORKDIR /app
 COPY . /app

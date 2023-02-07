@@ -24,6 +24,7 @@ export const submitExperiment = async (values, userId) => {
 		scatter: values.scatter,
 		scatterIndVar: values.scatterIndVar,
 		scatterDepVar: values.scatterDepVar,
+		consts: values.dumbTextArea,
 		created: Date.now(),
 		params: JSON.stringify({
 			params: values.parameters,
