@@ -127,7 +127,12 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 					</div>
 				</div>
 
-				<div className='mt-6 grid grid-cols-3 gap-3'>
+				<span className='px-2 bg-white text-gray-500'>
+					(OAuth login support coming soon™)
+				</span>
+
+				{/* TODO implement OAuth sign in */}
+				{/* <div className='mt-6 grid grid-cols-3 gap-3'>
 					<div>
 						<a
 							href='#'
@@ -184,7 +189,7 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 							</svg>
 						</a>
 					</div>
-				</div>
+				</div> */}
 			</div>
 		</div>
 	</div>;

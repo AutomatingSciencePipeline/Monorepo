@@ -1,4 +1,5 @@
 import { joiResolver, useForm } from '@mantine/form';
+import Link from 'next/link';
 import { useState } from 'react';
 import { AiOutlineGithub, AiOutlineGoogle, AiOutlineTwitter } from 'react-icons/ai';
 import { useAuth } from '../../firebase/fbAuth';
@@ -26,8 +27,13 @@ export const SignUpModal = ({ afterSignUp }) => {
 					<p className='text-sm font-medium text-gray-700'>
 						Sign in with
 					</p>
+					<span className='px-2 bg-white text-gray-500'>
+						(OAuth login support coming soon™)
+					</span>
 					<div className='pt-3 grid grid-cols-3 gap-3'>
-						<div>
+						{/* TODO implement OAuth sign in */}
+
+						{/* <div>
 							<a
 								href='#'
 								className='w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'
@@ -61,11 +67,11 @@ export const SignUpModal = ({ afterSignUp }) => {
 								</span>
 								<AiOutlineGithub className='w-5 h-5' />
 							</a>
-						</div>
+						</div> */}
 					</div>
 				</div>
 
-				<div className='mt-6 relative'>
+				<div className='mt-3 relative'>
 					<div
 						className='absolute inset-0 flex items-center'
 						aria-hidden='true'
@@ -79,13 +85,18 @@ export const SignUpModal = ({ afterSignUp }) => {
 					</div>
 				</div>
 
-				<div className='mt-6'>
+				<div className='mt-2'>
+					<div className='mb-3'>
+						<p className='text-sm font-medium text-gray-700'>
+							Create an Account
+						</p>
+					</div>
 					<form
 						onAbort={() => {
 							console.log('abort');
 						}}
 						onSubmit={form.onSubmit(async (values) => {
-							console.log('HWHW');
+							console.log('Sign in was submitted');
 							const { email, password } = values;
 							setButtonDisabled(true);
 							setButtonText(SIGN_UP_LOADING_TEXT);
@@ -156,26 +167,48 @@ export const SignUpModal = ({ afterSignUp }) => {
 						</div>
 					</form>
 				</div>
+				<div className='mt-3 relative'>
+					<div
+						className='absolute inset-0 flex items-center'
+						aria-hidden='true'
+					>
+						<div className='w-full border-t border-gray-300' />
+					</div>
+					<div className='relative flex justify-center text-sm'>
+						<span className='px-2 bg-white text-gray-500'>
+						Or
+						</span>
+					</div>
+				</div>
+				<div className='mt-3'>
+					<Link href={'/signin'}>
+						<a
+							className='space-x-6 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+						>
+								Go to the Login Page
+						</a>
+					</Link>
+				</div>
 			</div>
 			<div className='px-4 py-6 bg-gray-50 border-t-2 border-gray-200 sm:px-10'>
 				<p className='text-xs leading-5 text-gray-500'>
 					By signing up, you agree to our{' '}
 					<a
-						href='#'
+						href='#TODO'
 						className='font-medium text-gray-900 hover:underline'
 					>
 						Terms
 					</a>
 					,{' '}
 					<a
-						href='#'
+						href='#TODO'
 						className='font-medium text-gray-900 hover:underline'
 					>
 						Data Policy
 					</a>{' '}
 					and{' '}
 					<a
-						href='#'
+						href='#TODO'
 						className='font-medium text-gray-900 hover:underline'
 					>
 						Cookies Policy
