@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { firebaseApp } from './firebaseClient';
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
-import noImage from '../images/NoImage.png'
+import noImage from '../images/NoImage.png';
 
 export interface AuthContextType {
 	user: User | null;
