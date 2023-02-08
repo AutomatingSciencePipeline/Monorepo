@@ -25,5 +25,4 @@ jobs:
         working-directory: ./apps/frontend
         run: |
           npm install
-          npm run dev
           npm test
