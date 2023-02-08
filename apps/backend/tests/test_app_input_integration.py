@@ -1,15 +1,7 @@
-#this is for integration testing, not unit testing 
-from asyncio import wait_for
-from multiprocessing.connection import wait
-import pytest
 import unittest
+#import pytest
 # import app
-import json
-import requests
-from urllib.parse import urljoin
-from urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
-#pytest_plugins = ["docker_compose"]
+
 
 
 #@pytest.fixture(scope="function")  # to be module
