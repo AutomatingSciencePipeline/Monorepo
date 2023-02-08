@@ -7,12 +7,16 @@ import { Bars3Icon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Logo } from '../components/Logo';
 import { SignUpModal } from '../components/auth/SignUpModal';
+import { useAuth } from '../firebase/fbAuth';
+import { AlreadySignedInModal } from '../components/auth/AlreadySignedInModal';
+import { useState } from 'react';
 
 const HomePage = () => {
 	const router = useRouter();
-	// if (userId) {
-	// 	// router.push('/dashboard');
-	// }
+	const { userId } = useAuth();
+	const [loading, setLoading] = useState(false);
+
+	console.log('userId', userId);
 
 	return (
 		<div className={'w-full h-full'}>
@@ -113,10 +117,15 @@ const HomePage = () => {
 											</div>
 										</div>
 									</div>
-									<SignUpModal afterSignUp={() => {
-										// router.push('/dashboard');
-										alert('Complete success');
-									}}/>
+									{userId && !loading ?
+										<AlreadySignedInModal
+											continueButtonMessage={'Continue to the Dashboard'}
+											linkTarget={'/dashboard'}
+										/> :
+										<SignUpModal afterSignUp={() => {
+											setLoading(true);
+											router.push('/dashboard');
+										}}/>}
 								</div>
 							</div>
 						</main>
