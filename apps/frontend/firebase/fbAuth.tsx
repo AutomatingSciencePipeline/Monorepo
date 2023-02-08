@@ -83,8 +83,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		signInWithGoogle: async () => {
 			console.error('TODO');
 		},
+
 		signOut: async () => {
-			return await signOut(auth);
+			await signOut(auth);
+			setUser(null);
 		},
 	};
 
