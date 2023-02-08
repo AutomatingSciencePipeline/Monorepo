@@ -25,9 +25,7 @@ except ImportError:
     sys.exit(1)
 
 # Must override so that vscode doesn't incorrectly parse another env file and have bad values
-# TODO we turned off override for CI to work, but if we want windows hosts again, we will need it
-# HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
-HAS_DOTENV_FILE = load_dotenv("./.env")
+HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
 
 ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
 
