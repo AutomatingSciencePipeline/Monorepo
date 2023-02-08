@@ -1,4 +1,8 @@
 # Ignore docker container volume contents
 ExperimentFiles/
 
+# Python
+__pycache__
+.venv
+
 # All below this point is uncategorized (categorize them!)

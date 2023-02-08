@@ -1,25 +1,58 @@
 # Usage
 #   Start:          docker-compose up
-#   With helpers:   docker-compose -f docker-compose.yml -f ./dev/docker-compose.dev.yml up
+#   With helpers:   docker-compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml up
 #   Stop:           docker-compose down
-#   Destroy:        docker-compose -f docker-compose.yml -f ./dev/docker-compose.dev.yml down -v --remove-orphans
+#   Destroy:        docker-compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml down -v --remove-orphans
 
-version: '3.8'
+version: '3'
 name: glados-project
 
 services:
   app-backend:
-      build:
-        context: ./apps/backend
-        # dockerfile: ./Dockerfile # TODO there wasn't one in the old location?
-      # image: glados-backend # TODO was still commented out in old
-      container_name: glados-backend
-      environment:
-        creds: ${FIREBASE_KEY}
-      volumes:
-          - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
-      restart: always
-      ports:
-          - 5050:5050
-      expose:
-          - "5050"
+    build:
+      context: ./apps/backend
+      dockerfile: ./backend.Dockerfile
+    container_name: glados-backend
+    environment:
+      FIREBASE_KEY: ${FIREBASE_KEY}
+    volumes:
+        - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
+    # TODO switch to ${BACKEND_PORT}
+    ports:
+        # TODO does this need to be exposed to host?
+        - 5050:5050
+    expose:
+        - "5050"
+
+  app-frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: ./frontend.Dockerfile
+    container_name: glados-frontend
+    working_dir: /home/node/app
+    # TODO switch to ${FRONTEND_WEBSERVER_PORT}
+    ports:
+      - 3000:3000
+      - 80:3000
+    expose:
+      - "3000"
+      - "80"
+  app-mongodb:
+    image: mongo
+    container_name: glados-mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
+    volumes:
+      - ./data/db:/data/db
+networks:
+  default:
+    driver: bridge
+    name: glados-bridge
+
+    # Enable this when/if we switch to Docker Swarm
+    # driver: overlay
+    # attachable: true
+    # name: glados-overlay

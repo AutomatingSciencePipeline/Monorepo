@@ -1,45 +1,42 @@
 {
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
     "configurations": [
         {
-            "name": "Docker Node.js Launch",
-            "type": "docker",
+            "name": "Debug Backend",
+            "type": "python",
             "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "platform": "node",
-            "node": {
-                "package": "${workspaceFolder}/apps/frontend/package.json",
-                "localRoot": "${workspaceFolder}/apps/frontend"
-            }
+            "module": "flask",
+            "cwd": "${workspaceFolder}/apps/backend",
+            "env": {
+                "FLASK_DEBUG": "1"
+            },
+            "args": [
+                "run",
+                "--no-debugger", // I have no idea why VSCode suggested this be here, I assume it turns off flask's own debugger?
+                "--host=0.0.0.0",
+                "-p",
+                "5050"
+            ],
+            "jinja": true,
+            "justMyCode": false
         },
         {
-            "name": "Docker: Python - General",
-            "type": "docker",
+            "name": "Debug Frontend",
             "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "python": {
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}",
-                        "remoteRoot": "/app"
-                    }
-                ],
-                "projectType": "general"
-            }
-        },
-        {
-            "name": "Docker: Python - Flask",
-            "type": "docker",
-            "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "python": {
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}",
-                        "remoteRoot": "/app"
-                    }
-                ],
-                "projectType": "flask"
-            }
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/apps/frontend",
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "console": "integratedTerminal",
+            "type": "node"
         }
     ]
 }
