@@ -29,4 +29,4 @@ jobs:
         pipenv install --system --deploy --ignore-pipfile
     - name: Test with pytest
       working-directory: ./apps/backend
-      run: pipenv run pytest
+      run: pytest
