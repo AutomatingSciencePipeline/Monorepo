@@ -27,4 +27,4 @@ jobs:
         pip install pipenv
     - name: Test with pytest
       working-directory: ./apps/backend
-      run: pytest
+      run: pipenv run pytest
