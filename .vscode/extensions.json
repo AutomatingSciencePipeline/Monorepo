@@ -17,6 +17,7 @@
         "wix.vscode-import-cost",
         "jock.svg",
         "herrmannplatz.npm-dependency-links",
+        "doggy8088.quicktype-refresh",
 
         // Backend
         "KevinRose.vsc-python-indent",
