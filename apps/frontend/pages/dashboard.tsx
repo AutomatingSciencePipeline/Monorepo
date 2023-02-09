@@ -250,7 +250,7 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 					null :
 					<>
 						<p>
-							{project['runs'] ? `Total Experiments To Run: ${project['runs']}` : '(Calculating total experiment runs...)'}
+							{project['totalExperimentRuns'] ? `Total Experiments To Run: ${project['totalExperimentRuns']}` : '(Calculating total experiment runs...)'}
 						</p>
 					</>
 				}

@@ -124,7 +124,7 @@ def run_batch(data):
     numExperimentsToRun = len(configResult) - 1
 
     #Updating with run information
-    expRef.update({"runs": numExperimentsToRun + 1})
+    expRef.update({"totalExperimentRuns": numExperimentsToRun + 1})
 
     #Running the Experiment
     print(f"Running Experiment {expId}")
