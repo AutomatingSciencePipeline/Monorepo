@@ -179,6 +179,9 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 	const [project, setProject] = useState(projectinit);
 	useEffect(() => subscribeToExp(project.expId, setProject), []); // TODO adding project causes render loop
 	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
+	const totalRuns = project['totalExperimentRuns'] ?? 0;
+	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
+	const experimentInProgress = !project['finished'] && project['startedAtEpochMillis'];
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -231,33 +234,50 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 			</div>
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
-					<span className={`font-mono ${project['finished'] ? '' : 'text-gray-500'}`}>
-						{/* TODO distinguish between an experiment in progress and one that never started */}
-						{project['finished'] ? 'Experiment Completed' : 'Experiment In Progress'}
-					</span>
+					{project['finished'] ?
+						<span className='font-mono'>Experiment Completed</span> :
+						(experimentInProgress ?
+							<span className='font-mono text-blue-500'>Experiment In Progress</span> :
+							<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>)
+					}
 				</p>
-				<p className='flex items-center space-x-4'>
-					<span className='font-mono text-red-500'>FAILS: {project['fails'] ?? 0}</span>
-					<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
-				</p>
-				{project['finished'] ?
-					null :
-					<p>
-						{expectedTimeToRun ? `Expected Time to Run: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
-					</p>
+				{project['finished'] || experimentInProgress ?
+					<p className='flex items-center space-x-4'>
+						<span className='font-mono text-red-500'>FAILS: {project['fails'] ?? 0}</span>
+						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
+					</p> :
+					null
 				}
-				{project['finished'] ?
-					null :
-					<>
-						<p>
-							{project['totalExperimentRuns'] ? `Total Experiments To Run: ${project['totalExperimentRuns']}` : '(Calculating total experiment runs...)'}
-						</p>
-					</>
+				{experimentInProgress ?
+					<p>
+						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
+					</p> :
+					null
+				}
+				{experimentInProgress ?
+					(project['totalExperimentRuns'] ?
+						<p>{`${runsLeft} runs remain (of ${project['totalExperimentRuns']})`}</p>:
+						<p>(Calculating total experiment runs...)</p>
+					) :
+					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Deployed {new Date(project['created']).toString()}</span>
-					<span>{project.location}</span>
+					<span>Uploaded at {new Date(project['created']).toString()}</span>
+					{/* TODO unused location field? */}
+					{/* <span>{project.location}</span> */}
 				</p>
+				{project['startedAtEpochMillis'] ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Started at {new Date(project['startedAtEpochMillis']).toString()}</span>
+					</p> :
+					null
+				}
+				{project['finishedAtEpochMillis'] ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString()}</span>
+					</p> :
+					null
+				}
 			</div>
 		</div>
 	);
