@@ -22,6 +22,7 @@
         "pipenv",
         "Pyenv",
         "pyplot",
+        "pytest",
         "rawfiletype",
         "signin",
         "tabler",

@@ -25,6 +25,7 @@ RUN pip install pipenv
 COPY Pipfile .
 COPY Pipfile.lock .
 # Args explanation: https://stackoverflow.com/a/49705601
+# https://pipenv-fork.readthedocs.io/en/latest/basics.html#pipenv-install
 RUN pipenv install --system --deploy --ignore-pipfile
 
 WORKDIR /app

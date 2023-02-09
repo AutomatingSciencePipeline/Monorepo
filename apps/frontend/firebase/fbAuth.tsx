@@ -7,20 +7,32 @@ import React, {
 	useDebugValue,
 } from 'react';
 import { firebaseApp } from './firebaseClient';
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 import noImage from '../images/NoImage.png';
+import { FirebaseError } from 'firebase/app';
+import { StaticImageData } from 'next/image';
+
+// We must explicitly type specify the contents of authService because the info gets "lost" when going through the useAuth hook
+export interface AuthServiceType {
+	userId: string | undefined;
+	userEmail: string | null | undefined;
+	userPhotoUrl: string | StaticImageData;
+	signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
+	signUpWithEmailAndPassword: (email: string, password: string) => Promise<void>;
+	signInWithGoogle: () => Promise<void>;
+	sendPasswordResetEmail: (email: string) => Promise<void>;
+	signOut: () => Promise<void>;
+}
 
 export interface AuthContextType {
 	user: User | null;
 	userId: String | null;
-	authService; // TODO find a way to make a type for this, ideally without duplicating all the function names
-  }
+	authService: AuthServiceType;
+	loading: boolean;
+}
 
-const AuthContext = createContext<AuthContextType>({
-	user: null,
-	userId: null,
-	authService: null,
-});
+// We know this will become non-null immediately so okay to typecast https://stackoverflow.com/questions/63080452/react-createcontextnull-not-allowed-with-typescript
+const AuthContext = createContext({} as AuthContextType);
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -46,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}
 	}), [auth]);
 
-	const authService = {
+	const authService: AuthServiceType = {
 		userId: useMemo(() => {
 			const newVal = user?.uid;
 			console.log('userId is now', newVal);
@@ -66,25 +78,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				.then((userCredential) => {
 					console.log('sign in success, UserCred is ', userCredential);
 				// no need to set state because onAuthStateChanged will pick it up
-				}).catch((error) => {
+				}).catch((error: FirebaseError) => {
 					console.error('Firebase sign in error', error);
 					throw error;
 				});
 		},
+
 		signUpWithEmailAndPassword: async (email: string, password: string) => {
 			return await createUserWithEmailAndPassword(auth, email, password)
 				.then((userCredential) => {
 					console.log('sign up success, UserCred is ', userCredential);
-				}).catch((error) => {
+				}).catch((error: FirebaseError) => {
 					console.error('Firebase sign up error', error);
 					throw error;
 				});
 		},
+
 		signInWithGoogle: async () => {
 			console.error('TODO');
 		},
+
+		sendPasswordResetEmail: async (email: string) => {
+			try {
+				await sendPasswordResetEmail(auth, email);
+			} catch (error) {
+				console.error('Firebase password reset error', error);
+				throw error;
+			}
+		},
+
 		signOut: async () => {
-			return await signOut(auth);
+			await signOut(auth);
+			setUser(null);
 		},
 	};
 
@@ -92,7 +117,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		<AuthContext.Provider value={{
 			user,
 			userId: authService?.userId || null,
-			authService }
+			authService,
+			loading,
+		}
 		}>
 			{loading ? (
 				<div>

@@ -155,16 +155,25 @@ def run_batch(data):
     if configResult is None:
         #TODO return and exit with error
         raise Exception("Error generating configs - somehow no configs were produced")
+    numExperimentsToRun = len(configResult) - 1
+
+    #Updating with run information
+    expRef.update({"totalExperimentRuns": numExperimentsToRun + 1})
 
     #Running the Experiment
-    expToRun = len(configResult) - 1
     print(f"Running Experiment {expId}")
+    expRef.update({"startedAtEpochMillis": int(time.time() * 1000)})
     passes = 0
     fails = 0
     with open('results.csv', 'w', encoding="utf8") as expResults:
         paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
+
+        #Timing the first experiment
+        startSeconds = time.time()
         firstRun = run_experiment(filepath, f'configFiles/{0}.ini', filetype)
+        endSeconds = time.time()
+        timeTakenMinutes = (endSeconds - startSeconds) / 60
         if resultOutput == '':
             writer.writerow(["Experiment Run", "Result"] + paramNames)
         else:
@@ -176,8 +185,15 @@ def run_batch(data):
             writer.writerow([0, "Error"])
             print(f"Experiment {expId} ran into an error while running aborting")
             fails += 1
-        elif expToRun > 0:
-            print(f"result from running first experiment: {firstRun}\n Continuing now running {expToRun}")
+            expRef.update({'fails': fails})
+        elif numExperimentsToRun > 0:
+            #Running the rest of the experiments
+            #Estimating time for all experiments to run and informing frontend
+            estimatedTotalTimeMinutes = timeTakenMinutes * numExperimentsToRun
+            print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
+            expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
+
+            print(f"result from running first experiment: {firstRun}\n Continuing now running {numExperimentsToRun}")
             if experimentOutput != '':
                 add_to_batch(experimentOutput, 0)
                 firstRun = "In ResCsvs"
@@ -188,7 +204,7 @@ def run_batch(data):
                     #TODO update and return with error
                     raise Exception("Output error 2")
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
-            for i in range(1, expToRun + 1):
+            for i in range(1, numExperimentsToRun + 1):
                 res = run_experiment(filepath, f'configFiles/{i}.ini', filetype)
                 if experimentOutput != '':
                     res = 'In ResCsvs'
@@ -203,9 +219,12 @@ def run_batch(data):
                     writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
                 if res != PIPE_OUTPUT_ERROR_MESSAGE:
                     passes += 1
+                    expRef.update({'passes': passes})
                 else:
                     fails += 1
+                    expRef.update({'fails': fails})
         passes += 1
+        expRef.update({'passes': passes})
         print("Finished running Experiments")
 
     if postProcess:
@@ -234,7 +253,7 @@ def run_batch(data):
             raise Exception("Error uploading to firebase") from err
 
     #Updating Firebase Object
-    expRef.update({'finished': True, 'passes': passes, 'fails': fails})
+    expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
     print(f'Exiting experiment {expId}')
     os.chdir('../..')
 

@@ -25,9 +25,10 @@ const Parameter = ({ form, type, index, ...rest }) => {
 						<Center {...provided.dragHandleProps}>
 							<GripVertical className='mr-2' />
 						</Center>
+						<span className='text-gray-500 mr-2'>{type}</span>
 						<input
 							type='text'
-							placeholder={`${type}`}
+							placeholder='name'
 							className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 							{...form.getListInputProps('parameters', index, 'name')}
 							required
