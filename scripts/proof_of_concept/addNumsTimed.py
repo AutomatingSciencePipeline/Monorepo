@@ -3,6 +3,7 @@ import configparser
 import time
 
 def main():
+    print("waiting 10 seconds...")
     time.sleep(10)
     config = configparser.ConfigParser()
     args = sys.argv[1:]
@@ -10,8 +11,9 @@ def main():
     config.read(configFile)
     x = int(config["DEFAULT"]["x"])
     y = int(config["DEFAULT"]["y"])
-    print(x+y)
-    print("done")
+    result = x+y
+    print(f"done with result: {result}")
+    print(result)
     return 0
 
 

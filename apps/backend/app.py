@@ -128,6 +128,7 @@ def run_batch(data):
 
     #Running the Experiment
     print(f"Running Experiment {expId}")
+    expRef.update({"startedAtEpochMillis": int(time.time() * 1000)})
     passes = 0
     fails = 0
     with open('results.csv', 'w', encoding="utf8") as expResults:
@@ -218,7 +219,7 @@ def run_batch(data):
             raise Exception("Error uploading to firebase") from err
 
     #Updating Firebase Object
-    expRef.update({'finished': True, 'passes': passes, 'fails': fails})
+    expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
     print(f'Exiting experiment {expId}')
     os.chdir('../..')
 
