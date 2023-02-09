@@ -256,7 +256,7 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 				}
 				{experimentInProgress ?
 					(project['totalExperimentRuns'] ?
-						<p>{`${runsLeft} runs remain (of ${project['totalExperimentRuns']})`}</p>:
+						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p>:
 						<p>(Calculating total experiment runs...)</p>
 					) :
 					null
