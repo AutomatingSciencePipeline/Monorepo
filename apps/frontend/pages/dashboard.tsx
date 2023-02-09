@@ -107,9 +107,6 @@ const Navbar = (props) => {
 																		item.name === 'Sign out' &&
 																		authService
 																			.signOut()
-																			.then(() => {
-																				Router.reload();
-																			})
 																			.catch((err) => console.log('Sign out error', err))
 																	);
 																}}
