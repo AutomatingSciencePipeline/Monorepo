@@ -243,7 +243,7 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 				</p>
 				{project['finished'] || experimentInProgress ?
 					<p className='flex items-center space-x-4'>
-						<span className='font-mono text-red-500'>FAILS: {project['fails'] ?? 0}</span>
+						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
 						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
 					</p> :
 					null
