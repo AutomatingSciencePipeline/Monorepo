@@ -230,9 +230,9 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 					<span className='font-mono text-red-500'>FAILS: {project['fails']}</span>
 					<span className='font-mono'>SUCCESSES: {project['passes']}</span>
 				</p>
-				{project['finished'] == false && project['estimatedTime'] != 0 ?
+				{project['finished'] == false && project['estimatedTotalTimeMinutes'] != 0 ?
 					<p>
-						Expected Time to Run: {Math.round(project['estimatedTime']*100)/100} Minutes
+						Expected Time to Run: {Math.round(project['estimatedTotalTimeMinutes']*100)/100} Minutes
 					</p> : ''
 				}
 				{project['finished'] == false && project['runs'] != 0 ?

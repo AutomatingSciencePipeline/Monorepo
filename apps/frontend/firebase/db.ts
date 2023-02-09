@@ -29,7 +29,7 @@ export const submitExperiment = async (values, userId) => {
 			params: values.parameters,
 		}),
 		finished: false,
-		estimatedTime: 0,
+		estimatedTotalTimeMinutes: 0,
 		expToRun: 0,
 	});
 	console.log(`Created Experiment: ${newExperiment.id}`);

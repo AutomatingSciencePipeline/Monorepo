@@ -155,7 +155,7 @@ def run_batch(data):
             #Estimating time for all experiments to run and informing frontend
             estimatedTotalTimeMinutes = timeTakenMinutes * numExperimentsToRun
             print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-            expRef.update({'estimatedTime': estimatedTotalTimeMinutes})
+            expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
 
             print(f"result from running first experiment: {firstRun}\n Continuing now running {numExperimentsToRun}")
             if experimentOutput != '':
