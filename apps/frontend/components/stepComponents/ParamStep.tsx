@@ -2,6 +2,8 @@ import { Fragment } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../InputSection';
 
+export const ParameterOptions = ['integer', 'float', 'bool', 'string'] as const;
+
 export const ParamStep = ({ form, ...props }) => {
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
@@ -9,10 +11,10 @@ export const ParamStep = ({ form, ...props }) => {
 				<InputSection header={'Parameters'}>
 					<div className='sm:col-span-4 inline-flex'>
 						<span className='rounded-l-md text-sm text-white font-bold bg-blue-600  items-center px-4 py-2 border border-transparent'>
-                            +
+							+
 						</span>
 						<span className='relative z-0 inline-flex flex-1 shadow-sm rounded-md'>
-							{['integer', 'float', 'bool', 'string'].map((type) => (
+							{ParameterOptions.map((type) => (
 								<button
 									type='button'
 									key={`addNew_${type}`}
