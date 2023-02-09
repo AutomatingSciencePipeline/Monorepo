@@ -150,6 +150,7 @@ def run_batch(data):
             writer.writerow([0, "Error"])
             print(f"Experiment {expId} ran into an error while running aborting")
             fails += 1
+            expRef.update({'fails': fails})
         elif numExperimentsToRun > 0:
             #Running the rest of the experiments
             #Estimating time for all experiments to run and informing frontend
@@ -183,9 +184,12 @@ def run_batch(data):
                     writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
                 if res != PIPE_OUTPUT_ERROR_MESSAGE:
                     passes += 1
+                    expRef.update({'passes': passes})
                 else:
                     fails += 1
+                    expRef.update({'fails': fails})
         passes += 1
+        expRef.update({'passes': passes})
         print("Finished running Experiments")
 
     if postProcess:
