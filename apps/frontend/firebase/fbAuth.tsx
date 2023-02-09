@@ -7,7 +7,7 @@ import React, {
 	useDebugValue,
 } from 'react';
 import { firebaseApp } from './firebaseClient';
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 import noImage from '../images/NoImage.png';
 import { FirebaseError } from 'firebase/app';
 import { StaticImageData } from 'next/image';
@@ -20,6 +20,7 @@ export interface AuthServiceType {
 	signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
 	signUpWithEmailAndPassword: (email: string, password: string) => Promise<void>;
 	signInWithGoogle: () => Promise<void>;
+	sendPasswordResetEmail: (email: string) => Promise<void>;
 	signOut: () => Promise<void>;
 }
 
@@ -95,6 +96,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 		signInWithGoogle: async () => {
 			console.error('TODO');
+		},
+
+		sendPasswordResetEmail: async (email: string) => {
+			try {
+				await sendPasswordResetEmail(auth, email);
+			} catch (error) {
+				console.error('Firebase password reset error', error);
+				throw error;
+			}
 		},
 
 		signOut: async () => {

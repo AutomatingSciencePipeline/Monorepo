@@ -29,6 +29,10 @@ const boolschema = Joi.object().keys({
 	default: Joi.boolean().required(),
 	type: Joi.string().valid('bool'),
 });
+
+export const emailSchema = Joi.string()
+	.email({ tlds: { allow: false } });
+
 export const experimentSchema = Joi.object().keys({
 	name: Joi.string().required(),
 	description: Joi.string(),
@@ -38,9 +42,7 @@ export const experimentSchema = Joi.object().keys({
 });
 
 export const signUpSchema = Joi.object().keys({
-	email: Joi.string()
-		.email({ tlds: { allow: false } })
-		.required(),
+	email: emailSchema.required(),
 	password: Joi.string().required(),
 	passwordRepeat: Joi.string().required().valid(Joi.ref('password')).messages({
 		'*': 'Make sure your passwords match',
@@ -48,8 +50,6 @@ export const signUpSchema = Joi.object().keys({
 });
 
 export const signInSchema = Joi.object().keys({
-	email: Joi.string()
-		.email({ tlds: { allow: false } })
-		.required(),
+	email: emailSchema.required(),
 	password: Joi.string().required(),
 });

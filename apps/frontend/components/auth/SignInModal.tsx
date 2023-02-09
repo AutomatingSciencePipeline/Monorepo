@@ -2,7 +2,7 @@ import { joiResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '../../firebase/fbAuth';
-import { signInSchema } from '../../utils/validators';
+import { emailSchema, signInSchema } from '../../utils/validators';
 
 export const DEFAULT_SIGN_IN_TEXT = 'Sign in';
 export const SIGN_IN_LOADING_TEXT = 'Loading...';
@@ -91,8 +91,22 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 				<div className='flex items-center justify-between'>
 					<div className='text-sm'>
 						<a
-							href='#TODO'
+							href='#'
 							className='font-medium text-blue-600 hover:text-blue-500'
+							onClick={async () => {
+								const entryEmail = form.getInputProps('email').value;
+								const { error: validationError, value: validatedEmail } = emailSchema.validate(entryEmail);
+								if (validationError) {
+									alert('Please enter a valid email address');
+								} else {
+									try {
+										await authService.sendPasswordResetEmail(validatedEmail);
+										alert('Password reset email sent');
+									} catch (error) {
+										alert(`Problem sending password reset email: ${error}`);
+									}
+								}
+							}}
 						>
 							Forgot your password?
 						</a>
