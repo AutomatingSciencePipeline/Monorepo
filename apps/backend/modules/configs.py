@@ -5,6 +5,8 @@ import os
 DEFAULT_STEP_INT = 1
 DEFAULT_STEP_FLOAT = 0.1
 
+FilePath = str
+
 
 def float_range(start: float, stop: float, step=1.0):
     count = 0
@@ -16,7 +18,7 @@ def float_range(start: float, stop: float, step=1.0):
         count += 1
 
 
-def gen_list(otherVar, paramspos):
+def generate_list(otherVar, paramspos):
     if otherVar['type'] == 'integer':
         step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(otherVar['step']) == 0 else otherVar['step']
         if otherVar['max'] == otherVar['min']:
@@ -33,37 +35,25 @@ def gen_list(otherVar, paramspos):
         paramspos.append([(otherVar['name'], val) for val in [True, False]])
 
 
-def gen_consts(toParse: str):
-    res = {}
+def generate_consts(toParse: str):
+    constants = {}
     if toParse != '':
         parsedLst = toParse.split('\n')
         #Splits each element of the parsed list on = then strips extra white space, programming scheme style! (Sorry Rob)
         fullyParsed = list(map(lambda unparsedConst: map(lambda ind: ind.strip(), unparsedConst.split('=')), parsedLst))
-        for const, val in fullyParsed:
-            res[const] = val
-    return res
+        for key, val in fullyParsed:
+            constants[key] = val
+    return constants
 
 
-def gen_configs(hyperparams, unparsedConstInfo):
+def generate_config_files(hyperparams, unparsedConstInfo):
     os.mkdir('configFiles')
     os.chdir('configFiles')
     configIdNumber = 0
-    constants = gen_consts(unparsedConstInfo)
+    constants = generate_consts(unparsedConstInfo)
     parameters = []
     configs = []
-    for param in hyperparams:
-        try:
-            if (param['type'] == 'integer' or param['type'] == 'float') and param['min'] == param['max']:
-                print('param ' + param['name'] + ' has the same min and max value converting to constant')
-                constants[param['name']] = param['min']
-            elif param['type'] == 'string':
-                print('param ' + param['name'] + ' is a string, adding to constants')
-                constants[param['name']] = param['default']
-            else:
-                print('param ' + param['name'] + ' varies, adding to batch')
-                parameters.append(param)
-        except KeyError as err:
-            raise Exception(f'{err} during finding constants') from err
+    gather_parameters(hyperparams, constants, parameters)
 
     for defaultVar in parameters:
         print(f'Keeping {defaultVar} constant')
@@ -77,7 +67,7 @@ def gen_configs(hyperparams, unparsedConstInfo):
         for otherVar in hyperparams:
             if otherVar['name'] != defaultVar['name']:
                 try:
-                    gen_list(otherVar, paramspos)
+                    generate_list(otherVar, paramspos)
                 except KeyError as err:
                     raise Exception(f'error {err} during list generation') from err
         try:
@@ -103,7 +93,25 @@ def gen_configs(hyperparams, unparsedConstInfo):
     return configs
 
 
-def get_config_paramNames(configfile):
+def gather_parameters(hyperparams, constants, parameters):
+    for hyperparameter in hyperparams:
+        try:
+            parameterType = hyperparameter['type']
+            parameterKey = hyperparameter['name']
+            if (parameterType in ('integer', 'float')) and hyperparameter['min'] == hyperparameter['max']:
+                print(f'param {parameterKey} has the same min and max value; converting to constant')
+                constants[parameterKey] = hyperparameter['min']
+            elif parameterType == 'string':
+                print('param ' + parameterKey + ' is a string, adding to constants')
+                constants[parameterKey] = hyperparameter['default']
+            else:
+                print('param ' + parameterKey + ' varies, adding to batch')
+                parameters.append(hyperparameter)
+        except KeyError as err:
+            raise Exception(f'{err} during finding constants') from err
+
+
+def get_config_paramNames(configfile: FilePath):
     config = configparser.ConfigParser()
     config.read(configfile)
     res = list(config['DEFAULT'].keys())
@@ -111,7 +119,7 @@ def get_config_paramNames(configfile):
     return res
 
 
-def get_configs_ordered(configfile, names):
+def get_configs_ordered(configfile: FilePath, names: "list[str]"):
     config = configparser.ConfigParser()
     config.read(configfile)
     res = [config["DEFAULT"][key] for key in names]
