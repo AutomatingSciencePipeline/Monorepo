@@ -40,7 +40,6 @@ services:
   app-mongodb:
     image: mongo
     container_name: glados-mongodb
-    restart: always
     ports:
       - 27017:27017
     expose:
