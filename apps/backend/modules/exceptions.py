@@ -30,7 +30,7 @@ class DataFormatError(Exception):
     """GLADOS data was not in an expected format"""
 
 
-class FileHandlingError(Exception):
+class FileHandlingError(GladosInternalError):
     """Something went wrong with GLADOS handling of files on the machine"""
 
 

@@ -2,7 +2,7 @@ import configparser
 import itertools
 import os
 
-from modules.exceptions import GladosInternalError
+from exceptions import GladosInternalError
 
 DEFAULT_STEP_INT = 1
 DEFAULT_STEP_FLOAT = 0.1
