@@ -2,6 +2,8 @@ import configparser
 import itertools
 import os
 
+from modules.exceptions import GladosInternalError
+
 DEFAULT_STEP_INT = 1
 DEFAULT_STEP_FLOAT = 0.1
 
@@ -69,11 +71,12 @@ def generate_config_files(hyperparams, unparsedConstInfo):
                 try:
                     generate_list(otherVar, paramspos)
                 except KeyError as err:
-                    raise Exception(f'error {err} during list generation') from err
+                    raise GladosInternalError('Error during list generation') from err
         try:
             permutations = list(itertools.product(*paramspos))
         except Exception as err:
-            raise Exception(f"Error {err} while making permutations") from err
+            raise GladosInternalError("Error while making permutations") from err
+
         for thisPermutation in permutations:
             outputConfig = configparser.ConfigParser()
             outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
@@ -108,7 +111,7 @@ def gather_parameters(hyperparams, constants, parameters):
                 print('param ' + parameterKey + ' varies, adding to batch')
                 parameters.append(hyperparameter)
         except KeyError as err:
-            raise Exception(f'{err} during finding constants') from err
+            raise GladosInternalError('Error during finding constants') from err
 
 
 def get_config_paramNames(configfile: FilePath):

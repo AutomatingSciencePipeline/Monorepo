@@ -1,4 +1,3 @@
-
 # TODO not sure if we need flask error because flask won't be the final one reporting the failure
 # https://flask.palletsprojects.com/en/2.2.x/errorhandling/#returning-api-errors-as-json
 class CustomFlaskError(Exception):
@@ -18,12 +17,26 @@ class CustomFlaskError(Exception):
 
 
 class GladosUserError(CustomFlaskError):
+    """Something went wrong but the user is probably to blame"""
     status_code = 400
 
 
 class GladosInternalError(CustomFlaskError):
+    """Something went wrong but the system is probably to blame"""
     status_code = 500
 
 
 class DataFormatError(Exception):
-    pass
+    """GLADOS data was not in an expected format"""
+
+
+class FileHandlingError(Exception):
+    """Something went wrong with GLADOS handling of files on the machine"""
+
+
+class InternalTrialFailedError(GladosInternalError):
+    """A trial failed for a reason having to do with GLADOS (the trial not passing is not a reason to throw this)"""
+
+
+class ExperimentAbort(Exception):
+    """The system should stop running the entire experiment"""
