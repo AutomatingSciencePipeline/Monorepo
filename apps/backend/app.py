@@ -278,15 +278,25 @@ def add_to_batch(fileOutput, ExpRun):
 def get_config_paramNames(configfile):
     config = configparser.ConfigParser()
     config.read(configfile)
-    res = list(config['DEFAULT'].keys())
+    res = []
+    for section in list(config):
+        res += [key for key in list(config[section]) if key not in res]
     res.sort()
     return res
-
 
 def get_configs_ordered(configfile, names):
     config = configparser.ConfigParser()
     config.read(configfile)
-    res = [config["DEFAULT"][key] for key in names]
+    res = []
+    for key in names:
+        for index, section in enumerate(list(config)):
+            try: #this part is kind of stupid but hey! it works fine
+                val = config[section][key]
+                res.append(val)
+                break
+            except KeyError:
+                if index == len(names):
+                    print("NO VAL ASSOCIATED WITH KEY") #TODO RAISE NO CONFIG ERROR
     return res
 
 
@@ -323,7 +333,7 @@ def gen_configs(hyperparams, unparsedConstInfo):
     os.mkdir('configFiles')
     os.chdir('configFiles')
     configIdNumber = 0
-    constants = gen_consts(unparsedConstInfo)
+    constants = {}
     parameters = []
     configs = []
     for param in hyperparams:
@@ -370,8 +380,10 @@ def gen_configs(hyperparams, unparsedConstInfo):
             outputConfig["DEFAULT"] = configItems
             with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
                 outputConfig.write(configFile)
+                configFile.write(unparsedConstInfo)
                 configFile.close()
                 print(f"Finished writing config {configIdNumber}")
+
             configIdNumber += 1
     os.chdir('..')
     print("Finished generating configs")

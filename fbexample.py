@@ -20,10 +20,6 @@ def frange(start, stop, step=None):
         count += 1
 
 
+
 if __name__ == "__main__":
     print("Hello world")
-    
-    start = time.time()
-    time.sleep(10)
-    timeTaken = (time.time() - start)/60
-    print(timeTaken)
