@@ -3,7 +3,7 @@ import os
 import csv
 import matplotlib.pyplot as plt
 
-def scatterPlot(independantVar, dependantVar, resultFile, id):
+def generateScatterPlot(independantVar, dependantVar, resultFile, id):
 
     x, y = [], []
     with open(resultFile) as file:

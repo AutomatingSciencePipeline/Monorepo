@@ -9,14 +9,14 @@ import csv
 import json
 import time
 import configparser
-from flask import Flask, abort, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 
-import plots
+from modules.output.plots import generateScatterPlot
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -53,15 +53,14 @@ DEFAULT_STEP_INT = 1
 DEFAULT_STEP_FLOAT = 0.1
 PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
 
-### FLASK API ENDPOINT
 runner = ProcessPoolExecutor(1)
 
-
+### FLASK API ENDPOINT
 @flaskApp.post("/experiment")
 def recv_experiment():
-    print("Purposely failing")
-    # runner.submit(run_batch, request.get_json())
-    raise GladosUserError('This message should show up to the end user somehow')
+    # print("Purposely failing")
+    runner.submit(run_batch, request.get_json())
+    # raise GladosUserError('This message should show up to the end user somehow')
     return 'OK'
 
 
@@ -128,9 +127,9 @@ def run_batch(data):
         print(f"No filepath specified so defaulting to {filepath}")
     print(f"Downloading {filepath} to ExperimentFiles/{expId}/{filepath}")
     try:
-        raise Exception('Testing exception')
-        # filedata = firebaseBucket.blob(filepath)
-        # filedata.download_to_filename(filepath)
+        # raise Exception('Testing exception')
+        filedata = firebaseBucket.blob(filepath)
+        filedata.download_to_filename(filepath)
     except Exception as err:
         #TODO update w/ error and return
         print(f'Ran into {err} while trying to download experiment')
@@ -234,7 +233,7 @@ def run_batch(data):
                 print("Creating Scatter Plot")
                 depVar = experiment['scatterDepVar']
                 indVar = experiment['scatterIndVar']
-                plots.scatterPlot(indVar, depVar, 'results.csv', expId)
+                generateScatterPlot(indVar, depVar, 'results.csv', expId)
         except KeyError as err:
             print(f"error during plot generation: {err}")
 
