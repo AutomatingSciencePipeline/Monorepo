@@ -102,7 +102,7 @@ if ! cd apps/backend; then
     source setup/exit_await_input.sh 1
 fi
 
-if ! pipenv install; then
+if ! pipenv install --dev; then
     echo "🛑 Failed to install or update backend dependencies, check above error for more details"
     source setup/exit_await_input.sh 1
 fi
