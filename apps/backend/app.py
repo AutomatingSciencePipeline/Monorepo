@@ -50,6 +50,7 @@ CORS(flaskApp)
 
 #Constants
 PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
+OUTPUT_INDICATOR_USING_CSVS = "In ResCsvs"
 
 runner = ProcessPoolExecutor(1)
 
@@ -207,7 +208,7 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
             print(f"Continuing now running {numTrialsToRun}")
             if experimentOutput != '':
                 add_to_output_batch(experimentOutput, 0)
-                firstTrial = "In ResCsvs"
+                firstTrial = OUTPUT_INDICATOR_USING_CSVS
             if resultOutput == '':
                 writer.writerow(["0", firstTrial] + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             else:
@@ -224,7 +225,7 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
                     continue
 
                 if experimentOutput != '':
-                    response_data = 'In ResCsvs'
+                    response_data = OUTPUT_INDICATOR_USING_CSVS
                     add_to_output_batch(experimentOutput, i)
                 if resultOutput == '':
                     writer.writerow([i, response_data] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
