@@ -1,6 +1,7 @@
 # pylint python linter configuration
 
 [MASTER]
+init-hook='import sys; sys.path.append("/apps/backend")' # https://stackoverflow.com/questions/1899436/pylint-unable-to-import-error-how-to-set-pythonpath
 disable=
     C0301, # line too long
     C0114, # missing-module-docstring
