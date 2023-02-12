@@ -30,6 +30,7 @@ jobs:
     - name: Analyze with pylint
       working-directory: ./apps/backend
       # https://pylint.readthedocs.io/en/v2.16.1/user_guide/configuration/all-options.html#fail-on
+      # Uses the .pylintrc rules file in the working directory
       # Fail if any Error-level notices were produced
       # Fail if the code quality score is below 9.0
       # Recursively search the specified directories for files to analyze

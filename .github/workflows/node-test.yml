@@ -22,6 +22,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Run ESLint
+        working-directory: ./apps/frontend
+        # https://eslint.org/docs/latest/use/command-line-interface#run-the-cli
+        # Run on any ts, tsx, js, jsx files recursively in the working directory
+        # Uses the .eslintrc.json rules file in the working directory
+        run: npx eslint **/*.ts **/*.tsx **/*.js **/*.jsx
       - name: Run NPM Test
         working-directory: ./apps/frontend
         run: |
