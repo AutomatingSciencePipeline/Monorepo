@@ -11,7 +11,7 @@ permissions:
 env:
   FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
 jobs:
-  build:
+  Test:
 
     runs-on: ubuntu-latest
 
@@ -27,10 +27,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv
         pipenv install --dev --system --deploy --ignore-pipfile
-    - name: Analysing the code with pylint
+    - name: Analyze with pylint
       working-directory: ./apps/backend
-      run: |
-        pylint --fail-on=E --recursive=y app.py ./modules/ ./tests/
+      # https://pylint.readthedocs.io/en/v2.16.1/user_guide/configuration/all-options.html#fail-on
+      # Fail if any Error-level notices were produced
+      # Fail if the code quality score is below 9.0
+      # Recursively search the specified directories for files to analyze
+      # Check the file app.py
+      # Check the directories ./modules and ./tests
+      run: pylint --fail-on=E --fail-under=9.0 --recursive=y app.py ./modules/ ./tests/
     - name: Test with pytest
       working-directory: ./apps/backend
       run: pytest

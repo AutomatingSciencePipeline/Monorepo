@@ -16,8 +16,6 @@ from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 
-from doesnt import exist
-
 import plots
 
 try:
