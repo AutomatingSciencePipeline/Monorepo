@@ -7,7 +7,7 @@ on:
     branches: [ GitHub-CI-Research ] 
 
 jobs:
-  build:
+  Lint_And_Test:
 
     runs-on: ubuntu-latest
 
