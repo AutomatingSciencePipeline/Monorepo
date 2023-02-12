@@ -27,11 +27,9 @@ jobs:
         run: npm ci
       - name: Run ESLint
         working-directory: ./apps/frontend
-        # https://eslint.org/docs/latest/use/command-line-interface#run-the-cli
-        # Run on any ts, tsx, js, jsx files recursively in the working directory
-        # Uses the .eslintrc.json rules file in the working directory
-        # run: npx eslint --ignore-pattern "./node_modules/*" **/*.ts **/*.tsx **/*.js **/*.jsx
+        # Run the lint task defined in package.json
         run: npm run lint
       - name: Run NPM Test
         working-directory: ./apps/frontend
+        # TODO is this the right command to run? we'll know once we have tests
         run: npm test
