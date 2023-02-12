@@ -30,7 +30,7 @@ jobs:
     - name: Analysing the code with pylint
       # https://stackoverflow.com/questions/73232772/pylint-fail-under-does-not-fail-my-github-action-job
       run: |
-        for file in '*.py'; do pylint "$file" --fail-under=7.0; done
+        pylint --fail-under=10.0 --recursive=y app.py ./modules/ ./tests/
     - name: Test with pytest
       working-directory: ./apps/backend
       run: pytest
