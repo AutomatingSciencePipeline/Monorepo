@@ -17,6 +17,7 @@ from modules.exceptions import CustomFlaskError, GladosInternalError, Experiment
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 
+
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
 except ImportError:

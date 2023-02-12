@@ -1,12 +1,10 @@
-import csv
 import sys
 import configparser
 
 # pylint: disable-next=pointless-string-statement
 """
-This experiment demonstrates outputting additional information to a file
-and telling the system to gather the data from that file.
-David, add more info here please.
+This experiment demonstrates how to read values that were specified as parameters in the frontend
+from the config files created by the system.
 
 Example settings for a run that demonstrates this:
 
@@ -23,11 +21,7 @@ def main():
     config.read(configFile)
     x = int(config["DEFAULT"]["x"])
     y = int(config["DEFAULT"]["y"])
-    with open('AddNumResult.csv', 'w', encoding="utf8") as result:
-        writer = csv.writer(result)
-        writer.writerow(['Addition', 'Subtraction'])
-        writer.writerow([x + y, x - y])
-
+    print(x + y)
     print("done")
     return 0
 

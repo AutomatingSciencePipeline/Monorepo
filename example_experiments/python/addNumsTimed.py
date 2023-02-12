@@ -4,14 +4,17 @@ import time
 
 # pylint: disable-next=pointless-string-statement
 """
-Example settings for a successful run:
+This experiment adds the input x and y parameters,
+but waits for an amount of time specified in the parameters before doing so.
+
+Example settings for a run that demonstrates this:
 
 Parameters:
 x, 1, 1, 10, 1
 y, 1, 1, 10, 1
 waitTime 3, 3, 3, 3
-
 """
+
 
 def main():
     config = configparser.ConfigParser()
@@ -23,7 +26,7 @@ def main():
     waitTime = int(config["DEFAULT"]["waitTime"])
     print(f"waiting {waitTime} seconds...")
     time.sleep(waitTime)
-    result = x+y
+    result = x + y
     print(f"done with result: {result}")
     print(result)
     return 0
