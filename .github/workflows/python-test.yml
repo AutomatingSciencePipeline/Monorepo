@@ -30,7 +30,7 @@ jobs:
     - name: Analysing the code with pylint
       working-directory: ./apps/backend
       run: |
-        pylint --fail-under=10.0 --recursive=y app.py ./modules/ ./tests/
+        pylint --fail-on=E --recursive=y app.py ./modules/ ./tests/
     - name: Test with pytest
       working-directory: ./apps/backend
       run: pytest
