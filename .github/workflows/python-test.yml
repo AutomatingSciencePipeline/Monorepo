@@ -1,4 +1,4 @@
-name: Python CI
+name: Python Lint and Test
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 env:
   FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
 jobs:
-  Test:
+  Lint and Test:
 
     runs-on: ubuntu-latest
 
