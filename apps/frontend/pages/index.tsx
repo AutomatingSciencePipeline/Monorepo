@@ -28,8 +28,6 @@ export default function HomePage() {
 	return <Home form={signUpForm} />;
 }
 
-purposeful linter error
-
 function Home({ form }) {
 	const router = useRouter();
 	const { userId, authService } = useAuth();
