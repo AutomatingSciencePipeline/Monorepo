@@ -10,9 +10,9 @@ but waits for an amount of time specified in the parameters before doing so.
 Example settings for a run that demonstrates this:
 
 Parameters:
-x, 1, 1, 10, 1
-y, 1, 1, 10, 1
-waitTime 3, 3, 3, 3
+x, default: 1, min: 1, max: 10, step: 1
+y, default: 1, min: 1, max: 10, step: 1
+waitTime, default: 3, min: 3, max: 3, step: 3
 """
 
 

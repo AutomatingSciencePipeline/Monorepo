@@ -2,7 +2,8 @@
 
 This experiment demonstrates Java support.
 
-David, add more info here please.
+Exact same setup as Python's AddNumsForConfig.py but set up for Java.
+For an example on how to use the PropParser package for Java look at AddNumsJavaFiles
 
 Example settings for a run that demonstrates this:
 

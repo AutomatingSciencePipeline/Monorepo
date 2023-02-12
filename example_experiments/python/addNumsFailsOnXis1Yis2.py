@@ -8,7 +8,8 @@ This experiment will fail with a KeyError in a trial where x==1 and y==2, but wi
 Example settings for a run that demonstrates this:
 
 Parameters:
-None
+x, default: 1, min: 1, max: 10, step: 1
+y, default: 1, min: 1, max: 10, step: 1
 """
 
 

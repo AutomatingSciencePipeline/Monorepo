@@ -6,9 +6,26 @@ import configparser
 """
 This experiment demonstrates outputting additional information to a file
 and telling the system to gather the data from that file.
-David, add more info here please.
+
+There are two different ways to gather additional information from an experiment
+    - Result Output: Gathers the designated file that a run of the file generates and places in a zip to be uploaded when
+        the experiment completes
+    - File Output: Integrates the information from a 2 line csv of headers and values that the file run generates
+        and adds them to the result csv that is being uploaded
+
+How to tell if they worked
+    - Result Output: You can download a zip file that contains the different output files specified
+    - File Output: The result csv downloaded has been expanded with information from the specified file
+
 
 Example settings for a run that demonstrates this:
+
+Info:
+If you want a collection of each CSV this experiment runs:
+    Result Output: AddNumResult.csv
+If you want the information from each CSV to be included in the resultCsv
+    File Output: AddNumResult.csv
+Both can be used at the same time
 
 Parameters:
 x, 1, 1, 10, 1
