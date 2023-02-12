@@ -11,7 +11,7 @@ permissions:
 env:
   FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
 jobs:
-  Lint and Test:
+  Lint_And_Test:
 
     runs-on: ubuntu-latest
 
