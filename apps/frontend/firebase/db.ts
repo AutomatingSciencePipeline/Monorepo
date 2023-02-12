@@ -20,7 +20,6 @@ export const submitExperiment = async (values, userId) => {
 		expId: newExperiment.id,
 		fileOutput: values.fileOutput,
 		resultOutput: values.resultOutput,
-		finished: false,
 		scatter: values.scatter,
 		scatterIndVar: values.scatterIndVar,
 		scatterDepVar: values.scatterDepVar,
@@ -29,6 +28,9 @@ export const submitExperiment = async (values, userId) => {
 		params: JSON.stringify({
 			params: values.parameters,
 		}),
+		finished: false,
+		estimatedTotalTimeMinutes: 0,
+		expToRun: 0,
 	});
 	console.log(`Created Experiment: ${newExperiment.id}`);
 	return newExperiment.id;

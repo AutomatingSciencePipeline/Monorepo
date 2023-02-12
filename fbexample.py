@@ -1,4 +1,5 @@
 from genericpath import isdir
+import time
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
@@ -19,16 +20,6 @@ def frange(start, stop, step=None):
         count += 1
 
 
+
 if __name__ == "__main__":
     print("Hello world")
-    config = configparser.ConfigParser()
-    config.read('0.ini')
-    res = [f' {key} = {config["DEFAULT"][key]} 'for key in config['DEFAULT'].keys()]
-
-    x = {"1":2}
-    try:
-        temp = x['step']
-    except:
-        x['step'] = 1
-        print(x)
-    print(res)    
