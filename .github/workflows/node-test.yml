@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ GitHub-CI-Research ] #change to main when using it for real
+    branches: [ main ] 
   pull_request:
-    branches: [ GitHub-CI-Research ] 
+    branches: [ main ] 
 
 jobs:
   Lint_And_Test:
