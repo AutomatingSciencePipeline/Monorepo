@@ -32,7 +32,10 @@
 
         // Docs
         "DavidAnson.vscode-markdownlint",
-        "bierner.markdown-preview-github-styles"
+        "bierner.markdown-preview-github-styles",
+
+        // CI
+        "me-dutour-mathieu.vscode-github-actions"
     ],
     "unwantedRecommendations": []
 }
