@@ -3,7 +3,7 @@ import shutil
 from subprocess import Popen, PIPE
 import time
 
-from modules.data.trial import Trial
+# from modules.data.trial import Trial
 from modules.configs import get_configs_ordered
 from modules.exceptions import ExperimentAbort, FileHandlingError
 from modules.exceptions import InternalTrialFailedError
@@ -36,8 +36,8 @@ def run_trial(experiment_path, config_path, filetype):
             return get_data(process)
 
 
-def run_trial_v2(trial: Trial):
-    pass
+# def run_trial_v2(trial: Trial):
+#     pass
 
 
 def get_header_results(filename):
