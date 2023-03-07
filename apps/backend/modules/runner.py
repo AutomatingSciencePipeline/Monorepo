@@ -2,6 +2,7 @@ import csv
 import shutil
 from subprocess import Popen, PIPE
 import time
+import os
 
 # from modules.data.trial import Trial
 from modules.configs import get_configs_ordered
@@ -13,27 +14,36 @@ PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
 OUTPUT_INDICATOR_USING_CSVS = "In ResCsvs"
 
 
-def get_data(process: 'Popen[str]'):
+def get_data(process: 'Popen[str]', trialRun: int):
     try:
         data = process.communicate()
+        os.chdir('ResCsvs')
+        with open(f"log{trialRun}.txt",'w', encoding='utf8') as f:
+            f.write(data[0])
+            if data[1]:
+                f.write(data[1])
+            f.close()
+        os.chdir('..')
+        print(data)
         if data[1]:
             print(f'errors returned from pipe is {data[1]}')
             return PIPE_OUTPUT_ERROR_MESSAGE
     except Exception as e:
+        print(e)
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from e
     result = data[0].split('\n')[0]
     print(f"result data: {result}")
     return result
 
 
-def run_trial(experiment_path, config_path, filetype):
+def run_trial(experiment_path, config_path, filetype, trialRun: int):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
     if filetype == 'python':
         with Popen(['python', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            return get_data(process)
+            return get_data(process, trialRun)
     elif filetype == 'java':
         with Popen(['java', '-jar', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            return get_data(process)
+            return get_data(process, trialRun)
 
 
 # def run_trial_v2(trial: Trial):
@@ -77,7 +87,7 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
         startSeconds = time.time()
         expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
         try:
-            firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype)
+            firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0)
             if resultOutput == '':
                 writer.writerow(["Experiment Run", "Result"] + paramNames)
             else:
@@ -120,7 +130,7 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             for i in range(1, numTrialsToRun + 1):
                 try:
-                    response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype)
+                    response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype, i)
                 except InternalTrialFailedError:
                     print('The trial failed for some internal reason?')  # TODO should this halt all further experiment runs?
                     fails += 1

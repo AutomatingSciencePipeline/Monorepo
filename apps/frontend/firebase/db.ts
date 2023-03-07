@@ -20,6 +20,7 @@ export const submitExperiment = async (values, userId) => {
 		expId: newExperiment.id,
 		fileOutput: values.fileOutput,
 		resultOutput: values.resultOutput,
+		keepLogs: values.keepLogs,
 		scatter: values.scatter,
 		scatterIndVar: values.scatterIndVar,
 		scatterDepVar: values.scatterDepVar,

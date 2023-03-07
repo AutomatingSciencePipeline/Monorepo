@@ -73,6 +73,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			dumbTextArea: '',
 			verbose: false,
 			scatter: false,
+			keepLogs: true,
 			nWorkers: 1,
 		},
 		schema: joiResolver(experimentSchema),
@@ -97,6 +98,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 						dumbTextArea: expInfo['consts'],
 						scatterIndVar: expInfo['scatterIndVar'],
 						scatterDepVar: expInfo['scatterDepVar'],
+						keepLogs: expInfo['keepLogs'],
 					});
 					setCopyId(null);
 					setStatus(FormStates.Info);

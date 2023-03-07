@@ -76,6 +76,7 @@ def run_batch(data):
     experiment['id'] = expId
     experimentOutput = experiment['fileOutput']
     resultOutput = experiment['resultOutput']
+    keepLogs = experiment['keepLogs']
     scatterPlot = experiment['scatter']
     dumbTextArea = experiment['consts']
     postProcess = scatterPlot != ''
@@ -83,7 +84,7 @@ def run_batch(data):
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    if experimentOutput != '' or postProcess != '':
+    if experimentOutput != '' or postProcess != '' or keepLogs:
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {expId}')
