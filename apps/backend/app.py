@@ -15,6 +15,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from dotenv import load_dotenv
+import pymongo
 
 import plots
 
@@ -43,6 +44,8 @@ firebaseCredentials = credentials.Certificate(json.loads(FIREBASE_CREDENTIALS))
 firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
+
+#MongoDB Objects
 
 #setting up the app
 flaskApp = Flask(__name__)
@@ -208,7 +211,22 @@ def run_batch(data):
     print('Uploading Results to the frontend')
     uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
     uploadBlob.upload_from_filename('results.csv')
+    # Upload to MongoDB
+    mongoClient = pymongo.MongoClient('glados-mongodb', 27017, serverSelectionTimeoutMS=1000)
+    print(mongoClient.server_info)
+    mongoGladosDB = mongoClient["gladosdb"]
+    mongoResultsCollection = mongoGladosDB.results
 
+    
+    print('Uploading to MongoDB')
+    experimentFile = open(f"results/result{expId}.csv") # there is probably a better way to do this
+    experimentData = experimentFile.read()
+    experimentFile.close()
+    experimentResult = {"_id": expId,
+                        "resultContent": experimentData}
+    
+    resultId = mongoResultsCollection.insert_one(experimentResult).inserted_id
+    print(f"inserted into mongodb with id: {resultId}")
     if experimentOutput != '' or postProcess:
         print('Uploading Result Csvs')
         try:
