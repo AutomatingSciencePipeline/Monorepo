@@ -74,8 +74,8 @@ def run_batch(data):
     experiment = expRef.get().to_dict()
     print(f"Experiment info: {experiment}")
     experiment['id'] = expId
-    experimentOutput = experiment['fileOutput']
-    resultOutput = experiment['resultOutput']
+    trialExtraFile = experiment['trialExtraFile']
+    trialResult = experiment['trialResult']
     keepLogs = experiment['keepLogs']
     scatterPlot = experiment['scatter']
     dumbTextArea = experiment['consts']
@@ -84,7 +84,7 @@ def run_batch(data):
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    if experimentOutput != '' or postProcess != '' or keepLogs:
+    if trialExtraFile != '' or postProcess != '' or keepLogs:
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {expId}')
@@ -124,7 +124,7 @@ def run_batch(data):
 
     try:
         #Running the Experiment
-        conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, filetype, numExperimentsToRun)
+        conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numExperimentsToRun, keepLogs)
 
         # Post Processing
         if postProcess:
@@ -143,7 +143,7 @@ def run_batch(data):
         uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
         uploadBlob.upload_from_filename('results.csv')
 
-        if experimentOutput != '' or postProcess:
+        if trialExtraFile != '' or postProcess:
             print('Uploading Result Csvs')
             try:
                 shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
