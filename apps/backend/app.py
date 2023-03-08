@@ -125,6 +125,8 @@ def run_batch(data):
     try:
         #Running the Experiment
         conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, filetype, numExperimentsToRun)
+
+        # Post Processing
         if postProcess:
             print("Beginning post processing")
             try:
@@ -153,7 +155,7 @@ def run_batch(data):
         print(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
         logging.exception(err)
     except Exception as err:
-        print(f'Uncaught exception "{err}," the GLADOS code needs to be changed to handle this, not doing any result uploading or post processing')
+        print(f'Uncaught exception "{err}," the GLADOS code needs to be changed to handle this in a cleaner manner')
         logging.exception(err)
         raise err
     finally:
