@@ -21,6 +21,7 @@
         "paramspos",
         "pipenv",
         "Pyenv",
+        "pylintrc",
         "pyplot",
         "pytest",
         "rawfiletype",
