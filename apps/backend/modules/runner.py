@@ -46,10 +46,6 @@ def run_trial(experiment_path, config_path, filetype, trialRun: int):
             return get_data(process, trialRun)
 
 
-# def run_trial_v2(trial: Trial):
-#     pass
-
-
 def get_first_line_of_trial_results_csv(filename):
     try:
         with open(filename, mode='r', encoding="utf8") as file:
