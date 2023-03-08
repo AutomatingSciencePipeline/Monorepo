@@ -45,6 +45,15 @@ export const InformationStep = ({ form, ...props }) => {
 						/>
 					</div>
 				</InputSection>
+				<InputSection header={'Keep Logs'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='checkbox'
+							checked={form.values.keepLogs}
+							onChange={() => form.setFieldValue('keepLogs', !form.values.keepLogs)}>
+						</input>
+					</div>
+				</InputSection>
 			</Fragment>
 		</div>
 	);
