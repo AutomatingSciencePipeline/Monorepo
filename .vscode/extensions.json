@@ -26,6 +26,7 @@
         "ms-python.pylint",
         "ms-python.vscode-pylance",
         "bungcip.better-toml", // Pyenv pipfile is toml
+        "slevesque.vscode-zipexplorer", // see inside experiment output zip files via right click -> explore
 
         // Setup Scripts
         "timonwong.shellcheck",
