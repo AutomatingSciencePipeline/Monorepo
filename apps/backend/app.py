@@ -151,6 +151,7 @@ def run_batch(data):
                 raise GladosInternalError("Error uploading to firebase") from err
     except ExperimentAbort as err:
         print(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
+        logging.exception(err)
     except Exception as err:
         print(f'Uncaught exception "{err}," the GLADOS code needs to be changed to handle this, not doing any result uploading or post processing')
         logging.exception(err)

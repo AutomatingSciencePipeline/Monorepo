@@ -6,7 +6,7 @@ import os
 
 # from modules.data.trial import Trial
 from modules.configs import get_configs_ordered
-from modules.exceptions import ExperimentAbort, FileHandlingError
+from modules.exceptions import ExperimentAbort, FileHandlingError, GladosUserError
 from modules.exceptions import InternalTrialFailedError
 from modules.configs import get_config_paramNames
 
@@ -18,7 +18,7 @@ def get_data(process: 'Popen[str]', trialRun: int):
     try:
         data = process.communicate()
         os.chdir('ResCsvs')
-        with open(f"log{trialRun}.txt",'w', encoding='utf8') as f:
+        with open(f"log{trialRun}.txt", 'w', encoding='utf8') as f:
             f.write(data[0])
             if data[1]:
                 f.write(data[1])
@@ -50,21 +50,27 @@ def run_trial(experiment_path, config_path, filetype, trialRun: int):
 #     pass
 
 
-def get_header_results(filename):
-    with open(filename, mode='r', encoding="utf8") as file:
-        reader = csv.reader(file)
-        for line in reader:
-            return line
+def get_first_line_of_trial_results_csv(filename):
+    try:
+        with open(filename, mode='r', encoding="utf8") as file:
+            reader = csv.reader(file)
+            for line in reader:
+                return line
+    except Exception as err:
+        raise GladosUserError("Failed to read trial results csv first line, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
 def get_output_results(filename):
-    with open(filename, mode='r', encoding="utf8") as file:
-        reader = csv.reader(file)
-        i = 0
-        for line in reader:
-            if i == 1:
-                return line
-            i += 1
+    try:
+        with open(filename, mode='r', encoding="utf8") as file:
+            reader = csv.reader(file)
+            i = 0
+            for line in reader:
+                if i == 1:
+                    return line
+                i += 1
+    except Exception as err:
+        raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
 def add_to_output_batch(fileOutput, ExpRun):
@@ -87,16 +93,17 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
         startSeconds = time.time()
         expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
         try:
+            print("Running the first trial...")
             firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0)
             if resultOutput == '':
                 writer.writerow(["Experiment Run", "Result"] + paramNames)
             else:
-                if (output := get_header_results(resultOutput)) is None:
+                if (output := get_first_line_of_trial_results_csv(resultOutput)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
                 writer.writerow(["Experiment Run"] + output + paramNames)
-        except InternalTrialFailedError as err:
+        except Exception as err:
             writer.writerow([0, "Error"])
-            message = f"First trial of {expId} ran into an error while running, aborting the whole experiment"
+            message = f"First trial of {expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
             print(message)
             fails += 1
             expRef.update({'fails': fails})
