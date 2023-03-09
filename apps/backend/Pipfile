@@ -21,6 +21,7 @@ trycast = "*"
 python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
 yapf = "*"
 pylint = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.8"

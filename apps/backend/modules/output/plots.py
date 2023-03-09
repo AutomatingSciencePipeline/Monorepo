@@ -1,15 +1,17 @@
-import numpy as np
 import os
 import csv
+import numpy as np
 import matplotlib.pyplot as plt
 
-def generateScatterPlot(independantVar, dependantVar, resultFile, id):
+from modules.exceptions import FileHandlingError
+
+def generateScatterPlot(independentVar, dependantVar, resultFile, expId):
 
     x, y = [], []
     with open(resultFile) as file:
         csvreader = csv.reader(file)
         fields = next(csvreader)
-        indIndex = fields.index(independantVar)
+        indIndex = fields.index(independentVar)
         depIndex = fields.index(dependantVar)
         for row in csvreader:
             x.append(float(row[indIndex]))
@@ -22,10 +24,10 @@ def generateScatterPlot(independantVar, dependantVar, resultFile, id):
     sc = ax.scatter(x,y)
     plt.plot(x, m*np.array(x) + b)
     ax.set_ylabel(dependantVar, loc='top')
-    ax.set_xlabel(independantVar, loc='left')
+    ax.set_xlabel(independentVar, loc='left')
     try:
         os.chdir('ResCsvs')
-        plt.savefig(f'scatter{id}.png')
+        plt.savefig(f'scatter{expId}.png')
         os.chdir('..')
     except Exception as err:
-        print(f"error during saving graph: {err}")
+        raise FileHandlingError("Error saving graph") from err

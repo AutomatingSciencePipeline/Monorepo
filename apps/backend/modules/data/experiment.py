@@ -1,4 +1,5 @@
 from typing import Optional, TypedDict, cast
+from enum import Enum
 from trycast import trycast
 
 from modules.exceptions import DataFormatError
@@ -6,6 +7,12 @@ from modules.exceptions import DataFormatError
 DocumentId = str
 UserId = str
 EpochMilliseconds = int
+
+
+class ExperimentType(Enum):
+    UNKNOWN = -1
+    PYTHON = 0
+    JAVA = 1
 
 
 class ExperimentData(TypedDict):
