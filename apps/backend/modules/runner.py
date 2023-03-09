@@ -25,7 +25,6 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
                     f.write(data[1])
                 f.close()
             os.chdir('..')
-        print(data)
         if data[1]:
             print(f'errors returned from pipe is {data[1]}')
             return PIPE_OUTPUT_ERROR_MESSAGE

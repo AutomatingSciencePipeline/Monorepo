@@ -17,7 +17,6 @@ from modules.exceptions import CustomFlaskError, GladosInternalError, Experiment
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 
-
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
 except ImportError:
@@ -98,17 +97,21 @@ def run_batch(data):
         filedata = firebaseBucket.blob(filepath)
         filedata.download_to_filename(filepath)
     except Exception as err:
+        print(f"Error {err} occurred while trying to download experiment file")
         raise GladosInternalError('Failed to download experiment files') from err
+    print(f"Downloaded {filepath} to ExperimentFiles/{expId}/{filepath}")
 
     #Determining FileType
     rawfiletype = magic.from_file(filepath)
+    print(rawfiletype)
     filetype = 'unknown'
-    if 'Python script' in rawfiletype:
+    if 'Python script' in rawfiletype or 'python3' in rawfiletype:
         filetype = 'python'
     elif 'Java archive data (JAR)' in rawfiletype:
         filetype = 'java'
 
     if filetype == 'unknown':
+        print(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
         raise NotImplementedError("Unknown experiment file type")
     print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
 
