@@ -1,12 +1,9 @@
 from typing import Optional, TypedDict, cast
 from enum import Enum
 from trycast import trycast
+from modules.data.types import DocumentId, EpochMilliseconds, UserId
 
 from modules.exceptions import DataFormatError
-
-DocumentId = str
-UserId = str
-EpochMilliseconds = int
 
 
 class ExperimentType(Enum):
@@ -23,6 +20,8 @@ class ExperimentData(TypedDict):
 
     name: str
     description: str
+
+    type: ExperimentType
 
     fileOutput: str
     file: str

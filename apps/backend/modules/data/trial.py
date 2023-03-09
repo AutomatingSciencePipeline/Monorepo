@@ -1,17 +1,9 @@
-from enum import Enum
-
-from modules.data.experiment import Experiment
-
-
-class ResultStatus(Enum):
-    UNKNOWN = -1
-    SUCCESS = 0
-    FAIL = 1
-    SYSTEM_ERROR = 2
+from modules.data.experiment import ExperimentData
+from modules.data.types import ResultStatus
 
 
 class Trial():
-    parentExperiment: Experiment
+    parentExperiment: ExperimentData
     status = ResultStatus.UNKNOWN
     startTimeEpochMillis: int
     endTimeEpochMillis: int
