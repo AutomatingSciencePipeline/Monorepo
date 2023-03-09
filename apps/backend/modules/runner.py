@@ -28,11 +28,11 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
         if data[1]:
             print(f'errors returned from pipe is {data[1]}')
             return PIPE_OUTPUT_ERROR_MESSAGE
-    except Exception as e:
-        print(e)
-        raise InternalTrialFailedError("Encountered another exception while reading pipe") from e
+    except Exception as err:
+        print("Encountered another exception while reading pipe: {err}")
+        raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
     result = data[0].split('\n')[0]
-    print(f"result data: {result}")
+    print(f"trial#{trialRun} result data: {result}")
     return result
 
 
@@ -121,7 +121,7 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
         if numTrialsToRun > 0:
             #Running the rest of the experiments
 
-            print(f"Continuing now running {numTrialsToRun}")
+            print(f"Continuing with running the {numTrialsToRun} other trials...")
             if trialExtraFile != '':
                 add_to_output_batch(trialExtraFile, 0)
                 firstTrial = OUTPUT_INDICATOR_USING_CSVS
@@ -156,4 +156,4 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                 else:
                     fails += 1
                     expRef.update({'fails': fails})
-        print("Finished running Experiments")
+        print("Finished running Trials")
