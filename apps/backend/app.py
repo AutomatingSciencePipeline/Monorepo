@@ -76,10 +76,12 @@ def run_batch(data):
     print(f'Run_Batch starting with data {data}')
     experiments = firebaseDb.collection('Experiments')
 
-    #Parsing the argument data
+    # Obtain most basic experiment info
     expId = data['experiment']['id']
     print(f'received {expId}')
     expRef = experiments.document(expId)
+
+    # Parsing the argument data
     experiment = expRef.get().to_dict()
     print(f"Experiment info: {experiment}")
     experiment['id'] = expId
@@ -93,36 +95,10 @@ def run_batch(data):
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    if trialExtraFile != '' or postProcess != '' or keepLogs:
-        print('There will be experiment outputs')
-        os.makedirs('ResCsvs')
-    print(f'Downloading file for {expId}')
-    try:
-        filepath = experiment['file']
-    except KeyError:
-        filepath = f'experiment{expId}'
-        print(f"No filepath specified so defaulting to {filepath}")
-    print(f"Downloading {filepath} to ExperimentFiles/{expId}/{filepath}")
-    try:
-        filedata = firebaseBucket.blob(filepath)
-        filedata.download_to_filename(filepath)
-    except Exception as err:
-        print(f"Error {err} occurred while trying to download experiment file")
-        raise GladosInternalError('Failed to download experiment files') from err
-    print(f"Downloaded {filepath} to ExperimentFiles/{expId}/{filepath}")
+    filepath = download_experiment_files(expId, experiment, trialExtraFile, keepLogs, postProcess)
 
-    #Determining FileType
-    rawfiletype = magic.from_file(filepath)
-    print(rawfiletype)
-    filetype = 'unknown'
-    if 'Python script' in rawfiletype or 'python3' in rawfiletype:
-        filetype = 'python'
-    elif 'Java archive data (JAR)' in rawfiletype:
-        filetype = 'java'
-
-    if filetype == 'unknown':
-        print(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
-        raise NotImplementedError("Unknown experiment file type")
+    #Determining experiment FileType -> how we need to execute it
+    rawfiletype, filetype = determine_experiment_file_type(filepath)
     print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
 
     #Generating Configs from hyperparameters
@@ -140,30 +116,10 @@ def run_batch(data):
         conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numExperimentsToRun, keepLogs)
 
         # Post Processing
-        if postProcess:
-            print("Beginning post processing")
-            try:
-                if scatterPlot:
-                    print("Creating Scatter Plot")
-                    depVar = experiment['scatterDepVar']
-                    indVar = experiment['scatterIndVar']
-                    generateScatterPlot(indVar, depVar, 'results.csv', expId)
-            except KeyError as err:
-                raise GladosInternalError("Error during plot generation") from err
+        post_process_experiment(expId, experiment, scatterPlot, postProcess)
 
         #Uploading Experiment Results
-        print('Uploading Results to the frontend')
-        uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
-        uploadBlob.upload_from_filename('results.csv')
-
-        if trialExtraFile != '' or postProcess:
-            print('Uploading Result Csvs')
-            try:
-                shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-                uploadBlob = firebaseBucket.blob(f"results/result{expId}.zip")
-                uploadBlob.upload_from_filename('ResultCsvs.zip')
-            except Exception as err:
-                raise GladosInternalError("Error uploading to firebase") from err
+        upload_experiment_results(expId, trialExtraFile, postProcess)
     except ExperimentAbort as err:
         print(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
         logging.exception(err)
@@ -176,6 +132,70 @@ def run_batch(data):
         expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
         print(f'Exiting experiment {expId}')
         os.chdir('../..')
+
+
+def determine_experiment_file_type(filepath):
+    rawfiletype = magic.from_file(filepath)
+    print(rawfiletype)
+    filetype = 'unknown'
+    if 'Python script' in rawfiletype or 'python3' in rawfiletype:
+        filetype = 'python'
+    elif 'Java archive data (JAR)' in rawfiletype:
+        filetype = 'java'
+
+    if filetype == 'unknown':
+        print(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
+        raise NotImplementedError("Unknown experiment file type")
+    return rawfiletype, filetype
+
+
+def download_experiment_files(expId, experiment, trialExtraFile, keepLogs, postProcess):
+    if trialExtraFile != '' or postProcess != '' or keepLogs:
+        print('There will be experiment outputs')
+        os.makedirs('ResCsvs')
+    print(f'Downloading file for {expId}')
+    try:
+        filepath = experiment['file']
+    except KeyError:
+        filepath = f'experiment{expId}'
+        print(f"No filepath specified so defaulting to {filepath}")
+    print(f"Downloading {filepath} to ExperimentFiles/{expId}/{filepath}")
+    try:
+        filedata = firebaseBucket.blob(filepath)
+        filedata.download_to_filename(filepath)
+    except Exception as err:
+        print(f"Error {err} occurred while trying to download experiment file")
+        raise GladosInternalError('Failed to download experiment files') from err
+    print(f"Downloaded {filepath} to ExperimentFiles/{expId}/{filepath}")
+    return filepath
+
+
+def upload_experiment_results(expId, trialExtraFile, postProcess):
+    print('Uploading Results to the frontend')
+    uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
+    uploadBlob.upload_from_filename('results.csv')
+
+    if trialExtraFile != '' or postProcess:
+        print('Uploading Result Csvs')
+        try:
+            shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
+            uploadBlob = firebaseBucket.blob(f"results/result{expId}.zip")
+            uploadBlob.upload_from_filename('ResultCsvs.zip')
+        except Exception as err:
+            raise GladosInternalError("Error uploading to firebase") from err
+
+
+def post_process_experiment(expId, experiment, scatterPlot, postProcess):
+    if postProcess:
+        print("Beginning post processing")
+        try:
+            if scatterPlot:
+                print("Creating Scatter Plot")
+                depVar = experiment['scatterDepVar']
+                indVar = experiment['scatterIndVar']
+                generateScatterPlot(indVar, depVar, 'results.csv', expId)
+        except KeyError as err:
+            raise GladosInternalError("Error during plot generation") from err
 
 
 if __name__ == '__main__':
