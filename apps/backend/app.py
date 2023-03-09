@@ -47,19 +47,29 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
-runner = ProcessPoolExecutor(1)
+MAX_WORKERS = 1
+runner = ProcessPoolExecutor(MAX_WORKERS)
 
 
 ### FLASK API ENDPOINT
 @flaskApp.post("/experiment")
 def recv_experiment():
-    runner.submit(run_batch, request.get_json())
+    runner.submit(handle_exceptions_from_run, request.get_json())
     return 'OK'
 
 
 @flaskApp.errorhandler(CustomFlaskError)
 def glados_custom_flask_error(error):
     return jsonify(error.to_dict()), error.status_code
+
+
+def handle_exceptions_from_run(data):
+    try:
+        run_batch(data)
+    except Exception as err:
+        print(f"Unexpected exception while trying to run the experiment, this was not caught by our own code and needs to be handled better: {err}")
+        logging.exception(err)
+        raise err
 
 
 def run_batch(data):
