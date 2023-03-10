@@ -21,7 +21,7 @@ To verify if it worked once the experiment is over you should be able to downloa
 Example settings for a run that demonstrates this:
 
 Info:
-Trial's Extra File: geneticRes.csv
+Trial Result: geneticRes.csv
 
 Parameters: -The parameters are shortened to make it easier to fill out
 g: int, default: 1, min: 1, max: 10, step: 1 this is the generations variable
