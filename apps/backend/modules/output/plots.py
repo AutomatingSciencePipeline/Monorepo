@@ -17,14 +17,14 @@ def generateScatterPlot(independentVar, dependantVar, resultFile, expId):
             x.append(float(row[indIndex]))
             y.append(float(row[depIndex]))
 
-    fig, ax = plt.subplots()
+    figure, axes = plt.subplots()
     print(np.array(x))
     print(np.array(y))
     m, b = np.polyfit(np.array(x), np.array(y), 1)
-    sc = ax.scatter(x,y)
+    sc = axes.scatter(x,y)
     plt.plot(x, m*np.array(x) + b)
-    ax.set_ylabel(dependantVar, loc='top')
-    ax.set_xlabel(independentVar, loc='left')
+    axes.set_ylabel(dependantVar, loc='top')
+    axes.set_xlabel(independentVar, loc='left')
     try:
         os.chdir('ResCsvs')
         plt.savefig(f'scatter{expId}.png')

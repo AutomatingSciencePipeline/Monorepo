@@ -14,36 +14,36 @@ PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
 OUTPUT_INDICATOR_USING_CSVS = "In ResCsvs"
 
 
-def get_data(process: 'Popen[str]', trialRun: int):
+def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
     try:
         data = process.communicate()
-        os.chdir('ResCsvs')
-        with open(f"log{trialRun}.txt", 'w', encoding='utf8') as f:
-            f.write(data[0])
-            if data[1]:
-                f.write(data[1])
-            f.close()
-        os.chdir('..')
-        print(data)
+        if keepLogs:
+            os.chdir('ResCsvs')
+            with open(f"log{trialRun}.txt", 'w', encoding='utf8') as f:
+                f.write(data[0])
+                if data[1]:
+                    f.write(data[1])
+                f.close()
+            os.chdir('..')
         if data[1]:
             print(f'errors returned from pipe is {data[1]}')
             return PIPE_OUTPUT_ERROR_MESSAGE
-    except Exception as e:
-        print(e)
-        raise InternalTrialFailedError("Encountered another exception while reading pipe") from e
+    except Exception as err:
+        print("Encountered another exception while reading pipe: {err}")
+        raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
     result = data[0].split('\n')[0]
-    print(f"result data: {result}")
+    print(f"trial#{trialRun} result data: {result}")
     return result
 
 
-def run_trial(experiment_path, config_path, filetype, trialRun: int):
+def run_trial(experiment_path, config_path, filetype, trialRun: int, keepLogs: bool):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
     if filetype == 'python':
         with Popen(['python', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            return get_data(process, trialRun)
+            return get_data(process, trialRun, keepLogs)
     elif filetype == 'java':
         with Popen(['java', '-jar', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            return get_data(process, trialRun)
+            return get_data(process, trialRun, keepLogs)
 
 
 def get_first_line_of_trial_results_csv(filename):
@@ -76,7 +76,7 @@ def add_to_output_batch(fileOutput, ExpRun):
         raise FileHandlingError("Failed to copy results csv") from err
 
 
-def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, filetype, numTrialsToRun):
+def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numTrialsToRun, keepLogs):
     print(f"Running Experiment {expId}")
 
     passes = 0
@@ -90,11 +90,11 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
         expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
         try:
             print("Running the first trial...")
-            firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0)
-            if resultOutput == '':
+            firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0, keepLogs)
+            if trialResult == '':
                 writer.writerow(["Experiment Run", "Result"] + paramNames)
             else:
-                if (output := get_first_line_of_trial_results_csv(resultOutput)) is None:
+                if (output := get_first_line_of_trial_results_csv(trialResult)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
                 writer.writerow(["Experiment Run"] + output + paramNames)
         except Exception as err:
@@ -121,32 +121,32 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
         if numTrialsToRun > 0:
             #Running the rest of the experiments
 
-            print(f"Continuing now running {numTrialsToRun}")
-            if experimentOutput != '':
-                add_to_output_batch(experimentOutput, 0)
+            print(f"Continuing with running the {numTrialsToRun} other trials...")
+            if trialExtraFile != '':
+                add_to_output_batch(trialExtraFile, 0)
                 firstTrial = OUTPUT_INDICATOR_USING_CSVS
-            if resultOutput == '':
+            if trialResult == '':
                 writer.writerow(["0", firstTrial] + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             else:
-                if (output := get_output_results(resultOutput)) is None:
+                if (output := get_output_results(trialResult)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the first run?) (David, improve this error message please)")
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             for i in range(1, numTrialsToRun + 1):
                 try:
-                    response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype, i)
+                    response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype, i, keepLogs)
                 except InternalTrialFailedError:
                     print('The trial failed for some internal reason?')  # TODO should this halt all further experiment runs?
                     fails += 1
                     expRef.update({'fails': fails})
                     continue
 
-                if experimentOutput != '':
+                if trialExtraFile != '':
                     response_data = OUTPUT_INDICATOR_USING_CSVS
-                    add_to_output_batch(experimentOutput, i)
-                if resultOutput == '':
+                    add_to_output_batch(trialExtraFile, i)
+                if trialResult == '':
                     writer.writerow([i, response_data] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
                 else:
-                    output = get_output_results(resultOutput)
+                    output = get_output_results(trialResult)
                     if output is None:
                         raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
                     writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
@@ -156,4 +156,4 @@ def conduct_experiment(expId, expRef, experimentOutput, resultOutput, filepath, 
                 else:
                     fails += 1
                     expRef.update({'fails': fails})
-        print("Finished running Experiments")
+        print("Finished running Trials")
