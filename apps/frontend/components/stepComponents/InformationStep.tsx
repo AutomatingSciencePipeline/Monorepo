@@ -25,7 +25,7 @@ export const InformationStep = ({ form, ...props }) => {
 					</div>
 				</InputSection>
 
-				<InputSection header={'Trial\'s Extra File'}>
+				<InputSection header={"Trial's Extra File"}>
 					<div className='sm:col-span-4'>
 						<input
 							type='text'
