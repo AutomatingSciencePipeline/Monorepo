@@ -1,6 +1,6 @@
 import csv
 import shutil
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, TimeoutExpired
 import time
 import os
 
@@ -16,7 +16,7 @@ OUTPUT_INDICATOR_USING_CSVS = "In ResCsvs"
 
 def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
     try:
-        data = process.communicate()
+        data = process.communicate(timeout=5)
         if keepLogs:
             os.chdir('ResCsvs')
             with open(f"log{trialRun}.txt", 'w', encoding='utf8') as f:
@@ -28,6 +28,9 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
         if data[1]:
             print(f'errors returned from pipe is {data[1]}')
             return PIPE_OUTPUT_ERROR_MESSAGE
+    except TimeoutExpired as timeErr:
+        print(f"{timeErr} Trail timed out")
+        raise InternalTrialFailedError("Trial Timeout error") from timeErr
     except Exception as err:
         print("Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
@@ -98,19 +101,19 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                     raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
                 writer.writerow(["Experiment Run"] + output + paramNames)
         except Exception as err:
-            writer.writerow([0, "Error"])
+            writer.writerow([0, "Error"]) #TODO: this might error out if the user is using Trial Result, maybe add in as many errors as there are headers
             message = f"First trial of {expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
             print(message)
             fails += 1
             expRef.update({'fails': fails})
             raise ExperimentAbort(message) from err
-        finally:
-            endSeconds = time.time()
-            timeTakenMinutes = (endSeconds - startSeconds) / 60
-            #Estimating time for all experiments to run and informing frontend
-            estimatedTotalTimeMinutes = timeTakenMinutes * numTrialsToRun
-            print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-            expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
+        
+        endSeconds = time.time()
+        timeTakenMinutes = (endSeconds - startSeconds) / 60
+        #Estimating time for all experiments to run and informing frontend
+        estimatedTotalTimeMinutes = timeTakenMinutes * numTrialsToRun
+        print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
+        expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
 
         passes += 1
         expRef.update({'passes': passes})
