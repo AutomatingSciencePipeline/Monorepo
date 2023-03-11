@@ -10,3 +10,8 @@ services:
       target: development
     volumes:
       - ./apps/backend/:/app
+  app-frontend:
+    build: 
+      target: development
+    volumes:
+      - ./apps/frontend/:/app

@@ -403,7 +403,7 @@ export default function DashboardPage() {
 													aria-hidden='true'
 												/>
 												<span className='text-sm text-gray-500 font-medium'>
-													{experiments?.length} project
+													{experiments?.length} project{experiments?.length == 1 ? '' : 's'}
 												</span>
 											</div>
 										</div>
