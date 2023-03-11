@@ -14,4 +14,4 @@ services:
     build: 
       target: development
     volumes:
-      - ./apps/frontend/:/home/node/app
+      - ./apps/frontend/:/app
