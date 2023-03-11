@@ -20,7 +20,7 @@
         {
             "label": "Docker Compose Up (Attached)",
             "type": "shell",
-            "command": "docker-compose up --build",
+            "command": "docker compose up --build",
             "problemMatcher": []
         }
     ]
