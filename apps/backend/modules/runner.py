@@ -1,12 +1,12 @@
 import csv
 import shutil
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, TimeoutExpired
 import time
 import os
 
 # from modules.data.trial import Trial
 from modules.configs import get_configs_ordered
-from modules.exceptions import ExperimentAbort, FileHandlingError, GladosUserError
+from modules.exceptions import ExperimentAbort, FileHandlingError, GladosUserError, TrialTimeoutError
 from modules.exceptions import InternalTrialFailedError
 from modules.configs import get_config_paramNames
 
@@ -14,9 +14,9 @@ PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
 OUTPUT_INDICATOR_USING_CSVS = "In ResCsvs"
 
 
-def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
+def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
     try:
-        data = process.communicate()
+        data = process.communicate(timeout=trialTimeout)
         if keepLogs:
             os.chdir('ResCsvs')
             with open(f"log{trialRun}.txt", 'w', encoding='utf8') as f:
@@ -28,6 +28,9 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
         if data[1]:
             print(f'errors returned from pipe is {data[1]}')
             return PIPE_OUTPUT_ERROR_MESSAGE
+    except TimeoutExpired as timeErr: 
+        print(f"{timeErr} Trial timed out")
+        raise TrialTimeoutError("Trial took too long to complete") from timeErr
     except Exception as err:
         print("Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
@@ -36,14 +39,14 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool):
     return result
 
 
-def run_trial(experiment_path, config_path, filetype, trialRun: int, keepLogs: bool):
+def run_trial(experiment_path, config_path, filetype, trialRun: int, keepLogs: bool, trialTimeout: int):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
     if filetype == 'python':
         with Popen(['python', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            return get_data(process, trialRun, keepLogs)
+            return get_data(process, trialRun, keepLogs, trialTimeout)
     elif filetype == 'java':
         with Popen(['java', '-jar', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            return get_data(process, trialRun, keepLogs)
+            return get_data(process, trialRun, keepLogs, trialTimeout)
 
 
 def get_first_line_of_trial_results_csv(filename):
@@ -76,7 +79,7 @@ def add_to_output_batch(fileOutput, ExpRun):
         raise FileHandlingError("Failed to copy results csv") from err
 
 
-def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numTrialsToRun, keepLogs):
+def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numTrialsToRun, trialTimeout, keepLogs):
     print(f"Running Experiment {expId}")
 
     passes = 0
@@ -90,27 +93,35 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
         expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
         try:
             print("Running the first trial...")
-            firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0, keepLogs)
+            firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0, keepLogs, trialTimeout)
             if trialResult == '':
                 writer.writerow(["Experiment Run", "Result"] + paramNames)
+                numOutputs = 1
             else:
                 if (output := get_first_line_of_trial_results_csv(trialResult)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
+                numOutputs = len(output)
                 writer.writerow(["Experiment Run"] + output + paramNames)
+        except TrialTimeoutError as timeoutErr:
+            writer.writerow([0, "Timeout"]) #TODO: this might error out if the user is using Trial Result, maybe add in as many errors as there are headers
+            message = f"First trial of {expId} timed out into an error while running, aborting the whole experiment."
+            print(message)
+            fails += 1
+            expRef.update({'fails': fails})
+            raise ExperimentAbort(message) from timeoutErr
         except Exception as err:
-            writer.writerow([0, "Error"])
+            writer.writerow([0, "Error"]) #TODO: this might error out if the user is using Trial Result, maybe add in as many errors as there are headers
             message = f"First trial of {expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
             print(message)
             fails += 1
             expRef.update({'fails': fails})
             raise ExperimentAbort(message) from err
-        finally:
-            endSeconds = time.time()
-            timeTakenMinutes = (endSeconds - startSeconds) / 60
-            #Estimating time for all experiments to run and informing frontend
-            estimatedTotalTimeMinutes = timeTakenMinutes * numTrialsToRun
-            print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-            expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
+        endSeconds = time.time()
+        timeTakenMinutes = (endSeconds - startSeconds) / 60
+        #Estimating time for all experiments to run and informing frontend
+        estimatedTotalTimeMinutes = timeTakenMinutes * numTrialsToRun
+        print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
+        expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
 
         passes += 1
         expRef.update({'passes': passes})
@@ -133,11 +144,17 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             for i in range(1, numTrialsToRun + 1):
                 try:
-                    response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype, i, keepLogs)
+                    response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype, i, keepLogs, trialTimeout)
                 except InternalTrialFailedError:
                     print('The trial failed for some internal reason?')  # TODO should this halt all further experiment runs?
                     fails += 1
                     expRef.update({'fails': fails})
+                    continue
+                except TrialTimeoutError:
+                    print(f"Trial#{i} timed out")
+                    fails += 1
+                    expRef.update({'fails': fails})
+                    writer.writerow([i] + ["TIMEOUT" for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
                     continue
 
                 if trialExtraFile != '':

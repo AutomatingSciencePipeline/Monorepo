@@ -1,5 +1,8 @@
 # TODO not sure if we need flask error because flask won't be the final one reporting the failure
 # https://flask.palletsprojects.com/en/2.2.x/errorhandling/#returning-api-errors-as-json
+from subprocess import TimeoutExpired
+
+
 class CustomFlaskError(Exception):
     status_code = 500
 
@@ -37,6 +40,8 @@ class FileHandlingError(GladosInternalError):
 class InternalTrialFailedError(GladosInternalError):
     """A trial failed for a reason having to do with GLADOS (the trial not passing is not a reason to throw this)"""
 
+class TrialTimeoutError(GladosUserError):
+    """A Trial took too long to complete"""
 
 class ExperimentAbort(Exception):
     """The system should stop running the entire experiment"""

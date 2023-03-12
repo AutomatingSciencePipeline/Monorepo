@@ -45,6 +45,16 @@ export const InformationStep = ({ form, ...props }) => {
 						/>
 					</div>
 				</InputSection>
+				<InputSection header={'Trial Timeout'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='number'
+							placeholder='Maximum length for an trial to run in seconds'
+							{...form.getInputProps('timeout')}
+							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+						/>
+					</div>
+				</InputSection>
 				<InputSection header={'Keep Logs'}>
 					<div className='sm:col-span-4'>
 						<input

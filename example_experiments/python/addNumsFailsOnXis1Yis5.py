@@ -1,9 +1,10 @@
 import sys
 import configparser
+import time
 
 # pylint: disable-next=pointless-string-statement
 """
-This experiment will fail with a KeyError in a trial where x==1 and y==2, but will succeed otherwise.
+This experiment will fail with a KeyError in a trial where x==1 and y==5, but will succeed otherwise.
 
 Example settings for a run that demonstrates this:
 
@@ -20,7 +21,8 @@ def main():
     config.read(configFile)
     x = int(config["DEFAULT"]["x"])
     y = int(config["DEFAULT"]["y"])
-    if x == 1 and y == 2:
+    if x == 1 and y == 5:
+        time.sleep(5)
         raise KeyError('Intentionally thrown exception because x==1 and y==2')
     print(x + y)
     print("done")
