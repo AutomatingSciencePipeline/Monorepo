@@ -96,9 +96,11 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
             firstTrial = run_trial(filepath, f'configFiles/{0}.ini', filetype, 0, keepLogs, trailTimeout)
             if trialResult == '':
                 writer.writerow(["Experiment Run", "Result"] + paramNames)
+                numOutputs = 1
             else:
                 if (output := get_first_line_of_trial_results_csv(trialResult)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
+                numOutputs = len(output)
                 writer.writerow(["Experiment Run"] + output + paramNames)
         except TrialTimeoutError as timeoutErr:
             writer.writerow([0, "Timeout"]) #TODO: this might error out if the user is using Trial Result, maybe add in as many errors as there are headers
@@ -152,7 +154,7 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                     print(f"Trial#{i} timed out")
                     fails += 1
                     expRef.update({'fails': fails})
-                    writer.writerow([i, "TIMEOUT"] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
+                    writer.writerow([i] + ["TIMEOUT" for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
                     continue
 
                 if trialExtraFile != '':
