@@ -1,7 +1,7 @@
 import csv
 import sys
 import configparser
-import time
+
 # pylint: disable-next=pointless-string-statement
 """
 This experiment demonstrates outputting additional information to a file
@@ -40,8 +40,6 @@ def main():
     config.read(configFile)
     x = int(config["DEFAULT"]["x"])
     y = int(config["DEFAULT"]["y"])
-    if x == 1 and y == 5:
-        time.sleep(4)
     with open('AddNumResult.csv', 'w', encoding="utf8") as result:
         writer = csv.writer(result)
         writer.writerow(['Addition', 'Subtraction'])
