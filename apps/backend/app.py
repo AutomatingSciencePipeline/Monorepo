@@ -88,7 +88,7 @@ def run_batch(data):
     trialExtraFile = experiment['trialExtraFile']
     trialResult = experiment['trialResult']
     keepLogs = experiment['keepLogs']
-    timeout = experiment['timeout']
+    trialTimeout = int(experiment['timeout'])
     scatterPlot = experiment['scatter']
     dumbTextArea = experiment['consts']
     postProcess = scatterPlot != ''
@@ -114,7 +114,7 @@ def run_batch(data):
 
     try:
         #Running the Experiment
-        conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numExperimentsToRun, timeout, keepLogs)
+        conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numExperimentsToRun, trialTimeout, keepLogs)
 
         # Post Processing
         post_process_experiment(expId, experiment, scatterPlot, postProcess)
