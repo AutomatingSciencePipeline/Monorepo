@@ -143,7 +143,7 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                     raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the first run?) (David, improve this error message please)")
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             for i in range(1, numTrialsToRun + 1):
-                try: #TODO: Catch timeout error and do stuff with it
+                try:
                     response_data = run_trial(filepath, f'configFiles/{i}.ini', filetype, i, keepLogs, trailTimeout)
                 except InternalTrialFailedError:
                     print('The trial failed for some internal reason?')  # TODO should this halt all further experiment runs?

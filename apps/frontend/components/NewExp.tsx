@@ -15,7 +15,7 @@ import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 
-const DEFAULT_TIMEOUT = 5*60*60; // 5 hours in seconds
+const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 
 export const FormStates = {
 	Closed: -1,
@@ -72,7 +72,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			scatterIndVar: '',
 			scatterDepVar: '',
 			dumbTextArea: '',
-			timeout: DEFAULT_TIMEOUT,
+			timeout: DEFAULT_TRIAL_TIMEOUT_SECONDS,
 			verbose: false,
 			scatter: false,
 			keepLogs: true,
