@@ -12,6 +12,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 import pymongo
+from pymongo.errors import ConnectionFailure
 
 from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, GladosInternalError, ExperimentAbort
@@ -185,6 +186,11 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
     mongoGladosDB = mongoClient["gladosdb"]
     mongoResultsCollection = mongoGladosDB.results
 
+    try:
+            mongoClient.admin.command('ping')
+    except ConnectionFailure:
+        print("Server not available (this is an error)")
+        
     
     print('Uploading to MongoDB')
     experimentFile = open(f"results/result{expId}.csv") # there is probably a better way to do this
