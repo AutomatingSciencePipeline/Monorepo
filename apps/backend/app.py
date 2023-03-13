@@ -179,6 +179,22 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
     uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
     uploadBlob.upload_from_filename('results.csv')
 
+        # Upload to MongoDB
+    mongoClient = pymongo.MongoClient('glados-mongodb', 27017, serverSelectionTimeoutMS=1000)
+    print(mongoClient.server_info)
+    mongoGladosDB = mongoClient["gladosdb"]
+    mongoResultsCollection = mongoGladosDB.results
+
+    
+    print('Uploading to MongoDB')
+    experimentFile = open(f"results/result{expId}.csv") # there is probably a better way to do this
+    experimentData = experimentFile.read()
+    experimentFile.close()
+    experimentResult = {"_id": expId,
+                        "resultContent": experimentData}
+    
+    resultId = mongoResultsCollection.insert_one(experimentResult).inserted_id
+    print(f"inserted into mongodb with id: {resultId}")
     if trialExtraFile != '' or postProcess:
         print('Uploading Result Csvs')
         try:
