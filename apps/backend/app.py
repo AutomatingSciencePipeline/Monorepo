@@ -1,15 +1,11 @@
 import os
 import shutil
-from subprocess import Popen, PIPE
 import logging
 from concurrent.futures import ProcessPoolExecutor
 import sys
-import itertools
-import csv
 import json
 import time
-import configparser
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
@@ -17,7 +13,10 @@ from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 import pymongo
 
-import plots
+from modules.runner import conduct_experiment
+from modules.exceptions import CustomFlaskError, GladosInternalError, ExperimentAbort
+from modules.output.plots import generateScatterPlot
+from modules.configs import generate_config_files
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -51,43 +50,111 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
-#Constants
-DEFAULT_STEP_INT = 1
-DEFAULT_STEP_FLOAT = 0.1
-PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
+MAX_WORKERS = 1
+runner = ProcessPoolExecutor(MAX_WORKERS)
+
 
 ### FLASK API ENDPOINT
-runner = ProcessPoolExecutor(1)
-
-
 @flaskApp.post("/experiment")
 def recv_experiment():
-    runner.submit(run_batch, request.get_json())
+    runner.submit(handle_exceptions_from_run, request.get_json())
     return 'OK'
 
 
+@flaskApp.errorhandler(CustomFlaskError)
+def glados_custom_flask_error(error):
+    return jsonify(error.to_dict()), error.status_code
+
+
+def handle_exceptions_from_run(data):
+    try:
+        run_batch(data)
+    except Exception as err:
+        print(f"Unexpected exception while trying to run the experiment, this was not caught by our own code and needs to be handled better: {err}")
+        logging.exception(err)
+        raise err
+
+
 def run_batch(data):
-    time.sleep(1)  # TODO purpose of this delay?
-    print(data)
+    print(f'Run_Batch starting with data {data}')
     experiments = firebaseDb.collection('Experiments')
 
-    #Parsing the argument data
+    # Obtain most basic experiment info
     expId = data['experiment']['id']
     print(f'received {expId}')
     expRef = experiments.document(expId)
+
+    # Parsing the argument data
     experiment = expRef.get().to_dict()
+    print(f"Experiment info: {experiment}")
     experiment['id'] = expId
-    experimentOutput = experiment['fileOutput']
-    resultOutput = experiment['resultOutput']
+    trialExtraFile = experiment['trialExtraFile']
+    trialResult = experiment['trialResult']
+    keepLogs = experiment['keepLogs']
+    trialTimeout = int(experiment['timeout'])
     scatterPlot = experiment['scatter']
     dumbTextArea = experiment['consts']
     postProcess = scatterPlot != ''
-    print(f"Experiment info: {experiment}")
 
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    if experimentOutput != '' or postProcess != '':
+    filepath = download_experiment_files(expId, experiment, trialExtraFile, keepLogs, postProcess)
+
+    #Determining experiment FileType -> how we need to execute it
+    rawfiletype, filetype = determine_experiment_file_type(filepath)
+    print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
+
+    #Generating Configs from hyperparameters
+    print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
+    configResult = generate_config_files(json.loads(experiment['params'])['params'], dumbTextArea)
+    if configResult is None:
+        raise GladosInternalError("Error generating configs - somehow no config files were produced?")
+    numExperimentsToRun = len(configResult) - 1
+
+    #Updating with run information
+    expRef.update({"totalExperimentRuns": numExperimentsToRun + 1})
+
+    try:
+        #Running the Experiment
+        conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numExperimentsToRun, trialTimeout, keepLogs)
+
+        # Post Processing
+        post_process_experiment(expId, experiment, scatterPlot, postProcess)
+
+        #Uploading Experiment Results
+        upload_experiment_results(expId, trialExtraFile, postProcess)
+    except ExperimentAbort as err:
+        print(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
+        logging.exception(err)
+    except Exception as err:
+        print(f'Uncaught exception "{err}," the GLADOS code needs to be changed to handle this in a cleaner manner')
+        logging.exception(err)
+        raise err
+    finally:
+        #Updating Firebase Object
+        expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
+        print(f'Exiting experiment {expId}')
+        os.chdir('../..')
+
+
+def determine_experiment_file_type(filepath):
+    rawfiletype = magic.from_file(filepath)
+    print(rawfiletype)
+    filetype = 'unknown'
+    if 'Python script' in rawfiletype or 'python3' in rawfiletype:
+        filetype = 'python'
+    elif 'Java archive data (JAR)' in rawfiletype:
+        filetype = 'java'
+
+    if filetype == 'unknown':
+        print(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
+        raise NotImplementedError("Unknown experiment file type")
+    return rawfiletype, filetype
+
+
+def download_experiment_files(expId, experiment, trialExtraFile, keepLogs, postProcess):
+    if trialExtraFile != '' or postProcess != '' or keepLogs:
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {expId}')
@@ -101,101 +168,28 @@ def run_batch(data):
         filedata = firebaseBucket.blob(filepath)
         filedata.download_to_filename(filepath)
     except Exception as err:
-        #TODO update w/ error and return
-        print(f'Ran into {err} while trying to download experiment')
-        raise err
+        print(f"Error {err} occurred while trying to download experiment file")
+        raise GladosInternalError('Failed to download experiment files') from err
+    print(f"Downloaded {filepath} to ExperimentFiles/{expId}/{filepath}")
+    return filepath
 
-    #Determining FileType
-    rawfiletype = magic.from_file(filepath)
-    filetype = 'unknown'
-    if 'Python script' in rawfiletype:
-        filetype = 'python'
-    elif 'Java archive data (JAR)' in rawfiletype:
-        filetype = 'java'
 
-    if filetype == 'unknown':
-        #TODO return and update with error
-        raise Exception("Filetype Unknown")
-    print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
+def upload_experiment_results(expId, trialExtraFile, postProcess):
+    print('Uploading Results to the frontend')
+    uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
+    uploadBlob.upload_from_filename('results.csv')
 
-    #Generating Configs from hyperparameters
-    print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
-    configResult = gen_configs(json.loads(experiment['params'])['params'], dumbTextArea)
-    if configResult is None:
-        #TODO return and exit with error
-        raise Exception("Error generating configs - somehow no configs were produced")
-    numExperimentsToRun = len(configResult) - 1
+    if trialExtraFile != '' or postProcess:
+        print('Uploading Result Csvs')
+        try:
+            shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
+            uploadBlob = firebaseBucket.blob(f"results/result{expId}.zip")
+            uploadBlob.upload_from_filename('ResultCsvs.zip')
+        except Exception as err:
+            raise GladosInternalError("Error uploading to firebase") from err
 
-    #Updating with run information
-    expRef.update({"totalExperimentRuns": numExperimentsToRun + 1})
 
-    #Running the Experiment
-    print(f"Running Experiment {expId}")
-    expRef.update({"startedAtEpochMillis": int(time.time() * 1000)})
-    passes = 0
-    fails = 0
-    with open('results.csv', 'w', encoding="utf8") as expResults:
-        paramNames = get_config_paramNames('configFiles/0.ini')
-        writer = csv.writer(expResults)
-
-        #Timing the first experiment
-        startSeconds = time.time()
-        firstRun = run_experiment(filepath, f'configFiles/{0}.ini', filetype)
-        endSeconds = time.time()
-        timeTakenMinutes = (endSeconds - startSeconds) / 60
-        if resultOutput == '':
-            writer.writerow(["Experiment Run", "Result"] + paramNames)
-        else:
-            if (output := get_header_results(resultOutput)) is None:
-                #TODO update and return with error
-                raise Exception("Output error 1")
-            writer.writerow(["Experiment Run"] + output + paramNames)
-        if firstRun == PIPE_OUTPUT_ERROR_MESSAGE:
-            writer.writerow([0, "Error"])
-            print(f"Experiment {expId} ran into an error while running aborting")
-            fails += 1
-            expRef.update({'fails': fails})
-        elif numExperimentsToRun > 0:
-            #Running the rest of the experiments
-            #Estimating time for all experiments to run and informing frontend
-            estimatedTotalTimeMinutes = timeTakenMinutes * numExperimentsToRun
-            print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-            expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
-
-            print(f"result from running first experiment: {firstRun}\n Continuing now running {numExperimentsToRun}")
-            if experimentOutput != '':
-                add_to_batch(experimentOutput, 0)
-                firstRun = "In ResCsvs"
-            if resultOutput == '':
-                writer.writerow(["0", firstRun] + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
-            else:
-                if (output := get_output_results(resultOutput)) is None:
-                    #TODO update and return with error
-                    raise Exception("Output error 2")
-                writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
-            for i in range(1, numExperimentsToRun + 1):
-                res = run_experiment(filepath, f'configFiles/{i}.ini', filetype)
-                if experimentOutput != '':
-                    res = 'In ResCsvs'
-                    add_to_batch(experimentOutput, i)
-                if resultOutput == '':
-                    writer.writerow([i, res] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
-                else:
-                    output = get_output_results(resultOutput)
-                    if output is None:
-                        #TODO update and return with error
-                        raise Exception("Output error 3")
-                    writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
-                if res != PIPE_OUTPUT_ERROR_MESSAGE:
-                    passes += 1
-                    expRef.update({'passes': passes})
-                else:
-                    fails += 1
-                    expRef.update({'fails': fails})
-        passes += 1
-        expRef.update({'passes': passes})
-        print("Finished running Experiments")
-
+def post_process_experiment(expId, experiment, scatterPlot, postProcess):
     if postProcess:
         print("Beginning post processing")
         try:
@@ -203,220 +197,9 @@ def run_batch(data):
                 print("Creating Scatter Plot")
                 depVar = experiment['scatterDepVar']
                 indVar = experiment['scatterIndVar']
-                plots.scatterPlot(indVar, depVar, 'results.csv', expId)
+                generateScatterPlot(indVar, depVar, 'results.csv', expId)
         except KeyError as err:
-            print(f"error during plot generation: {err}")
-
-    #Uploading Experiment Results
-    print('Uploading Results to the frontend')
-    uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
-    uploadBlob.upload_from_filename('results.csv')
-    # Upload to MongoDB
-    mongoClient = pymongo.MongoClient('glados-mongodb', 27017, serverSelectionTimeoutMS=1000)
-    print(mongoClient.server_info)
-    mongoGladosDB = mongoClient["gladosdb"]
-    mongoResultsCollection = mongoGladosDB.results
-
-    
-    print('Uploading to MongoDB')
-    experimentFile = open(f"results/result{expId}.csv") # there is probably a better way to do this
-    experimentData = experimentFile.read()
-    experimentFile.close()
-    experimentResult = {"_id": expId,
-                        "resultContent": experimentData}
-    
-    resultId = mongoResultsCollection.insert_one(experimentResult).inserted_id
-    print(f"inserted into mongodb with id: {resultId}")
-    if experimentOutput != '' or postProcess:
-        print('Uploading Result Csvs')
-        try:
-            shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-            uploadBlob = firebaseBucket.blob(f"results/result{expId}.zip")
-            uploadBlob.upload_from_filename('ResultCsvs.zip')
-        except Exception as err:
-            raise Exception("Error uploading to firebase") from err
-
-    #Updating Firebase Object
-    expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
-    print(f'Exiting experiment {expId}')
-    os.chdir('../..')
-
-
-### UTILS
-def run_experiment(experiment_path, config_path, filetype):
-    #make sure that the cwd is ExperimentsFiles/{ExperimentId}
-    if filetype == 'python':
-        with Popen(['python', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as p:
-            return get_data(p)
-    elif filetype == 'java':
-        with Popen(['java', '-jar', experiment_path, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as p:
-            return get_data(p)
-
-
-def get_header_results(filename):
-    with open(filename, mode='r', encoding="utf8") as file:
-        reader = csv.reader(file)
-        for line in reader:
-            return line
-
-
-def get_output_results(filename):
-    with open(filename, mode='r', encoding="utf8") as file:
-        reader = csv.reader(file)
-        i = 0
-        for line in reader:
-            if i == 1:
-                return line
-            i += 1
-
-
-def get_data(p):
-    try:
-        data = p.communicate()
-        if data[1]:
-            print(f'errors returned from pipe is {data[1]}')
-            return PIPE_OUTPUT_ERROR_MESSAGE
-    # pylint: disable-next=broad-except # TODO do we want this to be able to catch any exception and consider it an experiment error?
-    except Exception as e:
-        print("Encountered another exception while reading pipe")
-        print(e)
-        return PIPE_OUTPUT_ERROR_MESSAGE
-    result = data[0].split('\n')[0]
-    print(f"result data: {result}")
-    return result
-
-
-def add_to_batch(fileOutput, ExpRun):
-    try:
-        shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
-    except Exception as err:
-        raise Exception("Failed to copy results csv") from err
-
-
-def get_config_paramNames(configfile):
-    config = configparser.ConfigParser()
-    config.read(configfile)
-    res = []
-    for section in list(config):
-        res += [key for key in list(config[section]) if key not in res]
-    res.sort()
-    return res
-
-def get_configs_ordered(configfile, names):
-    config = configparser.ConfigParser()
-    config.read(configfile)
-    res = []
-    for key in names:
-        for index, section in enumerate(list(config)):
-            try: #this part is kind of stupid but hey! it works fine
-                val = config[section][key]
-                res.append(val)
-                break
-            except KeyError:
-                if index == len(names):
-                    print("NO VAL ASSOCIATED WITH KEY") #TODO RAISE NO CONFIG ERROR
-    return res
-
-
-def frange(start, stop, step=None):
-    if step is None:
-        step = 1.0
-    count = 0
-    while True:
-        temp = float(start + count * step)
-        if temp >= stop:
-            break
-        yield temp
-        count += 1
-
-
-def gen_list(otherVar, paramspos):
-    if otherVar['type'] == 'integer':
-        step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(otherVar['step']) == 0 else otherVar['step']
-        if otherVar['max'] == otherVar['min']:
-            otherVar['max'] = int(otherVar['max']) + int(step)
-        paramspos.append([(otherVar['name'], i) for i in range(int(otherVar['min']), int(otherVar['max']), int(step))])
-    elif otherVar['type'] == 'float':
-        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' or float(otherVar['step']) == 0 else otherVar['step']
-        if otherVar['max'] == otherVar['min']:
-            otherVar['max'] = float(otherVar['max']) + float(step)
-        paramspos.append([(otherVar['name'], i) for i in frange(float(otherVar['min']), float(otherVar['max']), float(step))])
-    elif otherVar['type'] == 'string':
-        paramspos.append([(otherVar['name'], otherVar['default'])])
-    elif otherVar['type'] == 'bool':
-        paramspos.append([(otherVar['name'], val) for val in [True, False]])
-
-
-def gen_configs(hyperparams, unparsedConstInfo):
-    os.mkdir('configFiles')
-    os.chdir('configFiles')
-    configIdNumber = 0
-    constants = {}
-    parameters = []
-    configs = []
-    for param in hyperparams:
-        try:
-            if (param['type'] == 'integer' or param['type'] == 'float') and param['min'] == param['max']:
-                print('param ' + param['name'] + ' has the same min and max value converting to constant')
-                constants[param['name']] = param['min']
-            elif param['type'] == 'string':
-                print('param ' + param['name'] + ' is a string, adding to constants')
-                constants[param['name']] = param['default']
-            else:
-                print('param ' + param['name'] + ' varies, adding to batch')
-                parameters.append(param)
-        except KeyError as err:
-            raise Exception(f'{err} during finding constants') from err
-
-    for defaultVar in parameters:
-        print(f'Keeping {defaultVar} constant')
-        try:
-            paramspos = []
-            default = [(defaultVar['name'], defaultVar['default'])]
-            paramspos.append(default)
-        except KeyError as err:
-            print(f"Some sorta error with accessing default {err}")
-            return None
-        for otherVar in hyperparams:
-            if otherVar['name'] != defaultVar['name']:
-                try:
-                    gen_list(otherVar, paramspos)
-                except KeyError as err:
-                    raise Exception(f'error {err} during list generation') from err
-        try:
-            permutations = list(itertools.product(*paramspos))
-        except Exception as err:
-            raise Exception(f"Error {err} while making permutations") from err
-        for thisPermutation in permutations:
-            outputConfig = configparser.ConfigParser()
-            outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
-            configItems = {}
-            for item in thisPermutation:
-                configItems[item[0]] = item[1]
-            configItems.update(constants)
-            configs.append(configItems)
-            outputConfig["DEFAULT"] = configItems
-            with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
-                outputConfig.write(configFile)
-                configFile.write(unparsedConstInfo)
-                configFile.close()
-                print(f"Finished writing config {configIdNumber}")
-
-            configIdNumber += 1
-    os.chdir('..')
-    print("Finished generating configs")
-    return configs
-
-
-def gen_consts(toParse: str):
-    res = {}
-    if toParse != '':
-        parsedLst = toParse.split('\n')
-        #Splits each element of the parsed list on = then strips extra white space, programming scheme style! (Sorry Rob)
-        fullyParsed = list(map(lambda unparsedConst: map(lambda ind: ind.strip(), unparsedConst.split('=')), parsedLst))
-        for const, val in fullyParsed:
-            res[const] = val
-    return res
+            raise GladosInternalError("Error during plot generation") from err
 
 
 if __name__ == '__main__':

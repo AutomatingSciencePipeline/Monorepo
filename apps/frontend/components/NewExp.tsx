@@ -15,6 +15,7 @@ import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 
+const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 
 export const FormStates = {
 	Closed: -1,
@@ -66,13 +67,15 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			parameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
-			fileOutput: '',
-			resultOutput: '',
+			trialExtraFile: '',
+			trialResult: '',
 			scatterIndVar: '',
 			scatterDepVar: '',
 			dumbTextArea: '',
+			timeout: DEFAULT_TRIAL_TIMEOUT_SECONDS,
 			verbose: false,
 			scatter: false,
+			keepLogs: true,
 			nWorkers: 1,
 		},
 		schema: joiResolver(experimentSchema),
@@ -89,14 +92,16 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 						parameters: formList(params),
 						name: expInfo['name'],
 						description: expInfo['description'],
-						fileOutput: expInfo['fileOutput'],
-						resultOutput: expInfo['resultOutput'],
+						trialExtraFile: expInfo['trialExtraFile'],
+						trialResult: expInfo['trialResult'],
 						verbose: expInfo['verbose'],
 						nWorkers: expInfo['workers'],
 						scatter: expInfo['scatter'],
 						dumbTextArea: expInfo['consts'],
 						scatterIndVar: expInfo['scatterIndVar'],
 						scatterDepVar: expInfo['scatterDepVar'],
+						timeout: expInfo['timeout'],
+						keepLogs: expInfo['keepLogs'],
 					});
 					setCopyId(null);
 					setStatus(FormStates.Info);

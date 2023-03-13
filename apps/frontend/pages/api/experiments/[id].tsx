@@ -10,7 +10,10 @@ async function sendViaUrl(url: string, id, key, res) {
 		// credentials:
 		body: JSON.stringify({ experiment: { id, key } }),
 	});
-	res.status(200).json({ response: response });
+	if (!response.ok) {
+		console.error(`Error while handling upload for id ${id}: `, response);
+	}
+	res.status(response.status).json({ response: response });
 }
 
 const handler = async (req, res) => {
