@@ -24,7 +24,7 @@ def generate_list(otherVar, paramspos):
     if otherVar['type'] == 'integer':
         step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(otherVar['step']) == 0 else otherVar['step']
         if otherVar['max'] == otherVar['min']:
-            otherVar['max'] = int(otherVar['max']) + int(step)
+            otherVar['max'] = int(otherVar['max']) + int(step) #TODO: Should this line be removed? Should already be a constant from gather_params
         paramspos.append([(otherVar['name'], i) for i in range(int(otherVar['min']), int(otherVar['max']), int(step))])
     elif otherVar['type'] == 'float':
         step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' or float(otherVar['step']) == 0 else otherVar['step']
