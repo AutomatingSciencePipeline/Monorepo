@@ -18,15 +18,15 @@ export type FirebaseUserId = FirebaseId;
 export type ExperimentDocumentId = FirebaseDocumentId;
 
 export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId): Promise<FirebaseId> => {
-	const newExperiment = doc(experiments, undefined);
+	const newExperimentDocument = doc(experiments);
 	console.log('Experiment submitted. Values:', values);
-	setDoc(newExperiment, {
+	setDoc(newExperimentDocument, {
 		creator: userId,
 		name: values.name,
 		description: values.description,
 		verbose: values.verbose,
 		workers: values.workers,
-		expId: newExperiment.id,
+		expId: newExperimentDocument.id,
 		trialExtraFile: values.trialExtraFile,
 		trialResult: values.trialResult,
 		timeout: values.timeout,
@@ -43,8 +43,8 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 		estimatedTotalTimeMinutes: 0,
 		expToRun: 0,
 	});
-	console.log(`Created Experiment: ${newExperiment.id}`);
-	return newExperiment.id;
+	console.log(`Created Experiment: ${newExperimentDocument.id}`);
+	return newExperimentDocument.id;
 };
 
 

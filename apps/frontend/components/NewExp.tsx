@@ -66,7 +66,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
-			parameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
+			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			trialExtraFile: '',
@@ -91,7 +91,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 					const expInfo = docSnap.data();
 					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
 					form.setValues({
-						parameters: formList(hyperparameters),
+						hyperparameters: formList(hyperparameters),
 						name: expInfo['name'],
 						description: expInfo['description'],
 						trialExtraFile: expInfo['trialExtraFile'],
@@ -116,7 +116,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 
-	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
+	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
 	});
 

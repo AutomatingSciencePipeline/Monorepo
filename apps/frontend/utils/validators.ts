@@ -37,7 +37,7 @@ export const experimentSchema = Joi.object().keys({
 	name: Joi.string().required(),
 	description: Joi.string(),
 	verbose: Joi.boolean(),
-	parameters: Joi.array().items(intschema, floatschema, boolschema, strschema),
+	hyperparameters: Joi.array().items(intschema, floatschema, boolschema, strschema),
 	workers: Joi.number().integer().required(),
 });
 
