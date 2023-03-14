@@ -22,9 +22,11 @@ services:
     volumes:
         - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
     ports:
+        # Exposed to the Host : Port inside the container Container https://docs.docker.com/compose/compose-file/compose-file-v3/#ports
         # TODO does this need to be exposed to host?
         - ${BACKEND_PORT}:${BACKEND_PORT}
     expose:
+        # Exposed to other containers in the same network https://docs.docker.com/compose/compose-file/compose-file-v3/#expose
         - "${BACKEND_PORT}"
 
   app-frontend:
@@ -37,9 +39,11 @@ services:
       FRONTEND_WEBSERVER_PORT: ${FRONTEND_WEBSERVER_PORT}
     working_dir: /app
     ports:
+      # Exposed to the Host : Port inside the container Container https://docs.docker.com/compose/compose-file/compose-file-v3/#ports
       - ${FRONTEND_WEBSERVER_PORT}:${FRONTEND_WEBSERVER_PORT}
       - 80:${FRONTEND_WEBSERVER_PORT}
     expose:
+      # Exposed to other containers in the same network https://docs.docker.com/compose/compose-file/compose-file-v3/#expose
       - "${FRONTEND_WEBSERVER_PORT}"
       - "80"
 

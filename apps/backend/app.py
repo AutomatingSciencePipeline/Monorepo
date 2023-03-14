@@ -50,6 +50,8 @@ CORS(flaskApp)
 MAX_WORKERS = 1
 runner = ProcessPoolExecutor(MAX_WORKERS)
 
+DB_COLLECTION_EXPERIMENTS = 'Experiments'
+
 
 ### FLASK API ENDPOINT
 @flaskApp.post("/experiment")
@@ -74,7 +76,7 @@ def handle_exceptions_from_run(data):
 
 def run_batch(data):
     print(f'Run_Batch starting with data {data}')
-    experiments = firebaseDb.collection('Experiments')
+    experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
 
     # Obtain most basic experiment info
     expId = data['experiment']['id']
@@ -90,7 +92,7 @@ def run_batch(data):
     keepLogs = experiment['keepLogs']
     trialTimeout = int(experiment['timeout'])
     scatterPlot = experiment['scatter']
-    dumbTextArea = experiment['consts']
+    dumbTextArea = experiment['dumbTextArea']
     postProcess = scatterPlot != ''
 
     #Downloading Experiment File
@@ -104,7 +106,7 @@ def run_batch(data):
 
     #Generating Configs from hyperparameters
     print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
-    configResult = generate_config_files(json.loads(experiment['params'])['params'], dumbTextArea)
+    configResult = generate_config_files(json.loads(experiment['hyperparameters'])['hyperparameters'], dumbTextArea)
     if configResult is None:
         raise GladosInternalError("Error generating configs - somehow no config files were produced?")
     numExperimentsToRun = len(configResult) - 1

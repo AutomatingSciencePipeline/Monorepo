@@ -1,6 +1,6 @@
 import NewExp, { FormStates } from '../components/NewExp';
 import { useAuth } from '../firebase/fbAuth';
-import { subscribeToExp, listenToExperiments, downloadExp, downloadExpZip } from '../firebase/db';
+import { subscribeToExp, listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -193,7 +193,7 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 				{project['finished'] == true ?
 					<button type= "button" data-id={project.expId}
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={downloadExp}>
+						onClick={downloadExperimentResults}>
 						Download Results
 					</button> :
 					null
@@ -201,7 +201,7 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
 					<button type= "button" data-id={project.expId}
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={downloadExpZip}>
+						onClick={downloadExperimentProjectZip}>
 						Download Project Zip
 					</button> :
 					null

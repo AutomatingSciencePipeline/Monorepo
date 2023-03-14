@@ -38,7 +38,7 @@ export const experimentSchema = Joi.object().keys({
 	description: Joi.string(),
 	verbose: Joi.boolean(),
 	parameters: Joi.array().items(intschema, floatschema, boolschema, strschema),
-	nWorkers: Joi.number().integer().required(),
+	workers: Joi.number().integer().required(),
 });
 
 export const signUpSchema = Joi.object().keys({
