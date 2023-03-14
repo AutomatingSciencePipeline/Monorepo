@@ -193,7 +193,7 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
         
     
     print('Uploading to MongoDB')
-    experimentFile = open(f"results/result{expId}.csv") # there is probably a better way to do this
+    experimentFile = open(f"results.csv") # there is probably a better way to do this
     experimentData = experimentFile.read()
     experimentFile.close()
     experimentResult = {"_id": expId,
