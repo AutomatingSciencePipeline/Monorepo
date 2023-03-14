@@ -6,7 +6,8 @@
 		"dev": "cross-env NODE_OPTIONS='--inspect' next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
