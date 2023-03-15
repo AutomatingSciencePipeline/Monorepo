@@ -44,18 +44,21 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 MAX_WORKERS = 1
 runner = ProcessPoolExecutor(MAX_WORKERS)
-
 DB_COLLECTION_EXPERIMENTS = 'Experiments'
 
 #setting up the Flask webserver (handles the uploaded experiment files)
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
-
 @flaskApp.post("/experiment")
 def recv_experiment():
     runner.submit(handle_exceptions_from_run, request.get_json())
     return 'OK'
+
+
+@flaskApp.get("/queue")
+def get_queue():
+    return jsonify({"queueSize": len(runner._pending_work_items)})
 
 
 @flaskApp.errorhandler(CustomFlaskError)
