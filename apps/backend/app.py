@@ -27,6 +27,7 @@ except ImportError:
 HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
 
 ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
+DB_COLLECTION_EXPERIMENTS = 'Experiments'
 
 FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
 if FIREBASE_CREDENTIALS is None:
@@ -44,7 +45,6 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 MAX_WORKERS = 1
 runner = ProcessPoolExecutor(MAX_WORKERS)
-DB_COLLECTION_EXPERIMENTS = 'Experiments'
 
 #setting up the Flask webserver (handles the uploaded experiment files)
 flaskApp = Flask(__name__)
