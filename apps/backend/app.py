@@ -13,6 +13,9 @@ from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 import pymongo
 from pymongo.errors import ConnectionFailure
+import base64
+import bson
+from bson.binary import Binary
 
 from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, GladosInternalError, ExperimentAbort
@@ -46,7 +49,11 @@ firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 #MongoDB Objects
-
+mongoClient = pymongo.MongoClient('glados-mongodb', 27017, serverSelectionTimeoutMS=1000)
+print(mongoClient.server_info)
+mongoGladosDB = mongoClient["gladosdb"]
+mongoResultsCollection = mongoGladosDB.results
+mongoResultsZipCollections = mongoGladosDB.zips
 #setting up the app
 flaskApp = Flask(__name__)
 CORS(flaskApp)
@@ -181,10 +188,6 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
     uploadBlob.upload_from_filename('results.csv')
 
         # Upload to MongoDB
-    mongoClient = pymongo.MongoClient('glados-mongodb', 27017, serverSelectionTimeoutMS=1000)
-    print(mongoClient.server_info)
-    mongoGladosDB = mongoClient["gladosdb"]
-    mongoResultsCollection = mongoGladosDB.results
 
     try:
             mongoClient.admin.command('ping')
@@ -196,17 +199,25 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
     experimentFile = open(f"results.csv") # there is probably a better way to do this
     experimentData = experimentFile.read()
     experimentFile.close()
-    experimentResult = {"_id": expId,
+    experimentResultEntry = {"_id": expId,
                         "resultContent": experimentData}
     
-    resultId = mongoResultsCollection.insert_one(experimentResult).inserted_id
-    print(f"inserted into mongodb with id: {resultId}")
+    resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
+    print(f"inserted result csv into mongodb with id: {resultId}")
     if trialExtraFile != '' or postProcess:
         print('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
             uploadBlob = firebaseBucket.blob(f"results/result{expId}.zip")
             uploadBlob.upload_from_filename('ResultCsvs.zip')
+            
+            # mongoResultsZipCollections
+            with open("ResultCsvs.zip", "rb") as file:
+                encoded = Binary(file.read())
+            experimentZipEntry = {"_id": expId,
+                            "fileContent": encoded}
+            resultZipId = mongoResultsZipCollections.insert_one(experimentZipEntry).inserted_id
+            print(f"inserted zip file into mongodb with id: {resultZipId}")
         except Exception as err:
             raise GladosInternalError("Error uploading to firebase") from err
 
