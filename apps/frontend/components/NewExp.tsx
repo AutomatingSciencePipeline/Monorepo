@@ -87,7 +87,13 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 			getDoc(doc(db, 'Experiments', copyID)).then((docSnap) => {
 				if (docSnap.exists()) {
 					const expInfo = docSnap.data();
-					const params = JSON.parse(expInfo['params'])['params'];
+					let params;
+					try {
+						params = JSON.parse(expInfo['params'])['params'];
+					} catch (error) {
+						console.error(error);
+						alert('Unexpected data encountered while copying experiment. Did you copy one with old settings?');
+					}
 					form.setValues({
 						parameters: formList(params),
 						name: expInfo['name'],
