@@ -30,13 +30,13 @@ const Parameter = ({ form, type, index, ...rest }) => {
 							type='text'
 							placeholder='name'
 							className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-							{...form.getListInputProps('parameters', index, 'name')}
+							{...form.getListInputProps('hyperparameters', index, 'name')}
 							required
 						/>
 						<Component form={form} type={type} index={index} {...rest} />
 						<ActionIcon
 							color='red'
-							onClick={() => form.removeListItem('parameters', index)}
+							onClick={() => form.removeListItem('hyperparameters', index)}
 							className='ml-2'
 						>
 							<Trash/>
@@ -59,7 +59,7 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 						placeholder={`${label}`}
 						className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 						required
-						{...form.getListInputProps('parameters', index, label)}
+						{...form.getListInputProps('hyperparameters', index, label)}
 					/>
 				);
 			})}
@@ -73,7 +73,7 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 			label={'value'}
 			onLabel={'True'}
 			offLabel={'False'}
-			{...form.getListInputProps('parameters', index, 'default')}
+			{...form.getListInputProps('hyperparameters', index, 'default')}
 		/>
 	);
 };
@@ -85,7 +85,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 				type='text'
 				placeholder={`${type} value`}
 				className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-				{...form.getListInputProps('parameters', index, 'default')}
+				{...form.getListInputProps('hyperparameters', index, 'default')}
 				required
 			/>
 		</>
