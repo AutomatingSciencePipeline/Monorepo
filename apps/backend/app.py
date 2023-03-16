@@ -62,7 +62,6 @@ runner = ProcessPoolExecutor(MAX_WORKERS)
 DB_COLLECTION_EXPERIMENTS = 'Experiments'
 
 #setting up the Flask webserver (handles the uploaded experiment files)
-
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
