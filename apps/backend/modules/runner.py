@@ -10,8 +10,10 @@ from modules.exceptions import ExperimentAbort, FileHandlingError, GladosUserErr
 from modules.exceptions import InternalTrialFailedError
 from modules.configs import get_config_paramNames
 
-PIPE_OUTPUT_ERROR_MESSAGE = "ERROR"
+PIPE_OUTPUT_ERROR_MESSAGE = "ERROR" #TODO TURN TO EXCEPTION
 OUTPUT_INDICATOR_USING_CSVS = "In ResCsvs"
+PROCESS_OUT_STREAM = 0
+PROCESS_ERROR_STREAM = 1
 
 
 def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
@@ -19,14 +21,14 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout:
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
             os.chdir('ResCsvs')
-            with open(f"log{trialRun}.txt", 'w', encoding='utf8') as f:
-                f.write(data[0])
+            with open(f"log{trialRun}.txt", 'w', encoding='utf8') as trialLogFile:
+                trialLogFile.write(data[PROCESS_OUT_STREAM])
                 if data[1]:
-                    f.write(data[1])
-                f.close()
+                    trialLogFile.write(data[PROCESS_ERROR_STREAM])
+                trialLogFile.close()
             os.chdir('..')
-        if data[1]:
-            print(f'errors returned from pipe is {data[1]}')
+        if data[PROCESS_ERROR_STREAM]: #TODO TURN TO EXCEPTION follow the cases below
+            print(f'errors returned from pipe is {data[PROCESS_ERROR_STREAM]}')
             return PIPE_OUTPUT_ERROR_MESSAGE
     except TimeoutExpired as timeErr: 
         print(f"{timeErr} Trial timed out")
@@ -34,7 +36,7 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout:
     except Exception as err:
         print("Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
-    result = data[0].split('\n')[0]
+    result = data[0].split('\n')[0] #TODO ask yoder if this is still relevant
     print(f"trial#{trialRun} result data: {result}")
     return result
 
@@ -49,7 +51,8 @@ def run_trial(experiment_path, config_path, filetype, trialRun: int, keepLogs: b
             return get_data(process, trialRun, keepLogs, trialTimeout)
 
 
-def get_first_line_of_trial_results_csv(filename):
+def get_first_line_of_trial_results_csv(filename):#Header of a 2 line result csv
+    #TODO collapse with below function
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
@@ -59,7 +62,7 @@ def get_first_line_of_trial_results_csv(filename):
         raise GladosUserError("Failed to read trial results csv first line, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
-def get_output_results(filename):
+def get_second_line_of_trial_results_csv(filename):#Values of a 2 line result csv
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
@@ -68,7 +71,7 @@ def get_output_results(filename):
                 if i == 1:
                     return line
                 i += 1
-    except Exception as err:
+    except Exception as err: #TODO add more exception handling for blank file and 1 line file
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
@@ -116,12 +119,16 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
             fails += 1
             expRef.update({'fails': fails})
             raise ExperimentAbort(message) from err
+        
+        
+        
         endSeconds = time.time()
-        timeTakenMinutes = (endSeconds - startSeconds) / 60
+        timeTakenMinutes = (endSeconds - startSeconds) / 60   
         #Estimating time for all experiments to run and informing frontend
         estimatedTotalTimeMinutes = timeTakenMinutes * numTrialsToRun
         print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
         expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
+        
 
         passes += 1
         expRef.update({'passes': passes})
@@ -139,7 +146,7 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
             if trialResult == '':
                 writer.writerow(["0", firstTrial] + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             else:
-                if (output := get_output_results(trialResult)) is None:
+                if (output := get_second_line_of_trial_results_csv(trialResult)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the first run?) (David, improve this error message please)")
                 writer.writerow(["0"] + output + get_configs_ordered(f'configFiles/{0}.ini', paramNames))
             for i in range(1, numTrialsToRun + 1):
@@ -163,7 +170,7 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                 if trialResult == '':
                     writer.writerow([i, response_data] + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
                 else:
-                    output = get_output_results(trialResult)
+                    output = get_second_line_of_trial_results_csv(trialResult)
                     if output is None:
                         raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
                     writer.writerow([i] + output + get_configs_ordered(f'configFiles/{i}.ini', paramNames))
