@@ -212,9 +212,11 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
     experimentFile.close()
     experimentResultEntry = {"_id": expId,
                         "resultContent": experimentData}
-    
-    resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
-    print(f"inserted result csv into mongodb with id: {resultId}")
+    try:
+        resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
+        print(f"inserted result csv into mongodb with id: {resultId}")
+    except Exception as err:
+        raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
     if trialExtraFile != '' or postProcess:
         print('Uploading Result Csvs')
         try:
@@ -227,8 +229,11 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
                 encoded = Binary(file.read())
             experimentZipEntry = {"_id": expId,
                             "fileContent": encoded}
-            resultZipId = mongoResultsZipCollections.insert_one(experimentZipEntry).inserted_id
-            print(f"inserted zip file into mongodb with id: {resultZipId}")
+            try:
+                resultZipId = mongoResultsZipCollections.insert_one(experimentZipEntry).inserted_id
+                print(f"inserted zip file into mongodb with id: {resultZipId}")
+            except Exception as err:
+                raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
         except Exception as err:
             raise GladosInternalError("Error uploading to firebase") from err
 
