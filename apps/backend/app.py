@@ -204,8 +204,8 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
 
     try:
             mongoClient.admin.command('ping')
-    except ConnectionFailure:
-        print("Server not available (this is an error)")
+    except ConnectionFailure as err:
+        raise GladosInternalError("MongoDB server not available/unreachable") from err
         
     
     print('Uploading to MongoDB')
