@@ -1,42 +1,48 @@
 # Usage
-#   Start:          docker-compose up
-#   With helpers:   docker-compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml up
-#   Stop:           docker-compose down
-#   Destroy:        docker-compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml down -v --remove-orphans
+#   Start:          docker compose up
+#   With helpers:   docker compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml up
+#   Stop:           docker compose down
+#   Destroy:        docker compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml down -v --remove-orphans
 
 version: '3'
 name: glados-project
+
+# Make sure you have a .env file in the root of the project, it supplies variables in the ${}
 
 services:
   app-backend:
     build:
       context: ./apps/backend
       dockerfile: ./backend.Dockerfile
+      target: production
     container_name: glados-backend
     environment:
       FIREBASE_KEY: ${FIREBASE_KEY}
+      BACKEND_PORT: ${BACKEND_PORT}
     volumes:
         - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
-    # TODO switch to ${BACKEND_PORT}
     ports:
         # TODO does this need to be exposed to host?
-        - 5050:5050
+        - ${BACKEND_PORT}:${BACKEND_PORT}
     expose:
-        - "5050"
+        - "${BACKEND_PORT}"
 
   app-frontend:
     build:
       context: ./apps/frontend
       dockerfile: ./frontend.Dockerfile
+      target: runner
     container_name: glados-frontend
-    working_dir: /home/node/app
-    # TODO switch to ${FRONTEND_WEBSERVER_PORT}
+    environment:
+      FRONTEND_WEBSERVER_PORT: ${FRONTEND_WEBSERVER_PORT}
+    working_dir: /app
     ports:
-      - 3000:3000
-      - 80:3000
+      - ${FRONTEND_WEBSERVER_PORT}:${FRONTEND_WEBSERVER_PORT}
+      - 80:${FRONTEND_WEBSERVER_PORT}
     expose:
-      - "3000"
+      - "${FRONTEND_WEBSERVER_PORT}"
       - "80"
+
   app-mongodb:
     image: mongo
     container_name: glados-mongodb

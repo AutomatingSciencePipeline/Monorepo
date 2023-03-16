@@ -10,12 +10,13 @@ import {
 	RectangleStackIcon,
 	MagnifyingGlassIcon,
 	BarsArrowUpIcon,
-
+	QueueListIcon,
 } from '@heroicons/react/24/solid';
 import { Logo } from '../components/Logo';
 import classNames from 'classnames';
 import Router from 'next/router';
 import Image from 'next/image';
+import { setInterval } from 'timers';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -198,7 +199,7 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 					</button> :
 					null
 				}
-				{project['finished'] == true && (project['fileOutput'] || project['scatter'] || project['keepLogs']) ?
+				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
 					<button type= "button" data-id={project.expId}
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={downloadExpZip}>
@@ -315,6 +316,46 @@ export default function DashboardPage() {
 		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList));
 	}, [userId]);
 
+	const QUEUE_UNKNOWN_LENGTH = -1;
+	const QUEUE_ERROR_LENGTH = -2;
+	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
+
+	const queryQueueLength = () => {
+		console.log('Querying queue length');
+		setQueueLength(QUEUE_UNKNOWN_LENGTH);
+		fetch('/api/queue').then((res) => res.json()).then((data) => {
+			console.log('Data back is', data);
+			const value = data.response.queueSize;
+			if (typeof value === 'number') {
+				setQueueLength(value);
+			} else {
+				setQueueLength(QUEUE_ERROR_LENGTH);
+			}
+		}).catch((err) => {
+			console.error('Error fetching queue length', err);
+		});
+	};
+
+	// const QUEUE_RECHECK_INTERVAL_MS = 4000;
+	useEffect(() => {
+		queryQueueLength();
+		// TODO this seems to cause ghost intervals to be left behind, maybe hot reload's fault?
+		// console.log('⏰ Setting up queue length checking timer');
+		// const intervalId = setInterval(() => {
+		// 	fetch('/api/queue').then((res) => res.json()).then((data) => {
+		// 		console.log('Data back is', data);
+		// 		setQueueLength(data.response.queueSize);
+		// 	}).catch((err) => {
+		// 		console.error('Error fetching queue length', err);
+		// 	});
+		// }, QUEUE_RECHECK_INTERVAL_MS);
+		// return () => {
+		// 	console.log('⏰ Clearing queue length checking timer');
+		// 	clearInterval(intervalId);
+		// };
+	}, []);
+
+
 	const [copyID, setCopyId] = useState(null);
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
@@ -403,8 +444,27 @@ export default function DashboardPage() {
 													aria-hidden='true'
 												/>
 												<span className='text-sm text-gray-500 font-medium'>
-													{experiments?.length} project
+													{experiments?.length} project{experiments?.length == 1 ? '' : 's'}
 												</span>
+											</div>
+											<div className='flex items-center space-x-2'>
+												<QueueListIcon
+													className='h-5 w-5 text-blue-400'
+													aria-hidden='true'
+												/>
+												<span className={`text-sm text-${queueLength == QUEUE_ERROR_LENGTH ? 'red' : 'blue'}-500 font-medium`}>
+													{queueLength == QUEUE_ERROR_LENGTH ?
+														'Error - Glados Backend Offline' :
+														(queueLength == QUEUE_UNKNOWN_LENGTH) ?
+															'Loading...' :
+															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
+													}
+												</span>
+												<button type= "button"
+													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+													onClick={queryQueueLength}>
+													TEMP Manual Query
+												</button>
 											</div>
 										</div>
 									</div>
@@ -486,7 +546,6 @@ export default function DashboardPage() {
 								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 							>
 								{experiments?.map((project: any) => { // TODO a type for experiments should alleviate the need for `any` here
-									console.log('Project for this experiment is', project);
 									return (
 										<li
 											key={project.expId}

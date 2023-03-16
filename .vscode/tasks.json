@@ -18,9 +18,15 @@
             }
         },
         {
-            "label": "Docker Compose Up (Attached)",
+            "label": "DEVELOPMENT Docker Compose Up (Attached)",
             "type": "shell",
-            "command": "docker-compose up --build",
+            "command": "docker compose --file docker-compose.yml --file docker-compose.dev.yml up --build",
+            "problemMatcher": []
+        },
+        {
+            "label": "PRODUCTION Docker Compose Up (Attached)",
+            "type": "shell",
+            "command": "docker compose up --build",
             "problemMatcher": []
         }
     ]

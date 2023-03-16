@@ -25,22 +25,32 @@ export const InformationStep = ({ form, ...props }) => {
 					</div>
 				</InputSection>
 
-				<InputSection header={'File Output'}>
+				<InputSection header={"Trial's Extra File"}>
 					<div className='sm:col-span-4'>
 						<input
 							type='text'
 							placeholder='Name and extension of the output CSV file'
-							{...form.getInputProps('fileOutput')}
+							{...form.getInputProps('trialExtraFile')}
 							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 						/>
 					</div>
 				</InputSection>
-				<InputSection header={'Result Output'}>
+				<InputSection header={'Trial Result'}>
 					<div className='sm:col-span-4'>
 						<input
 							type='text'
 							placeholder='Name and extension of the experiment results file'
-							{...form.getInputProps('resultOutput')}
+							{...form.getInputProps('trialResult')}
+							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+						/>
+					</div>
+				</InputSection>
+				<InputSection header={'Trial Timeout'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='number'
+							placeholder='Maximum length for an trial to run in seconds'
+							{...form.getInputProps('timeout')}
 							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 						/>
 					</div>
