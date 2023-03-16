@@ -51,7 +51,6 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 #MongoDB Objects
 mongoClient = pymongo.MongoClient('glados-mongodb', 27017, serverSelectionTimeoutMS=1000)
-print(mongoClient.server_info)
 mongoGladosDB = mongoClient["gladosdb"]
 mongoResultsCollection = mongoGladosDB.results
 mongoResultsZipCollections = mongoGladosDB.zips
