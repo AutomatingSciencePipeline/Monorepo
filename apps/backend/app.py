@@ -199,8 +199,7 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
     uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
     uploadBlob.upload_from_filename('results.csv')
 
-        # Upload to MongoDB
-
+    # Upload to MongoDB
     try:
             mongoClient.admin.command('ping')
     except ConnectionFailure:
