@@ -16,6 +16,8 @@ python-dotenv = "*"
 matplotlib = "*"
 trycast = "*"
 pymongo = "*"
+pydantic = "*"
+pipfile = "*"
 
 [dev-packages]
 # libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)
