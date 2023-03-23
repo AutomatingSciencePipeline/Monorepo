@@ -61,5 +61,5 @@ class FloatParam(Parameter):
     @classmethod
     def check_step(cls, step):
         if step <= 0:
-            raise ValueError("Step value cannot be less than 1")
+            raise ValueError("Step value cannot be less than or equal to 0")
         return step
