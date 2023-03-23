@@ -1,9 +1,9 @@
-from typing import Optional, TypedDict, cast
+from typing import Optional
 from enum import Enum
-from trycast import trycast
+from pydantic import BaseModel, validator
+
 from modules.data.parameters import Parameter
 from modules.data.types import DocumentId, EpochMilliseconds, UserId
-from pydantic import BaseModel, ValidationError, validator
 
 # from modules.exceptions import DataFormatError
 
