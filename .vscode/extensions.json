@@ -9,7 +9,7 @@
         "wmaurer.change-case",
         "ramyaraoa.show-offset",
         "ms-vscode-remote.vscode-remote-extensionpack",
-        
+
         // Frontend
         "herrmannplatz.npm-dependency-links",
         "dbaeumer.vscode-eslint",
@@ -27,6 +27,7 @@
         "ms-python.vscode-pylance",
         "bungcip.better-toml", // Pyenv pipfile is toml
         "slevesque.vscode-zipexplorer", // see inside experiment output zip files via right click -> explore
+        "littlefoxteam.vscode-python-test-adapter", // run tests from the sidebar
 
         // Setup Scripts
         "timonwong.shellcheck",
