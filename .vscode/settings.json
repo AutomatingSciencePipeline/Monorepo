@@ -67,11 +67,7 @@
         "apps"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "scm.diffDecorationsGutterPattern": {
-        "added": true
-    }
-
+    "python.testing.pytestEnabled": true
     // ======================= Frontend =============================
 
     // Below this point is uncategorized (please categorize)
