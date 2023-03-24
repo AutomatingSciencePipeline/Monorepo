@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 
 
 class ParamType(Enum):
@@ -21,24 +21,28 @@ class StringParameter(Parameter):
     default: str
 
 
+def _check_bounds(values):
+    start, stop = values.get('min'), values.get('max')
+    if start > stop:
+        raise ValueError("Min value cannot be greater than max value")
+    return values
+
+
 class IntegerParam(Parameter):
     default: int
     min: int
     max: int
     step: int
 
-    @validator('max')
+    @root_validator
     @classmethod
-    def check_max(cls, stop, values):
-        start = values.get('min')
-        if start > stop:
-            raise ValueError("Min value cannot be greater than max value")
-        return stop
+    def check_bounds(cls, values):
+        return _check_bounds(values)
 
     @validator('step')
     @classmethod
-    def check_step(cls, step):
-        if step <= 0:
+    def check_step(cls, step: int):
+        if step < 1:
             raise ValueError("Step value cannot be less than 1")
         return step
 
@@ -49,17 +53,14 @@ class FloatParam(Parameter):
     max: float
     step: float
 
-    @validator('max')
+    @root_validator
     @classmethod
-    def check_max(cls, stop, values):
-        start = values.get('min')
-        if start > stop:
-            raise ValueError("Min value cannot be greater than max value")
-        return stop
+    def check_bounds(cls, values):
+        return _check_bounds(values)
 
     @validator('step')
     @classmethod
-    def check_step(cls, step):
+    def check_step(cls, step: float):
         if step <= 0:
             raise ValueError("Step value cannot be less than or equal to 0")
         return step

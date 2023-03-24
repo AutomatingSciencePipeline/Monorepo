@@ -1,6 +1,6 @@
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, root_validator, validator
 
 from modules.data.parameters import Parameter
 from modules.data.types import DocumentId, EpochMilliseconds, UserId
@@ -18,7 +18,7 @@ class ExperimentData(BaseModel):
     type: ExperimentType
     id: DocumentId
     creator: UserId
-    trialExtraFile: str
+    trialExtraFile: Optional[str]
     trialResult: str
     file: str
     timeout: int
@@ -30,30 +30,34 @@ class ExperimentData(BaseModel):
 
     hyperparameters: dict
 
-    startedAtEpochMillis: EpochMilliseconds
-    finishedAtEpochMillis: EpochMilliseconds
-    finished: bool  # TODO replace with presence of finished timestamp?
+    startedAtEpochMillis: Optional[EpochMilliseconds]
+    finishedAtEpochMillis: Optional[EpochMilliseconds]
+    finished: Optional[bool]  # TODO replace with presence of finished timestamp?
 
-    totalExperimentRuns: int
-    passes: int
-    fails: int
+    totalExperimentRuns: Optional[int]
+    passes: Optional[int]
+    fails: Optional[int]
 
     @validator('hyperparameters')
     @classmethod
     def check_hyperparams(cls, v):
         for key, param in v.items():
-            if not isinstance(param, Parameter):
+            # For some reason, isinstance does not work here. Maybe it has to do with how pydantic validators work? - Rob
+            if not param.__class__ in Parameter.__subclasses__():
                 raise ValueError(f'value {param} associated with {key} in hyperparameters is not a Parameter')
         return v
 
-    @validator("scatterDepVar")
+    @root_validator
     @classmethod
-    def check_scatter_validity(cls, scatterDepVar, values):
-        scatter, scatterIndVar = values.get('scatter'), values.get('scatterIndVar')
+    def check_scatter_settings(cls, values):
+        scatter, scatterIndVar, scatterDepVar = values.get('scatter'), values.get('scatterIndVar'), values.get('scatterDepVar')
+        print(f"the values are {scatter}, {scatterIndVar}, {scatterDepVar}")
         if scatter:
             if scatterIndVar is None or scatterDepVar is None:
-                raise ValueError("ScatterIndVar or ScatterDepVar are not set while scatter is true")
-        return scatterDepVar
+                raise ValueError("scatter is enabled, but scatterIndVar and/or scatterDepVar are absent")
+        elif scatterIndVar is not None or scatterDepVar is not None:
+            raise ValueError("scatter is disabled, but scatterIndVar and/or scatterDepVar are present")
+        return values
 
 
 # class ExperimentData(TypedDict):
