@@ -6,7 +6,7 @@ EpochMilliseconds = int
 
 
 class ResultStatus(Enum):
-    UNKNOWN = -1
-    SUCCESS = 0
-    FAIL = 1
-    SYSTEM_ERROR = 2
+    UNKNOWN = "unknown"
+    SUCCESS = "success"
+    FAIL = "fail"
+    SYSTEM_ERROR = "system_error"
