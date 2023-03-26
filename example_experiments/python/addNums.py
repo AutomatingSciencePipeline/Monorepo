@@ -21,10 +21,9 @@ How to tell if they worked
 Example settings for a run that demonstrates this:
 
 Info:
+Trial Result: AddNumResult.csv
 If you want a collection of each CSV this experiment runs:
     Trial's Extra File: AddNumResult.csv
-If you want the information from each CSV to be included in the resultCsv
-    Trial Result: AddNumResult.csv
 Both can be used at the same time
 
 Parameters:

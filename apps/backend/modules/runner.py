@@ -37,9 +37,9 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout:
     except Exception as err:
         print("Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
-    result = data[0].split('\n')[0]  #TODO ask yoder if this is still relevant
-    print(f"trial#{trialRun} result data: {result}")
-    return result
+    # result = data[0].split('\n')[0]  #TODO ask yoder if this is still relevant
+    # print(f"trial#{trialRun} result data: {result}")
+    # return result
 
 
 def run_trial(experiment_path, config_path, filetype, trialRun: int, keepLogs: bool, trialTimeout: int):
@@ -86,7 +86,7 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
             startSeconds = time.time()
             expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
             try:
-                response_data = run_trial(filepath, f'configFiles/{trialNum}.ini', filetype, trialNum, keepLogs, trialTimeout)
+                run_trial(filepath, f'configFiles/{trialNum}.ini', filetype, trialNum, keepLogs, trialTimeout)
             except InternalTrialFailedError as err:
                 print(f'Internal Trial Failure {err}')  # TODO should this halt all further experiment runs?
                 fails += 1
@@ -120,25 +120,20 @@ def conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, fil
                 print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
                 #Setting up the header for the Result CSV
-                if trialResult == '':
-                    writer.writerow(["Experiment Run", "Result"] + paramNames)
-                    numOutputs = 1
-                else:
-                    if (output := get_line_n_of_trial_results_csv(0,trialResult)) is None:
-                        raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
-                    numOutputs = len(output)
-                    writer.writerow(["Experiment Run"] + output + paramNames)
+                if (output := get_line_n_of_trial_results_csv(0,trialResult)) is None:
+                    raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
+                numOutputs = len(output)
+                writer.writerow(["Experiment Run"] + output + paramNames)
 
             if trialExtraFile != '':
                 response_data = OUTPUT_INDICATOR_USING_CSVS
                 add_to_output_batch(trialExtraFile, trialNum)
-            if trialResult == '':
-                writer.writerow([trialNum, response_data] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-            else:
-                output = get_line_n_of_trial_results_csv(1,trialResult)
-                if output is None:
-                    raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
-                writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+                
+            output = get_line_n_of_trial_results_csv(1,trialResult)
+            if output is None:
+                raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
+            writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+            
             passes += 1
             expRef.update({'passes': passes})
         print("Finished running Trials")

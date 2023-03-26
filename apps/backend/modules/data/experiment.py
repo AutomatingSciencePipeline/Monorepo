@@ -35,6 +35,13 @@ class ExperimentData(BaseModel):
     passes: Optional[int]
     fails: Optional[int]
 
+    @validator('trialResult')
+    @classmethod
+    def check_trialResult(cls, v):
+        if v == '':
+            raise ValueError("Trial Result field cannot be empty")
+        return v
+
     @validator('hyperparameters')
     @classmethod
     def check_hyperparams(cls, v):
