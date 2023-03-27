@@ -20,34 +20,33 @@ if __name__ == "__main__":
                'scatterIndVar': 'iparam',
                'scatterDepVar': 'fparam',
                'timeout': 18000, 'workers': 1,
-               'keeplogs': True, #'keepLogs': True, L is capatilized on the frontend #TODO: change backend or frontend?
+               'keepLogs': True,
                'hyperparameters': '{"hyperparameters":[{"name":"iparam","default":"1","min":"1","max":"10","step":"1","type":"integer"},{"name":"fparam","default":"1.0","min":"1.0","max":"10.0","step":"1.0","type":"float"},{"name":"bparam","default":"false","type":"bool"},{"name":"sparam","default":"VALUE","type":"string"}]}',
                'name': 'Just to get the datA',
                'trialResult': 'dummy',
-               'expToRun': 0, #This is totalExperimentRuns in the data type 
+               'totalExperimentRuns': 0,
                'created': 1679705027850,
                'scatter': True,
-               'id': 'V3dpcllHWPrK1Kgbyzqb' #'expId': 'V3dpcllHWPrK1Kgbyzqb' #TODO: change backend or frontend?
-               }
+               'expId': 'V3dpcllHWPrK1Kgbyzqb'}
     hyperparameters = json.loads(expInfo['hyperparameters'])['hyperparameters']
-    lst = {}
+    result = {}
     for param in hyperparameters:
         name = param['name']
         del param['name']
         if param['type'] == 'integer':
             param['type'] = ParamType.INTEGER
-            lst[name] = IntegerParam(**param)
+            result[name] = IntegerParam(**param)
         elif param['type'] =='float':
             param['type'] = ParamType.FLOAT
-            lst[name] = FloatParam(**param)
+            result[name] = FloatParam(**param)
         elif param['type'] == 'bool':
             param['type'] = ParamType.BOOL
-            lst[name] = BoolParameter(**param)
+            result[name] = BoolParameter(**param)
         elif param['type'] == 'string':
             param['type'] = ParamType.STRING
-            lst[name] = StringParameter(**param)
-    print(lst)
-    expInfo['hyperparameters'] = lst
+            result[name] = StringParameter(**param)
+    print(result)
+    expInfo['hyperparameters'] = result
     exp = ExperimentData(**expInfo)
     print(exp)
     

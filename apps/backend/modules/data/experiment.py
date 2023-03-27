@@ -12,14 +12,14 @@ class ExperimentType(Enum):
 
 
 class ExperimentData(BaseModel):
-    type: ExperimentType
-    id: DocumentId
+    type = ExperimentType.UNKNOWN
+    expId: DocumentId
     creator: UserId
     trialExtraFile: Optional[str]
     trialResult: str
     file: str
     timeout: int
-    keeplogs: bool
+    keepLogs: bool
     scatter: bool
     scatterIndVar: Optional[str]
     scatterDepVar: Optional[str]
