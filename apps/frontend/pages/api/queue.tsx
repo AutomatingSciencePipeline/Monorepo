@@ -7,7 +7,7 @@ async function process(url: string, id, key, res) {
 		console.error(`Error while handling upload for id ${id}: `, response);
 	}
 	const contents = await response.json();
-	console.log(contents);
+	console.log('Queue Size', contents);
 	res.status(response.status).json({ response: contents });
 }
 
