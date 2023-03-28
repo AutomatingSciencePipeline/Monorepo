@@ -1,6 +1,25 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ChangeEventHandler, useState } from 'react';
 
-export const SearchBar = ({ labelText, placeholderText }) => {
+export interface SearchBarProps {
+	labelText: string,
+	placeholderText: string,
+	initialValue?: string,
+	onValueChanged: (newValue: string) => void
+}
+
+export const SearchBar = ({ labelText, placeholderText, initialValue, onValueChanged }: SearchBarProps) => {
+	const [searchInput, setSearchInput] = useState<string>(initialValue || '');
+
+	const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+		event.preventDefault();
+		const newValue = event.target.value;
+		setSearchInput(newValue);
+		onValueChanged(newValue);
+	};
+
+	// Future improvement: add a debounce to the onChange event handler https://medium.com/nerd-for-tech/debounce-your-search-react-input-optimization-fd270a8042b
+
 	return (
 		<div className='flex basis-1/2 justify-center lg:justify-end'>
 			<div className='w-full px-2 justify-center place-content-center lg:px-6'>
@@ -14,9 +33,11 @@ export const SearchBar = ({ labelText, placeholderText }) => {
 					<input
 						id='search'
 						name='search'
+						type='search'
 						className='block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-blue-400 bg-opacity-25 text-blue-100 placeholder-blue-200 focus:outline-none focus:bg-white focus:ring-0 focus:placeholder-gray-400 focus:text-gray-900 sm:text-sm'
 						placeholder={placeholderText}
-						type='search'
+						onChange={handleChange}
+						value={searchInput}
 					/>
 				</div>
 			</div>
