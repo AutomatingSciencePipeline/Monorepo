@@ -107,13 +107,13 @@ export const subscribeToExp = (id: ExperimentDocumentId, callback: ExperimentSub
 
 
 export interface MultipleExperimentSubscribeCallback {
-	(data: [Partial<ExperimentData>]): any;
+	(data: Partial<ExperimentData>[]): any;
 }
 
 export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExperimentSubscribeCallback) => {
 	const q = query(experiments, where('creator', '==', uid));
 	const unsubscribe = onSnapshot(q, (snapshot) => {
-		const result = [] as unknown as [Partial<ExperimentData>];
+		const result = [] as unknown as Partial<ExperimentData>[];
 		snapshot.forEach((doc) => result.push(doc.data()));
 		callback(result);
 	});

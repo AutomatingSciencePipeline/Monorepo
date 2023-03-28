@@ -1,12 +1,11 @@
-import NewExp, { FormStates } from '../components/flows/AddExperiment/NewExp';
+import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
-import { subscribeToExp, listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip } from '../firebase/db';
+import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
-	ChevronRightIcon,
 	RectangleStackIcon,
 	BarsArrowUpIcon,
 	QueueListIcon,
@@ -15,6 +14,8 @@ import { Logo } from '../components/Logo';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { SearchBar } from '../components/SearchBar';
+import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
+import { ExperimentData } from '../firebase/db_types';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -172,124 +173,15 @@ const Navbar = (props) => {
 	);
 };
 
-
-const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
-	const [project, setProject] = useState(projectinit);
-	useEffect(() => subscribeToExp(project.expId, setProject), []); // TODO adding project causes render loop
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
-	const totalRuns = project['totalExperimentRuns'] ?? 0;
-	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
-	const experimentInProgress = !project['finished'] && project['startedAtEpochMillis'];
-
-	return (
-		<div className='flex items-center justify-between space-x-4'>
-			<div className='min-w-0 space-y-3'>
-				<div className='flex items-center space-x-3'>
-					<span className='block'>
-						<h2 className='text-sm font-medium'>
-							{project.name}{' '}
-						</h2>
-					</span>
-				</div>
-				{project['finished'] == true ?
-					<button type= "button" data-id={project.expId}
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={downloadExperimentResults}>
-						Download Results
-					</button> :
-					null
-				}
-				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
-					<button type= "button" data-id={project.expId}
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={downloadExperimentProjectZip}>
-						Download Project Zip
-					</button> :
-					null
-				}
-				<button type= "button" data-id={project.expId}
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={() => {
-						setFormState(1);
-						setCopyId(project.expId);
-					}}>
-					Copy Experiment
-				</button>
-				<a
-					href={project.repoHref}
-					className='relative group flex items-center space-x-2.5'
-				>
-					<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
-						{project.description}
-					</span>
-				</a>
-			</div>
-			<div className='sm:hidden'>
-				<ChevronRightIcon
-					className='h-5 w-5 text-gray-400'
-					aria-hidden='true'
-				/>
-			</div>
-			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
-				<p className='flex items-center space-x-4'>
-					{project['finished'] ?
-						<span className='font-mono'>Experiment Completed</span> :
-						(experimentInProgress ?
-							<span className='font-mono text-blue-500'>Experiment In Progress</span> :
-							<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>)
-					}
-				</p>
-				{project['finished'] || experimentInProgress ?
-					<p className='flex items-center space-x-4'>
-						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
-						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
-					</p> :
-					null
-				}
-				{experimentInProgress ?
-					<p>
-						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
-					</p> :
-					null
-				}
-				{experimentInProgress ?
-					(project['totalExperimentRuns'] ?
-						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p>:
-						<p>(Calculating total experiment runs...)</p>
-					) :
-					null
-				}
-				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toString()}</span>
-					{/* TODO unused location field? */}
-					{/* <span>{project.location}</span> */}
-				</p>
-				{project['startedAtEpochMillis'] ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toString()}</span>
-					</p> :
-					null
-				}
-				{project['finishedAtEpochMillis'] ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString()}</span>
-					</p> :
-					null
-				}
-			</div>
-		</div>
-	);
-};
-
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
-	const [experiments, setExperiments] = useState([] as unknown[]); // TODO experiment type
+	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]); // TODO experiment type
 
 	useEffect(() => {
 		if (!userId) {
 			return;
 		}
-		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList));
+		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
@@ -332,7 +224,7 @@ export default function DashboardPage() {
 	}, []);
 
 
-	const [copyID, setCopyId] = useState(null);
+	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
 	useEffect(() => {
@@ -521,13 +413,21 @@ export default function DashboardPage() {
 								role='list'
 								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 							>
-								{experiments?.map((project: any) => { // TODO a type for experiments should alleviate the need for `any` here
+								{experiments?.map((project: ExperimentData) => {
 									return (
 										<li
 											key={project.expId}
 											className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
 										>
-											<ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
+											<ExperimentListing
+												projectinit={project}
+												onCopyExperiment={(experimentId) => {
+													setFormState(FormStates.Params);
+													setCopyId(experimentId);
+												}}
+												onDownloadResults={downloadExperimentResults}
+												onDownloadProjectZip={downloadExperimentProjectZip}
+											/>
 										</li>
 									);
 								})}
@@ -578,7 +478,7 @@ export default function DashboardPage() {
 							</div>
 						</div>
 					</div>
-					<NewExp
+					<NewExperiment
 						formState={formState}
 						setFormState={setFormState}
 						copyID = {copyID}

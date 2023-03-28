@@ -62,7 +62,7 @@ const Steps = ({ steps }) => {
 	);
 };
 
-const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
+const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
@@ -254,4 +254,4 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	);
 };
 
-export default NewExp;
+export default NewExperiment;
