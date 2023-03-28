@@ -421,7 +421,8 @@ const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) 
 		);
 	};
 
-	const [filterShowCompleted, setFilterShowCompleted] = useState(true);
+	const [includeCompleted, setIncludeCompleted] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(false);
 
 	return <div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
@@ -432,7 +433,7 @@ const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) 
 						<BarsArrowUpIcon
 							className='mr-3 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
-						Sort
+						TODO Sort
 						<ChevronDownIcon
 							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
@@ -488,10 +489,10 @@ const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) 
 								{({ active }) => (
 									<div className={menuHoverActiveCss(active)}>
 										<Toggle
-											label={'Completed'}
-											initialValue={filterShowCompleted}
+											label={'Include Completed'}
+											initialValue={includeCompleted}
 											onChange={(newValue) => {
-												setFilterShowCompleted(newValue);
+												setIncludeCompleted(newValue);
 											} } />
 									</div>
 								)}
@@ -502,7 +503,12 @@ const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) 
 										href='#'
 										className={menuHoverActiveCss(active)}
 									>
-										TODO Archived
+										<Toggle
+											label={'Include Archived'}
+											initialValue={includeArchived}
+											onChange={(newValue) => {
+												setIncludeArchived(newValue);
+											} } />
 									</a>
 								)}
 							</Menu.Item>
@@ -526,6 +532,16 @@ const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) 
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
 			{experiments?.map((project: ExperimentData) => {
+				if (!includeCompleted && project.finished) {
+					return null;
+				}
+				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+				const oneHourMilliseconds = 1000 * 60 * 60;
+				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+				if (!includeArchived && projectIsArchived) {
+					return null;
+				}
 				return (
 					<li
 						key={project.expId}
