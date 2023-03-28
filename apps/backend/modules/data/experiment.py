@@ -12,7 +12,7 @@ class ExperimentType(Enum):
 
 
 class ExperimentData(BaseModel):
-    type = ExperimentType.UNKNOWN
+    experimentType = ExperimentType.UNKNOWN
     expId: DocumentId
     creator: UserId
     trialExtraFile: Optional[str]
@@ -24,6 +24,7 @@ class ExperimentData(BaseModel):
     scatterIndVar: Optional[str]
     scatterDepVar: Optional[str]
     dumbTextArea: str
+    postProcess = False
 
     hyperparameters: dict
 
@@ -31,7 +32,7 @@ class ExperimentData(BaseModel):
     finishedAtEpochMillis: Optional[EpochMilliseconds]
     finished: Optional[bool]  # TODO replace with presence of finished timestamp?
 
-    totalExperimentRuns: Optional[int]
+    totalExperimentRuns = 0
     passes: Optional[int]
     fails: Optional[int]
 
@@ -46,6 +47,7 @@ class ExperimentData(BaseModel):
     @classmethod
     def check_hyperparams(cls, v):
         for key, param in v.items():
+            print(param.__class__)
             # For some reason, isinstance does not work here. Maybe it has to do with how pydantic validators work? - Rob
             if not param.__class__ in Parameter.__subclasses__():
                 raise ValueError(f'value {param} associated with {key} in hyperparameters is not a Parameter')
@@ -59,6 +61,6 @@ class ExperimentData(BaseModel):
         if scatter:
             if scatterIndVar is None or scatterDepVar is None:
                 raise ValueError("scatter is enabled, but scatterIndVar and/or scatterDepVar are absent")
-        elif scatterIndVar is not None or scatterDepVar is not None:
+        elif scatterIndVar is not '' or scatterDepVar is not '':
             raise ValueError("scatter is disabled, but scatterIndVar and/or scatterDepVar are present")
         return values

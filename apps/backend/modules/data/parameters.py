@@ -1,24 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, validator, root_validator
 
-def parseParams(hyperparameters):
-    result = {}
-    for param in hyperparameters:
-        name = param['name']
-        del param['name']
-        if param['type'] == 'integer':
-            param['type'] = ParamType.INTEGER
-            result[name] = IntegerParam(**param)
-        elif param['type'] =='float':
-            param['type'] = ParamType.FLOAT
-            result[name] = FloatParam(**param)
-        elif param['type'] == 'bool':
-            param['type'] = ParamType.BOOL
-            result[name] = BoolParameter(**param)
-        elif param['type'] == 'string':
-            param['type'] = ParamType.STRING
-            result[name] = StringParameter(**param)
-    print(result)
 
 class ParamType(Enum):
     BOOL = "bool"
