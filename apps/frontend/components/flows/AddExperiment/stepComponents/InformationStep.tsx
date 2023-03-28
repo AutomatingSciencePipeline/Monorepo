@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { InputSection } from '../InputSection';
+import { InputSection } from '../../../InputSection';
 
 export const InformationStep = ({ form, ...props }) => {
 	return (

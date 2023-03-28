@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 
-import { InputSection } from '../InputSection';
+import { InputSection } from '../../../InputSection';
 
 export const PostProcessStep = ({ form, ...props }) => {
 	return (

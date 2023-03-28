@@ -1,4 +1,4 @@
-import NewExp, { FormStates } from '../components/NewExp';
+import NewExp, { FormStates } from '../components/flows/AddExperiment/NewExp';
 import { useAuth } from '../firebase/fbAuth';
 import { subscribeToExp, listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
@@ -8,15 +8,13 @@ import {
 	ChevronDownIcon,
 	ChevronRightIcon,
 	RectangleStackIcon,
-	MagnifyingGlassIcon,
 	BarsArrowUpIcon,
 	QueueListIcon,
 } from '@heroicons/react/24/solid';
 import { Logo } from '../components/Logo';
 import classNames from 'classnames';
-import Router from 'next/router';
 import Image from 'next/image';
-import { setInterval } from 'timers';
+import { SearchBar } from '../components/SearchBar';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -59,8 +57,7 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
-
-							<SearchBar />
+							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} />
 							{/* Links section */}
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
@@ -276,30 +273,6 @@ const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
 					</p> :
 					null
 				}
-			</div>
-		</div>
-	);
-};
-
-const SearchBar = (props) => {
-	return (
-		<div className='flex basis-1/2 justify-center lg:justify-end'>
-			<div className='w-full px-2 justify-center place-content-center lg:px-6'>
-				<label htmlFor='search' className='sr-only'>
-					Search experiments
-				</label>
-				<div className='relative text-blue-200 focus-within:text-gray-400'>
-					<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-						<MagnifyingGlassIcon className='h-5 w-5' aria-hidden='true' />
-					</div>
-					<input
-						id='search'
-						name='search'
-						className='block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-blue-400 bg-opacity-25 text-blue-100 placeholder-blue-200 focus:outline-none focus:bg-white focus:ring-0 focus:placeholder-gray-400 focus:text-gray-900 sm:text-sm'
-						placeholder='Search projects'
-						type='search'
-					/>
-				</div>
 			</div>
 		</div>
 	);

@@ -1,11 +1,11 @@
 import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Toggle } from './Toggle';
-import Parameter from './Parameter';
+import { Toggle } from '../../Toggle';
+import Parameter from '../../Parameter';
 import { useForm, formList, joiResolver } from '@mantine/form';
-import { experimentSchema } from '../utils/validators';
+import { experimentSchema } from '../../../utils/validators';
 
-import { firebaseApp } from '../firebase/firebaseClient';
+import { firebaseApp } from '../../../firebase/firebaseClient';
 import { getDoc, getFirestore, doc } from 'firebase/firestore';
 
 import { DispatchStep } from './stepComponents/DispatchStep';
@@ -14,7 +14,7 @@ import { ParamStep } from './stepComponents/ParamStep';
 import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
-import { DB_COLLECTION_EXPERIMENTS } from '../firebase/db';
+import { DB_COLLECTION_EXPERIMENTS } from '../../../firebase/db';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 

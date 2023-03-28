@@ -1,4 +1,4 @@
-import ProtectedRoute from '../components/ProtectedRoute';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 import '../styles/globals.css';
 import { AuthProvider } from '../firebase/fbAuth';
 

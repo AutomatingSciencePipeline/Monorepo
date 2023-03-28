@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { InputSection } from '../InputSection';
+import { InputSection } from '../../../InputSection';
 
 const PLACEHOLDER_TEXT = `; Example of what you could paste in here (sections and comments supported)
 [const]
