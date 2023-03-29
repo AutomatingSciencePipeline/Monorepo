@@ -5,9 +5,9 @@ import time
 import os
 
 # from modules.data.trial import Trial
-from modules.configs import get_configs_ordered
+from modules.configs import create_config_from_data, get_configs_ordered
 from modules.data.experiment import ExperimentData, ExperimentType
-from modules.exceptions import ExperimentAbort, FileHandlingError, GladosUserError, TrialTimeoutError
+from modules.exceptions import ExperimentAbort, FileHandlingError, GladosInternalError, GladosUserError, TrialTimeoutError
 from modules.exceptions import InternalTrialFailedError
 from modules.configs import get_config_paramNames
 
@@ -68,6 +68,7 @@ def add_to_output_batch(fileOutput, ExpRun):
 
 
 def conduct_experiment(experiment: ExperimentData, expRef):
+    os.mkdir('configFiles')
     print(f"Running Experiment {experiment.expId}")
 
     experiment.passes = 0
@@ -81,7 +82,12 @@ def conduct_experiment(experiment: ExperimentData, expRef):
             startSeconds = time.time()
             expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
             try:
-                run_trial(experiment, f'configFiles/{trialNum}.ini', trialNum)
+                configFileName = create_config_from_data(experiment, trialNum)
+            except Exception as err:
+                msg = f"Failed to generate config {trialNum} file"
+                raise GladosInternalError(msg) from err
+            try:
+                run_trial(experiment, f'configFiles/{configFileName}', trialNum)
             except InternalTrialFailedError as err:
                 print(f'Trial#{trialNum} Encountered an Error')
                 experiment.fails += 1

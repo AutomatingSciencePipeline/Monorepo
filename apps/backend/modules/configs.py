@@ -1,11 +1,11 @@
 import configparser
 import itertools
 import os
+from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 
 from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter
 from modules.exceptions import GladosInternalError
-
 
 FilePath = str
 
@@ -33,50 +33,64 @@ def generate_list(param: Parameter, paramName, paramspos):
 
 def generate_config_files(experiment: ExperimentData):
     hyperparams = experiment.hyperparameters
-    unparsedConstInfo = experiment.dumbTextArea
-    os.mkdir('configFiles')
-    os.chdir('configFiles')
     configIdNumber = 0
     constants = {}
     parameters = {}
     configs = []
     gather_parameters(hyperparams, constants, parameters)
 
+    configDict = {}
     for defaultKey, defaultVar in parameters.items():
         print(f'Keeping {defaultVar} constant')
         paramspos = []
         default = [(defaultKey, get_default(defaultVar))]
         paramspos.append(default)
-        
+
         for otherKey, otherVar in parameters.items():
             if otherKey != defaultKey:
-                try:
-                    generate_list(otherVar, otherKey,paramspos)
-                except KeyError as err:
-                    raise GladosInternalError('Error during list generation') from err
+                generate_list(otherVar, otherKey, paramspos)
         try:
             permutations = list(itertools.product(*paramspos))
         except Exception as err:
             raise GladosInternalError("Error while making permutations") from err
 
         for thisPermutation in permutations:
-            outputConfig = configparser.ConfigParser()
-            outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
             configItems = {}
             for item in thisPermutation:
                 configItems[item[0]] = item[1]
             configItems.update(constants)
             configs.append(configItems)
-            outputConfig["DEFAULT"] = configItems
-            with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
-                outputConfig.write(configFile)
-                configFile.write(unparsedConstInfo)
-                configFile.close()
-                print(f"Finished writing config {configIdNumber}")
+            configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
+            print(f'Generated config {configIdNumber}')
             configIdNumber += 1
-    os.chdir('..')
     print("Finished generating configs")
+    experiment.configs = configDict
     return configs
+
+
+def create_config_from_data(experiment: ExperimentData, configNum: int):
+    if experiment.configs is {}:
+        msg = f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty"
+        print(msg)
+    try:
+        configData = experiment.configs[f'config{configNum}'].data
+    except KeyError as err:  #TODO: Discuss how we handle this error
+        msg = f"There is no config {configNum} cannot generate this config, there are only {len(experiment.configs)} configs"
+        print(msg)
+        raise GladosInternalError(msg) from err
+
+    os.chdir('configFiles')
+    outputConfig = configparser.ConfigParser()
+    outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
+    outputConfig["DEFAULT"] = configData
+    with open(f'{configNum}.ini', 'w', encoding="utf8") as configFile:
+        outputConfig.write(configFile)
+        configFile.write(experiment.dumbTextArea)
+        configFile.close()
+        print(f"Wrote config{configNum} to a file")
+    os.chdir('..')
+    return f'{configNum}.ini'
+
 
 def get_default(parameter):
     if parameter.type == ParamType.INTEGER:
@@ -87,6 +101,7 @@ def get_default(parameter):
         return BoolParameter(**parameter.dict()).default
     elif parameter.type == ParamType.STRING:
         return StringParameter(**parameter.dict()).default
+
 
 def gather_parameters(hyperparams, constants, parameters):
     for parameterKey, hyperparameter in hyperparams.items():

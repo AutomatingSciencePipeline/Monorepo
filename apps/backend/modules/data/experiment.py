@@ -1,6 +1,7 @@
 from typing import Optional
 from enum import Enum
 from pydantic import BaseModel, root_validator, validator
+from modules.data.configData import ConfigData
 
 from modules.data.parameters import Parameter
 from modules.data.types import DocumentId, EpochMilliseconds, UserId
@@ -12,6 +13,8 @@ class ExperimentType(Enum):
 
 
 class ExperimentData(BaseModel):
+    
+        
     experimentType = ExperimentType.UNKNOWN
     expId: DocumentId
     creator: UserId
@@ -27,6 +30,7 @@ class ExperimentData(BaseModel):
     postProcess = False
 
     hyperparameters: dict
+    configs = {}
 
     startedAtEpochMillis: Optional[EpochMilliseconds]
     finishedAtEpochMillis: Optional[EpochMilliseconds]
@@ -43,11 +47,18 @@ class ExperimentData(BaseModel):
             raise ValueError("Trial Result field cannot be empty")
         return v
 
+    @validator('configs')
+    @classmethod
+    def check_configs(cls, v):
+        for key, param in v.items():
+            if not param.__class__ == ConfigData:
+                raise ValueError(f'value {param} associated with {key} in configs is not a ConfigData object')
+        return v
+    
     @validator('hyperparameters')
     @classmethod
     def check_hyperparams(cls, v):
         for key, param in v.items():
-            print(param.__class__)
             # For some reason, isinstance does not work here. Maybe it has to do with how pydantic validators work? - Rob
             if not param.__class__ in Parameter.__subclasses__():
                 raise ValueError(f'value {param} associated with {key} in hyperparameters is not a Parameter')
@@ -61,6 +72,9 @@ class ExperimentData(BaseModel):
         if scatter:
             if scatterIndVar is None or scatterDepVar is None:
                 raise ValueError("scatter is enabled, but scatterIndVar and/or scatterDepVar are absent")
-        elif scatterIndVar is not '' or scatterDepVar is not '':
+        elif scatterIndVar == '' or scatterDepVar == '':
             raise ValueError("scatter is disabled, but scatterIndVar and/or scatterDepVar are present")
         return values
+    class Config:
+        validate_assignment = True
+    

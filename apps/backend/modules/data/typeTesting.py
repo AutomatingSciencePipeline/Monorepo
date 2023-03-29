@@ -1,8 +1,9 @@
 import json
+import os
 from typing import List
 from app import parseParams
 from experiment import ExperimentData
-from modules.configs import gather_parameters, generate_config_files, generate_list, get_default
+from modules.configs import create_config_from_data, gather_parameters, generate_config_files, generate_list, get_default
 from modules.data.experiment import ExperimentType
 from modules.data.parameters import BoolParameter, FloatParam, Parameter, ParamType, IntegerParam, StringParameter
 
@@ -34,10 +35,9 @@ if __name__ == "__main__":
         'expId': 'V3dpcllHWPrK1Kgbyzqb'
     }
     hyperparameters = parseParams(json.loads(expInfo['hyperparameters'])['hyperparameters'])
-    expInfo['hyperparameters'] = hyperparameters 
+    expInfo['hyperparameters'] = hyperparameters
     experiment = ExperimentData(**expInfo)
-            
-    for config in generate_config_files(experiment):
-        print(config)
-        print()
+    generate_config_files(experiment)
 
+    for configId, config in experiment.configs.items():
+        print(f'{configId}: {config.data}\n')
