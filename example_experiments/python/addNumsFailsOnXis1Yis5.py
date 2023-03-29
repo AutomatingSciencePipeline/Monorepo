@@ -23,7 +23,7 @@ def main():
     y = int(config["DEFAULT"]["y"])
     if x == 1 and y == 5:
         time.sleep(5)
-        raise KeyError('Intentionally thrown exception because x==1 and y==2')
+        raise KeyError('Intentionally thrown exception because x==1 and y==5')
     print(x + y)
     print("done")
     return 0
