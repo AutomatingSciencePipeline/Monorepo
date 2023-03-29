@@ -14,10 +14,12 @@ class Parameter(BaseModel):
 
 
 class BoolParameter(Parameter):
+    type = ParamType.BOOL
     default: bool
 
 
 class StringParameter(Parameter):
+    type = ParamType.STRING
     default: str
 
 
@@ -29,6 +31,7 @@ def _check_bounds(values):
 
 
 class IntegerParam(Parameter):
+    type = ParamType.INTEGER
     default: int
     min: int
     max: int
@@ -48,6 +51,7 @@ class IntegerParam(Parameter):
 
 
 class FloatParam(Parameter):
+    type = ParamType.FLOAT
     default: float
     min: float
     max: float

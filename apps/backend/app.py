@@ -109,7 +109,7 @@ def run_batch(data):
     except KeyError as err:
         raise GladosInternalError("Error generating configs - hyperparameters not found in experiment object") from err
     print(type(hyperparameters))
-    experimentData['hyperParameters'] = hyperparameters
+    experimentData['hyperparameters'] = hyperparameters
 
     #Parsing into Datatype
     experiment = ExperimentData(**experimentData)

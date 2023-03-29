@@ -34,8 +34,8 @@ def generate_list(param: Parameter, paramName, paramspos):
 def generate_config_files(experiment: ExperimentData):
     hyperparams = experiment.hyperparameters
     unparsedConstInfo = experiment.dumbTextArea
-    # os.mkdir('configFiles')
-    # os.chdir('configFiles')
+    os.mkdir('configFiles')
+    os.chdir('configFiles')
     configIdNumber = 0
     constants = {}
     parameters = {}
@@ -67,14 +67,14 @@ def generate_config_files(experiment: ExperimentData):
                 configItems[item[0]] = item[1]
             configItems.update(constants)
             configs.append(configItems)
-            # outputConfig["DEFAULT"] = configItems
-            # with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
-            #     outputConfig.write(configFile)
-            #     configFile.write(unparsedConstInfo)
-            #     configFile.close()
-            #     print(f"Finished writing config {configIdNumber}")
+            outputConfig["DEFAULT"] = configItems
+            with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
+                outputConfig.write(configFile)
+                configFile.write(unparsedConstInfo)
+                configFile.close()
+                print(f"Finished writing config {configIdNumber}")
             configIdNumber += 1
-    # os.chdir('..')
+    os.chdir('..')
     print("Finished generating configs")
     return configs
 

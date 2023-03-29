@@ -76,14 +76,14 @@ def conduct_experiment(experiment: ExperimentData, expRef):
     with open('results.csv', 'w', encoding="utf8") as expResults:
         paramNames = get_config_paramNames('configFiles/0.ini')
         writer = csv.writer(expResults)
-        print(f"Now Running {experiment.totalExperimentRuns} trials")
+        print(f"Now Running {experiment.totalExperimentRuns + 1} trials")
         for trialNum in range(0, experiment.totalExperimentRuns + 1):
             startSeconds = time.time()
             expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
             try:
                 run_trial(experiment, f'configFiles/{trialNum}.ini', trialNum)
             except InternalTrialFailedError as err:
-                print(f'Internal Trial Failure {err}')  # TODO should this halt all further experiment runs?
+                print(f'Trial#{trialNum} Encountered an Error')
                 experiment.fails += 1
                 expRef.update({'fails': experiment.fails})
                 if numOutputs is not None:  #After the first trial this should be defined not sure how else to do this
@@ -127,6 +127,7 @@ def conduct_experiment(experiment: ExperimentData, expRef):
                 raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
             writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             
+            print(f'Trial#{trialNum} completed')
             experiment.passes += 1
             expRef.update({'passes': experiment.passes})
         print("Finished running Trials")
