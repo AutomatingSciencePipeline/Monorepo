@@ -65,32 +65,35 @@ export const uploadExec = async (id: ExperimentDocumentId, file) => {
 	});
 };
 
-export const downloadExperimentResults = (event) => {
-	const id = event.target.getAttribute('data-id');
-	console.log(`Downloading results for ${id}`);
-	const fileRef = ref(storage, `results/result${id}.csv`);
-	getDownloadURL(fileRef).then((url) => {
-		const anchor = document.createElement('a');
-		anchor.href = url;
-		anchor.download = `result${id}.csv`;
-		document.body.appendChild(anchor);
-		anchor.click();
-		document.body.removeChild(anchor);
-	}).catch((error) => console.log('Get download url for exp error: ', error));
+const downloadArbitraryFile = (url: string, name: string) => {
+	const anchor = document.createElement('a');
+	anchor.href = url;
+	anchor.download = name;
+	document.body.appendChild(anchor);
+	anchor.click();
+	document.body.removeChild(anchor);
 };
 
-export const downloadExperimentProjectZip = (event) => {
-	const id = event.target.getAttribute('data-id');
-	console.log(`Downloading project zip for ${id}`);
-	const fileRef = ref(storage, `results/result${id}.zip`);
+export const downloadExperimentResults = (expId: ExperimentDocumentId) => {
+	console.log(`Downloading results for ${expId}`);
+	const fileRef = ref(storage, `results/result${expId}.csv`);
 	getDownloadURL(fileRef).then((url) => {
-		const anchor = document.createElement('a');
-		anchor.href = url;
-		anchor.download = `result${id}.csv`;
-		document.body.appendChild(anchor);
-		anchor.click();
-		document.body.removeChild(anchor);
-	}).catch((error) => console.log('Upload download url for zip error: ', error));
+		downloadArbitraryFile(url, `result${expId}.csv`);
+	}).catch((error) => {
+		console.log('Get download url for exp error: ', error);
+		alert(`Error downloading file: ${error.message}`);
+	});
+};
+
+export const downloadExperimentProjectZip = (expId: ExperimentDocumentId) => {
+	console.log(`Downloading project zip for ${expId}`);
+	const fileRef = ref(storage, `results/result${expId}.zip`);
+	getDownloadURL(fileRef).then((url) => {
+		downloadArbitraryFile(url, `project_${expId}.zip`);
+	}).catch((error) => {
+		console.log('Get download url for zip error: ', error);
+		alert(`Error downloading zip: ${error.message}`);
+	});
 };
 
 export interface ExperimentSubscribeCallback {
