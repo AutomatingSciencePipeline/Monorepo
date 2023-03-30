@@ -1,8 +1,9 @@
 from pydantic import BaseModel, validator
 
+
 class ConfigData(BaseModel):
     data: dict
-    
+
     @validator('data')
     @classmethod
     def check_config_data(cls, v):

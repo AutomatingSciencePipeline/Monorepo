@@ -36,7 +36,6 @@ def generate_config_files(experiment: ExperimentData):
     configIdNumber = 0
     constants = {}
     parameters = {}
-    configs = []
     gather_parameters(hyperparams, constants, parameters)
 
     configDict = {}
@@ -59,13 +58,13 @@ def generate_config_files(experiment: ExperimentData):
             for item in thisPermutation:
                 configItems[item[0]] = item[1]
             configItems.update(constants)
-            configs.append(configItems)
             configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
             print(f'Generated config {configIdNumber}')
             configIdNumber += 1
+
     print("Finished generating configs")
     experiment.configs = configDict
-    return configs
+    return configIdNumber
 
 
 def create_config_from_data(experiment: ExperimentData, configNum: int):

@@ -18,7 +18,7 @@ How to tell if they worked
     - Trial Result: The result csv downloaded has been expanded with information from the specified file
 
 
-Example settings for a run that demonstrates this:
+Example settings for a run that demonstrates this: (Any Fields not specified can be left blank or to whatever their default is)
 
 Info:
 Trial Result: AddNumResult.csv

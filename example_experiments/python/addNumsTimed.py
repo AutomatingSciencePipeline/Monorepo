@@ -16,6 +16,9 @@ If you want a collection of each CSV this experiment runs:
     Trial's Extra File: AddNumResult.csv
 Both can be used at the same time
 
+If you wish to test exit on timeout set
+Trial Timeout: 2
+
 Parameters:
 x, default: 1, min: 1, max: 10, step: 1
 y, default: 1, min: 1, max: 10, step: 1

@@ -37,6 +37,7 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout:
         print("Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
 
+
 def run_trial(experiment: ExperimentData, config_path, trialRun: int):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
     if experiment.experimentType == ExperimentType.PYTHON:
@@ -60,6 +61,7 @@ def get_line_n_of_trial_results_csv(lineNum, filename):
     except Exception as err:  #TODO add more exception handling for blank file and 1 line file
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
+
 def add_to_output_batch(fileOutput, ExpRun):
     try:
         shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
@@ -75,17 +77,20 @@ def conduct_experiment(experiment: ExperimentData, expRef):
     experiment.fails = 0
     numOutputs = None
     with open('results.csv', 'w', encoding="utf8") as expResults:
-        paramNames = get_config_paramNames('configFiles/0.ini')
+        paramNames = []
         writer = csv.writer(expResults)
-        print(f"Now Running {experiment.totalExperimentRuns + 1} trials")
-        for trialNum in range(0, experiment.totalExperimentRuns + 1):
+        print(f"Now Running {experiment.totalExperimentRuns} trials")
+        for trialNum in range(0, experiment.totalExperimentRuns):
             startSeconds = time.time()
             expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
+
             try:
                 configFileName = create_config_from_data(experiment, trialNum)
+                paramNames = get_config_paramNames('configFiles/0.ini')
             except Exception as err:
                 msg = f"Failed to generate config {trialNum} file"
                 raise GladosInternalError(msg) from err
+
             try:
                 run_trial(experiment, f'configFiles/{configFileName}', trialNum)
             except InternalTrialFailedError as err:
@@ -120,19 +125,20 @@ def conduct_experiment(experiment: ExperimentData, expRef):
                 print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
                 #Setting up the header for the Result CSV
-                if (output := get_line_n_of_trial_results_csv(0,experiment.trialResult)) is None:
+                if (output := get_line_n_of_trial_results_csv(0, experiment.trialResult)) is None:
                     raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
                 numOutputs = len(output)
                 writer.writerow(["Experiment Run"] + output + paramNames)
 
             if experiment.trialExtraFile != '':
                 add_to_output_batch(experiment.trialExtraFile, trialNum)
-                
-            output = get_line_n_of_trial_results_csv(1,experiment.trialResult)
+
+            output = get_line_n_of_trial_results_csv(1, experiment.trialResult)
             if output is None:
                 raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
+            # writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-            
+
             print(f'Trial#{trialNum} completed')
             experiment.passes += 1
             expRef.update({'passes': experiment.passes})

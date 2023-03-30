@@ -6,6 +6,7 @@ from modules.data.configData import ConfigData
 from modules.data.parameters import Parameter
 from modules.data.types import DocumentId, EpochMilliseconds, UserId
 
+
 class ExperimentType(Enum):
     UNKNOWN = "unknown"
     PYTHON = "python"
@@ -13,14 +14,13 @@ class ExperimentType(Enum):
 
 
 class ExperimentData(BaseModel):
-    
-        
+
     experimentType = ExperimentType.UNKNOWN
     expId: DocumentId
     creator: UserId
     trialExtraFile: Optional[str]
     trialResult: str
-    file: str
+    file = "" #Will be set either by initializing or by app.py
     timeout: int
     keepLogs: bool
     scatter: bool
@@ -30,7 +30,7 @@ class ExperimentData(BaseModel):
     postProcess = False
 
     hyperparameters: dict
-    configs = {}
+    configs = {} #Will be set Later
 
     startedAtEpochMillis: Optional[EpochMilliseconds]
     finishedAtEpochMillis: Optional[EpochMilliseconds]
@@ -54,7 +54,7 @@ class ExperimentData(BaseModel):
             if not param.__class__ == ConfigData:
                 raise ValueError(f'value {param} associated with {key} in configs is not a ConfigData object')
         return v
-    
+
     @validator('hyperparameters')
     @classmethod
     def check_hyperparams(cls, v):
@@ -68,13 +68,12 @@ class ExperimentData(BaseModel):
     @classmethod
     def check_scatter_settings(cls, values):
         scatter, scatterIndVar, scatterDepVar = values.get('scatter'), values.get('scatterIndVar'), values.get('scatterDepVar')
-        print(f"the values are {scatter}, {scatterIndVar}, {scatterDepVar}")
         if scatter:
-            if scatterIndVar is None or scatterDepVar is None:
+            if scatterIndVar == '' or scatterDepVar == '':
                 raise ValueError("scatter is enabled, but scatterIndVar and/or scatterDepVar are absent")
-        elif scatterIndVar == '' or scatterDepVar == '':
+        elif scatterIndVar != '' or scatterDepVar != '':
             raise ValueError("scatter is disabled, but scatterIndVar and/or scatterDepVar are present")
         return values
+
     class Config:
         validate_assignment = True
-    

@@ -125,12 +125,12 @@ def run_batch(data):
 
     print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
 
-    configResult = generate_config_files(experiment)
-    if configResult is None:
+    totalExperimentRuns = generate_config_files(experiment)
+    if totalExperimentRuns == 0:
         raise GladosInternalError("Error generating configs - somehow no config files were produced?")
-    experiment.totalExperimentRuns = len(configResult) - 1
+    experiment.totalExperimentRuns = totalExperimentRuns
 
-    expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns + 1})
+    expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
 
     try:
         conduct_experiment(experiment, expRef)
@@ -171,11 +171,9 @@ def download_experiment_files(experiment: ExperimentData):
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
     print(f'Downloading file for {experiment.expId}')
-    try:
-        filepath = experiment.file
-    except KeyError:
-        filepath = f'experiment{experiment.expId}'
-        print(f"No filepath specified so defaulting to {filepath}")
+
+    filepath = f'experiment{experiment.expId}'
+    experiment.file = filepath
     print(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
         filedata = firebaseBucket.blob(filepath)
