@@ -48,13 +48,13 @@ def run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
             get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
 
 
-def get_line_n_of_trial_results_csv(lineNum, filename):
+def get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
             lineNum = 0
             for line in reader:
-                if lineNum == lineNum:
+                if lineNum == targetLineNumber:
                     return line
                 lineNum += 1
             if lineNum == 0:
