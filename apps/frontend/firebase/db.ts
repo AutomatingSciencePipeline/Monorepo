@@ -41,7 +41,7 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 		}),
 		finished: false,
 		estimatedTotalTimeMinutes: 0,
-		expToRun: 0,
+		totalExperimentRuns: 0,
 	});
 	console.log(`Created Experiment: ${newExperimentDocument.id}`);
 	return newExperimentDocument.id;

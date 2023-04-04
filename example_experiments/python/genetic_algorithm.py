@@ -28,7 +28,9 @@ g: int, default: 1, min: 1, max: 10, step: 1 this is the generations variable
 p: int, default: 60, min: 60, max: 100, step: 20 this is the population variable
 gl: int, default: 1, min: 1, max: 20, step: 1 this is the genomeLength variable
 mr: float, default: 0.2, min: 0.1, max: 0.8, step: 0.1 this is the mutationrate variable
-seed: int, default: 1, min: 1, max: 1, step: 1 this is the seed variable
+
+User Defined Constants
+seed = 1
 
 PostProcess:
 Scatter Plot: checked
