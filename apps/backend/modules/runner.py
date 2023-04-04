@@ -38,7 +38,7 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout:
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
 
 
-def run_trial(experiment: ExperimentData, config_path, trialRun: int):
+def run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     #make sure that the cwd is ExperimentsFiles/{ExperimentId}
     if experiment.experimentType == ExperimentType.PYTHON:
         with Popen(['python', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
@@ -52,13 +52,20 @@ def get_line_n_of_trial_results_csv(lineNum, filename):
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
-            i = 0
+            lineNum = 0
             for line in reader:
-                if i == lineNum:
+                if lineNum == lineNum:
                     return line
-                i += 1
-            raise GladosUserError(f"{filename} is either empty or only has one line")
-    except Exception as err:  #TODO add more exception handling for blank file and 1 line file
+                lineNum += 1
+            if lineNum == 0:
+                msg = f"{filename} is an empty file cannot gather any information"
+            elif lineNum == 1:
+                msg = f"{filename} only has one line, Potentially only has a Header or Value row"
+            else:
+                msg = "Error in get nth line that should not occur"
+            print(msg)
+            raise GladosUserError(msg)
+    except Exception as err:
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
@@ -124,19 +131,20 @@ def conduct_experiment(experiment: ExperimentData, expRef):
                 estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
                 print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
-                #Setting up the header for the Result CSV
-                if (output := get_line_n_of_trial_results_csv(0, experiment.trialResult)) is None:
-                    raise InternalTrialFailedError("Nothing returned when trying to get header results (David, improve this error message please)")
+                #Setting up the header for the Result 
+                try:
+                    output = get_line_n_of_trial_results_csv(0, experiment.trialResult)
+                except GladosUserError as err:
+                    raise err
                 numOutputs = len(output)
                 writer.writerow(["Experiment Run"] + output + paramNames)
 
             if experiment.trialExtraFile != '':
                 add_to_output_batch(experiment.trialExtraFile, trialNum)
-
-            output = get_line_n_of_trial_results_csv(1, experiment.trialResult)
-            if output is None:
-                raise InternalTrialFailedError("Nothing returned when trying to get first non-header line of results (the rest of the runs?) (David, improve this error message please)")
-            # writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+            try:
+                output = get_line_n_of_trial_results_csv(1, experiment.trialResult)
+            except GladosUserError as err:
+                raise err
             writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
 
             print(f'Trial#{trialNum} completed')

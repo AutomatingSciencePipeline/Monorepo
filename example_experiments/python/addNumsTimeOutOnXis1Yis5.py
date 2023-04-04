@@ -6,7 +6,7 @@ import time
 # pylint: disable-next=pointless-string-statement
 """
 This experiment adds the input x and y parameters,
-but waits for an amount of time specified in the parameters before doing so.
+but waits for an amount of time specified in the User Defined Constants before doing so.
 and if x == 1 and y == 5 the trial will timeout
 
 Example settings for a run that demonstrates this:

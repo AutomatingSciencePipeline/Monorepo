@@ -6,7 +6,7 @@ class ParamType(Enum):
     BOOL = "bool"
     INTEGER = "integer"
     FLOAT = "float"
-    STRING = 'string'
+    STRING = "string"
 
 
 class Parameter(BaseModel):

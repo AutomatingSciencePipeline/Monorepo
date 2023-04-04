@@ -41,22 +41,28 @@ def generate_config_files(experiment: ExperimentData):
     configDict = {}
     for defaultKey, defaultVar in parameters.items():
         print(f'Keeping {defaultVar} constant')
-        paramspos = []
+        possibleParamVals = []
+
+        #Required to do the cross product, since each config is made by
+        #doing a cross product of lists of name value pairs the default variable needs to be
+        #a single item list so that there is only one possible value for the default variable
         default = [(defaultKey, get_default(defaultVar))]
-        paramspos.append(default)
+        possibleParamVals.append(default)
 
         for otherKey, otherVar in parameters.items():
             if otherKey != defaultKey:
-                generate_list(otherVar, otherKey, paramspos)
+                generate_list(otherVar, otherKey, possibleParamVals)
         try:
-            permutations = list(itertools.product(*paramspos))
+            permutations = list(itertools.product(*possibleParamVals))
         except Exception as err:
             raise GladosInternalError("Error while making permutations") from err
 
         for thisPermutation in permutations:
             configItems = {}
             for item in thisPermutation:
-                configItems[item[0]] = item[1]
+                name = item[0]
+                value = item[1]
+                configItems[name] = value
             configItems.update(constants)
             configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
             print(f'Generated config {configIdNumber}')
@@ -115,15 +121,20 @@ def gather_parameters(hyperparams, constants, parameters):
                 if param.min == param.max:
                     print(f'param {parameterKey} has the same min and max value; converting to constant')
                     constants[parameterKey] = param.min
-                else:
+                else: #Varies adding to batch
+                    print(f'param {parameterKey} varies, adding to batch')
                     parameters[parameterKey] = param
-            elif parameterType == ParamType.STRING:
+            elif parameterType == ParamType.STRING: #Strings never vary technically should be in the constants section now
                 stringParam = StringParameter(**hyperparameter.dict())
-                print('param ' + parameterKey + ' is a string, adding to constants')
+                print(f'param {parameterKey} is a string, adding to constants')
                 constants[parameterKey] = stringParam.default
-            else:
-                print('param ' + parameterKey + ' varies, adding to batch')
+            elif parameterType == ParamType.BOOL:
+                print(f'param {parameterKey} varies, adding to batch')
                 parameters[parameterKey] = hyperparameter
+            else:
+                msg = f'ERROR DURING CONFIG GEN: param {parameterKey} {hyperparameter} Does not have a supported type'
+                print(msg)
+                raise GladosInternalError(msg)
         except KeyError as err:
             raise GladosInternalError('Error during finding constants') from err
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 from enum import Enum
 from pydantic import BaseModel, root_validator, validator
 from modules.data.configData import ConfigData
@@ -29,7 +29,7 @@ class ExperimentData(BaseModel):
     dumbTextArea: str
     postProcess = False
 
-    hyperparameters: dict
+    hyperparameters: Dict[str,Parameter]
     configs = {} #Will be set Later
 
     startedAtEpochMillis: Optional[EpochMilliseconds]
