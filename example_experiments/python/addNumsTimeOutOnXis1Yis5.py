@@ -25,7 +25,7 @@ y, default: 1, min: 1, max: 10, step: 1
 
 User Defined Constants:
 [wait]
-waitTime = 3
+waitTime = 2
 """
 
 
@@ -39,7 +39,8 @@ def main():
     waitTime = int(config["wait"]["waitTime"])
     time.sleep(waitTime)
     if x == 1 and y == 5:
-        time.sleep(waitTime)
+        # wait additional time, which will exceed the experiment timeout
+        time.sleep(waitTime * 10)
     with open('AddNumResult.csv', 'w', encoding="utf8") as result:
         writer = csv.writer(result)
         writer.writerow(['Addition', 'Subtraction'])
