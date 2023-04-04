@@ -32,13 +32,12 @@ def generate_list(param: Parameter, paramName, paramspos):
 
 
 def generate_config_files(experiment: ExperimentData):
-    hyperparams = experiment.hyperparameters
-    configIdNumber = 0
     constants = {}
     parameters = {}
-    gather_parameters(hyperparams, constants, parameters)
+    gather_parameters(experiment.hyperparameters, constants, parameters)
 
     configDict = {}
+    configIdNumber = 0
     for defaultKey, defaultVar in parameters.items():
         print(f'Keeping {defaultVar} constant')
         possibleParamVals = []
@@ -74,7 +73,7 @@ def generate_config_files(experiment: ExperimentData):
 
 
 def create_config_from_data(experiment: ExperimentData, configNum: int):
-    if experiment.configs is {}:
+    if experiment.configs == {}:
         msg = f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty"
         print(msg)
     try:
@@ -106,6 +105,8 @@ def get_default(parameter):
         return BoolParameter(**parameter.dict()).default
     elif parameter.type == ParamType.STRING:
         return StringParameter(**parameter.dict()).default
+    else:
+        raise GladosInternalError(f'Parameter {parameter} has an unsupported type')
 
 
 def gather_parameters(hyperparams, constants, parameters):
@@ -121,10 +122,10 @@ def gather_parameters(hyperparams, constants, parameters):
                 if param.min == param.max:
                     print(f'param {parameterKey} has the same min and max value; converting to constant')
                     constants[parameterKey] = param.min
-                else: #Varies adding to batch
+                else:  #Varies adding to batch
                     print(f'param {parameterKey} varies, adding to batch')
                     parameters[parameterKey] = param
-            elif parameterType == ParamType.STRING: #Strings never vary technically should be in the constants section now
+            elif parameterType == ParamType.STRING:  #Strings never vary technically should be in the constants section now
                 stringParam = StringParameter(**hyperparameter.dict())
                 print(f'param {parameterKey} is a string, adding to constants')
                 constants[parameterKey] = stringParam.default

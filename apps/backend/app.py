@@ -13,8 +13,6 @@ from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 import pymongo
 from pymongo.errors import ConnectionFailure
-import base64
-import bson
 from bson.binary import Binary
 
 from modules.runner import conduct_experiment
@@ -75,6 +73,7 @@ def recv_experiment():
 
 @flaskApp.get("/queue")
 def get_queue():
+    # There must be a cleaner way to access this queue size...
     return jsonify({"queueSize": len(runner._pending_work_items)})
 
 
@@ -219,7 +218,7 @@ def upload_experiment_results(experiment):
         raise GladosInternalError("MongoDB server not available/unreachable") from err
 
     print('Uploading to MongoDB')
-    experimentFile = open(f"results.csv")  # there is probably a better way to do this
+    experimentFile = open("results.csv")  # there is probably a better way to do this
     experimentData = experimentFile.read()
     experimentFile.close()
     experimentResultEntry = {"_id": experiment.expId, "resultContent": experimentData}

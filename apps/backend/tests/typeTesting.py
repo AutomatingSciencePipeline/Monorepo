@@ -9,6 +9,7 @@ from modules.data.experiment import ExperimentType
 if __name__ == "__main__":
     print("hello world")
 
+    # cspell:disable # disable spellchecker
     expInfo = {
         'trialExtraFile': 'dummy',
         'description': '',
@@ -32,6 +33,7 @@ if __name__ == "__main__":
         'scatter': True,
         'expId': 'V3dpcllHWPrK1Kgbyzqb'
     }
+    # cspell:enable
     hyperparameters = parseParams(json.loads(expInfo['hyperparameters'])['hyperparameters'])
     expInfo['hyperparameters'] = hyperparameters
     experiment = ExperimentData(**expInfo)

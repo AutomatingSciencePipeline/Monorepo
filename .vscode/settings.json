@@ -3,6 +3,7 @@
     // Spellcheck forcefully allowed words
     "cSpell.words": [
         "appspot",
+        "bson",
         "configfile",
         "dotenv",
         "eqcm",
@@ -24,6 +25,7 @@
         "pydantic",
         "Pyenv",
         "pylintrc",
+        "pymongo",
         "pyplot",
         "pytest",
         "rawfiletype",

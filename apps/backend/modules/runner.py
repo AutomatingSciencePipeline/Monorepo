@@ -131,7 +131,7 @@ def conduct_experiment(experiment: ExperimentData, expRef):
                 estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
                 print(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
-                #Setting up the header for the Result 
+                #Setting up the header for the Result
                 try:
                     output = get_line_n_of_trial_results_csv(0, experiment.trialResult)
                 except GladosUserError as err:
