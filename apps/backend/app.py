@@ -218,7 +218,7 @@ def upload_experiment_results(experiment):
         raise GladosInternalError("MongoDB server not available/unreachable") from err
 
     print('Uploading to MongoDB')
-    experimentFile = open("results.csv")  # there is probably a better way to do this
+    experimentFile = open("results.csv", encoding='utf8')  # there is probably a better way to do this
     experimentData = experimentFile.read()
     experimentFile.close()
     experimentResultEntry = {"_id": experiment.expId, "resultContent": experimentData}
