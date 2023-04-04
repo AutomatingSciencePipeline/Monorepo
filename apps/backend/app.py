@@ -206,27 +206,13 @@ def parseParams(hyperparameters):
     return result
 
 
-def upload_experiment_results(experiment):
+def upload_experiment_results(experiment: ExperimentData):
     print('Uploading Results to the frontend')
     uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
     uploadBlob.upload_from_filename('results.csv')
 
-    # Upload to MongoDB
-    try:
-        mongoClient.admin.command('ping')
-    except ConnectionFailure as err:
-        raise GladosInternalError("MongoDB server not available/unreachable") from err
+    _upload_to_mongodb(experiment)
 
-    print('Uploading to MongoDB')
-    experimentFile = open("results.csv", encoding='utf8')  # there is probably a better way to do this
-    experimentData = experimentFile.read()
-    experimentFile.close()
-    experimentResultEntry = {"_id": experiment.expId, "resultContent": experimentData}
-    try:
-        resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
-        print(f"inserted result csv into mongodb with id: {resultId}")
-    except Exception as err:
-        raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
     if experiment.trialExtraFile != '' or experiment.postProcess:
         print('Uploading Result Csvs')
         try:
@@ -245,6 +231,29 @@ def upload_experiment_results(experiment):
                 raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
         except Exception as err:
             raise GladosInternalError("Error uploading to firebase") from err
+
+
+def _upload_to_mongodb(experiment: ExperimentData):
+    print('Uploading to MongoDB')
+    try:
+        mongoClient.admin.command('ping')
+    except ConnectionFailure as err:
+        raise GladosInternalError("MongoDB server not available/unreachable") from err
+
+    experimentData = None
+    try:
+        experimentFile = open("results.csv", encoding='utf8')
+        experimentData = experimentFile.read()
+        experimentFile.close()
+    except Exception as err:
+        raise GladosInternalError("Failed to read file data for upload to mongodb") from err
+
+    experimentResultEntry = {"_id": experiment.expId, "resultContent": experimentData}
+    try:
+        resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
+        print(f"inserted result csv into mongodb with id: {resultId}")
+    except Exception as err:
+        raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
 
 
 def post_process_experiment(experiment: ExperimentData):
