@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
-import { useAuth } from '../firebase/fbAuth';
+import { useAuth } from '../../firebase/fbAuth';
 
 const ProtectedRoute = ({ children }) => {
 	const { user } = useAuth();

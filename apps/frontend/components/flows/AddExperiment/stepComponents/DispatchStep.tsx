@@ -1,8 +1,8 @@
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { submitExperiment, uploadExec } from '../../firebase/db';
+import { submitExperiment, uploadExec } from '../../../../firebase/db';
 import { Text } from '@mantine/core';
 
-import { useAuth } from '../../firebase/fbAuth';
+import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, X, File, IconProps } from 'tabler-icons-react';
 
 export const DispatchStep = ({ id, form, ...props }) => {

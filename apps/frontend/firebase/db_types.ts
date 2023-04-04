@@ -52,6 +52,7 @@ export interface StringHyperparameter extends GenericHyperparameter {
 }
 
 export interface ExperimentData {
+    // TODO make sure these match what python expects as well
     creator: FirebaseUserId;
     name: string;
     description: string;
@@ -72,6 +73,7 @@ export interface ExperimentData {
     estimatedTotalTimeMinutes: number;
     expToRun: number; // TODO is this used?
     file: StorageReference; // TODO rename to something more unique
+    startedAtEpochMillis: EpochMilliseconds;
     finishedAtEpochMilliseconds: EpochMilliseconds;
     passes: number;
     fails: number;

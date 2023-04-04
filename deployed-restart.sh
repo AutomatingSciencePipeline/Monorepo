@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script is meant to be run on the server to restart the docker containers
+
 echo "Stopping containers..."
 
 if ! docker container stop glados-frontend glados-backend glados-mongodb; then
@@ -26,4 +28,4 @@ fi
 
 docker ps -a
 
-echo "Ensure that the docker containers below all say 'started' and that there aren't any unexpected errors."
+echo "Ensure that the docker containers listed all say 'started' and that there aren't any unexpected errors."

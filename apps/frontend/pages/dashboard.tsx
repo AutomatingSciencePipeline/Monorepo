@@ -1,22 +1,23 @@
-import NewExp, { FormStates } from '../components/NewExp';
+import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
-import { subscribeToExp, listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip } from '../firebase/db';
+import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
-	ChevronRightIcon,
 	RectangleStackIcon,
-	MagnifyingGlassIcon,
 	BarsArrowUpIcon,
 	QueueListIcon,
+	FunnelIcon,
 } from '@heroicons/react/24/solid';
 import { Logo } from '../components/Logo';
 import classNames from 'classnames';
-import Router from 'next/router';
 import Image from 'next/image';
-import { setInterval } from 'timers';
+import { SearchBar } from '../components/SearchBar';
+import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
+import { ExperimentData } from '../firebase/db_types';
+import { Toggle } from '../components/Toggle';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -59,8 +60,10 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
-
-							<SearchBar />
+							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
+								function (newValue: string): void {
+									console.log(`SearchBar.onValueChanged: ${newValue}`);
+								} } />
 							{/* Links section */}
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
@@ -172,148 +175,15 @@ const Navbar = (props) => {
 	);
 };
 
-
-const ExpLog = ({ projectinit, setFormState, setCopyId }) => {
-	const [project, setProject] = useState(projectinit);
-	useEffect(() => subscribeToExp(project.expId, setProject), []); // TODO adding project causes render loop
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
-	const totalRuns = project['totalExperimentRuns'] ?? 0;
-	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
-	const experimentInProgress = !project['finished'] && project['startedAtEpochMillis'];
-
-	return (
-		<div className='flex items-center justify-between space-x-4'>
-			<div className='min-w-0 space-y-3'>
-				<div className='flex items-center space-x-3'>
-					<span className='block'>
-						<h2 className='text-sm font-medium'>
-							{project.name}{' '}
-						</h2>
-					</span>
-				</div>
-				{project['finished'] == true ?
-					<button type= "button" data-id={project.expId}
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={downloadExperimentResults}>
-						Download Results
-					</button> :
-					null
-				}
-				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
-					<button type= "button" data-id={project.expId}
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={downloadExperimentProjectZip}>
-						Download Project Zip
-					</button> :
-					null
-				}
-				<button type= "button" data-id={project.expId}
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={() => {
-						setFormState(1);
-						setCopyId(project.expId);
-					}}>
-					Copy Experiment
-				</button>
-				<a
-					href={project.repoHref}
-					className='relative group flex items-center space-x-2.5'
-				>
-					<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
-						{project.description}
-					</span>
-				</a>
-			</div>
-			<div className='sm:hidden'>
-				<ChevronRightIcon
-					className='h-5 w-5 text-gray-400'
-					aria-hidden='true'
-				/>
-			</div>
-			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
-				<p className='flex items-center space-x-4'>
-					{project['finished'] ?
-						<span className='font-mono'>Experiment Completed</span> :
-						(experimentInProgress ?
-							<span className='font-mono text-blue-500'>Experiment In Progress</span> :
-							<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>)
-					}
-				</p>
-				{project['finished'] || experimentInProgress ?
-					<p className='flex items-center space-x-4'>
-						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
-						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
-					</p> :
-					null
-				}
-				{experimentInProgress ?
-					<p>
-						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
-					</p> :
-					null
-				}
-				{experimentInProgress ?
-					(project['totalExperimentRuns'] ?
-						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p>:
-						<p>(Calculating total experiment runs...)</p>
-					) :
-					null
-				}
-				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toString()}</span>
-					{/* TODO unused location field? */}
-					{/* <span>{project.location}</span> */}
-				</p>
-				{project['startedAtEpochMillis'] ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toString()}</span>
-					</p> :
-					null
-				}
-				{project['finishedAtEpochMillis'] ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString()}</span>
-					</p> :
-					null
-				}
-			</div>
-		</div>
-	);
-};
-
-const SearchBar = (props) => {
-	return (
-		<div className='flex basis-1/2 justify-center lg:justify-end'>
-			<div className='w-full px-2 justify-center place-content-center lg:px-6'>
-				<label htmlFor='search' className='sr-only'>
-					Search experiments
-				</label>
-				<div className='relative text-blue-200 focus-within:text-gray-400'>
-					<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-						<MagnifyingGlassIcon className='h-5 w-5' aria-hidden='true' />
-					</div>
-					<input
-						id='search'
-						name='search'
-						className='block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-blue-400 bg-opacity-25 text-blue-100 placeholder-blue-200 focus:outline-none focus:bg-white focus:ring-0 focus:placeholder-gray-400 focus:text-gray-900 sm:text-sm'
-						placeholder='Search projects'
-						type='search'
-					/>
-				</div>
-			</div>
-		</div>
-	);
-};
-
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
-	const [experiments, setExperiments] = useState([] as unknown[]); // TODO experiment type
+	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]); // TODO experiment type
 
 	useEffect(() => {
 		if (!userId) {
 			return;
 		}
-		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList));
+		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
@@ -356,7 +226,7 @@ export default function DashboardPage() {
 	}, []);
 
 
-	const [copyID, setCopyId] = useState(null);
+	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
 	useEffect(() => {
@@ -366,6 +236,7 @@ export default function DashboardPage() {
 			setLabel('Continue Experiment');
 		}
 	}, [formState]);
+
 	return (
 		<>
 			{/* Background color split screen for large screens */}
@@ -472,91 +343,12 @@ export default function DashboardPage() {
 							</div>
 						</div>
 
-						{/* Projects List */}
-						<div className='bg-white lg:min-w-0 lg:flex-1'>
-							<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
-								<div className='flex items-center'>
-									<h1 className='flex-1 text-lg font-medium'>Projects</h1>
-									<Menu as='div' className='relative'>
-										<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
-											<BarsArrowUpIcon
-												className='mr-3 h-5 w-5 text-gray-400'
-												aria-hidden='true'
-											/>
-											Sort
-											<ChevronDownIcon
-												className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
-												aria-hidden='true'
-											/>
-										</Menu.Button>
-										<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
-											<div className='py-1'>
-												<Menu.Item>
-													{({ active }) => (
-														<a
-															href='#'
-															className={classNames(
-																active ?
-																	'bg-gray-100 text-gray-900' :
-																	'text-gray-700',
-																'block px-4 py-2 text-sm'
-															)}
-														>
-															Name
-														</a>
-													)}
-												</Menu.Item>
-												<Menu.Item>
-													{({ active }) => (
-														<a
-															href='#'
-															className={classNames(
-																active ?
-																	'bg-gray-100 text-gray-900' :
-																	'text-gray-700',
-																'block px-4 py-2 text-sm'
-															)}
-														>
-															Date modified
-														</a>
-													)}
-												</Menu.Item>
-												<Menu.Item>
-													{({ active }) => (
-														<a
-															href='#'
-															className={classNames(
-																active ?
-																	'bg-gray-100 text-gray-900' :
-																	'text-gray-700',
-																'block px-4 py-2 text-sm'
-															)}
-														>
-															Date created
-														</a>
-													)}
-												</Menu.Item>
-											</div>
-										</Menu.Items>
-									</Menu>
-								</div>
-							</div>
-							<ul
-								role='list'
-								className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
-							>
-								{experiments?.map((project: any) => { // TODO a type for experiments should alleviate the need for `any` here
-									return (
-										<li
-											key={project.expId}
-											className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-										>
-											<ExpLog projectinit={project} setFormState={setFormState} setCopyId={setCopyId}/>
-										</li>
-									);
-								})}
-							</ul>
-						</div>
+						<ExperimentList
+							experiments={experiments}
+							onCopyExperiment={(experimentId) => {
+								setFormState(FormStates.Params);
+								setCopyId(experimentId);
+							} } />
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -602,7 +394,7 @@ export default function DashboardPage() {
 							</div>
 						</div>
 					</div>
-					<NewExp
+					<NewExperiment
 						formState={formState}
 						setFormState={setFormState}
 						copyID = {copyID}
@@ -613,3 +405,157 @@ export default function DashboardPage() {
 		</>
 	);
 }
+
+export interface ExperimentListProps {
+	experiments: ExperimentData[];
+	onCopyExperiment: (experiment: ExperimentDocumentId) => void;
+}
+
+const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) => {
+	const menuHoverActiveCss = (active: boolean) => {
+		return classNames(
+			active ?
+				'bg-gray-100 text-gray-900' :
+				'text-gray-700',
+			'block px-4 py-2 text-sm'
+		);
+	};
+
+	const [includeCompleted, setIncludeCompleted] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(true);
+
+	return <div className='bg-white lg:min-w-0 lg:flex-1'>
+		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
+			<div className='flex items-center'>
+				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
+				<Menu as='div' className='relative'>
+					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+						<BarsArrowUpIcon
+							className='mr-3 h-5 w-5 text-gray-400'
+							aria-hidden='true' />
+						TODO Sort
+						<ChevronDownIcon
+							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
+							aria-hidden='true' />
+					</Menu.Button>
+					<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+						<div className='py-1'>
+							<Menu.Item>
+								{({ active }) => (
+									<a
+										href='#'
+										className={menuHoverActiveCss(active)}
+									>
+										Name
+									</a>
+								)}
+							</Menu.Item>
+							<Menu.Item>
+								{({ active }) => (
+									<a
+										href='#'
+										className={menuHoverActiveCss(active)}
+									>
+										Date modified
+									</a>
+								)}
+							</Menu.Item>
+							<Menu.Item>
+								{({ active }) => (
+									<a
+										href='#'
+										className={menuHoverActiveCss(active)}
+									>
+										Date created
+									</a>
+								)}
+							</Menu.Item>
+						</div>
+					</Menu.Items>
+				</Menu>
+				<Menu as='div' className='relative'>
+					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+						<FunnelIcon
+							className='mr-3 h-5 w-5 text-gray-400'
+							aria-hidden='true' />
+						Filter
+						<ChevronDownIcon
+							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
+							aria-hidden='true' />
+					</Menu.Button>
+					<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+						<div className='py-1'>
+							<Menu.Item>
+								{({ active }) => (
+									<div className={menuHoverActiveCss(active)}>
+										<Toggle
+											label={'Include Completed'}
+											initialValue={includeCompleted}
+											onChange={(newValue) => {
+												setIncludeCompleted(newValue);
+											} } />
+									</div>
+								)}
+							</Menu.Item>
+							<Menu.Item>
+								{({ active }) => (
+									<a
+										href='#'
+										className={menuHoverActiveCss(active)}
+									>
+										<Toggle
+											label={'Include Archived'}
+											initialValue={includeArchived}
+											onChange={(newValue) => {
+												setIncludeArchived(newValue);
+											} } />
+									</a>
+								)}
+							</Menu.Item>
+							<Menu.Item>
+								{({ active }) => (
+									<a
+										href='#'
+										className={menuHoverActiveCss(active)}
+									>
+										TODO AnotherOption
+									</a>
+								)}
+							</Menu.Item>
+						</div>
+					</Menu.Items>
+				</Menu>
+			</div>
+		</div>
+		<ul
+			role='list'
+			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
+		>
+			{experiments?.map((project: ExperimentData) => {
+				if (!includeCompleted && project.finished) {
+					return null;
+				}
+				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+				const oneHourMilliseconds = 1000 * 60 * 60;
+				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+				if (!includeArchived && projectIsArchived) {
+					return null;
+				}
+				return (
+					<li
+						key={project.expId}
+						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+					>
+						<ExperimentListing
+							projectinit={project}
+							onCopyExperiment={onCopyExperiment}
+							onDownloadResults={downloadExperimentResults}
+							onDownloadProjectZip={downloadExperimentProjectZip} />
+					</li>
+				);
+			})}
+		</ul>
+	</div>;
+};
+
