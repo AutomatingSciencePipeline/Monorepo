@@ -3,7 +3,7 @@ from pydantic import BaseModel, validator
 
 
 class ConfigData(BaseModel):
-    data: Dict[str, Any] 
+    data: Dict[str, Any]
 
     @validator('data')
     @classmethod
