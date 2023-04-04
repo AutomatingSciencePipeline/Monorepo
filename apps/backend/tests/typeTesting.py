@@ -1,13 +1,11 @@
 import json
-import os
-from typing import List
 from app import parseParams
-from experiment import ExperimentData
-from modules.configs import create_config_from_data, gather_parameters, generate_config_files, generate_list, get_default
+from modules.data.experiment import ExperimentData
+from modules.configs import generate_config_files
 from modules.data.experiment import ExperimentType
-from modules.data.parameters import BoolParameter, FloatParam, Parameter, ParamType, IntegerParam, StringParameter
 
-# TODO move this out to test files later
+# This file shows how to construct an ExperimentData object from a JSON string
+# This approach can help in writing tests for that functionality, after that, this file can be deleted
 if __name__ == "__main__":
     print("hello world")
 
