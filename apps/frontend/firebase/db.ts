@@ -74,15 +74,20 @@ const downloadArbitraryFile = (url: string, name: string) => {
 	document.body.removeChild(anchor);
 };
 
-export const downloadExperimentResults = (expId: ExperimentDocumentId) => {
+export const downloadExperimentResults = async (expId: ExperimentDocumentId) => {
 	console.log(`Downloading results for ${expId}`);
-	const fileRef = ref(storage, `results/result${expId}.csv`);
-	getDownloadURL(fileRef).then((url) => {
-		downloadArbitraryFile(url, `result${expId}.csv`);
-	}).catch((error) => {
-		console.log('Get download url for exp error: ', error);
-		alert(`Error downloading file: ${error.message}`);
+	const response = await fetch('/api/experiments/csv', {
+		method: 'POST',
+		headers: new Headers({
+			'Content-Type': 'application/json',
+		}),
+		body: JSON.stringify(expId),
 	});
+	console.log(response);
+	const record = await response.json();
+	const csvContents = record[0].resultContent;
+	const url = `data:text/plain;charset=utf-8,${encodeURIComponent(csvContents)}`;
+	downloadArbitraryFile(url, `result${expId}.csv`);
 };
 
 export const downloadExperimentProjectZip = (expId: ExperimentDocumentId) => {
