@@ -21,10 +21,15 @@
                 "5050" // TODO try to read env var for BACKEND_PORT? or up to the dev to manage this?
             ],
             "jinja": true,
-            "justMyCode": false
+            "justMyCode": false,
+            "presentation": {
+                "group": "local-debug",
+                "order": 2
+            },
         },
         {
             "name": "Debug Frontend",
+            "type": "node",
             "request": "launch",
             "runtimeArgs": [
                 "run",
@@ -36,7 +41,23 @@
                 "<node_internals>/**"
             ],
             "console": "integratedTerminal",
-            "type": "node"
+            "presentation": {
+                "group": "local-debug",
+                "order": 1
+            },
+        },
+        {
+            "name": "Python: Current File (in Backend App)",
+            "presentation": {
+                "group": "local-debug"
+            },
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/apps/backend"
+            }
         }
     ]
 }

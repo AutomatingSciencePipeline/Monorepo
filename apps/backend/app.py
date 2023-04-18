@@ -13,14 +13,15 @@ from firebase_admin import firestore, storage
 from dotenv import load_dotenv
 import pymongo
 from pymongo.errors import ConnectionFailure
-import base64
-import bson
 from bson.binary import Binary
 
 from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, GladosInternalError, ExperimentAbort
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
+
+from modules.data.experiment import ExperimentData, ExperimentType
+from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -48,14 +49,12 @@ firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
-
 #MongoDB Objects
 DEFAULT_MONGO_PORT = 27017
 mongoClient = pymongo.MongoClient('glados-mongodb', DEFAULT_MONGO_PORT, serverSelectionTimeoutMS=1000)
 mongoGladosDB = mongoClient["gladosdb"]
 mongoResultsCollection = mongoGladosDB.results
 mongoResultsZipCollections = mongoGladosDB.zips
-
 
 #setting up the app
 MAX_WORKERS = 1
@@ -65,6 +64,7 @@ runner = ProcessPoolExecutor(MAX_WORKERS)
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
+
 @flaskApp.post("/experiment")
 def recv_experiment():
     runner.submit(handle_exceptions_from_run, request.get_json())
@@ -73,6 +73,7 @@ def recv_experiment():
 
 @flaskApp.get("/queue")
 def get_queue():
+    # There must be a cleaner way to access this queue size...
     return jsonify({"queueSize": len(runner._pending_work_items)})
 
 
@@ -100,44 +101,42 @@ def run_batch(data):
     expRef = experiments.document(expId)
 
     # Parsing the argument data
-    experiment = expRef.get().to_dict()
-    print(f"Experiment info: {experiment}")
-    experiment['id'] = expId
-    trialExtraFile = experiment['trialExtraFile']
-    trialResult = experiment['trialResult']
-    keepLogs = experiment['keepLogs']
-    trialTimeout = int(experiment['timeout'])
-    scatterPlot = experiment['scatter']
-    dumbTextArea = experiment['dumbTextArea']
-    postProcess = scatterPlot != ''
+    experimentData = expRef.get().to_dict()
 
+    try:
+        hyperparameters: "dict[str,Parameter]" = parseParams(json.loads(experimentData['hyperparameters'])['hyperparameters'])
+    except KeyError as err:
+        raise GladosInternalError("Error generating configs - hyperparameters not found in experiment object") from err
+    print(type(hyperparameters))
+    experimentData['hyperparameters'] = hyperparameters
+
+    #Parsing into Datatype
+    experiment = ExperimentData(**experimentData)
+    experiment.postProcess = experiment.scatter
     #Downloading Experiment File
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    filepath = download_experiment_files(expId, experiment, trialExtraFile, keepLogs, postProcess)
+    filepath = download_experiment_files(experiment)
 
     rawfiletype, filetype = determine_experiment_file_type(filepath)
-    print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype}")
+    experiment.experimentType = filetype
+    print(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
 
     print(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
-    try:
-        hyperparameters = json.loads(experiment['hyperparameters'])['hyperparameters']
-    except KeyError as err:
-        raise GladosInternalError("Error generating configs - hyperparameters not found in experiment object") from err
 
-    configResult = generate_config_files(hyperparameters, dumbTextArea)
-    if configResult is None:
+    totalExperimentRuns = generate_config_files(experiment)
+    if totalExperimentRuns == 0:
         raise GladosInternalError("Error generating configs - somehow no config files were produced?")
-    numExperimentsToRun = len(configResult) - 1
+    experiment.totalExperimentRuns = totalExperimentRuns
 
-    expRef.update({"totalExperimentRuns": numExperimentsToRun + 1})
+    expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
 
     try:
-        conduct_experiment(expId, expRef, trialExtraFile, trialResult, filepath, filetype, numExperimentsToRun, trialTimeout, keepLogs)
+        conduct_experiment(experiment, expRef)
 
-        post_process_experiment(expId, experiment, scatterPlot, postProcess)
+        post_process_experiment(experiment)
 
-        upload_experiment_results(expId, trialExtraFile, postProcess)
+        upload_experiment_results(experiment)
     except ExperimentAbort as err:
         print(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
         logging.exception(err)
@@ -156,9 +155,9 @@ def determine_experiment_file_type(filepath):
     print(rawfiletype)
     filetype = 'unknown'
     if 'Python script' in rawfiletype or 'python3' in rawfiletype:
-        filetype = 'python'
+        filetype = ExperimentType.PYTHON
     elif 'Java archive data (JAR)' in rawfiletype:
-        filetype = 'java'
+        filetype = ExperimentType.JAVA
 
     if filetype == 'unknown':
         print(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
@@ -166,62 +165,65 @@ def determine_experiment_file_type(filepath):
     return rawfiletype, filetype
 
 
-def download_experiment_files(expId, experiment, trialExtraFile, keepLogs, postProcess):
-    if trialExtraFile != '' or postProcess != '' or keepLogs:
+def download_experiment_files(experiment: ExperimentData):
+    if experiment.trialExtraFile != '' or experiment.postProcess != '' or experiment.keepLogs:
         print('There will be experiment outputs')
         os.makedirs('ResCsvs')
-    print(f'Downloading file for {expId}')
-    try:
-        filepath = experiment['file']
-    except KeyError:
-        filepath = f'experiment{expId}'
-        print(f"No filepath specified so defaulting to {filepath}")
-    print(f"Downloading {filepath} to ExperimentFiles/{expId}/{filepath}")
+    print(f'Downloading file for {experiment.expId}')
+
+    filepath = f'experiment{experiment.expId}'
+    experiment.file = filepath
+    print(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
         filedata = firebaseBucket.blob(filepath)
         filedata.download_to_filename(filepath)
     except Exception as err:
         print(f"Error {err} occurred while trying to download experiment file")
         raise GladosInternalError('Failed to download experiment files') from err
-    print(f"Downloaded {filepath} to ExperimentFiles/{expId}/{filepath}")
+    print(f"Downloaded {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     return filepath
 
 
-def upload_experiment_results(expId, trialExtraFile, postProcess):
+def parseParams(hyperparameters):
+    result = {}
+    for param in hyperparameters:
+        name = param['name']
+        del param['name']
+        if param['type'] == 'integer':
+            param['type'] = ParamType.INTEGER
+            result[name] = IntegerParam(**param)
+        elif param['type'] == 'float':
+            param['type'] = ParamType.FLOAT
+            result[name] = FloatParam(**param)
+        elif param['type'] == 'bool':
+            param['type'] = ParamType.BOOL
+            result[name] = BoolParameter(**param)
+        elif param['type'] == 'string':
+            param['type'] = ParamType.STRING
+            result[name] = StringParameter(**param)
+        else:
+            raise GladosInternalError(f"{param['type']} is not a supported type")
+    return result
+
+
+def upload_experiment_results(experiment: ExperimentData):
     print('Uploading Results to the frontend')
-    uploadBlob = firebaseBucket.blob(f"results/result{expId}.csv")
+    uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
     uploadBlob.upload_from_filename('results.csv')
 
-    # Upload to MongoDB
-    try:
-            mongoClient.admin.command('ping')
-    except ConnectionFailure as err:
-        raise GladosInternalError("MongoDB server not available/unreachable") from err
-        
-    
-    print('Uploading to MongoDB')
-    experimentFile = open(f"results.csv") # there is probably a better way to do this
-    experimentData = experimentFile.read()
-    experimentFile.close()
-    experimentResultEntry = {"_id": expId,
-                        "resultContent": experimentData}
-    try:
-        resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
-        print(f"inserted result csv into mongodb with id: {resultId}")
-    except Exception as err:
-        raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
-    if trialExtraFile != '' or postProcess:
+    _upload_to_mongodb(experiment)
+
+    if experiment.trialExtraFile != '' or experiment.postProcess:
         print('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-            uploadBlob = firebaseBucket.blob(f"results/result{expId}.zip")
+            uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
             uploadBlob.upload_from_filename('ResultCsvs.zip')
-            
+
             # mongoResultsZipCollections
             with open("ResultCsvs.zip", "rb") as file:
                 encoded = Binary(file.read())
-            experimentZipEntry = {"_id": expId,
-                            "fileContent": encoded}
+            experimentZipEntry = {"_id": experiment.expId, "fileContent": encoded}
             try:
                 resultZipId = mongoResultsZipCollections.insert_one(experimentZipEntry).inserted_id
                 print(f"inserted zip file into mongodb with id: {resultZipId}")
@@ -231,15 +233,38 @@ def upload_experiment_results(expId, trialExtraFile, postProcess):
             raise GladosInternalError("Error uploading to firebase") from err
 
 
-def post_process_experiment(expId, experiment, scatterPlot, postProcess):
-    if postProcess:
+def _upload_to_mongodb(experiment: ExperimentData):
+    print('Uploading to MongoDB')
+    try:
+        mongoClient.admin.command('ping')
+    except ConnectionFailure as err:
+        raise GladosInternalError("MongoDB server not available/unreachable") from err
+
+    experimentData = None
+    try:
+        experimentFile = open("results.csv", encoding='utf8')
+        experimentData = experimentFile.read()
+        experimentFile.close()
+    except Exception as err:
+        raise GladosInternalError("Failed to read file data for upload to mongodb") from err
+
+    experimentResultEntry = {"_id": experiment.expId, "resultContent": experimentData}
+    try:
+        resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
+        print(f"inserted result csv into mongodb with id: {resultId}")
+    except Exception as err:
+        raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
+
+
+def post_process_experiment(experiment: ExperimentData):
+    if experiment.postProcess:
         print("Beginning post processing")
         try:
-            if scatterPlot:
+            if experiment.scatter:
                 print("Creating Scatter Plot")
-                depVar = experiment['scatterDepVar']
-                indVar = experiment['scatterIndVar']
-                generateScatterPlot(indVar, depVar, 'results.csv', expId)
+                depVar = experiment.scatterDepVar
+                indVar = experiment.scatterIndVar
+                generateScatterPlot(indVar, depVar, 'results.csv', experiment.expId)
         except KeyError as err:
             raise GladosInternalError("Error during plot generation") from err
 

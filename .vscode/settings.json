@@ -3,6 +3,7 @@
     // Spellcheck forcefully allowed words
     "cSpell.words": [
         "appspot",
+        "bson",
         "configfile",
         "dotenv",
         "eqcm",
@@ -14,13 +15,17 @@
         "hyperparameters",
         "hyperparams",
         "jsonify",
+        "keeplogs",
         "mantine",
         "matplotlib",
+        "Millis",
         "mouck",
         "paramspos",
         "pipenv",
+        "pydantic",
         "Pyenv",
         "pylintrc",
+        "pymongo",
         "pyplot",
         "pytest",
         "rawfiletype",
@@ -63,11 +68,7 @@
         "apps"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "scm.diffDecorationsGutterPattern": {
-        "added": true
-    }
-
+    "python.testing.pytestEnabled": true
     // ======================= Frontend =============================
 
     // Below this point is uncategorized (please categorize)

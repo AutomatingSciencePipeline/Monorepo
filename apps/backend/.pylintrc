@@ -1,6 +1,7 @@
 # pylint python linter configuration
 
 [MASTER]
+extension-pkg-whitelist=pydantic # stop "No name 'BaseModel' in module 'pydantic'" https://github.com/pydantic/pydantic/issues/1961#issuecomment-759522422
 disable=
     C0301, # line too long
     C0114, # missing-module-docstring

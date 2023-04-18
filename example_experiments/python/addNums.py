@@ -18,13 +18,12 @@ How to tell if they worked
     - Trial Result: The result csv downloaded has been expanded with information from the specified file
 
 
-Example settings for a run that demonstrates this:
+Example settings for a run that demonstrates this: (Any Fields not specified can be left blank or to whatever their default is)
 
 Info:
+Trial Result: AddNumResult.csv
 If you want a collection of each CSV this experiment runs:
     Trial's Extra File: AddNumResult.csv
-If you want the information from each CSV to be included in the resultCsv
-    Trial Result: AddNumResult.csv
 Both can be used at the same time
 
 Parameters:
