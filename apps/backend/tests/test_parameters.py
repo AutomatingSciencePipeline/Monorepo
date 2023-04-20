@@ -112,6 +112,7 @@ class TestFloatParameter(unittest.TestCase):
 class TestBoolParameter(unittest.TestCase):
     bool_dict_true = {'default': True, 'type': ParamType.BOOL}
     bool_dict_false = {'default': False, 'type': ParamType.BOOL}
+    bool_dict_no_default = {'type': ParamType.BOOL}
 
     def test_true_input(self):
         boolParam = BoolParameter(**self.bool_dict_true)
@@ -121,10 +122,10 @@ class TestBoolParameter(unittest.TestCase):
         boolParam = BoolParameter(**self.bool_dict_false)
         self.assertFalse(boolParam.default)
 
-
 class TestStringParameter(unittest.TestCase):
     testString = "Hello World"
     string_dict = {'default': testString, 'type': ParamType.STRING}
+    string_dict_no_default = {'type': ParamType.STRING}
 
     def test_true_input(self):
         strParam = StringParameter(**self.string_dict)
