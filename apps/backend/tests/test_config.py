@@ -1,30 +1,58 @@
 import unittest
 
 from modules.configs import gather_parameters
-
-test_empty_hyperparams_dict_list = []  #Empty dictionary
-test_one_hyperparams_dict_list = [{"name": "x", "default": "1", "min": "1", "max": "5", "step": "1", "type": "integer"}]
-test_empty_dict_list = {}
-test_empty_list = []
+from modules.data.parameters import BoolParameter, IntegerParam, ParamType
 
 
-def test_gather_parameters_no_params():
-    #Do we want to handle checking for not having any hyperparams in the array
-    gather_parameters(test_empty_hyperparams_dict_list, test_empty_dict_list, test_empty_list)
+class TestStringMethods(unittest.TestCase):
 
+    test_empty_hyperparams_dict = {}  #Empty dictionary
+    test_one_hyperparams_dict = {"x": IntegerParam(**{"default": 1, "min": 1, "max": 5, "step": 1, 'type': ParamType.INTEGER})}
+    test_const_hyperparams_dict = {"x": IntegerParam(**{"default": 1, "min": 5, "max": 5, "step": 1, 'type': ParamType.INTEGER})}
+    test_multiple_hyperparams_dict = {"x": IntegerParam(**{"default": 1, "min": 1, "max": 5, "step": 1, 'type': ParamType.INTEGER}), "y": IntegerParam(**{"default": 1, "min": 1, "max": 5, "step": 1, 'type': ParamType.INTEGER})}
+    test_bool_hyperparams_dict = {"bool": BoolParameter(**{"type": ParamType.BOOL, "default": True})}
+    test_empty_constants_dict = {}
+    test_empty_parameters_dict = {}
+    
 
-def test_gather_parameters_one_param():
-    gather_parameters(test_one_hyperparams_dict_list, test_empty_dict_list, test_empty_list)
+    def reset(self):
+        self.test_empty_hyperparams_dict = {}  #Empty dictionary
+        self.test_empty_constants_dict = {}
+        self.test_empty_parameters_dict = {}
+
+    def test_gather_parameters_no_hyperparams(self):
+        self.reset()
+        gather_parameters(self.test_empty_hyperparams_dict, self.test_empty_constants_dict, self.test_empty_parameters_dict)
+        self.assertFalse(self.test_empty_constants_dict)
+        self.assertFalse(self.test_empty_parameters_dict)
+
+    def test_gather_parameters_one_param(self):
+        self.reset()
+        gather_parameters(self.test_one_hyperparams_dict, self.test_empty_constants_dict, self.test_empty_parameters_dict)
+        self.assertFalse(self.test_empty_constants_dict)
+        self.assertEqual(len(self.test_empty_parameters_dict), 1)
+        self.assertTrue("x" in self.test_empty_parameters_dict)
+
+    def test_gather_parameters_two_param(self):
+        self.reset()
+        gather_parameters(self.test_multiple_hyperparams_dict, self.test_empty_constants_dict, self.test_empty_parameters_dict)
+        self.assertFalse(self.test_empty_constants_dict)
+        self.assertEqual(len(self.test_empty_parameters_dict), 2)
+        self.assertTrue("x" in self.test_empty_parameters_dict)
+        self.assertTrue("y" in self.test_empty_parameters_dict)
+    
+    def test_gather_parameters_const_param(self):
+        self.reset()
+        gather_parameters(self.test_const_hyperparams_dict, self.test_empty_constants_dict, self.test_empty_parameters_dict)
+        self.assertTrue(self.test_empty_constants_dict)
+        #self.assertTrue(5 in self.test_empty_constants_dict)
+        print(self.test_empty_constants_dict)
+        self.assertEqual(len(self.test_empty_parameters_dict), 0)
+        #self.assertTrue("x" in self.test_empty_parameters_dict)
 
 
 #Tests to write-- (gather_parameters)
-#Missing type (throws exception)
-#Missing name (throws exception)
-#Missing min and max for integer and floats (throws exception)
-#Missing default for string (throws exception)
-#Else case check parameters to see if hyperparameter is there
 #Happy case for min == max for integer float
-#Happy case for min != max for integer float
 #Happy case for string having default
 
 #Tests to wite-- (generate_list)
@@ -45,6 +73,5 @@ def test_gather_parameters_one_param():
 #Tests to write-- (get_config_paramNames)
 #Test for element being/not being in res
 
-
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
