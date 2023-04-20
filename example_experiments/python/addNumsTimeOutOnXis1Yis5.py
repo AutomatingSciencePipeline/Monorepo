@@ -7,7 +7,7 @@ import time
 """
 This experiment adds the input x and y parameters,
 but waits for an amount of time specified in the User Defined Constants before doing so.
-
+and if x == 1 and y == 5 the trial will timeout
 
 Example settings for a run that demonstrates this:
 
@@ -17,8 +17,7 @@ If you want a collection of each CSV this experiment runs:
     Trial's Extra File: AddNumResult.csv
 Both can be used at the same time
 
-If you wish to test exit on timeout set
-Trial Timeout: 2
+Trial Timeout: 5
 
 Parameters:
 x, default: 1, min: 1, max: 10, step: 1
@@ -26,7 +25,7 @@ y, default: 1, min: 1, max: 10, step: 1
 
 User Defined Constants:
 [wait]
-waitTime = 3
+waitTime = 2
 """
 
 
@@ -39,6 +38,9 @@ def main():
     y = int(config["DEFAULT"]["y"])
     waitTime = int(config["wait"]["waitTime"])
     time.sleep(waitTime)
+    if x == 1 and y == 5:
+        # wait additional time, which will exceed the experiment timeout
+        time.sleep(waitTime * 10)
     with open('AddNumResult.csv', 'w', encoding="utf8") as result:
         writer = csv.writer(result)
         writer.writerow(['Addition', 'Subtraction'])

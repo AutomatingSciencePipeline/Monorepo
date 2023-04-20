@@ -1,0 +1,17 @@
+# Use this docker-compose file in addition to the base one in order to set up development configurations for the containers
+# https://docs.docker.com/compose/extends/
+
+version: '3'
+name: glados-project
+
+services:
+  app-backend:
+    build:
+      target: development
+    volumes:
+      - ./apps/backend/:/app
+  app-frontend:
+    build: 
+      target: development
+    volumes:
+      - ./apps/frontend/:/app

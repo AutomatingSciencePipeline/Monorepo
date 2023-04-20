@@ -26,7 +26,7 @@ export interface AuthServiceType {
 
 export interface AuthContextType {
 	user: User | null;
-	userId: String | null;
+	userId: string | null;
 	authService: AuthServiceType;
 	loading: boolean;
 }

@@ -1,11 +1,11 @@
 import configparser
 import itertools
 import os
+from modules.data.configData import ConfigData
+from modules.data.experiment import ExperimentData
 
+from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter
 from modules.exceptions import GladosInternalError
-
-DEFAULT_STEP_INT = 1
-DEFAULT_STEP_FLOAT = 0.1
 
 FilePath = str
 
@@ -20,86 +20,122 @@ def float_range(start: float, stop: float, step=1.0):
         count += 1
 
 
-def generate_list(otherVar, paramspos):
-    if otherVar['type'] == 'integer':
-        step = DEFAULT_STEP_INT if otherVar['step'] == '' or int(otherVar['step']) == 0 else otherVar['step']
-        if otherVar['max'] == otherVar['min']:
-            otherVar['max'] = int(otherVar['max']) + int(step) #TODO: Should this line be removed? Should already be a constant from gather_params
-        paramspos.append([(otherVar['name'], i) for i in range(int(otherVar['min']), int(otherVar['max']), int(step))])
-    elif otherVar['type'] == 'float':
-        step = DEFAULT_STEP_FLOAT if otherVar['step'] == '' or float(otherVar['step']) == 0 else otherVar['step']
-        if otherVar['max'] == otherVar['min']:
-            otherVar['max'] = float(otherVar['max']) + float(step)
-        paramspos.append([(otherVar['name'], i) for i in float_range(float(otherVar['min']), float(otherVar['max']), float(step))])
-    elif otherVar['type'] == 'string':
-        paramspos.append([(otherVar['name'], otherVar['default'])])
-    elif otherVar['type'] == 'bool':
-        paramspos.append([(otherVar['name'], val) for val in [True, False]])
+def generate_list(param: Parameter, paramName, paramspos):
+    if param.type == ParamType.INTEGER:
+        intParam = IntegerParam(**param.dict())
+        paramspos.append([(paramName, i) for i in range(intParam.min, intParam.max, intParam.step)])
+    elif param.type == ParamType.FLOAT:
+        floatParam = FloatParam(**param.dict())
+        paramspos.append([(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)])
+    elif param.type == ParamType.BOOL:
+        paramspos.append([(paramName, val) for val in [True, False]])
 
 
-def generate_config_files(hyperparams, unparsedConstInfo):
-    os.mkdir('configFiles')
-    os.chdir('configFiles')
-    configIdNumber = 0
+def generate_config_files(experiment: ExperimentData):
     constants = {}
-    parameters = []
-    configs = []
-    gather_parameters(hyperparams, constants, parameters)
+    parameters = {}
+    gather_parameters(experiment.hyperparameters, constants, parameters)
 
-    for defaultVar in parameters:
+    configDict = {}
+    configIdNumber = 0
+    for defaultKey, defaultVar in parameters.items():
         print(f'Keeping {defaultVar} constant')
+        possibleParamVals = []
+
+        #Required to do the cross product, since each config is made by
+        #doing a cross product of lists of name value pairs the default variable needs to be
+        #a single item list so that there is only one possible value for the default variable
+        default = [(defaultKey, get_default(defaultVar))]
+        possibleParamVals.append(default)
+
+        for otherKey, otherVar in parameters.items():
+            if otherKey != defaultKey:
+                generate_list(otherVar, otherKey, possibleParamVals)
         try:
-            paramspos = []
-            default = [(defaultVar['name'], defaultVar['default'])]
-            paramspos.append(default)
-        except KeyError as err:
-            print(f"Some sorta error with accessing default {err}")
-            return None
-        for otherVar in hyperparams:
-            if otherVar['name'] != defaultVar['name']:
-                try:
-                    generate_list(otherVar, paramspos)
-                except KeyError as err:
-                    raise GladosInternalError('Error during list generation') from err
-        try:
-            permutations = list(itertools.product(*paramspos))
+            permutations = list(itertools.product(*possibleParamVals))
         except Exception as err:
             raise GladosInternalError("Error while making permutations") from err
 
         for thisPermutation in permutations:
-            outputConfig = configparser.ConfigParser()
-            outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
             configItems = {}
             for item in thisPermutation:
-                configItems[item[0]] = item[1]
+                name = item[0]
+                value = item[1]
+                configItems[name] = value
             configItems.update(constants)
-            configs.append(configItems)
-            outputConfig["DEFAULT"] = configItems
-            with open(f'{configIdNumber}.ini', 'w', encoding="utf8") as configFile:
-                outputConfig.write(configFile)
-                configFile.write(unparsedConstInfo)
-                configFile.close()
-                print(f"Finished writing config {configIdNumber}")
+            configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
+            print(f'Generated config {configIdNumber}')
             configIdNumber += 1
-    os.chdir('..')
+
     print("Finished generating configs")
-    return configs
+    experiment.configs = configDict
+    return configIdNumber
+
+
+def create_config_from_data(experiment: ExperimentData, configNum: int):
+    if experiment.configs == {}:
+        msg = f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty"
+        print(msg)
+    try:
+        configData = experiment.configs[f'config{configNum}'].data
+    except KeyError as err:  #TODO: Discuss how we handle this error
+        msg = f"There is no config {configNum} cannot generate this config, there are only {len(experiment.configs)} configs"
+        print(msg)
+        raise GladosInternalError(msg) from err
+
+    os.chdir('configFiles')
+    outputConfig = configparser.ConfigParser()
+    outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
+    outputConfig["DEFAULT"] = configData
+    with open(f'{configNum}.ini', 'w', encoding="utf8") as configFile:
+        outputConfig.write(configFile)
+        configFile.write(experiment.dumbTextArea)
+        configFile.close()
+        print(f"Wrote config{configNum} to a file")
+    os.chdir('..')
+    return f'{configNum}.ini'
+
+
+def get_default(parameter):
+    if parameter.type == ParamType.INTEGER:
+        return IntegerParam(**parameter.dict()).default
+    elif parameter.type == ParamType.FLOAT:
+        return FloatParam(**parameter.dict()).default
+    elif parameter.type == ParamType.BOOL:
+        return BoolParameter(**parameter.dict()).default
+    elif parameter.type == ParamType.STRING:
+        return StringParameter(**parameter.dict()).default
+    else:
+        raise GladosInternalError(f'Parameter {parameter} has an unsupported type')
 
 
 def gather_parameters(hyperparams, constants, parameters):
-    for hyperparameter in hyperparams:
+    for parameterKey, hyperparameter in hyperparams.items():
         try:
-            parameterType = hyperparameter['type']
-            parameterKey = hyperparameter['name']
-            if (parameterType in ('integer', 'float')) and hyperparameter['min'] == hyperparameter['max']:
-                print(f'param {parameterKey} has the same min and max value; converting to constant')
-                constants[parameterKey] = hyperparameter['min']
-            elif parameterType == 'string':
-                print('param ' + parameterKey + ' is a string, adding to constants')
-                constants[parameterKey] = hyperparameter['default']
+            parameterType = hyperparameter.type
+            if parameterType in (ParamType.INTEGER, ParamType.FLOAT):
+                if parameterType == ParamType.INTEGER:
+                    param = IntegerParam(**hyperparameter.dict())
+                else:
+                    param = FloatParam(**hyperparameter.dict())
+                #Since we already know if param will be an integer or a float we can access min and max without messing anything up
+                if param.min == param.max:
+                    print(f'param {parameterKey} has the same min and max value; converting to constant')
+                    constants[parameterKey] = param.min
+                else:  #Varies adding to batch
+                    print(f'param {parameterKey} varies, adding to batch')
+                    parameters[parameterKey] = param
+            elif parameterType == ParamType.STRING:  #Strings never vary technically should be in the constants section now
+                stringParam = StringParameter(**hyperparameter.dict())
+                print(f'param {parameterKey} is a string, adding to constants')
+                constants[parameterKey] = stringParam.default
+            elif parameterType == ParamType.BOOL:
+                print(f'param {parameterKey} varies, adding to batch')
+                parameters[parameterKey] = hyperparameter
             else:
-                print('param ' + parameterKey + ' varies, adding to batch')
-                parameters.append(hyperparameter)
+                msg = f'ERROR DURING CONFIG GEN: param {parameterKey} {hyperparameter} Does not have a supported type'
+                print(msg)
+                raise GladosInternalError(msg)
         except KeyError as err:
             raise GladosInternalError('Error during finding constants') from err
 

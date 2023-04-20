@@ -1,18 +1,18 @@
-import { Dropzone } from '@mantine/dropzone';
-import { submitExperiment, uploadExec } from '../../firebase/db';
+import { Dropzone, DropzoneProps } from '@mantine/dropzone';
+import { submitExperiment, uploadExec } from '../../../../firebase/db';
 import { Text } from '@mantine/core';
 
-import { useAuth } from '../../firebase/fbAuth';
+import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, X, File, IconProps } from 'tabler-icons-react';
 
 export const DispatchStep = ({ id, form, ...props }) => {
-	const { userId, authService } = useAuth();
+	const { userId } = useAuth();
 
-	const onDropFile = async (file) => {
+	const onDropFile = (files: Parameters<DropzoneProps["onDrop"]>) => {
 		console.log('Submitting Experiment!!!');
-		submitExperiment(form.values, userId).then(async (expId) => {
+		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}`);
-			const uploadResponse = await uploadExec(expId, file[0]);
+			const uploadResponse = await uploadExec(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
 				const response = await fetch(`/api/experiments/${expId}`, {
@@ -39,11 +39,12 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		});
 	};
 
+	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
 	return (
 		<Dropzone
-			onDrop={onDropFile}
+			onDrop={onDropFile as any}
 			onReject={(file) => console.log('NOPE, file rejected', file)}
-			maxSize={3 * 1024 ** 2}
+			maxSize={MAXIMUM_SIZE_BYTES}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 			accept={{
 				'text/plain': ['.py'],
@@ -62,16 +63,16 @@ const dropzoneKids = (status) => {
 			<UploadIcon status={status} />
 			<div>
 				<Text size='xl' inline>
-                    Upload your project executable.
+					Upload your project executable.
 				</Text>
 				<Text size='sm' color='dimmed' inline mt={7}>
-                    Let%apos;s revolutionize science!
+					Let{"'"}s revolutionize science!
 				</Text>
 			</div>
 		</div>;
 };
 interface UploadIconProps extends IconProps {
-    status
+	status
 }
 
 const UploadIcon: React.FC<UploadIconProps> = ({ status }) => {

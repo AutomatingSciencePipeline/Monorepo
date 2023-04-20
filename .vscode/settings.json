@@ -3,8 +3,8 @@
     // Spellcheck forcefully allowed words
     "cSpell.words": [
         "appspot",
+        "bson",
         "configfile",
-        "consts",
         "dotenv",
         "eqcm",
         "firestore",
@@ -15,13 +15,17 @@
         "hyperparameters",
         "hyperparams",
         "jsonify",
+        "keeplogs",
         "mantine",
         "matplotlib",
+        "Millis",
         "mouck",
         "paramspos",
         "pipenv",
+        "pydantic",
         "Pyenv",
         "pylintrc",
+        "pymongo",
         "pyplot",
         "pytest",
         "rawfiletype",
@@ -65,7 +69,6 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true
-
     // ======================= Frontend =============================
 
     // Below this point is uncategorized (please categorize)

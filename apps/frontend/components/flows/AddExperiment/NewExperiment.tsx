@@ -1,11 +1,11 @@
 import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Toggle } from './Toggle';
-import Parameter from './Parameter';
+import { Toggle } from '../../Toggle';
+import Parameter from '../../Parameter';
 import { useForm, formList, joiResolver } from '@mantine/form';
-import { experimentSchema } from '../utils/validators';
+import { experimentSchema } from '../../../utils/validators';
 
-import { firebaseApp } from '../firebase/firebaseClient';
+import { firebaseApp } from '../../../firebase/firebaseClient';
 import { getDoc, getFirestore, doc } from 'firebase/firestore';
 
 import { DispatchStep } from './stepComponents/DispatchStep';
@@ -14,7 +14,9 @@ import { ParamStep } from './stepComponents/ParamStep';
 import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
+import { DB_COLLECTION_EXPERIMENTS } from '../../../firebase/db';
 
+const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 
 export const FormStates = {
 	Closed: -1,
@@ -60,21 +62,23 @@ const Steps = ({ steps }) => {
 	);
 };
 
-const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
+const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
+		// TODO make this follow the schema as closely as we can
 		initialValues: {
-			parameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
+			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
-			fileOutput: '',
-			resultOutput: '',
+			trialExtraFile: '',
+			trialResult: '',
 			scatterIndVar: '',
 			scatterDepVar: '',
 			dumbTextArea: '',
+			timeout: DEFAULT_TRIAL_TIMEOUT_SECONDS,
 			verbose: false,
 			scatter: false,
 			keepLogs: true,
-			nWorkers: 1,
+			workers: 1,
 		},
 		schema: joiResolver(experimentSchema),
 	});
@@ -82,22 +86,23 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	useEffect(() => {
 		if (copyID != null) {
 			const db = getFirestore(firebaseApp);
-			getDoc(doc(db, 'Experiments', copyID)).then((docSnap) => {
+			getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
 				if (docSnap.exists()) {
 					const expInfo = docSnap.data();
-					const params = JSON.parse(expInfo['params'])['params'];
+					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
 					form.setValues({
-						parameters: formList(params),
+						hyperparameters: formList(hyperparameters),
 						name: expInfo['name'],
 						description: expInfo['description'],
-						fileOutput: expInfo['fileOutput'],
-						resultOutput: expInfo['resultOutput'],
+						trialExtraFile: expInfo['trialExtraFile'],
+						trialResult: expInfo['trialResult'],
 						verbose: expInfo['verbose'],
-						nWorkers: expInfo['workers'],
+						workers: expInfo['workers'],
 						scatter: expInfo['scatter'],
-						dumbTextArea: expInfo['consts'],
+						dumbTextArea: expInfo['dumbTextArea'],
 						scatterIndVar: expInfo['scatterIndVar'],
 						scatterDepVar: expInfo['scatterDepVar'],
+						timeout: expInfo['timeout'],
 						keepLogs: expInfo['keepLogs'],
 					});
 					setCopyId(null);
@@ -111,7 +116,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 
-	const fields = form.values.parameters.map(({ type, ...rest }, index) => {
+	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
 	});
 
@@ -197,7 +202,7 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 													placeholder={'Number of Workers'}
 													className='rounded-md  border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 													required
-													{...form.getInputProps('nWorkers')}
+													{...form.getInputProps('workers')}
 												/>
 												<Toggle
 													label={'Verbose?'}
@@ -249,4 +254,4 @@ const NewExp = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	);
 };
 
-export default NewExp;
+export default NewExperiment;

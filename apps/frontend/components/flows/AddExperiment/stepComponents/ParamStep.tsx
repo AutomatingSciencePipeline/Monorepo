@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { InputSection } from '../InputSection';
+import { InputSection } from '../../../InputSection';
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'string'] as const;
 
@@ -20,7 +20,7 @@ export const ParamStep = ({ form, ...props }) => {
 									key={`addNew_${type}`}
 									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
 									onClick={() =>
-										form.addListItem('parameters', {
+										form.addListItem('hyperparameters', {
 											name: '',
 											default: '',
 											...((type === 'integer' || type === 'float') && {
@@ -42,7 +42,7 @@ export const ParamStep = ({ form, ...props }) => {
 				<div className={'flex-0 p-4 h-full grow-0'}>
 					<DragDropContext
 						onDragEnd={({ destination, source }) => {
-							form.reorderListItem('parameters', {
+							form.reorderListItem('hyperparameters', {
 								from: source.index,
 								to: destination.index,
 							});

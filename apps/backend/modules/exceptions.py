@@ -38,5 +38,9 @@ class InternalTrialFailedError(GladosInternalError):
     """A trial failed for a reason having to do with GLADOS (the trial not passing is not a reason to throw this)"""
 
 
+class TrialTimeoutError(GladosUserError):
+    """A Trial took too long to complete"""
+
+
 class ExperimentAbort(Exception):
     """The system should stop running the entire experiment"""
