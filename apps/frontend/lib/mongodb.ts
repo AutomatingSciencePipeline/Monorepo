@@ -1,3 +1,4 @@
+// THIS IS CURRENTLY UNUSED, FIGURE OUT HOW TO IMPORT IT INTO api/experiments/
 import { MongoClient } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {

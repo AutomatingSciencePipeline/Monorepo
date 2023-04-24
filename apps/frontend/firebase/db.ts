@@ -83,22 +83,25 @@ export const downloadExperimentResults = async (expId: ExperimentDocumentId) => 
 		}),
 		body: JSON.stringify(expId),
 	});
-	console.log(response);
 	const record = await response.json();
 	const csvContents = record[0].resultContent;
 	const url = `data:text/plain;charset=utf-8,${encodeURIComponent(csvContents)}`;
 	downloadArbitraryFile(url, `result${expId}.csv`);
 };
 
-export const downloadExperimentProjectZip = (expId: ExperimentDocumentId) => {
+export const downloadExperimentProjectZip = async (expId: ExperimentDocumentId) => {
 	console.log(`Downloading project zip for ${expId}`);
-	const fileRef = ref(storage, `results/result${expId}.zip`);
-	getDownloadURL(fileRef).then((url) => {
-		downloadArbitraryFile(url, `project_${expId}.zip`);
-	}).catch((error) => {
-		console.log('Get download url for zip error: ', error);
-		alert(`Error downloading zip: ${error.message}`);
+	const response = await fetch('/api/experiments/zip', {
+		method: 'POST',
+		headers: new Headers({
+			'Content-Type': 'application/json',
+		}),
+		body: JSON.stringify(expId),
 	});
+	const record = await response.json();
+	const zipContents = record[0].fileContent;
+	const url = `data:text/plain;base64,${encodeURIComponent(zipContents)}`;
+	downloadArbitraryFile(url, `project_${expId}.zip`);
 };
 
 export interface ExperimentSubscribeCallback {
