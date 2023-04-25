@@ -35,4 +35,12 @@ const mongoZipHandler: NextApiHandler<ProjectZip> = async (req, res) => {
 	}
 };
 
+// Remove the file size limit on the response
+// https://nextjs.org/docs/api-routes/request-helpers#custom-config
+export const config = {
+	api: {
+		responseLimit: false,
+	},
+};
+
 export default mongoZipHandler;
