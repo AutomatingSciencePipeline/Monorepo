@@ -3,6 +3,7 @@ import { getFirestore, updateDoc } from 'firebase/firestore';
 import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ExperimentData } from './db_types';
+import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
 
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
@@ -75,33 +76,51 @@ const downloadArbitraryFile = (url: string, name: string) => {
 };
 
 export const downloadExperimentResults = async (expId: ExperimentDocumentId) => {
-	console.log(`Downloading results for ${expId}`);
-	const response = await fetch('/api/experiments/csv', {
-		method: 'POST',
-		headers: new Headers({
-			'Content-Type': 'application/json',
-		}),
-		body: JSON.stringify(expId),
+	console.log(`Downloading results for ${expId}...`);
+	await fetch(`/api/download/csv/${expId}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((record: ResultsCsv) => {
+		console.log(record);
+		const csvContents = record.resultContent;
+		const url = `data:text/plain;charset=utf-8,${encodeURIComponent(csvContents)}`;
+		downloadArbitraryFile(url, `result${expId}.csv`);
+	}).catch((response: Response) => {
+		console.warn('Error downloading results', response.status);
+		response.json().then((json: any) => {
+			console.warn(json?.response ?? json);
+			const message = json?.response;
+			if (message) {
+				alert(`Error downloading results: ${message}`);
+			}
+		});
 	});
-	const record = await response.json();
-	const csvContents = record[0].resultContent;
-	const url = `data:text/plain;charset=utf-8,${encodeURIComponent(csvContents)}`;
-	downloadArbitraryFile(url, `result${expId}.csv`);
 };
 
 export const downloadExperimentProjectZip = async (expId: ExperimentDocumentId) => {
-	console.log(`Downloading project zip for ${expId}`);
-	const response = await fetch('/api/experiments/zip', {
-		method: 'POST',
-		headers: new Headers({
-			'Content-Type': 'application/json',
-		}),
-		body: JSON.stringify(expId),
+	console.log(`Downloading project zip for ${expId}...`);
+	await fetch(`/api/download/zip/${expId}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((record: ProjectZip) => {
+		console.log(record);
+		const zipContents = record.fileContent;
+		const url = `data:text/plain;base64,${encodeURIComponent(zipContents)}`;
+		downloadArbitraryFile(url, `project_${expId}.zip`);
+	}).catch((response: Response) => {
+		console.warn('Error downloading results', response.status);
+		response.json().then((json: any) => {
+			console.warn(json?.response ?? json);
+			const message = json?.response;
+			if (message) {
+				alert(`Error downloading results: ${message}`);
+			}
+		});
 	});
-	const record = await response.json();
-	const zipContents = record[0].fileContent;
-	const url = `data:text/plain;base64,${encodeURIComponent(zipContents)}`;
-	downloadArbitraryFile(url, `project_${expId}.zip`);
 };
 
 export interface ExperimentSubscribeCallback {

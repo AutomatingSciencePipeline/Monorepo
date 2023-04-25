@@ -18,6 +18,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
 import { ExperimentData } from '../firebase/db_types';
 import { Toggle } from '../components/Toggle';
+import { QueueResponse } from './api/queue';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -177,7 +178,7 @@ const Navbar = (props) => {
 
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
-	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]); // TODO experiment type
+	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
 	useEffect(() => {
 		if (!userId) {
@@ -193,7 +194,7 @@ export default function DashboardPage() {
 	const queryQueueLength = () => {
 		console.log('Querying queue length');
 		setQueueLength(QUEUE_UNKNOWN_LENGTH);
-		fetch('/api/queue').then((res) => res.json()).then((data) => {
+		fetch('/api/queue').then((res) => res.json()).then((data: QueueResponse) => {
 			console.log('Data back is', data);
 			const value = data.response.queueSize;
 			if (typeof value === 'number') {

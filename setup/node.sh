@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Copy in the .env file
+echo "▶ Copying/updating .env file from repo root to the Frontend directory"
+if ! test -e ".env"; then
+    echo "🛑 You don't seem to have a .env file in the repo root - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
+    source setup/exit_await_input.sh 1
+fi
+if ! cp -f .env ./apps/frontend/.env; then
+    echo "🛑 Failed to copy .env file from repo root to frontend?"
+    source setup/exit_await_input.sh 1
+fi
+
 if command -v nvm; then
     echo "✔ nvm (node version manager) is already installed"
 else

@@ -1,14 +1,15 @@
 // THIS IS CURRENTLY UNUSED, FIGURE OUT HOW TO IMPORT IT INTO api/experiments/
 import { MongoClient } from 'mongodb';
+import { getEnvVar } from '../utils/env';
 
-if (!process.env.MONGODB_URI) {
-	throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
-}
+// Adapted from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 
-const uri = process.env.MONGODB_URI;
-const options = {};
+const CONTACT_MONGODB_AT = getEnvVar('CONTACT_MONGODB_AT');
+const MONGODB_PORT = getEnvVar('MONGODB_PORT');
+const MONGODB_URI = `mongodb://${CONTACT_MONGODB_AT}:${MONGODB_PORT}`;
+const MONGODB_OPTIONS = {};
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient> = new Promise((success) => {
 	return true;
 }); // declare as empty promise
@@ -17,11 +18,11 @@ if (process.env.NODE_ENV === 'development') {
 	// In development mode, use a global variable so that the value
 	// is preserved across module reloads caused by HMR (Hot Module Replacement).
 	const globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>
-  };
+		_mongoClientPromise?: Promise<MongoClient>
+	};
 
 	if (!globalWithMongo._mongoClientPromise) {
-		client = new MongoClient(uri, options);
+		client = new MongoClient(MONGODB_URI, MONGODB_OPTIONS);
 		globalWithMongo._mongoClientPromise = client.connect();
 	}
 	const temp = globalWithMongo._mongoClientPromise;
@@ -30,10 +31,12 @@ if (process.env.NODE_ENV === 'development') {
 	}
 } else {
 	// In production mode, it's best to not use a global variable.
-	client = new MongoClient(uri, options);
+	client = new MongoClient(MONGODB_URI, MONGODB_OPTIONS);
 	clientPromise = client.connect();
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;
+
+export const DB_NAME = 'gladosdb';
