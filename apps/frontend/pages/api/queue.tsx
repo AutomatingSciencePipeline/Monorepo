@@ -1,35 +1,31 @@
-// TODO the frontend should not have to directly communicate with the backend servers for this,
-//  it should just put stuff into database -> it's backend's job to look for new tasks to run
+import { NextApiHandler } from 'next';
+import { getEnvVar } from '../../utils/env';
 
-async function process(url: string, id, key, res) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		console.error(`Error while handling upload for id ${id}: `, response);
+
+const BACKEND_PORT = getEnvVar('BACKEND_PORT');
+const CONTACT_BACKEND_AT = getEnvVar('CONTACT_BACKEND_AT');
+
+export interface QueueResponse {
+	response: {
+		queueSize: number;
 	}
-	const contents = await response.json();
-	console.log('Queue Size', contents);
-	res.status(response.status).json({ response: contents });
 }
 
-// TODO code duplication with the experiment upload route
-
-const handler = async (req, res) => {
-	const { id } = req.query;
-	const { key } = req.body;
-
+const handler: NextApiHandler<QueueResponse> = async (req, res) => {
 	try {
-		await process('http://glados-backend:5050/queue', id, key, res);
-	} catch (error) {
-		console.log('Error contacting to docker server: ', error);
-		console.warn('Could not send to the Docker url, trying localhost...');
-		try {
-			await process('http://localhost:5050/queue', id, key, res);
-		} catch (error) {
-			const message = 'Could not reach the docker container nor localhost';
-			console.log('Error contacting to localhost server: ', error);
-			res.status(500).json({ response: message });
-			throw new Error(message);
+		const queueResponse = await fetch(`http://${CONTACT_BACKEND_AT}:${BACKEND_PORT}/queue`);
+		if (queueResponse?.ok) {
+			const contents = await queueResponse.json();
+			console.log('Queue Size', contents);
+			res.status(queueResponse.status).json({ response: contents });
+		} else {
+			throw new Error(`Fetch failed: ${queueResponse.status}`);
 		}
+	} catch (error) {
+		const message = 'Could not reach the server to determine the queue length';
+		console.warn('Error contacting server: ', error);
+		// This cast is tolerable because it's error code 500 so already being handled by error code at this point
+		res.status(500).json({ response: message } as unknown as QueueResponse);
 	}
 };
 
