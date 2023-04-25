@@ -7,8 +7,8 @@ from modules.data.parameters import BoolParameter, FloatParam, IntegerParam, Par
 class TestExperimentData(unittest.TestCase):
     params = parseParams([{"name":"iparam","default":"1","min":"1","max":"10","step":"1","type":"integer"},{"name":"fparam","default":"1.0","min":"1.0","max":"10.0","step":"1.0","type":"float"},{"name":"sparam","default":"Hi","type":"string"},{"name":"bparam","default":True,"type":"bool"}])
     optional = ["trialExtraFile", "scatterIndVar", "scatterDepVar", "startedAtEpochMillis", "finishedAtEpochMillis", "finished", "passes", "fails"]
-    fieldsWithDefault = {"file": "","postProcess": False,"configs": {},"totalExperimentRuns": 0, "experimentType":ExperimentType.UNKNOWN}
-    expInfo = {'trialExtraFile': 'Testing Data',
+    fields_with_default = {"file": "","postProcess": False,"configs": {},"totalExperimentRuns": 0, "experimentType":ExperimentType.UNKNOWN}
+    exp_info = {'trialExtraFile': 'Testing Data',
             'description': 'Testing Data', 
             'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 
             'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 
@@ -29,22 +29,22 @@ class TestExperimentData(unittest.TestCase):
             'expId': 'V3dpcllHWPrK1Kgbyzqb'}
     
     
-    def testNormal(self):
-        experiment = ExperimentData(**self.expInfo)
+    def test_creating_object_does_not_mutate_input_fields(self):
+        experiment = ExperimentData(**self.exp_info)
         expDict = experiment.dict().copy()
         for key, value in expDict.items():
             if key in self.optional:
-                if key in self.expInfo:
-                    self.assertEqual(value,self.expInfo[key])
+                if key in self.exp_info:
+                    self.assertEqual(value,self.exp_info[key])
                 else:
                     self.assertIsNone(value)
-            elif key in self.fieldsWithDefault:
-                if key in self.expInfo:
-                    self.assertEqual(value, self.expInfo[key])
+            elif key in self.fields_with_default:
+                if key in self.exp_info:
+                    self.assertEqual(value, self.exp_info[key])
                 else:
-                    self.assertEqual(value,self.fieldsWithDefault[key])
+                    self.assertEqual(value,self.fields_with_default[key])
             else:
-                self.assertEqual(value,self.expInfo[key])
+                self.assertEqual(value,self.exp_info[key])
         
         
         

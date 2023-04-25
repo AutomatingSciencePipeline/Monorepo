@@ -70,7 +70,7 @@ class TestFloatParameter(unittest.TestCase):
     float_param_dict_min_greater_max = {"default": floatDefault, "min": floatStop, "max": floatStart, "step": invalidFloatStep, "type": ParamType.FLOAT}
     float_param_dict_invalid_step = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": invalidFloatStep, "type": ParamType.FLOAT}
 
-    def test_normal(self):
+    def test_creating_object_does_not_mutate_input_fields(self):
         floatParam = FloatParam(**self.float_param_dict)
         self.assertEqual(floatParam.default, self.floatDefault)
         self.assertEqual(floatParam.min, self.floatStart)
