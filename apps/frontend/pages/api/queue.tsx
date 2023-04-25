@@ -24,8 +24,7 @@ const handler: NextApiHandler<QueueResponse> = async (req, res) => {
 	} catch (error) {
 		const message = 'Could not reach the server to determine the queue length';
 		console.warn('Error contacting server: ', error);
-		// This cast is tolerable because it's error code 500 so already being handled by error code at this point
-		res.status(500).json({ response: message } as unknown as QueueResponse);
+		res.status(500).json({ response: message } as any);
 	}
 };
 

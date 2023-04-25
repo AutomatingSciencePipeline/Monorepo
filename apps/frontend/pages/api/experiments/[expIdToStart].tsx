@@ -7,8 +7,8 @@ const CONTACT_BACKEND_AT = getEnvVar('CONTACT_BACKEND_AT');
 // TODO the frontend should not have to directly communicate with the backend servers for this,
 //  it should just put stuff into database -> it's backend's job to look for new tasks to run
 
-const handler: NextApiHandler = async (req, res) => {
-	const { id } = req.query;
+const startExperimentHandler: NextApiHandler = async (req, res) => {
+	const { expIdToStart } = req.query;
 	const { key } = req.body;
 
 	try {
@@ -19,7 +19,7 @@ const handler: NextApiHandler = async (req, res) => {
 				'Content-Type': 'application/json',
 			}),
 			// credentials:
-			body: JSON.stringify({ experiment: { id, key } }),
+			body: JSON.stringify({ experiment: { id: expIdToStart, key } }),
 		});
 		if (backendResponse?.ok) {
 			res.status(backendResponse.status).json({ response: backendResponse });
@@ -34,4 +34,4 @@ const handler: NextApiHandler = async (req, res) => {
 	}
 };
 
-export default handler;
+export default startExperimentHandler;
