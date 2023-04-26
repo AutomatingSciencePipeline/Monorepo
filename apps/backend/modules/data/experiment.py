@@ -34,7 +34,7 @@ class ExperimentData(BaseModel):
 
     startedAtEpochMillis: Optional[EpochMilliseconds]
     finishedAtEpochMillis: Optional[EpochMilliseconds]
-    finished: Optional[bool]  # TODO replace with presence of finished timestamp?
+    finished = False  # TODO replace with presence of finished timestamp?
 
     totalExperimentRuns = 0
     passes: Optional[int]
