@@ -34,10 +34,10 @@ def generate_list(param: Parameter, paramName, paramspos):
 def generate_config_files(experiment: ExperimentData):
     constants = {}
     parameters = {}
-    gather_parameters(experiment.hyperparameters, constants, parameters)
-
     configDict = {}
     configIdNumber = 0
+    gather_parameters(experiment.hyperparameters, constants, parameters)
+
     for defaultKey, defaultVar in parameters.items():
         print(f'Keeping {defaultVar} constant')
         possibleParamVals = []

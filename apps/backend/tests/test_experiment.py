@@ -1,15 +1,17 @@
 import unittest
 from app import parseParams
+from modules.data.configData import ConfigData
 
 from modules.data.experiment import ExperimentData, ExperimentType
 
 
 class TestExperimentData(unittest.TestCase):
     params = parseParams([{"name": "iparam", "default": "1", "min": "1", "max": "10", "step": "1", "type": "integer"}, {"name": "fparam", "default": "1.0", "min": "1.0", "max": "10.0", "step": "1.0", "type": "float"}, {"name": "sparam", "default": "Hi", "type": "string"}, {"name": "bparam", "default": True, "type": "bool"}])
+    configs = {"config0": ConfigData(**{"data":{"key":"value"}})}
     optional = ["trialExtraFile", "scatterIndVar", "scatterDepVar", "startedAtEpochMillis", "finishedAtEpochMillis", "passes", "fails"]
     fields_with_default = {"file": "", "postProcess": False, "configs": {}, "totalExperimentRuns": 0, "experimentType": ExperimentType.UNKNOWN, "finished": False}
 
-    exp_info = {'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'verbose': True, 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 18000, 'workers': 1, 'keepLogs': True, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb'}
+    exp_info = {'configs':configs,'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'verbose': True, 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 18000, 'workers': 1, 'keepLogs': True, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb'}
 
     exp_info_has_all_optional = {'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'verbose': True, 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', "startedAtEpochMillis": 0, "finishedAtEpochMillis": 0, 'timeout': 18000, 'workers': 1, 'keepLogs': True, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, "passes": 0, "fails": 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb'}
 
@@ -61,8 +63,18 @@ class TestExperimentData(unittest.TestCase):
         with self.assertRaises(ValueError):
             ExperimentData(**cloned_info)
 
-    def test_check_configs(self):  #TODO: Implement once configs have been tested
-        self.assertTrue(True)
+    def test_check_configs(self):
+        cloned_info = self.exp_info.copy()
+        invalid_configs_dict = {"field": "value"}
+        cloned_info['configs'] = invalid_configs_dict
+        with self.assertRaises(ValueError):
+            ExperimentData(**cloned_info)
+            
+        cloned_info = self.exp_info.copy()
+        invalid_configs_dict = {1: "value"}
+        cloned_info['configs'] = invalid_configs_dict
+        with self.assertRaises(ValueError):
+            ExperimentData(**cloned_info)
 
 
 if __name__ == '__main__':
