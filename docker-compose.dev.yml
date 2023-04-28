@@ -9,9 +9,16 @@ services:
     build:
       target: development
     volumes:
+      # Directly mount source code on host machine disk to container -> no need to rebuild container on every change
       - ./apps/backend/:/app
   app-frontend:
     build: 
       target: development
     volumes:
+      # Directly mount source code on host machine disk to container -> no need to rebuild container on every change
       - ./apps/frontend/:/app
+  app-mongodb:
+    # Only expose the MongoDB port to the host machine during development (for testing)
+    # because end users should access it via frontend webserver api routes instead
+    ports:
+    - ${MONGODB_PORT}:${MONGODB_PORT}

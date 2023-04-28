@@ -50,18 +50,13 @@ services:
   app-mongodb:
     image: mongo
     container_name: glados-mongodb
-    ports:
-      - 27017:27017
+    environment:
+      MONGODB_PORT: ${MONGODB_PORT}
     expose:
-      - "27017"
+      - "${MONGODB_PORT}"
     volumes:
       - ./data/db:/data/db
 networks:
   default:
     driver: bridge
     name: glados-bridge
-
-    # Enable this when/if we switch to Docker Swarm
-    # driver: overlay
-    # attachable: true
-    # name: glados-overlay

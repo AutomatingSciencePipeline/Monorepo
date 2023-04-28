@@ -4,15 +4,19 @@ import { ExperimentDocumentId, subscribeToExp } from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
 
 export interface ExperimentListingProps {
-	projectinit: ExperimentData,
-	onCopyExperiment: (experimentId: ExperimentDocumentId) => void
-	onDownloadResults: (experimentId: ExperimentDocumentId) => void,
-	onDownloadProjectZip: (experimentId: ExperimentDocumentId) => void,
+	projectinit: ExperimentData;
+	onCopyExperiment: (experimentId: ExperimentDocumentId) => void;
+	onDownloadResults: (experimentId: ExperimentDocumentId) => Promise<void>;
+	onDownloadProjectZip: (experimentId: ExperimentDocumentId) => Promise<void>;
 }
 
 
 export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip }: ExperimentListingProps) => {
 	const [project, setProject] = useState<ExperimentData>(projectinit);
+
+
+	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
+	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
 	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
@@ -36,20 +40,26 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				{project['finished'] == true ?
 					<button type= "button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={() => {
-							onDownloadResults(project.expId);
+						disabled={busyDownloadingResults}
+						onClick={async () => {
+							setBusyDownloadingResults(true);
+							await onDownloadResults(project.expId);
+							setBusyDownloadingResults(false);
 						}}>
-						Download Results
+						{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
 					</button> :
 					null
 				}
 				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
 					<button type= "button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={() => {
-							onDownloadProjectZip(project.expId);
+						disabled={busyDownloadingZip}
+						onClick={async () => {
+							setBusyDownloadingZip(true);
+							await onDownloadProjectZip(project.expId);
+							setBusyDownloadingZip(false);
 						}}>
-						Download Project Zip
+						{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
 					</button> :
 					null
 				}
