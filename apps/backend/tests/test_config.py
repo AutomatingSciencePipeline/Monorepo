@@ -32,6 +32,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertFalse(self.test_empty_constants_dict)
         self.assertEqual(len(self.test_empty_parameters_dict), 1)
         self.assertTrue("x" in self.test_empty_parameters_dict)
+        self.assertEqual(self.test_empty_parameters_dict['x'],self.test_one_hyperparams_dict['x'])
 
     def test_gather_parameters_two_param(self):
         self.reset()
@@ -40,15 +41,17 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(self.test_empty_parameters_dict), 2)
         self.assertTrue("x" in self.test_empty_parameters_dict)
         self.assertTrue("y" in self.test_empty_parameters_dict)
+        self.assertEqual(self.test_empty_parameters_dict['x'],self.test_multiple_hyperparams_dict['x'])
+        self.assertEqual(self.test_empty_parameters_dict['y'],self.test_multiple_hyperparams_dict['y'])
     
     def test_gather_parameters_const_param(self):
         self.reset()
         gather_parameters(self.test_const_hyperparams_dict, self.test_empty_constants_dict, self.test_empty_parameters_dict)
         self.assertTrue(self.test_empty_constants_dict)
-        #self.assertTrue(5 in self.test_empty_constants_dict)
         print(self.test_empty_constants_dict)
         self.assertEqual(len(self.test_empty_parameters_dict), 0)
-        #self.assertTrue("x" in self.test_empty_parameters_dict)
+        self.assertTrue("x" in self.test_empty_constants_dict)
+        self.assertTrue(self.test_empty_constants_dict['x'],5) #TODO: Change this to use a constant
 
 
 #Tests to write-- (gather_parameters)

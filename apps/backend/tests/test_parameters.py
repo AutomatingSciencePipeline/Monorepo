@@ -3,9 +3,6 @@ import unittest
 from modules.data.experiment import ExperimentType
 from modules.data.parameters import BoolParameter, FloatParam, IntegerParam, ParamType, StringParameter
 
-expInfo = {'trialExtraFile': 'dummy', 'description': '', 'type': ExperimentType.PYTHON.value, 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'verbose': True, 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 18000, 'workers': 1, 'keepLogs': True, 'hyperparameters': '{"hyperparameters":[{"name":"iparam","default":"1","min":"1","max":"10","step":"1","type":"integer"},{"name":"fparam","default":"1.0","min":"1.0","max":"10.0","step":"1.0","type":"float"},{"name":"sparam","default":"Hi","type":"string"},{"name":"bparam","default":true,"type":"bool"}]}', 'name': 'Just to get the datA', 'trialResult': 'dummy', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb'}
-
-
 class TestIntParameter(unittest.TestCase):
     intDefault, intStart, intStop, intStep, intStepInvalid = 0, 0, 10, 1, 0
 
