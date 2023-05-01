@@ -1,6 +1,5 @@
 import unittest
 
-from modules.data.experiment import ExperimentType
 from modules.data.parameters import BoolParameter, FloatParam, IntegerParam, ParamType, StringParameter
 
 class TestIntParameter(unittest.TestCase):
