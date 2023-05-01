@@ -11,14 +11,14 @@ class TestGatherParameters(unittest.TestCase):
     int_param = IntegerParam(**int_param_dict)
     int_const_param = IntegerParam(**int_param_const_dict)
 
-    floatDefault, floatStart, floatStop, floatStep, invalidFloatStep, floatConst = 0.0, 0.1, 1, 0.5, 0, 0.5    
+    floatDefault, floatStart, floatStop, floatStep, invalidFloatStep, floatConst = 0.0, 0.1, 1, 0.5, 0, 0.5
     float_param_dict = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT}
     float_param_const_dict = {"default": floatDefault, "min": floatConst, "max": floatConst, "step": floatStep, "type": ParamType.FLOAT}
     float_param = FloatParam(**float_param_dict)
     float_const_param = FloatParam(**float_param_const_dict)
-    
+
     bool_param = BoolParameter(**{"type": ParamType.BOOL, "default": True})
-    string_param = StringParameter(**{'type': ParamType.STRING, "default":"Weezer!"})
+    string_param = StringParameter(**{'type': ParamType.STRING, "default": "Weezer!"})
 
     empty_hyperparams_dict = {}  #Empty dictionary
     single_int_param_dict = {"x": int_param}
@@ -27,10 +27,9 @@ class TestGatherParameters(unittest.TestCase):
     single_float_const_param_dict = {"x": float_const_param}
     single_bool_param_dict = {"b": bool_param}
     single_string_param_dict = {"s": string_param}
-    test_multiple_hyperparams_dict = {"x": int_param, "y": float_param}
+    mixed_param_dict = {"x": int_param, "y": float_param, 'intconst': int_const_param, 'floatconst': float_const_param, 'b': bool_param, 's': string_param}
     const_result_dict = {}
     param_result_dict = {}
-    
 
     def reset(self):
         self.empty_hyperparams_dict = {}  #Empty dictionary
@@ -49,65 +48,66 @@ class TestGatherParameters(unittest.TestCase):
         self.assertFalse(self.const_result_dict)
         self.assertEqual(len(self.param_result_dict), 1)
         self.assertTrue("x" in self.param_result_dict)
-        self.assertEqual(self.param_result_dict['x'],self.single_int_param_dict['x'])
-    
+        self.assertEqual(self.param_result_dict['x'], self.single_int_param_dict['x'])
+
     def test_gather_parameters_const_int_param(self):
         self.reset()
         gather_parameters(self.single_int_const_param_dict, self.const_result_dict, self.param_result_dict)
-        self.assertEqual(len(self.const_result_dict),1)
+        self.assertEqual(len(self.const_result_dict), 1)
         self.assertEqual(len(self.param_result_dict), 0)
         self.assertTrue("x" in self.const_result_dict)
-        self.assertTrue(self.const_result_dict['x'],self.intConst)
-        
+        self.assertTrue(self.const_result_dict['x'], self.intConst)
+
     def test_gather_parameters_one_float_param(self):
         self.reset()
         gather_parameters(self.single_float_param_dict, self.const_result_dict, self.param_result_dict)
         self.assertFalse(self.const_result_dict)
         self.assertEqual(len(self.param_result_dict), 1)
         self.assertTrue("x" in self.param_result_dict)
-        self.assertEqual(self.param_result_dict['x'],self.single_float_param_dict['x'])
-    
+        self.assertEqual(self.param_result_dict['x'], self.single_float_param_dict['x'])
+
     def test_gather_parameters_const_float_param(self):
         self.reset()
         gather_parameters(self.single_float_const_param_dict, self.const_result_dict, self.param_result_dict)
-        self.assertEqual(len(self.const_result_dict),1)
+        self.assertEqual(len(self.const_result_dict), 1)
         self.assertEqual(len(self.param_result_dict), 0)
         self.assertTrue("x" in self.const_result_dict)
-        self.assertTrue(self.const_result_dict['x'],self.floatConst)
-    
+        self.assertTrue(self.const_result_dict['x'], self.floatConst)
+
     def test_gather_parameters_bool_param(self):
         self.reset()
         gather_parameters(self.single_bool_param_dict, self.const_result_dict, self.param_result_dict)
         self.assertFalse(self.const_result_dict)
         self.assertEqual(len(self.param_result_dict), 1)
         self.assertTrue("b" in self.param_result_dict)
-        self.assertTrue(self.param_result_dict['b'],self.single_bool_param_dict['b'])
-    
+        self.assertTrue(self.param_result_dict['b'], self.single_bool_param_dict['b'])
+
     def test_gather_parameters_string_param(self):
         self.reset()
         gather_parameters(self.single_string_param_dict, self.const_result_dict, self.param_result_dict)
-        self.assertEqual(len(self.const_result_dict),1)
+        self.assertEqual(len(self.const_result_dict), 1)
         self.assertEqual(len(self.param_result_dict), 0)
         self.assertTrue("s" in self.const_result_dict)
-        self.assertTrue(self.const_result_dict['s'],self.bool_param.default)
-        
-        
-    
-    
+        self.assertTrue(self.const_result_dict['s'], self.bool_param.default)
+
     def test_gather_parameters_two_param(self):
         self.reset()
-        gather_parameters(self.test_multiple_hyperparams_dict, self.const_result_dict, self.param_result_dict)
-        self.assertFalse(self.const_result_dict)
-        self.assertEqual(len(self.param_result_dict), 2)
-        self.assertTrue("x" in self.param_result_dict)
-        self.assertTrue("y" in self.param_result_dict)
-        self.assertEqual(self.param_result_dict['x'],self.test_multiple_hyperparams_dict['x'])
-        self.assertEqual(self.param_result_dict['y'],self.test_multiple_hyperparams_dict['y'])
+        gather_parameters(self.mixed_param_dict, self.const_result_dict, self.param_result_dict)
+        self.assertEqual(len(self.const_result_dict), 3)
+        self.assertEqual(len(self.param_result_dict), 3)
+        self.assertTrue('x' in self.param_result_dict)
+        self.assertTrue('y' in self.param_result_dict)
+        self.assertTrue('b' in self.param_result_dict)
+        self.assertTrue('intconst' in self.const_result_dict)
+        self.assertTrue('floatconst' in self.const_result_dict)
+        self.assertTrue('s' in self.const_result_dict)
+        self.assertEqual(self.param_result_dict['x'], self.mixed_param_dict['x'])
+        self.assertEqual(self.param_result_dict['y'], self.mixed_param_dict['y'])
+        self.assertEqual(self.param_result_dict['b'], self.mixed_param_dict['b'])
+        self.assertEqual(self.const_result_dict['intconst'], self.intConst)
+        self.assertEqual(self.const_result_dict['floatconst'], self.floatConst)
+        self.assertEqual(self.const_result_dict['s'], self.string_param.default)
 
-
-#Tests to write-- (gather_parameters)
-#Happy case for min == max for integer float
-#Happy case for string having default
 
 #Tests to wite-- (generate_list)
 #Integer test empty step value (DEFAULT_STEP_INT)
