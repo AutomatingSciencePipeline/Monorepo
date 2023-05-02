@@ -25,7 +25,6 @@ const mongoCSVHandler: NextApiHandler<ResultsCsv> = async (req, res) => {
 		console.error('Error contacting server: ', error);
 		res.status(500).json({ response: message } as any);
 	}
-	console.log('found results: ', results);
 	if (results.length !== 1) {
 		console.warn(`Experiment ${expIdToCsvDownload} CSV not found`);
 		res.status(404).json({ response: 'Experiment CSV not found' } as any);
