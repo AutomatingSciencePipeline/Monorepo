@@ -132,6 +132,7 @@ class TestGenerateList(unittest.TestCase):
 #Error with default (returns None) Should we reraise the exception?
 #Error making permutations ("Error while making permutations")
 #Successful config generation
+#Vary one variable and keep the rest (multiple) as constants/default
 #Do we want to test the configFile writing?
 
 #Tests to write-- (get_config_paramNames)
