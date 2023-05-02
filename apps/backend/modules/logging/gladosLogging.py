@@ -58,18 +58,22 @@ def configure_root_logger():
     root_logger.addHandler(console)
 
 
+def get_filepath_for_experiment_log(experimentId: DocumentId):
+    return f"{LOGGING_DIRECTORY}/experiment/experiment_{experimentId}.log"
+
+
 def open_experiment_logger(experimentId: DocumentId):
     root_logger.info('Opening experiment logger for experiment %s', experimentId)
     explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
     if len(explogger.handlers) > 0:
-        root_logger.error("experiment logger already has a handler! This means the last one wasn't closed properly. Closing it now to avoid file pollution.")
+        root_logger.error("Experiment logger already has a handler! This means the last one wasn't closed properly. Closing it now to avoid file pollution.")
         while len(explogger.handlers) > 0:
             item = explogger.handlers[0]
             root_logger.error("Closed a handler: %s", item)
             explogger.removeHandler(item)
 
-    experiment_log_file = logging.FileHandler(filename=f"{LOGGING_DIRECTORY}/experiment/experiment_{experimentId}.log", encoding="utf-8")
+    experiment_log_file = logging.FileHandler(filename=get_filepath_for_experiment_log(experimentId), encoding="utf-8")
     experiment_log_file.setLevel(logging.DEBUG)
     experiment_log_file.setFormatter(_standard_file_formatter())
     explogger.addHandler(experiment_log_file)
@@ -80,11 +84,16 @@ def close_experiment_logger():
 
     explogger = logging.getLogger(EXPERIMENT_LOGGER)
     if len(explogger.handlers) == 0:
-        root_logger.warning("experiment logger has no handler! This means it was closed twice. Ignoring.")
+        root_logger.warning("Experiment logger has no handler! This means it was closed twice. Ignoring.")
         return
     handler = explogger.handlers[0]
     explogger.removeHandler(handler)
     handler.close()
+
+
+def upload_experiment_log(experimentId: DocumentId):
+    filePath = get_filepath_for_experiment_log(experimentId)
+    get_system_logger().warning('TODO upload the file to the database: %s', filePath)
 
 
 def _standard_file_formatter():

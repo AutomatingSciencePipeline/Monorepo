@@ -1,8 +1,7 @@
 import json
-from app import parseParams
-from modules.data.experiment import ExperimentData
+from app import parseRawHyperparameterData
 from modules.configs import generate_config_files
-from modules.data.experiment import ExperimentType
+from modules.data.experiment import ExperimentType, ExperimentData
 
 # This file shows how to construct an ExperimentData object from a JSON string
 # This approach can help in writing tests for that functionality, after that, this file can be deleted
@@ -34,7 +33,7 @@ if __name__ == "__main__":
         'expId': 'V3dpcllHWPrK1Kgbyzqb'
     }
     # cspell:enable
-    hyperparameters = parseParams(json.loads(expInfo['hyperparameters'])['hyperparameters'])
+    hyperparameters = parseRawHyperparameterData(json.loads(expInfo['hyperparameters'])['hyperparameters'])
     expInfo['hyperparameters'] = hyperparameters
     experiment = ExperimentData(**expInfo)
     generate_config_files(experiment)

@@ -79,6 +79,9 @@ def add_to_output_batch(fileOutput, ExpRun):
 
 
 def conduct_experiment(experiment: ExperimentData, expRef):
+    """
+    Call this function when inside the experiment folder!
+    """
     os.mkdir('configFiles')
     explogger.info(f"Running Experiment {experiment.expId}")
 

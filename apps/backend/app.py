@@ -6,7 +6,7 @@ import sys
 import json
 import time
 import typing
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
@@ -15,20 +15,21 @@ from dotenv import load_dotenv
 import pymongo
 from pymongo.errors import ConnectionFailure
 from bson.binary import Binary
+from modules.data.types import DocumentId, IncomingStartRequest
 
-from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
+from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger, upload_experiment_log
 from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, GladosInternalError, ExperimentAbort
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 
 from modules.data.experiment import ExperimentData, ExperimentType
-from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter
+from modules.data.parameters import Parameter, parseRawHyperparameterData
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
 except ImportError:
-    print("Failed to import the 'magic' package, you're probably missing a system level dependency")
+    logging.error("Failed to import the 'magic' package, you're probably missing a system level dependency")
     sys.exit(1)
 
 # Must override so that vscode doesn't incorrectly parse another env file and have bad values
@@ -39,17 +40,14 @@ DB_COLLECTION_EXPERIMENTS = "Experiments"
 
 # set up logger
 configure_root_logger()
-explogger = logging.getLogger(SYSTEM_LOGGER)
+syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
 FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
 if FIREBASE_CREDENTIALS is None:
     if HAS_DOTENV_FILE:
         raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} in your `.env` file")
-    else:
-        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined")
-else:
-    explogger.info("Loaded firebase credentials from environment variables")
+    raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined")
 
 firebaseCredentials = credentials.Certificate(json.loads(FIREBASE_CREDENTIALS))
 firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
@@ -71,13 +69,17 @@ runner = ProcessPoolExecutor(MAX_WORKERS)
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
-explogger.info("GLADOS Backend Started")
+syslogger.info("GLADOS Backend Started")
 
 
 @flaskApp.post("/experiment")
 def recv_experiment():
-    runner.submit(handle_uncaught_exceptions_from_run, request.get_json())
-    return 'OK'
+    data = request.get_json()
+    if _check_request_integrity(data):
+        runner.submit(run_batch_and_catch_exceptions, data)
+        return Response(status=200)
+    syslogger.error("Received malformed experiment request: %s", data)
+    return Response(status=400)
 
 
 @flaskApp.get("/queue")
@@ -91,45 +93,59 @@ def glados_custom_flask_error(error):
     return jsonify(error.to_dict()), error.status_code
 
 
-def handle_uncaught_exceptions_from_run(data: typing.Any):
+def _check_request_integrity(data: typing.Any):
+    try:
+        return data['experiment']['id'] is not None
+    except KeyError:
+        return False
+
+
+def run_batch_and_catch_exceptions(data: IncomingStartRequest):
     try:
         run_batch(data)
     except Exception as err:
-        explogger.error("Unexpected exception while trying to run the experiment, this was not caught by our own code and needs to be handled better.")
-        explogger.exception(err)
-        close_experiment_logger()  # TODO Unsafe to upload to firebase here (unknown expid), is there a workaround we can use? include expid in exceptions?
+        syslogger.error("Unexpected exception while trying to run the experiment, this was not caught by our own code and needs to be handled better.")
+        syslogger.exception(err)
+        close_experiment_logger()
+        # Unsafe to upload experiment logs files here
         raise err
 
 
-def run_batch(data: typing.Any):
-    explogger.info('Run_Batch starting with data %s', data)
+def run_batch(data: IncomingStartRequest):
+    syslogger.info('Run_Batch starting with data %s', data)
 
     # Obtain most basic experiment info
     expId = data['experiment']['id']
-    explogger.debug('received %s', expId)
+    syslogger.debug('received %s', expId)
 
     open_experiment_logger(expId)
 
     # Retrieve experiment details from firebase
-    # TODO handle errors from firebase
-    experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-    expRef = experiments.document(expId)
-    experimentData = expRef.get().to_dict()
-
-    #TODO @David does this still need to be here? doesn't parsing into datatype also check this?
     try:
-        hyperparameters: "dict[str,Parameter]" = parseParams(json.loads(experimentData['hyperparameters'])['hyperparameters'])
+        experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
+        expRef = experiments.document(expId)
+        experimentData = expRef.get().to_dict()
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        explogger.error("Error retrieving experiment data from firebase, aborting")
+        close_experiment_run(expId, None, err)
+        return
+
+    # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
+    try:
+        hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
     except KeyError as err:
-        raise GladosInternalError("Error generating configs - hyperparameters not found in experiment object") from err
+        explogger.error("Error generating configs - hyperparameters not found in experiment object, aborting")
+        close_experiment_run(expId, expRef, err)
+        return
     experimentData['hyperparameters'] = hyperparameters
 
-    #Parsing into Datatype
+    # Parsing into Datatype
     try:
         experiment = ExperimentData(**experimentData)
         experiment.postProcess = experiment.scatter
     except ValueError as err:
-        explogger.exception(err)
-        close_experiment_logger()  # TODO upload to firebase
+        explogger.error("Experiment data was not formatted correctly, aborting")
+        close_experiment_run(expId, expRef, err)
         return
 
     #Downloading Experiment File
@@ -146,11 +162,14 @@ def run_batch(data: typing.Any):
 
     totalExperimentRuns = generate_config_files(experiment)
     if totalExperimentRuns == 0:
-        raise GladosInternalError("Error generating configs - somehow no config files were produced?")
+        os.chdir('../..')
+        close_experiment_run(expId, expRef, GladosInternalError("Error generating configs - somehow no config files were produced?"))
+
     experiment.totalExperimentRuns = totalExperimentRuns
 
     expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
 
+    possibleException = None
     try:
         conduct_experiment(experiment, expRef)
 
@@ -158,17 +177,26 @@ def run_batch(data: typing.Any):
 
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
-        explogger.critical(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
-        explogger.exception(err)
-    except Exception as err:
-        explogger.error(f'Uncaught exception "{err}" while running an experiment the GLADOS code needs to be changed to handle this in a cleaner manner')
-        explogger.exception(err)
-        raise err
+        explogger.error(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
+        possibleException = err
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        explogger.error(f'Uncaught exception "{err}" while running an experiment. The GLADOS code needs to be changed to handle this in a cleaner manner')
+        possibleException = err
     finally:
-        expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
-        explogger.info(f'Exiting experiment {expId}')
-        close_experiment_logger()  # TODO upload to firebase
+        close_experiment_run(expId, expRef, possibleException)
         os.chdir('../..')
+
+
+def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None", error: "Exception | None"):
+    if error:
+        explogger.exception(error)
+    explogger.info(f'Exiting experiment {expId}')
+    if expRef:
+        expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
+    else:
+        syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
+    close_experiment_logger()
+    upload_experiment_log(expId)
 
 
 def determine_experiment_file_type(filepath):
@@ -205,29 +233,10 @@ def download_experiment_files(experiment: ExperimentData):
     return filepath
 
 
-def parseParams(hyperparameters):
-    result = {}
-    for param in hyperparameters:
-        name = param['name']
-        del param['name']
-        if param['type'] == 'integer':
-            param['type'] = ParamType.INTEGER
-            result[name] = IntegerParam(**param)
-        elif param['type'] == 'float':
-            param['type'] = ParamType.FLOAT
-            result[name] = FloatParam(**param)
-        elif param['type'] == 'bool':
-            param['type'] = ParamType.BOOL
-            result[name] = BoolParameter(**param)
-        elif param['type'] == 'string':
-            param['type'] = ParamType.STRING
-            result[name] = StringParameter(**param)
-        else:
-            raise GladosInternalError(f"{param['type']} is not a supported type")
-    return result
-
-
 def upload_experiment_results(experiment: ExperimentData):
+    """
+    Call this function when inside the experiment folder!
+    """
     explogger.info('Uploading Results to the frontend')
     uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
     uploadBlob.upload_from_filename('results.csv')
@@ -238,6 +247,8 @@ def upload_experiment_results(experiment: ExperimentData):
         explogger.info('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
+
+            # TODO remove firebase usage once transition to mongo file storage is complete
             uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
             uploadBlob.upload_from_filename('ResultCsvs.zip')
 
@@ -251,7 +262,7 @@ def upload_experiment_results(experiment: ExperimentData):
             except Exception as err:
                 raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
         except Exception as err:
-            raise GladosInternalError("Error uploading to firebase") from err
+            raise GladosInternalError("Error uploading experiment results") from err
 
 
 def _upload_to_mongodb(experiment: ExperimentData):
@@ -278,6 +289,9 @@ def _upload_to_mongodb(experiment: ExperimentData):
 
 
 def post_process_experiment(experiment: ExperimentData):
+    """
+    Call this function when inside the experiment folder!
+    """
     if experiment.postProcess:
         explogger.info("Beginning post processing")
         try:
