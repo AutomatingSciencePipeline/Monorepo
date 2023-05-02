@@ -10,6 +10,7 @@ from pylint.checkers.utils import check_messages
 if TYPE_CHECKING:
     from pylint.lint import PyLinter
 
+# TODO the CI can't seem to see this file (or its parent directory? so it currently only runs locally in the editor)
 
 class PrintUsedChecker(BaseChecker):
 
