@@ -40,19 +40,18 @@ def generate_config_files(experiment: ExperimentData):
 
     configDict = {}
     configIdNumber = 0
-    for defaultKey, defaultVar in parameters.items():
-        explogger.info(f'Keeping {defaultVar} constant')
+    for varyingKey, varyingVar in parameters.items():
+        explogger.info(f'Keeping {varyingVar} constant')
         possibleParamVals = []
 
         #Required to do the cross product, since each config is made by
         #doing a cross product of lists of name value pairs the default variable needs to be
         #a single item list so that there is only one possible value for the default variable
-        default = [(defaultKey, get_default(defaultVar))]
-        possibleParamVals.append(default)
+        generate_list(varyingVar, varyingKey, possibleParamVals)
 
         for otherKey, otherVar in parameters.items():
-            if otherKey != defaultKey:
-                generate_list(otherVar, otherKey, possibleParamVals)
+            if otherKey != varyingKey:
+                possibleParamVals.append([(otherKey, get_default(otherVar))])
         try:
             permutations = list(itertools.product(*possibleParamVals))
         except Exception as err:

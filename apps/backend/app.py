@@ -234,7 +234,7 @@ def upload_experiment_results(experiment: ExperimentData):
 
     _upload_to_mongodb(experiment)
 
-    if experiment.trialExtraFile != '' or experiment.postProcess:
+    if experiment.trialExtraFile != '' or experiment.postProcess or experiment.keepLogs:
         explogger.info('Uploading Result Csvs')
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')

@@ -91,7 +91,8 @@ def conduct_experiment(experiment: ExperimentData, expRef):
         explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
         for trialNum in range(0, experiment.totalExperimentRuns):
             startSeconds = time.time()
-            expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
+            if trialNum == 0:
+                expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
 
             try:
                 configFileName = create_config_from_data(experiment, trialNum)
