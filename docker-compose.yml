@@ -16,9 +16,8 @@ services:
       dockerfile: ./backend.Dockerfile
       target: production
     container_name: glados-backend
-    environment:
-      FIREBASE_KEY: ${FIREBASE_KEY}
-      BACKEND_PORT: ${BACKEND_PORT}
+    env_file:
+      - .env
     volumes:
         - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
         - ./apps/backend/logs:/app/logs
@@ -36,8 +35,8 @@ services:
       dockerfile: ./frontend.Dockerfile
       target: runner
     container_name: glados-frontend
-    environment:
-      FRONTEND_WEBSERVER_PORT: ${FRONTEND_WEBSERVER_PORT}
+    env_file:
+      - .env
     working_dir: /app
     ports:
       # Exposed to the Host : Port inside the container Container https://docs.docker.com/compose/compose-file/compose-file-v3/#ports
@@ -51,8 +50,8 @@ services:
   app-mongodb:
     image: mongo
     container_name: glados-mongodb
-    environment:
-      MONGODB_PORT: ${MONGODB_PORT}
+    env_file:
+      - .env
     expose:
       - "${MONGODB_PORT}"
     volumes:
