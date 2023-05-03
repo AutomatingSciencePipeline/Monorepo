@@ -36,6 +36,8 @@ except ImportError:
 HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
 
 ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
+ENV_MONGODB_PORT = "MONGODB_PORT"
+ENV_CONTACT_MONGODB_AT = "CONTACT_MONGODB_AT"
 DB_COLLECTION_EXPERIMENTS = "Experiments"
 
 # set up logger
@@ -43,20 +45,23 @@ configure_root_logger()
 syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
-FIREBASE_CREDENTIALS = os.environ.get(ENV_FIREBASE_CREDENTIALS)
-if FIREBASE_CREDENTIALS is None:
-    if HAS_DOTENV_FILE:
-        raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} in your `.env` file")
-    raise AssertionError(f"Missing environment variable {ENV_FIREBASE_CREDENTIALS} - you need a `.env` file in this folder with it defined")
 
-firebaseCredentials = credentials.Certificate(json.loads(FIREBASE_CREDENTIALS))
+def _get_env(key: str):
+    value = os.environ.get(key)
+    if value is None:
+        if HAS_DOTENV_FILE:
+            raise AssertionError(f"Missing environment variable {key} in your `.env` file")
+        raise AssertionError(f"Missing environment variable {key} - you need a `.env` file in this folder with it defined")
+    return value
+
+
+firebaseCredentials = credentials.Certificate(json.loads(_get_env(ENV_FIREBASE_CREDENTIALS)))
 firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
-#MongoDB Objects
-DEFAULT_MONGO_PORT = 27017
-mongoClient = pymongo.MongoClient('glados-mongodb', DEFAULT_MONGO_PORT, serverSelectionTimeoutMS=1000)
+#MongoDB
+mongoClient = pymongo.MongoClient(_get_env(ENV_CONTACT_MONGODB_AT), int(_get_env(ENV_MONGODB_PORT)), serverSelectionTimeoutMS=1000)
 mongoGladosDB = mongoClient["gladosdb"]
 mongoResultsCollection = mongoGladosDB.results
 mongoResultsZipCollections = mongoGladosDB.zips
