@@ -21,6 +21,7 @@ services:
       BACKEND_PORT: ${BACKEND_PORT}
     volumes:
         - ./apps/backend/ExperimentFiles:/app/ExperimentFiles
+        - ./apps/backend/logs:/app/logs
     ports:
         # Exposed to the Host : Port inside the container Container https://docs.docker.com/compose/compose-file/compose-file-v3/#ports
         # TODO does this need to be exposed to host?
