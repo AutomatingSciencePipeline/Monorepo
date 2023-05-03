@@ -25,7 +25,6 @@ const mongoZipHandler: NextApiHandler<ProjectZip> = async (req, res) => {
 		console.error('Error contacting server: ', error);
 		res.status(500).json({ response: message } as any);
 	}
-	console.log('found results: ', results);
 	if (results.length !== 1) {
 		console.warn(`Experiment ${expIdToZipDownload} ZIP not found`);
 		res.status(404).json({ response: 'Experiment ZIP not found' } as any);

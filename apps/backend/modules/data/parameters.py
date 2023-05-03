@@ -1,6 +1,8 @@
 from enum import Enum
 from pydantic import BaseModel, validator, root_validator
 
+from modules.exceptions import GladosInternalError
+
 
 class ParamType(Enum):
     BOOL = "bool"
@@ -68,3 +70,27 @@ class FloatParam(Parameter):
         if step <= 0:
             raise ValueError("Step value cannot be less than or equal to 0")
         return step
+
+
+def parseRawHyperparameterData(hyperparameters):
+    result = {}
+    for entry in hyperparameters:
+        entryType = entry['type']
+        entryName = entry['name']
+        del entry['name']
+
+        if entryType == 'integer':
+            entry['type'] = ParamType.INTEGER
+            result[entryName] = IntegerParam(**entry)
+        elif entryType == 'float':
+            entry['type'] = ParamType.FLOAT
+            result[entryName] = FloatParam(**entry)
+        elif entryType == 'bool':
+            entry['type'] = ParamType.BOOL
+            result[entryName] = BoolParameter(**entry)
+        elif entryType == 'string':
+            entry['type'] = ParamType.STRING
+            result[entryName] = StringParameter(**entry)
+        else:
+            raise GladosInternalError(f"{entryType} (used by '{entryName}') is not a supported hyperparameter type")
+    return result

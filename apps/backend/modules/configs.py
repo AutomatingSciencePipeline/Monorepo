@@ -6,9 +6,11 @@ from modules.data.experiment import ExperimentData
 
 from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter
 from modules.exceptions import GladosInternalError
+from modules.logging.gladosLogging import get_experiment_logger
 
 FilePath = str
 
+explogger = get_experiment_logger()
 
 def float_range(start: float, stop: float, step=1.0):
     count = 0
@@ -38,19 +40,18 @@ def generate_config_files(experiment: ExperimentData):
 
     configDict = {}
     configIdNumber = 0
-    for defaultKey, defaultVar in parameters.items():
-        print(f'Keeping {defaultVar} constant')
+    for varyingKey, varyingVar in parameters.items():
+        explogger.info(f'Keeping {varyingVar} constant')
         possibleParamVals = []
 
         #Required to do the cross product, since each config is made by
         #doing a cross product of lists of name value pairs the default variable needs to be
         #a single item list so that there is only one possible value for the default variable
-        default = [(defaultKey, get_default(defaultVar))]
-        possibleParamVals.append(default)
+        generate_list(varyingVar, varyingKey, possibleParamVals)
 
         for otherKey, otherVar in parameters.items():
-            if otherKey != defaultKey:
-                generate_list(otherVar, otherKey, possibleParamVals)
+            if otherKey != varyingKey:
+                possibleParamVals.append([(otherKey, get_default(otherVar))])
         try:
             permutations = list(itertools.product(*possibleParamVals))
         except Exception as err:
@@ -64,23 +65,22 @@ def generate_config_files(experiment: ExperimentData):
                 configItems[name] = value
             configItems.update(constants)
             configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
-            print(f'Generated config {configIdNumber}')
+            explogger.info(f'Generated config {configIdNumber}')
             configIdNumber += 1
 
-    print("Finished generating configs")
+    explogger.info("Finished generating configs")
     experiment.configs = configDict
     return configIdNumber
 
 
 def create_config_from_data(experiment: ExperimentData, configNum: int):
     if experiment.configs == {}:
-        msg = f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty"
-        print(msg)
+        explogger.info(f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty")
     try:
         configData = experiment.configs[f'config{configNum}'].data
     except KeyError as err:  #TODO: Discuss how we handle this error
         msg = f"There is no config {configNum} cannot generate this config, there are only {len(experiment.configs)} configs"
-        print(msg)
+        explogger.exception(err)
         raise GladosInternalError(msg) from err
 
     os.chdir('configFiles')
@@ -91,7 +91,7 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
         outputConfig.write(configFile)
         configFile.write(experiment.dumbTextArea)
         configFile.close()
-        print(f"Wrote config{configNum} to a file")
+        explogger.info(f"Wrote config{configNum} to a file")
     os.chdir('..')
     return f'{configNum}.ini'
 
@@ -120,21 +120,20 @@ def gather_parameters(hyperparams, constants, parameters):
                     param = FloatParam(**hyperparameter.dict())
                 #Since we already know if param will be an integer or a float we can access min and max without messing anything up
                 if param.min == param.max:
-                    print(f'param {parameterKey} has the same min and max value; converting to constant')
+                    explogger.warning(f'param {parameterKey} has the same min and max value; converting to constant')
                     constants[parameterKey] = param.min
                 else:  #Varies adding to batch
-                    print(f'param {parameterKey} varies, adding to batch')
+                    explogger.info(f'param {parameterKey} varies, adding to batch')
                     parameters[parameterKey] = param
             elif parameterType == ParamType.STRING:  #Strings never vary technically should be in the constants section now
                 stringParam = StringParameter(**hyperparameter.dict())
-                print(f'param {parameterKey} is a string, adding to constants')
+                explogger.warning(f'param {parameterKey} is a string, adding to constants')
                 constants[parameterKey] = stringParam.default
             elif parameterType == ParamType.BOOL:
-                print(f'param {parameterKey} varies, adding to batch')
+                explogger.info(f'param {parameterKey} varies, adding to batch')
                 parameters[parameterKey] = hyperparameter
             else:
                 msg = f'ERROR DURING CONFIG GEN: param {parameterKey} {hyperparameter} Does not have a supported type'
-                print(msg)
                 raise GladosInternalError(msg)
         except KeyError as err:
             raise GladosInternalError('Error during finding constants') from err
