@@ -37,6 +37,7 @@ HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
 
 ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
 ENV_MONGODB_PORT = "MONGODB_PORT"
+ENV_BACKEND_PORT = "BACKEND_PORT"
 ENV_CONTACT_MONGODB_AT = "CONTACT_MONGODB_AT"
 DB_COLLECTION_EXPERIMENTS = "Experiments"
 
@@ -69,6 +70,7 @@ mongoResultsZipCollections = mongoGladosDB.zips
 #setting up the app
 MAX_WORKERS = 1
 runner = ProcessPoolExecutor(MAX_WORKERS)
+APP_PORT = int(_get_env(ENV_BACKEND_PORT))
 
 #setting up the Flask webserver (handles the signal to run an experiment)
 flaskApp = Flask(__name__)
@@ -312,4 +314,8 @@ def post_process_experiment(experiment: ExperimentData):
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     os.chdir('/app/GLADOS_HOME')
-    flaskApp.run()
+
+    logging.warning('Waitress serve')
+    from waitress import serve
+    serve(flaskApp, host="0.0.0.0", port=APP_PORT)
+    # flaskApp.run()
