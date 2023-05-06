@@ -1,6 +1,6 @@
 import unittest
 
-from modules.configs import gather_parameters
+from modules.configs import gather_parameters, generate_list
 from modules.data.parameters import BoolParameter, FloatParam, IntegerParam, ParamType, StringParameter
 
 intDefault, intStart, intStop, intStep, intStepInvalid, intConst = 0, 0, 5, 1, 0, 5
@@ -9,7 +9,7 @@ int_param_const_dict = {"default": intDefault, "min": intConst, "max": intConst,
 int_param = IntegerParam(**int_param_dict)
 int_const_param = IntegerParam(**int_param_const_dict)
 
-floatDefault, floatStart, floatStop, floatStep, invalidFloatStep, floatConst = 0.0, 0.1, 1, 0.5, 0, 0.5
+floatDefault, floatStart, floatStop, floatStep, invalidFloatStep, floatConst = 0.0, 0.0, 0.5, 0.1, 0, 0.5
 float_param_dict = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT}
 float_param_const_dict = {"default": floatDefault, "min": floatConst, "max": floatConst, "step": floatStep, "type": ParamType.FLOAT}
 float_param = FloatParam(**float_param_dict)
@@ -110,17 +110,38 @@ class TestGatherParameters(unittest.TestCase):
         self.assertEqual(self.const_result_dict['floatconst'], floatConst)
         self.assertEqual(self.const_result_dict['s'], string_param.default)
 
-class TestGenerateList(unittest.TestCase):
-    const_result_dict = {}
-    param_result_dict = {}
-
+class TestGenerateList(unittest.TestCase):  
+    int_list = [('x',0),('x',1),('x',2),('x',3),('x',4)]
+    float_list = [('y',0.0),('y',0.1),('y',0.2),('y',0.3),('y',0.4)]
+    bool_list = [('b',True),('b',False)]
+    
+    possible_param_list = []
     def reset(self):
-        self.empty_hyperparams_dict = {}  #Empty dictionary
-        self.const_result_dict = {}
-        self.param_result_dict = {}
+        self.possible_param_list = []
+        
+    def assertListOfFloatTuplesEqual(self, list1, list2):
+        for item1, item2 in zip(list1,list2):
+            self.assertEqual(item1[0],item2[0])
+            self.assertAlmostEqual(item1[1],item2[1],delta=0.0001)
+    
+    def test_generate_int_list(self):
+        self.reset()
+        generate_list(int_param,'x',self.possible_param_list)
+        self.assertListEqual(self.possible_param_list,self.int_list)
+    
+    def test_generate_float_list(self):
+        self.reset()
+        generate_list(float_param,'y',self.possible_param_list)
+        # self.assertListOfFloatTuplesEqual(self.possible_param_list,self.float_list)
+    
+    def test_generate_bool_list(self):
+        self.reset()
+        generate_list(bool_param,'b',self.possible_param_list)
+        self.assertListEqual(self.possible_param_list,self.bool_list)
+    
 
 #Tests to wite-- (generate_list)
-#Integer test empty step value (DEFAULT_STEP_INT)
+#Integer test empty step value (DEFAULT_STEP_INT) No longer possible 
 #Integer test step == 0 (DEFAULT_STEP_INT) Make 0 a constant value in gather_parameters
 #Integer test not empty and not 0 (uses otherVar['step'])
 #Integer test make sure correct number of items given min and max
