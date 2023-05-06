@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# This script is meant to be run on the server to restart the docker containers
+# This script is meant to be run on the server to update the code and restart the docker containers
+# It is not intended to be run on developer machines.
 
 echo "Stopping containers..."
 
@@ -28,4 +29,5 @@ fi
 
 docker ps -a
 
-echo "Ensure that the docker containers listed all say 'started' and that there aren't any unexpected errors."
+echo "Ensure that the docker containers listed all report that they are 'up' and that there aren't any unexpected errors."
+echo "Reminder: Make sure that you have updated the system's .env file if new entries have been added since the last deploy!"

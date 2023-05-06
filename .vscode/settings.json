@@ -12,6 +12,7 @@
         "frange",
         "glados",
         "gladosbase",
+        "gladosdb",
         "headlessui",
         "hyperparameters",
         "hyperparams",

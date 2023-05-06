@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from modules.exceptions import FileHandlingError
+from modules.logging.gladosLogging import get_experiment_logger
+
+explogger = get_experiment_logger()
 
 def generateScatterPlot(independentVar, dependantVar, resultFile, expId):
 
@@ -18,8 +21,8 @@ def generateScatterPlot(independentVar, dependantVar, resultFile, expId):
             y.append(float(row[depIndex]))
 
     figure, axes = plt.subplots()
-    print(np.array(x))
-    print(np.array(y))
+    explogger.info('Array of x is %s', np.array(x))
+    explogger.info('Array of y is %s', np.array(y))
     m, b = np.polyfit(np.array(x), np.array(y), 1)
     sc = axes.scatter(x,y)
     plt.plot(x, m*np.array(x) + b)
