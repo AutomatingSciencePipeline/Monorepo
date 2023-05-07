@@ -22,20 +22,24 @@ def float_range(start: float, stop: float, step=1.0):
         count += 1
 
 
-def generate_list(param: Parameter, paramName, paramspos):
+def generate_list(param: Parameter, paramName):
     if param.type == ParamType.INTEGER:
         intParam = IntegerParam(**param.dict())
-        paramspos.append([(paramName, i) for i in range(intParam.min, intParam.max, intParam.step)])
+        return [(paramName, i) for i in range(intParam.min, intParam.max, intParam.step)]
     elif param.type == ParamType.FLOAT:
         floatParam = FloatParam(**param.dict())
-        paramspos.append([(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)])
+        return [(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)]
     elif param.type == ParamType.BOOL:
-        paramspos.append([(paramName, val) for val in [True, False]])
+        return [(paramName, val) for val in [True, False]]
+    else: #This will never happen
+        return []
 
 
 def generate_config_files(experiment: ExperimentData):
     constants = {}
     parameters = {}
+    gather_parameters(experiment.hyperparameters, constants, parameters)
+
     configDict = {}
     configIdNumber = 0
     for varyingKey, varyingVar in parameters.items():
@@ -45,7 +49,7 @@ def generate_config_files(experiment: ExperimentData):
         #Required to do the cross product, since each config is made by
         #doing a cross product of lists of name value pairs the default variable needs to be
         #a single item list so that there is only one possible value for the default variable
-        generate_list(varyingVar, varyingKey, possibleParamVals)
+        possibleParamVals.append(generate_list(varyingVar, varyingKey))
 
         for otherKey, otherVar in parameters.items():
             if otherKey != varyingKey:
@@ -94,7 +98,7 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
     return f'{configNum}.ini'
 
 
-def get_default(parameter):
+def get_default(parameter: Parameter):
     if parameter.type == ParamType.INTEGER:
         return IntegerParam(**parameter.dict()).default
     elif parameter.type == ParamType.FLOAT:
