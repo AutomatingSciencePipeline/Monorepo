@@ -42,4 +42,5 @@ jobs:
       working-directory: ./apps/backend
       run: coverage run -m pytest
     - name: Printing Coverage Report
+      working-directory: ./apps/backend
       run: coverage report -m
