@@ -1,7 +1,7 @@
 from typing import Dict
 import unittest
 
-from modules.configs import gather_parameters, generate_config_files, generate_list
+from modules.configs import gather_parameters, generate_config_files, generate_list, get_default
 from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 from modules.data.parameters import BoolParameter, FloatParam, IntegerParam, ParamType, Parameter, StringParameter, parseRawHyperparameterData
@@ -157,19 +157,36 @@ class TestGenerateConfigFiles(unittest.TestCase):
         self.exp_info = ExperimentData(**{'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'verbose': True, 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 18000, 'workers': 1, 'keepLogs': True, 'hyperparameters': {}, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb'})
 
     def assertConfigKeys(self, numConfigs, configs):
-        for i in range(0,numConfigs):
+        for i in range(0, numConfigs):
             self.assertTrue(f'config{i}' in configs)
-    
+
     def test_single_int_variable(self):
         self.reset()
         self.exp_info.hyperparameters = self.single_int_param_hyper_param
         generate_config_files(self.exp_info)
         configs = self.exp_info.configs
-        self.assertEqual(len(configs),5)
-        self.assertConfigKeys(5,configs)
-        self.assertDictEqual(configs,self.single_int_param_expected_configs)
+        self.assertEqual(len(configs), 5)
+        self.assertConfigKeys(5, configs)
+        self.assertDictEqual(configs, self.single_int_param_expected_configs)
 
 
+class TestGetDefault(unittest.TestCase):
+
+    def test_get_int_default(self):
+        result = get_default(int_param)
+        self.assertEqual(result, 0)
+
+    def test_get_float_default(self):
+        result = get_default(float_param)
+        self.assertEqual(result, 0.0)
+
+    def test_get_bool_default(self):
+        result = get_default(bool_param)
+        self.assertTrue(result)
+    
+    def test_get_string_default(self):
+        result = get_default(string_param)
+        self.assertEqual(result, "Weezer!")
 #Tests to write-- (generate_config_files)
 #Error with default (returns None) Should we reraise the exception?
 #Error making permutations ("Error while making permutations")
