@@ -56,8 +56,6 @@ def upload_experiment_log(experimentId: DocumentId):
 
     if len(explogger.handlers) != 0:
         raise GladosInternalError("Experiment logger still has a handler open at upload time. Close it first.")
-    
-    print(os.listdir('.'))
 
     contents = None
     try:

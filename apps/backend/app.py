@@ -163,8 +163,8 @@ def run_batch(data: IncomingStartRequest):
         explogger.error(f'Uncaught exception "{err}" while running an experiment. The GLADOS code needs to be changed to handle this in a cleaner manner')
         possibleException = err
     finally:
-        close_experiment_run(expId, expRef, possibleException)
         os.chdir('../..')
+        close_experiment_run(expId, expRef, possibleException)
 
 
 def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None", error: "Exception | None"):
