@@ -25,7 +25,7 @@ jobs:
                 push: false # Don't push to a container registry (we don't have that set up yet)
                 # Should match our build settings in docker-compose.yml
                 context: ./apps/backend
-                file: ./backend.Dockerfile
+                file: backend.Dockerfile
                 target: production
     frontend-prod:
         name: Frontend Production Container
@@ -41,6 +41,5 @@ jobs:
                 push: false
                 # Should match our build settings in docker-compose.yml
                 context: ./apps/frontend
-                file: ./frontend.Dockerfile
+                file: frontend.Dockerfile
                 target: runner
-
