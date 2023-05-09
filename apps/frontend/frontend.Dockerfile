@@ -34,6 +34,7 @@ ENV NODE_ENV=development
 ENV WATCHPACK_POLLING=true
 CMD npm run dev
 
+z # purposely break syntax here to confuse it
 
 # =====================================================================================================
 # Below based on https://github.com/vercel/next.js/blob/7fde79a9e840f3c73b60b49dd7df6849d332d07d/examples/with-docker/Dockerfile
