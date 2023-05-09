@@ -1,4 +1,4 @@
-import clientPromise, { DB_NAME } from '../../../../lib/mongodb';
+import clientPromise, { COLLECTION_ZIPS, DB_NAME } from '../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
 import { ProjectZip } from '../../../../lib/mongodb_types';
 
@@ -17,7 +17,7 @@ const mongoZipHandler: NextApiHandler<ProjectZip> = async (req, res) => {
 		const db = client.db(DB_NAME);
 
 		results = await db
-			.collection('zips')
+			.collection(COLLECTION_ZIPS)
 			// TODO correct mongodb typescript type for id
 			.find({ '_id': expIdToZipDownload as any }).toArray();
 	} catch (error) {
