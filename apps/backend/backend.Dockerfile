@@ -22,6 +22,7 @@ RUN apt-get update && \
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
 
+FROM base AS python_dependencies
 # Copy in python requirements definitions, but don't install yet, dev and prod need different deps
 RUN pip install pipenv
 COPY Pipfile .
@@ -30,7 +31,7 @@ COPY Pipfile.lock .
 
 
 # =====================================================================================================
-FROM base AS development
+FROM python_dependencies AS development
 # Args explanation: https://stackoverflow.com/a/49705601
 # https://pipenv-fork.readthedocs.io/en/latest/basics.html#pipenv-install
 # and also https://stackoverflow.com/a/53101932
@@ -47,7 +48,7 @@ CMD flask run --host=0.0.0.0 --no-debugger -p $BACKEND_PORT
 
 
 # =====================================================================================================
-FROM base AS production
+FROM python_dependencies AS production
 # Args explanation: https://stackoverflow.com/a/49705601
 # https://pipenv-fork.readthedocs.io/en/latest/basics.html#pipenv-install
 RUN pipenv install --system --deploy --ignore-pipfile
