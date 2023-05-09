@@ -12,7 +12,7 @@ services:
       # Directly mount source code on host machine disk to container -> no need to rebuild container on every change
       - ./apps/backend/:/app
   app-frontend:
-    build: 
+    build:
       target: development
     volumes:
       # Directly mount source code on host machine disk to container -> no need to rebuild container on every change
@@ -21,4 +21,16 @@ services:
     # Only expose the MongoDB port to the host machine during development (for testing)
     # because end users should access it via frontend webserver api routes instead
     ports:
-    - ${MONGODB_PORT}:${MONGODB_PORT}
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+  app-devonly-mongoexpress:
+    # Development-only interface to view the mongodb contents
+    # Based on https://gist.github.com/adamelliotfields/cd49f056deab05250876286d7657dc4b
+    image: mongo-express
+    container_name: glados-mongodb-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: $CONTACT_MONGODB_AT
+      ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+    depends_on:
+      - app-mongodb
+    ports:
+      - 8081
