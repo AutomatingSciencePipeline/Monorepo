@@ -44,7 +44,7 @@ ENV FLASK_ENV development
 ENV FLASK_DEBUG 1
 CMD flask run --host=0.0.0.0 --no-debugger -p $BACKEND_PORT
 
-z # purposely break syntax here to confuse it
+
 
 # =====================================================================================================
 FROM base AS production
