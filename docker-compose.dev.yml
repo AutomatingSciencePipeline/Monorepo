@@ -22,15 +22,26 @@ services:
     # because end users should access it via frontend webserver api routes instead
     ports:
       - ${MONGODB_PORT}:${MONGODB_PORT}
-  app-devonly-mongoexpress:
+    # Quiet the logging prints because they are super noisy, especially due to the healthcheck
+    command: mongod --quiet --logpath /dev/null 
+    # Need a healthcheck defined for to ensure the mongo-express instance starts up after this one
+    healthcheck:
+      # Based on https://stackoverflow.com/a/73783213/12693560
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MONGODB_PORT}/test --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+  app-mongoexpress:
     # Development-only interface to view the mongodb contents
     # Based on https://gist.github.com/adamelliotfields/cd49f056deab05250876286d7657dc4b
     image: mongo-express
-    container_name: glados-mongodb-express
+    container_name: glados-DEVONLY-mongodb-express
     environment:
       ME_CONFIG_MONGODB_SERVER: $CONTACT_MONGODB_AT
       ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
     depends_on:
-      - app-mongodb
+      app-mongodb:
+        condition: service_healthy
     ports:
       - 8081
