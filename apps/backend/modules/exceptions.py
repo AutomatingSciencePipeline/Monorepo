@@ -26,6 +26,10 @@ class GladosInternalError(CustomFlaskError):
     status_code = 500
 
 
+class DatabaseConnectionError(GladosInternalError):
+    """The database connection failed"""
+
+
 class DataFormatError(Exception):
     """GLADOS data was not in an expected format"""
 

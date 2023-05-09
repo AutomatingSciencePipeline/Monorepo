@@ -91,11 +91,6 @@ def close_experiment_logger():
     handler.close()
 
 
-def upload_experiment_log(experimentId: DocumentId):
-    filePath = get_filepath_for_experiment_log(experimentId)
-    get_system_logger().warning('TODO upload the file to the database: %s', filePath)
-
-
 def _standard_file_formatter():
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
     formatter.usesTime()

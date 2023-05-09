@@ -11,20 +11,18 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
-from dotenv import load_dotenv
-import pymongo
-from pymongo.errors import ConnectionFailure
 from bson.binary import Binary
+
 from modules.data.types import DocumentId, IncomingStartRequest
-
-from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger, upload_experiment_log
-from modules.runner import conduct_experiment
-from modules.exceptions import CustomFlaskError, GladosInternalError, ExperimentAbort
-from modules.output.plots import generateScatterPlot
-from modules.configs import generate_config_files
-
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
+from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
+from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
+from modules.runner import conduct_experiment
+from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort
+from modules.output.plots import generateScatterPlot
+from modules.configs import generate_config_files
+from modules.utils import _get_env
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -32,12 +30,7 @@ except ImportError:
     logging.error("Failed to import the 'magic' package, you're probably missing a system level dependency")
     sys.exit(1)
 
-# Must override so that vscode doesn't incorrectly parse another env file and have bad values
-HAS_DOTENV_FILE = load_dotenv("./.env", override=True)
-
 ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
-ENV_MONGODB_PORT = "MONGODB_PORT"
-ENV_CONTACT_MONGODB_AT = "CONTACT_MONGODB_AT"
 DB_COLLECTION_EXPERIMENTS = "Experiments"
 
 # set up logger
@@ -45,26 +38,10 @@ configure_root_logger()
 syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
-
-def _get_env(key: str):
-    value = os.environ.get(key)
-    if value is None:
-        if HAS_DOTENV_FILE:
-            raise AssertionError(f"Missing environment variable {key} in your `.env` file")
-        raise AssertionError(f"Missing environment variable {key} - you need a `.env` file in this folder with it defined")
-    return value
-
-
 firebaseCredentials = credentials.Certificate(json.loads(_get_env(ENV_FIREBASE_CREDENTIALS)))
 firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
-
-#MongoDB
-mongoClient = pymongo.MongoClient(_get_env(ENV_CONTACT_MONGODB_AT), int(_get_env(ENV_MONGODB_PORT)), serverSelectionTimeoutMS=1000)
-mongoGladosDB = mongoClient["gladosdb"]
-mongoResultsCollection = mongoGladosDB.results
-mongoResultsZipCollections = mongoGladosDB.zips
 
 #setting up the app
 MAX_WORKERS = 1
@@ -159,9 +136,7 @@ def run_batch(data: IncomingStartRequest):
     os.chdir(f'ExperimentFiles/{expId}')
     filepath = download_experiment_files(experiment)
 
-    rawfiletype, filetype = determine_experiment_file_type(filepath)
-    experiment.experimentType = filetype
-    explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
+    experiment.experimentType = determine_experiment_file_type(filepath)
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
 
@@ -204,19 +179,20 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None", error: 
     upload_experiment_log(expId)
 
 
-def determine_experiment_file_type(filepath):
+def determine_experiment_file_type(filepath: str):
     rawfiletype = magic.from_file(filepath)
-    explogger.info("Raw filetype is %s", rawfiletype)
-    filetype = 'unknown'
+    filetype = ExperimentType.UNKNOWN
     if 'Python script' in rawfiletype or 'python3' in rawfiletype:
         filetype = ExperimentType.PYTHON
     elif 'Java archive data (JAR)' in rawfiletype:
         filetype = ExperimentType.JAVA
 
-    if filetype == 'unknown':
+    explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
+
+    if filetype == ExperimentType.UNKNOWN:
         explogger.info(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
         raise NotImplementedError("Unknown experiment file type")
-    return rawfiletype, filetype
+    return filetype
 
 
 def download_experiment_files(experiment: ExperimentData):
@@ -242,55 +218,45 @@ def upload_experiment_results(experiment: ExperimentData):
     """
     Call this function when inside the experiment folder!
     """
-    explogger.info('Uploading Results to the frontend')
-    uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
-    uploadBlob.upload_from_filename('results.csv')
+    explogger.info('Uploading Experiment Results...')
 
-    _upload_to_mongodb(experiment)
+    try:
+        uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
+        uploadBlob.upload_from_filename('results.csv')
+    except Exception as err:
+        raise DatabaseConnectionError("Error uploading aggregated experiment results to firebase") from err
+
+    explogger.info('Uploading to MongoDB')
+    verify_mongo_connection()
+
+    resultContent = None
+    try:
+        with open('results.csv', 'r', encoding="utf8") as experimentFile:
+            resultContent = experimentFile.read()
+    except Exception as err:
+        raise GladosInternalError("Failed to read aggregated result file data for upload to mongodb") from err
+
+    upload_experiment_aggregated_results(experiment, resultContent)
 
     if experiment.trialExtraFile != '' or experiment.postProcess or experiment.keepLogs:
         explogger.info('Uploading Result Csvs')
+
+        encoded = None
         try:
             shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-
-            # TODO remove firebase usage once transition to mongo file storage is complete
-            uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
-            uploadBlob.upload_from_filename('ResultCsvs.zip')
-
-            # mongoResultsZipCollections
             with open("ResultCsvs.zip", "rb") as file:
                 encoded = Binary(file.read())
-            experimentZipEntry = {"_id": experiment.expId, "fileContent": encoded}
-            try:
-                resultZipId = mongoResultsZipCollections.insert_one(experimentZipEntry).inserted_id
-                explogger.info(f"inserted zip file into mongodb with id: {resultZipId}")
-            except Exception as err:
-                raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
         except Exception as err:
-            raise GladosInternalError("Error uploading experiment results") from err
+            raise GladosInternalError("Error preparing experiment results zip") from err
 
+        # TODO remove firebase usage once transition to mongo file storage is complete
+        try:
+            uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
+            uploadBlob.upload_from_filename('ResultCsvs.zip')
+        except Exception as err:
+            raise DatabaseConnectionError("Error uploading experiment results zip to firebase") from err
 
-def _upload_to_mongodb(experiment: ExperimentData):
-    explogger.info('Uploading to MongoDB')
-    try:
-        mongoClient.admin.command('ping')
-    except ConnectionFailure as err:
-        raise GladosInternalError("MongoDB server not available/unreachable") from err
-
-    experimentData = None
-    try:
-        experimentFile = open("results.csv", encoding='utf8')
-        experimentData = experimentFile.read()
-        experimentFile.close()
-    except Exception as err:
-        raise GladosInternalError("Failed to read file data for upload to mongodb") from err
-
-    experimentResultEntry = {"_id": experiment.expId, "resultContent": experimentData}
-    try:
-        resultId = mongoResultsCollection.insert_one(experimentResultEntry).inserted_id
-        explogger.info(f"inserted result csv into mongodb with id: {resultId}")
-    except Exception as err:
-        raise GladosInternalError("Encountered error while inserting results into MongoDB") from err
+        upload_experiment_zip(experiment, encoded)
 
 
 def post_process_experiment(experiment: ExperimentData):
