@@ -17,7 +17,8 @@ PROCESS_ERROR_STREAM = 1
 
 explogger = get_experiment_logger()
 
-def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
+
+def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
     try:
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
@@ -40,17 +41,19 @@ def get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout:
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
 
 
-def run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
-    #make sure that the cwd is ExperimentsFiles/{ExperimentId}
+def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
+    """
+    make sure that the cwd is ExperimentsFiles/{ExperimentId}
+    """
     if experiment.experimentType == ExperimentType.PYTHON:
         with Popen(['python', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
+            _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
     elif experiment.experimentType == ExperimentType.JAVA:
         with Popen(['java', '-jar', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
+            _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
 
 
-def get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
+def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
@@ -59,19 +62,17 @@ def get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
                 if lineNum == targetLineNumber:
                     return line
                 lineNum += 1
+
             if lineNum == 0:
-                msg = f"{filename} is an empty file cannot gather any information"
-            elif lineNum == 1:
-                msg = f"{filename} only has one line, Potentially only has a Header or Value row"
-            else:
-                msg = "Error in get nth line that should not occur"
-            explogger.error(msg)
-            raise GladosUserError(msg)
+                raise GladosUserError(f"{filename} is an empty file cannot gather any information")
+            if lineNum == 1:
+                raise GladosUserError(f"{filename} only has one line. Potentially only has a Header or Value row?")
+            raise GladosInternalError(f"Failed to get line {targetLineNumber} of {filename}")
     except Exception as err:
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
-def add_to_output_batch(fileOutput, ExpRun):
+def _add_to_output_batch(fileOutput, ExpRun):
     try:
         shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
     except Exception as err:
@@ -101,11 +102,10 @@ def conduct_experiment(experiment: ExperimentData, expRef):
                 configFileName = create_config_from_data(experiment, trialNum)
                 paramNames = get_config_paramNames('configFiles/0.ini')
             except Exception as err:
-                msg = f"Failed to generate config {trialNum} file"
-                raise GladosInternalError(msg) from err
+                raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
 
             try:
-                run_trial(experiment, f'configFiles/{configFileName}', trialNum)
+                _run_trial(experiment, f'configFiles/{configFileName}', trialNum)
             except InternalTrialFailedError as err:
                 explogger.error(f'Trial#{trialNum} Encountered an Error')
                 experiment.fails += 1
@@ -131,26 +131,25 @@ def conduct_experiment(experiment: ExperimentData, expRef):
 
             endSeconds = time.time()
             timeTakenMinutes = (endSeconds - startSeconds) / 60
-            #Estimating time for all experiments to run and informing frontend
 
-            if trialNum == 0:  #Setting up the Headers of the CSV
+            if trialNum == 0:
+                #Estimating time for all experiments to run and informing frontend
                 estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
                 explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
+
                 #Setting up the header for the Result
                 try:
-                    output = get_line_n_of_trial_results_csv(0, experiment.trialResult)
+                    output = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
                 except GladosUserError as err:
-                    raise err
+                    raise ExperimentAbort from err
                 numOutputs = len(output)
                 writer.writerow(["Experiment Run"] + output + paramNames)
 
-            if experiment.trialExtraFile != '':
-                add_to_output_batch(experiment.trialExtraFile, trialNum)
-            try:
-                output = get_line_n_of_trial_results_csv(1, experiment.trialResult)
-            except GladosUserError as err:
-                raise err
+            if experiment.has_extra_files():
+                _add_to_output_batch(experiment.trialExtraFile, trialNum)
+
+            output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
             writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
 
             explogger.info(f'Trial#{trialNum} completed')

@@ -19,7 +19,7 @@ from modules.data.parameters import Parameter, parseRawHyperparameterData
 from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
 from modules.runner import conduct_experiment
-from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort
+from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 from modules.utils import _get_env
@@ -109,7 +109,8 @@ def run_batch(data: IncomingStartRequest):
         experimentData = expRef.get().to_dict()
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from firebase, aborting")
-        close_experiment_run(expId, None, err)
+        explogger.exception(err)
+        close_experiment_run(expId, None)
         return
 
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
@@ -117,7 +118,8 @@ def run_batch(data: IncomingStartRequest):
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
     except KeyError as err:
         explogger.error("Error generating configs - hyperparameters not found in experiment object, aborting")
-        close_experiment_run(expId, expRef, err)
+        explogger.exception(err)
+        close_experiment_run(expId, expRef)
         return
     experimentData['hyperparameters'] = hyperparameters
 
@@ -127,7 +129,8 @@ def run_batch(data: IncomingStartRequest):
         experiment.postProcess = experiment.scatter
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
-        close_experiment_run(expId, expRef, err)
+        explogger.exception(err)
+        close_experiment_run(expId, expRef)
         return
 
     #Downloading Experiment File
@@ -193,7 +196,10 @@ def determine_experiment_file_type(filepath: str):
 
 
 def download_experiment_files(experiment: ExperimentData):
-    if experiment.trialExtraFile != '' or experiment.postProcess != '' or experiment.keepLogs:
+    """
+    Call this function when inside the experiment folder!
+    """
+    if experiment.has_extra_files() or experiment.postProcess != '' or experiment.keepLogs:
         explogger.info('There will be experiment outputs')
         os.makedirs('ResCsvs')
     explogger.info(f'Downloading file for {experiment.expId}')
@@ -235,7 +241,7 @@ def upload_experiment_results(experiment: ExperimentData):
 
     upload_experiment_aggregated_results(experiment, resultContent)
 
-    if experiment.trialExtraFile != '' or experiment.postProcess or experiment.keepLogs:
+    if experiment.has_extra_files() or experiment.postProcess or experiment.keepLogs:
         explogger.info('Uploading Result Csvs')
 
         encoded = None

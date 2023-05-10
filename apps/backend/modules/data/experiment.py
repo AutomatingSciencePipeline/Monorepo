@@ -20,7 +20,7 @@ class ExperimentData(BaseModel):
     creator: UserId
     trialExtraFile: Optional[str]
     trialResult: str
-    file = "" #Will be set either by initializing or by app.py
+    file = ""  #Will be set either by initializing or by app.py
     timeout: int
     keepLogs: bool
     scatter: bool
@@ -29,8 +29,8 @@ class ExperimentData(BaseModel):
     dumbTextArea: str
     postProcess = False
 
-    hyperparameters: Dict[str,Parameter]
-    configs = {} #Will be set Later
+    hyperparameters: Dict[str, Parameter]
+    configs = {}  #Will be set Later
 
     startedAtEpochMillis: Optional[EpochMilliseconds]
     finishedAtEpochMillis: Optional[EpochMilliseconds]
@@ -74,6 +74,9 @@ class ExperimentData(BaseModel):
         elif scatterIndVar != '' or scatterDepVar != '':
             raise ValueError("scatter is disabled, but scatterIndVar and/or scatterDepVar are present")
         return values
+
+    def has_extra_files(self):
+        return self.trialExtraFile != ''
 
     class Config:
         validate_assignment = True
