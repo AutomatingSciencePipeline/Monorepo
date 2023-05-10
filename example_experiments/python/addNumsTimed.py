@@ -29,6 +29,7 @@ User Defined Constants:
 waitTime = 3
 """
 
+# pylint: disable=glados-print-used
 
 def main():
     config = configparser.ConfigParser()
