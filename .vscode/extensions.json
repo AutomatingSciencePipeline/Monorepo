@@ -37,7 +37,7 @@
         "bierner.markdown-preview-github-styles",
 
         // CI
-        "me-dutour-mathieu.vscode-github-actions"
+        "GitHub.vscode-github-actions"
     ],
     "unwantedRecommendations": []
 }
