@@ -106,27 +106,8 @@ def conduct_experiment(experiment: ExperimentData, expRef):
 
             try:
                 _run_trial(experiment, f'configFiles/{configFileName}', trialNum)
-            except InternalTrialFailedError as err:
-                explogger.error(f'Trial#{trialNum} Encountered an Error')
-                experiment.fails += 1
-                expRef.update({'fails': experiment.fails})
-                if numOutputs is not None:  #After the first trial this should be defined not sure how else to do this
-                    writer.writerow([trialNum] + ["ERROR" for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-                if trialNum == 0:  #First Trial Failure Abort
-                    message = f"First trial of {experiment.expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
-                    explogger.error(message)
-                    raise ExperimentAbort(message) from err
-                continue
-            except TrialTimeoutError as timeoutErr:  #First Trial timeout Abort
-                explogger.error(f"Trial#{trialNum} timed out")
-                experiment.fails += 1
-                expRef.update({'fails': experiment.fails})
-                if numOutputs is not None:  #After the first trial this should be defined not sure how else to do this
-                    writer.writerow([trialNum] + ["TIMEOUT" for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-                if trialNum == 0:
-                    message = f"First trial of {experiment.expId} timed out while running, aborting the whole experiment."
-                    explogger.error(message)
-                    raise ExperimentAbort(message) from timeoutErr
+            except (TrialTimeoutError, InternalTrialFailedError) as err:
+                _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                 continue
 
             endSeconds = time.time()
@@ -140,19 +121,42 @@ def conduct_experiment(experiment: ExperimentData, expRef):
 
                 #Setting up the header for the Result
                 try:
-                    output = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
+                    header = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
                 except GladosUserError as err:
-                    raise ExperimentAbort from err
-                numOutputs = len(output)
-                writer.writerow(["Experiment Run"] + output + paramNames)
+                    _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
+                    return
+                numOutputs = len(header)
+                writer.writerow(["Experiment Run"] + header + paramNames)
 
             if experiment.has_extra_files():
                 _add_to_output_batch(experiment.trialExtraFile, trialNum)
 
-            output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
+            try:
+                output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
+            except GladosUserError as err:
+                _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
+                continue
             writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
 
             explogger.info(f'Trial#{trialNum} completed')
             experiment.passes += 1
             expRef.update({'passes': experiment.passes})
         explogger.info("Finished running Trials")
+
+
+def _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err):
+    csvErrorValue = None
+    if isinstance(err, TrialTimeoutError):
+        csvErrorValue = "TIMEOUT"
+        explogger.error(f"Trial#{trialNum} timed out")
+    else:
+        csvErrorValue = "ERROR"
+        explogger.error(f'Trial#{trialNum} Encountered an Error')
+    experiment.fails += 1
+    expRef.update({'fails': experiment.fails})
+    if numOutputs is not None:  #After the first trial this should be defined not sure how else to do this
+        writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+    if trialNum == 0:  #First Trial Failure Abort
+        message = f"First trial of {experiment.expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
+        explogger.error(message)
+        raise ExperimentAbort(message) from err
