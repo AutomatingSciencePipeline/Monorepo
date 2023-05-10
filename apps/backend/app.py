@@ -143,33 +143,30 @@ def run_batch(data: IncomingStartRequest):
     totalExperimentRuns = generate_config_files(experiment)
     if totalExperimentRuns == 0:
         os.chdir('../..')
-        close_experiment_run(expId, expRef, GladosInternalError("Error generating configs - somehow no config files were produced?"))
+        explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
+        close_experiment_run(expId, expRef)
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
     expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
 
-    possibleException = None
     try:
         conduct_experiment(experiment, expRef)
-
         post_process_experiment(experiment)
-
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
         explogger.error(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
-        possibleException = err
+        explogger.exception(err)
     except Exception as err:  # pylint: disable=broad-exception-caught
-        explogger.error(f'Uncaught exception "{err}" while running an experiment. The GLADOS code needs to be changed to handle this in a cleaner manner')
-        possibleException = err
+        explogger.error('Uncaught exception while running an experiment. The GLADOS code needs to be changed to handle this in a cleaner manner')
+        explogger.exception(err)
     finally:
+        # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
-        close_experiment_run(expId, expRef, possibleException)
+        close_experiment_run(expId, expRef)
 
 
-def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None", error: "Exception | None"):
-    if error:
-        explogger.exception(error)
+def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     explogger.info(f'Exiting experiment {expId}')
     if expRef:
         expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})

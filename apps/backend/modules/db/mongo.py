@@ -52,7 +52,7 @@ def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
 
 def upload_experiment_log(experimentId: DocumentId):
     filePath = get_filepath_for_experiment_log(experimentId)
-    get_system_logger().info('TODO Uploading log file to the database: %s', filePath)
+    get_system_logger().info('Uploading log file to the database: %s', filePath)
 
     if len(explogger.handlers) != 0:
         raise GladosInternalError("Experiment logger still has a handler open at upload time. Close it first.")
