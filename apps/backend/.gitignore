@@ -8,4 +8,8 @@ logs/
 __pycache__
 .venv
 
+# Code Coverage reports
+.coverage
+coverage.xml
+
 # All below this point is uncategorized (categorize them!)
