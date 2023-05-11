@@ -72,11 +72,13 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
-def _add_to_output_batch(fileOutput, ExpRun):
+def _add_to_output_batch(trialExtraFile, ExpRun: int):
     try:
-        shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
+        # Currently only extra CSV files are supported, this will need to be adapted for other file types
+        shutil.copy2(f'{trialExtraFile}', f'ResCsvs/Result{ExpRun}.csv')
     except Exception as err:
-        raise FileHandlingError("Failed to copy results csv, Maybe there was a typo in the filepath") from err
+        explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
+        raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
 
 
 def conduct_experiment(experiment: ExperimentData, expRef):
@@ -125,7 +127,11 @@ def conduct_experiment(experiment: ExperimentData, expRef):
                 writer.writerow(["Experiment Run"] + csvHeader + paramNames)
 
             if experiment.has_extra_files():
-                _add_to_output_batch(experiment.trialExtraFile, trialNum)
+                try:
+                    _add_to_output_batch(experiment.trialExtraFile, trialNum)
+                except FileHandlingError as err:
+                    _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
+                    continue
 
             try:
                 output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
@@ -153,7 +159,6 @@ def _handle_trial_error(experiment: ExperimentData, expRef, numOutputs: int, par
     expRef.update({'fails': experiment.fails})
     if trialNum == 0:
         message = f"First trial of {experiment.expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
-        explogger.error(message)
         raise ExperimentAbort(message) from err
     else:
         writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))

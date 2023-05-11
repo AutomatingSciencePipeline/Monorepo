@@ -278,7 +278,8 @@ def post_process_experiment(experiment: ExperimentData):
                 indVar = experiment.scatterIndVar
                 generateScatterPlot(indVar, depVar, 'results.csv', experiment.expId)
         except (KeyError, ValueError) as err:
-            explogger.error(f'Error during plot generation: {err}')
+            explogger.error('Error during plot generation')
+            explogger.exception(err)
 
 
 if __name__ == '__main__':
