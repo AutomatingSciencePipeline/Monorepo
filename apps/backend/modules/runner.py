@@ -76,7 +76,7 @@ def _add_to_output_batch(fileOutput, ExpRun):
     try:
         shutil.copy2(f'{fileOutput}', f'ResCsvs/Result{ExpRun}.csv')
     except Exception as err:
-        raise FileHandlingError("Failed to copy results csv") from err
+        raise FileHandlingError("Failed to copy results csv, Maybe there was a typo in the filepath") from err
 
 
 def conduct_experiment(experiment: ExperimentData, expRef):

@@ -117,7 +117,12 @@ def run_batch(data: IncomingStartRequest):
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
     except KeyError as err:
-        explogger.error("Error generating configs - hyperparameters not found in experiment object, aborting")
+        explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
+        explogger.exception(err)
+        close_experiment_run(expId, expRef)
+        return
+    except ValueError as err:
+        explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
         close_experiment_run(expId, expRef)
         return
@@ -275,7 +280,9 @@ def post_process_experiment(experiment: ExperimentData):
                 indVar = experiment.scatterIndVar
                 generateScatterPlot(indVar, depVar, 'results.csv', experiment.expId)
         except KeyError as err:
-            raise GladosInternalError("Error during plot generation") from err
+            explogger.error(f'Error during plot generation: {err}')
+        except ValueError as err:
+            explogger.error(f'Error during plot generation: {err}')
 
 
 if __name__ == '__main__':

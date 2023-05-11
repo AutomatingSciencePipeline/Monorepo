@@ -55,6 +55,13 @@ class ExperimentData(BaseModel):
                 raise ValueError(f'value {param} associated with {key} in configs is not a ConfigData object')
         return v
 
+    @validator('timeout')
+    @classmethod
+    def check_timeout(cls, v):
+        if v < 1:
+            raise ValueError(f'value {v} is an invalid timeout, timeout must be greater than or equal to 1')
+        return v
+
     @validator('hyperparameters')
     @classmethod
     def check_hyperparams(cls, v):
@@ -62,6 +69,8 @@ class ExperimentData(BaseModel):
             # For some reason, isinstance does not work here. Maybe it has to do with how pydantic validators work? - Rob
             if not param.__class__ in Parameter.__subclasses__():
                 raise ValueError(f'value {param} associated with {key} in hyperparameters is not a Parameter')
+            if key == '':
+                raise ValueError(f'Key for parameter cannot be empty')
         return v
 
     @root_validator
