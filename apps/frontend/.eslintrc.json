@@ -53,6 +53,13 @@
                 "avoidEscape": true
             }
         ],
+        "no-restricted-syntax": [
+            "error",
+            {
+                "message": "Next.js doesn't support replaceAll, see https://stackoverflow.com/questions/62940927/cant-use-replaceall-or-replace-with-nextjs-reactjs",
+                "selector": "MemberExpression > Identifier[name=\"replaceAll\"]"
+            }
+        ],
         // we don't really care about the Next.js image optimizations and what they require us to do
         "@next/next/no-img-element": "off"
     }

@@ -1,4 +1,4 @@
-import clientPromise, { DB_NAME } from '../../../../lib/mongodb';
+import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS } from '../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
 import { ResultsCsv } from '../../../../lib/mongodb_types';
 
@@ -17,7 +17,7 @@ const mongoCSVHandler: NextApiHandler<ResultsCsv> = async (req, res) => {
 		const db = client.db(DB_NAME);
 
 		results = await db
-			.collection('results')
+			.collection(COLLECTION_RESULTS_CSVS)
 			// TODO correct mongodb typescript type for id
 			.find({ '_id': expIdToCsvDownload as any }).toArray();
 	} catch (error) {
