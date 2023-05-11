@@ -116,13 +116,11 @@ def run_batch(data: IncomingStartRequest):
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
-    except KeyError as err:
-        explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
-        explogger.exception(err)
-        close_experiment_run(expId, expRef)
-        return
-    except ValueError as err:
-        explogger.error("Error generating hyperparameters - Validation error")
+    except (KeyError, ValueError) as err:
+        if isinstance(err, KeyError):
+            explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
+        else:
+            explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
         close_experiment_run(expId, expRef)
         return
@@ -279,9 +277,7 @@ def post_process_experiment(experiment: ExperimentData):
                 depVar = experiment.scatterDepVar
                 indVar = experiment.scatterIndVar
                 generateScatterPlot(indVar, depVar, 'results.csv', experiment.expId)
-        except KeyError as err:
-            explogger.error(f'Error during plot generation: {err}')
-        except ValueError as err:
+        except (KeyError, ValueError) as err:
             explogger.error(f'Error during plot generation: {err}')
 
 
