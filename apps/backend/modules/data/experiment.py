@@ -36,9 +36,9 @@ class ExperimentData(BaseModel):
     finishedAtEpochMillis: Optional[EpochMilliseconds]
     finished: Optional[bool]  # TODO replace with presence of finished timestamp?
 
-    totalExperimentRuns = 0
-    passes: Optional[int]
-    fails: Optional[int]
+    totalExperimentRuns: int = 0
+    passes: int = 0
+    fails: int = 0
 
     @validator('trialResult')
     @classmethod
@@ -70,7 +70,7 @@ class ExperimentData(BaseModel):
             if not param.__class__ in Parameter.__subclasses__():
                 raise ValueError(f'value {param} associated with {key} in hyperparameters is not a Parameter')
             if key == '':
-                raise ValueError(f'Key for parameter cannot be empty')
+                raise ValueError('Key for parameter cannot be empty')
         return v
 
     @root_validator

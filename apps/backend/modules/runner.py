@@ -86,9 +86,7 @@ def conduct_experiment(experiment: ExperimentData, expRef):
     os.mkdir('configFiles')
     explogger.info(f"Running Experiment {experiment.expId}")
 
-    experiment.passes = 0
-    experiment.fails = 0
-    numOutputs = None
+    numOutputs = 0
     with open('results.csv', 'w', encoding="utf8") as expResults:
         paramNames = []
         writer = csv.writer(expResults)
@@ -114,19 +112,17 @@ def conduct_experiment(experiment: ExperimentData, expRef):
             timeTakenMinutes = (endSeconds - startSeconds) / 60
 
             if trialNum == 0:
-                #Estimating time for all experiments to run and informing frontend
                 estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
                 explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
 
-                #Setting up the header for the Result
                 try:
-                    header = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
+                    csvHeader = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
                 except GladosUserError as err:
                     _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                     return
-                numOutputs = len(header)
-                writer.writerow(["Experiment Run"] + header + paramNames)
+                numOutputs = len(csvHeader)
+                writer.writerow(["Experiment Run"] + csvHeader + paramNames)
 
             if experiment.has_extra_files():
                 _add_to_output_batch(experiment.trialExtraFile, trialNum)
@@ -144,7 +140,7 @@ def conduct_experiment(experiment: ExperimentData, expRef):
         explogger.info("Finished running Trials")
 
 
-def _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err):
+def _handle_trial_error(experiment: ExperimentData, expRef, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
     csvErrorValue = None
     if isinstance(err, TrialTimeoutError):
         csvErrorValue = "TIMEOUT"
@@ -152,11 +148,12 @@ def _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, tria
     else:
         csvErrorValue = "ERROR"
         explogger.error(f'Trial#{trialNum} Encountered an Error')
+    explogger.exception(err)
     experiment.fails += 1
     expRef.update({'fails': experiment.fails})
-    if numOutputs is not None:  #After the first trial this should be defined not sure how else to do this
-        writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-    if trialNum == 0:  #First Trial Failure Abort
+    if trialNum == 0:
         message = f"First trial of {experiment.expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
         explogger.error(message)
         raise ExperimentAbort(message) from err
+    else:
+        writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
