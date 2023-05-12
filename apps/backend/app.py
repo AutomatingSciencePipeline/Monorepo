@@ -142,7 +142,14 @@ def run_batch(data: IncomingStartRequest):
     os.chdir(f'ExperimentFiles/{expId}')
     filepath = download_experiment_files(experiment)
 
-    experiment.experimentType = determine_experiment_file_type(filepath)
+    try:
+        experiment.experimentType = determine_experiment_file_type(filepath)
+    except NotImplementedError as err:
+        explogger.error("This is not a supported experiment file type, aborting")
+        explogger.exception(err)
+        os.chdir('../..')
+        close_experiment_run(expId, expRef)
+        return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
 
@@ -151,6 +158,7 @@ def run_batch(data: IncomingStartRequest):
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
         close_experiment_run(expId, expRef)
+        return
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
@@ -193,7 +201,7 @@ def determine_experiment_file_type(filepath: str):
     explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
 
     if filetype == ExperimentType.UNKNOWN:
-        explogger.info(f"{rawfiletype} could not be mapped to python or java, if it should consider updating the matching statements")
+        explogger.error(f'File type "{rawfiletype}" could not be mapped to Python or Java, if it should consider updating the matching statements')
         raise NotImplementedError("Unknown experiment file type")
     return filetype
 
