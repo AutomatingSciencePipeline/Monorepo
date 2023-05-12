@@ -64,17 +64,17 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		>
 			<Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
 				<Dropzone.Accept>
-					<Upload size={80} />
+					<Upload size={80} strokeWidth={1}/>
 				</Dropzone.Accept>
 				<Dropzone.Reject>
 					{/* For some reason (seems to be happening on React itself's side?) the dropzone is claiming to reject files even if the file's mime
 					type is included in the accept list we pass it. Works for images, when changed to be images, but not our stuff. Check browser console
 					and you can see that the file object's type really does match what we have in our list!*/}
-					<Upload size={80} />
-					{/* <X size={80} /> */}
+					<Upload size={80} strokeWidth={1}/>
+					{/* <X size={80} strokeWidth={1}/> */}
 				</Dropzone.Reject>
 				<Dropzone.Idle>
-					<FileCode size={80} />
+					<FileCode size={80} strokeWidth={1}/>
 				</Dropzone.Idle>
 
 				<div>
