@@ -12,7 +12,7 @@ services:
       # Directly mount source code on host machine disk to container -> no need to rebuild container on every change
       - ./apps/backend/:/app
   app-frontend:
-    build: 
+    build:
       target: development
     volumes:
       # Directly mount source code on host machine disk to container -> no need to rebuild container on every change
@@ -21,4 +21,27 @@ services:
     # Only expose the MongoDB port to the host machine during development (for testing)
     # because end users should access it via frontend webserver api routes instead
     ports:
-    - ${MONGODB_PORT}:${MONGODB_PORT}
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    # Quiet the logging prints because they are super noisy, especially due to the healthcheck
+    command: mongod --quiet --logpath /dev/null 
+    # Need a healthcheck defined for to ensure the mongo-express instance starts up after this one
+    healthcheck:
+      # Based on https://stackoverflow.com/a/73783213/12693560
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MONGODB_PORT}/test --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+  app-mongoexpress:
+    # Development-only interface to view the mongodb contents
+    # Based on https://gist.github.com/adamelliotfields/cd49f056deab05250876286d7657dc4b
+    image: mongo-express
+    container_name: glados-DEVONLY-mongodb-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: $CONTACT_MONGODB_AT
+      ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+    depends_on:
+      app-mongodb:
+        condition: service_healthy
+    ports:
+      - 8081:8081

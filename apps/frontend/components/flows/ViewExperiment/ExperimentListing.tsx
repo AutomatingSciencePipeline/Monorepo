@@ -50,6 +50,16 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					</button> :
 					null
 				}
+				{project['finished'] == true ?
+					<button type= "button"
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						onClick={() => {
+							window.open(`/api/download/logs/${project.expId}`, '_blank');
+						}}>
+						View System Log
+					</button> :
+					null
+				}
 				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
 					<button type= "button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
@@ -88,14 +98,16 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			</div>
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
-					{project['finished'] ?
-						<span className='font-mono'>Experiment Completed</span> :
-						(experimentInProgress ?
+					{project.finished ?
+						(project.fails <= 1 && (project?.passes ?? 0) == 0 ?
+							<span className='font-mono text-red-500'>Experiment Aborted</span> :
+							<span className='font-mono'>Experiment Completed</span>
+						) : (experimentInProgress ?
 							<span className='font-mono text-blue-500'>Experiment In Progress</span> :
 							<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>)
 					}
 				</p>
-				{project['finished'] || experimentInProgress ?
+				{project.finished || experimentInProgress ?
 					<p className='flex items-center space-x-4'>
 						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
 						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
