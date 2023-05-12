@@ -98,14 +98,16 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			</div>
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
-					{project['finished'] ?
-						<span className='font-mono'>Experiment Completed</span> :
-						(experimentInProgress ?
+					{project.finished ?
+						(project.fails <= 1 && (project?.passes ?? 0) == 0 ?
+							<span className='font-mono text-red-500'>Experiment Aborted</span> :
+							<span className='font-mono'>Experiment Completed</span>
+						) : (experimentInProgress ?
 							<span className='font-mono text-blue-500'>Experiment In Progress</span> :
 							<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>)
 					}
 				</p>
-				{project['finished'] || experimentInProgress ?
+				{project.finished || experimentInProgress ?
 					<p className='flex items-center space-x-4'>
 						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
 						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>

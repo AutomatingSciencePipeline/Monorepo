@@ -1,17 +1,26 @@
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { submitExperiment, uploadExec } from '../../../../firebase/db';
-import { Text } from '@mantine/core';
+import { Group, Text } from '@mantine/core';
 
 import { useAuth } from '../../../../firebase/fbAuth';
-import { Upload, X, File, IconProps } from 'tabler-icons-react';
+import { Upload, FileCode } from 'tabler-icons-react';
+import { useState } from 'react';
+
+const SUPPORTED_FILE_TYPES = {
+	'text/plain': ['.py'],
+	'text/x-python': ['.py'],
+	'application/java-archive': ['.jar'],
+};
 
 export const DispatchStep = ({ id, form, ...props }) => {
 	const { userId } = useAuth();
+	const [loading, setLoading] = useState<boolean>(false);
 
-	const onDropFile = (files: Parameters<DropzoneProps["onDrop"]>) => {
-		console.log('Submitting Experiment!!!');
+	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
+		setLoading(true);
+		console.log('Submitting Experiment');
 		submitExperiment(form.values, userId as string).then(async (expId) => {
-			console.log(`Uploading file for ${expId}`);
+			console.log(`Uploading file for ${expId}:`, files);
 			const uploadResponse = await uploadExec(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
@@ -25,61 +34,63 @@ export const DispatchStep = ({ id, form, ...props }) => {
 					console.log('Response from backend received', response);
 				} else {
 					const responseText = await response.text();
-					alert(`Upload failed: ${response.status}: ${responseText}`);
 					console.log('Upload failed', responseText, response);
 					throw new Error(`Upload failed: ${response.status}: ${responseText}`);
 				}
 			} else {
-				alert('Failed to upload experiment file to the backend server, is it running?');
-				throw new Error('Upload failed');
+				throw new Error('Failed to upload experiment file to the backend server, is it running?');
 			}
 		}).catch((error) => {
 			console.log('Error uploading experiment: ', error);
 			alert(`Error uploading experiment: ${error.message}`);
+		}).finally(() => {
+			setLoading(false);
 		});
 	};
 
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
+
 	return (
 		<Dropzone
-			onDrop={onDropFile as any}
-			onReject={(file) => console.log('NOPE, file rejected', file)}
-			maxSize={MAXIMUM_SIZE_BYTES}
-			className='flex-1 flex flex-col justify-center m-4 items-center'
-			accept={{
-				'text/plain': ['.py'],
-				'application/java-archive': ['.jar'],
+			onDrop={onDropFile}
+			onReject={(rejections) => {
+				console.log('File rejection details', rejections);
+				const uploadedType = rejections[0]?.file?.type;
+				alert(`Rejected:\n${rejections[0]?.errors[0]?.message}\nYour file was of type: ${uploadedType ? uploadedType : 'Unknown'}\nCheck the console for more details.`);
 			}}
+			maxSize={MAXIMUM_SIZE_BYTES}
+			maxFiles={1}
+			className='flex-1 flex flex-col justify-center m-4 items-center'
+			loading={loading}
+			accept={Object.keys(SUPPORTED_FILE_TYPES)}
 		>
-			<>{(status) => dropzoneKids(status)}</>
+			<Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
+				<Dropzone.Accept>
+					<Upload size={80} strokeWidth={1}/>
+				</Dropzone.Accept>
+				<Dropzone.Reject>
+					{/* For some reason (seems to be happening on React itself's side?) the dropzone is claiming to reject files even if the file's mime
+					type is included in the accept list we pass it. Works for images, when changed to be images, but not our stuff. Check browser console
+					and you can see that the file object's type really does match what we have in our list!*/}
+					<Upload size={80} strokeWidth={1}/>
+					{/* <X size={80} strokeWidth={1}/> */}
+				</Dropzone.Reject>
+				<Dropzone.Idle>
+					<FileCode size={80} strokeWidth={1}/>
+				</Dropzone.Idle>
+
+				<div>
+					<Text size="xl" inline>
+						Upload your project executable.
+					</Text>
+					<Text size="sm" color="dimmed" inline mt={7}>
+						Drag-and-drop, or click here to open a file picker.
+					</Text>
+					<Text size="sm" color="dimmed" inline mt={7}>
+						Supported: {[...new Set(Object.values(SUPPORTED_FILE_TYPES).flat())].join(', ')}
+					</Text>
+				</div>
+			</Group>
 		</Dropzone>
 	);
-};
-
-const dropzoneKids = (status) => {
-	return (status.accepted) ?
-		<UploadIcon className={'bg-green-500'} status={status} /> :
-		<div className={'flex flex-col justify-center items-center space-y-6'}>
-			<UploadIcon status={status} />
-			<div>
-				<Text size='xl' inline>
-					Upload your project executable.
-				</Text>
-				<Text size='sm' color='dimmed' inline mt={7}>
-					Let{"'"}s revolutionize science!
-				</Text>
-			</div>
-		</div>;
-};
-interface UploadIconProps extends IconProps {
-	status
-}
-
-const UploadIcon: React.FC<UploadIconProps> = ({ status }) => {
-	if (status.accepted) {
-		return <Upload size={80} />;
-	} else if (status.rejected) {
-		return <X size={80} />;
-	}
-	return <File size={80} />;
 };

@@ -52,6 +52,7 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 export const uploadExec = async (id: ExperimentDocumentId, file) => {
 	const fileRef = ref(storage, `experiment${id}`);
 	return await uploadBytes(fileRef, file).then((snapshot) => {
+		console.log('Uploaded file. Updating doc...');
 		const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, id);
 		updateDoc(experimentRef, {
 			file: `experiment${id}`,
