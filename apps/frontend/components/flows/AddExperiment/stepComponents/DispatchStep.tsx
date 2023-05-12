@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
+	'text/x-python': ['.py'],
 	'application/java-archive': ['.jar'],
 };
 
@@ -54,7 +55,8 @@ export const DispatchStep = ({ id, form, ...props }) => {
 			onDrop={onDropFile}
 			onReject={(rejections) => {
 				console.log('File rejection details', rejections);
-				alert(`Rejected: ${rejections[0]?.errors[0]?.message}\nCheck the console for more details.`);
+				const uploadedType = rejections[0]?.file?.type;
+				alert(`Rejected:\n${rejections[0]?.errors[0]?.message}\nYour file was of type: ${uploadedType ? uploadedType : 'Unknown'}\nCheck the console for more details.`);
 			}}
 			maxSize={MAXIMUM_SIZE_BYTES}
 			maxFiles={1}
@@ -85,7 +87,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 						Drag-and-drop, or click here to open a file picker.
 					</Text>
 					<Text size="sm" color="dimmed" inline mt={7}>
-						Supported: {Object.values(SUPPORTED_FILE_TYPES).join(', ')}
+						Supported: {[...new Set(Object.values(SUPPORTED_FILE_TYPES).flat())].join(', ')}
 					</Text>
 				</div>
 			</Group>
