@@ -40,7 +40,7 @@ jobs:
       run: pylint --fail-on=E --fail-under=9.0 --recursive=y app.py ./modules/ ./tests/
     - name: Test with pytest
       working-directory: ./apps/backend
-      run: coverage run -m pytest tests/
+      run: coverage run -m pytest
     - name: Printing Coverage Report
       working-directory: ./apps/backend
       run: coverage report -m
