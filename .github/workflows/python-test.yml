@@ -11,6 +11,11 @@ permissions:
 env:
   FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
   CONTACT_MONGODB_AT: ${{ secrets.CONTACT_MONGODB_AT }}
+  BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+  MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
+  CONTACT_BACKEND_AT: ${{ secrets.CONTACT_BACKEND_AT }}
+  CONTACT_FRONTEND_AT: ${{ secrets.CONTACT_FRONTEND_AT }}
+  FRONTEND_WEBSERVER_PORT: ${{ secrets.FRONTEND_WEBSERVER_PORT }}
 jobs:
   Lint_And_Test:
 
