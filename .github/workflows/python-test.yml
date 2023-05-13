@@ -2,9 +2,9 @@ name: Python Lint and Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ Adding-Testing-Coverage ]
   pull_request:
-    branches: [ main ]
+    branches: [ Adding-Testing-Coverage ]
 
 permissions:
   contents: read
@@ -25,6 +25,7 @@ jobs:
       working-directory: ./apps/backend
       run: |
         python -m pip install --upgrade pip
+        python -m pip install coverage
         pip install pipenv
         pipenv install --dev --system --deploy --ignore-pipfile
     - name: Analyze with pylint
@@ -39,4 +40,7 @@ jobs:
       run: pylint --fail-on=E --fail-under=9.0 --recursive=y app.py ./modules/ ./tests/
     - name: Test with pytest
       working-directory: ./apps/backend
-      run: pytest tests/
+      run: coverage run -m pytest tests/
+    - name: Printing Coverage Report
+      working-directory: ./apps/backend
+      run: coverage report -m

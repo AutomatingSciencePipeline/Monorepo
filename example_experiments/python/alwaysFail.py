@@ -19,7 +19,7 @@ y, default: 1, min: 1, max: 10, step: 1
 """
 
 # There is intentionally unreachable code in this example
-# pylint: disable=unreachable
+# pylint: disable=unreachable glados-print-used
 
 
 def main():

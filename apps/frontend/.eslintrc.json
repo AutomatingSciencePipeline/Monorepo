@@ -38,7 +38,7 @@
         ],
         "prefer-template": "error",
         "no-tabs": "off",
-        "space-before-function-paren": "off",
+        "space-before-function-paren": "off", // cspell:disable-line
         "comma-dangle": "warn",
         "object-curly-spacing": [
             "warn",

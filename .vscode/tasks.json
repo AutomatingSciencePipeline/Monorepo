@@ -15,19 +15,32 @@
                 "panel": "shared",
                 "showReuseMessage": true,
                 "clear": false
-            }
+            },
+            "group": "none"
         },
         {
             "label": "DEVELOPMENT Docker Compose Up (Attached)",
             "type": "shell",
             "command": "docker compose --file docker-compose.yml --file docker-compose.dev.yml up --build",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "PRODUCTION Docker Compose Up (Attached)",
             "type": "shell",
             "command": "docker compose up --build",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Backend Code Coverage Report",
+            "type": "shell",
+            "command": "cd ./apps/backend; source ./.venv/scripts/activate; bash ./coverage.sh",
+            "problemMatcher": [],
+            "group": "test"
         }
     ]
 }

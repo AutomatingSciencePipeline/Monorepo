@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Backend",
+            "name": "Debug Backend Locally",
             "type": "python",
             "request": "launch",
             "module": "flask",
@@ -15,10 +15,10 @@
             },
             "args": [
                 "run",
-                "--no-debugger", // I have no idea why VSCode suggested this be here, I assume it turns off flask's own debugger?
+                "--no-debugger", // no idea why VSCode suggested this be here, presumably turns off flask's own debugger?
                 "--host=0.0.0.0",
                 "-p",
-                "5050" // TODO try to read env var for BACKEND_PORT? or up to the dev to manage this?
+                "5050" // not sure how to get this to read env var for BACKEND_PORT
             ],
             "jinja": true,
             "justMyCode": false,
@@ -28,7 +28,7 @@
             },
         },
         {
-            "name": "Debug Frontend",
+            "name": "Debug Frontend Locally",
             "type": "node",
             "request": "launch",
             "runtimeArgs": [
@@ -47,7 +47,7 @@
             },
         },
         {
-            "name": "Python: Current File (in Backend App)",
+            "name": "Python: Debug Current File (in Backend App)",
             "presentation": {
                 "group": "local-debug"
             },

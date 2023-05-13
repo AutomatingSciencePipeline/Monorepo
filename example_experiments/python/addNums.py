@@ -31,6 +31,7 @@ x, 1, 1, 10, 1
 y, 1, 1, 10, 1
 """
 
+# pylint: disable=glados-print-used
 
 def main():
     config = configparser.ConfigParser()

@@ -36,6 +36,7 @@ invert = False
 c = Test String
 """
 
+# pylint: disable=glados-print-used
 
 def shuffle_word(word):
     word = list(word)
