@@ -39,4 +39,4 @@ jobs:
       run: pylint --fail-on=E --fail-under=9.0 --recursive=y app.py ./modules/ ./tests/
     - name: Test with pytest
       working-directory: ./apps/backend
-      run: pytest
+      run: pytest tests/
