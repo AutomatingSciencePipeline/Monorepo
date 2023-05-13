@@ -1,5 +1,5 @@
 import unittest
-from app import parseRawHyperparameterData
+from modules.data.parameters import parseRawHyperparameterData
 from modules.data.configData import ConfigData
 
 from modules.data.experiment import ExperimentData, ExperimentType
