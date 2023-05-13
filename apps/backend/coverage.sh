@@ -1,5 +1,7 @@
 #!/bin/bash
-# This script is used by the VSCode task 'Backend Code Coverage Report' to produce a report that can be displayed in the editor
+# This script is used by
+#   - the VSCode task 'Backend Code Coverage Report' to produce a report that can be displayed in the editor
+#   - the CI to execute the tests and produce a report that gets uploaded as an artifact for download
 
 # Avoid pollution from past runs
 rm -f .coverage
