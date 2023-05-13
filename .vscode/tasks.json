@@ -36,7 +36,7 @@
             "group": "build"
         },
         {
-            "label": "Backend Code Coverage Report",
+            "label": "Backend Test + Code Coverage Report",
             "type": "shell",
             "command": "cd ./apps/backend; source ./.venv/scripts/activate; bash ./coverage.sh",
             "problemMatcher": [],

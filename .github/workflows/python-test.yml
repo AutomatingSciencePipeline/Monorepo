@@ -2,14 +2,17 @@ name: Python Lint and Test
 
 on:
   push:
-    branches: [ Adding-Testing-Coverage ]
+    branches: [ main ]
   pull_request:
-    branches: [ Adding-Testing-Coverage ]
+    branches: [ main ]
 
 permissions:
   contents: read
 env:
   FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
+  CONTACT_MONGODB_AT: ${{ secrets.CONTACT_MONGODB_AT }}
+  BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+  MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
 jobs:
   Lint_And_Test:
 
@@ -38,9 +41,14 @@ jobs:
       # Check the file app.py
       # Check the directories ./modules and ./tests
       run: pylint --fail-on=E --fail-under=9.0 --recursive=y app.py ./modules/ ./tests/
-    - name: Test with pytest
+    - name: Test with pytest + record coverage
       working-directory: ./apps/backend
-      run: coverage run -m pytest
-    - name: Printing Coverage Report
+      run: bash coverage.sh
+    - name: Zip coverage report
       working-directory: ./apps/backend
-      run: coverage report -m
+      run: zip -r codeCoverage.zip coverageReport/
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: ./apps/backend/codeCoverage.zip

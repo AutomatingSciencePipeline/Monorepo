@@ -12,7 +12,7 @@ if __name__ == "__main__":
     expInfo = {
         'trialExtraFile': 'dummy',
         'description': '',
-        'type': ExperimentType.PYTHON.value,  #Doesn't exist in firebase TODO: Make optional?
+        'type': ExperimentType.PYTHON.value,
         'file': 'experimentV3dpcllHWPrK1Kgbyzqb',
         'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2',
         'finished': False,
