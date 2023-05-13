@@ -9,6 +9,7 @@
         "wmaurer.change-case",
         "ramyaraoa.show-offset",
         "ms-vscode-remote.vscode-remote-extensionpack",
+        "ryanluker.vscode-coverage-gutters",
 
         // Frontend
         "herrmannplatz.npm-dependency-links",

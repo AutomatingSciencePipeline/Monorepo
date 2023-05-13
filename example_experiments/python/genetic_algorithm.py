@@ -9,7 +9,7 @@ import configparser
 #sample experiment that runs a truncation generational loop with a genome represented by a list of 0s and 1s. fitness is measured by number of 1s
 #in genome. maximum fitness is measured at the given generation number.
 #number of population, genome length, and mutation rate are given. a number can be given for seed or an r can be given for a random seed
-# pylint: disable = W0612
+
 # pylint: disable-next=pointless-string-statement
 """
 This experiment demonstrates doing things with Post Processing.
@@ -39,13 +39,15 @@ Dependant Variable: fitness
 
 """
 
+# pylint: disable = unused-variable glados-print-used
+# cspell:ignore chrom
 
 class Chromosome:
     genome = []
     fitness = 0
 
     #determine fitness of chromosome
-    def chromFitness(self):
+    def chromosomeFitness(self):
         self.fitness = 0
         for bit in self.genome:
             if bit == 1:
