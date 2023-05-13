@@ -10,6 +10,7 @@ permissions:
   contents: read
 env:
   FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
+  CONTACT_MONGODB_AT: ${{ secrets.CONTACT_MONGODB_AT }}
 jobs:
   Lint_And_Test:
 
