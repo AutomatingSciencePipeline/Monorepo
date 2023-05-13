@@ -2,9 +2,9 @@ name: Python Lint and Test
 
 on:
   push:
-    branches: [ Adding-Testing-Coverage ]
+    branches: [ Testing_System ]
   pull_request:
-    branches: [ Adding-Testing-Coverage ]
+    branches: [ Testing_System ]
 
 permissions:
   contents: read
