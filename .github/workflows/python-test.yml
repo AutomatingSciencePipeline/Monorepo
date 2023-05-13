@@ -44,11 +44,8 @@ jobs:
     - name: Test with pytest + record coverage
       working-directory: ./apps/backend
       run: bash coverage.sh
-    - name: Zip coverage report
-      working-directory: ./apps/backend
-      run: zip -r codeCoverage.zip coverageReport/
     - name: Upload coverage report
       uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report
-        path: ./apps/backend/codeCoverage.zip
+        path: ./apps/backend/codeCoverage
