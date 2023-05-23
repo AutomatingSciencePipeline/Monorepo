@@ -30,6 +30,7 @@ WORKDIR /app
 # The source code will be bind monuted in via docker compose, so we don't need to copy it in here
 
 ENV NODE_ENV=development
+ENV NODE_OPTIONS="--inspect"
 # Enable hot reload functionality https://github.com/vercel/next.js/issues/36774#issuecomment-1444286244
 ENV WATCHPACK_POLLING=true
 CMD npm run dev
