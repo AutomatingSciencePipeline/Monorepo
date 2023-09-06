@@ -1,11 +1,11 @@
-FROM node:14-alpine AS base
+FROM node:20 AS base
 
 ARG FRONTEND_WEBSERVER_PORT
 ENV FRONTEND_WEBSERVER_PORT=$FRONTEND_WEBSERVER_PORT
 
 # Retain installed node modules between runs. Production always installs them fresh anyways (npm ci).
 # We can't use the deps from a host because windows and linux deps are different
-# VOLUME [ "/home/node/app/node_modules" ]
+VOLUME [ "/home/node/app/node_modules" ]
 
 WORKDIR /app
 

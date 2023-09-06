@@ -40,6 +40,7 @@ services:
     environment:
       ME_CONFIG_MONGODB_SERVER: $CONTACT_MONGODB_AT
       ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+      ME_CONFIG_OPTIONS_EDITORTHEME: "darcula"
     depends_on:
       app-mongodb:
         condition: service_healthy
