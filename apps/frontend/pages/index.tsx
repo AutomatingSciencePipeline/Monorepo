@@ -19,7 +19,7 @@ const HomePage = () => {
 	console.log('userId', userId);
 
 	return (
-		<div className={'w-full h-full'}>
+        <div className={'w-full h-full'}>
 			<Head>
 				<title>Glados</title>
 			</Head>
@@ -65,10 +65,12 @@ const HomePage = () => {
 									</div>
 								</div>
 								<div className='hidden md:flex'>
-									<Link href={'/signin'}>
-										<a className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
+									<Link
+                                        href={'/signin'}
+                                        className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
+										
 											Log in
-										</a>
+										
 									</Link>
 								</div>
 							</nav>
@@ -133,7 +135,7 @@ const HomePage = () => {
 				</div>
 			</main>
 		</div>
-	);
+    );
 };
 
 export default HomePage;
