@@ -7,7 +7,7 @@ export DOCKER_INSTALLER_LOCATION="./setup/temp/DockerDesktopInstaller.exe"
 export PYTHON_VERSION="3.8.10"
 export BACKEND_VENV_PATH="./apps/backend/.venv"
 
-export NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.10/nvm-setup.exe"
+export NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.11/nvm-setup.exe"
 export NVM_WINDOWS_INSTALLER_LOCATION="./setup/temp/nvm-setup.exe"
 
 # Should match node version used by the frontend container
