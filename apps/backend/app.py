@@ -43,38 +43,62 @@ firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
-#setting up the app
-MAX_WORKERS = 1
-runner = ProcessPoolExecutor(MAX_WORKERS)
+# setting up the server
+MAX_WORKERS = 1 # The max number of processes
+runner = ProcessPoolExecutor(MAX_WORKERS) # Runs code in parallel using MAX_WORKERS number of processes
 
-#setting up the Flask webserver (handles the signal to run an experiment)
+# setting up the Flask webserver
 flaskApp = Flask(__name__)
 CORS(flaskApp)
 
 syslogger.info("GLADOS Backend Started")
 
 
+"""
+The query to run an experiment. 
+
+@body   experiment  The experiment's data. Must include property 'id'
+@return             The status code. 200 for success, 400 for error.
+"""
 @flaskApp.post("/experiment")
 def recv_experiment():
     data = request.get_json()
     if _check_request_integrity(data):
+        # add the "run experiment" task to the queue
         runner.submit(run_batch_and_catch_exceptions, data)
         return Response(status=200)
     syslogger.error("Received malformed experiment request: %s", data)
     return Response(status=400)
 
 
+"""
+The query to get the size of the queue
+
+@return     A json body with the property 'queueSize'
+"""
 @flaskApp.get("/queue")
 def get_queue():
     # There must be a cleaner way to access this queue size...
     return jsonify({"queueSize": len(runner._pending_work_items)})
 
 
+"""
+A function that returns the response when an error is raised.
+
+@param  error   The error encounterd 
+@return         Error code with error details.
+"""
 @flaskApp.errorhandler(CustomFlaskError)
 def glados_custom_flask_error(error):
     return jsonify(error.to_dict()), error.status_code
 
 
+"""
+A function that checks if the body contains an experiment id
+
+@param  data    Any json object
+@return         True if the data contains an experiment and the experiment conains an id. Otherwise returns false
+"""
 def _check_request_integrity(data: typing.Any):
     try:
         return data['experiment']['id'] is not None
@@ -82,6 +106,12 @@ def _check_request_integrity(data: typing.Any):
         return False
 
 
+"""
+Catches any exceptions that occur in run_batch 
+
+@param  data    A json object that contains the property 'experiment' which contains property 'id'
+@return         void
+"""
 def run_batch_and_catch_exceptions(data: IncomingStartRequest):
     try:
         run_batch(data)
@@ -93,6 +123,12 @@ def run_batch_and_catch_exceptions(data: IncomingStartRequest):
         raise err
 
 
+"""
+Runs the experiment
+
+@param  data    A json object that contains the property 'experiment' which contains property 'id'
+@return         void
+"""
 def run_batch(data: IncomingStartRequest):
     syslogger.info('Run_Batch starting with data %s', data)
 
@@ -180,6 +216,13 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run(expId, expRef)
 
 
+"""
+Exits the experiment
+
+@param  expId   The experiment id
+@param  expRef  json object or none
+@return         void
+"""
 def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     explogger.info(f'Exiting experiment {expId}')
     if expRef:
@@ -190,6 +233,15 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     upload_experiment_log(expId)
 
 
+"""
+Determines if the type of the experiment. Accepted types are:
+- Python script
+- python3
+- Java archive data (JAR)
+
+@param  filepath    The path to the experiment's code
+@return             The mime type of the file
+"""
 def determine_experiment_file_type(filepath: str):
     rawfiletype = magic.from_file(filepath)
     filetype = ExperimentType.UNKNOWN
@@ -206,10 +258,14 @@ def determine_experiment_file_type(filepath: str):
     return filetype
 
 
+"""
+Downloads the experiment files
+Call this function when inside the experiment folder!
+
+@param  experiment  json object of the experiment
+@return             The filepath to the downloaded file
+"""
 def download_experiment_files(experiment: ExperimentData):
-    """
-    Call this function when inside the experiment folder!
-    """
     if experiment.has_extra_files() or experiment.postProcess != '' or experiment.keepLogs:
         explogger.info('There will be experiment outputs')
         os.makedirs('ResCsvs')
@@ -228,10 +284,15 @@ def download_experiment_files(experiment: ExperimentData):
     return filepath
 
 
+"""
+Uploads the experiment files
+TODO: replace firebase with MongoDB 
+Call this function when inside the experiment folder!
+
+@param  experiment  json object of the experiment
+@return             void
+"""
 def upload_experiment_results(experiment: ExperimentData):
-    """
-    Call this function when inside the experiment folder!
-    """
     explogger.info('Uploading Experiment Results...')
 
     try:
@@ -273,10 +334,15 @@ def upload_experiment_results(experiment: ExperimentData):
         upload_experiment_zip(experiment, encoded)
 
 
+"""
+Does post processing on the experiment. Post processing includes:
+- Creating a scatterplot if enabled
+Call this function when inside the experiment folder!
+
+@param  experiment  json object of the experiment
+@return             void
+"""
 def post_process_experiment(experiment: ExperimentData):
-    """
-    Call this function when inside the experiment folder!
-    """
     if experiment.postProcess:
         explogger.info("Beginning post processing")
         try:
