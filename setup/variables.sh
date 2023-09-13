@@ -14,4 +14,4 @@ export NVM_WINDOWS_INSTALLER_LOCATION="./setup/temp/nvm-setup.exe"
 # You can find the exact version the container uses by looking at the dockerfile linked on the hub
 # https://hub.docker.com/_/node/
 # or by running `node --version` in the terminal of a running frontend container
-export NODE_VERSION="20.6.0"
+export NODE_VERSION="20.6.1"
