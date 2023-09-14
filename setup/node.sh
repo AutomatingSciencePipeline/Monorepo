@@ -70,7 +70,7 @@ if grep "${NODE_VERSION}" -q <<< "$FOUND_VERSION" ; then
     echo "✔ Node.js version ${NODE_VERSION} was found on path"
 else
     echo "🛑 Somehow the detected node version (${FOUND_VERSION}) is not what was switched to with nvm (${NODE_VERSION}), do you have another node install that is interfering?"
-    echo "You might need to restart the script again if nvm just installed node for you"
+    echo "You might need to re-run the script, or possibly restart your computer, if nvm just installed node for you."
     source setup/exit_await_input.sh 1
 fi
 

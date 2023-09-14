@@ -74,7 +74,7 @@ else
     # Not using a --user install because that requires more stuff on PATH on windows
     # The docs suggesting a user install: https://pipenv.pypa.io/en/latest/install/#pragmatic-installation-of-pipenv
     if ! pip install pipenv; then
-        echo "🛑 Failed to install pipenv? See above error."
+        echo "🛑 Failed to install pipenv? See above error. If there is no error message, try running the 'pip' command in Powershell. You may have to manually clean up more Python files and remove entries from Windows' PATH if you've previously had Python installed."
         source setup/exit_await_input.sh 1
     fi
 fi

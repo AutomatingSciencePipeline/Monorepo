@@ -65,10 +65,10 @@ const HomePage = () => {
 									</div>
 								</div>
 								<div className='hidden md:flex'>
-									<Link href={'/signin'}>
-										<a className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
+									<Link
+										href={'/signin'}
+										className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
 											Log in
-										</a>
 									</Link>
 								</div>
 							</nav>

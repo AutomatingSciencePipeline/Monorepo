@@ -22,8 +22,7 @@ jobs:
             - name: Build
               uses: docker/build-push-action@v4
               with:
-                push: false # Don't push to a container registry (we don't have that set up yet)
-                # Should match our build settings in docker-compose.yml
+                # Should match the "build" subsection's settings in docker-compose.yml
                 context: ./apps/backend
                 file: ./apps/backend/backend.Dockerfile
                 target: production
@@ -38,8 +37,37 @@ jobs:
             - name: Build
               uses: docker/build-push-action@v4
               with:
-                push: false
-                # Should match our build settings in docker-compose.yml
+                # Should match the "build" subsection's settings in docker-compose.yml
                 context: ./apps/frontend
                 file: ./apps/frontend/frontend.Dockerfile
                 target: runner
+
+    # Development containers get the settings from docker-compose.dev.yml layered on top of docker-compose.yml
+    backend-dev:
+      name: Backend Development Container
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+          - name: Set up Docker Buildx
+            uses: docker/setup-buildx-action@v2
+          - name: Build
+            uses: docker/build-push-action@v4
+            with:
+              context: ./apps/backend
+              file: ./apps/backend/backend.Dockerfile
+              target: development
+    frontend-dev:
+      name: Frontend Development Container
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+          - name: Set up Docker Buildx
+            uses: docker/setup-buildx-action@v2
+          - name: Build
+            uses: docker/build-push-action@v4
+            with:
+              context: ./apps/frontend
+              file: ./apps/frontend/frontend.Dockerfile
+              target: development
