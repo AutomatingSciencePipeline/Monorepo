@@ -19,6 +19,7 @@ import { ExperimentListing as ExperimentListing } from '../components/flows/View
 import { ExperimentData } from '../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from './api/queue';
+import { type } from 'os';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -47,6 +48,19 @@ const activityItems = [
 	},
 ];
 
+/*
+* Creates the Navigation bar, the upper section of the frontend webpage. It contains the following:
+* - Logo
+* - Search bar
+* - Current user
+*   - Name
+*   - Image
+*     - Profile link
+*     - Sign out link
+* 
+* @param	props	The properties of the Navbar element
+* @return			The HTML Navbar element
+*/
 const Navbar = (props) => {
 	const { authService } = useAuth();
 	return (
@@ -176,10 +190,21 @@ const Navbar = (props) => {
 	);
 };
 
+/*
+* Creates the main page
+* 
+* @return			The HTML page element
+*/
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
+	/*
+	* useEffect is a React Hook that lets you synchronize a component with an external system. 
+	* useEffect(callback, dependency)
+	* The callback is called when a dependency changes
+	* Hence will run listenToExperiments when userId is populated
+	*/
 	useEffect(() => {
 		if (!userId) {
 			return;
@@ -191,6 +216,7 @@ export default function DashboardPage() {
 	const QUEUE_ERROR_LENGTH = -2;
 	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
 
+	// Queries the backend for the experiment queue length
 	const queryQueueLength = () => {
 		console.log('Querying queue length');
 		setQueueLength(QUEUE_UNKNOWN_LENGTH);
@@ -208,6 +234,7 @@ export default function DashboardPage() {
 	};
 
 	// const QUEUE_RECHECK_INTERVAL_MS = 4000;
+	// Checks experiment's queue length every 4s
 	useEffect(() => {
 		queryQueueLength();
 		// TODO this seems to cause ghost intervals to be left behind, maybe hot reload's fault?
@@ -227,6 +254,7 @@ export default function DashboardPage() {
 	}, []);
 
 
+	// Updates the label when the state of the experiment changes
 	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
