@@ -80,6 +80,13 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					}}>
 					Copy Experiment
 				</button>
+				<button type="button"
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={() => {
+
+					}}>
+					Delete Experiment
+				</button>
 				{/* TODO we don't make use of this display field */}
 				{/* <a
 					href={project.repoHref}
