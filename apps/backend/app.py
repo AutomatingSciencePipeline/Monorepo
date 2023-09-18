@@ -249,11 +249,13 @@ def determine_experiment_file_type(filepath: str):
         filetype = ExperimentType.PYTHON
     elif 'Java archive data (JAR)' in rawfiletype:
         filetype = ExperimentType.JAVA
+    elif 'PE32 executable' in rawfiletype:
+        filetype = ExperimentType.C
 
     explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
 
     if filetype == ExperimentType.UNKNOWN:
-        explogger.error(f'File type "{rawfiletype}" could not be mapped to Python or Java, if it should consider updating the matching statements')
+        explogger.error(f'File type "{rawfiletype}" could not be mapped to Python, Java or C, if it should consider updating the matching statements')
         raise NotImplementedError("Unknown experiment file type")
     return filetype
 
