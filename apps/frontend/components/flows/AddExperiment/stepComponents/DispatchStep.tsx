@@ -8,8 +8,10 @@ import { useState } from 'react';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
-	'text/x-python': ['.py'],
+	'text/x-python': ['.py'], // does nothing atm, from what I can tell
 	'application/java-archive': ['.jar'],
+	'application/x-sharedlib': [], // does nothing atm, from what I can tell
+	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
 export const DispatchStep = ({ id, form, ...props }) => {
@@ -62,7 +64,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 			maxFiles={1}
 			className='flex-1 flex flex-col justify-center m-4 items-center'
 			loading={loading}
-			accept={Object.keys(SUPPORTED_FILE_TYPES)}
+			accept={SUPPORTED_FILE_TYPES}
 		>
 			<Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
 				<Dropzone.Accept>
