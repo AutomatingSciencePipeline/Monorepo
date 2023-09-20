@@ -2,6 +2,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentDocumentId, subscribeToExp } from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
+import { Timestamp } from 'mongodb';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
@@ -19,9 +20,15 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
 	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
+
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
 	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
 	const experimentInProgress = !project['finished'] && project['startedAtEpochMillis'];
+
+	// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
+	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
+	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
+
 
 	useEffect(() => subscribeToExp(project.expId, (data) => {
 		setProject(data as ExperimentData); // TODO this assumes that all values will be present, which is not true
@@ -118,6 +125,15 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					<p>
 						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
 					</p> :
+					null
+				}
+				{experimentInProgress ?
+					expectedFinishTime && (
+						<p className='flex text-gray-500 text-sm space-x-2'>
+							<span> Expected Finish Time: {expectedFinishTime.toString()}</span>
+							{/* expectedFinishTime.toString().substring(4, 23) */}
+						</p>
+					) :
 					null
 				}
 				{experimentInProgress ?
