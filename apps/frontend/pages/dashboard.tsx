@@ -349,10 +349,7 @@ export default function DashboardPage() {
 							onCopyExperiment={(experimentId) => {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
-							} } 
-							onDeleteExperiment={(experimentId) => {
-								console.log('Querying queue length');
-							}}/>
+							} } />
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -413,10 +410,9 @@ export default function DashboardPage() {
 export interface ExperimentListProps {
 	experiments: ExperimentData[];
 	onCopyExperiment: (experiment: ExperimentDocumentId) => void;
-	onDeleteExperiment: (experiment: ExperimentDocumentId) => void;
 }
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) => {
 	const menuHoverActiveCss = (active: boolean) => {
 		return classNames(
 			active ?
@@ -556,8 +552,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							projectinit={project}
 							onCopyExperiment={onCopyExperiment}
 							onDownloadResults={downloadExperimentResults}
-							onDownloadProjectZip={downloadExperimentProjectZip}
-							onDeleteExperiment={onDeleteExperiment} />
+							onDownloadProjectZip={downloadExperimentProjectZip} />
 					</li>
 				);
 			})}
