@@ -9,10 +9,11 @@ export interface ExperimentListingProps {
 	onCopyExperiment: (experimentId: ExperimentDocumentId) => void;
 	onDownloadResults: (experimentId: ExperimentDocumentId) => Promise<void>;
 	onDownloadProjectZip: (experimentId: ExperimentDocumentId) => Promise<void>;
+	onDeleteExperiment: (experimentId: ExperimentDocumentId) => void;
 }
 
 
-export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip }: ExperimentListingProps) => {
+export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
 	const [project, setProject] = useState<ExperimentData>(projectinit);
 
 
@@ -86,6 +87,13 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 						onCopyExperiment(project.expId);
 					}}>
 					Copy Experiment
+				</button>
+				<button type="button"
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={() => {
+						onDeleteExperiment(project.expId);
+					}}>
+					Delete Experiment
 				</button>
 				{/* TODO we don't make use of this display field */}
 				{/* <a
