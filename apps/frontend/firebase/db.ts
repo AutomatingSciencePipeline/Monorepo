@@ -1,5 +1,5 @@
 import { firebaseApp } from './firebaseClient';
-import { getFirestore, updateDoc } from 'firebase/firestore';
+import { getFirestore, updateDoc, deleteDoc } from 'firebase/firestore';
 import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ExperimentData } from './db_types';
@@ -149,4 +149,14 @@ export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExper
 		callback(result);
 	});
 	return unsubscribe;
+};
+
+export const deleteExperiment = async (expId: ExperimentDocumentId) => {
+	const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, expId);
+	console.log(`Deleting ${expId} from firestore...`);
+	deleteDoc(experimentRef).then(() => {
+		console.log(`Deleted experiment ${expId}`);
+		return true;
+	}).catch((error) => console.log('Delete experiment error: ', error));
+	return false;
 };

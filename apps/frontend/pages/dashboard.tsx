@@ -1,5 +1,6 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
+import { deleteExperiment } from '../firebase/db';
 import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
@@ -349,9 +350,9 @@ export default function DashboardPage() {
 							onCopyExperiment={(experimentId) => {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
-							} } 
-							onDeleteExperiment={(experimentId) => {
-								console.log('Querying queue length');
+							} }
+							onDeleteExperiment={async (experimentId) => {
+								deleteExperiment(experimentId);
 							}}/>
 					</div>
 					{/* Activity feed */}
