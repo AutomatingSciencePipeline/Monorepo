@@ -349,10 +349,28 @@ export default function DashboardPage() {
 							onCopyExperiment={(experimentId) => {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
-							} } 
-							onDeleteExperiment={(experimentId) => {
-								console.log('Querying queue length');
-							}}/>
+							} }
+
+							onDeleteExperiment={async (experimentId) => {
+								try {
+									console.log(`Handing experiment ${experimentId} to the backend`);
+									const response = await fetch(`/api/experiments/${experimentId}`, {
+										method: 'DELETE',
+										headers: new Headers({ 'Content-Type': 'application/json' }),
+										credentials: 'same-origin',
+										body: JSON.stringify({ id: experimentId }),
+									});
+									if (response.ok) {
+										console.log('Response from backend received', response);
+									} else {
+										const responseText = await response.text();
+										throw new Error(`Delete failed: ${response.status}: ${responseText}`, );
+									}
+								} catch (error) {
+									console.log('Error Deleting Experiment: ', error);
+								}
+							} }
+						/>
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>

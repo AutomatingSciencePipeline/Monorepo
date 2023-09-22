@@ -48,7 +48,6 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	return newExperimentDocument.id;
 };
 
-
 export const uploadExec = async (id: ExperimentDocumentId, file) => {
 	const fileRef = ref(storage, `experiment${id}`);
 	return await uploadBytes(fileRef, file).then((snapshot) => {

@@ -71,6 +71,31 @@ def recv_experiment():
     return Response(status=400)
 
 
+@flaskApp.delete("/experiment")
+def del_experiment():
+    data = request.get_json()
+    if _check_request_integrity(data):
+        
+        # Obtain most basic experiment info
+        expId = data['experiment']['id']
+        syslogger.debug('received %s', expId)
+        
+        # Retrieve experiment details from firebase
+        try:
+            experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
+            expRef = experiments.document(expId)
+            expRef.delete()
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            explogger.error("Error retrieving experiment data from firebase, aborting")
+            explogger.exception(err)
+            close_experiment_run(expId, None)
+            return Response(status=500)
+        
+        return Response(status=200)
+    syslogger.error("Received malformed experiment request: %s", data)
+    return Response(status=400)
+
+
 """
 The query to get the size of the queue
 
@@ -85,7 +110,7 @@ def get_queue():
 """
 A function that returns the response when an error is raised.
 
-@param  error   The error encounterd 
+@param  error   The error encountered 
 @return         Error code with error details.
 """
 @flaskApp.errorhandler(CustomFlaskError)
@@ -97,7 +122,7 @@ def glados_custom_flask_error(error):
 A function that checks if the body contains an experiment id
 
 @param  data    Any json object
-@return         True if the data contains an experiment and the experiment conains an id. Otherwise returns false
+@return         True if the data contains an experiment and the experiment contains an id. Otherwise returns false
 """
 def _check_request_integrity(data: typing.Any):
     try:
