@@ -32,6 +32,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 5s
+
   app-mongoexpress:
     # Development-only interface to view the mongodb contents
     # Based on https://gist.github.com/adamelliotfields/cd49f056deab05250876286d7657dc4b
