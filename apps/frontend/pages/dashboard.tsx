@@ -1,5 +1,6 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
+import { deleteExperiment } from '../firebase/db';
 import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
@@ -349,7 +350,10 @@ export default function DashboardPage() {
 							onCopyExperiment={(experimentId) => {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
-							} } />
+							} }
+							onDeleteExperiment={async (experimentId) => {
+								deleteExperiment(experimentId);
+							}}/>
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -410,9 +414,10 @@ export default function DashboardPage() {
 export interface ExperimentListProps {
 	experiments: ExperimentData[];
 	onCopyExperiment: (experiment: ExperimentDocumentId) => void;
+	onDeleteExperiment: (experiment: ExperimentDocumentId) => void;
 }
 
-const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
 	const menuHoverActiveCss = (active: boolean) => {
 		return classNames(
 			active ?
@@ -552,7 +557,8 @@ const ExperimentList = ({ experiments, onCopyExperiment }: ExperimentListProps) 
 							projectinit={project}
 							onCopyExperiment={onCopyExperiment}
 							onDownloadResults={downloadExperimentResults}
-							onDownloadProjectZip={downloadExperimentProjectZip} />
+							onDownloadProjectZip={downloadExperimentProjectZip}
+							onDeleteExperiment={onDeleteExperiment} />
 					</li>
 				);
 			})}

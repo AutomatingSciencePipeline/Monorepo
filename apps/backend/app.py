@@ -85,7 +85,7 @@ def get_queue():
 """
 A function that returns the response when an error is raised.
 
-@param  error   The error encounterd 
+@param  error   The error encountered 
 @return         Error code with error details.
 """
 @flaskApp.errorhandler(CustomFlaskError)
@@ -97,7 +97,7 @@ def glados_custom_flask_error(error):
 A function that checks if the body contains an experiment id
 
 @param  data    Any json object
-@return         True if the data contains an experiment and the experiment conains an id. Otherwise returns false
+@return         True if the data contains an experiment and the experiment contains an id. Otherwise returns false
 """
 def _check_request_integrity(data: typing.Any):
     try:
@@ -336,7 +336,7 @@ def upload_experiment_results(experiment: ExperimentData):
 
 """
 Does post processing on the experiment. Post processing includes:
-- Creating a scatterplot if enabled
+- Creating a scatter plot if enabled
 Call this function when inside the experiment folder!
 
 @param  experiment  json object of the experiment
