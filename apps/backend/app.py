@@ -249,7 +249,7 @@ def determine_experiment_file_type(filepath: str):
         filetype = ExperimentType.PYTHON
     elif 'Java archive data (JAR)' in rawfiletype:
         filetype = ExperimentType.JAVA
-    elif 'ELF 64-bit LSB shared object' in rawfiletype:
+    elif 'ELF 64-bit LSB' in rawfiletype:
         filetype = ExperimentType.C
 
     explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
