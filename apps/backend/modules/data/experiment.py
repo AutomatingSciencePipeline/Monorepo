@@ -11,6 +11,7 @@ class ExperimentType(Enum):
     UNKNOWN = "unknown"
     PYTHON = "python"
     JAVA = "java"
+    C = "c"
 
 
 class ExperimentData(BaseModel):

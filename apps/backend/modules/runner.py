@@ -51,6 +51,10 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     elif experiment.experimentType == ExperimentType.JAVA:
         with Popen(['java', '-jar', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
+    elif experiment.experimentType == ExperimentType.C:
+        Popen(['chmod', '+x', experiment.file], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8')
+        with Popen(['./' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+            _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
 
 
 def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
