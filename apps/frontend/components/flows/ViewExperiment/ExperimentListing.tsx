@@ -151,13 +151,13 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toString()}</span>
+					<span>Uploaded at {new Date(project['created']).toString().substring(4, 31)}</span>
 					{/* TODO unused location field? */}
 					{/* <span>{project.location}</span> */}
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toString()}</span>
+						<span>Started at {new Date(project['startedAtEpochMillis']).toString().substring(4, 31)}</span>
 					</p> :
 					null
 				}
