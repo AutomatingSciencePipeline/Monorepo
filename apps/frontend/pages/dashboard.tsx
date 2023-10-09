@@ -425,32 +425,27 @@ const SortingOptions = {
 
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
 	// Initial sorting option
-	const [sortBy, setSortBy] = useState(SortingOptions.NAME);
+	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
+	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
 	// Sorting functions
 	const sortByName = (a, b) => a.name.localeCompare(b.name);
-	const sortByDateModified = (a, b) => a.finishedAtEpochMilliseconds - b.finishedAtEpochMilliseconds;
-	const sortByDateCreated = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
+	const sortByDateModified = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
+	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
 		switch (sortBy) {
 		case SortingOptions.NAME:
-			console.log('sortBy option: sortByName');
-			experiments.sort(sortByName);
-			console.log(experiments.sort(sortByName));
+			setSortedExperiments([...experiments].sort(sortByName));
 			break;
 
 		case SortingOptions.DATE_MODIFIED:
-			console.log('sortBy option: sortByDateModified');
-			experiments.sort(sortByDateModified);
-			console.log(experiments.sort(sortByDateModified));
+			setSortedExperiments([...experiments].sort(sortByDateModified));
 			break;
 
 		case SortingOptions.DATE_CREATED:
-			console.log('sortBy option: sortByDateCreated');
-			experiments.sort(sortByDateCreated);
-			console.log(experiments.sort(sortByDateCreated));
+			setSortedExperiments([...experiments].sort(sortByDateCreated));
 			break;
 
 		default:
@@ -460,7 +455,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
-		console.log(`trying to ${newSortBy}`);
 		setSortBy(newSortBy);
 	};
 
@@ -579,7 +573,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			role='list'
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
-			{experiments?.map((project: ExperimentData) => {
+			{sortedExperiments?.map((project: ExperimentData) => {
 				if (!includeCompleted && project.finished) {
 					return null;
 				}

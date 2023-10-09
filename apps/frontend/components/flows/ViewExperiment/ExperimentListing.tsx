@@ -16,11 +16,10 @@ export interface ExperimentListingProps {
 export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
 	const [project, setProject] = useState<ExperimentData>(projectinit);
 
-
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
+	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100; //TODO: solve error when deleting experiment
 
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
 	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
