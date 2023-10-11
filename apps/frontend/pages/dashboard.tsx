@@ -417,7 +417,47 @@ export interface ExperimentListProps {
 	onDeleteExperiment: (experiment: ExperimentDocumentId) => void;
 }
 
+const SortingOptions = {
+	NAME: 'name',
+	DATE_MODIFIED: 'dateModified',
+	DATE_CREATED: 'dateCreated',
+};
+
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+	// Initial sorting option
+	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
+	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
+
+	// Sorting functions
+	const sortByName = (a, b) => a.name.localeCompare(b.name);
+	const sortByDateModified = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
+	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+
+	// Sort the experiments based on the selected sorting option
+	useEffect(() => {
+		switch (sortBy) {
+		case SortingOptions.NAME:
+			setSortedExperiments([...experiments].sort(sortByName));
+			break;
+
+		case SortingOptions.DATE_MODIFIED:
+			setSortedExperiments([...experiments].sort(sortByDateModified));
+			break;
+
+		case SortingOptions.DATE_CREATED:
+			setSortedExperiments([...experiments].sort(sortByDateCreated));
+			break;
+
+		default:
+			break;
+		}
+	}, [sortBy, experiments]);
+
+	// Handle sorting option change
+	const handleSortChange = (newSortBy) => {
+		setSortBy(newSortBy);
+	};
+
 	const menuHoverActiveCss = (active: boolean) => {
 		return classNames(
 			active ?
@@ -430,7 +470,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const [includeCompleted, setIncludeCompleted] = useState(true);
 	const [includeArchived, setIncludeArchived] = useState(true);
 
-	return <div className='bg-white lg:min-w-0 lg:flex-1'>
+	return (<div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
@@ -439,7 +479,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 						<BarsArrowUpIcon
 							className='mr-3 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
-						TODO Sort
+						Sort
 						<ChevronDownIcon
 							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
@@ -449,8 +489,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							<Menu.Item>
 								{({ active }) => (
 									<a
-										href='#'
+										href="#"
 										className={menuHoverActiveCss(active)}
+										onClick={() => handleSortChange(SortingOptions.NAME)}
 									>
 										Name
 									</a>
@@ -459,8 +500,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							<Menu.Item>
 								{({ active }) => (
 									<a
-										href='#'
+										href="#"
 										className={menuHoverActiveCss(active)}
+										onClick={() => handleSortChange(SortingOptions.DATE_MODIFIED)}
 									>
 										Date modified
 									</a>
@@ -469,8 +511,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							<Menu.Item>
 								{({ active }) => (
 									<a
-										href='#'
+										href="#"
 										className={menuHoverActiveCss(active)}
+										onClick={() => handleSortChange(SortingOptions.DATE_CREATED)}
 									>
 										Date created
 									</a>
@@ -483,8 +526,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 						<FunnelIcon
 							className='mr-3 h-5 w-5 text-gray-400'
-							aria-hidden='true' />
-						Filter
+							aria-hidden='true' />Filter
 						<ChevronDownIcon
 							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
@@ -505,10 +547,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							</Menu.Item>
 							<Menu.Item>
 								{({ active }) => (
-									<a
-										href='#'
-										className={menuHoverActiveCss(active)}
-									>
+									<a href='#'className={menuHoverActiveCss(active)}>
 										<Toggle
 											label={'Include Archived'}
 											initialValue={includeArchived}
@@ -520,10 +559,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							</Menu.Item>
 							<Menu.Item>
 								{({ active }) => (
-									<a
-										href='#'
-										className={menuHoverActiveCss(active)}
-									>
+									<a href='#'className={menuHoverActiveCss(active)}>
 										TODO AnotherOption
 									</a>
 								)}
@@ -537,7 +573,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			role='list'
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
-			{experiments?.map((project: ExperimentData) => {
+			{sortedExperiments?.map((project: ExperimentData) => {
 				if (!includeCompleted && project.finished) {
 					return null;
 				}
@@ -563,6 +599,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 				);
 			})}
 		</ul>
-	</div>;
+	</div>);
 };
 
