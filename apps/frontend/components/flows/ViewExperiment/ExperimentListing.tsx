@@ -163,7 +163,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				}
 				{project['finishedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString()}</span>
+						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString().substring(4, 31)}</span>
 					</p> :
 					null
 				}
