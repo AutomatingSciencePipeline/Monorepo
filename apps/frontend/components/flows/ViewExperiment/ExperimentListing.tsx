@@ -16,11 +16,10 @@ export interface ExperimentListingProps {
 export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
 	const [project, setProject] = useState<ExperimentData>(projectinit);
 
-
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100;
+	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100; //TODO: solve error when deleting experiment
 
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
 	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
@@ -152,19 +151,19 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toString()}</span>
+					<span>Uploaded at {new Date(project['created']).toString().substring(4, 31)}</span>
 					{/* TODO unused location field? */}
 					{/* <span>{project.location}</span> */}
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toString()}</span>
+						<span>Started at {new Date(project['startedAtEpochMillis']).toString().substring(4, 31)}</span>
 					</p> :
 					null
 				}
 				{project['finishedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString()}</span>
+						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString().substring(4, 31)}</span>
 					</p> :
 					null
 				}
