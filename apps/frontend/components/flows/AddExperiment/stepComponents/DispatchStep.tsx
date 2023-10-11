@@ -10,6 +10,7 @@ const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
 	'text/x-python': ['.py'], // does nothing atm, from what I can tell
 	'application/java-archive': ['.jar'],
+	'text/c': ['.c'],
 	'application/x-sharedlib': [], // does nothing atm, from what I can tell
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
@@ -89,7 +90,8 @@ export const DispatchStep = ({ id, form, ...props }) => {
 						Drag-and-drop, or click here to open a file picker.
 					</Text>
 					<Text size="sm" color="dimmed" inline mt={7}>
-						Supported: {[...new Set(Object.values(SUPPORTED_FILE_TYPES).flat())].join(', ')}
+						{/* Supported: {[...new Set(Object.values(SUPPORTED_FILE_TYPES).flat())].join(', ')} */}
+						Supporting .py, .jar and binary executables
 					</Text>
 				</div>
 			</Group>
