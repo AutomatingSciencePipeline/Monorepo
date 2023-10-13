@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import { firebaseApp } from './firebaseClient';
 import { getFirestore, updateDoc, deleteDoc } from 'firebase/firestore';
 import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
@@ -159,4 +160,16 @@ export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 		return true;
 	}).catch((error) => console.log('Delete experiment error: ', error));
 	return false;
+};
+
+export const updateProjectNameInFirebase = async (projectId, updatedName) => {
+	try {
+	  // Reference the project document in Firebase
+	  const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, projectId);
+
+	  // Update the project name
+	  await updateDoc(experimentRef, { name: updatedName });
+	} catch (error) {
+	  console.error('Error updating project name:', error);
+	}
 };

@@ -1,0 +1,48 @@
+/* experiment-listing-styles.css */
+.project-title-input {
+  border-radius: 4px;
+}
+
+.editable-text {
+    display: inline-block;
+    padding: 4px;
+    cursor: pointer;
+  }
+  
+  .icon.edit-icon {
+    font-size: 20px;
+    color: #9AA5B1;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  
+  .save-button {
+    background-color: #88B1FC;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-left: 10px;
+    margin-right: 5px;
+    cursor: pointer;
+  }
+  
+  .cancel-button {
+    background-color: #ccc;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  
+  .save-button:hover,
+  .cancel-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .save-button:focus,
+  .cancel-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+  }
