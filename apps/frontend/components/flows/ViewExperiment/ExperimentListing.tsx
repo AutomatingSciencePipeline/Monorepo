@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp } from '../../../firebase/db';
+import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase } from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
 import { MdEdit } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
@@ -33,8 +33,11 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [isEditing, setIsEditing] = useState(false);
 
 	const handleSave = () => {
-	  // Save the edited project name, e.g., make an API call or update the state.
-	  setIsEditing(false);
+	  // Update the project name in Firebase
+		updateProjectNameInFirebase(project.expId, project.name);
+
+		// Exit the editing mode
+		setIsEditing(false);
 	};
 
 	const handleKeyUp = (e) => {
@@ -206,3 +209,4 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		</div>
 	);
 };
+
