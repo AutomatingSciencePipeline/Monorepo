@@ -231,7 +231,7 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
         syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
     close_experiment_logger()
     upload_experiment_log(expId)
-
+    remove_downloaded_directory(expId)
 
 """
 Determines if the type of the experiment. Accepted types are:
@@ -285,6 +285,22 @@ def download_experiment_files(experiment: ExperimentData):
     explogger.info(f"Downloaded {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     return filepath
 
+
+def remove_downloaded_directory(experimentId: DocumentId):
+    
+    folder_name = experimentId
+    target_directory = "ExperimentFiles"
+    folder_path = f'{target_directory}/{ folder_name}'
+    explogger.info("this is the path " + folder_path)
+    explogger.info("Does the path exist? " + str(os.path.exists(folder_path)))
+    items = os.listdir(target_directory)
+    
+    try:
+        shutil.rmtree(folder_path)
+        explogger.info("The folder directory " + folder_path + " successfully deleted.")
+    except FileNotFoundError as err:
+        explogger.error('Error during plot generation')
+        explogger.exception(err)
 
 """
 Uploads the experiment files
