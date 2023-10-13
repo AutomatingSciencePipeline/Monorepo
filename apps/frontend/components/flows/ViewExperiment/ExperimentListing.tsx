@@ -1,7 +1,9 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentDocumentId, subscribeToExp } from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
+import { MdEdit } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
 
 export interface ExperimentListingProps {
@@ -28,21 +30,65 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
+	const [isEditing, setIsEditing] = useState(false);
+
+	const handleSave = () => {
+	  // Save the edited project name, e.g., make an API call or update the state.
+	  setIsEditing(false);
+	};
+
+	const handleKeyUp = (e) => {
+	  if (e.key === 'Enter') {
+			handleSave();
+	  } else if (e.key === 'Escape') {
+			handleCancel();
+	  }
+	};
+
+	const handleCancel = () => {
+	  // Cancel the editing and revert to the original project name.
+	  setIsEditing(false);
+	};
 
 
 	useEffect(() => subscribeToExp(project.expId, (data) => {
 		setProject(data as ExperimentData); // TODO this assumes that all values will be present, which is not true
-	}), []); // TODO adding project causes render loop
+	}), []);
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>
 				<div className='flex items-center space-x-3'>
-					<span className='block'>
-						<h2 className='text-sm font-medium'>
-							{project.name}{' '}
-						</h2>
+					<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
+						{isEditing ? (
+							<>
+								<input
+									type="text"
+									value={project.name}
+									onChange={(e) => setProject({ ...project, name: e.target.value })}
+									onBlur={handleSave}
+									onKeyUp={handleKeyUp}
+								/>
+								<button className="save-button" onClick={handleSave}>Save</button>
+								<button className="cancel-button" onClick={handleCancel}>Cancel</button>
+							</>
+						) : (
+							<>
+								<span
+									onClick={() => setIsEditing(true)}
+									className="editable-text"
+								>
+									{project.name}
+								</span>
+								<MdEdit
+									className="icon edit-icon"
+									onClick={() => setIsEditing(true)}
+								/>
+							</>
+						)}
 					</span>
+
+
 				</div>
 				{project['finished'] == true ?
 					<button type= "button"
@@ -94,15 +140,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					}}>
 					Delete Experiment
 				</button>
-				{/* TODO we don't make use of this display field */}
-				{/* <a
-					href={project.repoHref}
-					className='relative group flex items-center space-x-2.5'
-				>
-					<span className='text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate'>
-						{project.description}
-					</span>
-				</a> */}
 			</div>
 			<div className='sm:hidden'>
 				<ChevronRightIcon
@@ -152,8 +189,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
 					<span>Uploaded at {new Date(project['created']).toString().substring(4, 31)}</span>
-					{/* TODO unused location field? */}
-					{/* <span>{project.location}</span> */}
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
