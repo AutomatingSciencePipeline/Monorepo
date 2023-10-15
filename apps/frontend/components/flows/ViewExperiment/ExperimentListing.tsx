@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase } from '../../../firebase/db';
+import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName} from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
 import { MdEdit } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
@@ -21,7 +21,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100; //TODO: solve error when deleting experiment
+	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100; // TODO: solve error when deleting experiment
 
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
 	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
@@ -30,15 +30,51 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
+
+	const [editedProjectName, setEditedProjectName] = useState(projectinit.name); // New state for edited project name
 	const [isEditing, setIsEditing] = useState(false);
+	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
+	const [originalProjectName, setOriginalProjectName] = useState(projectinit.name); // State to store the original project name
+
+	const handleEdit = () => {
+		// Enable editing and set the edited project name to the current project name
+		setIsEditing(true);
+		setEditedProjectName(project.name);
+		// setOriginalProjectName(project.name); // Store the original project name
+	};
 
 	const handleSave = () => {
-	  // Update the project name in Firebase
-		updateProjectNameInFirebase(project.expId, project.name);
+		// Update the project name in Firebase with the edited name
+		updateProjectNameInFirebase(project.expId, editedProjectName);
+
+		// Update the original project name to match the edited name
+		// setOriginalProjectName(editedProjectName);
 
 		// Exit the editing mode
 		setIsEditing(false);
 	};
+
+	const handleCancel = () => {
+		// TODO: Currently if we click the cancel button, editingCanceled variable does not change 
+		// Cancel the editing and revert to the original project name
+		setEditedProjectName(originalProjectName); // Revert to the original name
+		setEditingCanceled(true);
+		console.log(`editingCanceled: ${editingCanceled}`);
+		setIsEditing(false);
+	};
+
+	useEffect(() => {
+		console.log(`editingCanceled: ${editingCanceled}`);
+		if (editingCanceled) {
+		  setEditedProjectName(originalProjectName); // Revert to the original name
+		  setEditingCanceled(true);
+		} else {
+		  subscribeToExp(project.expId, (data) => {
+			setProject(data as ExperimentData);
+		  });
+		}
+	  }, [editingCanceled, originalProjectName, project.expId]);
+
 
 	const handleKeyUp = (e) => {
 	  if (e.key === 'Enter') {
@@ -48,15 +84,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	  }
 	};
 
-	const handleCancel = () => {
-	  // Cancel the editing and revert to the original project name.
-	  setIsEditing(false);
-	};
-
-
-	useEffect(() => subscribeToExp(project.expId, (data) => {
-		setProject(data as ExperimentData); // TODO this assumes that all values will be present, which is not true
-	}), []);
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -67,8 +94,8 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							<>
 								<input
 									type="text"
-									value={project.name}
-									onChange={(e) => setProject({ ...project, name: e.target.value })}
+									value={editedProjectName}
+									onChange={(e) => setEditedProjectName(e.target.value)}
 									onBlur={handleSave}
 									onKeyUp={handleKeyUp}
 								/>
@@ -78,14 +105,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 						) : (
 							<>
 								<span
-									onClick={() => setIsEditing(true)}
 									className="editable-text"
+									onClick={handleEdit}
 								>
 									{project.name}
 								</span>
 								<MdEdit
 									className="icon edit-icon"
-									onClick={() => setIsEditing(true)}
+									onClick={handleEdit}
 								/>
 							</>
 						)}
