@@ -70,7 +70,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		  setEditingCanceled(true);
 		} else {
 		  subscribeToExp(project.expId, (data) => {
-			setProject(data as ExperimentData);
+				setProject(data as ExperimentData);
 		  });
 		}
 	  }, [editingCanceled, originalProjectName, project.expId]);

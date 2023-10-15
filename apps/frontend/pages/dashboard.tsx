@@ -522,7 +522,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 						</div>
 					</Menu.Items>
 				</Menu>
-				<Menu as='div' className='relative'>
+				<Menu as='div' className='relative' style={{ marginLeft: '0.5rem' }}>
 					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 						<FunnelIcon
 							className='mr-3 h-5 w-5 text-gray-400'
