@@ -8,9 +8,11 @@ import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
 	RectangleStackIcon,
-	BarsArrowUpIcon,
+	SwatchIcon,
 	QueueListIcon,
 	FunnelIcon,
+	ArrowUpIcon,
+	ArrowDownIcon,
 } from '@heroicons/react/24/solid';
 import { Logo } from '../components/Logo';
 import classNames from 'classnames';
@@ -419,8 +421,11 @@ export interface ExperimentListProps {
 
 const SortingOptions = {
 	NAME: 'name',
+	NAME_REVERSE: 'nameReverse',
 	DATE_MODIFIED: 'dateModified',
+	DATE_MODIFIED_REVERSE: 'dateModifiedReverse',
 	DATE_CREATED: 'dateCreated',
+	DATE_CREATED_REVERSE: 'dateModifiedReverse',
 };
 
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
@@ -428,10 +433,17 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
+	// State of arrow icon
+	const [sortAsc, setSortAsc] = useState(true);
+	const [sortArrowUp, setSortArrowUp] = useState(true);
+
 	// Sorting functions
 	const sortByName = (a, b) => a.name.localeCompare(b.name);
+	const sortByNameReverse = (a, b) => b.name.localeCompare(a.name);
 	const sortByDateModified = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+	const sortByDateModifiedReverse = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
+	const sortByDateCreated = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
+	const sortByDateCreatedReverse = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
@@ -440,18 +452,65 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			setSortedExperiments([...experiments].sort(sortByName));
 			break;
 
+		case SortingOptions.NAME_REVERSE:
+			setSortedExperiments([...experiments].sort(sortByNameReverse));
+			break;
+
 		case SortingOptions.DATE_MODIFIED:
 			setSortedExperiments([...experiments].sort(sortByDateModified));
+			break;
+
+		case SortingOptions.DATE_MODIFIED_REVERSE:
+			setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
 			break;
 
 		case SortingOptions.DATE_CREATED:
 			setSortedExperiments([...experiments].sort(sortByDateCreated));
 			break;
 
+		case SortingOptions.DATE_CREATED_REVERSE:
+			setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+			break;
+
 		default:
 			break;
 		}
 	}, [sortBy, experiments]);
+
+	// Toggle the arrow icon state when the user clicks the button
+	// Toggle the arrow icon state when the user clicks the button
+	const toggleSortOrder = () => {
+		setSortAsc((prevSortAsc) => !prevSortAsc);
+
+		// Determine the new sorting option based on the current state
+		let newSortBy;
+
+		switch (sortBy) {
+		case SortingOptions.NAME:
+			newSortBy = sortAsc ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
+			break;
+		case SortingOptions.NAME_REVERSE:
+			newSortBy = sortAsc ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
+			break;
+		case SortingOptions.DATE_MODIFIED:
+			newSortBy = sortAsc ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
+			break;
+		case SortingOptions.DATE_MODIFIED_REVERSE:
+			newSortBy = sortAsc ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
+			break;
+		case SortingOptions.DATE_CREATED:
+			newSortBy = sortAsc ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
+			break;
+		case SortingOptions.DATE_CREATED_REVERSE:
+			newSortBy = sortAsc ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
+			break;
+		default:
+			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+			break;
+		}
+
+		handleSortChange(newSortBy);
+	};
 
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
@@ -474,9 +533,22 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
+				<div
+					className="cursor-pointer"
+					style={{padding: '0.5rem'}}
+					onClick={() => {
+						toggleSortOrder();
+						setSortArrowUp((prevSortArrowUp) => !prevSortArrowUp);
+					}}>
+					{sortArrowUp ? (
+						<ArrowUpIcon className="h-5 w-5 text-gray-400" />
+					) : (
+						<ArrowDownIcon className="h-5 w-5 text-gray-400" />
+					)}
+				</div>
 				<Menu as='div' className='relative'>
 					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
-						<BarsArrowUpIcon
+						<SwatchIcon
 							className='mr-3 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
 						Sort
@@ -573,6 +645,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			role='list'
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
+
 			{sortedExperiments?.map((project: ExperimentData) => {
 				if (!includeCompleted && project.finished) {
 					return null;
