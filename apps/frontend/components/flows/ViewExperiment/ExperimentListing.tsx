@@ -55,7 +55,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 	const handleCancel = () => {
-		// TODO: Currently if we click the cancel button, editingCanceled variable does not change 
+		// TODO: Currently if we click the cancel button, editingCanceled variable does not change
 		// Cancel the editing and revert to the original project name
 		setEditedProjectName(originalProjectName); // Revert to the original name
 		setEditingCanceled(true);
@@ -204,7 +204,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				{experimentInProgress ?
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span> Expected Finish Time: {expectedFinishTime.toString()}</span>
+							<span> Expected Finish Time: {expectedFinishTime.toString().substring(4, 31)}</span>
 							{/* expectedFinishTime.toString().substring(4, 23) */}
 						</p>
 					) :
