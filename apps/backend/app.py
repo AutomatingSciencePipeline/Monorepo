@@ -1,9 +1,11 @@
+import os
 import kubernetes
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from modules.logging.gladosLogging import SYSTEM_LOGGER, configure_root_logger
+from modules.exceptions import CustomFlaskError
 import typing
 
 
@@ -53,3 +55,18 @@ def _check_request_integrity(data: typing.Any):
         return data['experiment']['id'] is not None
     except KeyError:
         return False
+    
+"""
+A function that returns the response when an error is raised.
+
+@param  error   The error encountered 
+@return         Error code with error details.
+"""
+@flaskApp.errorhandler(CustomFlaskError)
+def glados_custom_flask_error(error):
+    return jsonify(error.to_dict()), error.status_code
+
+if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
+    os.chdir('/app/GLADOS_HOME')
+    flaskApp.run()

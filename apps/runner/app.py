@@ -1,13 +1,10 @@
 import os
 import shutil
 import logging
-from concurrent.futures import ProcessPoolExecutor
 import sys
 import json
 import time
 import typing
-from flask import Flask, Response, jsonify, request
-from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
@@ -19,7 +16,7 @@ from modules.data.parameters import Parameter, parseRawHyperparameterData
 from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
 from modules.runner import conduct_experiment
-from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
+from modules.exceptions import DatabaseConnectionError, GladosInternalError, ExperimentAbort
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 from modules.utils import _get_env
@@ -43,15 +40,7 @@ firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
 firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
-# setting up the server
-MAX_WORKERS = 1 # The max number of processes
-runner = ProcessPoolExecutor(MAX_WORKERS) # Runs code in parallel using MAX_WORKERS number of processes
-
-# setting up the Flask webserver
-flaskApp = Flask(__name__)
-CORS(flaskApp)
-
-syslogger.info("GLADOS Backend Started")
+syslogger.info("GLADOS Runner Started")
 
 
 """
@@ -60,50 +49,20 @@ The query to run an experiment.
 @body   experiment  The experiment's data. Must include property 'id'
 @return             The status code. 200 for success, 400 for error.
 """
-@flaskApp.post("/experiment")
+# @flaskApp.post("/experiment")
 def recv_experiment():
-    data = request.get_json()
-    if _check_request_integrity(data):
-        # add the "run experiment" task to the queue
-        runner.submit(run_batch_and_catch_exceptions, data)
-        return Response(status=200)
-    syslogger.error("Received malformed experiment request: %s", data)
-    return Response(status=400)
-
-
-"""
-The query to get the size of the queue
-
-@return     A json body with the property 'queueSize'
-"""
-@flaskApp.get("/queue")
-def get_queue():
-    # There must be a cleaner way to access this queue size...
-    return jsonify({"queueSize": len(runner._pending_work_items)})
-
-
-"""
-A function that returns the response when an error is raised.
-
-@param  error   The error encountered 
-@return         Error code with error details.
-"""
-@flaskApp.errorhandler(CustomFlaskError)
-def glados_custom_flask_error(error):
-    return jsonify(error.to_dict()), error.status_code
-
-
-"""
-A function that checks if the body contains an experiment id
-
-@param  data    Any json object
-@return         True if the data contains an experiment and the experiment contains an id. Otherwise returns false
-"""
-def _check_request_integrity(data: typing.Any):
-    try:
-        return data['experiment']['id'] is not None
-    except KeyError:
-        return False
+    # LEGACY METHOD
+    # data = request.get_json()
+    # if _check_request_integrity(data):
+    #     # add the "run experiment" task to the queue
+    #     runner.submit(run_batch_and_catch_exceptions, data)
+    #     return Response(status=200)
+    # syslogger.error("Received malformed experiment request: %s", data)
+    # return Response(status=400)
+    
+    # TODO: change method so it is not an endpoint
+    # - Figure out how to take in inputs as a Job before implementing this method
+    syslogger.debug("TODO: implement")
 
 
 """
@@ -356,9 +315,3 @@ def post_process_experiment(experiment: ExperimentData):
         except (KeyError, ValueError) as err:
             explogger.error('Error during plot generation')
             explogger.exception(err)
-
-
-if __name__ == '__main__':
-    logging.getLogger().setLevel(logging.INFO)
-    os.chdir('/app/GLADOS_HOME')
-    flaskApp.run()
