@@ -6,8 +6,15 @@ name = "pypi"
 [packages]
 flask = "==2.0.2" # Was specifically versioned by the last team. TODO see if we can update it.
 flask-cors = "==3.0.10" # Was specifically versioned by the last team. TODO see if we can update it.
+kubernetes = "==28.1.0" # Was specifically versioned by the last team. TODO see if we can update it.
 
 [dev-packages]
+# libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)
+python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
+yapf = "*"
+pylint = "*"
+pytest = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.8"

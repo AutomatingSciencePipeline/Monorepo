@@ -1,6 +1,7 @@
 import os
 import kubernetes
 import logging
+import sys
 from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
@@ -8,6 +9,11 @@ from modules.logging.gladosLogging import SYSTEM_LOGGER, configure_root_logger
 from modules.exceptions import CustomFlaskError
 import typing
 
+try:
+    import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
+except ImportError:
+    logging.error("Failed to import the 'magic' package, you're probably missing a system level dependency")
+    sys.exit(1)
 
 # New backend just spawns jobs, has the /experiment endpoint
 # TODO: do this using either subprocess + kubectl or python kubernetes
