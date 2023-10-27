@@ -79,7 +79,7 @@ else
     fi
 fi
 
-# Copy in the .env file
+# Copy in the .env file to backend
 echo "▶ Copying/updating .env file from repo root to the Backend directory"
 if ! test -e ".env"; then
     echo "🛑 You don't seem to have a .env file in the repo root - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
@@ -87,6 +87,17 @@ if ! test -e ".env"; then
 fi
 if ! cp -f .env ./apps/backend/.env; then
     echo "🛑 Failed to copy .env file from repo root to backend?"
+    source setup/exit_await_input.sh 1
+fi
+
+# Copy in the .env file to runner
+echo "▶ Copying/updating .env file from repo root to the Runner directory"
+if ! test -e ".env"; then
+    echo "🛑 You don't seem to have a .env file in the repo root - follow the directions here to get one: https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide#get-the-env-files"
+    source setup/exit_await_input.sh 1
+fi
+if ! cp -f .env ./apps/runner/.env; then
+    echo "🛑 Failed to copy .env file from repo root to runner?"
     source setup/exit_await_input.sh 1
 fi
 
@@ -99,6 +110,21 @@ export PIPENV_VENV_IN_PROJECT=1
 # Install python package dependencies (pipenv will also create the venv if it doesn't exist yet)
 if ! cd apps/backend; then
     echo "🛑 Failed to change dir to backend directory?"
+    source setup/exit_await_input.sh 1
+fi
+
+# --dev flag means it grabs dev dependencies too
+# https://pipenv-fork.readthedocs.io/en/latest/basics.html#pipenv-install
+if ! pipenv install --dev; then
+    echo "🛑 Failed to install or update backend dependencies, check above error for more details"
+    source setup/exit_await_input.sh 1
+fi
+
+cd ../..
+
+# Install python package dependencies (pipenv will also create the venv if it doesn't exist yet)
+if ! cd apps/runner; then
+    echo "🛑 Failed to change dir to runner directory?"
     source setup/exit_await_input.sh 1
 fi
 
