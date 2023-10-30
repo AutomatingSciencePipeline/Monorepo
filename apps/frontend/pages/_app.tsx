@@ -20,3 +20,4 @@ function GladosApp({ Component, pageProps, router }) {
 }
 
 export default GladosApp;
+

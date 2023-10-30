@@ -31,7 +31,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
 
-	const [editedProjectName, setEditedProjectName] = useState(projectinit.name); // New state for edited project name
+	const [projectName, setProjectName] = useState(projectinit.name); // New state for edited project name
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
 	const [originalProjectName, setOriginalProjectName] = useState(projectinit.name); // State to store the original project name
@@ -41,16 +41,18 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
-		setEditedProjectName(project.name);
+		setProjectName(project.name);
 		// setOriginalProjectName(project.name); // Store the original project name
 	};
 
-	const handleSave = () => {
+	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		updateProjectNameInFirebase(project.expId, editedProjectName);
+		console.log(`in handle save new project name: ${newProjectName}`);
+		console.log(`in handle save old project name: ${projectName}`);
+		updateProjectNameInFirebase(project.expId, projectName);
 
 		// Update the original project name to match the edited name
-		// setOriginalProjectName(editedProjectName);
+		// setOriginalProjectName(projectName);
 
 		// Exit the editing mode
 		setIsEditing(false);
@@ -59,28 +61,28 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const handleCancel = () => {
 		// TODO: Currently if we click the cancel button, editingCanceled variable does not change
 		// Cancel the editing and revert to the original project name
-		setEditedProjectName(originalProjectName); // Revert to the original name
+		setProjectName(originalProjectName); // Revert to the original name
 		setEditingCanceled(true);
 		console.log(`editingCanceled: ${editingCanceled}`);
 		setIsEditing(false);
 	};
 
-	useEffect(() => {
-		console.log(`editingCanceled: ${editingCanceled}`);
-		if (editingCanceled) {
-			setEditedProjectName(originalProjectName); // Revert to the original name
-			setEditingCanceled(true);
-		} else {
-			subscribeToExp(project.expId, (data) => {
-				setProject(data as ExperimentData);
-			});
-		}
-	}, [editingCanceled, originalProjectName, project.expId]);
+	// useEffect(() => {
+	// 	console.log(`editingCanceled: ${editingCanceled}`);
+	// 	if (editingCanceled) {
+	// 		setProjectName(originalProjectName); // Revert to the original name
+	// 		setEditingCanceled(true);
+	// 	} else {
+	// 		subscribeToExp(project.expId, (data) => {
+	// 			setProject(data as ExperimentData);
+	// 		});
+	// 	}
+	// }, [editingCanceled, originalProjectName, project.expId]);
 
 
 	const handleKeyUp = (e) => {
 		if (e.key === 'Enter') {
-			handleSave();
+			handleSave(e.target.value);
 		} else if (e.key === 'Escape') {
 			handleCancel();
 		}
@@ -97,6 +99,17 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 
+	const handleProjectName = (projectName) => {
+		if (editingCanceled) {
+			setProjectName(originalProjectName); // Revert to the original name
+			setEditingCanceled(true);
+		} else {
+			subscribeToExp(project.expId, (data) => {
+				setProject(data as ExperimentData);
+			});
+		}
+	};
+
 	return (
 		<div className='flex items-center justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>
@@ -106,9 +119,9 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							<>
 								<input
 									type="text"
-									value={editedProjectName}
-									onChange={(e) => setEditedProjectName(e.target.value)}
-									onBlur={handleSave}
+									value={projectName}
+									onChange={(e) => setProjectName(e.target.value)}
+									onBlur={handleCancel}
 									onKeyUp={handleKeyUp}
 								/>
 								<button className="save-button" onClick={handleSave}>Save</button>
@@ -277,7 +290,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				{experimentInProgress ?
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span> Expected Finish Time: {expectedFinishTime.toString().substring(4, 31)}</span>
+							<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
 							{/* expectedFinishTime.toString().substring(4, 23) */}
 						</p>
 					) :
@@ -291,17 +304,17 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toString().substring(4, 31)}</span>
+					<span>Uploaded at {new Date(project['created']).toLocaleString()}</span>
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toString().substring(4, 31)}</span>
+						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
 				{project['finishedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString().substring(4, 31)}</span>
+						<span>Finished at {new Date(project['finishedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
