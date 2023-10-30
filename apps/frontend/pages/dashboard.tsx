@@ -425,7 +425,7 @@ const SortingOptions = {
 	DATE_MODIFIED: 'dateModified',
 	DATE_MODIFIED_REVERSE: 'dateModifiedReverse',
 	DATE_CREATED: 'dateCreated',
-	DATE_CREATED_REVERSE: 'dateModifiedReverse',
+	DATE_CREATED_REVERSE: 'dateCreatedReverse',
 };
 
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
@@ -434,16 +434,17 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
 	// State of arrow icon
-	const [sortAsc, setSortAsc] = useState(true);
 	const [sortArrowUp, setSortArrowUp] = useState(true);
 
+	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
+
 	// Sorting functions
-	const sortByName = (a, b) => a.name.localeCompare(b.name);
-	const sortByNameReverse = (a, b) => b.name.localeCompare(a.name);
-	const sortByDateModified = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	const sortByDateModifiedReverse = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
-	const sortByDateCreated = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
-	const sortByDateCreatedReverse = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+	const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
+	const sortByName = (a, b) => b.name.localeCompare(a.name);
+	const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
+	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
+	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
+	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
@@ -478,31 +479,64 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	}, [sortBy, experiments]);
 
 	// Toggle the arrow icon state when the user clicks the button
-	// Toggle the arrow icon state when the user clicks the button
-	const toggleSortOrder = () => {
-		setSortAsc((prevSortAsc) => !prevSortAsc);
+	const toggleSortOrder = (sortBy) => {
+		// Determine the new sorting option based on the current state
+		let newSortBy;
 
+		console.log('in toggle order: ', { sortBy });
+
+		switch (sortBy) {
+		case SortingOptions.NAME:
+			newSortBy = SortingOptions.NAME_REVERSE;
+			break;
+		case SortingOptions.NAME_REVERSE:
+			newSortBy = SortingOptions.NAME;
+			break;
+		case SortingOptions.DATE_MODIFIED:
+			newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
+			break;
+		case SortingOptions.DATE_MODIFIED_REVERSE:
+			newSortBy = SortingOptions.DATE_MODIFIED;
+			break;
+		case SortingOptions.DATE_CREATED:
+			newSortBy = SortingOptions.DATE_CREATED_REVERSE;
+			break;
+		case SortingOptions.DATE_CREATED_REVERSE:
+			newSortBy = SortingOptions.DATE_CREATED;
+			break;
+		default:
+			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+			break;
+		}
+
+		console.log('in toggle order new sort: ', { newSortBy });
+
+		//setSortBy(newSortBy);
+		handleSortChange(newSortBy);
+	};
+
+	const displaySortOrder = (sortBy) => {
 		// Determine the new sorting option based on the current state
 		let newSortBy;
 
 		switch (sortBy) {
 		case SortingOptions.NAME:
-			newSortBy = sortAsc ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
+			newSortBy = sortArrowUp ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
 			break;
 		case SortingOptions.NAME_REVERSE:
-			newSortBy = sortAsc ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
+			newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
 			break;
 		case SortingOptions.DATE_MODIFIED:
-			newSortBy = sortAsc ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
+			newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
 			break;
 		case SortingOptions.DATE_MODIFIED_REVERSE:
-			newSortBy = sortAsc ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
+			newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
 			break;
 		case SortingOptions.DATE_CREATED:
-			newSortBy = sortAsc ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
+			newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
 			break;
 		case SortingOptions.DATE_CREATED_REVERSE:
-			newSortBy = sortAsc ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
+			newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
 			break;
 		default:
 			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
@@ -512,9 +546,33 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		handleSortChange(newSortBy);
 	};
 
+	// Handle displaying sorting option
+
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
 		setSortBy(newSortBy);
+		console.log(`in handleSortChange param: ${newSortBy}`);
+		console.log(`in handleSortChange: ${newSortBy}`);
+		handleDisplaySortingOptions(newSortBy);
+	};
+
+
+	const handleDisplaySortingOptions = (newSortBy) => {
+		let sortingOption;
+
+		console.log(`in display SortChange: ${newSortBy}`);
+
+		if (newSortBy == SortingOptions.NAME || newSortBy == SortingOptions.NAME_REVERSE) {
+			sortingOption = 'Name';
+		} else if (newSortBy == SortingOptions.DATE_CREATED || newSortBy == SortingOptions.DATE_CREATED_REVERSE) {
+			sortingOption = 'Date Created';
+		} else if (newSortBy == SortingOptions.DATE_MODIFIED || newSortBy == SortingOptions.DATE_MODIFIED_REVERSE) {
+			sortingOption = 'Date Modified';
+		}
+
+		console.log(`in display SortChange text: ${sortingOption}`);
+
+		setSelectedSortText(sortingOption);
 	};
 
 	const menuHoverActiveCss = (active: boolean) => {
@@ -535,10 +593,10 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
 				<div
 					className="cursor-pointer"
-					style={{padding: '0.5rem'}}
+					style={{ padding: '0.5rem' }}
 					onClick={() => {
-						toggleSortOrder();
-						setSortArrowUp((prevSortArrowUp) => !prevSortArrowUp);
+						setSortArrowUp((sortArrowUp) => !sortArrowUp);
+						toggleSortOrder(sortBy);
 					}}>
 					{sortArrowUp ? (
 						<ArrowUpIcon className="h-5 w-5 text-gray-400" />
@@ -551,7 +609,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 						<SwatchIcon
 							className='mr-3 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
-						Sort
+						Sort by {selectedSortText}
 						<ChevronDownIcon
 							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
@@ -563,7 +621,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => handleSortChange(SortingOptions.NAME)}
+										onClick={() => displaySortOrder(SortingOptions.NAME)}
 									>
 										Name
 									</a>
@@ -574,7 +632,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => handleSortChange(SortingOptions.DATE_MODIFIED)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_MODIFIED)}
 									>
 										Date modified
 									</a>
@@ -585,7 +643,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => handleSortChange(SortingOptions.DATE_CREATED)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
 									>
 										Date created
 									</a>
