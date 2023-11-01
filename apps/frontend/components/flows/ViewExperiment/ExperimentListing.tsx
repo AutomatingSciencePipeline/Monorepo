@@ -1,9 +1,9 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase } from '../../../firebase/db';
+import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName } from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
-import { MdEdit } from 'react-icons/md';
+import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
 
 export interface ExperimentListingProps {
@@ -21,7 +21,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes']*100)/100; //TODO: solve error when deleting experiment
+	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
 
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
 	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
@@ -30,33 +30,64 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
-	const [isEditing, setIsEditing] = useState(false);
 
-	const handleSave = () => {
-	  // Update the project name in Firebase
-		updateProjectNameInFirebase(project.expId, project.name);
+	const [projectName, setProjectName] = useState(projectinit.name); // New state for edited project name
+	const [isEditing, setIsEditing] = useState(false);
+	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
+	const [originalProjectName, setOriginalProjectName] = useState(projectinit.name); // State to store the original project name
+
+	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+
+	const handleEdit = () => {
+		// Enable editing and set the edited project name to the current project name
+		setIsEditing(true);
+		setProjectName(project.name);
+	};
+
+	const handleSave = (newProjectName) => {
+		// Update the project name in Firebase with the edited name
+		updateProjectNameInFirebase(project.expId, projectName);
 
 		// Exit the editing mode
 		setIsEditing(false);
 	};
 
-	const handleKeyUp = (e) => {
-	  if (e.key === 'Enter') {
-			handleSave();
-	  } else if (e.key === 'Escape') {
-			handleCancel();
-	  }
-	};
-
 	const handleCancel = () => {
-	  // Cancel the editing and revert to the original project name.
-	  setIsEditing(false);
+		// Cancel the editing and revert to the original project name
+		setProjectName(originalProjectName); // Revert to the original name
+		setEditingCanceled(true);
+		setIsEditing(false);
 	};
 
+	useEffect(() => {
+		if (editingCanceled) {
+			setProjectName(originalProjectName); // Revert to the original name
+			setEditingCanceled(true);
+		} else {
+			subscribeToExp(project.expId, (data) => {
+				setProject(data as ExperimentData);
+			});
+		}
+	}, [editingCanceled, originalProjectName, project.expId]);
 
-	useEffect(() => subscribeToExp(project.expId, (data) => {
-		setProject(data as ExperimentData); // TODO this assumes that all values will be present, which is not true
-	}), []);
+
+	const handleKeyUp = (e) => {
+		if (e.key === 'Enter') {
+			handleSave(e.target.value);
+		} else if (e.key === 'Escape') {
+			handleCancel();
+		}
+	};
+
+	// Function to open the delete modal
+	const openDeleteModal = () => {
+		setDeleteModalOpen(true);
+	};
+
+	// Function to close the delete modal
+	const closeDeleteModal = () => {
+		setDeleteModalOpen(false);
+	};
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -67,25 +98,25 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							<>
 								<input
 									type="text"
-									value={project.name}
-									onChange={(e) => setProject({ ...project, name: e.target.value })}
-									onBlur={handleSave}
+									value={projectName}
+									onChange={(e) => setProjectName(e.target.value)}
+									onBlur={handleCancel}
 									onKeyUp={handleKeyUp}
 								/>
-								<button className="save-button" onClick={handleSave}>Save</button>
-								<button className="cancel-button" onClick={handleCancel}>Cancel</button>
+								{/* <button className="save-button" onClick={handleSave}>Save</button>
+								<button className="cancel-button" onClick={handleCancel}>Cancel</button> */}
 							</>
 						) : (
 							<>
 								<span
-									onClick={() => setIsEditing(true)}
 									className="editable-text"
+									onClick={handleEdit}
 								>
 									{project.name}
 								</span>
 								<MdEdit
 									className="icon edit-icon"
-									onClick={() => setIsEditing(true)}
+									onClick={handleEdit}
 								/>
 							</>
 						)}
@@ -94,7 +125,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 				</div>
 				{project['finished'] == true ?
-					<button type= "button"
+					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						disabled={busyDownloadingResults}
 						onClick={async () => {
@@ -107,7 +138,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				{project['finished'] == true ?
-					<button type= "button"
+					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={() => {
 							window.open(`/api/download/logs/${project.expId}`, '_blank');
@@ -117,7 +148,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
-					<button type= "button"
+					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						disabled={busyDownloadingZip}
 						onClick={async () => {
@@ -129,19 +160,80 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					</button> :
 					null
 				}
-				<button type= "button"
+
+				{isDeleteModalOpen && (
+					<div className="fixed z-10 inset-0 overflow-y-auto">
+						<div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+							<div className="fixed inset-0 transition-opacity" aria-hidden="true">
+								<div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+							</div>
+
+							<span
+								className="hidden sm:inline-block sm:align-middle sm:h-screen"
+								aria-hidden="true">
+							&#8203;
+							</span>
+
+							<div
+								className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+								role="dialog"
+								style={{ padding: '1rem' }}
+								aria-modal="true"
+								aria-labelledby="modal-headline"
+							>
+								<div className="bg-white">
+									<div className="relative bg-white">
+										<div className="text-center mt-2">
+											<p className="text-xl font-extrabold text-gray-900">Delete Experiment</p>
+										</div>
+									</div>
+
+									<div className="px-4 py-2">
+										<p className="text-gray-500">Are you sure you want to delete this experiment?</p>
+									</div>
+
+									<div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+										<button
+											onClick={() => {
+												onDeleteExperiment(project.expId);
+												closeDeleteModal(); // Close the modal after deletion
+											}}
+											className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+										>
+											Delete
+										</button>
+										<button
+											onClick={closeDeleteModal}
+											className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+										>
+											Cancel
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+				<button type="button"
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={() => {
 						onCopyExperiment(project.expId);
 					}}>
 					Copy Experiment
 				</button>
-				<button type="button"
+				{/* <button type="button"
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={() => {
 						onDeleteExperiment(project.expId);
 					}}>
 					Delete Experiment
+				</button> */}
+				<button
+					type="button"
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={openDeleteModal}
+				>
+        		Delete Experiment
 				</button>
 			</div>
 			<div className='sm:hidden'>
@@ -177,31 +269,30 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				{experimentInProgress ?
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span> Expected Finish Time: {expectedFinishTime.toString()}</span>
-							{/* expectedFinishTime.toString().substring(4, 23) */}
+							<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
 						</p>
 					) :
 					null
 				}
 				{experimentInProgress ?
 					(project['totalExperimentRuns'] ?
-						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p>:
+						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
 						<p>(Calculating total experiment runs...)</p>
 					) :
 					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toString().substring(4, 31)}</span>
+					<span>Uploaded at {new Date(project['created']).toLocaleString()}</span>
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toString().substring(4, 31)}</span>
+						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
 				{project['finishedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toString().substring(4, 31)}</span>
+						<span>Finished at {new Date(project['finishedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}

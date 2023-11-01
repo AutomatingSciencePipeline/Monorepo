@@ -1,6 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { firebaseApp } from './firebaseClient';
-import { getFirestore, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ExperimentData } from './db_types';
@@ -171,5 +171,28 @@ export const updateProjectNameInFirebase = async (projectId, updatedName) => {
 	  await updateDoc(experimentRef, { name: updatedName });
 	} catch (error) {
 	  console.error('Error updating project name:', error);
+	}
+};
+
+
+// Function to get the project name from Firebase
+export const getCurrentProjectName = async (projectId) => {
+	try {
+	  // Reference the project document in Firebase
+	  const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, projectId);
+
+	  // Get the project document
+	  const docSnapshot = await getDoc(experimentRef);
+
+	  if (docSnapshot.exists()) {
+		// Extract and return the project name
+			return docSnapshot.data().name;
+	  } else {
+			console.error('Project document does not exist.');
+			return null;
+	  }
+	} catch (error) {
+	  console.error('Error getting project name:', error);
+	  return null;
 	}
 };
