@@ -42,13 +42,10 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
 		setProjectName(project.name);
-		// setOriginalProjectName(project.name); // Store the original project name
 	};
 
 	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		console.log(`in handle save new project name: ${newProjectName}`);
-		console.log(`in handle save old project name: ${projectName}`);
 		updateProjectNameInFirebase(project.expId, projectName);
 
 		// Exit the editing mode
@@ -59,12 +56,10 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		// Cancel the editing and revert to the original project name
 		setProjectName(originalProjectName); // Revert to the original name
 		setEditingCanceled(true);
-		console.log(`editingCanceled: ${editingCanceled}`);
 		setIsEditing(false);
 	};
 
 	useEffect(() => {
-		console.log(`editingCanceled in use effect: ${editingCanceled}`);
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
