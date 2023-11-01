@@ -51,15 +51,11 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		console.log(`in handle save old project name: ${projectName}`);
 		updateProjectNameInFirebase(project.expId, projectName);
 
-		// Update the original project name to match the edited name
-		// setOriginalProjectName(projectName);
-
 		// Exit the editing mode
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		// TODO: Currently if we click the cancel button, editingCanceled variable does not change
 		// Cancel the editing and revert to the original project name
 		setProjectName(originalProjectName); // Revert to the original name
 		setEditingCanceled(true);
@@ -96,18 +92,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	// Function to close the delete modal
 	const closeDeleteModal = () => {
 		setDeleteModalOpen(false);
-	};
-
-
-	const handleProjectName = (projectName) => {
-		if (editingCanceled) {
-			setProjectName(originalProjectName); // Revert to the original name
-			setEditingCanceled(true);
-		} else {
-			subscribeToExp(project.expId, (data) => {
-				setProject(data as ExperimentData);
-			});
-		}
 	};
 
 	return (
