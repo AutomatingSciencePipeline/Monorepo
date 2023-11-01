@@ -67,17 +67,17 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		setIsEditing(false);
 	};
 
-	// useEffect(() => {
-	// 	console.log(`editingCanceled: ${editingCanceled}`);
-	// 	if (editingCanceled) {
-	// 		setProjectName(originalProjectName); // Revert to the original name
-	// 		setEditingCanceled(true);
-	// 	} else {
-	// 		subscribeToExp(project.expId, (data) => {
-	// 			setProject(data as ExperimentData);
-	// 		});
-	// 	}
-	// }, [editingCanceled, originalProjectName, project.expId]);
+	useEffect(() => {
+		console.log(`editingCanceled in use effect: ${editingCanceled}`);
+		if (editingCanceled) {
+			setProjectName(originalProjectName); // Revert to the original name
+			setEditingCanceled(true);
+		} else {
+			subscribeToExp(project.expId, (data) => {
+				setProject(data as ExperimentData);
+			});
+		}
+	}, [editingCanceled, originalProjectName, project.expId]);
 
 
 	const handleKeyUp = (e) => {
@@ -124,8 +124,8 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 									onBlur={handleCancel}
 									onKeyUp={handleKeyUp}
 								/>
-								<button className="save-button" onClick={handleSave}>Save</button>
-								<button className="cancel-button" onClick={handleCancel}>Cancel</button>
+								{/* <button className="save-button" onClick={handleSave}>Save</button>
+								<button className="cancel-button" onClick={handleCancel}>Cancel</button> */}
 							</>
 						) : (
 							<>
@@ -291,7 +291,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
 							<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
-							{/* expectedFinishTime.toString().substring(4, 23) */}
 						</p>
 					) :
 					null
