@@ -54,6 +54,10 @@ CORS(flaskApp)
 syslogger.info("GLADOS Backend Started")
 
 
+# TODO: Create a endpoint to receive the github repo
+
+
+
 """
 The query to run an experiment. 
 
@@ -149,7 +153,7 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run(expId, None)
         return
 
-    # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
+    # Parse hyperparameters into their datatype. Required to parse the rest of the experiment data
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
     except (KeyError, ValueError) as err:
