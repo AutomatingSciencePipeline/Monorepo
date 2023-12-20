@@ -4,8 +4,11 @@ import logging
 from concurrent.futures import ProcessPoolExecutor
 import sys
 import json
+import requests
 import time
 import typing
+import subprocess
+import shlex
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import firebase_admin
@@ -54,8 +57,54 @@ CORS(flaskApp)
 syslogger.info("GLADOS Backend Started")
 
 
-# TODO: Create a endpoint to receive the github repo
+# Create a endpoint to receive the github repo
+@flaskApp.post('/check-github-repo', methods=['POST'])
+def check_github_repo():
+    try:
+        data = request.get_json()
+        github_url = data.get('githubUrl')
+        response = requests.head(github_url)
+        print("Returning code: {response.status_code}")
+        return response.status_code == 200
+    
+    except Exception as e:
+        print(f"Error checking cloneability: {e}")
+                
+    return False
 
+   
+    # try:
+    #     data = request.get_json()
+    #     github_url = data.get('githubUrl')
+
+    #     if not github_url:
+    #         return jsonify({'error': 'GitHub URL not provided'}), 400
+        
+    #     # Extract owner and repo name from URL
+    #     owner, repo = github_url.split("/")[-3:]
+
+    #     # Build API request URL
+    #     api_url = f"https://api.github.com/repos/{owner}/{repo}"
+        
+    #     print(jsonify({'owner': owner, 'repo': repo, 'api_url': api_url}))
+
+
+    #     # Set a timeout for the GitHub API request (e.g., 10 seconds)
+    #     timeout = 10
+        
+    #     # Make the request without authentication (public repos only)
+    #     response = requests.get(api_url, timeout=timeout)
+
+    #     if response.status_code == 200:
+    #         repo_data = response.json()
+    #         is_cloneable = not repo_data.get('private', True)
+    #         return jsonify({'isCloneable': is_cloneable})
+
+    #     return jsonify({'error': 'Failed to fetch GitHub repository information'}), response.status_code
+
+    # except Exception as e:
+    #     print(e.__cause__)
+    #     return jsonify({'error': str(e)}), 500
 
 
 """

@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
 import { deleteExperiment } from '../firebase/db';
@@ -22,6 +23,7 @@ import { ExperimentListing as ExperimentListing } from '../components/flows/View
 import { ExperimentData } from '../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from './api/queue';
+import GithubExperimentModal from '../components/flows/AutomateExperiment/GithubExperiment';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -229,7 +231,7 @@ export default function DashboardPage() {
 		// };
 	}, []);
 
-
+	const [isGithubExperimentModalOpen, setIsGithubExperimentModalOpen] = useState(false);
 	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
@@ -294,6 +296,23 @@ export default function DashboardPage() {
 												>
 													{label}
 												</button>
+												<div className='space-y-8 sm:space-y-0 sm:flex sm:justify-between sm:items-center xl:block xl:space-y-8'>
+
+													{/* New "Github Experiment" button */}
+													<button
+														type='button'
+														className='mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full'
+														onClick={() => setIsGithubExperimentModalOpen(true)}
+													>
+														Github Experiment
+													</button>
+
+													{/* Modal component */}
+													<GithubExperimentModal
+														isOpen={isGithubExperimentModalOpen}
+														onClose={() => setIsGithubExperimentModalOpen(false)}
+													/>
+												</div>
 												<button
 													type='button'
 													className='mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full'
