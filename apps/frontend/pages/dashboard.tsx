@@ -24,6 +24,8 @@ import { ExperimentData } from '../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from './api/queue';
 import GithubExperimentModal from '../components/flows/AutomateExperiment/GithubExperiment';
+import DockerImageSelectionModal from '../components/flows/AutomateExperiment/DockerImageSelectionBox';
+import DockerImageSelectionBox from '../components/flows/AutomateExperiment/DockerImageSelectionBox';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -243,6 +245,10 @@ export default function DashboardPage() {
 		}
 	}, [formState]);
 
+	function setIsDockerImageModalOpen(arg0: boolean) {
+		throw new Error('Function not implemented.');
+	}
+
 	return (
 		<>
 			{/* Background color split screen for large screens */}
@@ -286,33 +292,26 @@ export default function DashboardPage() {
 											</div>
 											{/* Action buttons */}
 											<div className='flex flex-col sm:flex-row xl:flex-col'>
+												<div className='space-y-8 sm:space-y-0 sm:flex sm:justify-between sm:items-center xl:block xl:space-y-8 pb-4'>
+													<DockerImageSelectionBox/>
+												</div>
+
+												{/* Modal component -- out of 23-24 scope*/}
+												{/* <GithubExperimentModal
+														isOpen={isGithubExperimentModalOpen}
+														onClose={() => setIsGithubExperimentModalOpen(false)}
+													/> */}
+
 												<button
 													type='button'
 													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 													onClick={() => {
 														setFormState(1);
 													}}
-													// onClick
 												>
-													{label}
+													New Experiment
 												</button>
-												<div className='space-y-8 sm:space-y-0 sm:flex sm:justify-between sm:items-center xl:block xl:space-y-8'>
 
-													{/* New "Github Experiment" button */}
-													<button
-														type='button'
-														className='mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full'
-														onClick={() => setIsGithubExperimentModalOpen(true)}
-													>
-														Github Experiment
-													</button>
-
-													{/* Modal component */}
-													<GithubExperimentModal
-														isOpen={isGithubExperimentModalOpen}
-														onClose={() => setIsGithubExperimentModalOpen(false)}
-													/>
-												</div>
 												<button
 													type='button'
 													className='mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full'
