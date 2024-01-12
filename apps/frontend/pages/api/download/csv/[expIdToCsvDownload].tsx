@@ -1,6 +1,6 @@
 import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS } from '../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
-import { ResultsCsv } from '../../../../lib/mongodb_types';
+import { ResultsCsv } from '../../../../MongoDB/mongodb_types';
 
 // TODO possible to extract a common function/class here? very little varies between this and zip
 

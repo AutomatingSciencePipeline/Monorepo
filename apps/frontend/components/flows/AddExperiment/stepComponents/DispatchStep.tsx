@@ -5,6 +5,7 @@ import { Group, Text } from '@mantine/core';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
+import {submitMongoExperiment, updateMongoDoc} from '../../../../pages/mongoFunc';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -22,6 +23,13 @@ export const DispatchStep = ({ id, form, ...props }) => {
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
+		console.log('Also submitting mongo experiment');
+
+		submitMongoExperiment(form.values, userId as string).then(async (expId) => {
+			console.log(`Uploading file for MongoDB ${expId}:`, files);
+			updateMongoDoc(expId);
+		});
+
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
 			const uploadResponse = await uploadExec(expId, files[0]);
