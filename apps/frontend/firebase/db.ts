@@ -4,7 +4,7 @@ import { getFirestore, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ExperimentData } from './db_types';
-import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
+import { ResultsCsv, ProjectZip } from '../MongoDB/mongodb_types';
 
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 

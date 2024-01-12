@@ -10,6 +10,7 @@ const MONGODB_URI = `mongodb://${CONTACT_MONGODB_AT}:${MONGODB_PORT}`;
 const MONGODB_OPTIONS = {};
 
 export const DB_NAME = 'gladosdb';
+export const COLLECTION_EXPERIMENTS = 'experiments';
 export const COLLECTION_LOGS = 'logs';
 export const COLLECTION_ZIPS = 'zips';
 export const COLLECTION_RESULTS_CSVS = 'results';
