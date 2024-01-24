@@ -17,6 +17,7 @@ matplotlib = "*"
 pymongo = "*"
 pydantic = "*"
 pytest-cov = "*"
+docker = "*"
 
 [dev-packages]
 # libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)

@@ -1,19 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 function DockerImageSelectionBox() {
 	const [images, setImages] = useState([]);
+	const [selectedImage, setSelectedImage] = useState('');
 
 	useEffect(() => {
-		fetch("/get/docker-images")
-			.then((response) => response.json())
-			.then((data) => setImages(data));
+		// Fetch Docker images when the component mounts
+		fetchDockerImages();
 	}, []);
+
+	const fetchDockerImages = async () => {
+		try {
+			const response = await fetch('/api/docker-images');
+			const data = await response.json();
+
+			if (response.ok) {
+				setImages(data.images);
+			} else {
+				console.error('Error fetching Docker images:', data.error);
+			}
+		} catch (error) {
+			console.error('Unexpected error fetching Docker images:', error);
+		}
+	};
+
+	const handleImageChange = (event) => {
+		setSelectedImage(event.target.value);
+	};
+
 
 	return (
 		<div className="docker-images-modal-wrapper">
 			<div className="docker-images-content">
 				<h2 className="pb-2">Select Docker Image</h2>
-				<select>
+				<select value={selectedImage} onChange={handleImageChange}>
+					<option value="">Select an Image</option>
 					{images.map((image, index) => (
 						<option key={index} value={image}>
 							{image}
@@ -42,6 +63,10 @@ function DockerImageSelectionBox() {
 
 export default DockerImageSelectionBox;
 
+
+function then(arg0: (response: any) => any) {
+	throw new Error('Function not implemented.');
+}
 // const DockerImageSelection = () => {
 // 	const [selectedImage, setSelectedImage] = useState("");
 

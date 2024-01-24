@@ -4,18 +4,15 @@ import logging
 from concurrent.futures import ProcessPoolExecutor
 import sys
 import json
-import requests
 import time
 import typing
-import subprocess
-import shlex
+# import docker
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from bson.binary import Binary
-
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
@@ -26,6 +23,7 @@ from modules.exceptions import CustomFlaskError, DatabaseConnectionError, Glados
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 from modules.utils import _get_env
+
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -50,61 +48,40 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 MAX_WORKERS = 1 # The max number of processes
 runner = ProcessPoolExecutor(MAX_WORKERS) # Runs code in parallel using MAX_WORKERS number of processes
 
+
+
 # setting up the Flask webserver
 flaskApp = Flask(__name__)
 CORS(flaskApp)
+FLASK_DEBUG = 1 
+
+syslogger.info("This is the sys version: " + sys.version)
+
 
 syslogger.info("GLADOS Backend Started")
 
+client = docker.from_env()
 
-# Create a endpoint to receive the github repo
-@flaskApp.post('/check-github-repo', methods=['POST'])
-def check_github_repo():
-    try:
-        data = request.get_json()
-        github_url = data.get('githubUrl')
-        response = requests.head(github_url)
-        print("Returning code: {response.status_code}")
-        return response.status_code == 200
-    
-    except Exception as e:
-        print(f"Error checking cloneability: {e}")
-                
-    return False
+@flaskApp.route('/get/docker-images', methods=['GET'])
+def get_docker_images():
+    images = []
+    syslogger.info("inside app.py /get/docker-images")
+    syslogger.info(client.images.list())
+    for image in client.images.list():
+        if 'RepoTags' in image.attrs: # type: ignore
+            repo_tags = image.attrs['RepoTags'] # type: ignore
+            
+            if repo_tags:
+                image_name = repo_tags[0].split(':')[0]
+                images.append(image_name)
 
-   
-    # try:
-    #     data = request.get_json()
-    #     github_url = data.get('githubUrl')
+    return jsonify(images)
 
-    #     if not github_url:
-    #         return jsonify({'error': 'GitHub URL not provided'}), 400
-        
-    #     # Extract owner and repo name from URL
-    #     owner, repo = github_url.split("/")[-3:]
-
-    #     # Build API request URL
-    #     api_url = f"https://api.github.com/repos/{owner}/{repo}"
-        
-    #     print(jsonify({'owner': owner, 'repo': repo, 'api_url': api_url}))
-
-
-    #     # Set a timeout for the GitHub API request (e.g., 10 seconds)
-    #     timeout = 10
-        
-    #     # Make the request without authentication (public repos only)
-    #     response = requests.get(api_url, timeout=timeout)
-
-    #     if response.status_code == 200:
-    #         repo_data = response.json()
-    #         is_cloneable = not repo_data.get('private', True)
-    #         return jsonify({'isCloneable': is_cloneable})
-
-    #     return jsonify({'error': 'Failed to fetch GitHub repository information'}), response.status_code
-
-    # except Exception as e:
-    #     print(e.__cause__)
-    #     return jsonify({'error': str(e)}), 500
+# @flaskApp.route('/get/docker-images', methods=['GET'])
+#  def get_docker_images():
+#     # Your implementation to fetch Docker images
+#     images = ["image1", "image2", "image3"]  # Replace with your logic
+#     return jsonify(images)
 
 
 """
@@ -202,7 +179,7 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run(expId, None)
         return
 
-    # Parse hyperparameters into their datatype. Required to parse the rest of the experiment data
+    # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
     except (KeyError, ValueError) as err:
