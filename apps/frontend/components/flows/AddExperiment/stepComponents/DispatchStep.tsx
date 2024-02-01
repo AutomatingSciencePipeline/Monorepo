@@ -5,7 +5,7 @@ import { Group, Text } from '@mantine/core';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
-import {submitMongoExperiment, updateMongoDoc} from '../../../../pages/mongoFunc';
+import {submitMongoExperiment, updateMongoDoc, saveToBackend} from '../../../../MongoDB/mongoFunc';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -27,11 +27,14 @@ export const DispatchStep = ({ id, form, ...props }) => {
 
 		submitMongoExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for MongoDB ${expId}:`, files);
-			updateMongoDoc(expId);
+			console.log('This is a file: ', files[0]);
+			const uploadResponse = await saveToBackend(expId, files[0]);
+			//updateMongoDoc(expId);
 		});
 
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
+			// const uploadResponse1 = await saveToBackend(expId, files[0]);
 			const uploadResponse = await uploadExec(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);

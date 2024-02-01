@@ -23,7 +23,6 @@ const updateExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 		const found = await db.collection('Experiments').find(
 			{ '_id': expIDtoUpdate as any }
 		);
-		console.log(`ohhhhhhh ${found}`);
 
 		if (found) {
 			console.log(`The ID of the found object is: ${JSON.stringify(found)}`);
@@ -34,12 +33,12 @@ const updateExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 			{ '_id': expIDtoUpdate as any },
 			{
 				$set: { 'experiment.$.expId': expIDtoUpdate },
-			}
-		).then(async (obj) => {
-			console.log(`Updated - ${obj}`);
-		}).catch((err) => {
-			console.log(`Error: ${err}`);
-		});
+			},
+			// function (err, result) {
+			// 	if (err) throw err;
+			// 	console.log(result);
+			//  }
+		);
 
 		res.status(200).json({ message: 'Data updated successfully', result});
 	} catch (error) {

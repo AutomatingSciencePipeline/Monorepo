@@ -42,7 +42,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 		console.log('Response:', responseData);
 		experiment.expId = await responseData;
 	} else {
-		throw new Error('Request failed');
+		throw new Error('Request experiment failed');
 	}
 
 	return experiment.expId;
@@ -64,7 +64,24 @@ export const updateMongoDoc = async ( expId: String) => {
 		const responseData = await updateResult.json();
 		console.log('Response from update:', responseData);
 	} else {
-		throw new Error('Request failed');
+		throw new Error('Request for update failed');
+	}
+};
+
+export const saveToBackend = async (id: String, file) => {
+	const saveUrl = '/api/MongoREST/saveToBackend';
+	const data = new FormData();
+	console.log('File time~~~~~~~~~~~~~~~~~~~~', file);
+	data.append('file', file);
+	const saveResult = await fetch(saveUrl, {
+		method: 'POST',
+		body: data,
+	});
+	if (saveResult.ok) {
+		const saveResultData = await saveResult.json();
+		console.log('Response from saving to backend: ', saveResultData);
+	} else {
+		throw new Error('Request to save failed');
 	}
 };
 

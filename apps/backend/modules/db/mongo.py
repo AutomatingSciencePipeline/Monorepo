@@ -8,7 +8,7 @@ from modules.data.experiment import ExperimentData
 from modules.data.types import DocumentId
 from modules.exceptions import DatabaseConnectionError, GladosInternalError
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, get_filepath_for_experiment_log, get_system_logger
-
+from bson.objectid import ObjectId
 from modules.utils import _get_env
 
 ENV_MONGODB_PORT = "MONGODB_PORT"
@@ -23,7 +23,7 @@ mongoGladosDB = mongoClient["gladosdb"]
 resultsCollection = mongoGladosDB.results
 resultZipCollection = mongoGladosDB.zips
 logCollection = mongoGladosDB.logs
-
+experimentDataCollection = mongoGladosDB.Experiments
 
 def verify_mongo_connection():
     try:
@@ -31,6 +31,12 @@ def verify_mongo_connection():
     except ConnectionFailure as err:
         raise DatabaseConnectionError("MongoDB server not available/unreachable") from err
 
+# def retrieve_experiment_data(expId):
+#     try:
+#         experimentData = experimentData.find_one({"_id": ObjectId(expId)})
+#         return experimentData
+#     except Exception as err:
+#         raise DatabaseConnectionError("Could not retrieve any experimentData from Mongo")
 
 def upload_experiment_aggregated_results(experiment: ExperimentData, resultContent: str):
     experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}

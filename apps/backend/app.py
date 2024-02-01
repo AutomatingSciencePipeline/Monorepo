@@ -6,7 +6,9 @@ import sys
 import json
 import time
 import typing
+import json
 from flask import Flask, Response, jsonify, request
+import base64
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
@@ -70,7 +72,38 @@ def recv_experiment():
     syslogger.error("Received malformed experiment request: %s", data)
     return Response(status=400)
 
+@flaskApp.post("/backendExp")
+def save_to_backend():
+     
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    # file = request
+    file = request.files['file']
+    fileName = request.form['fileName']
+    # print("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", fileName)
+   
+    folder_path = f'{"TemporaryExpFiles"}/{fileName}'
+    print("the folder path is: " + folder_path)
+    with open(folder_path, 'wb') as f:
+        f.write(file.read())
+        f.close()
+    return Response(status=200)
+        # if uploaded_file:
+        #     # Specify the directory where you want to save the uploaded files
+        #     folder_name = uploaded_file.filename
+        #     folder_path = f'{"TemporaryExpFiles"}/{folder_name}'
+        #     # Save the file to the specified directory
+        #     file_path = os.path.join(folder_path, folder_name)
+        #     uploaded_file.save(file_path)
 
+    #         # Process the uploaded file as needed
+    #         # You can add your own logic here
+
+            
+        
+    # except Exception as e:
+    #     print('Error uploading file:', str(e))
+    #     return jsonify({'error': 'Error uploading file'}), 500
 """
 The query to get the size of the queue
 
@@ -142,6 +175,7 @@ def run_batch(data: IncomingStartRequest):
     try:
         experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
         expRef = experiments.document(expId)
+        # print("This is the experimentData we gotta handle" + expRef.get())
         experimentData = expRef.get().to_dict()
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from firebase, aborting")
@@ -231,7 +265,7 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
         syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
     close_experiment_logger()
     upload_experiment_log(expId)
-    remove_downloaded_directory(expId)
+    # remove_downloaded_directory(expId)
 
 """
 Determines if the type of the experiment. Accepted types are:
@@ -290,10 +324,10 @@ def remove_downloaded_directory(experimentId: DocumentId):
     
     folder_name = experimentId
     target_directory = "ExperimentFiles"
-    folder_path = f'{target_directory}/{ folder_name}'
-    explogger.info("this is the path " + folder_path)
-    explogger.info("Does the path exist? " + str(os.path.exists(folder_path)))
-    items = os.listdir(target_directory)
+    folder_path = f'{target_directory}/{folder_name}'
+    # explogger.info("this is the path " + folder_path)
+    # explogger.info("Does the path exist? " + str(os.path.exists(folder_path)))
+    # items = os.listdir(target_directory)
     
     try:
         shutil.rmtree(folder_path)
