@@ -18,7 +18,7 @@ from bson.binary import Binary
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
-from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
+from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, retrieve_experiment_data
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
 from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
@@ -79,8 +79,8 @@ def save_to_backend():
         return jsonify({'error': 'No file provided'}), 400
     # file = request
     file = request.files['file']
-    fileName = request.form['fileName']
-    # print("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", fileName)
+    fileName = request.form['expId']
+    print("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", fileName)
    
     folder_path = f'{"TemporaryExpFiles"}/{fileName}'
     print("the folder path is: " + folder_path)
@@ -171,12 +171,39 @@ def run_batch(data: IncomingStartRequest):
 
     open_experiment_logger(expId)
 
+    # Retrieve experiment details from mongo
+    # try:
+    #     experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
+    #     expRef = experiments.document(expId)
+    #     print("This is the experimentData we gotta handle")
+    #     print( expRef.get())
+    #     experimentData = expRef.get().to_dict()
+    # except Exception as err:  # pylint: disable=broad-exception-caught
+    #     explogger.error("Error retrieving experiment data from firebase, aborting")
+    #     explogger.exception(err)
+    #     close_experiment_run(expId, None)
+    #     return
+
+    # Retrieve experiment details from firebase
+    # try:
+    #     experimentData = retrieve_experiment_data(expId)
+    #     # experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
+    #     # expRef = experiments.document(expId)
+    #     # experimentData = expRef.get().to_dict()
+  
+    # except Exception as err:  # pylint: disable=broad-exception-caught
+    #     explogger.error("Error retrieving experiment data from firebase, aborting")
+    #     explogger.exception(err)
+    #     close_experiment_run(expId, None)
+    #     return
+
     # Retrieve experiment details from firebase
     try:
         experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
         expRef = experiments.document(expId)
-        # print("This is the experimentData we gotta handle" + expRef.get())
         experimentData = expRef.get().to_dict()
+        print("This is the format")
+        print(experimentData)
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from firebase, aborting")
         explogger.exception(err)
@@ -319,7 +346,27 @@ def download_experiment_files(experiment: ExperimentData):
     explogger.info(f"Downloaded {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     return filepath
 
+"""
+In here, Retrieve the file from local directory we already have instead of firebase storage.
 
+"""
+
+def download_Experiment_files_local(experiment: ExperimentData):
+    if experiment.has_extra_files() or experiment.postProcess != '' or experiment.keepLogs:
+        explogger.info('There will be experiment outputs')
+        os.makedirs('ResCsvs')
+    explogger.info(f'Downloading file for {experiment.expId}')
+    # Specify the source file path
+    source_file_path = f'{"TemporaryExpFiles"}/{experiment.expId}'
+    # Specify the destination directory path
+    filepath = f'experiment{experiment.expId}'
+    # Copy the file from the source directory to the destination directory
+    shutil.copy(source_file_path, filepath)
+    
+"""
+Finds a directory and removes it
+"""    
+    
 def remove_downloaded_directory(experimentId: DocumentId):
     
     folder_name = experimentId

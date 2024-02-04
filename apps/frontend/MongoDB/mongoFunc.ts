@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { ExperimentData } from '../firebase/db_types';
 
 export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: String): Promise<String> => {
@@ -68,11 +67,12 @@ export const updateMongoDoc = async ( expId: String) => {
 	}
 };
 
-export const saveToBackend = async (id: String, file) => {
+export const saveToBackend = async (expId, file) => {
 	const saveUrl = '/api/MongoREST/saveToBackend';
 	const data = new FormData();
-	console.log('File time~~~~~~~~~~~~~~~~~~~~', file);
+	const expID = expId["experimentID"];
 	data.append('file', file);
+	data.append('id', expID);
 	const saveResult = await fetch(saveUrl, {
 		method: 'POST',
 		body: data,
@@ -84,34 +84,4 @@ export const saveToBackend = async (id: String, file) => {
 		throw new Error('Request to save failed');
 	}
 };
-
-// export const uploadExecMongo = async (id: string, file) => {
-// 	const refer = `experiment${id}`;
-
-// 	const apiUrl = '/api/MongoREST/SubmitBinaryDataHandler';
-// 	const formDataInput = new FormData();
-// 	formDataInput.append('file', file);
-// 	formDataInput.append('expId', refer);
-
-// 	try {
-// 		const result = await fetch(apiUrl, {
-// 			method: 'POST',
-// 			// Not sure which header to put
-// 			// headers: {
-// 			// 	'Content-Type': 'application/json',
-// 			// },
-// 			body: formDataInput,
-// 		});
-
-// 		if (result.ok) {
-// 			const data = await result.json();
-// 			console.log('File uploaded:', data.fileId);
-// 		} else {
-// 			console.error('File upload failed:', result.statusText);
-// 		}
-// 	} catch (error) {
-// 		console.error('Error uploading file:', error.message);
-// 	}
-// };
-
 

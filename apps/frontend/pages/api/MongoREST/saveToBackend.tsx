@@ -2,7 +2,6 @@ import formidable, {errors as formidableErrors} from 'formidable';
 import { getEnvVar } from '../../../utils/env';
 import { NextResponse, NextRequest } from 'next/server';
 import fs from 'fs';
-import path from 'path';
 
 const BACKEND_PORT = getEnvVar('BACKEND_PORT');
 const CONTACT_BACKEND_AT = getEnvVar('CONTACT_BACKEND_AT');
@@ -23,6 +22,7 @@ const saveToBackend = async (req, res) => {
 		// 	fs.mkdirSync(uploadDir, { recursive: true });
 		// }
 		[fields, files] = await form.parse(req);
+		console.log("This is fields", fields['id'][0]);
 		const oldPath = files.file[0].filepath;
 		// const newPath = path.join(uploadDir, fileName);
 		// console.log("the new path is: ", newPath);
@@ -39,22 +39,11 @@ const saveToBackend = async (req, res) => {
 
 		try {
 			const data = fs.readFileSync(oldPath);
-			// if (fs.existsSync('../TempFiles')) {
-			// 	console.log('Directory exists.');
-			// } else {
-			// 	console.log('Directory does not exist.');
-			// }
-			// try {
-			// 	fs.writeFileSync(`../TempFiles/${files.file[0].originalFilename}`, data);
-			// 	console.log('The file writing was successful');
-			// } catch (error) {
-			// 	console.log('did not work', error);
-			// }
 			const formData = new FormData();
 			const blobData = new Blob([data]);
-			const fileName = files.file[0].originalFilename;
+			const expID = fields['id'][0];
 			formData.append('file', blobData);
-			formData.append('fileName', fileName);
+			formData.append('expId', expID);
 			console.log("This is a formdata ", formData);
 			const url = `http://${CONTACT_BACKEND_AT}:${BACKEND_PORT}/backendExp`;
 			const saveResponse = await fetch(url, {
@@ -84,14 +73,6 @@ const saveToBackend = async (req, res) => {
 		res.end(String(err));
 		return;
 	}
-	//const formData = new FormData();
-	//const fileData: Buffer = fs.readFileSync
-	// formData.append('file', files.file);
-	// try {
-	// 	for (const pair of formData.entries()) {
-	// 		console.log("Here it goes~~~~~~~~~~~");
-	// 		console.log(`${pair[0]}, ${pair[1]}`);
-	// 	}
 };
 
 export default saveToBackend;
