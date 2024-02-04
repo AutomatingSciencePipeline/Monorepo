@@ -38,12 +38,12 @@ def verify_mongo_connection():
     except ConnectionFailure as err:
         raise DatabaseConnectionError("MongoDB server not available/unreachable") from err
 
-# def retrieve_experiment_data(expId):
-#     try:
-#         experimentData = experimentData.find_one({"_id": ObjectId(expId)})
-#         return experimentData
-#     except Exception as err:
-#         raise DatabaseConnectionError("Could not retrieve any experimentData from Mongo")
+def retrieve_experiment_data(expId):
+    try:
+        experimentData = experimentData.find_one({"_id": ObjectId(expId)})
+        return experimentData
+    except Exception as err:
+        raise DatabaseConnectionError("Could not retrieve any experimentData from Mongo")
 
 def upload_experiment_aggregated_results(experiment: ExperimentData, resultContent: str):
     experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}
