@@ -6,7 +6,7 @@ import sys
 import json
 import time
 import typing
-# import docker
+import docker
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import firebase_admin
@@ -48,8 +48,6 @@ firebaseBucket = storage.bucket("gladosbase.appspot.com")
 MAX_WORKERS = 1 # The max number of processes
 runner = ProcessPoolExecutor(MAX_WORKERS) # Runs code in parallel using MAX_WORKERS number of processes
 
-
-
 # setting up the Flask webserver
 flaskApp = Flask(__name__)
 CORS(flaskApp)
@@ -60,28 +58,32 @@ syslogger.info("This is the sys version: " + sys.version)
 
 syslogger.info("GLADOS Backend Started")
 
-client = docker.from_env()
+# When we comment out this function, error comes up
+
+
+# @flaskApp.route('/get/docker-images', methods=['GET'])
+# def get_docker_images():
+#     print("Docker Socket Path:", docker.constants.DEFAULT_DOCKER_API_VERSION)
+
+#     client = docker.from_env()
+#     images = []
+#     syslogger.info("inside app.py /get/docker-images")
+#     syslogger.info(client.images.list())
+#     for image in client.images.list():
+#         if 'RepoTags' in image.attrs: # type: ignore
+#             repo_tags = image.attrs['RepoTags'] # type: ignore
+           
+#             if repo_tags:
+#                 image_name = repo_tags[0].split(':')[0]
+#                 images.append(image_name)
+
+#     return jsonify(images)
 
 @flaskApp.route('/get/docker-images', methods=['GET'])
 def get_docker_images():
-    images = []
-    syslogger.info("inside app.py /get/docker-images")
-    syslogger.info(client.images.list())
-    for image in client.images.list():
-        if 'RepoTags' in image.attrs: # type: ignore
-            repo_tags = image.attrs['RepoTags'] # type: ignore
-            
-            if repo_tags:
-                image_name = repo_tags[0].split(':')[0]
-                images.append(image_name)
-
+    # Your implementation to fetch Docker images
+    images = ["image1", "image2", "image3"]  # Replace with your logic
     return jsonify(images)
-
-# @flaskApp.route('/get/docker-images', methods=['GET'])
-#  def get_docker_images():
-#     # Your implementation to fetch Docker images
-#     images = ["image1", "image2", "image3"]  # Replace with your logic
-#     return jsonify(images)
 
 
 """
