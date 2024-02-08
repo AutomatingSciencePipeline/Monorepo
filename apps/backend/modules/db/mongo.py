@@ -34,8 +34,9 @@ def verify_mongo_connection():
 def update_mongo_data(expId, field_to_update: str, new_value):
     # Update document based on _id and field name
     try:
-        update_query = {"_id": expId}
-        update_operation = {"$set": {field_to_update: new_value}}
+        update_query = {"_id": ObjectId(expId)}
+        to_update = "experiment." + field_to_update
+        update_operation = {"$set": {to_update: new_value}}
         experimentDataCollection.update_one(update_query, update_operation)
     except Exception as err:
         raise DatabaseConnectionError("Could not update any experimentData from Mongo")

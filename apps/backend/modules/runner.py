@@ -21,6 +21,7 @@ explogger = get_experiment_logger()
 
 def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
     try:
+        print("The process being...", process)
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
             os.chdir('ResCsvs')
@@ -46,6 +47,7 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     """
     make sure that the cwd is ExperimentsFiles/{ExperimentId}
     """
+    print("I'm currently at ", os.getcwd())
     if experiment.experimentType == ExperimentType.PYTHON:
         with Popen(['python', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
@@ -59,6 +61,7 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
 
 
 def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
+    print("This is the filenameee", filename)
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
@@ -94,15 +97,17 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
         paramNames = []
         writer = csv.writer(expResults)
         explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
+        
         for trialNum in range(0, experiment.totalExperimentRuns):
             startSeconds = time.time()
             if trialNum == 0:
                 update_mongo_data(expId, "startedAtEpochMillis", int(startSeconds * 1000))
                 # expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
-
+                
             try:
                 configFileName = create_config_from_data(experiment, trialNum)
                 paramNames = get_config_paramNames('configFiles/0.ini')
+            
             except Exception as err:
                 raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
 

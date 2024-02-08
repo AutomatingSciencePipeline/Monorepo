@@ -29,7 +29,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 			console.log(`Uploading file for MongoDB ${expId}:`, files);
 			console.log(`This is the expId: `, expId['experimentID']);
 			console.log('This is a file: ', files[0]);
-			const uploadResponse = await saveToBackend(expId['experimentID'], files[0]);
+			const uploadResponse = await saveToBackend(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId['experimentID']} to the backend`);
 				const response = await fetch(`/api/experiments/${expId['experimentID']}`, {

@@ -14,7 +14,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from bson.binary import Binary
-
+from pathlib import Path
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
@@ -65,7 +65,6 @@ The query to run an experiment.
 @flaskApp.post("/experiment")
 def recv_experiment():
     data = request.get_json()
-    print("The data is: ", data)
     if _check_request_integrity(data):
         # add the "run experiment" task to the queue
         runner.submit(run_batch_and_catch_exceptions, data)
@@ -80,26 +79,12 @@ def save_to_backend():
     # file = request
     file = request.files['file']
     fileName = request.form['expId']
-    # print("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", fileName)
     folder_path = f'{"TemporaryExpFiles"}/{fileName}'
-    print("the folder path is: " + folder_path)
     with open(folder_path, 'wb') as f:
         f.write(file.read())
         f.close()
     return Response(status=200)
-        # if uploaded_file:
-        #     # Specify the directory where you want to save the uploaded files
-        #     folder_name = uploaded_file.filename
-        #     folder_path = f'{"TemporaryExpFiles"}/{folder_name}'
-        #     # Save the file to the specified directory
-        #     file_path = os.path.join(folder_path, folder_name)
-        #     uploaded_file.save(file_path)
 
-    #         # Process the uploaded file as needed
-    #         # You can add your own logic here      
-    # except Exception as e:
-    #     print('Error uploading file:', str(e))
-    #     return jsonify({'error': 'Error uploading file'}), 500
 """
 The query to get the size of the queue
 
@@ -164,7 +149,10 @@ def run_batch(data: IncomingStartRequest):
     # Obtain most basic experiment info
     expId = data['experiment']['id']
     syslogger.debug('received %s', expId)
-
+    update_mongo_data(expId, 'expId', expId)
+    file_ref_update = "experiment"+expId
+    update_mongo_data(expId, 'file', file_ref_update)
+    # exp = retrieve_experiment_data(expId)
     open_experiment_logger(expId)
     
     # Retrieve experiment details from MongoDB
@@ -172,7 +160,7 @@ def run_batch(data: IncomingStartRequest):
         experimentData = retrieve_experiment_data(expId)['experiment']
         print("The experiment hyperparameter is: ", experimentData['hyperparameters'])
     except Exception as err:  # pylint: disable=broad-exception-caught
-        explogger.error("Error retrieving experiment data from firebase, aborting")
+        explogger.error("Error retrieving experiment data from MongoDB, aborting")
         explogger.exception(err)
         close_experiment_run(expId, None)
         return
@@ -193,7 +181,6 @@ def run_batch(data: IncomingStartRequest):
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
-        print("This is so annoying ", hyperparameters)
     except (KeyError, ValueError) as err:
         if isinstance(err, KeyError):
             explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
@@ -205,7 +192,6 @@ def run_batch(data: IncomingStartRequest):
         return
     experimentData['hyperparameters'] = hyperparameters
 
-    print("Is the trial result empty??", experimentData)
     # Parsing into Datatype
     try:
         experiment = ExperimentData(**experimentData)
@@ -216,13 +202,15 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run_mongo(expId)
         # close_experiment_run(expId, expRef)
         return
-
+    print("This is how experiment currently looks like, ", experiment)
     #Downloading Experiment File
     # If the program errors here after you just deleted the ExperimentFiles on your dev machine, restart the docker container, seems to be volume mount weirdness
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    filepath = download_experiment_files(experiment)
-
+    print("The experiment", experiment)
+    filepath = download_Experiment_files_local(experiment)
+    print("This is the current directory: ", os.getcwd())
+    print("The file path I want to work with", filepath)
     try:
         experiment.experimentType = determine_experiment_file_type(filepath)
     except NotImplementedError as err:
@@ -234,7 +222,6 @@ def run_batch(data: IncomingStartRequest):
         return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
-
     totalExperimentRuns = generate_config_files(experiment)
     if totalExperimentRuns == 0:
         os.chdir('../..')
@@ -353,13 +340,29 @@ def download_Experiment_files_local(experiment: ExperimentData):
         explogger.info('There will be experiment outputs')
         os.makedirs('ResCsvs')
     explogger.info(f'Downloading file for {experiment.expId}')
-    # Specify the source file path
-    source_file_path = f'{"TemporaryExpFiles"}/{experiment.expId}'
-    # Specify the destination directory path
-    filepath = f'experiment{experiment.expId}'
-    # Copy the file from the source directory to the destination directory
-    shutil.copy(source_file_path, filepath)
     
+    current_directory = Path.cwd()
+    neighbor_directory_name = "TemporaryExpFiles"
+    
+    neighbor_directory_path = current_directory.parent.parent / neighbor_directory_name
+    file_name = experiment.expId
+    file_path = neighbor_directory_path / file_name
+    
+    destination_file_name = "experiment" + experiment.expId
+    destination_directory = current_directory / destination_file_name
+ 
+    try:
+        shutil.copy(file_path, destination_directory)
+        directory_contents = os.listdir(current_directory)
+
+        # Print out the contents of the directory
+        print("Contents of the directory:")
+        for item in directory_contents:
+            print(item)
+    except Exception as err:
+        explogger.error(f"Error {err} occurred while copying to a path")
+        raise GladosInternalError('Failed to copy experiment files') from err
+    return destination_directory
 """
 Finds a directory and removes it
 """    
