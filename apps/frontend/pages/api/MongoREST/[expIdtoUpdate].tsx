@@ -1,6 +1,4 @@
 import clientPromise, {DB_NAME} from '../../../lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { ExperimentData } from '../../../MongoDB/mongodb_types';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const updateExperimentMongo = async (req: NextApiRequest, res: NextApiResponse ) => {

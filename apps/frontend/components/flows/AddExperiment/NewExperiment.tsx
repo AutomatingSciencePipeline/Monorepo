@@ -7,7 +7,7 @@ import { experimentSchema } from '../../../utils/validators';
 
 import { firebaseApp } from '../../../firebase/firebaseClient';
 import { getDoc, getFirestore, doc } from 'firebase/firestore';
-
+import { findExp } from '../../../MongoDB/mongoFunc';
 import { DispatchStep } from './stepComponents/DispatchStep';
 import { InformationStep } from './stepComponents/InformationStep';
 import { ParamStep } from './stepComponents/ParamStep';
@@ -85,10 +85,10 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	useEffect(() => {
 		if (copyID != null) {
-			const db = getFirestore(firebaseApp);
-			getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
-				if (docSnap.exists()) {
-					const expInfo = docSnap.data();
+			// console.log(`The copyId is: ${copyID}`);
+			findExp(copyID).then((docSnap) => {
+				if (docSnap) {
+					const expInfo = docSnap;
 					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
 					form.setValues({
 						hyperparameters: formList(hyperparameters),
@@ -113,8 +113,39 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 				}
 			});
 		}
-	}, [copyID]); // TODO adding form or setCopyId causes render loop?
+	}, [copyID]);
 
+	// useEffect(() => {
+	// 	if (copyID != null) {
+	// 		const db = getFirestore(firebaseApp);
+	// 		getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
+	// 			if (docSnap.exists()) {
+	// 				const expInfo = docSnap.data();
+	// 				const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+	// 				form.setValues({
+	// 					hyperparameters: formList(hyperparameters),
+	// 					name: expInfo['name'],
+	// 					description: expInfo['description'],
+	// 					trialExtraFile: expInfo['trialExtraFile'],
+	// 					trialResult: expInfo['trialResult'],
+	// 					verbose: expInfo['verbose'],
+	// 					workers: expInfo['workers'],
+	// 					scatter: expInfo['scatter'],
+	// 					dumbTextArea: expInfo['dumbTextArea'],
+	// 					scatterIndVar: expInfo['scatterIndVar'],
+	// 					scatterDepVar: expInfo['scatterDepVar'],
+	// 					timeout: expInfo['timeout'],
+	// 					keepLogs: expInfo['keepLogs'],
+	// 				});
+	// 				setCopyId(null);
+	// 				setStatus(FormStates.Info);
+	// 				console.log('Copied!');
+	// 			} else {
+	// 				console.log('No such document!');
+	// 			}
+	// 		});
+	// 	}
+	// }, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;

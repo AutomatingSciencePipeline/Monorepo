@@ -9,7 +9,7 @@ const BACKEND_PORT = getEnvVar('BACKEND_PORT');
 const startExperimentHandler: NextApiHandler = async (req, res) => {
 	const { expIdToStart } = req.query;
 	const { key } = req.body;
-
+	console.log("The expIdToStart is ", expIdToStart);
 	try {
 		const url = `http://glados-service-backend:${BACKEND_PORT}/experiment`;
 		const backendResponse = await fetch(url, {
