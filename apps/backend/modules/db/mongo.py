@@ -30,10 +30,19 @@ def verify_mongo_connection():
         mongoClient.admin.command('ping')
     except ConnectionFailure as err:
         raise DatabaseConnectionError("MongoDB server not available/unreachable") from err
-
+    
+def update_mongo_data(expId, field_to_update: str, new_value):
+    # Update document based on _id and field name
+    try:
+        update_query = {"_id": expId}
+        update_operation = {"$set": {field_to_update: new_value}}
+        experimentDataCollection.update_one(update_query, update_operation)
+    except Exception as err:
+        raise DatabaseConnectionError("Could not update any experimentData from Mongo")
+    
 def retrieve_experiment_data(expId):
     try:
-        experimentData = experimentData.find_one({"_id": ObjectId(expId)})
+        experimentData = experimentDataCollection.find_one({"_id": ObjectId(expId)})
         return experimentData
     except Exception as err:
         raise DatabaseConnectionError("Could not retrieve any experimentData from Mongo")

@@ -10,7 +10,7 @@ const CONTACT_BACKEND_AT = getEnvVar('CONTACT_BACKEND_AT');
 const startExperimentHandler: NextApiHandler = async (req, res) => {
 	const { expIdToStart } = req.query;
 	const { key } = req.body;
-
+	console.log("The expIdToStart is ", expIdToStart);
 	try {
 		const url = `http://${CONTACT_BACKEND_AT}:${BACKEND_PORT}/experiment`;
 		const backendResponse = await fetch(url, {

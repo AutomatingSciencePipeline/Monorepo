@@ -47,7 +47,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 	return experiment.expId;
 };
 
-export const updateMongoDoc = async ( expId: String) => {
+export const updateMongoDoc = async (expId: String) => {
 	const updateUrl = `/api/MongoREST/${expId}`;
 	const updateResult = await fetch(updateUrl, {
 		method: 'PUT',
@@ -67,10 +67,32 @@ export const updateMongoDoc = async ( expId: String) => {
 	}
 };
 
-export const saveToBackend = async (expId, file) => {
+export const findExp = async (expId: String ) => {
+	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
+	const findResult = await fetch(findUrl, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		// body: JSON.stringify({
+		// 	'content': 'expId',
+		// }),
+	});
+	// console.log(`This is the response from the finding ${await findResult.json()}`);
+	// if (findResult.ok) {
+	// 	const responseData = await findResult.json();
+	// 	console.log('Response from finding:', responseData);
+	// } else {
+	// 	throw new Error('Request for finding failed');
+	// }
+
+	return await findResult;
+};
+
+export const saveToBackend = async (expId, file): Promise<Boolean> => {
 	const saveUrl = '/api/MongoREST/saveToBackend';
 	const data = new FormData();
-	const expID = expId["experimentID"];
+	const expID = expId['experimentID'];
 	data.append('file', file);
 	data.append('id', expID);
 	const saveResult = await fetch(saveUrl, {
@@ -80,8 +102,10 @@ export const saveToBackend = async (expId, file) => {
 	if (saveResult.ok) {
 		const saveResultData = await saveResult.json();
 		console.log('Response from saving to backend: ', saveResultData);
+		return true;
 	} else {
 		throw new Error('Request to save failed');
+		return false;
 	}
 };
 

@@ -18,9 +18,9 @@ from bson.binary import Binary
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
-from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, retrieve_experiment_data
+from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, retrieve_experiment_data, update_mongo_data
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
-from modules.runner import conduct_experiment
+from modules.runner import conduct_experiment, conduct_experiment_mongo
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
@@ -65,6 +65,7 @@ The query to run an experiment.
 @flaskApp.post("/experiment")
 def recv_experiment():
     data = request.get_json()
+    print("The data is: ", data)
     if _check_request_integrity(data):
         # add the "run experiment" task to the queue
         runner.submit(run_batch_and_catch_exceptions, data)
@@ -74,14 +75,12 @@ def recv_experiment():
 
 @flaskApp.post("/backendExp")
 def save_to_backend():
-     
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
     # file = request
     file = request.files['file']
     fileName = request.form['expId']
-    print("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", fileName)
-   
+    # print("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", fileName)
     folder_path = f'{"TemporaryExpFiles"}/{fileName}'
     print("the folder path is: " + folder_path)
     with open(folder_path, 'wb') as f:
@@ -97,10 +96,7 @@ def save_to_backend():
         #     uploaded_file.save(file_path)
 
     #         # Process the uploaded file as needed
-    #         # You can add your own logic here
-
-            
-        
+    #         # You can add your own logic here      
     # except Exception as e:
     #     print('Error uploading file:', str(e))
     #     return jsonify({'error': 'Error uploading file'}), 500
@@ -170,59 +166,46 @@ def run_batch(data: IncomingStartRequest):
     syslogger.debug('received %s', expId)
 
     open_experiment_logger(expId)
-
-    # Retrieve experiment details from mongo
-    # try:
-    #     experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-    #     expRef = experiments.document(expId)
-    #     print("This is the experimentData we gotta handle")
-    #     print( expRef.get())
-    #     experimentData = expRef.get().to_dict()
-    # except Exception as err:  # pylint: disable=broad-exception-caught
-    #     explogger.error("Error retrieving experiment data from firebase, aborting")
-    #     explogger.exception(err)
-    #     close_experiment_run(expId, None)
-    #     return
-
-    # Retrieve experiment details from firebase
-    # try:
-    #     experimentData = retrieve_experiment_data(expId)
-    #     # experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-    #     # expRef = experiments.document(expId)
-    #     # experimentData = expRef.get().to_dict()
-  
-    # except Exception as err:  # pylint: disable=broad-exception-caught
-    #     explogger.error("Error retrieving experiment data from firebase, aborting")
-    #     explogger.exception(err)
-    #     close_experiment_run(expId, None)
-    #     return
-
-    # Retrieve experiment details from firebase
+    
+    # Retrieve experiment details from MongoDB
     try:
-        experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-        expRef = experiments.document(expId)
-        experimentData = expRef.get().to_dict()
-        print("This is the format")
-        print(experimentData)
+        experimentData = retrieve_experiment_data(expId)['experiment']
+        print("The experiment hyperparameter is: ", experimentData['hyperparameters'])
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from firebase, aborting")
         explogger.exception(err)
         close_experiment_run(expId, None)
         return
+    
+    # Retrieve experiment details from firebase
+    # try:
+    #     experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
+    #     expRef = experiments.document(expId)
+    #     experimentData = expRef.get().to_dict()
+    #     print("This is the format")
+    #     print(experimentData)
+    # except Exception as err:  # pylint: disable=broad-exception-caught
+    #     explogger.error("Error retrieving experiment data from firebase, aborting")
+    #     explogger.exception(err)
+    #     close_experiment_run(expId, None)
+    #     return
 
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
+        print("This is so annoying ", hyperparameters)
     except (KeyError, ValueError) as err:
         if isinstance(err, KeyError):
             explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
         else:
             explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
-        close_experiment_run(expId, expRef)
+        close_experiment_run_mongo(expId)
+        # close_experiment_run(expId, expRef)
         return
     experimentData['hyperparameters'] = hyperparameters
 
+    print("Is the trial result empty??", experimentData)
     # Parsing into Datatype
     try:
         experiment = ExperimentData(**experimentData)
@@ -230,7 +213,8 @@ def run_batch(data: IncomingStartRequest):
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)
-        close_experiment_run(expId, expRef)
+        close_experiment_run_mongo(expId)
+        # close_experiment_run(expId, expRef)
         return
 
     #Downloading Experiment File
@@ -245,7 +229,8 @@ def run_batch(data: IncomingStartRequest):
         explogger.error("This is not a supported experiment file type, aborting")
         explogger.exception(err)
         os.chdir('../..')
-        close_experiment_run(expId, expRef)
+        close_experiment_run_mongo(expId)
+        # close_experiment_run(expId, expRef)
         return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
@@ -254,15 +239,18 @@ def run_batch(data: IncomingStartRequest):
     if totalExperimentRuns == 0:
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
-        close_experiment_run(expId, expRef)
+        close_experiment_run_mongo(expId)
+        # close_experiment_run(expId, expRef)
         return
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
-    expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
+    update_mongo_data(expId, "totalExperimentRuns", experiment.totalExperimentRuns)
+    # expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
 
     try:
-        conduct_experiment(experiment, expRef)
+        conduct_experiment_mongo(experiment, expId)
+        # conduct_experiment(experiment, expRef)
         post_process_experiment(experiment)
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
@@ -274,7 +262,8 @@ def run_batch(data: IncomingStartRequest):
     finally:
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
-        close_experiment_run(expId, expRef)
+        close_experiment_run_mongo(expId)
+        # close_experiment_run(expId, expRef)
 
 
 """
@@ -293,6 +282,14 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     close_experiment_logger()
     upload_experiment_log(expId)
     # remove_downloaded_directory(expId)
+
+def close_experiment_run_mongo(expId: DocumentId):
+    explogger.info(f'Exiting experiment {expId}')
+    if expId:
+        update_mongo_data(expId, 'finished', True)
+        update_mongo_data(expId, 'finishedAtEpochMillis', int(time.time() * 1000))
+    else:
+        syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
 
 """
 Determines if the type of the experiment. Accepted types are:
