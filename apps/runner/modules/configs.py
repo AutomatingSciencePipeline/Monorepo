@@ -39,13 +39,13 @@ def generate_config_files(experiment: ExperimentData):
     constants = {}
     parameters = {}
     gather_parameters(experiment.hyperparameters, constants, parameters)
-
+    print("These be the constants", constants)
+    print("Params nowww", parameters)
     configDict = {}
     configIdNumber = 0
     for varyingKey, varyingVar in parameters.items():
         explogger.info(f'Keeping {varyingVar} constant')
         possibleParamVals = []
-
         #Required to do the cross product, since each config is made by
         #doing a cross product of lists of name value pairs the default variable needs to be
         #a single item list so that there is only one possible value for the default variable
@@ -79,6 +79,7 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
     """
     Call this function when inside the experiment folder!
     """
+    print("The experiment to handle", experiment)
     if experiment.configs == {}:
         explogger.info(f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty")
     try:

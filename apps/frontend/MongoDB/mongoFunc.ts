@@ -105,7 +105,6 @@ export const saveToBackend = async (expId, file): Promise<Boolean> => {
 		return true;
 	} else {
 		throw new Error('Request to save failed');
-		return false;
 	}
 };
 
