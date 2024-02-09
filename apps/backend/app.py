@@ -201,15 +201,12 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run_mongo(expId)
         # close_experiment_run(expId, expRef)
         return
-    print("This is how experiment currently looks like, ", experiment)
     #Downloading Experiment File
     # If the program errors here after you just deleted the ExperimentFiles on your dev machine, restart the docker container, seems to be volume mount weirdness
     os.makedirs(f'ExperimentFiles/{expId}')
     os.chdir(f'ExperimentFiles/{expId}')
-    print("The experiment", experiment)
     filepath = download_Experiment_files_local(experiment)
-    print("This is the current directory: ", os.getcwd())
-    print("The file path I want to work with", filepath)
+
     try:
         experiment.experimentType = determine_experiment_file_type(filepath)
     except NotImplementedError as err:
