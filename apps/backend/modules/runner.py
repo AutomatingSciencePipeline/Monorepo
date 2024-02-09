@@ -21,7 +21,6 @@ explogger = get_experiment_logger()
 
 def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
     try:
-        print("The process being...", process)
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
             os.chdir('ResCsvs')
@@ -47,7 +46,6 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     """
     make sure that the cwd is ExperimentsFiles/{ExperimentId}
     """
-    print("I'm currently at ", os.getcwd())
     if experiment.experimentType == ExperimentType.PYTHON:
         with Popen(['python', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
@@ -61,7 +59,6 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
 
 
 def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
-    print("This is the filenameee", filename)
     try:
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)

@@ -158,7 +158,6 @@ def run_batch(data: IncomingStartRequest):
     # Retrieve experiment details from MongoDB
     try:
         experimentData = retrieve_experiment_data(expId)['experiment']
-        print("The experiment hyperparameter is: ", experimentData['hyperparameters'])
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from MongoDB, aborting")
         explogger.exception(err)
