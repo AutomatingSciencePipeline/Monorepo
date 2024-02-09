@@ -79,7 +79,6 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
     """
     Call this function when inside the experiment folder!
     """
-    print("The experiment to handle", experiment)
     if experiment.configs == {}:
         explogger.info(f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty")
     try:
