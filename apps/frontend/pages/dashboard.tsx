@@ -336,7 +336,7 @@ export default function DashboardPage() {
 													}
 												</span>
 												<button type= "button"
-													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
 													onClick={queryQueueLength}>
 													TEMP Manual Query
 												</button>
@@ -605,7 +605,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 					)}
 				</div>
 				<Menu as='div' className='relative'>
-					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-small text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 						<SwatchIcon
 							className='mr-3 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
@@ -653,7 +653,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 					</Menu.Items>
 				</Menu>
 				<Menu as='div' className='relative' style={{ marginLeft: '0.5rem' }}>
-					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-small text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 						<FunnelIcon
 							className='mr-3 h-5 w-5 text-gray-400'
 							aria-hidden='true' />Filter

@@ -126,7 +126,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				</div>
 				{project['finished'] == true ?
 					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						disabled={busyDownloadingResults}
 						onClick={async () => {
 							setBusyDownloadingResults(true);
@@ -139,7 +139,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				}
 				{project['finished'] == true ?
 					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={() => {
 							window.open(`/api/download/logs/${project.expId}`, '_blank');
 						}}>
@@ -149,7 +149,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				}
 				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) ?
 					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						disabled={busyDownloadingZip}
 						onClick={async () => {
 							setBusyDownloadingZip(true);
@@ -198,13 +198,13 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 												onDeleteExperiment(project.expId);
 												closeDeleteModal(); // Close the modal after deletion
 											}}
-											className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+											className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-small text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
 										>
 											Delete
 										</button>
 										<button
 											onClick={closeDeleteModal}
-											className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+											className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-small text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
 										>
 											Cancel
 										</button>
@@ -215,14 +215,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					</div>
 				)}
 				<button type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={() => {
 						onCopyExperiment(project.expId);
 					}}>
 					Copy Experiment
 				</button>
 				{/* <button type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={() => {
 						onDeleteExperiment(project.expId);
 					}}>
@@ -230,7 +230,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				</button> */}
 				<button
 					type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-small rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={openDeleteModal}
 				>
         		Delete Experiment

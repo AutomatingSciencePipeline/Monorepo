@@ -33,7 +33,7 @@ export const InformationStep = ({ form, ...props }) => {
 							{...form.getInputProps("tags")}
 							className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"/> */}
 						<div className="sm:col-span-4">
-							<AutoCompleteChip className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+							<AutoCompleteChip />
 						</div>
 					</div>
 				</InputSection>

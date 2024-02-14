@@ -1,6 +1,7 @@
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import '../styles/globals.css';
 import '../styles/experimentListing.css';
+import '../styles/experimentStep.css';
 import { AuthProvider } from '../firebase/fbAuth';
 
 const noAuthRequired = ['/', '/signin'];
