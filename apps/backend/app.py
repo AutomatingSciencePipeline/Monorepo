@@ -263,6 +263,7 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     else:
         syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
     close_experiment_logger()
+    
     upload_experiment_log(expId)
     # remove_downloaded_directory(expId)
 
@@ -273,6 +274,8 @@ def close_experiment_run_mongo(expId: DocumentId):
         update_mongo_data(expId, 'finishedAtEpochMillis', int(time.time() * 1000))
     else:
         syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
+    close_experiment_logger()
+    upload_experiment_log(expId)
 
 """
 Determines if the type of the experiment. Accepted types are:
@@ -349,12 +352,12 @@ def download_Experiment_files_local(experiment: ExperimentData):
  
     try:
         shutil.copy(file_path, destination_directory)
-        directory_contents = os.listdir(current_directory)
+        # directory_contents = os.listdir(current_directory)
 
         # Print out the contents of the directory
-        print("Contents of the directory:")
-        for item in directory_contents:
-            print(item)
+        # print("Contents of the directory:")
+        # for item in directory_contents:
+        #     print(item)
     except Exception as err:
         explogger.error(f"Error {err} occurred while copying to a path")
         raise GladosInternalError('Failed to copy experiment files') from err
@@ -381,20 +384,20 @@ def remove_downloaded_directory(experimentId: DocumentId):
 
 """
 Uploads the experiment files
-TODO: replace firebase with MongoDB 
+DONE: replace firebase with MongoDB 
 Call this function when inside the experiment folder!
 
 @param  experiment  json object of the experiment
 @return             void
 """
 def upload_experiment_results(experiment: ExperimentData):
-    explogger.info('Uploading Experiment Results...')
+    # explogger.info('Uploading Experiment Results...')
 
-    try:
-        uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
-        uploadBlob.upload_from_filename('results.csv')
-    except Exception as err:
-        raise DatabaseConnectionError("Error uploading aggregated experiment results to firebase") from err
+    # try:
+    #     uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
+    #     uploadBlob.upload_from_filename('results.csv')
+    # except Exception as err:
+    #     raise DatabaseConnectionError("Error uploading aggregated experiment results to firebase") from err
 
     explogger.info('Uploading to MongoDB')
     verify_mongo_connection()
@@ -420,11 +423,11 @@ def upload_experiment_results(experiment: ExperimentData):
             raise GladosInternalError("Error preparing experiment results zip") from err
 
         # TODO remove firebase usage once transition to mongo file storage is complete
-        try:
-            uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
-            uploadBlob.upload_from_filename('ResultCsvs.zip')
-        except Exception as err:
-            raise DatabaseConnectionError("Error uploading experiment results zip to firebase") from err
+        # try:
+        #     uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
+        #     uploadBlob.upload_from_filename('ResultCsvs.zip')
+        # except Exception as err:
+        #     raise DatabaseConnectionError("Error uploading experiment results zip to firebase") from err
 
         upload_experiment_zip(experiment, encoded)
 

@@ -1,6 +1,6 @@
 # Ignore docker container volume contents
 ExperimentFiles/
-
+TemporaryExpFiles/
 # Ignore log files produced by the system
 logs/
 

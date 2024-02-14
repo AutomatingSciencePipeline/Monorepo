@@ -47,6 +47,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 	return experiment.expId;
 };
 
+// Not really being used right now... This step is being done in the backend.
 export const updateMongoDoc = async (expId: String) => {
 	const updateUrl = `/api/MongoREST/${expId}`;
 	const updateResult = await fetch(updateUrl, {
@@ -74,17 +75,7 @@ export const findExp = async (expId: String ) => {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		// body: JSON.stringify({
-		// 	'content': 'expId',
-		// }),
 	});
-	// console.log(`This is the response from the finding ${await findResult.json()}`);
-	// if (findResult.ok) {
-	// 	const responseData = await findResult.json();
-	// 	console.log('Response from finding:', responseData);
-	// } else {
-	// 	throw new Error('Request for finding failed');
-	// }
 
 	return await findResult;
 };

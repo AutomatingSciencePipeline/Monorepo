@@ -30,7 +30,7 @@ const updateExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 		const result = await db.collection('Experiments').updateOne(
 			{ '_id': expIDtoUpdate as any },
 			{
-				$set: { 'experiment.$.expId': expIDtoUpdate },
+				$set: { 'experiment.expId': expIDtoUpdate },
 			},
 			// function (err, result) {
 			// 	if (err) throw err;
