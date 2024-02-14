@@ -1,38 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { AutoComplete } from 'primereact/autocomplete';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
 
 export function AutoCompleteChip() {
-	const [selectedCountries, setSelectedCountries] = useState<{ name: string }[]>([]);
-	const [filteredCountries, setFilteredCountries] = useState<{ name: string }[]>([]);
+	const [selectedTags, setselectedTags] = useState<{ name: string }[]>([]);
+	const [filteredTags, setfilteredTags] = useState<{ name: string }[]>([]);
 
 	// Mock data for countries
-	const mockCountries = [
-		{ name: 'Afghanistan' },
-		{ name: 'Albania' },
-		{ name: 'Algeria' },
-		// Add more countries as needed
+	const tagList = [
+		{ name: 'java' },
+		{ name: 'python' },
+		{ name: 'c' },
+		// Add more tags if needed
 	];
 
 	const search = (event) => {
 		// Timeout to emulate a network connection
 		setTimeout(() => {
-			let _filteredCountries;
+			let _filteredTags;
 
 			if (!event.query.trim().length) {
-				_filteredCountries = [...mockCountries]; // Use mock data instead of countries
+				_filteredTags = [...tagList];
 			} else {
-				_filteredCountries = mockCountries.filter((country) => {
-					return country.name.toLowerCase().startsWith(event.query.toLowerCase());
+				_filteredTags = tagList.filter((tag) => {
+					return tag.name.toLowerCase().startsWith(event.query.toLowerCase());
 				});
 			}
 
-			setFilteredCountries(_filteredCountries);
+			setfilteredTags(_filteredTags);
 		}, 250);
 	};
 
 	useEffect(() => {
-		// Set initial filtered countries to all countries
-		setFilteredCountries(mockCountries);
+		setfilteredTags(tagList);
 	}, []);
 
 	return (
@@ -40,10 +40,11 @@ export function AutoCompleteChip() {
 			<AutoComplete
 				field="name"
 				multiple
-				value={selectedCountries}
-				suggestions={filteredCountries}
+				value={selectedTags}
+				suggestions={filteredTags}
 				completeMethod={search}
-				onChange={(e) => setSelectedCountries(e.value)}
+				onChange={(e) => setselectedTags(e.value)}
+				className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 			/>
 		</div>
 	);
