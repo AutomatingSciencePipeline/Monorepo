@@ -245,10 +245,6 @@ export default function DashboardPage() {
 		}
 	}, [formState]);
 
-	function setIsDockerImageModalOpen(arg0: boolean) {
-		throw new Error('Function not implemented.');
-	}
-
 	return (
 		<>
 			{/* Background color split screen for large screens */}

@@ -11,8 +11,9 @@ function DockerImageSelectionBox() {
 
 	const fetchDockerImages = async () => {
 		try {
-			const response = await fetch('/api/docker-images');
-			const data = await response.json();
+			const response = await fetch(`/search_images?query=${encodeURIComponent(query)}`);
+		const data = await response.json();
+		setImages(data.results || []);
 
 			if (response.ok) {
 				setImages(data.images);

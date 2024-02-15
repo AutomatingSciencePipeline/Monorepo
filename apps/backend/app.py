@@ -6,7 +6,7 @@ import sys
 import json
 import time
 import typing
-import docker
+import requests
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import firebase_admin
@@ -58,33 +58,30 @@ syslogger.info("This is the sys version: " + sys.version)
 
 syslogger.info("GLADOS Backend Started")
 
-# When we comment out this function, error comes up
+username = 'your_username'
+password = 'your_password'
 
+# Authenticate with Docker Hub
+def get_auth_token(username, password):
+    url = 'https://hub.docker.com/v2/users/login/'
+    data = {'username': username, 'password': password}
+    response = requests.post(url, json=data)
+    if response.status_code == 200:
+        return response.json()['token']
+    else:
+        return None
 
-# @flaskApp.route('/get/docker-images', methods=['GET'])
-# def get_docker_images():
-#     print("Docker Socket Path:", docker.constants.DEFAULT_DOCKER_API_VERSION)
+token = get_auth_token(username, password)
 
-#     client = docker.from_env()
-#     images = []
-#     syslogger.info("inside app.py /get/docker-images")
-#     syslogger.info(client.images.list())
-#     for image in client.images.list():
-#         if 'RepoTags' in image.attrs: # type: ignore
-#             repo_tags = image.attrs['RepoTags'] # type: ignore
-           
-#             if repo_tags:
-#                 image_name = repo_tags[0].split(':')[0]
-#                 images.append(image_name)
-
-#     return jsonify(images)
-
-@flaskApp.route('/get/docker-images', methods=['GET'])
-def get_docker_images():
-    # Your implementation to fetch Docker images
-    images = ["image1", "image2", "image3"]  # Replace with your logic
-    return jsonify(images)
-
+# Search for repositories
+def search_repositories(query, token):
+    url = f'https://hub.docker.com/v2/search/repositories/?query={query}'
+    headers = {'Authorization': f'Bearer {token}'}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
 
 """
 The query to run an experiment. 
