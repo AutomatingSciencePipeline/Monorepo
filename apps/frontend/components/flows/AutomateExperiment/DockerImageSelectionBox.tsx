@@ -3,20 +3,24 @@ import React, { useEffect, useState } from 'react';
 function DockerImageSelectionBox() {
 	const [images, setImages] = useState([]);
 	const [selectedImage, setSelectedImage] = useState('');
+	const user = 'gladospipeline';
+	const repository = 'glados-testing';
 
 	useEffect(() => {
 		// Fetch Docker images when the component mounts
-		fetchDockerImages();
+		fetchDockerImages(user, repository);
 	}, []);
 
-	const fetchDockerImages = async () => {
+	const fetchDockerImages = async (user, repository) => {
 		try {
-			const response = await fetch(`/search_images?query=${encodeURIComponent(query)}`);
-		const data = await response.json();
-		setImages(data.results || []);
-
+			// Corrected the URL to match the Flask route and added user and repository as query parameters
+			const url = `/get-images?user=${encodeURIComponent(user)}&repository=${encodeURIComponent(repository)}`;
+			const response = await fetch(url);
+			const data = await response.json();
+			// Assuming the backend returns a JSON array directly
 			if (response.ok) {
-				setImages(data.images);
+				// Update your state or DOM based on 'data', which now contains image names
+				setImages(data); // Assuming 'data' is the array of image names
 			} else {
 				console.error('Error fetching Docker images:', data.error);
 			}
@@ -24,6 +28,7 @@ function DockerImageSelectionBox() {
 			console.error('Unexpected error fetching Docker images:', error);
 		}
 	};
+
 
 	const handleImageChange = (event) => {
 		setSelectedImage(event.target.value);

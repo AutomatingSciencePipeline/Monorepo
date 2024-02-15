@@ -13,6 +13,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
 from bson.binary import Binary
+import requests 
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
@@ -54,34 +55,26 @@ CORS(flaskApp)
 FLASK_DEBUG = 1 
 
 syslogger.info("This is the sys version: " + sys.version)
-
-
 syslogger.info("GLADOS Backend Started")
 
-username = 'your_username'
-password = 'your_password'
+@flaskApp.route('/get-images', methods=['GET'])
+def list_image_tags():
+    user = request.args.get('user')
+    repository = request.args.get('repository')
+    url = f"https://hub.docker.com/v2/repositories/{user}/{repository}/tags"
+    response = requests.get(url)
+    image_names = []
 
-# Authenticate with Docker Hub
-def get_auth_token(username, password):
-    url = 'https://hub.docker.com/v2/users/login/'
-    data = {'username': username, 'password': password}
-    response = requests.post(url, json=data)
     if response.status_code == 200:
-        return response.json()['token']
+        tags = response.json()
+        for tag in tags['results']:
+            image_name = f"{user}/{repository}:{tag['name']}"
+            image_names.append(image_name)
     else:
-        return None
+        print("Failed to fetch image tags")
+    
+    return {'images': image_names} #
 
-token = get_auth_token(username, password)
-
-# Search for repositories
-def search_repositories(query, token):
-    url = f'https://hub.docker.com/v2/search/repositories/?query={query}'
-    headers = {'Authorization': f'Bearer {token}'}
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
 
 """
 The query to run an experiment. 
