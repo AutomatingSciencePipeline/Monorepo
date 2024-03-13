@@ -69,6 +69,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
+			tag: '',
 			trialExtraFile: '',
 			trialResult: '',
 			scatterIndVar: '',
@@ -94,6 +95,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 						hyperparameters: formList(hyperparameters),
 						name: expInfo['name'],
 						description: expInfo['description'],
+						tag: expInfo['tag'],
 						trialExtraFile: expInfo['trialExtraFile'],
 						trialResult: expInfo['trialResult'],
 						verbose: expInfo['verbose'],

@@ -11,6 +11,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 		workers: values.workers,
 		// Change this with MongoDB ID
 		expId: '',
+		tag: values.tag,
 		trialExtraFile: values.trialExtraFile,
 		trialResult: values.trialResult,
 		timeout: values.timeout,

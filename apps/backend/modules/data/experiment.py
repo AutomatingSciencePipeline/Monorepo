@@ -19,6 +19,7 @@ class ExperimentData(BaseModel):
     experimentType = ExperimentType.UNKNOWN
     expId: DocumentId
     creator: UserId
+    tag: Optional[str]
     trialExtraFile: Optional[str]
     trialResult: str
     file = ""  #Will be set either by initializing or by app.py
