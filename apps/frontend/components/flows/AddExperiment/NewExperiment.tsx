@@ -88,6 +88,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			// console.log(`The copyId is: ${copyID}`);
 			findExp(copyID).then((docSnap) => {
 				if (docSnap) {
+					console.log("This is the document of Mongo ", docSnap);
 					const expInfo = docSnap;
 					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
 					form.setValues({

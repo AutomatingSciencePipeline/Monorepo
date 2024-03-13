@@ -1,7 +1,7 @@
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { submitExperiment, uploadExec } from '../../../../firebase/db';
 import { Group, Text } from '@mantine/core';
-
+import { findExp } from '../../../../MongoDB/mongoFunc';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
@@ -22,13 +22,12 @@ export const DispatchStep = ({ id, form, ...props }) => {
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
-		console.log('Submitting Experiment');
-		console.log('Also submitting mongo experiment');
 
 		submitMongoExperiment(form.values, userId as string).then(async (expId) => {
 			// console.log(`Uploading file for MongoDB ${expId}:`, files);
 			// console.log(`This is the expId: `, expId['experimentID']);
 			// console.log('This is a file: ', files[0]);
+
 			const uploadResponse = await saveToBackend(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId['experimentID']} to the backend`);

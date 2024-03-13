@@ -1,5 +1,4 @@
 import { ExperimentData } from '../firebase/db_types';
-
 export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: String): Promise<String> => {
 	const apiUrl = '/api/MongoREST/SubmitExperimentHandler';
 
@@ -77,7 +76,26 @@ export const findExp = async (expId: String ) => {
 		},
 	});
 
-	return await findResult;
+	const jsonResult = await findResult.json();
+	return jsonResult['experiment'];
+};
+
+export interface ExperimentSubscribeCallback {
+	(data: Partial<ExperimentData>): any;
+}
+
+export const findExpWCallback = async (expId: String, callback: ExperimentSubscribeCallback) => {
+	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
+	const findResult = await fetch(findUrl, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	const jsonResult = await findResult.json();
+	console.log('findResultWCallback result is: ', jsonResult);
+	callback(jsonResult);
 };
 
 export const saveToBackend = async (expId, file): Promise<Boolean> => {
@@ -99,3 +117,24 @@ export const saveToBackend = async (expId, file): Promise<Boolean> => {
 	}
 };
 
+// export const subscribeToExpMongo = (id: String) => {
+// 	const eventSource = new EventSource(`/api/MongoREST/MongoFrontend/IdConnection/${id}`);
+
+// 	// Handle events from SSE
+// 	eventSource.onmessage = (event) => {
+// 		const message = JSON.parse(event.data);
+// 		console.log('the received message from mongo is: ', message);
+// 		// Checking whether the message is the inital data or not
+// 		// if (Array.isArray(message)) {
+// 		// 	callback();
+// 		// } else {
+// 		// 	callback();
+// 		// }
+// 	};
+
+// 	const unsubscribe = () => {
+// 		eventSource.close();
+// 	};
+
+// 	return unsubscribe;
+// };

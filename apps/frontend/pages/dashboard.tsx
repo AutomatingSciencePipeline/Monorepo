@@ -187,6 +187,7 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
+		console.log('Should I listen to experiments?');
 		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 	}, [userId]);
 

@@ -5,6 +5,7 @@ import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getC
 import { ExperimentData } from '../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
+import { findExpWCallback } from '../../../MongoDB/mongoFunc';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
@@ -59,17 +60,30 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		setIsEditing(false);
 	};
 
+	// useEffect(() => {
+	// 	if (editingCanceled) {
+	// 		setProjectName(originalProjectName); // Revert to the original name
+	// 		setEditingCanceled(true);
+	// 	} else {
+	// 		subscribeToExp(project.expId, (data) => {
+	// 			setProject(data as ExperimentData);
+	// 		});
+	// 	}
+	// }, [editingCanceled, originalProjectName, project.expId]);
+
 	useEffect(() => {
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			subscribeToExp(project.expId, (data) => {
+			findExpWCallback(project.expId, (data) => {
 				setProject(data as ExperimentData);
 			});
+			// subscribeToExp(project.expId, (data) => {
+			// 	setProject(data as ExperimentData);
+			// });
 		}
 	}, [editingCanceled, originalProjectName, project.expId]);
-
 
 	const handleKeyUp = (e) => {
 		if (e.key === 'Enter') {
