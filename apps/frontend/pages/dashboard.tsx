@@ -184,21 +184,31 @@ export default function DashboardPage() {
 	const { userId, authService } = useAuth();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
+	// useEffect(() => {
+	// 	if (!userId) {
+	// 		return;
+	// 	}
+
+	// 	// Use fetchExperimentsByUserId to Fetch experiments by user ID
+
+
+	// }, [userId]);
 	useEffect(() => {
-		if (!userId) {
-			return;
+		if (userId) {
+			// Make sure to declare and call an async function within useEffect
+			const fetchAndSetExperiments = async () => {
+				const fetchedExperiments = await fetchExperimentsByUserId(userId);
+				if (fetchedExperiments) {
+					setExperiments(fetchedExperiments);
+				} else {
+					// Handle the case when no experiments are fetched
+					console.log('No experiments were fetched, or an error occurred.');
+					setExperiments([]);
+				}
+			};
+			fetchAndSetExperiments();
 		}
-
-		//TODO
-		fetchExperimentsByUserId(userId).then((experimentsFromMongo) => {
-			console.log('Experiments fetched from top-level:', experimentsFromMongo);
-			setExperiments(experimentsFromMongo as ExperimentData[]);
-		}).catch((error) => {
-			console.error('Failed to fetch experiments:', error);
-		});
-
-		// The commented-out part is for a real-time update feature, which would be handled differently.
-	}, [userId]);
+	}, [userId]); // This effect depends on userId
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
 	const QUEUE_ERROR_LENGTH = -2;
@@ -488,7 +498,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 				break;
 			}
 		}
-		
 	}, [sortBy, experiments]);
 
 	// Toggle the arrow icon state when the user clicks the button
