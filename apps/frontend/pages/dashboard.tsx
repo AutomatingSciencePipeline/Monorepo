@@ -2,6 +2,7 @@ import NewExperiment, { FormStates } from '../components/flows/AddExperiment/New
 import { useAuth } from '../firebase/fbAuth';
 import { deleteExperiment } from '../firebase/db';
 import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
+import { findExpByUser, fetchExperimentsByUserId } from '../MongoDB/mongoFunc';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -187,7 +188,15 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
+
+		fetchExperimentsByUserId(userId).then((experimentsFromMongo) => {
+			console.log('Experiments fetched from top-level:', experimentsFromMongo);
+			setExperiments(experimentsFromMongo as ExperimentData[]);
+		}).catch((error) => {
+			console.error('Failed to fetch experiments:', error);
+		});
+
+		// The commented-out part is for a real-time update feature, which would be handled differently.
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
@@ -431,7 +440,7 @@ const SortingOptions = {
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
-	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
+	const [sortedExperiments, setSortedExperiments] = useState(Array.isArray(experiments) ? [...experiments] : []);
 
 	// State of arrow icon
 	const [sortArrowUp, setSortArrowUp] = useState(true);
@@ -448,34 +457,37 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
-		switch (sortBy) {
-		case SortingOptions.NAME:
-			setSortedExperiments([...experiments].sort(sortByName));
-			break;
+		if (experiments?.length > 0) {
+			switch (sortBy) {
+			case SortingOptions.NAME:
+				setSortedExperiments([...experiments].sort(sortByName));
+				break;
 
-		case SortingOptions.NAME_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByNameReverse));
-			break;
+			case SortingOptions.NAME_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByNameReverse));
+				break;
 
-		case SortingOptions.DATE_MODIFIED:
-			setSortedExperiments([...experiments].sort(sortByDateModified));
-			break;
+			case SortingOptions.DATE_MODIFIED:
+				setSortedExperiments([...experiments].sort(sortByDateModified));
+				break;
 
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
-			break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
+				break;
 
-		case SortingOptions.DATE_CREATED:
-			setSortedExperiments([...experiments].sort(sortByDateCreated));
-			break;
+			case SortingOptions.DATE_CREATED:
+				setSortedExperiments([...experiments].sort(sortByDateCreated));
+				break;
 
-		case SortingOptions.DATE_CREATED_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
-			break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+				break;
 
-		default:
-			break;
+			default:
+				break;
+			}
 		}
+		
 	}, [sortBy, experiments]);
 
 	// Toggle the arrow icon state when the user clicks the button
@@ -511,7 +523,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 		console.log('in toggle order new sort: ', { newSortBy });
 
-		//setSortBy(newSortBy);
+		// setSortBy(newSortBy);
 		handleSortChange(newSortBy);
 	};
 
