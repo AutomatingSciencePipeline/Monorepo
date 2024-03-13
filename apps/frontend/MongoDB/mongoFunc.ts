@@ -1,3 +1,4 @@
+import { FirebaseUserId } from '../firebase/db';
 import { ExperimentData } from '../firebase/db_types';
 
 export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: String): Promise<String> => {
@@ -69,6 +70,7 @@ export const updateMongoDoc = async (expId: String) => {
 	}
 };
 
+// Finding one experiment by its ID
 export const findExp = async (expId: String ) => {
 	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
 	const findResult = await fetch(findUrl, {
@@ -80,6 +82,48 @@ export const findExp = async (expId: String ) => {
 
 	return await findResult;
 };
+
+// Finding experiments by the user's ID
+export const findExpByUser = async (userId: String) => {
+	const findUrl = `/api/MongoREST/MongoFrontend/user/${userId}`;
+	const findResult = await fetch(findUrl, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	// Parse the JSON response body
+	const data = await findResult.json();
+	return data; // This now returns the parsed data
+};
+
+export const fetchExperimentsByUserId = async (userId: string) => {
+	console.log(`Fetching experiments for user ${userId}...`);
+	await fetch(`/api/MongoREST/MongoFrontend/user/${userId}`)
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			}
+			return Promise.reject(response);
+		})
+		.then((experiments: ExperimentData[]) => {
+			console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
+			// Process or display the experiments as needed
+		})
+		.catch((error: Response) => {
+			console.error('Error fetching experiments:', error.status);
+			error.json().then((json) => {
+				console.error(json?.response ?? json);
+				const message = json?.response;
+				if (message) {
+					alert(`Error fetching experiments: ${message}`);
+				}
+			}).catch((err) => console.error('Error parsing error response:', err));
+		});
+};
+
+
 
 export const saveToBackend = async (expId, file): Promise<Boolean> => {
 	const saveUrl = '/api/MongoREST/saveToBackend';
