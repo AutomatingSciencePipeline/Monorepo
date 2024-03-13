@@ -84,20 +84,6 @@ export const findExp = async (expId: String ) => {
 };
 
 // Finding experiments by the user's ID
-export const findExpByUser = async (userId: String) => {
-	const findUrl = `/api/MongoREST/MongoFrontend/user/${userId}`;
-	const findResult = await fetch(findUrl, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
-
-	// Parse the JSON response body
-	const data = await findResult.json();
-	return data; // This now returns the parsed data
-};
-
 export const fetchExperimentsByUserId = async (userId: string) => {
 	console.log(`Fetching experiments for user ${userId}...`);
 	await fetch(`/api/MongoREST/MongoFrontend/user/${userId}`)
@@ -109,7 +95,7 @@ export const fetchExperimentsByUserId = async (userId: string) => {
 		})
 		.then((experiments: ExperimentData[]) => {
 			console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
-			// Process or display the experiments as needed
+			return experiments;
 		})
 		.catch((error: Response) => {
 			console.error('Error fetching experiments:', error.status);
@@ -122,8 +108,6 @@ export const fetchExperimentsByUserId = async (userId: string) => {
 			}).catch((err) => console.error('Error parsing error response:', err));
 		});
 };
-
-
 
 export const saveToBackend = async (expId, file): Promise<Boolean> => {
 	const saveUrl = '/api/MongoREST/saveToBackend';

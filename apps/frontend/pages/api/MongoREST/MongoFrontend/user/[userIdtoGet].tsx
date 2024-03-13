@@ -15,15 +15,12 @@ const userExperimentsHandler: NextApiHandler<ExperimentData[]> = async (req, res
 	try {
 		const client = await clientPromise;
 		const db = client.db(DB_NAME);
-		console.log('in userExperimentsHandler');
 
 		// Query the database for experiments associated with the userId
 		const experiments = await db
 			.collection('Experiments')
 			.find({ 'experiment.creator': userIdtoGet }) // Assuming 'creator' field holds the userId
 			.toArray();
-
-		console.log('experiments length', experiments.length);
 
 		// Respond with the fetched experiments
 		res.status(200).json(experiments);
