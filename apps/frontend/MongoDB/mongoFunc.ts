@@ -80,7 +80,26 @@ export const findExp = async (expId: String ) => {
 		},
 	});
 
-	return await findResult;
+	const jsonResult = await findResult.json();
+	return jsonResult['experiment'];
+};
+
+export interface ExperimentSubscribeCallback {
+	(data: Partial<ExperimentData>): any;
+}
+
+export const findExpWCallback = async (expId: String, callback: ExperimentSubscribeCallback) => {
+	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
+	const findResult = await fetch(findUrl, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	const jsonResult = await findResult.json();
+	console.log('findResultWCallback result is: ', jsonResult['experiments']);
+	callback(jsonResult['experiments']);
 };
 
 // Finding experiments by the user's ID

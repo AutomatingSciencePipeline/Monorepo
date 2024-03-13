@@ -64,9 +64,12 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			subscribeToExp(project.expId, (data) => {
+			findExpWCallback(project.expId, (data) => {
 				setProject(data as ExperimentData);
 			});
+			// subscribeToExp(project.expId, (data) => {
+			// 	setProject(data as ExperimentData);
+			// });
 		}
 	}, [editingCanceled, originalProjectName, project.expId]);
 
