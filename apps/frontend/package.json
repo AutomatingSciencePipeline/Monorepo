@@ -37,6 +37,7 @@
 		"react-beautiful-dnd": "^13.1.1",
 		"react-dom": "^18.2.0",
 		"react-icons": "^4.6.0",
+		"react-select": "^5.8.0",
 		"tabler-icons-react": "^1.55.0",
 		"uuid": "^9.0.0"
 	},

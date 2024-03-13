@@ -64,6 +64,7 @@ export interface ExperimentData {
     verbose: boolean;
     workers: number;
     expId: String; // TODO do we want to ensure this doesn't get stored in fb itself?
+    tag: string[];
     trialExtraFile: FileName;
     trialResult: FileName;
     timeout: number;
