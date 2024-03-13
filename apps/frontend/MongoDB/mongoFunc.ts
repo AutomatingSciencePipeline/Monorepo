@@ -84,29 +84,46 @@ export const findExp = async (expId: String ) => {
 };
 
 // Finding experiments by the user's ID
-export const fetchExperimentsByUserId = async (userId: string) => {
+// export const fetchExperimentsByUserId = async (userId: string) => {
+// 	console.log(`Fetching experiments for user ${userId}...`);
+// 	await fetch(`/api/MongoREST/MongoFrontend/user/${userId}`)
+// 		.then((response) => {
+// 			if (response.ok) {
+// 				return response.json();
+// 			}
+// 			return Promise.reject(response);
+// 		})
+// 		.then((experiments: ExperimentData[]) => {
+// 			console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
+// 			return experiments;
+// 		})
+// 		.catch((error: Response) => {
+// 			console.error('Error fetching experiments:', error.status);
+// 			error.json().then((json) => {
+// 				console.error(json?.response ?? json);
+// 				const message = json?.response;
+// 				if (message) {
+// 					alert(`Error fetching experiments: ${message}`);
+// 				}
+// 			}).catch((err) => console.error('Error parsing error response:', err));
+// 		});
+// };
+
+export const fetchExperimentsByUserId = async (userId: string): Promise<ExperimentData[] | null> => {
 	console.log(`Fetching experiments for user ${userId}...`);
-	await fetch(`/api/MongoREST/MongoFrontend/user/${userId}`)
-		.then((response) => {
-			if (response.ok) {
-				return response.json();
-			}
-			return Promise.reject(response);
-		})
-		.then((experiments: ExperimentData[]) => {
-			console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
-			return experiments;
-		})
-		.catch((error: Response) => {
-			console.error('Error fetching experiments:', error.status);
-			error.json().then((json) => {
-				console.error(json?.response ?? json);
-				const message = json?.response;
-				if (message) {
-					alert(`Error fetching experiments: ${message}`);
-				}
-			}).catch((err) => console.error('Error parsing error response:', err));
-		});
+	try {
+		const response = await fetch(`/api/MongoREST/MongoFrontend/user/${userId}`);
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const experiments: ExperimentData[] = await response.json();
+		console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
+		return experiments;
+	} catch (error) {
+		console.error('Error fetching experiments:', error);
+		// Optionally handle the error more gracefully here
+		return null;
+	}
 };
 
 export const saveToBackend = async (expId, file): Promise<Boolean> => {
