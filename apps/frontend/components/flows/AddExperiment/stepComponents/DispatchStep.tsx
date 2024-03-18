@@ -4,8 +4,9 @@ import { Group, Text } from '@mantine/core';
 
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
-import { useState } from 'react';
-import {submitMongoExperiment, saveToBackend} from '../../../../MongoDB/mongoFunc';
+import { FC, useEffect, useRef, useState } from 'react';
+import { submitMongoExperiment, saveToBackend } from '../../../../MongoDB/mongoFunc';
+import { set } from 'mongoose';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -16,9 +17,93 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, ...props }) => {
+export interface DispatchStepProps {
+    form: any; // Use a more specific type if available
+    id: string | null;
+    handleDropFile: (files: File[]) => void; // Adjust the type based on the actual function signature
+}
+
+export const DispatchStep = ({ form, id, dispatchSignal }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
+	const [expFile, setExpFile] = useState<File | null>(null);
+
+	// const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
+	// 	setLoading(true);
+	// 	setExpFile(files[0]);
+	// 	console.log("File dropped: ", files[0]);
+	// };
+
+	// useEffect(() => {
+	// 	if (dispatchSignal.current) {
+	// 		handleDropFile();
+	// 		dispatchSignal.current = false; // Reset the signal
+	// 	}
+	// }, [dispatchSignal.current]);
+
+
+	// const handleDropFile = () => {
+	// 	console.log('Submitting Experiment');
+
+	// 	submitMongoExperiment(form.values, userId as string).then(async (expId) => {
+	// 		// console.log(`Uploading file for MongoDB ${expId}:`, files);
+	// 		// console.log(`This is the expId: `, expId['experimentID']);
+	// 		// console.log('This is a file: ', files[0]);
+	// 		const uploadResponse = await saveToBackend(expId, expFile);
+	// 		if (uploadResponse) {
+	// 			console.log(`Handing experiment ${expId['experimentID']} to the backend`);
+	// 			const response = await fetch(`/api/experiments/${expId['experimentID']}`, {
+	// 				method: 'POST',
+	// 				headers: new Headers({ 'Content-Type': 'application/json' }),
+	// 				credentials: 'same-origin',
+	// 				body: JSON.stringify({ id: expId['experimentID'] }),
+	// 			});
+	// 			if (response.ok) {
+	// 				console.log('Response from backend received', response);
+	// 			} else {
+	// 				const responseText = await response.text();
+	// 				console.log('Upload failed', responseText, response);
+	// 				throw new Error(`Upload failed: ${response.status}: ${responseText}`);
+	// 			}
+	// 		} else {
+	// 			throw new Error('Failed to upload experiment file to the backend server, is it running?');
+	// 		}
+	// 	}).catch((error) => {
+	// 		console.log('Error uploading experiment: ', error);
+	// 		alert(`Error uploading experiment: ${error.message}`);
+	// 	}).finally(() => {
+	// 		setLoading(false);
+	// 	});
+
+	// 	submitExperiment(form.values, userId as string).then(async (expId) => {
+	// 		console.log(`Uploading file for ${expId}:`, files);
+	// 		// const uploadResponse1 = await saveToBackend(expId, files[0]);
+	// 		const uploadResponse = await uploadExec(expId, files[0]);
+	// 		if (uploadResponse) {
+	// 			console.log(`Handing experiment ${expId} to the backend`);
+	// 			const response = await fetch(`/api/experiments/${expId}`, {
+	// 				method: 'POST',
+	// 				headers: new Headers({ 'Content-Type': 'application/json' }),
+	// 				credentials: 'same-origin',
+	// 				body: JSON.stringify({ id: expId }),
+	// 			});
+	// 			if (response.ok) {
+	// 				console.log('Response from backend received', response);
+	// 			} else {
+	// 				const responseText = await response.text();
+	// 				console.log('Upload failed', responseText, response);
+	// 				throw new Error(`Upload failed: ${response.status}: ${responseText}`);
+	// 			}
+	// 		} else {
+	// 			throw new Error('Failed to upload experiment file to the backend server, is it running?');
+	// 		}
+	// 	}).catch((error) => {
+	// 		console.log('Error uploading experiment: ', error);
+	// 		alert(`Error uploading experiment: ${error.message}`);
+	// 	}).finally(() => {
+	// 		setLoading(false);
+	// 	});
+	// };
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
@@ -54,35 +139,6 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		}).finally(() => {
 			setLoading(false);
 		});
-
-		// submitExperiment(form.values, userId as string).then(async (expId) => {
-		// 	console.log(`Uploading file for ${expId}:`, files);
-		// 	// const uploadResponse1 = await saveToBackend(expId, files[0]);
-		// 	const uploadResponse = await uploadExec(expId, files[0]);
-		// 	if (uploadResponse) {
-		// 		console.log(`Handing experiment ${expId} to the backend`);
-		// 		const response = await fetch(`/api/experiments/${expId}`, {
-		// 			method: 'POST',
-		// 			headers: new Headers({ 'Content-Type': 'application/json' }),
-		// 			credentials: 'same-origin',
-		// 			body: JSON.stringify({ id: expId }),
-		// 		});
-		// 		if (response.ok) {
-		// 			console.log('Response from backend received', response);
-		// 		} else {
-		// 			const responseText = await response.text();
-		// 			console.log('Upload failed', responseText, response);
-		// 			throw new Error(`Upload failed: ${response.status}: ${responseText}`);
-		// 		}
-		// 	} else {
-		// 		throw new Error('Failed to upload experiment file to the backend server, is it running?');
-		// 	}
-		// }).catch((error) => {
-		// 	console.log('Error uploading experiment: ', error);
-		// 	alert(`Error uploading experiment: ${error.message}`);
-		// }).finally(() => {
-		// 	setLoading(false);
-		// });
 	};
 
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;

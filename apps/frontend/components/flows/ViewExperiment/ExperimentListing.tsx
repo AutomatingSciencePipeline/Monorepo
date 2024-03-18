@@ -2,9 +2,10 @@
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName } from '../../../firebase/db';
-import { ExperimentData } from '../../../firebase/db_types';
+import { ExperimentData } from '../../../MongoDB/mongodb_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
+import { findExpWCallback } from '../../../MongoDB/mongoFunc';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
@@ -20,6 +21,8 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
+	console.log('project: ', project);
+	console.log("project['estimatedTotalTimeMinutes'] is: ", project['estimatedTotalTimeMinutes']);
 
 	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
 
@@ -64,9 +67,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
+			console.log('IN USEEFFECT');
+			console.log('project.expId:', project.expId);
 			findExpWCallback(project.expId, (data) => {
-				setProject(data as ExperimentData);
-			});
+				console.log('findExpWCallback is called');
+				setProject(data['experiment'] as unknown as ExperimentData);
+				console.log('project:', project);
+				console.log('out of use effect');
+			} );
 			// subscribeToExp(project.expId, (data) => {
 			// 	setProject(data as ExperimentData);
 			// });
@@ -96,7 +104,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		<div className='flex items-center justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>
 				<div className='flex items-center space-x-3'>
-					<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
+					<span className='text-sm font-medium flex items-center'>
 						{isEditing ? (
 							<>
 								<input
@@ -124,7 +132,16 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							</>
 						)}
 					</span>
-
+					<div className='flex flex-wrap gap-2'>
+						{project['tag']?.map((tag, index) => (
+							<span
+								key={index}
+								className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
+							>
+								{tag.label}
+							</span>
+						))}
+					</div>
 
 				</div>
 				{project['finished'] == true ?

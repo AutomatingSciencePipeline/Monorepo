@@ -1,4 +1,4 @@
-import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
+import { Fragment, useState, useLayoutEffect, useEffect, useRef} from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
@@ -7,7 +7,7 @@ import { experimentSchema } from '../../../utils/validators';
 
 import { firebaseApp } from '../../../firebase/firebaseClient';
 import { getDoc, getFirestore, doc } from 'firebase/firestore';
-import { findExp } from '../../../MongoDB/mongoFunc';
+import { findExp, saveToBackend, submitMongoExperiment } from '../../../MongoDB/mongoFunc';
 import { DispatchStep } from './stepComponents/DispatchStep';
 import { InformationStep } from './stepComponents/InformationStep';
 import { ParamStep } from './stepComponents/ParamStep';
@@ -15,6 +15,7 @@ import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS } from '../../../firebase/db';
+import { DropzoneProps } from '@mantine/dropzone';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 
@@ -62,6 +63,7 @@ const Steps = ({ steps }) => {
 	);
 };
 
+
 const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
@@ -84,6 +86,11 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 		schema: joiResolver(experimentSchema),
 	});
 
+	const dispatchSignal = useRef(false);
+
+	const handleDispatch = () => {
+		dispatchSignal.current = true;
+	};
 	useEffect(() => {
 		if (copyID != null) {
 			// console.log(`The copyId is: ${copyID}`);
@@ -116,38 +123,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			});
 		}
 	}, [copyID]);
-
-	// useEffect(() => {
-	// 	if (copyID != null) {
-	// 		const db = getFirestore(firebaseApp);
-	// 		getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
-	// 			if (docSnap.exists()) {
-	// 				const expInfo = docSnap.data();
-	// 				const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
-	// 				form.setValues({
-	// 					hyperparameters: formList(hyperparameters),
-	// 					name: expInfo['name'],
-	// 					description: expInfo['description'],
-	// 					trialExtraFile: expInfo['trialExtraFile'],
-	// 					trialResult: expInfo['trialResult'],
-	// 					verbose: expInfo['verbose'],
-	// 					workers: expInfo['workers'],
-	// 					scatter: expInfo['scatter'],
-	// 					dumbTextArea: expInfo['dumbTextArea'],
-	// 					scatterIndVar: expInfo['scatterIndVar'],
-	// 					scatterDepVar: expInfo['scatterDepVar'],
-	// 					timeout: expInfo['timeout'],
-	// 					keepLogs: expInfo['keepLogs'],
-	// 				});
-	// 				setCopyId(null);
-	// 				setStatus(FormStates.Info);
-	// 				console.log('Copied!');
-	// 			} else {
-	// 				console.log('No such document!');
-	// 			}
-	// 		});
-	// 	}
-	// }, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
@@ -224,7 +199,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form = {form} id={id} />
+										<DispatchStep form={form} id={id} dispatchSignal={dispatchSignal}/>
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -264,6 +239,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												{...(status === FormStates.Dispatch ?
 													{ type: 'submit', onClick: () => {
+														handleDispatch();
 														setFormState(-1);
 														localStorage.removeItem('ID');
 														setStatus(FormStates.Info);
