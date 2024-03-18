@@ -1,7 +1,7 @@
 import { FirebaseUserId } from '../firebase/db';
 import { ExperimentData } from '../firebase/db_types';
 
-export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: String): Promise<String> => {
+export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: string): Promise<string> => {
 	const apiUrl = '/api/MongoREST/SubmitExperimentHandler';
 
 	const experiment = {
@@ -50,7 +50,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 };
 
 // Not really being used right now... This step is being done in the backend.
-export const updateMongoDoc = async (expId: String) => {
+export const updateMongoDoc = async (expId: string) => {
 	const updateUrl = `/api/MongoREST/${expId}`;
 	const updateResult = await fetch(updateUrl, {
 		method: 'PUT',
@@ -71,7 +71,7 @@ export const updateMongoDoc = async (expId: String) => {
 };
 
 // Finding one experiment by its ID
-export const findExp = async (expId: String ) => {
+export const findExp = async (expId: string ) => {
 	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
 	const findResult = await fetch(findUrl, {
 		method: 'GET',
@@ -88,8 +88,10 @@ export interface ExperimentSubscribeCallback {
 	(data: Partial<ExperimentData>): any;
 }
 
-export const findExpWCallback = async (expId: String, callback: ExperimentSubscribeCallback) => {
+export const findExpWCallback = async (expId: string, callback: ExperimentSubscribeCallback) => {
+	console.log("IN FINDEXPWCALLBACK");
 	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
+	console.log('url is: ', findUrl);
 	const findResult = await fetch(findUrl, {
 		method: 'GET',
 		headers: {
@@ -98,8 +100,9 @@ export const findExpWCallback = async (expId: String, callback: ExperimentSubscr
 	});
 
 	const jsonResult = await findResult.json();
-	console.log('findResultWCallback result is: ', jsonResult['experiments']);
-	callback(jsonResult['experiments']);
+	console.log('findResultWCallback result is: ', jsonResult);
+	// jsonResult['experiment']
+	callback(jsonResult);
 };
 
 // Finding experiments by the user's ID
@@ -135,9 +138,13 @@ export const fetchExperimentsByUserId = async (userId: string): Promise<Experime
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-		const experiments: ExperimentData[] = await response.json();
-		console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
-		return experiments;
+		const experiments = await response.json();
+
+		const parsedExperiments = experiments.map((exp) => {
+			return exp['experiment'];
+		});
+		console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, parsedExperiments);
+		return parsedExperiments;
 	} catch (error) {
 		console.error('Error fetching experiments:', error);
 		// Optionally handle the error more gracefully here
