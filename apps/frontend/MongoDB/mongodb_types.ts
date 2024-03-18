@@ -58,12 +58,12 @@ export enum HyperparameterTypes {
 }
 export interface ExperimentData {
     // TODO make sure these match what python expects as well
-    creator: String;
+    creator: string;
     name: string;
     description: string;
     verbose: boolean;
     workers: number;
-    expId: String; // TODO do we want to ensure this doesn't get stored in fb itself?
+    expId: string; // TODO do we want to ensure this doesn't get stored in fb itself?
     tag: string[];
     trialExtraFile: FileName;
     trialResult: FileName;
