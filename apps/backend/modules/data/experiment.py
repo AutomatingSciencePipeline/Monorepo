@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+from typing import List, Optional, Dict
+from typing_extensions import TypedDict
 from enum import Enum
 from pydantic import BaseModel, root_validator, validator
 from modules.data.configData import ConfigData
@@ -13,13 +14,16 @@ class ExperimentType(Enum):
     JAVA = "java"
     C = "c"
 
+class TagType(TypedDict):
+    value: str
+    label: str
 
 class ExperimentData(BaseModel):
 
     experimentType = ExperimentType.UNKNOWN
     expId: DocumentId
     creator: UserId
-    tag: Optional[str]
+    tag: Optional[List[TagType]] = None
     trialExtraFile: Optional[str]
     trialResult: str
     file = ""  #Will be set either by initializing or by app.py

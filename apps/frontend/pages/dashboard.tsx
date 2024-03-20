@@ -451,7 +451,7 @@ const SortingOptions = {
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
-	const [sortedExperiments, setSortedExperiments] = useState(Array.isArray(experiments) ? [...experiments] : []);
+	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
 	// State of arrow icon
 	const [sortArrowUp, setSortArrowUp] = useState(true);
@@ -468,37 +468,34 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
+		const sorted = [...experiments];
 		if (experiments?.length > 0) {
 			switch (sortBy) {
 			case SortingOptions.NAME:
-				setSortedExperiments([...experiments].sort(sortByName));
+				sorted.sort(sortByName);
 				break;
-
 			case SortingOptions.NAME_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByNameReverse));
+				sorted.sort(sortByNameReverse);
 				break;
-
 			case SortingOptions.DATE_MODIFIED:
-				setSortedExperiments([...experiments].sort(sortByDateModified));
+				sorted.sort(sortByDateModified);
 				break;
-
 			case SortingOptions.DATE_MODIFIED_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
+				sorted.sort(sortByDateModifiedReverse);
 				break;
-
 			case SortingOptions.DATE_CREATED:
-				setSortedExperiments([...experiments].sort(sortByDateCreated));
+				sorted.sort(sortByDateCreated);
 				break;
-
 			case SortingOptions.DATE_CREATED_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+				sorted.sort(sortByDateCreatedReverse);
 				break;
-
 			default:
 				break;
 			}
 		}
-	}, [sortBy, experiments]);
+		setSortedExperiments(sorted);
+	}, [experiments, sortBy]);
+
 
 	// Toggle the arrow icon state when the user clicks the button
 	const toggleSortOrder = (sortBy) => {
@@ -568,8 +565,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		handleSortChange(newSortBy);
 	};
 
-	// Handle displaying sorting option
-
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
 		setSortBy(newSortBy);
@@ -578,7 +573,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		handleDisplaySortingOptions(newSortBy);
 	};
 
-
+	// Handle displaying sorting option
 	const handleDisplaySortingOptions = (newSortBy) => {
 		let sortingOption;
 
