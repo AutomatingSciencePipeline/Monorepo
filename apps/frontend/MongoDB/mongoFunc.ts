@@ -70,6 +70,24 @@ export const updateMongoDoc = async (expId: string) => {
 	}
 };
 
+export const deleteExpMongo = async (expId: string) => {
+	const delUrl = `/api/MongoREST/${expId}`;
+	console.log(`The url to delete is ${delUrl}`);
+	const delResult = await fetch(delUrl, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	if (delResult.ok) {
+		const responseData = await delResult.json();
+		console.log('Response from delete:', responseData);
+	} else {
+		throw new Error('Request for delete failed');
+	}
+};
+
 // Finding one experiment by its ID
 export const findExp = async (expId: string ) => {
 	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
