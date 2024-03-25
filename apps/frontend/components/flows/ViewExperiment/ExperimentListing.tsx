@@ -13,16 +13,16 @@ export interface ExperimentListingProps {
 	onDownloadResults: (experimentId: ExperimentDocumentId) => Promise<void>;
 	onDownloadProjectZip: (experimentId: ExperimentDocumentId) => Promise<void>;
 	onDeleteExperiment: (experimentId: ExperimentDocumentId) => void;
+	refetchExperiments: () => void;
 }
 
-
-export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
+export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment, refetchExperiments }: ExperimentListingProps) => {
 	const [project, setProject] = useState<ExperimentData>(projectinit);
 
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
-	console.log('project: ', project);
-	console.log("project['estimatedTotalTimeMinutes'] is: ", project['estimatedTotalTimeMinutes']);
+	// console.log('project: ', project);
+	// console.log("project['estimatedTotalTimeMinutes'] is: ", project['estimatedTotalTimeMinutes']);
 
 	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
 
@@ -33,6 +33,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
+	console.log('expectedFinishTime: ', new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000));
 
 	const [projectName, setProjectName] = useState(projectinit.name); // New state for edited project name
 	const [isEditing, setIsEditing] = useState(false);
@@ -62,18 +63,27 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		setIsEditing(false);
 	};
 
+	// useEffect for the expected time to run
+	useEffect(() => {
+		if (project['startedAtEpochMillis'] && !project['finished']) {
+			const timeout = expectedTimeToRun * 60000; // convert minutes to milliseconds
+			const timer = setTimeout(() => {
+				refetchExperiments(); // Call the refetch function after the expected time
+			}, timeout);
+
+			return () => clearTimeout(timer); // Clear the timer if the component unmounts or the experiment finishes
+		}
+	}, [project['startedAtEpochMillis'], project['finished'], expectedTimeToRun, refetchExperiments]);
+
+	// useEffect to handle project name editing
 	useEffect(() => {
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			console.log('IN USEEFFECT');
 			console.log('project.expId:', project.expId);
 			findExpWCallback(project.expId, (data) => {
-				console.log('findExpWCallback is called');
 				setProject(data['experiment'] as unknown as ExperimentData);
-				console.log('project:', project);
-				console.log('out of use effect');
 			} );
 			// subscribeToExp(project.expId, (data) => {
 			// 	setProject(data as ExperimentData);
@@ -289,7 +299,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				{experimentInProgress ?
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
+							<span> Expected Finish Time: {expectedFinishTime.toLocaleString()}</span>
 						</p>
 					) :
 					null

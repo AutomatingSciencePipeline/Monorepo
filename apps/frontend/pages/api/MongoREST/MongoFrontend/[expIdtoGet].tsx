@@ -16,9 +16,6 @@ const getExperimentMongo = async (req: NextApiRequest, res: NextApiResponse ) =>
 		const expObjectId = new ObjectId(expString);
 		result = await db.collection('Experiments')
 			.find({ '_id': expObjectId }).toArray();
-		console.log('This is the result: ', result);
-		console.log(`The length of an item is: ${result.length}`);
-		console.log(`In MongoFrontend: This is the result: ${result[0]}`);
 		res.status(200).json(result[0]);
 	} catch (error) {
 		const message = 'Failed to Retrieve information';

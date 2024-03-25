@@ -64,7 +64,7 @@ const Steps = ({ steps }) => {
 };
 
 
-const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
+export const NewExperiment = ({ formState, setFormState, copyID, setCopyId, refetchExperiments, ...rest }) => {
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
@@ -88,8 +88,10 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	const dispatchSignal = useRef(false);
 
-	const handleDispatch = () => {
+	const handleDispatch = async () => {
 		dispatchSignal.current = true;
+		console.log('Submitting Experiment');
+		await refetchExperiments();
 	};
 	useEffect(() => {
 		if (copyID != null) {
