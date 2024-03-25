@@ -1,8 +1,8 @@
 import { NewExperiment, FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
-import { deleteExperiment } from '../firebase/db';
-import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
-import { findExpByUser, fetchExperimentsByUserId } from '../MongoDB/mongoFunc';
+import { deleteExpMongo } from '../MongoDB/mongoFunc';
+import { downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
+import { fetchExperimentsByUserId } from '../MongoDB/mongoFunc';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -382,7 +382,8 @@ export default function DashboardPage() {
 								setCopyId(experimentId);
 							} }
 							onDeleteExperiment={async (experimentId) => {
-								deleteExperiment(experimentId);
+								deleteExpMongo(experimentId);
+								// deleteExperiment(experimentId);
 							}}/>
 					</div>
 					{/* Activity feed */}
