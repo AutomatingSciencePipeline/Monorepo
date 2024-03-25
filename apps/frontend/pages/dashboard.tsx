@@ -1,4 +1,4 @@
-import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
+import { NewExperiment, FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../firebase/fbAuth';
 import { deleteExperiment } from '../firebase/db';
 import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
@@ -184,15 +184,23 @@ export default function DashboardPage() {
 	const { userId, authService } = useAuth();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
+	// Use fetchExperimentsByUserId to Fetch experiments by user ID
+	const refetchExperiments = async () => {
+		const refetchedExperiments = await fetchExperimentsByUserId(userId ?? '');
+		console.log('fetchedExperiments: ', refetchedExperiments);
+		if (refetchedExperiments) {
+			setExperiments(refetchedExperiments);
+		} else {
+			// Handle the case when no experiments are fetched
+			console.log('No experiments were fetched, or an error occurred.');
+			setExperiments([]);
+		}
+	};
+
 	// useEffect(() => {
-	// 	if (!userId) {
-	// 		return;
-	// 	}
+	// 	fetchAndSetExperiments(userId);
+	// }, []);
 
-	// 	// Use fetchExperimentsByUserId to Fetch experiments by user ID
-
-
-	// }, [userId]);
 	useEffect(() => {
 		if (userId) {
 			// Make sure to declare and call an async function within useEffect
@@ -208,7 +216,7 @@ export default function DashboardPage() {
 			};
 			fetchAndSetExperiments();
 		}
-	}, [userId]); // This effect depends on userId
+	}, [userId]); // This effect depends on user
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
 	const QUEUE_ERROR_LENGTH = -2;
@@ -424,9 +432,9 @@ export default function DashboardPage() {
 					<NewExperiment
 						formState={formState}
 						setFormState={setFormState}
-						copyID = {copyID}
-						setCopyId = {setCopyId}
-					/>
+						copyID={copyID}
+						setCopyId={setCopyId}
+						refetchExperiments={refetchExperiments} />
 				</div>
 			</div>
 		</>
@@ -449,6 +457,8 @@ const SortingOptions = {
 };
 
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+	const { userId, authService } = useAuth();
+
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -465,6 +475,19 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
 	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
 	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+
+	const refetchExperiments = async () => {
+		// Look into more so that we can make the sorting also work
+		// const refetchedExperiments = await fetchExperimentsByUserId(userId ?? '');
+		// console.log('fetchedExperiments: ', refetchedExperiments);
+		// if (refetchedExperiments) {
+		// 	setSortedExperiments(refetchedExperiments);
+		// } else {
+		// 	// Handle the case when no experiments are fetched
+		// 	console.log('No experiments were fetched, or an error occurred.');
+		// 	setSortedExperiments([]);
+		// }
+	};
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
@@ -742,7 +765,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 							onCopyExperiment={onCopyExperiment}
 							onDownloadResults={downloadExperimentResults}
 							onDownloadProjectZip={downloadExperimentProjectZip}
-							onDeleteExperiment={onDeleteExperiment} />
+							onDeleteExperiment={onDeleteExperiment}
+							refetchExperiments={refetchExperiments} />
 					</li>
 				);
 			})}
