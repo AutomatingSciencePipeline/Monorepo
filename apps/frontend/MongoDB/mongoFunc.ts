@@ -50,7 +50,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 };
 
 // Not really being used right now... This step is being done in the backend.
-export const updateMongoDoc = async (expId: string) => {
+export const updateMongoDoc = async (expId: string, updateValue: string) => {
 	const updateUrl = `/api/MongoREST/${expId}`;
 	const updateResult = await fetch(updateUrl, {
 		method: 'PUT',
@@ -58,16 +58,17 @@ export const updateMongoDoc = async (expId: string) => {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			'content': 'expId',
+			'content': 'creator',
+			'valueToUpdate': updateValue,
 		}),
 	});
 	console.log(`This is the response from the update${await updateResult.json()}`);
-	if (updateResult.ok) {
-		const responseData = await updateResult.json();
-		console.log('Response from update:', responseData);
-	} else {
-		throw new Error('Request for update failed');
-	}
+	// if (updateResult.ok) {
+	// 	const responseData = await updateResult.json();
+	// 	console.log('Response from update:', responseData);
+	// } else {
+	// 	throw new Error('Request for update failed');
+	// }
 };
 
 export const deleteExpMongo = async (expId: string) => {
