@@ -42,8 +42,8 @@ const deleteExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 			console.log('right before the result');
 			result = await db.collection('Experiments').updateOne(
 				{ '_id': expObjectId },
-				{"$set":
-					{ 'experiment.name': 'lolololokljhvjblkmlol' },
+				{ '$set':
+					{ 'objectField': newValue },
 				}
 			);
 			// {"$set": {to_update: new_value}}

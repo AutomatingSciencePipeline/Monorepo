@@ -191,6 +191,7 @@ def run_batch(data: IncomingStartRequest):
         return
     experimentData['hyperparameters'] = hyperparameters
 
+    
     # Parsing into Datatype
     try:
         experiment = ExperimentData(**experimentData)
