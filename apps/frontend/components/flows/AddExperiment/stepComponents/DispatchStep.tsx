@@ -117,6 +117,7 @@ export const DispatchStep = ({ form, id, dispatchSignal }) => {
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId['experimentID']} to the backend`);
 
+
 				const response = await fetch(`/api/experiments/${expId['experimentID']}`, {
 					method: 'POST',
 					headers: new Headers({ 'Content-Type': 'application/json' }),
@@ -140,6 +141,7 @@ export const DispatchStep = ({ form, id, dispatchSignal }) => {
 			setLoading(false);
 		});
 	};
+	updateMongoDoc('6601ab451cf1e0c05a486d29', 'hahahahahah');
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
 
 	return (
