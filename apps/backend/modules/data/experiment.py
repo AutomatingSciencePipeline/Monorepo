@@ -24,6 +24,7 @@ class ExperimentData(BaseModel):
     expId: DocumentId
     creator: UserId
     tag: Optional[List[TagType]] = None
+    # TODO: Fix error when creating a new experiment with no tag --> validation error
     trialExtraFile: Optional[str]
     trialResult: str
     file = ""  #Will be set either by initializing or by app.py
