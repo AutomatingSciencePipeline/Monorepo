@@ -1,11 +1,10 @@
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { submitExperiment, uploadExec } from '../../../../firebase/db';
 import { Group, Text } from '@mantine/core';
-
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { FC, useEffect, useRef, useState } from 'react';
-import { submitMongoExperiment, saveToBackend } from '../../../../MongoDB/mongoFunc';
+import { submitMongoExperiment, saveToBackend, updateMongoDoc } from '../../../../MongoDB/mongoFunc';
 import { set } from 'mongoose';
 
 const SUPPORTED_FILE_TYPES = {
@@ -117,6 +116,7 @@ export const DispatchStep = ({ form, id, dispatchSignal }) => {
 			const uploadResponse = await saveToBackend(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId['experimentID']} to the backend`);
+				
 				const response = await fetch(`/api/experiments/${expId['experimentID']}`, {
 					method: 'POST',
 					headers: new Headers({ 'Content-Type': 'application/json' }),
@@ -140,7 +140,7 @@ export const DispatchStep = ({ form, id, dispatchSignal }) => {
 			setLoading(false);
 		});
 	};
-
+	updateMongoDoc('6601ab451cf1e0c05a486d29', 'hahahahahah');
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
 
 	return (
