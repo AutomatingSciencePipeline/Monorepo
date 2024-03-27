@@ -1,4 +1,5 @@
-import clientPromise, {DB_NAME} from '../../../lib/mongodb';
+import { object } from 'joi';
+import clientPromise, { DB_NAME } from '../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -7,11 +8,10 @@ const deleteExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 		const { expIdToUpdateDel } = req.query;
 		let result;
 		try {
-			// Retrieve information to store.
-			// const { content } = req.body;
-
 			const client = await clientPromise;
 			const db = client.db(DB_NAME);
+
+			// Id to search.
 			const expString = expIdToUpdateDel as string;
 			const expObjectId = new ObjectId(expString);
 			result = await db.collection('Experiments')
@@ -28,30 +28,35 @@ const deleteExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 		}
 	} else if (req.method === 'PUT') {
 		const { expIdToUpdateDel } = req.query;
+		const { content, valueToUpdate } = req.body;
 		let result;
 		try {
-			// Retrieve information to store.
-			const { content, valueToUpdate } = req.body;
+			// The value to update.
 			const newValue = valueToUpdate as string;
+
+			// The name of the field to update.
 			const field = content as string;
 			const objectField = `experiment.${field}`;
+
 			const client = await clientPromise;
 			const db = client.db(DB_NAME);
+
+			// _id to search.
 			const expString = expIdToUpdateDel as string;
 			const expObjectId = new ObjectId(expString);
-			console.log('right before the result');
+
+			// Searching and updating the field.
 			result = await db.collection('Experiments').updateOne(
 				{ '_id': expObjectId },
-				{ '$set':
-					{ 'objectField': newValue },
+				{
+					$set: {
+						[objectField]: newValue,
+					},
 				}
 			);
-			// {"$set": {to_update: new_value}}
-			// Check if the update was successful
-			console.log("result baby", result);
 			if (result.modifiedCount > 0) {
 				console.log('Update successful.');
-				res.status(200).json({ message: 'Data updated successfully', result});
+				res.status(200).json({ message: 'Data updated successfully', result });
 			} else {
 				console.log('No documents matched the filter, or no documents were modified.');
 			}
@@ -59,7 +64,7 @@ const deleteExperimentMongo = async (req: NextApiRequest, res: NextApiResponse )
 			res.status(500).json({ error: 'Error updating file.' });
 		}
 	} else {
-		return res.status(405).json({ message: 'Not a DELETE or UPDATE method. Not Allowed.'});
+		return res.status(405).json({ message: 'Not a DELETE or UPDATE method. Not Allowed.' });
 	}
 };
 

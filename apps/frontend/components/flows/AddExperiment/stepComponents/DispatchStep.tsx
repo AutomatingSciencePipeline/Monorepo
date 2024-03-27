@@ -141,7 +141,6 @@ export const DispatchStep = ({ form, id, dispatchSignal }) => {
 			setLoading(false);
 		});
 	};
-	
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
 
 	return (

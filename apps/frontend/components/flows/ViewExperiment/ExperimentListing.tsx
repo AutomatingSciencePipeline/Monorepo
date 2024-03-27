@@ -3,6 +3,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName } from '../../../firebase/db';
 import { ExperimentData } from '../../../MongoDB/mongodb_types';
+import { updateMongoDoc } from '../../../MongoDB/mongoFunc';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
 import { findExpWCallback } from '../../../MongoDB/mongoFunc';
@@ -52,8 +53,9 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		updateProjectNameInFirebase(project.expId, projectName);
-
+		// updateProjectNameInFirebase(project.expId, projectName);
+		console.log('The handleSave is done for name change');
+		updateMongoDoc(project.expId, 'name', projectName);
 		// Exit the editing mode
 		setIsEditing(false);
 	};

@@ -50,7 +50,7 @@ export const submitMongoExperiment = async (values: Partial<ExperimentData>, use
 };
 
 // Not really being used right now... This step is being done in the backend.
-export const updateMongoDoc = async (expId: string, updateKey: string,  updateValue: string) => {
+export const updateMongoDoc = async (expId: string, updateKey: string, updateValue: string) => {
 	const updateUrl = `/api/MongoREST/${expId}`;
 	const updateResult = await fetch(updateUrl, {
 		method: 'PUT',
