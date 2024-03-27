@@ -21,19 +21,21 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
-	// console.log('project: ', project);
-	// console.log("project['estimatedTotalTimeMinutes'] is: ", project['estimatedTotalTimeMinutes']);
-
-	const expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
 
 	const totalRuns = project['totalExperimentRuns'] ?? 0;
 	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
 	const experimentInProgress = !project['finished'] && project['startedAtEpochMillis'];
+	let expectedFinishTime: Date | null = null;
+	let expectedTimeToRun = 0;
 
-	// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
-	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
-	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
-	console.log('expectedFinishTime: ', new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000));
+	if (project['estimatedTotalTimeMinutes'] > 0 && project['startedAtEpochMillis'] && !project['finished']) {
+		// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
+		expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
+		expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
+		// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
+		console.log('expectedFinishTime: ', new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000));
+		console.log('project["estimatedTotalTimeMinutes"]: ', project['estimatedTotalTimeMinutes']);
+	}
 
 	const [projectName, setProjectName] = useState(projectinit.name); // New state for edited project name
 	const [isEditing, setIsEditing] = useState(false);
@@ -143,14 +145,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 						)}
 					</span>
 					<div className='flex flex-wrap gap-2'>
-						{project['tag']?.map((tag, index) => (
+						{project['tag'] && Array.isArray(project['tag']) ? project['tag'].map((tag, index) => (
 							<span
 								key={index}
 								className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
 							>
 								{tag.label}
 							</span>
-						))}
+						)) : null}
 					</div>
 
 				</div>
