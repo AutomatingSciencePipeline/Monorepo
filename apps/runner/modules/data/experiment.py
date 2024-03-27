@@ -6,6 +6,7 @@ from modules.data.configData import ConfigData
 
 from modules.data.parameters import Parameter
 from modules.data.types import DocumentId, EpochMilliseconds, UserId
+from typing import Union
 
 
 class ExperimentType(Enum):
@@ -23,8 +24,7 @@ class ExperimentData(BaseModel):
     experimentType = ExperimentType.UNKNOWN
     expId: DocumentId
     creator: UserId
-    tag: Optional[List[TagType]] = None
-    # TODO: Fix error when creating a new experiment with no tag --> validation error
+    tag: Optional[Union[List[TagType], str]]
     trialExtraFile: Optional[str]
     trialResult: str
     file = ""  #Will be set either by initializing or by app.py
