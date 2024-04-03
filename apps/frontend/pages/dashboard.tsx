@@ -383,8 +383,11 @@ export default function DashboardPage() {
 							} }
 							onDeleteExperiment={async (experimentId) => {
 								deleteExpMongo(experimentId);
+								await refetchExperiments();
 								// deleteExperiment(experimentId);
-							}}/>
+							}}
+							refetchExperiments={refetchExperiments}
+						/>
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -446,6 +449,7 @@ export interface ExperimentListProps {
 	experiments: ExperimentData[];
 	onCopyExperiment: (experiment: ExperimentDocumentId) => void;
 	onDeleteExperiment: (experiment: ExperimentDocumentId) => void;
+	refetchExperiments: () => void;
 }
 
 const SortingOptions = {
@@ -457,7 +461,7 @@ const SortingOptions = {
 	DATE_CREATED_REVERSE: 'dateCreatedReverse',
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, refetchExperiments }: ExperimentListProps) => {
 	const { userId, authService } = useAuth();
 
 	// Initial sorting option
@@ -477,18 +481,18 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
 	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
 
-	const refetchExperiments = async () => {
-		// Look into more so that we can make the sorting also work
-		// const refetchedExperiments = await fetchExperimentsByUserId(userId ?? '');
-		// console.log('fetchedExperiments: ', refetchedExperiments);
-		// if (refetchedExperiments) {
-		// 	setSortedExperiments(refetchedExperiments);
-		// } else {
-		// 	// Handle the case when no experiments are fetched
-		// 	console.log('No experiments were fetched, or an error occurred.');
-		// 	setSortedExperiments([]);
-		// }
-	};
+	// const refetchExperiments = async () => {
+	// Look into more so that we can make the sorting also work
+	// const refetchedExperiments = await fetchExperimentsByUserId(userId ?? '');
+	// console.log('fetchedExperiments: ', refetchedExperiments);
+	// if (refetchedExperiments) {
+	// 	setSortedExperiments(refetchedExperiments);
+	// } else {
+	// 	// Handle the case when no experiments are fetched
+	// 	console.log('No experiments were fetched, or an error occurred.');
+	// 	setSortedExperiments([]);
+	// }
+	// };
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
