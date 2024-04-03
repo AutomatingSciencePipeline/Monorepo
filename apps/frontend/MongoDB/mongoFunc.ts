@@ -1,5 +1,6 @@
-import { FirebaseUserId } from '../firebase/db';
+// import { ExperimentData } from '../MongoDB/mongodb_types';
 import { ExperimentData } from '../firebase/db_types';
+//TODO: error for having the same import using from mongodb_types and db_types from firebase
 
 export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: string): Promise<string> => {
 	const apiUrl = '/api/MongoREST/SubmitExperimentHandler';
@@ -62,7 +63,8 @@ export const updateMongoDoc = async (expId: string, updateKey: string, updateVal
 			'valueToUpdate': updateValue,
 		}),
 	});
-	console.log(`This is the response from the update${await updateResult.json()}`);
+	console.log(`This is the response from the update ${await updateResult.json()}`);
+
 	// if (updateResult.ok) {
 	// 	const responseData = await updateResult.json();
 	// 	console.log('Response from update:', responseData);
@@ -108,7 +110,6 @@ export interface ExperimentSubscribeCallback {
 }
 
 export const findExpWCallback = async (expId: string, callback: ExperimentSubscribeCallback) => {
-	console.log("IN FINDEXPWCALLBACK");
 	const findUrl = `/api/MongoREST/MongoFrontend/${expId}`;
 	console.log('url is: ', findUrl);
 	const findResult = await fetch(findUrl, {

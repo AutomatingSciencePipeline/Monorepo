@@ -1,11 +1,10 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName } from '../../../firebase/db';
+import { ExperimentDocumentId } from '../../../firebase/db';
 import { ExperimentData } from '../../../MongoDB/mongodb_types';
 import { updateMongoDoc } from '../../../MongoDB/mongoFunc';
-import { MdEdit, MdPadding } from 'react-icons/md';
-import { Timestamp } from 'mongodb';
+import { MdEdit } from 'react-icons/md';
 import { findExpWCallback } from '../../../MongoDB/mongoFunc';
 
 export interface ExperimentListingProps {
@@ -51,11 +50,11 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		setProjectName(project.name);
 	};
 
-	const handleSave = (newProjectName) => {
+	const handleSave = async (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		// updateProjectNameInFirebase(project.expId, projectName);
 		console.log('The handleSave is done for name change');
-		updateMongoDoc(project.expId, 'name', projectName);
+		updateMongoDoc(project.expId, 'name', newProjectName);
+		await refetchExperiments();
 		// Exit the editing mode
 		setIsEditing(false);
 	};
@@ -68,16 +67,16 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 	// useEffect for the expected time to run
-	useEffect(() => {
-		if (project['startedAtEpochMillis'] && !project['finished']) {
-			const timeout = expectedTimeToRun * 60000; // convert minutes to milliseconds
-			const timer = setTimeout(() => {
-				refetchExperiments(); // Call the refetch function after the expected time
-			}, timeout);
+	// useEffect(() => {
+	// 	if (project['startedAtEpochMillis'] && !project['finished']) {
+	// 		const timeout = expectedTimeToRun * 60000; // convert minutes to milliseconds
+	// 		const timer = setTimeout(() => {
+	// 			refetchExperiments(); // Call the refetch function after the expected time
+	// 		}, timeout);
 
-			return () => clearTimeout(timer); // Clear the timer if the component unmounts or the experiment finishes
-		}
-	}, [project['startedAtEpochMillis'], project['finished'], expectedTimeToRun, refetchExperiments]);
+	// 		return () => clearTimeout(timer); // Clear the timer if the component unmounts or the experiment finishes
+	// 	}
+	// }, [project['startedAtEpochMillis'], project['finished'], expectedTimeToRun, refetchExperiments]);
 
 	// useEffect to handle project name editing
 	useEffect(() => {
@@ -123,6 +122,8 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							<>
 								<input
 									type="text"
+									title='Edit project name'
+									className="edit-input"
 									value={projectName}
 									onChange={(e) => setProjectName(e.target.value)}
 									onBlur={handleCancel}
