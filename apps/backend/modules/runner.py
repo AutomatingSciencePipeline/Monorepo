@@ -80,7 +80,8 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
 def _add_to_output_batch(trialExtraFile, ExpRun: int):
     try:
         # Currently only extra CSV files are supported, this will need to be adapted for other file types
-        shutil.copy2(f'{trialExtraFile}', f'ResCsvs/Result{ExpRun}.csv')
+        folderName = trialExtraFile[7:len(trialExtraFile) - 4]
+        shutil.copy2(f'{trialExtraFile}', f'ResCsvs/{folderName}/Result{ExpRun}.csv')
     except Exception as err:
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
@@ -135,7 +136,15 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
 
             if experiment.has_extra_files():
                 try:
-                    _add_to_output_batch(experiment.trialExtraFile, trialNum)
+                    # Check if we have comma
+                    # for loop for each experiment
+                    # ...., ...., 
+                    if ( "," in experiment.trialExtraFile ):
+                        extraFiles = experiment.trialExtraFile.split(',')
+                        for extraFile in extraFiles:
+                            _add_to_output_batch(extraFile, trialNum)
+                            
+                    else: _add_to_output_batch(experiment.trialExtraFile, trialNum)
                 except FileHandlingError as err:
                     _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
                     # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
