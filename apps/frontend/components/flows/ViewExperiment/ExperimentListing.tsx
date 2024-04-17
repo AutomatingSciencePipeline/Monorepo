@@ -22,9 +22,16 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
-	const totalRuns = project['totalExperimentRuns'] ?? 0;
-	const runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
-	const experimentInProgress = !project['finished'] && project['startedAtEpochMillis'];
+	//check if project has been initialized
+	let runsLeft = 0;
+	let experimentInProgress = false;
+
+	if (project) {
+		const totalRuns = project['totalExperimentRuns'] ?? 0;
+		runsLeft = totalRuns - (project['passes'] ?? 0) - (project['fails'] ?? 0);
+		experimentInProgress = !project['finished'] && !!project['startedAtEpochMillis'];
+		console.log('project:', project);
+	}
 	let expectedFinishTime: Date | null = null;
 	let expectedTimeToRun = 0;
 
