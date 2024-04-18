@@ -80,7 +80,20 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
 def _add_to_output_batch(trialExtraFile, ExpRun: int):
     try:
         # Currently only extra CSV files are supported, this will need to be adapted for other file types
-        shutil.copy2(f'{trialExtraFile}', f'ResCsvs/Result{ExpRun}.csv')
+        fileName = trialExtraFile[7:len(trialExtraFile)-4]
+        destination_dir = f'ResCsvs/Result{ExpRun}/'
+        destination_file = f'{destination_dir}{fileName}.csv'
+       
+        # Ensure the directory exists
+        if not os.path.exists(destination_dir):
+            os.makedirs(destination_dir)
+       
+        shutil.copy2(trialExtraFile, destination_file)
+        
+        # Move log file to the same directory
+        if os.path.exists(f'ResCsvs/log{ExpRun}.txt'):
+            shutil.move(f'ResCsvs/log{ExpRun}.txt', destination_dir)
+            
     except Exception as err:
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
@@ -135,107 +148,40 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
 
             if experiment.has_extra_files():
                 try:
-                    _add_to_output_batch(experiment.trialExtraFile, trialNum)
+                    # Check if we have comma
+                    # for loop for each extra file
+                    if experiment.trialExtraFile is not None and ("," in experiment.trialExtraFile):
+                        if (", " in experiment.trialExtraFile):
+                            extraFiles = experiment.trialExtraFile.split(", ")
+                        elif ("," in experiment.trialExtraFile):
+                            extraFiles = experiment.trialExtraFile.split(",")
+                        
+                        for extraFile in extraFiles:
+                            _add_to_output_batch(extraFile, trialNum)
+                    else:
+                        _add_to_output_batch(experiment.trialExtraFile, trialNum)
                 except FileHandlingError as err:
                     _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
                     # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                     continue
 
             try:
-                output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
+                for i in range(1, numOutputs):
+                    output = _get_line_n_of_trial_results_csv(i, experiment.trialResult)
             except GladosUserError as err:
                 _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
                 # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                 continue
             writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-
+            # zip the folders that are inside the output folder
+            shutil.make_archive(f'ResCsvs/Result{trialNum}', 'zip', f'ResCsvs/Result{trialNum}')
+            # delete the non-zipped folder
+            shutil.rmtree(f'ResCsvs/Result{trialNum}')
             explogger.info(f'Trial#{trialNum} completed')
             experiment.passes += 1
             update_mongo_data(expId, 'passes', experiment.passes)
             # expRef.update({'passes': experiment.passes})
         explogger.info("Finished running Trials")
-
-def conduct_experiment(experiment: ExperimentData, expRef):
-    """
-    Call this function when inside the experiment folder!
-    """
-    os.mkdir('configFiles')
-    explogger.info(f"Running Experiment {experiment.expId}")
-
-    numOutputs = 0
-    with open('results.csv', 'w', encoding="utf8") as expResults:
-        paramNames = []
-        writer = csv.writer(expResults)
-        explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
-        for trialNum in range(0, experiment.totalExperimentRuns):
-            startSeconds = time.time()
-            if trialNum == 0:
-                expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
-
-            try:
-                configFileName = create_config_from_data(experiment, trialNum)
-                paramNames = get_config_paramNames('configFiles/0.ini')
-            except Exception as err:
-                raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
-
-            try:
-                _run_trial(experiment, f'configFiles/{configFileName}', trialNum)
-            except (TrialTimeoutError, InternalTrialFailedError) as err:
-                _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
-                continue
-
-            endSeconds = time.time()
-            timeTakenMinutes = (endSeconds - startSeconds) / 60
-
-            if trialNum == 0:
-                estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
-                explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-                expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
-
-                try:
-                    csvHeader = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
-                except GladosUserError as err:
-                    _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
-                    return
-                numOutputs = len(csvHeader)
-                writer.writerow(["Experiment Run"] + csvHeader + paramNames)
-
-            if experiment.has_extra_files():
-                try:
-                    _add_to_output_batch(experiment.trialExtraFile, trialNum)
-                except FileHandlingError as err:
-                    _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
-                    continue
-
-            try:
-                output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
-            except GladosUserError as err:
-                _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
-                continue
-            writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-
-            explogger.info(f'Trial#{trialNum} completed')
-            experiment.passes += 1
-            expRef.update({'passes': experiment.passes})
-        explogger.info("Finished running Trials")
-
-
-def _handle_trial_error(experiment: ExperimentData, expRef, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
-    csvErrorValue = None
-    if isinstance(err, TrialTimeoutError):
-        csvErrorValue = "TIMEOUT"
-        explogger.error(f"Trial#{trialNum} timed out")
-    else:
-        csvErrorValue = "ERROR"
-        explogger.error(f'Trial#{trialNum} Encountered an Error')
-    explogger.exception(err)
-    experiment.fails += 1
-    expRef.update({'fails': experiment.fails})
-    if trialNum == 0:
-        message = f"First trial of {experiment.expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
-        raise ExperimentAbort(message) from err
-    else:
-        writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
 
 def _handle_trial_error_mongo(experiment: ExperimentData, expId, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
     csvErrorValue = None
