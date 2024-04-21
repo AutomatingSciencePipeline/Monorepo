@@ -20,7 +20,7 @@ from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
 from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, retrieve_experiment_data, update_mongo_data
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
-from modules.runner import conduct_experiment, conduct_experiment_mongo
+from modules.runner import conduct_experiment_mongo
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
@@ -164,19 +164,6 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run(expId, None)
         return
     
-    # Retrieve experiment details from firebase
-    # try:
-    #     experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-    #     expRef = experiments.document(expId)
-    #     experimentData = expRef.get().to_dict()
-    #     print("This is the format")
-    #     print(experimentData)
-    # except Exception as err:  # pylint: disable=broad-exception-caught
-    #     explogger.error("Error retrieving experiment data from firebase, aborting")
-    #     explogger.exception(err)
-    #     close_experiment_run(expId, None)
-    #     return
-
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
         hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
