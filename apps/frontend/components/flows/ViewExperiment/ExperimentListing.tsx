@@ -35,7 +35,8 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	let expectedFinishTime: Date | null = null;
 	let expectedTimeToRun = 0;
 
-	if (project['estimatedTotalTimeMinutes'] > 0 && project['startedAtEpochMillis'] && !project['finished']) {
+	// Check if the project has an estimated total time and is in progress
+	if (project['estimatedTotalTimeMinutes'] && project['estimatedTotalTimeMinutes'] > 0 && project['startedAtEpochMillis'] && !project['finished']) {
 		// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
 		expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
 		expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;

@@ -137,6 +137,7 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 update_mongo_data(expId, 'estimatedTotalTimeMinutes', estimatedTotalTimeMinutes)
                 # expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
 
+                # Get the header of the csv file for result
                 try:
                     csvHeader = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
                 except GladosUserError as err:
@@ -165,17 +166,22 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                     # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                     continue
 
+            # Generates giant result file
             try:
-                for i in range(1, numOutputs):
+                # TODO: Hardcoded to 102 for now, will need to be changed to a dynamic value
+                for i in range(1, 102):
                     output = _get_line_n_of_trial_results_csv(i, experiment.trialResult)
+                    writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             except GladosUserError as err:
                 _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
                 # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                 continue
-            writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-            # zip the folders that are inside the output folder
+            # writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+            
+            # Zip the folders that are inside the output folder
             shutil.make_archive(f'ResCsvs/Result{trialNum}', 'zip', f'ResCsvs/Result{trialNum}')
-            # delete the non-zipped folder
+            
+            # Delete the non-zipped folder
             shutil.rmtree(f'ResCsvs/Result{trialNum}')
             explogger.info(f'Trial#{trialNum} completed')
             experiment.passes += 1
