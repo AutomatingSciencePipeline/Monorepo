@@ -63,6 +63,15 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
             lineNum = 0
+            lineBox = []
+            if targetLineNumber == 0:
+                line = None
+                lineCounter = 0
+                for item in reader:
+                    if lineNum == targetLineNumber:
+                        lineBox.append(item)
+                    lineCounter += 1
+                return (lineBox[0], lineCounter)
             for line in reader:
                 if lineNum == targetLineNumber:
                     return line
@@ -108,6 +117,7 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
         writer = csv.writer(expResults)
         explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
         
+        totalLineNumber = 0
         for trialNum in range(0, experiment.totalExperimentRuns):
             startSeconds = time.time()
             if trialNum == 0:
@@ -139,7 +149,10 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
 
                 # Get the header of the csv file for result
                 try:
-                    csvHeader = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
+                    headerAndTrials = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
+                    print(headerAndTrials)
+                    csvHeader = headerAndTrials[0]
+                    totalLineNumber = headerAndTrials[1]
                 except GladosUserError as err:
                     _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
                     # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
@@ -169,7 +182,7 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
             # Generates giant result file
             try:
                 # TODO: Hardcoded to 102 for now, will need to be changed to a dynamic value
-                for i in range(1, 102):
+                for i in range(1, totalLineNumber):
                     output = _get_line_n_of_trial_results_csv(i, experiment.trialResult)
                     writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             except GladosUserError as err:
