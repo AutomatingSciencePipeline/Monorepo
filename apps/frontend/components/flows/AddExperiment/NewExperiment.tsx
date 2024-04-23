@@ -145,6 +145,12 @@ export const NewExperiment = ({ formState, setFormState, copyID, setCopyId, refe
 		}
 	}, [formState]); // TODO adding 'form' causes an update loop
 
+	const [isFolder, setIsFolder] = useState(false);
+
+    // Callback to handle changes to isFolder
+    const handleIsFolderChange = (value) => {
+        setIsFolder(value);
+    };
 	return (
 		<Transition.Root show={open} as={Fragment}>
 			<Dialog
@@ -191,7 +197,7 @@ export const NewExperiment = ({ formState, setFormState, copyID, setCopyId, refe
 
 									{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 									{status === FormStates.Info ? (
-										<InformationStep form={form}></InformationStep>
+										<InformationStep form={form} onIsFolderChange={handleIsFolderChange} ></InformationStep>
 									) : status === FormStates.DumbTextArea ? (
 										<DumbTextArea form={form}></DumbTextArea>
 									) : status === FormStates.Params ? (
@@ -201,7 +207,7 @@ export const NewExperiment = ({ formState, setFormState, copyID, setCopyId, refe
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form={form} id={id} dispatchSignal={dispatchSignal}/>
+										<DispatchStep form={form} id={id} dispatchSignal={dispatchSignal} isFolder={isFolder}/>
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
