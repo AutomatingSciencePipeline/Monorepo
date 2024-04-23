@@ -1,10 +1,9 @@
-import { Fragment } from "react";
-import { InputSection } from "../../../InputSection";
+import { InputSection } from '../../../InputSection';
 import CreatableSelect from 'react-select/creatable';
+import { InputSectionWithCheckBox } from '../../../InputSectionWithCheckBox';
+import { Fragment, useState } from 'react';
 
-export const InformationStep = ({ form, ...props }) => {
-	//add the tag options for the tags
-	// https://react-select.com/creatable
+export const InformationStep = ({ form, onIsFolderChange, ...props }) => {
 	// Create a function that returns the tag options fetches from the mongodb
 	const tagOptions = [
 		{ value: 'java', label: 'java' },
@@ -12,6 +11,16 @@ export const InformationStep = ({ form, ...props }) => {
 		{ value: 'c', label: 'c' },
 		// Add more tags if needed
 	];
+
+	const [isFolder, setIsFolder] = useState(false);
+
+	// Function to handle checkbox change
+	const handleCheckBoxChange = () => {
+		const newIsFolder = !isFolder;
+		setIsFolder(newIsFolder);
+		// Call the callback function passed from the parent component
+		onIsFolderChange(newIsFolder);
+	};
 
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
@@ -36,15 +45,15 @@ export const InformationStep = ({ form, ...props }) => {
 					</div>
 				</InputSection>
 
-				<InputSection header={"Tag"}>
+				<InputSection header={'Tag'}>
 					<div className="sm:col-span-4">
 						<div className="sm:col-span-4">
-							<CreatableSelect {...form.getInputProps("tag")} isMulti options={tagOptions} className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"/>
+							<CreatableSelect {...form.getInputProps('tag')} isMulti options={tagOptions} className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"/>
 						</div>
 					</div>
 				</InputSection>
 
-				<InputSection header={"Trial Result"}>
+				<InputSectionWithCheckBox header={'Trial Result'} isChecked={isFolder} onCheckboxChange={handleCheckBoxChange}>
 					<div className="sm:col-span-4">
 						<input
 							type='text'
@@ -53,7 +62,7 @@ export const InformationStep = ({ form, ...props }) => {
 							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 						/>
 					</div>
-				</InputSection>
+				</InputSectionWithCheckBox>
 				<InputSection header={"Trial's Extra File"}>
 					<div className='sm:col-span-4'>
 						<input
