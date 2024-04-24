@@ -1,6 +1,6 @@
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
-import { ExperimentData } from '../../../../../MongoDB/mongodb_types';
+import { ErrorResponse, ExperimentData } from '../../../../../MongoDB/mongodb_types';
 
 
 const userExperimentsHandler: NextApiHandler<ExperimentData[]> = async (req, res) => {
@@ -8,7 +8,7 @@ const userExperimentsHandler: NextApiHandler<ExperimentData[]> = async (req, res
 	const { userIdtoGet } = req.query;
 
 	if (!userIdtoGet || typeof userIdtoGet !== 'string') {
-		res.status(400).json({ error: 'userId is this from userExperimentsHandler' });
+		console.error('Error contacting MongoDB:', Error);
 		return;
 	}
 
@@ -23,10 +23,10 @@ const userExperimentsHandler: NextApiHandler<ExperimentData[]> = async (req, res
 			.toArray();
 
 		// Respond with the fetched experiments
-		res.status(200).json(experiments);
+		res.status(200).json(experiments as any);
 	} catch (error) {
 		console.error('Error contacting MongoDB:', error);
-		res.status(500).json({ error: 'Failed to fetch experiments from MongoDB' } as ExperimentData[]);
+		res.status(500).json({ error: 'Failed to fetch experiments from MongoDB' } as any);
 	}
 };
 

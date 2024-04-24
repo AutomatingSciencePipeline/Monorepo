@@ -39,10 +39,9 @@ def generate_config_files(experiment: ExperimentData):
     constants = {}
     parameters = {}
     gather_parameters(experiment.hyperparameters, constants, parameters)
-    print("These be the constants", constants)
-    print("Params nowww", parameters)
     configDict = {}
     configIdNumber = 0
+
     for varyingKey, varyingVar in parameters.items():
         explogger.info(f'Keeping {varyingVar} constant')
         possibleParamVals = []
@@ -70,6 +69,8 @@ def generate_config_files(experiment: ExperimentData):
             explogger.info(f'Generated config {configIdNumber}')
             configIdNumber += 1
 
+    contents = os.listdir(os.getcwd())
+ 
     explogger.info("Finished generating configs")
     experiment.configs = configDict
     return configIdNumber

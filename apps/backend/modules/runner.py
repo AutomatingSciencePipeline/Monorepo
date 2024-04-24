@@ -20,6 +20,8 @@ explogger = get_experiment_logger()
 
 
 def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
+    # If they are not going for file / , exclude everything else than the made file to get the name
+    # Files to exclude: configFiles, experiment{expId}, ResCsvs, results.csv
     try:
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
@@ -150,7 +152,6 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 # Get the header of the csv file for result
                 try:
                     headerAndTrials = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
-                    print(headerAndTrials)
                     csvHeader = headerAndTrials[0]
                     totalLineNumber = headerAndTrials[1]
                 except GladosUserError as err:
@@ -164,7 +165,16 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 try:
                     # Check if we have comma
                     # for loop for each extra file
-                    if experiment.trialExtraFile is not None and ("," in experiment.trialExtraFile):
+                    if '*' in experiment.trialExtraFile:
+                        extra_without_star = experiment.trialExtraFile.replace('*', '')
+                        directory_path = f'{extra_without_star}'
+                        
+                        extraFiles = os.listdir(directory_path)
+                
+                        for extraFile in extraFiles:
+                            new_dir = f'{extra_without_star}/{extraFile}'
+                            _add_to_output_batch(new_dir, trialNum)
+                    elif experiment.trialExtraFile is not None and ("," in experiment.trialExtraFile):
                         if (", " in experiment.trialExtraFile):
                             extraFiles = experiment.trialExtraFile.split(", ")
                         elif ("," in experiment.trialExtraFile):
@@ -181,7 +191,6 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
 
             # Generates giant result file
             try:
-                # TODO: Hardcoded to 102 for now, will need to be changed to a dynamic value
                 for i in range(1, totalLineNumber):
                     output = _get_line_n_of_trial_results_csv(i, experiment.trialResult)
                     writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
