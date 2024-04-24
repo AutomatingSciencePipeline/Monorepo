@@ -29,9 +29,16 @@ export const DispatchStep = ({ form, id, dispatchSignal, isFolder }) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
 		console.log('Also submitting mongo experiment');
-
+		console.log(form.values['trialExtraFile']);
 		submitMongoExperiment(form.values, userId as string).then(async (expId) => {
 			const uploadResponse = await saveToBackend(expId, files[0]);
+			if (isFolder) {
+				let concatVal = form.values['trialExtraFile'];
+				console.log('Includes');
+				console.log(!concatVal.includes('*'));
+				form.values['trialExtraFile']  = concatVal + '*';
+				
+			}
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId['experimentID']} to the backend`);
 
@@ -39,7 +46,7 @@ export const DispatchStep = ({ form, id, dispatchSignal, isFolder }) => {
 					method: 'POST',
 					headers: new Headers({ 'Content-Type': 'application/json' }),
 					credentials: 'same-origin',
-					body: JSON.stringify({ id: expId['experimentID'], isFolder: isFolder}),
+					body: JSON.stringify({ id: expId['experimentID']}),
 				});
 				if (response.ok) {
 					console.log('Response from backend received', response);
