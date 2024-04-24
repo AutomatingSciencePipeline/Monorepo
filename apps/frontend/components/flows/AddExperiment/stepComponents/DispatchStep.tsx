@@ -33,11 +33,10 @@ export const DispatchStep = ({ form, id, dispatchSignal, isFolder }) => {
 		submitMongoExperiment(form.values, userId as string).then(async (expId) => {
 			const uploadResponse = await saveToBackend(expId, files[0]);
 			if (isFolder) {
-				let concatVal = form.values['trialExtraFile'];
+				const concatVal = form.values['trialExtraFile'];
 				console.log('Includes');
 				console.log(!concatVal.includes('*'));
-				form.values['trialExtraFile']  = concatVal + '*';
-				
+				form.values['trialExtraFile'] = `${concatVal}*`;
 			}
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId['experimentID']} to the backend`);

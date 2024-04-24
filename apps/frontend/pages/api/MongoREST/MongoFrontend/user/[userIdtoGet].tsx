@@ -1,6 +1,6 @@
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
-import { ErrorResponse, ExperimentData } from '../../../../../MongoDB/mongodb_types';
+import { ExperimentData } from '../../../../../MongoDB/mongodb_types';
 
 
 const userExperimentsHandler: NextApiHandler<ExperimentData[]> = async (req, res) => {
