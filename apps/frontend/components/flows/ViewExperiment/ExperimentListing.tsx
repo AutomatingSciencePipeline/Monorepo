@@ -2,7 +2,7 @@
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentDocumentId } from '../../../firebase/db';
-import { ExperimentData } from '../../../MongoDB/mongodb_types';
+import { ExperimentData } from '../../../firebase/db_types';
 import { updateMongoDoc } from '../../../MongoDB/mongoFunc';
 import { MdEdit } from 'react-icons/md';
 import { findExpWCallback } from '../../../MongoDB/mongoFunc';
@@ -155,7 +155,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							</>
 						)}
 					</span>
-					<div className='flex flex-wrap gap-2'>
+					{/* <div className='flex flex-wrap gap-2'>
 						{project['tag'] && Array.isArray(project['tag']) ? project['tag'].map((tag, index) => (
 							<span
 								key={index}
@@ -164,7 +164,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 								{tag.label}
 							</span>
 						)) : null}
-					</div>
+					</div> */}
 
 				</div>
 				{project['finished'] == true ?
