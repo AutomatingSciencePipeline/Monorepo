@@ -9,4 +9,8 @@ setup/temp/
 
 # MongoDB data volume
 data/*
+
+# Mkdocs generated files
+docs/site/*
+
 # All below this point is uncategorized (categorize them!)

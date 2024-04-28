@@ -1,0 +1,26 @@
+# Configuration, see https://www.mkdocs.org/user-guide/configuration/
+site_name: GLADOS
+site_description: Documentation for GLADOS - Automated Science Pipeline
+site_url: https://automatingsciencepipeline.github.io/Monorepo/
+
+repo_url: https://github.com/AutomatingSciencePipeline/Monorepo
+edit_uri: ''
+
+# Read about themes here: https://www.mkdocs.org/user-guide/choosing-your-theme/
+theme: 
+  name: material
+  features:
+    - content.code.copy
+
+
+# Site navigation - remember to update when creating new pages!
+nav:
+  - Home: index.md
+  - About GLADOS: about.md
+  - Tutorial:
+    - Usage: tutorial/usage.md
+    - Dev Installation: tutorial/installation.md
+    - Troubleshooting: tutorial/troubleshooting.md
+  - Documentation:
+    - Updating Guide: documentation/guide.md
+
