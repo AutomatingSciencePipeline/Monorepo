@@ -46,3 +46,5 @@ mkdocs build
 There are many [MkDocs Plugins](https://github.com/mkdocs/catalog) that may be useful while updating documentation, so consider them as this documentation evolves! [More information about plugins here](https://www.mkdocs.org/dev-guide/plugins/).
 
 The Github Action for automatic deployment was found [here](https://squidfunk.github.io/mkdocs-material/publishing-your-site/#with-github-actions), slightly changed.
+
+If time allows for it, consider looking at [Sphinx](https://www.sphinx-doc.org/en/master/) instead, for documentation. It seems more advanced, with more features and apparently better code integration with documentation, but may be harder to set up and learn.
