@@ -20,7 +20,7 @@ import classNames from 'classnames';
 import Image from 'next/image';
 import { SearchBar } from '../components/SearchBar';
 import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
-import { ExperimentData } from '../firebase/db_types';
+import { ExperimentData } from '../MongoDB/mongodb_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from './api/queue';
 

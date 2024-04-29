@@ -57,6 +57,12 @@ export enum HyperparameterTypes {
     BOOLEAN = 'boolean',
 }
 
+export interface TagType {
+    value: string;
+    label: string;
+}
+
+export type Tag = TagType[] | string | null;
 export interface ExperimentData {
     // TODO make sure these match what python expects as well
     creator: string;
@@ -65,7 +71,7 @@ export interface ExperimentData {
     verbose: boolean;
     workers: number;
     expId: string; // TODO do we want to ensure this doesn't get stored in fb itself?
-    tag: string;
+    tag: Tag;
     trialExtraFile: FileName;
     trialResult: FileName;
     timeout: number;

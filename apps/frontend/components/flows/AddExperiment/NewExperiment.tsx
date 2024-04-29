@@ -5,17 +5,13 @@ import Parameter from '../../Parameter';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../utils/validators';
 
-import { firebaseApp } from '../../../firebase/firebaseClient';
-import { getDoc, getFirestore, doc } from 'firebase/firestore';
-import { findExp, saveToBackend, submitMongoExperiment } from '../../../MongoDB/mongoFunc';
+import { findExp } from '../../../MongoDB/mongoFunc';
 import { DispatchStep } from './stepComponents/DispatchStep';
 import { InformationStep } from './stepComponents/InformationStep';
 import { ParamStep } from './stepComponents/ParamStep';
 import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
-import { DB_COLLECTION_EXPERIMENTS } from '../../../firebase/db';
-import { DropzoneProps } from '@mantine/dropzone';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 
