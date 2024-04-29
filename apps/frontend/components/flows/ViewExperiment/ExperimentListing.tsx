@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
@@ -22,7 +23,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
 
-	//check if project has been initialized
+	// check if project has been initialized
 	let runsLeft = 0;
 	let experimentInProgress = false;
 
@@ -38,7 +39,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	// Check if the project has an estimated total time and is in progress
 	if (project['estimatedTotalTimeMinutes'] && project['estimatedTotalTimeMinutes'] > 0 && project['startedAtEpochMillis'] && !project['finished']) {
 		// Calculate the expected finish time by adding expectedTimeToRun (in minutes) to the start time
-		expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100; // TODO: solve error when deleting experiment
+		expectedTimeToRun = Math.round(project['estimatedTotalTimeMinutes'] * 100) / 100;
 		expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 		// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
 		console.log('expectedFinishTime: ', new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000));

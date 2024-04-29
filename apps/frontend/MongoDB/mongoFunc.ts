@@ -1,6 +1,4 @@
-// import { ExperimentData } from '../MongoDB/mongodb_types';
-import { ExperimentData } from '../firebase/db_types';
-//TODO: error for having the same import using from mongodb_types and db_types from firebase
+import { ExperimentData } from '../MongoDB/mongodb_types';
 
 export const submitMongoExperiment = async (values: Partial<ExperimentData>, userId: string): Promise<string> => {
 	const apiUrl = '/api/MongoREST/SubmitExperimentHandler';
