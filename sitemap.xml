@@ -2,42 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/about/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/repository_guide/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/documentation/guide/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://automatingsciencepipeline.github.io/Monorepo/tutorial/development_installation/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <loc>https://automatingsciencepipeline.github.io/Monorepo/tutorial/developer_installation/</loc>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/tutorial/installation/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/tutorial/troubleshooting/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

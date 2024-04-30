@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/installation/">
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/developer_installation/">
       
       
-        <link rel="prev" href="../usage/">
+        <link rel="prev" href="../installation/">
       
       
-        <link rel="next" href="../developer_installation/">
+        <link rel="next" href="../troubleshooting/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Installation - GLADOS</title>
+        <title>Developer Installation - GLADOS</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#developer-installation" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Developer Installation
             
           </span>
         </div>
@@ -350,6 +350,27 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -366,7 +387,7 @@
           
   
   <span class="md-ellipsis">
-    Installation
+    Developer Installation
   </span>
   
 
@@ -377,7 +398,7 @@
         
   
   <span class="md-ellipsis">
-    Installation
+    Developer Installation
   </span>
   
 
@@ -399,9 +420,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#dependencies" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Dependencies
     </span>
   </a>
   
@@ -489,20 +510,68 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-the-system-locally" class="md-nav__link">
+  <a href="#tool-installation" class="md-nav__link">
     <span class="md-ellipsis">
-      Run the System Locally
+      Tool Installation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#ide-setup" class="md-nav__link">
     <span class="md-ellipsis">
-      Next Steps
+      IDE Setup
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="IDE Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-linter-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Linter Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-launching-with-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Launching with Docker
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extras" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extras
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extras">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remote-development-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remote Development Extensions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -510,27 +579,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../developer_installation/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Developer Installation
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -674,9 +722,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#dependencies" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Dependencies
     </span>
   </a>
   
@@ -764,20 +812,68 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-the-system-locally" class="md-nav__link">
+  <a href="#tool-installation" class="md-nav__link">
     <span class="md-ellipsis">
-      Run the System Locally
+      Tool Installation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#ide-setup" class="md-nav__link">
     <span class="md-ellipsis">
-      Next Steps
+      IDE Setup
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="IDE Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-linter-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Linter Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-launching-with-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Launching with Docker
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extras" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extras
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extras">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remote-development-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remote Development Extensions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -796,18 +892,18 @@
                   
 
 
-<h1 id="installation">Installation</h1>
-<h2 id="overview">Overview</h2>
-<p>This section covers how to, as a user of the Automating Science Project system, run a simulation of the system on your local machine.</p>
-<p>If you don't want to run your own copy, you can instead access the live website <a href="http://glados-lb.csse.rose-hulman.edu/">here</a> and jump straight to <a href="../usage/">Running an Experiment</a>.</p>
+<h1 id="developer-installation">Developer Installation</h1>
+<p>This guide contains a short tutorial on getting a local development environment up and running.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>As of March 2024, we have shifted towards running the system on Kubernetes, rather than Docker. These steps still work with the current codebase, but as we fully migrate the codebase to our Kubernetes version, these steps will need to be updated accordingly.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>These steps mainly concern hosting a local system on a Windows computer. Steps on other OS's will have the same steps, although the specific steps on installation, as well as configuration, may differ.</p>
+<p>These steps mainly concern developing on a Windows computer, with Git Bash. Steps on other OS's, or with WSL terminal, will have the same steps, although the specific steps on installation, as well as configuration, may differ.</p>
 </div>
+<h2 id="dependencies">Dependencies</h2>
+<p>If you have already followed the <a href="../installation/">Installation guide</a>, <a href="./#tool-installation">skip ahead</a>. If not, continue reading.</p>
 <h2 id="required-tools">Required Tools</h2>
 <h3 id="git">Git</h3>
 <p>Git is a code version management tool that integrates with Github, where our codebase is stored. </p>
@@ -843,24 +939,57 @@ For security reasons, these cannot be publicly distributed with the rest of the 
 <p>The file should be named exactly <code>.env</code> and placed in the root folder of the repository.</p>
 <h4 id="alternative-set-up-your-own-env-file">Alternative: Set up your own .env file</h4>
 <p>You can create your own <code>.env</code> file, if you want to set up your own GLADOS system. There is an <code>.example.env</code> file in the repository that has sample fields to fill in. During this process, you will need to set up a Firebase project for account management. Note that the frontend code has the Firebase public key in it, which does not need to be secure, but will need to be replaced when hosting your own GLADOS system.</p>
-<h2 id="run-the-system-locally">Run the System Locally</h2>
-<p>Once you have the above taken care of, you can use Docker to spin up a copy of the system.</p>
-<ol>
-<li>Open a terminal in Monorepo root folder (<code>Monorepo/</code>)</li>
-<li>Run <code>docker compose up --build</code></li>
-<li>This will start up the Docker Compose for the <strong>production version</strong> of the project, which will locally host a backend, frontend, and database for you. With the included <code>.env</code> file, it will point to the production Firebase project for authentication.</li>
-<li>Optionally use the flag <code>-d</code> to detach it from the terminal window, which means Docker will keep running even when the terminal is closed.</li>
-<li>If you see an error message like <code>open //./pipe/docker_engine: The system cannot find the file specified</code> you probably don't have Docker started.</li>
-<li>The <code>--build</code> flag indicates it should build the containers from scratch. You can exclude this flag from future runs, but you should build again after pulling new code from the repo.</li>
-<li>If this succeeds, the last message in the console should be similar to: <code>glados-backend  | Press CTRL+C to quit</code></li>
-<li>If this fails, see the troubleshooting steps below</li>
-<li>Go to <a href="http://localhost:3000">http://localhost:3000</a> (or another address, if the command output reports a different url) in your browser</li>
-<li>Because you're running the production version, pages should load nearly instantly. The developer version might take a bit to load.</li>
-<li>Once on the site, sign up for an account or log in.</li>
-</ol>
-<p>Now you are ready to run an experiment.</p>
-<h2 id="next-steps">Next Steps</h2>
-<p>See how to <a href="../usage/">run an experiment</a>.</p>
+<h2 id="tool-installation">Tool Installation</h2>
+<p>We include a <code>dev-install.sh</code> script that assists in the process of installing everything needed to develop on the system. This setup process includes:</p>
+<ul>
+<li>Installing Docker</li>
+<li>Installing Python 3.8 via pyenv</li>
+<li>Creating pipenvs for both the backend and documentation packages, containing project dependencies</li>
+<li>Installing Node.JS via npm, with project dependencies</li>
+</ul>
+<p>Of course, it is recommended to look through the scripts themselves, before running it, for a sanity check.</p>
+<p>To run the script, run the following command with a Git Bash terminal in the root folder of the repository:</p>
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>dev-install.sh
+</code></pre></div>
+<p>This process may require you to close and reopen the terminal, uninstall programs you may have, or restart your computer. You may need to run the script multiple times, as a result.</p>
+<h2 id="ide-setup">IDE Setup</h2>
+<p>We strongly suggest using Visual Studio Code (VSCode) as your IDE.
+Numerous configuration files and utilities, such as suggested extensions, are already included with the repo.</p>
+<p>It can be downloaded <a href="https://code.visualstudio.com/download">here</a>.</p>
+<p>After installing VSCode, you should install the recommended extensions after opening the repository in VSCode. A prompt may appear after opening the project, but if not, you can also go to the Extensions view, filter by '@recommended', and install the extensions under 'Workspace Recommendations'.</p>
+<p>Configure the python interpreter via Ctrl+Shift+P &gt; <code>Python: Select Interpreter</code> &gt; <code>Use Python from 'python.defaultInterpreterPath' setting</code></p>
+<h3 id="check-linter-setup">Check Linter Setup</h3>
+<p>In order to test the frontend linter, we'll introduce a syntax error and make sure that it reports it as a problem. You can undo this change after you're done.</p>
+<ul>
+<li>Open <code>/apps/frontend/pages/_app.tsx</code></li>
+<li>Add the line <code>var unused = 'hi';</code> as shown in the screenshot below and confirm that the same 3 errors are reported when you hover over the symbol <code>unused</code>.</li>
+</ul>
+<p><img alt="Intentional Error" src="https://i.imgur.com/6at100I.png" /></p>
+<p>If the linter doesn't detect 3 errors, make sure the recommended extensions are installed, and check the VSCode "Output" View, select ESLint from the dropdown, and check for any errors.</p>
+<p>You may run into CI issues, with build failures, without a working linter.</p>
+<p>You are now fully set up to develop on the system!</p>
+<h2 id="quick-launching-with-docker">Quick Launching with Docker</h2>
+<p>You can quickly build and launch all service containers via VSCode Tasks.</p>
+<p>Ctrl+Shift+P &gt; <code>Tasks: Run Task</code> &gt; <code>DEVELOPMENT Docker Compose Up (Attached)</code></p>
+<p>If you don't want to use VSCode tasks to start the commands, look at the <code>.vscode/tasks.json</code> file to see what commands are run behind the scenes.</p>
+<p>This supports enable hot reloading for the backend and frontend.
+Once the docker containers are built (this will take a while for the first run) you should start seeing log messages from the containers.</p>
+<p>The Docker Desktop application will tell you what port the frontend is accessible from, but it should match the port specified in your <code>.env</code> file.</p>
+<p><img alt="Docker Desktop screenshot" src="https://i.imgur.com/W8zJPks.png" /></p>
+<p>Click on the link shown in the screenshot and it should open a page to the frontend in your browser.
+Once you try to connect, the frontend will start to build for hot reloading.</p>
+<p>The frontend's hot reloading is really slow at first but gets better after its first builds are done. It may take up to <strong>a few minutes</strong> to turn on for the first time.
+While it is building, your browser will be sitting on a blank page still trying to connect. This is normal.</p>
+<p>After it finishes loading, you should be taken to the homepage.</p>
+<h2 id="extras">Extras</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These are optional resources that you may consider using, although we have found a simpler setup to work better.</p>
+</div>
+<h3 id="remote-development-extensions">Remote Development Extensions</h3>
+<p>The Remote Development extension pack for VS Code allows you to connect your IDE to connect to remote servers, or containers, and develop from them as if they were your local computer.</p>
+<p>It can be installed with <a href="vscode:extension/ms-vscode-remote.vscode-remote-extensionpack">this quick install link</a>
+or downloaded via its <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack">marketplace page</a>.</p>
 
 
 

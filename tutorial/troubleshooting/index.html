@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/troubleshooting/">
       
       
-        <link rel="prev" href="../installation/">
+        <link rel="prev" href="../developer_installation/">
       
       
         <link rel="next" href="../../documentation/guide/">
@@ -74,6 +74,11 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
+      
+        
+        <a href="#troubleshooting" class="md-skip">
+          Skip to content
+        </a>
       
     </div>
     <div data-md-component="announce">
@@ -352,7 +357,28 @@
         
   
   <span class="md-ellipsis">
-    Dev Installation
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer_installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Installation
   </span>
   
 
@@ -375,6 +401,19 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         
@@ -385,6 +424,58 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#docker-startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Startup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shut-down-your-local-copy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shut Down your Local Copy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Shut Down your Local Copy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correctly-close-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Correctly Close Docker
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -444,7 +535,7 @@
         
   
   <span class="md-ellipsis">
-    Updating Guide
+    Updating Documentation
   </span>
   
 
@@ -457,6 +548,26 @@
           </ul>
         </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    (Old) Repository Guide
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -478,6 +589,49 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#docker-startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Startup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shut-down-your-local-copy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shut Down your Local Copy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Shut Down your Local Copy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correctly-close-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Correctly Close Docker
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -492,9 +646,62 @@
                   
 
 
-  <h1>Troubleshooting</h1>
-
-
+<h1 id="troubleshooting">Troubleshooting</h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of March 2024, we have shifted towards running the system on Kubernetes, rather than Docker. These steps still work with the current codebase, but as we fully migrate the codebase to our Kubernetes version, these steps will need to be updated accordingly.</p>
+</div>
+<p>You can view the logs or output of a specific docker container by clicking on its row in the Docker Desktop application.</p>
+<h2 id="docker-startup">Docker Startup</h2>
+<ul>
+<li>Docker Engine not started</li>
+<li>Fix: Docker Desktop probably isn't on; turn it on. If it is on, open the GUI to look for errors.</li>
+<li>Error message like below:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>error<span class="w"> </span>during<span class="w"> </span>connect:<span class="w"> </span>this<span class="w"> </span>error<span class="w"> </span>may<span class="w"> </span>indicate<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>docker<span class="w"> </span>daemon<span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>running:<span class="w"> </span>Get<span class="w"> </span><span class="s2">&quot;http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.24/containers/json?all=1&amp;filters=%7B%22label%22%3A%7B%22com.docker.compose.project%3Dglados-project%22%3Atrue%7D%7D&quot;</span>:<span class="w"> </span>open<span class="w"> </span>//./pipe/docker_engine:<span class="w"> </span>The<span class="w"> </span>system<span class="w"> </span>cannot<span class="w"> </span>find<span class="w"> </span>the<span class="w"> </span>file<span class="w"> </span>specified.
+</code></pre></div>
+<ul>
+<li>Docker Desktop perpetually stuck on "Docker Desktop is starting..."</li>
+<li><a href="https://stackoverflow.com/questions/43041331/docker-forever-in-docker-is-starting-at-windows-task">See this stackoverflow post</a></li>
+<li>Or <a href="https://brightersidetech.com/docker-desktop-starting-forever-solved/">this post</a></li>
+<li>Or, try manually installing any WSL distribution (ex. Ubuntu, Alpine) through the Microsoft Store</li>
+<li>
+<p>Or, try turning off WSL support in optionalfeatures.exe and re-running the Docker Desktop installer so that it re-enables it itself (the approach from <a href="https://stackoverflow.com/a/63771669">here</a>)</p>
+</li>
+<li>
+<p><code>level=warning msg="The \"FIREBASE_KEY\" variable is not set. Defaulting to a blank string."</code></p>
+</li>
+<li>You need to obtain or set up a .env file as described in the section above.</li>
+</ul>
+<!-- cspell:ignore HRESULT -->
+<ul>
+<li>While building Docker, there might be an exception like this: <code>Error response from daemon: status code not OK but 500: Unhandled exception: SQLITE_CONSTRAINT_UNIQUE (Exception from HRESULT: 0x87AF0813)</code></li>
+<li>Go to Windows Docker Desktop App &gt; Setting &gt; Resources &gt; File Sharing and add the directory that you have the MonoRepo.</li>
+<li>Restart your Docker and rebuild it.</li>
+<li>
+<p>Check out this <a href="https://stackoverflow.com/questions/60754297/docker-compose-failed-to-build-filesharing-has-been-cancelled">stackoverflow post</a></p>
+</li>
+<li>
+<p>After building the container, you might run into an error <code>glados-mongodb exited with code 14
+dependency failed to start: container glados-mongodb exited (14)</code></p>
+</li>
+<li>Go to the Docker Desktop application's Settings &gt; General and check if "User the WSL 2 based engine" checkbox is checked (It should be enabled)</li>
+</ul>
+<h2 id="shut-down-your-local-copy">Shut Down your Local Copy</h2>
+<p>To stop the system, you must shut down the docker containers. There are a few ways to do this:</p>
+<ul>
+<li>In the repo root, run the command <code>docker compose down</code></li>
+<li>If you did not use the <code>-d</code> flag when starting the docker compose, using <code>Ctrl+C</code> will shut down the compose and containers.</li>
+<li>Use the Docker Desktop user interface 'Stop' button on the collection</li>
+</ul>
+<h3 id="correctly-close-docker">Correctly Close Docker</h3>
+<p>Docker is very convenient for modular systems and development,
+but unfortunately, it can be quite a memory hog.
+In Windows task manager, it will show up as <code>Vmmem</code>,
+since it's using the WSL2 backend.</p>
+<p>Once you're done using it, make sure to 'Quit Docker Desktop' from the tray icon (Windows) when you're done
+to get your memory back.</p>
+<p><img alt="Quit Docker Desktop" src="https://i.imgur.com/ko3vFY2.png" /></p>
 
 
 

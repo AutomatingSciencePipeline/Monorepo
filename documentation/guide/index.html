@@ -16,13 +16,15 @@
         <link rel="prev" href="../../tutorial/troubleshooting/">
       
       
+        <link rel="next" href="../../repository_guide/">
+      
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.19">
     
     
       
-        <title>Updating Guide - GLADOS</title>
+        <title>Updating Documentation - GLADOS</title>
       
     
     
@@ -110,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Updating Guide
+              Updating Documentation
             
           </span>
         </div>
@@ -353,7 +355,28 @@
         
   
   <span class="md-ellipsis">
-    Dev Installation
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/developer_installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Installation
   </span>
   
 
@@ -448,7 +471,7 @@
           
   
   <span class="md-ellipsis">
-    Updating Guide
+    Updating Documentation
   </span>
   
 
@@ -459,7 +482,7 @@
         
   
   <span class="md-ellipsis">
-    Updating Guide
+    Updating Documentation
   </span>
   
 
@@ -528,6 +551,26 @@
           </ul>
         </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    (Old) Repository Guide
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -613,27 +656,31 @@
 <p>Documentation is powered by <a href="https://www.mkdocs.org/">MkDocs</a> with <a href="https://squidfunk.github.io/mkdocs-material/">MkDocs Material</a>, hosted on <a href="https://pages.github.com/">Github Pages</a>. Older docs still exist on the <a href="https://github.com/AutomatingSciencePipeline/Monorepo/wiki">Monorepo's Github Wiki</a>, but it is being migrated to this page. </p>
 <h2 id="setup">Setup</h2>
 <p>For developers, a MkDocs setup is included as part of the dev install script. When working with the documentation locally, remember to activate the venv:</p>
-<pre><code>source docs/.venv/Scripts/activate
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>docs/.venv/Scripts/activate
+</code></pre></div>
 <p>Otherwise, mkdocs commands will likely not work.</p>
 <p>To exit the venv, while in the venv, run</p>
-<pre><code>deactivate
-</code></pre>
+<div class="highlight"><pre><span></span><code>deactivate
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For any mkdocs commands, you must be in the outermost <code>docs</code> folder for it to find your files correctly.</p>
+</div>
 <h2 id="updating">Updating</h2>
 <p>Updating documentation is as simple as updating Markdown files, all contained within the <code>docs</code> folder in the Monorepo. </p>
-<p>To preview your changes, this will build the site locally, with automatic updates as you make changes:</p>
-<pre><code>mkdocs serve
-</code></pre>
+<p>To preview your changes, this will build the site locally, with automatic updates as you make changes:
+<div class="highlight"><pre><span></span><code>mkdocs<span class="w"> </span>serve
+</code></pre></div></p>
 <h2 id="deploying">Deploying</h2>
 <p>With Github Actions, updates to the <code>main</code> branch will automatically build and deploy the static site to the <code>gh-pages</code> branch.</p>
-<p>To deploy manually, run</p>
-<pre><code>mkdocs gh-deploy --force
-</code></pre>
+<p>To deploy manually, run
+<div class="highlight"><pre><span></span><code>mkdocs<span class="w"> </span>gh-deploy<span class="w"> </span>--force
+</code></pre></div></p>
 <p>This updates the <code>gh-pages</code> branch with the static site. Keep in mind, if there are unpublished changes, it will display those changes as well, so beware!</p>
 <!-- TODO: maybe put this warning in a warning block -->
-<p>To preview what files will be generated and published, this generates the static website files under <code>docs/site/</code>:</p>
-<pre><code>mkdocs build
-</code></pre>
+<p>To preview what files will be generated and published, this generates the static website files under <code>docs/site/</code>:
+<div class="highlight"><pre><span></span><code>mkdocs<span class="w"> </span>build
+</code></pre></div></p>
 <h2 id="notes">Notes</h2>
 <p>There are many <a href="https://github.com/mkdocs/catalog">MkDocs Plugins</a> that may be useful while updating documentation, so consider them as this documentation evolves! <a href="https://www.mkdocs.org/dev-guide/plugins/">More information about plugins here</a>.</p>
 <p>The Github Action for automatic deployment was found <a href="https://squidfunk.github.io/mkdocs-material/publishing-your-site/#with-github-actions">here</a>, slightly changed.</p>
