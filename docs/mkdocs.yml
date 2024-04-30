@@ -23,6 +23,12 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
+# Markdown Extensions supported by mkdocs-material here: https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/
+markdown_extensions:
+  # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 # Site navigation - remember to update when creating new pages!
 nav:

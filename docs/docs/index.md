@@ -2,7 +2,7 @@
 
 ## For Users
 
-When you're on the Rose-Hulman internal network, you can access the deployed project at <http://glados.csse.rose-hulman.edu>.
+When you're on the Rose-Hulman internal network, you can access the deployed project at <http://glados-lb.csse.rose-hulman.edu>.
 
 **To get a local copy of the system running on your own computer**: Start by following the [User guide](tutorial/installation.md).
 
