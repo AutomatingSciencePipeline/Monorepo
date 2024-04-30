@@ -1,6 +1,5 @@
 import { InputSection } from '../../../InputSection';
 import CreatableSelect from 'react-select/creatable';
-import { InputSectionWithCheckBox } from '../../../InputSectionWithCheckBox';
 import { Fragment, useState } from 'react';
 
 export const InformationStep = ({ form, onIsFolderChange, ...props }) => {
@@ -11,16 +10,6 @@ export const InformationStep = ({ form, onIsFolderChange, ...props }) => {
 		{ value: 'c', label: 'c' },
 		// Add more tags if needed
 	];
-
-	const [isFolder, setIsFolder] = useState(false);
-
-	// Function to handle checkbox change
-	const handleCheckBoxChange = () => {
-		const newIsFolder = !isFolder;
-		setIsFolder(newIsFolder);
-		// Call the callback function passed from the parent component
-		onIsFolderChange(newIsFolder);
-	};
 
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
@@ -53,7 +42,7 @@ export const InformationStep = ({ form, onIsFolderChange, ...props }) => {
 					</div>
 				</InputSection>
 
-				<InputSectionWithCheckBox header={'Trial Result'} isChecked={isFolder} onCheckboxChange={handleCheckBoxChange}>
+				<InputSection header={'Trial Result'}>
 					<div className="sm:col-span-4">
 						<input
 							type='text'
@@ -62,9 +51,12 @@ export const InformationStep = ({ form, onIsFolderChange, ...props }) => {
 							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 						/>
 					</div>
-				</InputSectionWithCheckBox>
+				</InputSection>
 				<InputSection header={"Trial's Extra File"}>
 					<div className='sm:col-span-4'>
+						<p className='text-sm text-gray-500'>
+							To capture all files in a directory, add &apos;/*&apos; after the directory name
+						</p>
 						<input
 							type='text'
 							placeholder='Name and extension of the output CSV file'
