@@ -4,7 +4,20 @@ site_description: Documentation for GLADOS - Automated Science Pipeline
 site_url: https://automatingsciencepipeline.github.io/Monorepo/
 
 repo_url: https://github.com/AutomatingSciencePipeline/Monorepo
-edit_uri: ''
+edit_uri: '' # edit is hidden
+
+# Site navigation - remember to update when creating new pages!
+nav:
+  - Home: index.md
+  - About GLADOS: about.md
+  - Tutorial:
+    - Usage: tutorial/usage.md
+    - Installation: tutorial/installation.md
+    - Developer Installation: tutorial/developer_installation.md
+    - Troubleshooting: tutorial/troubleshooting.md
+  - Documentation:
+    - Updating Documentation: documentation/guide.md
+  - (Old) Repository Guide: repository_guide.md
 
 # Read about themes here: https://www.mkdocs.org/user-guide/choosing-your-theme/
 theme: 
@@ -29,15 +42,4 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-
-# Site navigation - remember to update when creating new pages!
-nav:
-  - Home: index.md
-  - About GLADOS: about.md
-  - Tutorial:
-    - Usage: tutorial/usage.md
-    - Dev Installation: tutorial/installation.md
-    - Troubleshooting: tutorial/troubleshooting.md
-  - Documentation:
-    - Updating Guide: documentation/guide.md
 

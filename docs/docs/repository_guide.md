@@ -1,6 +1,8 @@
-# This page is currently being migrated, and consists of old information
-
 # Repository Guide
+
+!!! warning
+
+    This document is out of date, originating from the 2022-23 team, and is currently being migrated. There are some broken links, and some unfinished content. 
 
 In order to keep the entire codebase in sync as it is developed,
 we have opted to organize every service into a singular monorepo.

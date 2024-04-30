@@ -37,8 +37,6 @@ Directions to fix that can be found [here](https://icij.gitbook.io/datashare/faq
 To get Docker to work properly, you will need to install WSL.
 This may fail for Windows. In this case, check that virtualization is enabled in the BIOS.
 
-
-
 ## Retrieve the Code
 
 In a location of your choice in a drive with at least 1 GB of free space,
