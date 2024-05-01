@@ -9,4 +9,5 @@ setup/temp/
 
 # MongoDB data volume
 data/*
+
 # All below this point is uncategorized (categorize them!)
