@@ -10,22 +10,28 @@
       
       
       
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/infrastructure/kubernetes/">
       
       
+        <link rel="prev" href="../../documentation/guide/">
       
-      <link rel="icon" href="/Monorepo/assets/images/favicon.png">
+      
+        <link rel="next" href="../../cheatsheet/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.19">
     
     
       
-        <title>GLADOS</title>
+        <title>Kubernetes - GLADOS</title>
       
     
     
-      <link rel="stylesheet" href="/Monorepo/assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
       
         
-        <link rel="stylesheet" href="/Monorepo/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -44,7 +50,7 @@
       
     
     
-    <script>__md_scope=new URL("/Monorepo/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -69,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#kubernetes" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -81,7 +92,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/Monorepo/." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
+    <a href="../.." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -101,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Kubernetes
             
           </span>
         </div>
@@ -214,7 +225,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/Monorepo/." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
+    <a href="../.." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -244,7 +255,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -264,7 +275,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/about/" class="md-nav__link">
+      <a href="../../about/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -319,7 +330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/tutorial/usage/" class="md-nav__link">
+      <a href="../../tutorial/usage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -340,7 +351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/tutorial/installation/" class="md-nav__link">
+      <a href="../../tutorial/installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -361,7 +372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/tutorial/developer_installation/" class="md-nav__link">
+      <a href="../../tutorial/developer_installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -382,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/tutorial/troubleshooting/" class="md-nav__link">
+      <a href="../../tutorial/troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -445,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/documentation/guide/" class="md-nav__link">
+      <a href="../../documentation/guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -470,17 +481,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -494,7 +507,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Infrastructure
@@ -505,10 +518,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/Monorepo/infrastructure/kubernetes/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Kubernetes
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -517,6 +550,80 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#virtualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Virtualization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Images
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kubernetes-terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubernetes Terminology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Cluster
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Networking
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -536,7 +643,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/cheatsheet/" class="md-nav__link">
+      <a href="../../cheatsheet/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -556,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Monorepo/repository_guide/" class="md-nav__link">
+      <a href="../../repository_guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -586,6 +693,70 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#virtualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Virtualization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Images
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kubernetes-terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubernetes Terminology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Cluster
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Networking
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -597,8 +768,64 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+<h1 id="kubernetes">Kubernetes</h1>
+<p>This section gives an overview and an introduction to Kubernetes, aiming to explain concepts to someone brand new to virtualization and distributed systems.</p>
+<p>For those who have some familiarization with virtualization, and/or have worked with Docker, <a href="#kubernetes-terminology">skip ahead</a>.</p>
+<h2 id="virtualization">Virtualization</h2>
+<p>Imagine a program that simulated everything that your laptop could do, including running an OS, installing programs, and searching the web. This program, called a <strong>Virtual Machine</strong>, or VM, could be ran on an actual, physical computer or server. The program would have it's own storage, processes, and interactions separate from the physical machine it is running on, even though it is all running on one physical machine.</p>
+<p>Now imagine a computer system with everything stripped out of it except for the bare minimums required to run a single program, and have this system be simulated by a program. This is called a <strong>container</strong>. Much like a VM, it has all of its resources isolated from the physical machine it is running on. </p>
+<p>Both of these allow for multiple identical virtual systems to be created and ran on any computer environment, making them versatile for development and usage.</p>
+<h2 id="images">Images</h2>
+<p>Containers are built off of <strong>images</strong>, which dictate the starting configuration and environment. Oftentimes, images are built off of other images, to achieve a more specific use case. <a href="https://hub.docker.com/search">Docker Hub</a>, like Github, stores these images in a registry, allowing for other systems to pull images and build containers from them.</p>
+<p>GLADOS has images made for each process in the system: the frontend, the backend, the database, and the runners. From them, we build containers that interact together within a Kubernetes cluster. This is explained in more detail <a href="#production-setup">later on in this page</a>.</p>
+<h2 id="kubernetes-terminology">Kubernetes Terminology</h2>
+<p>This contains a list of brief definitions that Kubernetes uses to describe different aspects of the system.</p>
+<dl>
+<dt><code>Pod</code></dt>
+<dd>
+<p>A single container or group of containers, runs an image. This is normally managed by other resources, like Deployments or Jobs. <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Reference</a></p>
+</dd>
+<dt><code>Node</code></dt>
+<dd>
+<p>A machine within the Kubernetes cluster. This can be anything from a server to VMs, and Pods run using the Node's resources (CPU, memory, storage, etc). <a href="https://kubernetes.io/docs/concepts/architecture/nodes/">Reference</a></p>
+</dd>
+<dt><code>Cluster</code></dt>
+<dd>
+<p>The overarching Kubernetes system, consisting of (usually) multiple Nodes. Each cluster has a control-plane Node that manages the interactions within the system. To learn what a cluster needs to manage the system, <a href="#creating-a-cluster">skip ahead</a>.</p>
+</dd>
+</dl>
+<p><img alt="Diagram" src="https://kubernetes.io/images/docs/kubernetes-cluster-architecture.svg" />
+Image originated from Kubernetes website.</p>
+<h2 id="production-setup">Production Setup</h2>
+<p>All components of the system are ran with Kubernetes, within Pods. The frontend, backend, and database are each created through a Deployment, which creates a single Pod. Runners, which run the experiments, are created through Jobs, aimed to complete the task within a Pod and exit when finished. Jobs are created only when an experiment is submitted.</p>
+<h2 id="creating-a-cluster">Creating a Cluster</h2>
+<p>Each cluster requires these things to run properly:</p>
+<ol>
+<li><a href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">Container Runtime</a>, which runs the containers. <strong>This needs to be selected, with multiple options</strong>.</li>
+<li><a href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/">Container Network Interface</a>, or CNI, which manages Pod-to-Pod communication. <strong>This needs to be selected, with compatability with the Container Runtime</strong>.</li>
+<li><a href="https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/">Kubelet</a>, which manages the nodes.</li>
+<li><a href="https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/">kube-apiserver</a>, which manages resources. This is installed automatically as part of the control plane node.</li>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/">kubectl</a>, which lets the user interact with the kube-apiserver, allowing you to view and make changes to the cluster.</li>
+</ol>
+<p>There are many tools that help in creating a cluster, some of which abstract parts of setting this up. <a href="https://minikube.sigs.k8s.io/docs/">Minikube</a> creates a locally hosted cluster, abstracting a lot of the setup for simple testing. <a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/">Kubeadm</a> is a more advanced tool, requiring configuration and networking setup. On the production server, we used kubeadm to create the cluster, with Flannel as a CNI and CRI-O as the container runtime. We have used minikube to test the system setup locally.</p>
+<h2 id="networking">Networking</h2>
+<p>it sucks</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -632,10 +859,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/Monorepo/", "features": ["content.code.copy"], "search": "/Monorepo/assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/Monorepo/assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="../../assets/javascripts/bundle.dd8806f2.min.js"></script>
       
     
   </body>
