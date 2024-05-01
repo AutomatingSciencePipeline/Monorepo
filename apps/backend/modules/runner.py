@@ -91,7 +91,12 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
 def _add_to_output_batch(trialExtraFile, ExpRun: int):
     try:
         # Currently only extra CSV files are supported, this will need to be adapted for other file types
-        fileName = trialExtraFile[7:len(trialExtraFile)-4]
+        fileName = None
+        if '/' in trialExtraFile:
+            fileName = trialExtraFile.split('/')[-1]
+        else:
+            fileName = trialExtraFile
+        
         destination_dir = f'ResCsvs/Result{ExpRun}/'
         destination_file = f'{destination_dir}{fileName}.csv'
        
@@ -200,11 +205,11 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 continue
             # writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             
-            # Zip the folders that are inside the output folder
-            shutil.make_archive(f'ResCsvs/Result{trialNum}', 'zip', f'ResCsvs/Result{trialNum}')
-            
-            # Delete the non-zipped folder
-            shutil.rmtree(f'ResCsvs/Result{trialNum}')
+            if experiment.has_extra_files:
+                # Zip the folders that are inside the output folder
+                shutil.make_archive(f'ResCsvs/Result{trialNum}', 'zip', f'ResCsvs/Result{trialNum}')
+                # Delete the non-zipped folder
+                shutil.rmtree(f'ResCsvs/Result{trialNum}')
             explogger.info(f'Trial#{trialNum} completed')
             experiment.passes += 1
             update_mongo_data(expId, 'passes', experiment.passes)
