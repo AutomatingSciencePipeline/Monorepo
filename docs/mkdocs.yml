@@ -17,6 +17,7 @@ nav:
     - Troubleshooting: tutorial/troubleshooting.md
   - Documentation:
     - Updating Documentation: documentation/guide.md
+  - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
 
 # Read about themes here: https://www.mkdocs.org/user-guide/choosing-your-theme/
