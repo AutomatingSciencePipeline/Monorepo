@@ -109,4 +109,15 @@ if ! pipenv install --dev; then
     source setup/exit_await_input.sh 1
 fi
 
-cd ../..
+# Install documentation dependencies
+if ! cd ../../docs; then
+    echo "🛑 Failed to change dir to docs directory?"
+    source setup/exit_await_input.sh 1
+fi
+
+if ! pipenv install --dev; then
+    echo "🛑 Failed to install or update backend dependencies, check above error for more details"
+    source setup/exit_await_input.sh 1
+fi
+
+cd ..

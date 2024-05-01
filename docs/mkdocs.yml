@@ -1,0 +1,46 @@
+# Configuration, see https://www.mkdocs.org/user-guide/configuration/
+site_name: GLADOS
+site_description: Documentation for GLADOS - Automated Science Pipeline
+site_url: https://automatingsciencepipeline.github.io/Monorepo/
+
+repo_url: https://github.com/AutomatingSciencePipeline/Monorepo
+edit_uri: '' # edit is hidden
+
+# Site navigation - remember to update when creating new pages!
+nav:
+  - Home: index.md
+  - About GLADOS: about.md
+  - Tutorial:
+    - Usage: tutorial/usage.md
+    - Installation: tutorial/installation.md
+    - Developer Installation: tutorial/developer_installation.md
+    - Troubleshooting: tutorial/troubleshooting.md
+  - Documentation:
+    - Updating Documentation: documentation/guide.md
+  - Cheatsheet: cheatsheet.md
+  - (Old) Repository Guide: repository_guide.md
+
+# Read about themes here: https://www.mkdocs.org/user-guide/choosing-your-theme/
+theme: 
+  name: material
+  features:
+    - content.code.copy
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+# Markdown Extensions supported by mkdocs-material here: https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/
+markdown_extensions:
+  # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+

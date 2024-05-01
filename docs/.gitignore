@@ -1,0 +1,6 @@
+# Mkdocs generated files
+site
+
+# Python environment
+__pycache__
+.venv
