@@ -205,7 +205,7 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 continue
             # writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             
-            if experiment.has_extra_files:
+            if experiment.has_extra_files():
                 # Zip the folders that are inside the output folder
                 shutil.make_archive(f'ResCsvs/Result{trialNum}', 'zip', f'ResCsvs/Result{trialNum}')
                 # Delete the non-zipped folder
