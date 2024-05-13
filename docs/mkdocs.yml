@@ -17,6 +17,8 @@ nav:
     - Troubleshooting: tutorial/troubleshooting.md
   - Documentation:
     - Updating Documentation: documentation/guide.md
+  - Infrastructure:
+    - Kubernetes: infrastructure/kubernetes.md
   - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
 
@@ -43,4 +45,7 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#definition-lists
+  - def_list
+  # # https://yakworks.github.io/docmark/extensions/permalinks/
+  # - toc(permalink=true)

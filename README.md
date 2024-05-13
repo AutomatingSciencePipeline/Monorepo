@@ -6,6 +6,10 @@ The Automating Science Pipeline seeks to make it easier to run data-collecting c
 - A user should be able to download and simulate the system on their local machine with minimal effort and configuration.
 - The system is open source and designed for expansion to other languages and user-implemented functionality (ex. Output data post-processing).
 
+## Documentation
+
+Our live documentation website is hosted [here](https://automatingsciencepipeline.github.io/Monorepo). As of May 2024, old documentation is being migrated to the website.
+
 ## User Guide
 
 This user guide is meant to assist first time users in setting up a local simulation of the system. You can find it on the [wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide).
