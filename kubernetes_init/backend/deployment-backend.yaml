@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-test-backend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: GLADOS
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: GLADOS
+        tier: backend
+    spec:
+      containers:
+      - name: container-test-backend
+        image: sugiyat/image-test-backend:latest
+        ports:
+        - containerPort: 0000
+          # hostPort: 0000
+        env:
+        - name: BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
+        - name: MONGODB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_PORT
+        - name: SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: SERVICE_ROLE_KEY
+        - name: FIREBASE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FIREBASE_KEY

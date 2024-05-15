@@ -1,2 +1,0 @@
-# Needed for the CI to ignore node_modules
-node_modules/

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: glados-service-mongodb
+  namespace: default
+  labels:
+    app: GLADOS
+spec:
+  selector:
+    app: glados-mongodb
+  ports:
+    - protocol: TCP
+      port: 0000
+      targetPort: 0000

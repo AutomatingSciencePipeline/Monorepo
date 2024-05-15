@@ -2,7 +2,6 @@ import { NextApiHandler } from 'next';
 import { getEnvVar } from '../../../utils/env';
 
 const BACKEND_PORT = getEnvVar('BACKEND_PORT');
-const CONTACT_BACKEND_AT = getEnvVar('CONTACT_BACKEND_AT');
 
 // TODO the frontend should not have to directly communicate with the backend servers for this,
 //  it should just put stuff into database -> it's backend's job to look for new tasks to run
@@ -12,7 +11,7 @@ const startExperimentHandler: NextApiHandler = async (req, res) => {
 	const { key } = req.body;
 
 	try {
-		const url = `http://${CONTACT_BACKEND_AT}:${BACKEND_PORT}/experiment`;
+		const url = `http://glados-service-backend:${BACKEND_PORT}/experiment`;
 		const backendResponse = await fetch(url, {
 			method: 'POST',
 			headers: new Headers({

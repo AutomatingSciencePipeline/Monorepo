@@ -2,29 +2,12 @@
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
-# Packages in here should be left on * unless there is a specific reason, which should be explained by a comment
 
 [packages]
-flask = "==2.0.2" # Was specifically versioned by the last team. TODO see if we can update it.
-flask-cors = "==3.0.10" # Was specifically versioned by the last team. TODO see if we can update it.
-gunicorn = "==20.1.0" # Was specifically versioned by the last team. TODO see if we can update it.
-numpy = "*"
-firebase-admin = "*"
-configparser = "*"
-python-magic = "*"
-python-dotenv = "*"
-matplotlib = "*"
-pymongo = "*"
-pydantic = "*"
-pytest-cov = "*"
-
-[dev-packages]
-# libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)
-python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
-yapf = "*"
-pylint = "*"
-pytest = "*"
-coverage = "*"
+flask = "*"
+requests = "*"
+kubernetes = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.8"

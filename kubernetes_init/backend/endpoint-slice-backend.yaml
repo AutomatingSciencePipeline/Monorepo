@@ -1,0 +1,22 @@
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: glados-eps-backend
+  namespace: default
+  labels:
+    kubernetes.io/service-name: glados-service-backend
+addressType: IPv4
+ports:
+  - name: backend
+    protocol: TCP
+    port: 0000
+endpoints:
+  - addresses:
+      - "0.0.0.0" # replace with ipv4 address of frontend
+    conditions:
+      ready: true
+    hostname: glados-pod
+    nodeName: glados-node
+    metadata:
+      name: glados-ep-backend
+    # zone: us-west2-a

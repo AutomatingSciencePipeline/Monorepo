@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-test-frontend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: GLADOS
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: GLADOS
+        tier: frontend
+    spec:
+      containers:
+      - name: container-test-frontend
+        image: sugiyat/image-test-frontend:latest
+        ports:
+        - containerPort: 0000
+          # hostPort: 0000
+        env:
+        - name: BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
+        - name: FRONTEND_WEBSERVER_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FRONTEND_WEBSERVER_PORT
+        - name: MONGODB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_PORT
+        - name: SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: SERVICE_ROLE_KEY
+        - name: FIREBASE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FIREBASE_KEY
+        - name: MONGODB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_USERNAME
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_PASSWORD
+        
