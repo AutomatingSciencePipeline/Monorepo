@@ -75,18 +75,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		setIsEditing(false);
 	};
 
-	// useEffect for the expected time to run
-	// useEffect(() => {
-	// 	if (project['startedAtEpochMillis'] && !project['finished']) {
-	// 		const timeout = expectedTimeToRun * 60000; // convert minutes to milliseconds
-	// 		const timer = setTimeout(() => {
-	// 			refetchExperiments(); // Call the refetch function after the expected time
-	// 		}, timeout);
-
-	// 		return () => clearTimeout(timer); // Clear the timer if the component unmounts or the experiment finishes
-	// 	}
-	// }, [project['startedAtEpochMillis'], project['finished'], expectedTimeToRun, refetchExperiments]);
-
 	// useEffect to handle project name editing
 	useEffect(() => {
 		if (editingCanceled) {

@@ -16,26 +16,9 @@ const saveToBackend = async (req, res) => {
 	const form = formidable({});
 	let fields;
 	let files;
-	// const uploadDir = path.join(process.cwd(), '.', 'TempFiles');
 	try {
-		// if (!fs.existsSync(uploadDir)) {
-		// 	fs.mkdirSync(uploadDir, { recursive: true });
-		// }
 		[fields, files] = await form.parse(req);
-		console.log("This is fields", fields['id'][0]);
 		const oldPath = files.file[0].filepath;
-		// const newPath = path.join(uploadDir, fileName);
-		// console.log("the new path is: ", newPath);
-		// fs.readdir('../TempFiles', (err, files) => {
-		// 	if (err) {
-		// 	  console.error('Error reading directory:', err);
-		// 	  return;
-		// 	}
-		// 	console.log('Contents of the directory:');
-		// 	files.forEach((file) => {
-		// 	  console.log(file);
-		// 	});
-		//   });
 
 		try {
 			const data = fs.readFileSync(oldPath);
@@ -44,18 +27,13 @@ const saveToBackend = async (req, res) => {
 			const expID = fields['id'][0];
 			formData.append('file', blobData);
 			formData.append('expId', expID);
-			console.log("This is a formdata ", formData);
 			const url = `http://${CONTACT_BACKEND_AT}:${BACKEND_PORT}/backendExp`;
 			const saveResponse = await fetch(url, {
 				method: 'POST',
-				// headers: new Headers({
-				// 	'Content-Type': 'application/json',
-				// }),
 				body: formData,
 			});
 			if (saveResponse?.ok) {
-				// res.status(saveResponse.status).json({ response: saveResponse });
-				console.log("Posting successful");
+				console.log('Posting successful');
 			} else {
 				throw new Error(`Fetch save file failed: ${saveResponse.status}`);
 			}
@@ -64,7 +42,7 @@ const saveToBackend = async (req, res) => {
 			res.status(500).json({ error: 'Error saving file.' });
 		}
 	} catch (err) {
-		// example to check for a very specific error
+		// could be used when looking for a specific error.
 		if (err.code === formidableErrors.maxFieldsExceeded) {
 
 		}

@@ -1,4 +1,3 @@
-import { object } from 'joi';
 import clientPromise, { DB_NAME } from '../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';

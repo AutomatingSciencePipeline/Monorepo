@@ -91,7 +91,6 @@ export const NewExperiment = ({ formState, setFormState, copyID, setCopyId, refe
 	};
 	useEffect(() => {
 		if (copyID != null) {
-			// console.log(`The copyId is: ${copyID}`);
 			findExp(copyID).then((docSnap) => {
 				if (docSnap) {
 					const expInfo = docSnap;
@@ -143,10 +142,10 @@ export const NewExperiment = ({ formState, setFormState, copyID, setCopyId, refe
 
 	const [isFolder, setIsFolder] = useState(false);
 
-    // Callback to handle changes to isFolder
-    const handleIsFolderChange = (value) => {
-        setIsFolder(value);
-    };
+	// Callback to handle changes to isFolder
+	const handleIsFolderChange = (value) => {
+		setIsFolder(value);
+	};
 	return (
 		<Transition.Root show={open} as={Fragment}>
 			<Dialog

@@ -28,14 +28,10 @@ export const DispatchStep = ({ form, id, dispatchSignal, isFolder }) => {
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
-		console.log('Also submitting mongo experiment');
-		console.log(form.values['trialExtraFile']);
 		submitMongoExperiment(form.values, userId as string).then(async (expId) => {
 			const uploadResponse = await saveToBackend(expId, files[0]);
 			if (isFolder) {
 				const concatVal = form.values['trialExtraFile'];
-				console.log('Includes');
-				console.log(!concatVal.includes('*'));
 				form.values['trialExtraFile'] = `${concatVal}*`;
 			}
 			if (uploadResponse) {

@@ -62,13 +62,6 @@ export const updateMongoDoc = async (expId: string, updateKey: string, updateVal
 		}),
 	});
 	console.log(`This is the response from the update ${await updateResult.json()}`);
-
-	// if (updateResult.ok) {
-	// 	const responseData = await updateResult.json();
-	// 	console.log('Response from update:', responseData);
-	// } else {
-	// 	throw new Error('Request for update failed');
-	// }
 };
 
 export const deleteExpMongo = async (expId: string) => {
@@ -122,32 +115,6 @@ export const findExpWCallback = async (expId: string, callback: ExperimentSubscr
 	// jsonResult['experiment']
 	callback(jsonResult);
 };
-
-// Finding experiments by the user's ID
-// export const fetchExperimentsByUserId = async (userId: string) => {
-// 	console.log(`Fetching experiments for user ${userId}...`);
-// 	await fetch(`/api/MongoREST/MongoFrontend/user/${userId}`)
-// 		.then((response) => {
-// 			if (response.ok) {
-// 				return response.json();
-// 			}
-// 			return Promise.reject(response);
-// 		})
-// 		.then((experiments: ExperimentData[]) => {
-// 			console.log(`Fetched ${experiments.length} experiments for user ${userId}.`, experiments);
-// 			return experiments;
-// 		})
-// 		.catch((error: Response) => {
-// 			console.error('Error fetching experiments:', error.status);
-// 			error.json().then((json) => {
-// 				console.error(json?.response ?? json);
-// 				const message = json?.response;
-// 				if (message) {
-// 					alert(`Error fetching experiments: ${message}`);
-// 				}
-// 			}).catch((err) => console.error('Error parsing error response:', err));
-// 		});
-// };
 
 export const fetchExperimentsByUserId = async (userId: string): Promise<ExperimentData[] | null> => {
 	console.log(`Fetching experiments for user ${userId}...`);
