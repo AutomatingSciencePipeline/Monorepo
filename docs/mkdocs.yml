@@ -22,6 +22,10 @@ nav:
   - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
 
+# Drafts are excluded from deployments, but are shown while using `mkdocs serve`.
+draft_docs: |
+  drafts/
+
 # Read about themes here: https://www.mkdocs.org/user-guide/choosing-your-theme/
 theme: 
   name: material

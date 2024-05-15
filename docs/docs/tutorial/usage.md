@@ -16,7 +16,7 @@ You will need an account to run an experiment.
 
 ## Prepare your Code
 
-Currently, the system only accepts single file Python projects, Java .jar applications that have a single return value or output to a csv file, or Unix-compiled executables (C projects) that output to a csv file. More complex projects may be supported in the future.
+GLADOS has limited support for experiments. To ensure your experiment may run on GLADOS, check whether it falls under [compatible specs](#compatability).
 
 The main steps a typical experiment will need to take is:
 
@@ -55,7 +55,7 @@ Once your experiment is set up, continue by [running the experiment](#running-ex
 
 GLADOS supports experiments that:
 
-* run on Python 3.8, with no external packages aside from `configparser`, and no multiprocessing/threading features
+* run on Python 3.8 through a single Python file, with no external packages aside from `configparser`, and no multiprocessing/threading features
 * are packaged in a `.jar` executable
 * are compiled into a binary executable for Unix systems, such that a base Debian system can run it
 
