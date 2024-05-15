@@ -71,6 +71,12 @@ def recv_experiment():
         return Response(status=200)
     syslogger.error("Received malformed experiment request: %s", data)
     return Response(status=400)
+"""
+The method receives the experiment file from the frontend and saves it to the backend folder named TemporaryExpFiles
+
+@body   experiment  From the request, downloads the file with expId
+@return             The status code. 200 for success, 400 for error.
+"""
 
 @flaskApp.post("/backendExp")
 def save_to_backend():
@@ -152,7 +158,6 @@ def run_batch(data: IncomingStartRequest):
     update_mongo_data(expId, 'expId', expId)
     file_ref_update = "experiment"+expId
     update_mongo_data(expId, 'file', file_ref_update)
-    # exp = retrieve_experiment_data(expId)
     open_experiment_logger(expId)
     
     # Retrieve experiment details from MongoDB
@@ -174,7 +179,6 @@ def run_batch(data: IncomingStartRequest):
             explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
         close_experiment_run_mongo(expId)
-        # close_experiment_run(expId, expRef)
         return
     experimentData['hyperparameters'] = hyperparameters
 
@@ -187,7 +191,6 @@ def run_batch(data: IncomingStartRequest):
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)
         close_experiment_run_mongo(expId)
-        # close_experiment_run(expId, expRef)
         return
     #Downloading Experiment File
     # If the program errors here after you just deleted the ExperimentFiles on your dev machine, restart the docker container, seems to be volume mount weirdness
@@ -202,7 +205,6 @@ def run_batch(data: IncomingStartRequest):
         explogger.exception(err)
         os.chdir('../..')
         close_experiment_run_mongo(expId)
-        # close_experiment_run(expId, expRef)
         return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
@@ -211,17 +213,14 @@ def run_batch(data: IncomingStartRequest):
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
         close_experiment_run_mongo(expId)
-        # close_experiment_run(expId, expRef)
         return
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
     update_mongo_data(expId, "totalExperimentRuns", experiment.totalExperimentRuns)
-    # expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
 
     try:
         conduct_experiment_mongo(experiment, expId)
-        # conduct_experiment(experiment, expRef)
         post_process_experiment(experiment)
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
@@ -234,7 +233,6 @@ def run_batch(data: IncomingStartRequest):
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
         close_experiment_run_mongo(expId)
-        # close_experiment_run(expId, expRef)
 
 
 """
@@ -253,8 +251,15 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     close_experiment_logger()
     
     upload_experiment_log(expId)
-    # remove_downloaded_directory(expId)
+    # This removes the experiment folder in ExperimentFiles folder after the experiment is done running. 
+    # Comment this out if you want to see what information gets saved and used in experiment folder. 
+    remove_downloaded_directory(expId)
 
+"""
+Closes the experiment after it runs by updating the JSON data file
+@param expId The experiment id
+@return void
+"""
 def close_experiment_run_mongo(expId: DocumentId):
     explogger.info(f'Exiting experiment {expId}')
     if expId:
@@ -292,33 +297,14 @@ def determine_experiment_file_type(filepath: str):
     return filetype
 
 
+
 """
 Downloads the experiment files
 Call this function when inside the experiment folder!
+In here, Retrieve the file from local directory we already have instead of firebase storage.
 
 @param  experiment  json object of the experiment
 @return             The filepath to the downloaded file
-"""
-def download_experiment_files(experiment: ExperimentData):
-    if experiment.has_extra_files() or experiment.postProcess != '' or experiment.keepLogs:
-        explogger.info('There will be experiment outputs')
-        os.makedirs('ResCsvs')
-    explogger.info(f'Downloading file for {experiment.expId}')
-
-    filepath = f'experiment{experiment.expId}'
-    experiment.file = filepath
-    explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
-    try:
-        filedata = firebaseBucket.blob(filepath)
-        filedata.download_to_filename(filepath)
-    except Exception as err:
-        explogger.error(f"Error {err} occurred while trying to download experiment file")
-        raise GladosInternalError('Failed to download experiment files') from err
-    explogger.info(f"Downloaded {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
-    return filepath
-
-"""
-In here, Retrieve the file from local directory we already have instead of firebase storage.
 
 """
 
@@ -352,6 +338,8 @@ def download_Experiment_files_local(experiment: ExperimentData):
     return destination_directory
 """
 Finds a directory and removes it
+@param experimentId the id of the experiment folder to remove in ExperimentFiles folder
+@return void
 """    
     
 def remove_downloaded_directory(experimentId: DocumentId):
@@ -359,9 +347,6 @@ def remove_downloaded_directory(experimentId: DocumentId):
     folder_name = experimentId
     target_directory = "ExperimentFiles"
     folder_path = f'{target_directory}/{folder_name}'
-    # explogger.info("this is the path " + folder_path)
-    # explogger.info("Does the path exist? " + str(os.path.exists(folder_path)))
-    # items = os.listdir(target_directory)
     
     try:
         shutil.rmtree(folder_path)
@@ -379,14 +364,6 @@ Call this function when inside the experiment folder!
 @return             void
 """
 def upload_experiment_results(experiment: ExperimentData):
-    # explogger.info('Uploading Experiment Results...')
-
-    # try:
-    #     uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
-    #     uploadBlob.upload_from_filename('results.csv')
-    # except Exception as err:
-    #     raise DatabaseConnectionError("Error uploading aggregated experiment results to firebase") from err
-
     explogger.info('Uploading to MongoDB')
     verify_mongo_connection()
 
@@ -409,13 +386,6 @@ def upload_experiment_results(experiment: ExperimentData):
                 encoded = Binary(file.read())
         except Exception as err:
             raise GladosInternalError("Error preparing experiment results zip") from err
-
-        # TODO remove firebase usage once transition to mongo file storage is complete
-        # try:
-        #     uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
-        #     uploadBlob.upload_from_filename('ResultCsvs.zip')
-        # except Exception as err:
-        #     raise DatabaseConnectionError("Error uploading experiment results zip to firebase") from err
 
         upload_experiment_zip(experiment, encoded)
 

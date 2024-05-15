@@ -18,10 +18,13 @@ PROCESS_ERROR_STREAM = 1
 
 explogger = get_experiment_logger()
 
+"""
+Get's the data and writes the trial log while running experiment.
+@param process, trialRun, keepLogs, trialTimeout    Process to run trial, run of the trial, log keeping boolean, trial timeout
+@return void
 
+"""
 def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
-    # If they are not going for file / , exclude everything else than the made file to get the name
-    # Files to exclude: configFiles, experiment{expId}, ResCsvs, results.csv
     try:
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
@@ -43,7 +46,11 @@ def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout
         explogger.error("Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
 
-
+"""
+Runs the trial based on the experiment type. 
+@param experiment, config_path, trialRun    Experiment JSON file, path of configuration files, the trial run
+@return void
+"""
 def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     """
     make sure that the cwd is ExperimentsFiles/{ExperimentId}
@@ -59,7 +66,12 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
         with Popen(['./' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
 
+"""
+Obtains the desired lines from the target result file
 
+@param targetLineNumber, filename   The line numbers of the target result and the name of the file
+@return tuple, line      Retrieves the header of the result and the line counter when targetLineNumber is zero. Returns the line otherwise.
+"""
 def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
     try:
         with open(filename, mode='r', encoding="utf8") as file:
@@ -87,6 +99,11 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
     except Exception as err:
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
+"""
+Given the name of the extra files, copy them to the directory so it can be used later.
+@param trailExtraFile, ExpRun   the name of the extra file and the run of the experiment.
+@return void 
+"""
 
 def _add_to_output_batch(trialExtraFile, ExpRun: int):
     try:
@@ -114,6 +131,11 @@ def _add_to_output_batch(trialExtraFile, ExpRun: int):
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
 
+"""
+Conducts the experiment from data from the database given experiment JSON file and the id 
+@param experiment, expId    Experiment JSON file and the Id 
+@return void
+"""
 def conduct_experiment_mongo(experiment: ExperimentData, expId):
     os.mkdir('configFiles')
     explogger.info(f"Running Experiment {experiment.expId}")
@@ -129,7 +151,6 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
             startSeconds = time.time()
             if trialNum == 0:
                 update_mongo_data(expId, "startedAtEpochMillis", int(startSeconds * 1000))
-                # expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
                 
             try:
                 configFileName = create_config_from_data(experiment, trialNum)
@@ -152,7 +173,6 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
                 explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
                 update_mongo_data(expId, 'estimatedTotalTimeMinutes', estimatedTotalTimeMinutes)
-                # expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
 
                 # Get the header of the csv file for result
                 try:
@@ -170,15 +190,19 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                 try:
                     # Check if we have comma
                     # for loop for each extra file
+                    
                     if '*' in experiment.trialExtraFile:
                         extra_without_star = experiment.trialExtraFile.replace('*', '')
                         directory_path = f'{extra_without_star}'
                         
                         extraFiles = os.listdir(directory_path)
                 
+                        # If * is in the name of the extra file's name, download everything from the given directory
                         for extraFile in extraFiles:
                             new_dir = f'{extra_without_star}/{extraFile}'
                             _add_to_output_batch(new_dir, trialNum)
+                    
+                    # If the extra files are separated by comma, download the files separated by comma. 
                     elif experiment.trialExtraFile is not None and ("," in experiment.trialExtraFile):
                         if (", " in experiment.trialExtraFile):
                             extraFiles = experiment.trialExtraFile.split(", ")
@@ -187,11 +211,11 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                         
                         for extraFile in extraFiles:
                             _add_to_output_batch(extraFile, trialNum)
+                    
                     else:
                         _add_to_output_batch(experiment.trialExtraFile, trialNum)
                 except FileHandlingError as err:
                     _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
-                    # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                     continue
 
             # Generates giant result file
@@ -201,9 +225,7 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
                     writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             except GladosUserError as err:
                 _handle_trial_error_mongo(experiment, expId, numOutputs, paramNames, writer, trialNum, err)
-                # _handle_trial_error(experiment, expRef, numOutputs, paramNames, writer, trialNum, err)
                 continue
-            # writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
             
             if experiment.has_extra_files():
                 # Zip the folders that are inside the output folder
@@ -213,7 +235,6 @@ def conduct_experiment_mongo(experiment: ExperimentData, expId):
             explogger.info(f'Trial#{trialNum} completed')
             experiment.passes += 1
             update_mongo_data(expId, 'passes', experiment.passes)
-            # expRef.update({'passes': experiment.passes})
         explogger.info("Finished running Trials")
 
 def _handle_trial_error_mongo(experiment: ExperimentData, expId, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
