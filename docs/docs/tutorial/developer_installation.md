@@ -159,10 +159,10 @@ minikube dashboard
 Once all the deployments are ready, you will need to port forward the frontend manually, via:
 
 ```bash
-kubectl port-forward pod/deployment-test-backend-<ID stuff> 8080:8080
+kubectl port-forward deployment/deployment-test-backend 3000:3000
 ```
 
-This will allow you to view the frontend on http://localhost:8080.
+This will allow you to view the frontend on http://localhost:3000.
 
 To update the system, you will need to rebuild and push the images, then recreate the system, using `python3 kubernetes/init.py --hard`. Ensure it is building using the same images you just pushed, within each deployment manifest.
 
