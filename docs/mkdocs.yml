@@ -15,6 +15,11 @@ nav:
     - Installation: tutorial/installation.md
     - Developer Installation: tutorial/developer_installation.md
     - Troubleshooting: tutorial/troubleshooting.md
+    - Onboarding Tasks: tutorial/onboarding_tasks.md
+  - Development:
+    - Contributing: development/contributing.md
+    - For Frontend Developers: development/frontend_dev.md
+    - For Backend Developers: development/backend_dev.md
   - Documentation:
     - Updating Documentation: documentation/guide.md
   - Infrastructure:

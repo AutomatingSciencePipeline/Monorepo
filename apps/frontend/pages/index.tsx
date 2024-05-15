@@ -10,7 +10,7 @@ import { SignUpModal } from '../components/auth/SignUpModal';
 import { useAuth } from '../firebase/fbAuth';
 import { AlreadySignedInModal } from '../components/auth/AlreadySignedInModal';
 import { useState } from 'react';
-
+import RoseHulmanWhiteLogo from '../images/RoseHulmanWhiteLogo.png';
 const HomePage = () => {
 	const router = useRouter();
 	const { userId } = useAuth();
@@ -111,9 +111,13 @@ const HomePage = () => {
 												Used by
 											</p>
 											<div className='mt-5 w-full sm:mx-auto sm:max-w-lg lg:ml-0'>
-												{/* <div className='flex flex-wrap items-start justify-between'>
-													TODO: include rose logo and other stuff
-												</div> */}
+												<div className='flex flex-wrap items-start justify-between'>
+													<img
+														className='h-8'
+														src={RoseHulmanWhiteLogo.src} // Access the src property of the StaticImageData type
+														alt='Rose-Hulman Institute of Technology'
+													></img>
+												</div>
 											</div>
 										</div>
 									</div>
