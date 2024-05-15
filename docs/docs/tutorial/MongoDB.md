@@ -18,6 +18,10 @@ In the backend, the database can be accessed through mongo.py file in db directo
 
 The frontend is connected to the backend with flaskApp. To do so, create an API file in api directory in the frontend and in the file, provide a url that connects to the backend with the backend port provided. experiment directory in api directory is a good example of how frontend and backend is connected. Given the port and the name of the receiving end specified in the url, the frontend and the backend can make connection with each other and send different files.
 
+## Mongo-Express
+
+To check whether data is handling the information correctly, [Mongo-Express](https://github.com/mongo-express/mongo-express) can be used to check whether that is done correctly. Once the system is composed, you can access the website through localhost:8080. Mongo-Express is a web-based MongoDB admin interface that you can view the database contents and also perform CRUD operations based on your needs. Make sure that it's loaded on Mongo-Express pod correctly before use.
+
 ## Future Implementation
 
 Currently, the real-time update feature is not implemented, but it needs to be implemented to complete the system. Please refer to how Firebase connection is retrieving and updates useEffect to set up the connection. [Change Stream](https://www.mongodb.com/docs/manual/changeStreams/) seems to be a good technology we can use to create connection. However, it requires the database set up to be a [replica set](https://www.mongodb.com/docs/manual/replication/) and also put together with Kubernetes. [This](https://www.mongodb.com/docs/kubernetes-operator/stable/tutorial/deploy-replica-set/) MongoDB official document seems to be a good reference to have. Once the set up is made, API calls need to be created to set up real-time update.
