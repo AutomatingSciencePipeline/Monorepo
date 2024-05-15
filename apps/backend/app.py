@@ -1,13 +1,10 @@
 """Module that uses flask to host endpoints for the backend"""
 from concurrent.futures import ProcessPoolExecutor
-from sys import stdout
 from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
-from spawn_runner import create_job, create_job_object
-from flask_cors import CORS
 
+from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
-CORS(flaskApp)
 
 config.load_incluster_config()
 BATCH_API = client.BatchV1Api()

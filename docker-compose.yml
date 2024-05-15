@@ -1,3 +1,5 @@
+# As of May 2024, docker-compose is not used to build GLADOS. This can be removed in the future.
+
 # Usage
 #   Start:          docker compose up
 #   With helpers:   docker compose -f docker-compose.yml -f ./.devcontainer/docker-compose.dev.yml up

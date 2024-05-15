@@ -1,3 +1,5 @@
+# As of May 2024, docker-compose is not used to build GLADOS. This can be removed in the future.
+
 # Use this docker-compose file in addition to the base one in order to set up development configurations for the containers
 # https://docs.docker.com/compose/extends/
 

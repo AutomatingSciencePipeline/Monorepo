@@ -1,0 +1,15 @@
+# pylint python linter configuration
+
+[MASTER]
+extension-pkg-whitelist=pydantic # stop "No name 'BaseModel' in module 'pydantic'" https://github.com/pydantic/pydantic/issues/1961#issuecomment-759522422
+disable=
+    C0301, # line too long
+    C0114, # missing-module-docstring
+    C0116, # missing-function-docstring
+    C0115, # missing-class-docstring
+    C0103, # we chose to use camel case to be consistent with our frontend code
+    W1203, # we want to use fstrings for log message readability, the performance cost is not significant enough for us to care. but, don't turn off W1201 because if the dev wants to use % syntax, they should use lazy logging since the syntax readability is equivalent
+
+# Load our own custom plugins
+; load-plugins=
+;     linters.no_print
