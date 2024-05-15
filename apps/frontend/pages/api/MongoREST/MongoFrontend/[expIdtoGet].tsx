@@ -4,9 +4,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const getExperimentMongo = async (req: NextApiRequest, res: NextApiResponse ) => {
 	const { expIdtoGet } = req.query;
-	// const expIDtoGet = req.query.expIdtoGet;
-	// console.log(`This is from the req ${req.query.expIdtoGet}`);
-	// console.log(`The id of item to get is: ${expIdtoGet}`);
 
 	let result;
 	try {
