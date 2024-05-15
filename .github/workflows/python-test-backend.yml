@@ -1,4 +1,4 @@
-name: Python Lint and Test
+name: Python Lint and Test - Backend
 
 on:
   push:
@@ -40,35 +40,14 @@ jobs:
       # Recursively search the specified directories for files to analyze
       # Check the file app.py
       run: pylint --fail-on=E --fail-under=9.0 --recursive=y app.py
-    - name: Analyze runner with pylint
-      working-directory: ./apps/runner
-      # https://pylint.readthedocs.io/en/v2.16.1/user_guide/configuration/all-options.html#fail-on
-      # Uses the .pylintrc rules file in the working directory
-      # Fail if any Error-level notices were produced
-      # Fail if the code quality score is below 9.0
-      # Recursively search the specified directories for files to analyze
-      # Check the file runner.py
-      # Check the ./modules and ./tests directory
-      run: pylint --fail-on=E --fail-under=9.0 --recursive=y runner.py ./modules/ ./tests/
     - name: Test backend with pytest + record coverage
       working-directory: ./apps/backend
       run: bash coverage.sh
     - name: Zip backend coverage report
       working-directory: ./apps/backend
       run: zip -r codeCoverage.zip coverageReport/
-    - name: Test runner with pytest + record coverage
-      working-directory: ./apps/runner
-      run: bash coverage.sh
-    - name: Zip runner coverage report
-      working-directory: ./apps/runner
-      run: zip -r codeCoverage.zip coverageReport/
     - name: Upload backend coverage report
       uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report-backend
         path: ./apps/backend/codeCoverage.zip
-    - name: Upload runner coverage report
-      uses: actions/upload-artifact@v3
-      with:
-        name: code-coverage-report-runner
-        path: ./apps/runner/codeCoverage.zip
