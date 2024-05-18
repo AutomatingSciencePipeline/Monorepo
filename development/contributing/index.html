@@ -504,35 +504,11 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#contributing-to-the-docs" class="md-nav__link">
+  <a href="#branch-description" class="md-nav__link">
     <span class="md-ellipsis">
-      Contributing to the Docs
+      Branch Description
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Contributing to the Docs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#edit-from-the-web" class="md-nav__link">
-    <span class="md-ellipsis">
-      Edit from the Web
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#local-copy-of-the-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Local Copy of the Docs
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -568,6 +544,15 @@
   <a href="#pull-request" class="md-nav__link">
     <span class="md-ellipsis">
       Pull Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tips
     </span>
   </a>
   
@@ -935,35 +920,11 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#contributing-to-the-docs" class="md-nav__link">
+  <a href="#branch-description" class="md-nav__link">
     <span class="md-ellipsis">
-      Contributing to the Docs
+      Branch Description
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Contributing to the Docs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#edit-from-the-web" class="md-nav__link">
-    <span class="md-ellipsis">
-      Edit from the Web
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#local-copy-of-the-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Local Copy of the Docs
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1004,6 +965,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tips
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1025,27 +995,10 @@
 
 
 <h1 id="contributing">Contributing</h1>
-<p>This page will eventually contain information on best practices to follow when contributing to the repository.</p>
-<p>Check out the <a href="">Repository Guide</a> to familiarize yourself with each system component.</p>
-<h2 id="contributing-to-the-docs">Contributing to the Docs</h2>
-<p>When working on the documentation, your contributions should pass the markdownlint-ci2 engine, implemented by editor extensions such as <a href="https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint">this one</a> for Visual Studio Code.</p>
-<h3 id="edit-from-the-web">Edit from the Web</h3>
-<p>It's possible to edit the docs from the web on Github, but github won't put through the linter described above, so it is suggested you edit them locally.</p>
-<h3 id="local-copy-of-the-docs">Local Copy of the Docs</h3>
-<p>Github internally keeps track of changes to repository wikis in a secondary git repository.</p>
-<p>In order to make editing the docs easier, and help keep them in sync with the main repo,
-the documentation repo is included as a <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">git submodule</a> in the main repository,
-which means it will be cloned when you clone the repo.
-As a result, changes to the docs will be noted in commits to the main repo as well by a 'pointer' that holds the commit hash of a certain commit on the docs repo.</p>
-<p>Git clients may prevent you from committing changes to the main repo until you commit your docs changes as well.</p>
-<p>To commit and push changes to the submodule, you can open it as another repository from whatever git client you're using, then use git commands as normal from there.</p>
-<p>You may be on a "detached HEAD" on the wiki repository - this is not a problem, just checkout <code>master</code> again and you'll be fine.</p>
-<ul>
-<li>Github desktop: <a href="https://stackoverflow.com/questions/60086154/how-can-i-push-my-submodules-from-github-desktop">Add it as an existing repository</a> (the local folder you need to select will be named <code>Monorepo.wiki</code>)</li>
-<li>Check the <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">git docs</a> for how to use it with git command line.</li>
-<li>In Sourcetree, it shows up on the right side and opens as another tab:
-  <img alt="Sourcetree" src="https://user-images.githubusercontent.com/25965766/213574381-410834ad-14fa-4158-897d-3b1c90773b75.png" /></li>
-</ul>
+<h2 id="branch-description">Branch Description</h2>
+<p><code>main</code> has no MongoDB implementation (in firebase) but Kubernetes implementation</p>
+<p><code>mongo+documentation</code> has a migrated version to MongoDB and the most updated version of documentation (so create a new branch from here)</p>
+<p><code>migrated-to-mongo</code> is a functioning branch that has migration to mongoDB (if the top branch doesn't work checkout from this branch and work on your implementation)</p>
 <h2 id="version-control">Version Control</h2>
 <h3 id="main-branch">Main Branch</h3>
 <p>The main branch cannot be pushed directly; branch protection rules require it to pass our review process. When a group member is finished with their branch, they can submit their work for review via a pull request, which requires a manual code review before it is merged. This will allow it to be checked for style concerns and ensure that bugs and other related issues are prevented from reaching the main branch.</p>
@@ -1053,6 +1006,8 @@ As a result, changes to the docs will be noted in commits to the main repo as we
 <p>Branches that are not the main branch are feature branches, where members can freely alter code without having to worry about causing issues with the main branch or other members.</p>
 <h3 id="pull-request">Pull Request</h3>
 <p>When implementing a new feature, create a new branch with the name of the feature and implement it. After committing and pushing the changes, create a <code>Pull Request</code> to merge the branch to the main branch. Members need to thoroughly go over the changes to prevent further issues and merge the branch.</p>
+<h3 id="tips">Tips</h3>
+<p>For each feature/implementation, try to create a separate branch to avoid merge conflicts.</p>
 
 
 
