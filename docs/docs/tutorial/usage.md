@@ -1,49 +1,33 @@
 # Usage
 
-!!! note
-
-    This section is currently being rewritten.
-
 This section covers how to run an experiment on the system.
 
 Definitions:
 
 * **Trial**: A single run of submitted code with a corresponding config file
 
-## Connect to the System
+## Accessing the System
 
-When on the Rose network, you can access the live copy at <http://glados-lb.csse.rose-hulman.edu/> (note: this is **not** https).
+When on the Rose-Hulman network, you can access the live copy at <http://glados-lb.csse.rose-hulman.edu/> (note: this is **not** https).
 
 If you need a local copy the system, view the [installation guide](installation.md).
 
-## Create An Account
-
-If you don't have an account yet, create one by filling in the relevant fields on the homepage.
-
-If you have an account, it should be auto-detected and offer to take you to the dashboard. Otherwise, got to the sign in page via the "Log In" button and enter your credentials.
+You will need an account to run an experiment.
 
 ## Prepare your Code
 
-Currently, the system only accepts single file Python projects, Java .jar applications that have a single return value or output to a csv file, or Unix-compiled executables (C projects) that output to a csv file.
+GLADOS has limited support for experiments. To ensure your experiment may run on GLADOS, check whether it falls under [compatible specs](#compatability).
 
-### Python
+The main steps a typical experiment will need to take is:
 
-Example experiments written in Python can be found [in the repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/python).
+* Ensure GLADOS supports the experiment. Specific details can be found under [Compatability](#compatability)
+* Have parameters input via a `.ini` file, passed through as a command line argument
+* Have output be written to a csv file
+  * Alternatively, you can have a single return value be captured as the output
 
-Before submitting an experiment to the system, you may have to:
+We provided simple example experiments [in the repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for how to make your experiment run on GLADOS.
 
-* Ensure it can run on Python 3.8
-* Ensure it does not require downloading any external packages
-* Ensure it does not use Python's multiprocessing/threading features
-* Modify your code so that it accepts the location of an `.ini` config file as a command line argument
-* Use the `configparser` library to read the passed ini file to obtain trial parameters
-* Modify your code to print out the return value to the command line (if you wish to use that approach for collecting experiment output)
-
-Consider checking out the examples linked above to see how to do this in practice.
-
-A guide for using .ini config files can be found here: <https://docs.google.com/document/d/1kTmFn61QkkfWvBuImnBgnrRV0LtZva7u6gRnt_BK9zY/edit> (TODO migrate to wiki page)
-
-Set up your code such that it will accept a .ini config file in the form of
+For any experiment, you will need to set up your code such that it will accept a .ini config file in the form of:
 
 ```ini
 [DEFAULT]
@@ -54,65 +38,35 @@ mr = 0.2
 s = 1
 ```
 
-Once you're ready, proceed to [Uploading to the System](#uploading-to-the-system).
-
-### Java
-
-Example experiments written in Java can be found [in the repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/java).
-
-Similarly to Python configure your Java project to accept the location of a properties config file as a command line argument to get access to experiment parameters, also have your file print out the return value to the command line.
-
-Set up your code such that it will accept a .properties config file in the form of
-
-```properties
-g = 5
-p = 50
-gl = 1
-mr = 0.2
-s = 1
-```
-
-After editing your Java project, export it into a .jar file.
-
-A good guide on how to do so in IntelliJ can be found [here](https://www.jetbrains.com/help/idea/compiling-applications.html)
-
-### C
-
-Example experiments written in Java can be found [in the repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/c).
-
-Configure your C project to accept the location of a properties config file as a command line argument to get access to experiment parameters, and have your file print out the return value to the command line.
-
-Set up your code such that it will accept a .ini config file in the form of:
-
-```ini
-[DEFAULT]
-g = 5
-p = 50
-gl = 1
-mr = 0.2
-s = 1
-```
-
-To do this, utilizing [this ini parser](https://github.com/benhoyt/inih) works great.
-
-Compile your C project for Unix systems via gcc:
-
-```bash
-gcc <your_project_files> <location of ini.c> -o <output file>
-```
-
-More info can be found [here](https://steffanynaranjo.medium.com/how-to-compile-c-files-with-gcc-step-by-step-5939ab8a6c47)
-
-### All types
-
-Set up your code to output to a two-line csv that consists of headers and results like so
+Additionally, set up your code to output to a two-line csv that consists of headers and results like so:
 
 ```csv
 HeaderFor1, HeaderFor2
 Result1, Result2
 ```
 
-## Uploading to the System
+Java experiments must be packaged into an executable `.jar` file.
+C experiments must be compiled into a Unix binary executable.
+Specifics are noted under [Compatability](#compatability).
+
+Once your experiment is set up, continue by [running the experiment](#running-experiments)
+
+### Compatability
+
+GLADOS supports experiments that:
+
+* run on Python 3.8 through a single Python file, with no external packages aside from `configparser`, and no multiprocessing/threading features
+* are packaged in a `.jar` executable
+* are compiled into a binary executable for Unix systems, such that a base Debian system can run it
+
+Other experiment types may be supported, though testing is limited. *Try at your own risk*
+
+GLADOS supports more complex outputs, like multiple files. However, currently, data aggregation is only done on a single file.
+You can get all the generated files, organized by each run, by downloading the Project Zip after completion.
+
+In the future, we plan to add more support for dependencies and other types of experiments.
+
+## Running Experiments
 
 This example will walk through running the Python Genetic Algorithm Experiment, which can be found [in the repository's examples](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/python).
 
@@ -124,8 +78,6 @@ To start an experiment click the blue 'new experiment' button on the top left co
 This will bring up the Experiment Information pane.
 
 ![informationStep](https://user-images.githubusercontent.com/23245825/223880912-8f234bb7-0958-4a04-ad18-81bd33d3b9cc.png)
-
-TODO we should add this kind of info as hover-tooltip-helpers near each field so you don't need to reference other documents for help
 
 Field Specifications:
 
@@ -188,11 +140,11 @@ Clicking next will bring up the confirmation page:
 ![confirmationPage](https://user-images.githubusercontent.com/23245825/223884249-eab24c91-2b8f-43f9-9423-4c9e156e99df.png)
 
 This contains a json file of what will be passed to the backend you can check it again here.
-Clicking next will bring up the Dispatch Page. Drop the .py or .jar file that you want the experiment to run on and click Dispatch which will start the experiment.
+Clicking next will bring up the Dispatch Page. Drop the .py or .jar file that you want the experiment to run on and click Dispatch to start the experiment.
 
-## Experiment is Running
+### Results
 
-While the system is generating the config files this is what will appear on the dashboard:
+While the system is generating the config files, this is what will appear on the dashboard:
 
 ![awaitingExpStart](https://user-images.githubusercontent.com/23245825/223901376-b047a2bc-9dc2-40d2-9d0e-6a0185f7f6cb.png)
 

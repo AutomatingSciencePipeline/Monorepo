@@ -1,9 +1,3 @@
-# Ignore docker container volume contents
-ExperimentFiles/
-
-# Ignore log files produced by the system
-logs/
-
 # Python
 __pycache__
 .venv

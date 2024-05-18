@@ -1,2 +1,4 @@
-# https://docs.docker.com/language/nodejs/build-images/#create-a-dockerignore-file
 /node_modules
+**/.dockerignore
+**/Dockerfile*
+README.md

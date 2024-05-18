@@ -1,0 +1,15 @@
+# Ignore docker container volume contents
+ExperimentFiles/
+
+# Ignore log files produced by the system
+logs/
+
+# Python
+__pycache__
+.venv
+
+# Code Coverage reports
+.coverage
+coverage.xml
+
+# All below this point is uncategorized (categorize them!)

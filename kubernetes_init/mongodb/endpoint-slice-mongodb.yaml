@@ -1,0 +1,22 @@
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: glados-mongodb-eps
+  namespace: default
+  labels:
+    kubernetes.io/service-name: glados-mongodb-service
+addressType: IPv4
+ports:
+  - name: mongodb
+    protocol: TCP
+    port: 0000
+endpoints:
+  - addresses:
+      - "0.0.0.0" # replace with ipv4 address of mongodb
+    conditions:
+      ready: true
+    hostname: glados-pod
+    nodeName: glados-node
+    metadata:
+      name: glados-mongodb-ep
+    # zone: us-west2-a

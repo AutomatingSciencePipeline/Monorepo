@@ -27,6 +27,7 @@ If you don't already have it installed, you can download it on the [git website]
 Docker is a utility that manages small virtual machine "containers."
 
 To install it, follow the instructions on [Docker's documentation](https://docs.docker.com/get-docker/).
+Alternatively, running our install script will install Docker for you.
 
 You might encounter a permissions error on Windows
 mentioning not being part of the docker-users group.
@@ -65,7 +66,7 @@ It may also not have the correct line endings (CRLF vs LF) for your system.
 ## Get the .env file(s)
 
 The system keeps track of private keys (strings that act as passwords to various services) in a `.env` file.
-For security reasons, these cannot be publicly distributed with the rest of the code.
+To maintain privacy, these cannot be publicly distributed with the rest of the code.
 
 You can get a copy of our `.env` file from our private Discord in the [#env-files channel](https://discord.com/channels/1017208818989539368/1042935101601873970). Note that you must already be a member of the Discord to open this link; contact us if you need access.
 
@@ -94,6 +95,18 @@ bash dev-install.sh
 
 This process may require you to close and reopen the terminal, uninstall programs you may have, or restart your computer. You may need to run the script multiple times, as a result.
 
+## Install Minikube and related tools
+
+Minikube allows you to easily run a Kubernetes cluster locally on your machine, mainly for learning and testing purposes. 
+
+To install it, follow the instructions on [Minikube's documentation](https://minikube.sigs.k8s.io/docs/start/). You must have Docker installed already, unless you have another [minikube driver](https://minikube.sigs.k8s.io/docs/drivers/) you prefer.
+
+Additionally, some tools are required to work with kubernetes. 
+Kubectl allows you to interact with the cluster through the command line. To install it, [follow the instructions here](https://kubernetes.io/docs/tasks/tools/#kubectl), for your OS.
+Python Kubernetes Client works the same way, but through Python instead of the command line. This is used to set up the system easily. To install it, [follow the instructions here](https://github.com/kubernetes-client/python?tab=readme-ov-file#installation). If preferred, you may also set this up in a separate pyenv, much like what is done in the `dev-install.sh` script.
+
+Ensure you can start minikube and interact with the cluster with kubectl before continuing.
+
 ## IDE Setup
 
 We strongly suggest using Visual Studio Code (VSCode) as your IDE.
@@ -120,7 +133,44 @@ You may run into CI issues, with build failures, without a working linter.
 
 You are now fully set up to develop on the system!
 
+## Launching the project with Minikube
+
+To launch GLADOS locally, first start minikube. Then, you can run our `kubernetes/init.py` script to start all the resources. Here are the commands:
+
+```bash
+minikube start
+python3 kubernetes/init.py --hard
+```
+
+Sometimes it fails to create all the resources. To fix this, run the script again.
+
+To ensure it is running, list all resources via:
+
+```bash
+kubectl get all
+```
+
+There should be four deployments. They may take a while to start up, so be patient. To debug, you may also use the minikube dashboard via:
+
+```bash
+minikube dashboard
+```
+
+Once all the deployments are ready, you will need to port forward the frontend manually, via:
+
+```bash
+kubectl port-forward deployment/deployment-test-backend 3000:3000
+```
+
+This will allow you to view the frontend on http://localhost:3000.
+
+To update the system, you will need to rebuild and push the images, then recreate the system, using `python3 kubernetes/init.py --hard`. Ensure it is building using the same images you just pushed, within each deployment manifest.
+
 ## Quick Launching with Docker
+
+!!! note
+
+    Docker is used to run an older version of GLADOS that does not allow multiple experiments to be ran at the same time. However, some of our current development is done through running on Docker, as the system has not fully migrated to Kubernetes. As of May 15, 2024, the `main` branch is ran via Kubernetes, and all other branches are ran via Docker.
 
 You can quickly build and launch all service containers via VSCode Tasks.
 

@@ -3,7 +3,6 @@ import { getEnvVar } from '../../utils/env';
 
 
 const BACKEND_PORT = getEnvVar('BACKEND_PORT');
-const CONTACT_BACKEND_AT = getEnvVar('CONTACT_BACKEND_AT');
 
 export interface QueueResponse {
 	response: {
@@ -13,7 +12,7 @@ export interface QueueResponse {
 
 const handler: NextApiHandler<QueueResponse> = async (req, res) => {
 	try {
-		const queueResponse = await fetch(`http://${CONTACT_BACKEND_AT}:${BACKEND_PORT}/queue`);
+		const queueResponse = await fetch(`http://glados-service-backend:${BACKEND_PORT}/queue`);
 		if (queueResponse?.ok) {
 			const contents = await queueResponse.json();
 			console.log('Queue Size', contents);

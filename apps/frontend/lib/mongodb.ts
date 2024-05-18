@@ -4,9 +4,11 @@ import { getEnvVar } from '../utils/env';
 
 // Adapted from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 
-const CONTACT_MONGODB_AT = getEnvVar('CONTACT_MONGODB_AT');
 const MONGODB_PORT = getEnvVar('MONGODB_PORT');
-const MONGODB_URI = `mongodb://${CONTACT_MONGODB_AT}:${MONGODB_PORT}`;
+const USERNAME = getEnvVar('MONGODB_USERNAME');
+const PASSWORD = getEnvVar('MONGODB_PASSWORD');
+
+const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
 const MONGODB_OPTIONS = {};
 
 export const DB_NAME = 'gladosdb';
@@ -43,5 +45,3 @@ if (process.env.NODE_ENV === 'development') {
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;
-
-
