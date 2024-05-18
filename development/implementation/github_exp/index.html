@@ -10,28 +10,28 @@
       
       
       
-        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/installation/">
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/development/implementation/github_exp/">
       
       
-        <link rel="prev" href="../usage/">
+        <link rel="prev" href="../../troubleshooting/">
       
       
-        <link rel="next" href="../developer_installation/">
+        <link rel="next" href="../../../documentation/guide/">
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.19">
     
     
       
-        <title>Installation - GLADOS</title>
+        <title>Automating Github Experiments - GLADOS</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.66ac8b77.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -50,7 +50,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#automating-github-repo-experiment" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +92,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
+    <a href="../../.." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Automating Github Experiments
             
           </span>
         </div>
@@ -225,7 +225,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
+    <a href="../../.." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -255,7 +255,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -275,7 +275,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../about/" class="md-nav__link">
+      <a href="../../../about/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -292,19 +292,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -318,7 +316,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Tutorial
@@ -332,7 +330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../usage/" class="md-nav__link">
+      <a href="../../../tutorial/usage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -350,30 +348,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Installation
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../tutorial/installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -382,134 +360,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#required-tools" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Tools
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Required Tools">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#git" class="md-nav__link">
-    <span class="md-ellipsis">
-      Git
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      Docker
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#wsl-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      WSL Error
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#retrieve-the-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Retrieve the Code
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-the-env-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      Get the .env file(s)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Get the .env file(s)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#alternative-set-up-your-own-env-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Alternative: Set up your own .env file
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-the-system-locally" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run the System Locally
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next Steps
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -522,7 +372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer_installation/" class="md-nav__link">
+      <a href="../../../tutorial/developer_installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -543,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+      <a href="../../../tutorial/troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -564,7 +414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../onboarding_tasks.md" class="md-nav__link">
+      <a href="../../../tutorial/onboarding_tasks.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -589,17 +439,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -613,7 +465,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Development
@@ -627,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/contributing/" class="md-nav__link">
+      <a href="../../contributing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -648,7 +500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/frontend_dev/" class="md-nav__link">
+      <a href="../../frontend_dev/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -669,7 +521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/backend_dev/" class="md-nav__link">
+      <a href="../../backend_dev/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -690,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/mongodb/" class="md-nav__link">
+      <a href="../../mongodb/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -711,7 +563,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -729,17 +581,19 @@
                 
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" checked>
         
           
           <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
@@ -753,7 +607,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_6">
             <span class="md-nav__icon md-icon"></span>
             Implementation
@@ -764,10 +618,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../development/implementation/github_exp/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Automating Github Experiments
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -776,6 +650,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-goal-of-automating-github-experiment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Goal of Automating Github Experiment
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-goal-of-automating-github-experiment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Final Goal of Automating Github Experiment
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Progress
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -838,7 +759,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../documentation/guide/" class="md-nav__link">
+      <a href="../../../documentation/guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -901,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../infrastructure/kubernetes/" class="md-nav__link">
+      <a href="../../../infrastructure/kubernetes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -929,7 +850,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cheatsheet/" class="md-nav__link">
+      <a href="../../../cheatsheet/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -949,7 +870,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../repository_guide/" class="md-nav__link">
+      <a href="../../../repository_guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -989,108 +910,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#current-goal-of-automating-github-experiment" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Current Goal of Automating Github Experiment
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#required-tools" class="md-nav__link">
+  <a href="#final-goal-of-automating-github-experiment" class="md-nav__link">
     <span class="md-ellipsis">
-      Required Tools
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Required Tools">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#git" class="md-nav__link">
-    <span class="md-ellipsis">
-      Git
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      Docker
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#wsl-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      WSL Error
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#retrieve-the-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Retrieve the Code
+      Final Goal of Automating Github Experiment
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-the-env-files" class="md-nav__link">
+  <a href="#current-progress" class="md-nav__link">
     <span class="md-ellipsis">
-      Get the .env file(s)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Get the .env file(s)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#alternative-set-up-your-own-env-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Alternative: Set up your own .env file
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-the-system-locally" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run the System Locally
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next Steps
+      Current Progress
     </span>
   </a>
   
@@ -1111,71 +951,42 @@
                   
 
 
-<h1 id="installation">Installation</h1>
-<h2 id="overview">Overview</h2>
-<p>This section covers how to, as a user of the Automating Science Project system, run a simulation of the system on your local machine.</p>
-<p>If you don't want to run your own copy, you can instead access the live website <a href="http://glados-lb.csse.rose-hulman.edu/">here</a> and jump straight to <a href="../usage/">Running an Experiment</a>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>As of March 2024, we have shifted towards running the system on Kubernetes, rather than Docker. These steps still work with the current codebase, but as we fully migrate the codebase to our Kubernetes version, these steps will need to be updated accordingly.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>These steps mainly concern hosting a local system on a Windows computer. Steps on other OS's will have the same steps, although the specific steps on installation, as well as configuration, may differ.</p>
-</div>
-<h2 id="required-tools">Required Tools</h2>
-<h3 id="git">Git</h3>
-<p>Git is a code version management tool that integrates with Github, where our codebase is stored. </p>
-<p>If you don't already have it installed, you can download it on the <a href="https://git-scm.com/downloads">git website</a>.</p>
-<h3 id="docker">Docker</h3>
-<p>Docker is a utility that manages small virtual machine "containers."</p>
-<p>To install it, follow the instructions on <a href="https://docs.docker.com/get-docker/">Docker's documentation</a>.</p>
-<p>You might encounter a permissions error on Windows
-mentioning not being part of the docker-users group.
-Directions to fix that can be found <a href="https://icij.gitbook.io/datashare/faq-errors/you-are-not-allowed-to-use-docker-you-must-be-in-the-docker-users-group-.-what-should-i-do">here</a>.</p>
-<h4 id="wsl-error">WSL Error</h4>
-<p>To get Docker to work properly, you will need to install WSL.
-This may fail for Windows. In this case, check that virtualization is enabled in the BIOS.</p>
-<h2 id="retrieve-the-code">Retrieve the Code</h2>
-<p>In a location of your choice in a drive with at least 1 GB of free space,
-use Git to clone the repo.</p>
-<p>Your command will probably look like this:</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/AutomatingSciencePipeline/Monorepo.git
-</code></pre></div>
-<p>Or this if you have <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">ssh keys</a> set up (Recommended):</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>git@github.com:AutomatingSciencePipeline/Monorepo.git
-</code></pre></div>
-<p>The <code>--recurse-submodules</code> can be omitted if you don't want to download a copy of the docs as well.</p>
-<p>If cloning isn't working for some reason,
-you can download a zip from <a href="https://github.com/AutomatingSciencePipeline/Monorepo/archive/refs/heads/main.zip">here</a> instead.
-Note that, if you download a zip, Windows or antivirus programs may block you from running the code,
-in which case you will have to navigate various security dialogs to unblock it.
-It may also not have the correct line endings (CRLF vs LF) for your system.</p>
-<h2 id="get-the-env-files">Get the .env file(s)</h2>
-<p>The system keeps track of private keys (strings that act as passwords to various services) in a <code>.env</code> file.
-For security reasons, these cannot be publicly distributed with the rest of the code.</p>
-<p>You can get a copy of our <code>.env</code> file from our private Discord in the <a href="https://discord.com/channels/1017208818989539368/1042935101601873970">#env-files channel</a>. Note that you must already be a member of the Discord to open this link; contact us if you need access.</p>
-<p>The file should be named exactly <code>.env</code> and placed in the root folder of the repository.</p>
-<h4 id="alternative-set-up-your-own-env-file">Alternative: Set up your own .env file</h4>
-<p>You can create your own <code>.env</code> file, if you want to set up your own GLADOS system. There is an <code>.example.env</code> file in the repository that has sample fields to fill in. During this process, you will need to set up a Firebase project for account management. Note that the frontend code has the Firebase public key in it, which does not need to be secure, but will need to be replaced when hosting your own GLADOS system.</p>
-<h2 id="run-the-system-locally">Run the System Locally</h2>
-<p>Once you have the above taken care of, you can use Docker to spin up a copy of the system.</p>
-<ol>
-<li>Open a terminal in Monorepo root folder (<code>Monorepo/</code>)</li>
-<li>Run <code>docker compose up --build</code></li>
-<li>This will start up the Docker Compose for the <strong>production version</strong> of the project, which will locally host a backend, frontend, and database for you. With the included <code>.env</code> file, it will point to the production Firebase project for authentication.</li>
-<li>Optionally use the flag <code>-d</code> to detach it from the terminal window, which means Docker will keep running even when the terminal is closed.</li>
-<li>If you see an error message like <code>open //./pipe/docker_engine: The system cannot find the file specified</code> you probably don't have Docker started.</li>
-<li>The <code>--build</code> flag indicates it should build the containers from scratch. You can exclude this flag from future runs, but you should build again after pulling new code from the repo.</li>
-<li>If this succeeds, the last message in the console should be similar to: <code>glados-backend  | Press CTRL+C to quit</code></li>
-<li>If this fails, see the troubleshooting steps below</li>
-<li>Go to <a href="http://localhost:3000">http://localhost:3000</a> (or another address, if the command output reports a different url) in your browser</li>
-<li>Because you're running the production version, pages should load nearly instantly. The developer version might take a bit to load.</li>
-<li>Once on the site, sign up for an account or log in.</li>
-</ol>
-<p>Now you are ready to run an experiment.</p>
-<h2 id="next-steps">Next Steps</h2>
-<p>See how to <a href="../usage/">run an experiment</a>.</p>
+<h1 id="automating-github-repo-experiment">Automating Github Repo Experiment</h1>
+<p>Updated on 12/11/2023</p>
+<p>*Currently this implementation is in backlog, check the branch "automate-github-repo"</p>
+<h2 id="current-goal-of-automating-github-experiment">Current Goal of Automating Github Experiment</h2>
+<ul>
+<li>[Front-end] User enters github url on the website</li>
+<li>[Back-end] GLADOS checks if the github repo is cloneable</li>
+<li>[Back-end] GLADOS checks if the github has already been cloned</li>
+<li>[Back-end] If not, GLADOS creates a Docker image based on the cloned repo url</li>
+<li>[Front-end] User chooses which image to create the container</li>
+<li>Currently cannot spawn the container so will be cloning the repo inside our back-end container (?)</li>
+</ul>
+<h2 id="final-goal-of-automating-github-experiment">Final Goal of Automating Github Experiment</h2>
+<p>(a.k.a. HAPPY PATH :))
+(Assuming that distributed systems are working..)</p>
+<ul>
+<li>[Front-end] User enters github url on the website</li>
+<li>[Back-end] GLADOS checks if the github repo is cloneable</li>
+<li>[Back-end] GLADOS checks if the github has already been cloned (via MongoDB)</li>
+<li>[Back-end] If not, GLADOS creates a Docker image based on the cloned repo url<blockquote>
+<p>Refer to this <a href="https://docs.docker.com/engine/reference/commandline/build/#git-repositories">link</a></p>
+</blockquote>
+</li>
+<li>[Front-end] User chooses which image to create the container</li>
+<li>[Back-end] GLADOS creates a Docker container (and runs a sanity check if the experiment meets the requirements / running bash script)</li>
+<li>Currently cannot spawn the container so will be cloning the repo inside our back-end container</li>
+<li>[Back-end] GLADOS downloads dependencies and modules</li>
+<li>[Back-end] GLADOS creates config files with the config parser (currently not sure)</li>
+<li>[Back-end] GLADOS runs experiment</li>
+</ul>
+<h2 id="current-progress">Current Progress</h2>
+<ul>
+<li>Currently we are using <a href="https://github.com/rhit-easy-lab/evo-devo-nkfl-core.git">evo-devo-nkfl-core</a> as our sample github repository.</li>
+<li>[Front-end] Created a button <code>Github Experiment</code> modal to input and alerts for un-cloneable urls</li>
+<li>[Back-end] Trying to check if the github repo is cloneable by using subprocess in python</li>
+</ul>
 
 
 
@@ -1222,10 +1033,10 @@ For security reasons, these cannot be publicly distributed with the rest of the 
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.dd8806f2.min.js"></script>
       
     
   </body>

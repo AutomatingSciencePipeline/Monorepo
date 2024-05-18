@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/installation/">
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/development/contributing/">
       
       
-        <link rel="prev" href="../usage/">
+        <link rel="prev" href="../../tutorial/troubleshooting/">
       
       
-        <link rel="next" href="../developer_installation/">
+        <link rel="next" href="../frontend_dev/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Installation - GLADOS</title>
+        <title>Contributing - GLADOS</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#contributing" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Contributing
             
           </span>
         </div>
@@ -292,19 +292,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -318,7 +316,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Tutorial
@@ -332,7 +330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../usage/" class="md-nav__link">
+      <a href="../../tutorial/usage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -350,30 +348,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Installation
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../tutorial/installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -382,134 +360,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#required-tools" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Tools
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Required Tools">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#git" class="md-nav__link">
-    <span class="md-ellipsis">
-      Git
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      Docker
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#wsl-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      WSL Error
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#retrieve-the-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Retrieve the Code
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-the-env-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      Get the .env file(s)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Get the .env file(s)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#alternative-set-up-your-own-env-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Alternative: Set up your own .env file
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-the-system-locally" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run the System Locally
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next Steps
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -522,7 +372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer_installation/" class="md-nav__link">
+      <a href="../../tutorial/developer_installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -543,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+      <a href="../../tutorial/troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -564,7 +414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../onboarding_tasks.md" class="md-nav__link">
+      <a href="../../tutorial/onboarding_tasks.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -589,17 +439,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -613,7 +465,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Development
@@ -624,10 +476,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../development/contributing/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -636,6 +508,101 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-to-the-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing to the Docs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing to the Docs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edit-from-the-web" class="md-nav__link">
+    <span class="md-ellipsis">
+      Edit from the Web
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-copy-of-the-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Copy of the Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Version Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-branch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Main Branch
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Feature Branches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull Request
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -648,7 +615,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/frontend_dev/" class="md-nav__link">
+      <a href="../frontend_dev/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -669,7 +636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/backend_dev/" class="md-nav__link">
+      <a href="../backend_dev/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -690,7 +657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/mongodb/" class="md-nav__link">
+      <a href="../mongodb/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -711,7 +678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -767,7 +734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/implementation/github_exp/" class="md-nav__link">
+      <a href="../implementation/github_exp/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -989,85 +956,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#contributing-to-the-docs" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Contributing to the Docs
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#required-tools" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Tools
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Required Tools">
+    <nav class="md-nav" aria-label="Contributing to the Docs">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#git" class="md-nav__link">
+  <a href="#edit-from-the-web" class="md-nav__link">
     <span class="md-ellipsis">
-      Git
+      Edit from the Web
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#docker" class="md-nav__link">
+  <a href="#local-copy-of-the-docs" class="md-nav__link">
     <span class="md-ellipsis">
-      Docker
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#wsl-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      WSL Error
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#retrieve-the-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Retrieve the Code
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-the-env-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      Get the .env file(s)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Get the .env file(s)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#alternative-set-up-your-own-env-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Alternative: Set up your own .env file
+      Local Copy of the Docs
     </span>
   </a>
   
@@ -1079,20 +989,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-the-system-locally" class="md-nav__link">
+  <a href="#version-control" class="md-nav__link">
     <span class="md-ellipsis">
-      Run the System Locally
+      Version Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-branch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Main Branch
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#feature-branches" class="md-nav__link">
     <span class="md-ellipsis">
-      Next Steps
+      Feature Branches
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull Request
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1111,71 +1045,35 @@
                   
 
 
-<h1 id="installation">Installation</h1>
-<h2 id="overview">Overview</h2>
-<p>This section covers how to, as a user of the Automating Science Project system, run a simulation of the system on your local machine.</p>
-<p>If you don't want to run your own copy, you can instead access the live website <a href="http://glados-lb.csse.rose-hulman.edu/">here</a> and jump straight to <a href="../usage/">Running an Experiment</a>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>As of March 2024, we have shifted towards running the system on Kubernetes, rather than Docker. These steps still work with the current codebase, but as we fully migrate the codebase to our Kubernetes version, these steps will need to be updated accordingly.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>These steps mainly concern hosting a local system on a Windows computer. Steps on other OS's will have the same steps, although the specific steps on installation, as well as configuration, may differ.</p>
-</div>
-<h2 id="required-tools">Required Tools</h2>
-<h3 id="git">Git</h3>
-<p>Git is a code version management tool that integrates with Github, where our codebase is stored. </p>
-<p>If you don't already have it installed, you can download it on the <a href="https://git-scm.com/downloads">git website</a>.</p>
-<h3 id="docker">Docker</h3>
-<p>Docker is a utility that manages small virtual machine "containers."</p>
-<p>To install it, follow the instructions on <a href="https://docs.docker.com/get-docker/">Docker's documentation</a>.</p>
-<p>You might encounter a permissions error on Windows
-mentioning not being part of the docker-users group.
-Directions to fix that can be found <a href="https://icij.gitbook.io/datashare/faq-errors/you-are-not-allowed-to-use-docker-you-must-be-in-the-docker-users-group-.-what-should-i-do">here</a>.</p>
-<h4 id="wsl-error">WSL Error</h4>
-<p>To get Docker to work properly, you will need to install WSL.
-This may fail for Windows. In this case, check that virtualization is enabled in the BIOS.</p>
-<h2 id="retrieve-the-code">Retrieve the Code</h2>
-<p>In a location of your choice in a drive with at least 1 GB of free space,
-use Git to clone the repo.</p>
-<p>Your command will probably look like this:</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/AutomatingSciencePipeline/Monorepo.git
-</code></pre></div>
-<p>Or this if you have <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">ssh keys</a> set up (Recommended):</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>git@github.com:AutomatingSciencePipeline/Monorepo.git
-</code></pre></div>
-<p>The <code>--recurse-submodules</code> can be omitted if you don't want to download a copy of the docs as well.</p>
-<p>If cloning isn't working for some reason,
-you can download a zip from <a href="https://github.com/AutomatingSciencePipeline/Monorepo/archive/refs/heads/main.zip">here</a> instead.
-Note that, if you download a zip, Windows or antivirus programs may block you from running the code,
-in which case you will have to navigate various security dialogs to unblock it.
-It may also not have the correct line endings (CRLF vs LF) for your system.</p>
-<h2 id="get-the-env-files">Get the .env file(s)</h2>
-<p>The system keeps track of private keys (strings that act as passwords to various services) in a <code>.env</code> file.
-For security reasons, these cannot be publicly distributed with the rest of the code.</p>
-<p>You can get a copy of our <code>.env</code> file from our private Discord in the <a href="https://discord.com/channels/1017208818989539368/1042935101601873970">#env-files channel</a>. Note that you must already be a member of the Discord to open this link; contact us if you need access.</p>
-<p>The file should be named exactly <code>.env</code> and placed in the root folder of the repository.</p>
-<h4 id="alternative-set-up-your-own-env-file">Alternative: Set up your own .env file</h4>
-<p>You can create your own <code>.env</code> file, if you want to set up your own GLADOS system. There is an <code>.example.env</code> file in the repository that has sample fields to fill in. During this process, you will need to set up a Firebase project for account management. Note that the frontend code has the Firebase public key in it, which does not need to be secure, but will need to be replaced when hosting your own GLADOS system.</p>
-<h2 id="run-the-system-locally">Run the System Locally</h2>
-<p>Once you have the above taken care of, you can use Docker to spin up a copy of the system.</p>
-<ol>
-<li>Open a terminal in Monorepo root folder (<code>Monorepo/</code>)</li>
-<li>Run <code>docker compose up --build</code></li>
-<li>This will start up the Docker Compose for the <strong>production version</strong> of the project, which will locally host a backend, frontend, and database for you. With the included <code>.env</code> file, it will point to the production Firebase project for authentication.</li>
-<li>Optionally use the flag <code>-d</code> to detach it from the terminal window, which means Docker will keep running even when the terminal is closed.</li>
-<li>If you see an error message like <code>open //./pipe/docker_engine: The system cannot find the file specified</code> you probably don't have Docker started.</li>
-<li>The <code>--build</code> flag indicates it should build the containers from scratch. You can exclude this flag from future runs, but you should build again after pulling new code from the repo.</li>
-<li>If this succeeds, the last message in the console should be similar to: <code>glados-backend  | Press CTRL+C to quit</code></li>
-<li>If this fails, see the troubleshooting steps below</li>
-<li>Go to <a href="http://localhost:3000">http://localhost:3000</a> (or another address, if the command output reports a different url) in your browser</li>
-<li>Because you're running the production version, pages should load nearly instantly. The developer version might take a bit to load.</li>
-<li>Once on the site, sign up for an account or log in.</li>
-</ol>
-<p>Now you are ready to run an experiment.</p>
-<h2 id="next-steps">Next Steps</h2>
-<p>See how to <a href="../usage/">run an experiment</a>.</p>
+<h1 id="contributing">Contributing</h1>
+<p>This page will eventually contain information on best practices to follow when contributing to the repository.</p>
+<p>Check out the <a href="">Repository Guide</a> to familiarize yourself with each system component.</p>
+<h2 id="contributing-to-the-docs">Contributing to the Docs</h2>
+<p>When working on the documentation, your contributions should pass the markdownlint-ci2 engine, implemented by editor extensions such as <a href="https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint">this one</a> for Visual Studio Code.</p>
+<h3 id="edit-from-the-web">Edit from the Web</h3>
+<p>It's possible to edit the docs from the web on Github, but github won't put through the linter described above, so it is suggested you edit them locally.</p>
+<h3 id="local-copy-of-the-docs">Local Copy of the Docs</h3>
+<p>Github internally keeps track of changes to repository wikis in a secondary git repository.</p>
+<p>In order to make editing the docs easier, and help keep them in sync with the main repo,
+the documentation repo is included as a <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">git submodule</a> in the main repository,
+which means it will be cloned when you clone the repo.
+As a result, changes to the docs will be noted in commits to the main repo as well by a 'pointer' that holds the commit hash of a certain commit on the docs repo.</p>
+<p>Git clients may prevent you from committing changes to the main repo until you commit your docs changes as well.</p>
+<p>To commit and push changes to the submodule, you can open it as another repository from whatever git client you're using, then use git commands as normal from there.</p>
+<p>You may be on a "detached HEAD" on the wiki repository - this is not a problem, just checkout <code>master</code> again and you'll be fine.</p>
+<ul>
+<li>Github desktop: <a href="https://stackoverflow.com/questions/60086154/how-can-i-push-my-submodules-from-github-desktop">Add it as an existing repository</a> (the local folder you need to select will be named <code>Monorepo.wiki</code>)</li>
+<li>Check the <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">git docs</a> for how to use it with git command line.</li>
+<li>In Sourcetree, it shows up on the right side and opens as another tab:
+  <img alt="Sourcetree" src="https://user-images.githubusercontent.com/25965766/213574381-410834ad-14fa-4158-897d-3b1c90773b75.png" /></li>
+</ul>
+<h2 id="version-control">Version Control</h2>
+<h3 id="main-branch">Main Branch</h3>
+<p>The main branch cannot be pushed directly; branch protection rules require it to pass our review process. When a group member is finished with their branch, they can submit their work for review via a pull request, which requires a manual code review before it is merged. This will allow it to be checked for style concerns and ensure that bugs and other related issues are prevented from reaching the main branch.</p>
+<h3 id="feature-branches">Feature Branches</h3>
+<p>Branches that are not the main branch are feature branches, where members can freely alter code without having to worry about causing issues with the main branch or other members.</p>
+<h3 id="pull-request">Pull Request</h3>
+<p>When implementing a new feature, create a new branch with the name of the feature and implement it. After committing and pushing the changes, create a <code>Pull Request</code> to merge the branch to the main branch. Members need to thoroughly go over the changes to prevent further issues and merge the branch.</p>
 
 
 
