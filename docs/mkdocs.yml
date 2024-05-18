@@ -15,12 +15,12 @@ nav:
     - Installation: tutorial/installation.md
     - Developer Installation: tutorial/developer_installation.md
     - Troubleshooting: tutorial/troubleshooting.md
-    - Onboarding Tasks: tutorial/onboarding_tasks.md
   - Development:
     - Contributing: development/contributing.md
     - Frontend: development/frontend_dev.md
     - Backend: development/backend_dev.md
     - MongoDB: development/mongodb.md
+    - Troubleshooting: development/troubleshooting.md
     - Implementation: 
       - Automating Github Experiments: development/implementation/github_exp.md
   - Documentation:

@@ -16,7 +16,14 @@ To set up a new machine for development, follow the [developer installation guid
 
 To get familiar with the components of the system, check out the [Repository Guide](repository_guide.md).
 
-To know more about front-end development, check out the [Frontend Developer Guide](developers/frontend_dev.md).
+To start onboarding, check out the Onboarding Tasks in our [Task Board](https://github.com/orgs/AutomatingSciencePipeline/projects/1/views/1).
+
+To know more about front-end development, check out the [Frontend Developer Guide](development/frontend_dev.md).
+
+To know more about back-end development, check out the [Backend Developer Guide](development/backend_dev.md).
+
+To know more about MongoDB, check out the [MongoDB Guide](development/mongodb.md).
+
 
 <!-- This wiki also contains docs from the [old repo](https://github.com/GLADOSPipeline/Monorepo/wiki) prefixed with `Old`.
 These files are no longer up to date, and are planned to be removed, but are kept for developer reference.

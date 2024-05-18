@@ -1,4 +1,4 @@
-# Overview
+# MongoDB Guide
 
 This section gives a general idea about how MongoDB is used in this project, and how to set up a REST API connection between frontend and backend.
 
@@ -24,4 +24,4 @@ To check whether data is handling the information correctly, [Mongo-Express](htt
 
 ## Future Implementation
 
-Currently, the real-time update feature is not implemented, but it needs to be implemented to complete the system. Please refer to how Firebase connection is retrieving and updates useEffect to set up the connection. [Change Stream](https://www.mongodb.com/docs/manual/changeStreams/) seems to be a good technology we can use to create connection. However, it requires the database set up to be a [replica set](https://www.mongodb.com/docs/manual/replication/) and also put together with Kubernetes. [This](https://www.mongodb.com/docs/kubernetes-operator/stable/tutorial/deploy-replica-set/) MongoDB official document seems to be a good reference to have. Once the set up is made, API calls need to be created to set up real-time update.
+Currently, the real-time update feature is not implemented, but it needs to be implemented to complete the system. Please refer to how Firebase connection is retrieving and updates useEffect to set up the connection. [Change Stream](https://www.mongodb.com/docs/manual/changeStreams/) seems to be a good technology we can use to create connection. However, it requires the database set up to be a [replica set](https://www.mongodb.com/docs/manual/replication/) and also put together with Kubernetes. This [MongoDB official document](https://www.mongodb.com/docs/kubernetes-operator/stable/tutorial/deploy-replica-set/) seems to be a good reference to have. Once the set up is made, API calls need to be created to set up real-time update.

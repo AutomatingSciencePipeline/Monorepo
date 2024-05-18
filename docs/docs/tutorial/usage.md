@@ -2,6 +2,11 @@
 
 This section covers how to run an experiment on the system.
 
+## User guide
+<iframe width="560" height="315" src="
+https://www.youtube.com/embed/JC1HgvlJUT8?si=-zE72fyr1TrEL_f5"
+title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 Definitions:
 
 * **Trial**: A single run of submitted code with a corresponding config file
