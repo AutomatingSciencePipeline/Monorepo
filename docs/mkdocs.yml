@@ -18,8 +18,11 @@ nav:
     - Onboarding Tasks: tutorial/onboarding_tasks.md
   - Development:
     - Contributing: development/contributing.md
-    - For Frontend Developers: development/frontend_dev.md
-    - For Backend Developers: development/backend_dev.md
+    - Frontend: development/frontend_dev.md
+    - Backend: development/backend_dev.md
+    - MongoDB: development/mongodb.md
+    - Implementation: 
+      - Automating Github Experiments: development/implementation/github_exp.md
   - Documentation:
     - Updating Documentation: documentation/guide.md
   - Infrastructure:
