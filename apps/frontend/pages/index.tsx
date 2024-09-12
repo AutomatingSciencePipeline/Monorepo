@@ -101,7 +101,7 @@ const HomePage = () => {
 												</span>
 											</h1>
 											<p className='mt-3 text-base text-gray-300 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl'>
-												A senior capstone project built for Rose-Hulman
+												Testing docker builds. A senior capstone project built for Rose-Hulman
 												Institute of Technology, Glados aims to become the
 												premier platform for researchers to share computational
 												resources in performing compute-intensive research
