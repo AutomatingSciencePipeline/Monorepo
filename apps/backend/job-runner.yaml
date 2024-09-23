@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: runner
-        image: sugiyat/image-test-runner:latest
+        image: gladospipeline/glados-runner:latest
         command: []
         env:
         - name: MONGODB_PORT
