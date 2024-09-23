@@ -14,7 +14,7 @@ echo "Restarting cubed"
 sudo kubeadm reset
 rm -f $HOME/.kube/config
 
-sudo kubeadm init --config kubeadm-config.yaml
+sudo kubeadm init --config kubeadm-config-new.yaml
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
