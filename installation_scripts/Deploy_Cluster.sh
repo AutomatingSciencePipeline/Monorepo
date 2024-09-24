@@ -6,25 +6,25 @@ echo "Restarting cubed"
 sudo kubeadm reset
 rm -f $HOME/.kube/config
 
-sudo kubeadm init --config kubeadm-config-new.yaml
+sudo kubeadm init --config ../kube_config/kubeadm-config-new.yaml
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-# Allows replica sets to deploy pods on this node (remove once there are multiple nodes)
-kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+# UNCOMMENT IF ONLY USING 1 NODE
+# kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 # install networking + metallb
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
 
-python3 kubernetes_init/init.py
+python3 ../kubernetes_init/init.py
 echo 'Waiting for a pod to start....'
 sleep 5
-until kubectl apply -f ipaddresspool.yaml
+until kubectl apply -f ../kube_config/ipaddresspool.yaml
 do 
    sleep 1
    echo 'Waiting for a pod to start....'
 done
-kubectl apply -f l2advertisement.yaml
+kubectl apply -f ../kube_config/l2advertisement.yaml
 kubectl expose deployment deployment-test-frontend --type LoadBalancer --port 80 --target-port 3000
