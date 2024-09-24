@@ -7,7 +7,7 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Publish Backend Docker image
+name: Publish Production Backend Docker image
 
 on:
   push:
