@@ -4,6 +4,8 @@
 # Secure environment files
 .env
 
+.venv/
+
 # Temp files from the setup process
 setup/temp/
 
