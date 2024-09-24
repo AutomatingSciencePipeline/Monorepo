@@ -10,5 +10,5 @@ git checkout development
 
 git pull origin development
 
-sed -i 's/glados-backend:latest/glados-backend:development/g' ../kubernetes_init/backend/deployment-backend.yaml
-sed -i 's/glados-frontend:latest/glados-frontend:development/g' ../kubernetes_init/frontend/deployment-frontend.yaml
+sed -i 's/glados-backend:latest/glados-backend:development/g' ./Monorepo/kubernetes_init/backend/deployment-backend.yaml
+sed -i 's/glados-frontend:latest/glados-frontend:development/g' ./Monorepo/kubernetes_init/frontend/deployment-frontend.yaml
