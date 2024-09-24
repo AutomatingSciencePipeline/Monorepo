@@ -19,7 +19,7 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
 
 cd ..
-python3 ../kubernetes_init/init.py
+python3 ./kubernetes_init/init.py
 cd installation_scripts || exit
 echo 'Waiting for a pod to start....'
 sleep 5
