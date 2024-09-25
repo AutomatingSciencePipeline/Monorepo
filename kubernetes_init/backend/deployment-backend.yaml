@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: container-test-backend
-        image: sugiyat/image-test-backend:latest
+        image: gladospipeline/glados-backend:latest
         ports:
         - containerPort: 0000
           # hostPort: 0000
