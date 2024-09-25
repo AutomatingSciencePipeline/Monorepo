@@ -42,3 +42,13 @@ spec:
             secretKeyRef:
               name: secret-env
               key: FIREBASE_KEY
+        - name: MONGODB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_USERNAME
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_PASSWORD
