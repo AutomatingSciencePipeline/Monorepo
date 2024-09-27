@@ -9,9 +9,9 @@ def verify_mongo_connection(mongoClient):
         # just use a generic exception
         raise Exception("MongoDB server not available/unreachable") from err
     
-def upload_experiment_aggregated_results(experiment: dict, results: dict, mongoClient):
+def upload_experiment_aggregated_results(experimentId: str, results: str, mongoClient):
     # turn experiment JSON into an object
-    experimentResultEntry = {"_id": experiment['expId'], "resultContent": results['content']}
+    experimentResultEntry = {"_id": experimentId, "resultContent": results}
     # Get the results connection
     resultsCollection = mongoClient["gladosdb"].results
     try:
