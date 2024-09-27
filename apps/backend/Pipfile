@@ -9,6 +9,7 @@ requests = "*"
 kubernetes = "*"
 flask-cors = "*"
 pytest-cov = "*"
+pymongo = "*"
 
 [dev-packages]
 # libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)

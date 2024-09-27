@@ -1,7 +1,10 @@
 """Module that uses flask to host endpoints for the backend"""
 from concurrent.futures import ProcessPoolExecutor
+import os
 from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
+import pymongo
+from pymongo.errors import ConnectionFailure
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -11,6 +14,25 @@ BATCH_API = client.BatchV1Api()
 
 MAX_WORKERS = 1
 executor = ProcessPoolExecutor(MAX_WORKERS)
+
+# Mongo Setup
+# create the mongo client
+mongoClient = pymongo.MongoClient(
+    "glados-service-mongodb",
+    int(str(os.getenv("MONGODB_PORT"))),
+    username=str(os.getenv("MONGODB_USERNAME")),
+    password=str(os.getenv("MONGODB_PASSWORD")),
+    authMechanism='SCRAM-SHA-256',
+    serverSelectionTimeoutMS=1000
+)
+# connect to the glados database
+gladosDB = mongoClient["gladosdb"]
+
+# setup the mongo collections
+experimentsCollection = gladosDB.experiments
+resultsCollection = gladosDB.results
+resultZipCollection = gladosDB.zips
+logCollection = gladosDB.logs
 
 @flaskApp.route('/')
 def hello_world():
@@ -34,6 +56,14 @@ def spawn_job(experiment_data):
     """Function for creating a job"""
     job = create_job_object(experiment_data)
     create_job(BATCH_API, job)
+    
+@flaskApp.get("/mongocheck")
+def check_mongo():
+    try:
+        mongoClient.admin.command("ping")
+        return Response(status=200)
+    except:
+        return Response(status=500)
 
 if __name__ == '__main__':
     flaskApp.run()
