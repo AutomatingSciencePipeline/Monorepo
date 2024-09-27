@@ -48,6 +48,8 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
         'experiment': json.dumps(experiment.__dict__),
         'results': resultContent
     }
+    #Temp debugging message
+    explogger.info(f"DEBUG: PAYLOAD IS {payload}")
     try:
         response = requests.post(url, json=payload)
         if response.status_code == 200:
@@ -55,7 +57,7 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
             if resultId:
                 explogger.info(f"inserted result csv into mongodb with id: {resultId}")
             else:
-                raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
+                raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB")
     except Exception as err:
         raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
             

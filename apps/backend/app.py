@@ -64,6 +64,8 @@ def upload_results():
     # Get JSON requests
     experiment = json['experiment']
     results = json['results']
+    print(experiment)
+    print(results)
     # now call the mongo stuff
     return {'id': mongo.upload_experiment_aggregated_results(experiment, results, mongoClient)}
     
