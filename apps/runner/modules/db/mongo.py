@@ -43,7 +43,7 @@ def verify_mongo_connection():
 
 def upload_experiment_aggregated_results(experiment: ExperimentData, resultContent: str):
     # Call the backend
-    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/upload_results'
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadResults'
     payload = {
         'experiment': json.dumps(experiment.__dict__),
         'results': resultContent
