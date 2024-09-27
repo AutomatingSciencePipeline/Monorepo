@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import os
@@ -73,7 +74,7 @@ def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
     url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadZip'
     payload = {
         "experimentId": experiment.expId,
-        "results": encoded
+        "results": base64.b64encode(encoded).decode("utf-8")
     } 
     # TODO: maybe turn into a method?
     try:

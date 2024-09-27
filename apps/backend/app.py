@@ -1,6 +1,8 @@
 """Module that uses flask to host endpoints for the backend"""
+import base64
 from concurrent.futures import ProcessPoolExecutor
 import os
+import bson
 from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
 import pymongo
@@ -72,7 +74,7 @@ def upload_zip():
     json = request.get_json()
     # Get JSON requests
     experimentId = json['experimentId']
-    encoded = json['encoded']
+    encoded = bson.Binary(base64.b64decode(json['encoded']))
     return {'id': mongo.upload_experiment_zip(experimentId, encoded, mongoClient)}
     
 @flaskApp.get("/mongocheck")
