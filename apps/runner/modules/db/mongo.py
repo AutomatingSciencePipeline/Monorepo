@@ -45,8 +45,8 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
     # Call the backend
     url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadResults'
     payload = {
-        'experimentId': experiment.expId,
-        'results': resultContent
+        "experimentId": experiment.expId,
+        "results": resultContent
     }
     #Temp debugging message
     explogger.info(f"DEBUG: PAYLOAD IS {payload}")

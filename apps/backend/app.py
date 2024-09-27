@@ -62,7 +62,7 @@ def spawn_job(experiment_data):
 def upload_results():
     json = request.get_json()
     # Get JSON requests
-    experimentId = json['experiment']
+    experimentId = json['experimentId']
     results = json['results']
     print(experimentId)
     print(results)
