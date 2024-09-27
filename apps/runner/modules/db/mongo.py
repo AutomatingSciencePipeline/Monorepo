@@ -74,7 +74,7 @@ def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
     url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadZip'
     payload = {
         "experimentId": experiment.expId,
-        "results": base64.b64encode(encoded).decode("utf-8")
+        "encoded": base64.b64encode(encoded).decode("utf-8")
     } 
     # TODO: maybe turn into a method?
     try:
