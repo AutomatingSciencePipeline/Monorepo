@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: runner
-        image: gladospipeline/glados-runner:latest
+        image: gladospipeline/glados-runner:development
         command: []
         env:
         - name: MONGODB_PORT
