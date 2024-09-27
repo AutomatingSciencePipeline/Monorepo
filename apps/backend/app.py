@@ -64,10 +64,16 @@ def upload_results():
     # Get JSON requests
     experimentId = json['experimentId']
     results = json['results']
-    print(experimentId)
-    print(results)
     # now call the mongo stuff
     return {'id': mongo.upload_experiment_aggregated_results(experimentId, results, mongoClient)}
+
+@flaskApp.post("/uploadZip")
+def upload_zip():
+    json = request.get_json()
+    # Get JSON requests
+    experimentId = json['experimentId']
+    encoded = json['encoded']
+    return {'id': mongo.upload_experiment_zip(experimentId, encoded, mongoClient)}
     
 @flaskApp.get("/mongocheck")
 def check_mongo():

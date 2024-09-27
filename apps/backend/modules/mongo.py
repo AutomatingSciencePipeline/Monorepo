@@ -1,6 +1,7 @@
 import json
 import pymongo
 from pymongo.errors import ConnectionFailure
+from bson import Binary
 
 def verify_mongo_connection(mongoClient):
     try:
@@ -10,7 +11,6 @@ def verify_mongo_connection(mongoClient):
         raise Exception("MongoDB server not available/unreachable") from err
     
 def upload_experiment_aggregated_results(experimentId: str, results: str, mongoClient):
-    # turn experiment JSON into an object
     experimentResultEntry = {"_id": experimentId, "resultContent": results}
     # Get the results connection
     resultsCollection = mongoClient["gladosdb"].results
@@ -22,3 +22,13 @@ def upload_experiment_aggregated_results(experimentId: str, results: str, mongoC
     except Exception as err:
         # Change to generic exception
         raise Exception("Encountered error while storing aggregated results in MongoDB") from err
+    
+def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient):
+    experimentZipEntry = {"_id": experimentId, "fileContent": encoded}
+    zipCollection = mongoClient["gladosdb"].zips
+    try:
+        # TODO: Refactor to call the backend
+        resultZipId = zipCollection.insert_one(experimentZipEntry).inserted_id
+        return resultZipId
+    except Exception as err:
+        raise Exception("Encountered error while storing results zip in MongoDB") from err

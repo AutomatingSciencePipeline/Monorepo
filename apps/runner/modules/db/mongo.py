@@ -47,9 +47,7 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
     payload = {
         "experimentId": experiment.expId,
         "results": resultContent
-    }
-    #Temp debugging message
-    explogger.info(f"DEBUG: PAYLOAD IS {payload}")
+    } 
     try:
         response = requests.post(url, json=payload)
         if response.status_code == 200:
@@ -63,7 +61,7 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
             
     # experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}
     # try:
-    #     # TODO: Refactor to call the backend
+    #     # DONE: Refactor to call the backend
     #     resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
     #     explogger.info(f"inserted result csv into mongodb with id: {resultId}")
     # except Exception as err:
@@ -71,13 +69,31 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
 
 
 def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
-    experimentZipEntry = {"_id": experiment.expId, "fileContent": encoded}
+    # Call the backend
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadZip'
+    payload = {
+        "experimentId": experiment.expId,
+        "results": encoded
+    } 
+    # TODO: maybe turn into a method?
     try:
-        # TODO: Refactor to call the backend
-        resultZipId = resultZipCollection.insert_one(experimentZipEntry).inserted_id
-        explogger.info(f"inserted zip file into mongodb with id: {resultZipId}")
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            resultId = response.json().get('id')
+            if resultId:
+                explogger.info(f"inserted result csv into mongodb with id: {resultId}")
+            else:
+                raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB")
     except Exception as err:
-        raise DatabaseConnectionError("Encountered error while storing results zip in MongoDB") from err
+        raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
+    
+    # experimentZipEntry = {"_id": experiment.expId, "fileContent": encoded}
+    # try:
+    #     # DONE: Refactor to call the backend
+    #     resultZipId = resultZipCollection.insert_one(experimentZipEntry).inserted_id
+    #     explogger.info(f"inserted zip file into mongodb with id: {resultZipId}")
+    # except Exception as err:
+    #     raise DatabaseConnectionError("Encountered error while storing results zip in MongoDB") from err
 
 
 def upload_experiment_log(experimentId: DocumentId):
