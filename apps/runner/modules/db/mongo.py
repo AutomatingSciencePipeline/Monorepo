@@ -42,6 +42,7 @@ def verify_mongo_connection():
 def upload_experiment_aggregated_results(experiment: ExperimentData, resultContent: str):
     experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}
     try:
+        # TODO: Refactor to call the backend
         resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
         explogger.info(f"inserted result csv into mongodb with id: {resultId}")
     except Exception as err:
@@ -51,6 +52,7 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
 def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
     experimentZipEntry = {"_id": experiment.expId, "fileContent": encoded}
     try:
+        # TODO: Refactor to call the backend
         resultZipId = resultZipCollection.insert_one(experimentZipEntry).inserted_id
         explogger.info(f"inserted zip file into mongodb with id: {resultZipId}")
     except Exception as err:
@@ -77,6 +79,7 @@ def upload_experiment_log(experimentId: DocumentId):
 def _upload_log_file(experimentId: DocumentId, contents: str):
     logFileEntry = {"_id": experimentId, "fileContent": contents}
     try:
+        # TODO: Refactor to call the backend
         resultId = logCollection.insert_one(logFileEntry).inserted_id
         syslogger.info(f"inserted log file into mongodb with id: {resultId}")
     except Exception as err:

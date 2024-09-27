@@ -5,6 +5,7 @@ from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
 import pymongo
 from pymongo.errors import ConnectionFailure
+import modules.mongo as mongo
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -60,7 +61,7 @@ def spawn_job(experiment_data):
 @flaskApp.get("/mongocheck")
 def check_mongo():
     try:
-        mongoClient.admin.command("ping")
+        mongo.verify_mongo_connection(mongoClient)
         return Response(status=200)
     except:
         return Response(status=500)
