@@ -1,7 +1,9 @@
+import json
 import logging
 import os
 from bson import Binary
 import pymongo
+import requests
 
 from pymongo.errors import ConnectionFailure
 from modules.data.experiment import ExperimentData
@@ -40,13 +42,30 @@ def verify_mongo_connection():
 
 
 def upload_experiment_aggregated_results(experiment: ExperimentData, resultContent: str):
-    experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}
+    # Call the backend
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/upload_results'
+    payload = {
+        'experiment': json.dumps(experiment.__dict__),
+        'results': resultContent
+    }
     try:
-        # TODO: Refactor to call the backend
-        resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
-        explogger.info(f"inserted result csv into mongodb with id: {resultId}")
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            resultId = response.json().get('id')
+            if resultId:
+                explogger.info(f"inserted result csv into mongodb with id: {resultId}")
+            else:
+                raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
     except Exception as err:
         raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
+            
+    # experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}
+    # try:
+    #     # TODO: Refactor to call the backend
+    #     resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
+    #     explogger.info(f"inserted result csv into mongodb with id: {resultId}")
+    # except Exception as err:
+    #     raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
 
 
 def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):

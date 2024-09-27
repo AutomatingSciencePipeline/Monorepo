@@ -58,6 +58,15 @@ def spawn_job(experiment_data):
     job = create_job_object(experiment_data)
     create_job(BATCH_API, job)
     
+@flaskApp.post("/uploadResults")
+def upload_results():
+    json = request.get_json()
+    # Get JSON requests
+    experiment = json['experiment']
+    results = json['results']
+    # now call the mongo stuff
+    return {'id': mongo.upload_experiment_aggregated_results(experiment, results, mongoClient)}
+    
 @flaskApp.get("/mongocheck")
 def check_mongo():
     try:

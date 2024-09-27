@@ -38,6 +38,11 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
+        - name: BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
       restartPolicy: Never
   backoffLimit: 4
   ttlSecondsAfterFinished: 60
