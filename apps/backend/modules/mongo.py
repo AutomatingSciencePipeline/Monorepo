@@ -32,3 +32,12 @@ def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient):
         return resultZipId
     except Exception as err:
         raise Exception("Encountered error while storing results zip in MongoDB") from err
+    
+def upload_log_file(experimentId: str, contents: str, mongoClient):
+    logFileEntry = {"_id": experimentId, "fileContent": contents}
+    logCollection = mongoClient["gladosdb"].zips
+    try:
+        resultId = logCollection.insert_one(logFileEntry).inserted_id
+        return resultId
+    except Exception as err:
+        raise Exception("Encountered error while storing log file in MongoDB") from err

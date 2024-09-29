@@ -36,10 +36,13 @@ logCollection = mongoGladosDB.logs
 
 
 def verify_mongo_connection():
-    try:
-        mongoClient.admin.command('ping')
-    except ConnectionFailure as err:
-        raise DatabaseConnectionError("MongoDB server not available/unreachable") from err
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/mongoPulse'
+    response = requests.get(url)
+    if response.ok:
+        return
+    else:
+        raise DatabaseConnectionError("MongoDB server not available/unreachable")
+    
 
 
 def upload_experiment_aggregated_results(experiment: ExperimentData, resultContent: str):
@@ -49,16 +52,7 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
         "experimentId": experiment.expId,
         "results": resultContent
     } 
-    try:
-        response = requests.post(url, json=payload)
-        if response.status_code == 200:
-            resultId = response.json().get('id')
-            if resultId:
-                explogger.info(f"inserted result csv into mongodb with id: {resultId}")
-            else:
-                raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB")
-    except Exception as err:
-        raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
+    callBackend(url, payload, "inserted result csv into mongodb with id")
             
     # experimentResultEntry = {"_id": experiment.expId, "resultContent": resultContent}
     # try:
@@ -77,16 +71,7 @@ def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
         "encoded": base64.b64encode(encoded).decode("utf-8")
     } 
     # TODO: maybe turn into a method?
-    try:
-        response = requests.post(url, json=payload)
-        if response.status_code == 200:
-            resultId = response.json().get('id')
-            if resultId:
-                explogger.info(f"inserted result csv into mongodb with id: {resultId}")
-            else:
-                raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB")
-    except Exception as err:
-        raise DatabaseConnectionError("Encountered error while storing aggregated results in MongoDB") from err
+    callBackend(url, payload, "inserted result csv into mongodb with id")
     
     # experimentZipEntry = {"_id": experiment.expId, "fileContent": encoded}
     # try:
@@ -111,7 +96,14 @@ def upload_experiment_log(experimentId: DocumentId):
     except Exception as err:
         raise GladosInternalError(f"Failed to read log file for experiment {experimentId}") from err
 
-    _upload_log_file(experimentId, contents)
+    # just call the backend here?
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadZip'
+    payload = {
+        "experimentId": experimentId,
+        "logContents": contents
+    } 
+    callBackend(url, payload, "inserted log file into mongodb with id")
+    #_upload_log_file(experimentId, contents)
 
 
 def _upload_log_file(experimentId: DocumentId, contents: str):
@@ -122,3 +114,15 @@ def _upload_log_file(experimentId: DocumentId, contents: str):
         syslogger.info(f"inserted log file into mongodb with id: {resultId}")
     except Exception as err:
         raise DatabaseConnectionError("Encountered error while storing log file in MongoDB") from err
+    
+def callBackend(url, payload, logMsg):
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            resultId = response.json().get('id')
+            if resultId:
+                explogger.info(f"{logMsg}: {resultId}")
+            else:
+                raise DatabaseConnectionError("Encountered error while writing document to MongoDB")
+    except Exception as err:
+        raise DatabaseConnectionError("Encountered error while writing document to MongoDB") from err

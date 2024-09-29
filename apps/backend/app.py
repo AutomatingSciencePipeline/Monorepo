@@ -76,8 +76,16 @@ def upload_zip():
     experimentId = json['experimentId']
     encoded = bson.Binary(base64.b64decode(json['encoded']))
     return {'id': mongo.upload_experiment_zip(experimentId, encoded, mongoClient)}
+
+@flaskApp.post("/uploadLog")
+def upload_log():
+    json = request.get_json()
+    # Get JSON requests
+    experimentId = json['experimentId']
+    logContents = json['logContents']
+    return {'id': mongo.upload_experiment_zip(experimentId, logContents, mongoClient)}
     
-@flaskApp.get("/mongocheck")
+@flaskApp.get("/mongoPulse")
 def check_mongo():
     try:
         mongo.verify_mongo_connection(mongoClient)
