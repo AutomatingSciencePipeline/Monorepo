@@ -26,8 +26,5 @@ output-format=colorized
 # Maximum allowed line length
 max-line-length=100
 
-# String quotes settings (single quotes recommended)
-string-quote='
-
 # Set indentation size for better formatting
 indent-string='    '
