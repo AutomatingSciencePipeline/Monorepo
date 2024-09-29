@@ -14,25 +14,21 @@ from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, get_
 
 from modules.utils import _get_env
 
-ENV_MONGODB_PORT = "MONGODB_PORT"
-ENV_MONGODB_USERNAME = "MONGODB_USERNAME"
-ENV_MONGODB_PASSWORD = "MONGODB_PASSWORD"
+# ENV_MONGODB_PORT = "MONGODB_PORT"
+# ENV_MONGODB_USERNAME = "MONGODB_USERNAME"
+# ENV_MONGODB_PASSWORD = "MONGODB_PASSWORD"
 
 syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
-mongoClient = pymongo.MongoClient(
-    "glados-service-mongodb:" + _get_env(ENV_MONGODB_PORT),
-    username=_get_env(ENV_MONGODB_USERNAME),
-    password=_get_env(ENV_MONGODB_PASSWORD),
-    authMechanism='SCRAM-SHA-256',
-    serverSelectionTimeoutMS=1000
-)
-mongoGladosDB = mongoClient["gladosdb"]
-
-resultsCollection = mongoGladosDB.results
-resultZipCollection = mongoGladosDB.zips
-logCollection = mongoGladosDB.logs
+# mongoClient = pymongo.MongoClient(
+#     "glados-service-mongodb:" + _get_env(ENV_MONGODB_PORT),
+#     username=_get_env(ENV_MONGODB_USERNAME),
+#     password=_get_env(ENV_MONGODB_PASSWORD),
+#     authMechanism='SCRAM-SHA-256',
+#     serverSelectionTimeoutMS=1000
+# )
+# mongoGladosDB = mongoClient["gladosdb"]
 
 
 def verify_mongo_connection():
@@ -97,7 +93,7 @@ def upload_experiment_log(experimentId: DocumentId):
         raise GladosInternalError(f"Failed to read log file for experiment {experimentId}") from err
 
     # just call the backend here?
-    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadZip'
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/uploadLog'
     payload = {
         "experimentId": experimentId,
         "logContents": contents
@@ -106,14 +102,14 @@ def upload_experiment_log(experimentId: DocumentId):
     #_upload_log_file(experimentId, contents)
 
 
-def _upload_log_file(experimentId: DocumentId, contents: str):
-    logFileEntry = {"_id": experimentId, "fileContent": contents}
-    try:
-        # TODO: Refactor to call the backend
-        resultId = logCollection.insert_one(logFileEntry).inserted_id
-        syslogger.info(f"inserted log file into mongodb with id: {resultId}")
-    except Exception as err:
-        raise DatabaseConnectionError("Encountered error while storing log file in MongoDB") from err
+# def _upload_log_file(experimentId: DocumentId, contents: str):
+#     logFileEntry = {"_id": experimentId, "fileContent": contents}
+#     try:
+#         # TODO: Refactor to call the backend
+#         resultId = logCollection.insert_one(logFileEntry).inserted_id
+#         syslogger.info(f"inserted log file into mongodb with id: {resultId}")
+#     except Exception as err:
+#         raise DatabaseConnectionError("Encountered error while storing log file in MongoDB") from err
     
 def callBackend(url, payload, logMsg):
     try:
