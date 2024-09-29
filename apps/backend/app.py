@@ -83,7 +83,7 @@ def upload_log():
     # Get JSON requests
     experimentId = json['experimentId']
     logContents = json['logContents']
-    return {'id': mongo.upload_experiment_zip(experimentId, logContents, mongoClient)}
+    return {'id': mongo.upload_log_file(experimentId, logContents, mongoClient)}
     
 @flaskApp.get("/mongoPulse")
 def check_mongo():
