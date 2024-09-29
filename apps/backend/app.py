@@ -6,8 +6,7 @@ import bson
 from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
 import pymongo
-from pymongo.errors import ConnectionFailure
-import modules.mongo as mongo
+from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -67,7 +66,7 @@ def upload_results():
     experimentId = json['experimentId']
     results = json['results']
     # now call the mongo stuff
-    return {'id': mongo.upload_experiment_aggregated_results(experimentId, results, mongoClient)}
+    return {'id': upload_experiment_aggregated_results(experimentId, results, mongoClient)}
 
 @flaskApp.post("/uploadZip")
 def upload_zip():
@@ -75,7 +74,7 @@ def upload_zip():
     # Get JSON requests
     experimentId = json['experimentId']
     encoded = bson.Binary(base64.b64decode(json['encoded']))
-    return {'id': mongo.upload_experiment_zip(experimentId, encoded, mongoClient)}
+    return {'id': mupload_experiment_zip(experimentId, encoded, mongoClient)}
 
 @flaskApp.post("/uploadLog")
 def upload_log():
@@ -83,14 +82,14 @@ def upload_log():
     # Get JSON requests
     experimentId = json['experimentId']
     logContents = json['logContents']
-    return {'id': mongo.upload_log_file(experimentId, logContents, mongoClient)}
+    return {'id': upload_log_file(experimentId, logContents, mongoClient)}
     
 @flaskApp.get("/mongoPulse")
 def check_mongo():
     try:
-        mongo.verify_mongo_connection(mongoClient)
+        verify_mongo_connection(mongoClient)
         return Response(status=200)
-    except:
+    except Exception as ex:
         return Response(status=500)
 
 if __name__ == '__main__':
