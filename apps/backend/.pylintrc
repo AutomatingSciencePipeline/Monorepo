@@ -1,17 +1,33 @@
-# pylint python linter configuration
+# .pylintrc configuration for Pylint 3.2.7
 
 [MASTER]
-extension-pkg-whitelist=pydantic # stop "No name 'BaseModel' in module 'pydantic'" https://github.com/pydantic/pydantic/issues/1961#issuecomment-759522422
+extension-pkg-allow-list=pydantic  # Updated from 'extension-pkg-whitelist'
 disable=
-    C0301, # line too long
-    C0114, # missing-module-docstring
-    C0116, # missing-function-docstring
-    C0115, # missing-class-docstring
-    C0103, # we chose to use camel case to be consistent with our frontend code
-    W1203, # we want to use fstrings for log message readability, the performance cost is not significant enough for us to care. but, don't turn off W1201 because if the dev wants to use % syntax, they should use lazy logging since the syntax readability is equivalent
+    C0301,  # line too long
+    C0114,  # missing-module-docstring
+    C0116,  # missing-function-docstring
+    C0115,  # missing-class-docstring
+    C0103,  # variable name doesn't conform to snake_case (using camelCase instead)
+    W1203,  # f-string used for logging
+    W1201,  # enable lazy logging format for % operator usage, prevents f-strings from being confused
 
-# Load our own custom plugins
+# To load custom plugins, enable this line and include the plugin name below
 ; load-plugins=
 ;     linters.no_print
 
+# Append the directory of this config to Python's path
 init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
+
+# Additional optional settings for consistency or improved readability
+[REPORTS]
+output-format=colorized
+
+[FORMAT]
+# Maximum allowed line length
+max-line-length=100
+
+# String quotes settings (single quotes recommended)
+string-quote='
+
+# Set indentation size for better formatting
+indent-string='    '
