@@ -74,7 +74,7 @@ def upload_zip():
     # Get JSON requests
     experimentId = json['experimentId']
     encoded = bson.Binary(base64.b64decode(json['encoded']))
-    return {'id': mupload_experiment_zip(experimentId, encoded, mongoClient)}
+    return {'id': upload_experiment_zip(experimentId, encoded, mongoClient)}
 
 @flaskApp.post("/uploadLog")
 def upload_log():
@@ -89,7 +89,7 @@ def check_mongo():
     try:
         verify_mongo_connection(mongoClient)
         return Response(status=200)
-    except Exception as ex:
+    except Exception:
         return Response(status=500)
 
 if __name__ == '__main__':
