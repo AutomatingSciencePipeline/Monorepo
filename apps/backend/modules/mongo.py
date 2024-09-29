@@ -35,7 +35,7 @@ def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient):
     
 def upload_log_file(experimentId: str, contents: str, mongoClient):
     logFileEntry = {"_id": experimentId, "fileContent": contents}
-    logCollection = mongoClient["gladosdb"].zips
+    logCollection = mongoClient["gladosdb"].logs
     try:
         resultId = logCollection.insert_one(logFileEntry).inserted_id
         return resultId
