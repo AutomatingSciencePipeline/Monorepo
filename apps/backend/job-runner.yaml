@@ -10,7 +10,8 @@ spec:
     spec:
       containers:
       - name: runner
-        image: sugiyat/image-test-runner:latest
+        image: gladospipeline/glados-runner:latest
+        imagePullPolicy: Always
         command: []
         env:
         - name: MONGODB_PORT
@@ -38,6 +39,11 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
+        - name: BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
       restartPolicy: Never
   backoffLimit: 4
   ttlSecondsAfterFinished: 60
