@@ -5,6 +5,9 @@ import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getC
 import { ExperimentData } from '../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
+import GraphModal from './Modal';
+import Modal from './Modal';
+import Chart from './Chart';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
@@ -37,6 +40,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const [originalProjectName, setOriginalProjectName] = useState(projectinit.name); // State to store the original project name
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [showGraphModal, setShowGraphModal] = useState(false);
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -88,6 +92,15 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const closeDeleteModal = () => {
 		setDeleteModalOpen(false);
 	};
+
+	const openGraphModal = () => {
+		setShowGraphModal(true);
+	};
+
+	const closeGraphModal = () => {
+		setShowGraphModal(false);
+	}
+
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -235,6 +248,12 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				>
         		Delete Experiment
 				</button>
+				<button type="button"
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={openGraphModal}
+				>
+					See Graph
+				</button>
 			</div>
 			<div className='sm:hidden'>
 				<ChevronRightIcon
@@ -296,6 +315,11 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					</p> :
 					null
 				}
+				{
+                showGraphModal && (
+                    <Chart onClose={closeGraphModal} />
+                )
+            }
 			</div>
 		</div>
 	);
