@@ -7,11 +7,11 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Publish Production Runner Docker image
+name: Publish Dev Runner Docker image
 
 on:
   push:
-    branches: ['main']
+    branches: ['development']
 
 env:
   REGISTRY: gladospipeline
@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+        with:
+          ref: development
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
