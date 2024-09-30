@@ -3,6 +3,9 @@
 This guide contains the steps to deploy changes to the GLADOS frontend, backend, and mongoDB nodes to test changes made to the codebase. It will setup the settings on a machine that has the Monorepo codebase and will complete all of the required prerequisite installation tasks.
 
 !!! note
+    This is a living document as of September 2024. Updates will be provided as new approaches to development deployment are implemented for easier CI/CD practices for the dev team.
+
+!!! note
     This page is only how to use the setup scripts, if a detailed understanding of the scripts are needed for debugging, see the [Developer Deployment](developer_deployment.md) page.
 
 ## Setup VM
