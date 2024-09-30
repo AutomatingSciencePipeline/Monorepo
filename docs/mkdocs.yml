@@ -13,7 +13,9 @@ nav:
   - Tutorial:
     - Usage: tutorial/usage.md
     - Installation: tutorial/installation.md
+    - Deployment: tutorial/deployment.md
     - Developer Installation: tutorial/developer_installation.md
+    - Developer Deployment: tutorial/developer_deployment.md
     - Troubleshooting: tutorial/troubleshooting.md
   - Documentation:
     - Updating Documentation: documentation/guide.md
