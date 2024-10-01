@@ -68,4 +68,4 @@ def check_insert_default_experiments(mongoClient: pymongo.MongoClient):
         insertExperiments()
     except:
         # keep trying
-        insertExperiments()
+        check_insert_default_experiments(mongoClient)
