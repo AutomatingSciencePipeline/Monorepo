@@ -41,3 +41,14 @@ def upload_log_file(experimentId: str, contents: str, mongoClient):
         return resultId
     except Exception as err:
         raise Exception("Encountered error while storing log file in MongoDB") from err
+    
+def check_insert_default_experiments(mongoClient: pymongo.MongoClient):
+    defaultExperimentCollection = mongoClient["gladosdb"].defaultExperiments
+    count = defaultExperimentCollection.count_documents({"name": "addNums.py"})
+    if count == 0:
+        # this means that the addNums document does not exist
+        print("adding add nums!!!!!!")
+        defaultExperimentCollection.insert_one({"name": "addNums.py",
+                                                "type": "python",
+                                                "url": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/addNums.py"
+                                                })
