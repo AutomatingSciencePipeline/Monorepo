@@ -32,7 +32,7 @@ mongoClient = pymongo.MongoClient(
 gladosDB = mongoClient["gladosdb"]
 # call the function to check if the documents for default experiments exist
 # start that in a different thread so that it can do its thing in peace
-addDefaultExpsThread = threading.Thread(target=verify_mongo_connection, args={mongoClient})
+addDefaultExpsThread = threading.Thread(target=check_insert_default_experiments, args={mongoClient})
 addDefaultExpsThread.start()
 
 # setup the mongo collections
