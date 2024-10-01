@@ -7,6 +7,7 @@ from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
 import pymongo
 from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments
+import threading
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -30,7 +31,9 @@ mongoClient = pymongo.MongoClient(
 # connect to the glados database
 gladosDB = mongoClient["gladosdb"]
 # call the function to check if the documents for default experiments exist
-check_insert_default_experiments(mongoClient)
+# start that in a different thread so that it can do its thing in peace
+addDefaultExpsThread = threading.Thread(target=verify_mongo_connection, args={mongoClient})
+addDefaultExpsThread.start()
 
 # setup the mongo collections
 experimentsCollection = gladosDB.experiments
