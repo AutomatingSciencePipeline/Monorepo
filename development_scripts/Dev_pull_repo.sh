@@ -12,5 +12,5 @@ git checkout development
 
 git pull origin development
 
-sed -i 's/glados-backend:latest/glados-backend:development/g' ./kubernetes_init/backend/deployment-backend.yaml && echo 'Sucessfully renamed backend image!'
-sed -i 's/glados-frontend:latest/glados-frontend:development/g' ./kubernetes_init/frontend/deployment-frontend.yaml && echo 'Sucessfully renamed frontend image!'
+sed -i 's/glados-backend:main/glados-backend:development/g' ./kubernetes_init/backend/deployment-backend.yaml && echo 'Sucessfully renamed backend image!'
+sed -i 's/glados-frontend:mainglados-frontend:development/g' ./kubernetes_init/frontend/deployment-frontend.yaml && echo 'Sucessfully renamed frontend image!'
