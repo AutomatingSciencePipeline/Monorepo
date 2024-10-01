@@ -43,6 +43,11 @@ def upload_log_file(experimentId: str, contents: str, mongoClient):
         raise Exception("Encountered error while storing log file in MongoDB") from err
     
 def check_insert_default_experiments(mongoClient: pymongo.MongoClient):
+    try:
+        verify_mongo_connection(mongoClient)
+    except:
+        # wait somehow...
+        check_insert_default_experiments(mongoClient)
     defaultExperimentCollection = mongoClient["gladosdb"].defaultExperiments
     count = defaultExperimentCollection.count_documents({"name": "addNums.py"})
     if count == 0:
