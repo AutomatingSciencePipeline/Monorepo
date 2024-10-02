@@ -7,7 +7,7 @@ import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
 import { getEnvVar } from '../../../../utils/env';
 
-const BACKEND_PORT = getEnvVar()
+const BACKEND_PORT = getEnvVar("BACKEND_PORT")
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
