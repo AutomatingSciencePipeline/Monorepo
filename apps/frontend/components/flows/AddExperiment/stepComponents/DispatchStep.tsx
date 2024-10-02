@@ -5,9 +5,9 @@ import { Group, Text } from '@mantine/core';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
-import { getEnvVar } from '../../../../utils/env';
 
-const BACKEND_PORT = getEnvVar("BACKEND_PORT")
+const BACKEND_PORT = process.env.BACKEND_PORT;
+console.log(BACKEND_PORT);
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
