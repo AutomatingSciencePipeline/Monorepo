@@ -96,6 +96,14 @@ def check_mongo():
         return Response(status=200)
     except Exception:
         return Response(status=500)
+    
+@flaskApp.post("/uploadExperimentFile")
+def upload_experiment_file():
+    json = request.get_json()
+    file = bson.Binary(base64.b64decode(json['file']))
+    userId = json['user']
+    print(file)
+    print(userId)
 
 if __name__ == '__main__':
     flaskApp.run()

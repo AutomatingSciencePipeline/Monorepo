@@ -5,6 +5,9 @@ import { Group, Text } from '@mantine/core';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
+import { getEnvVar } from '../../../../utils/env';
+
+const BACKEND_PORT = getEnvVar()
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -22,6 +25,16 @@ export const DispatchStep = ({ id, form, ...props }) => {
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
+		// First we need to write the new experiment to the database
+		// Store that in JSON
+		const testResponse = fetch(`http://glados-service-backend:${BACKEND_PORT}/uploadExperimentFile`, {
+			method: 'POST',
+			headers: new Headers({ 'Content-Type': 'application/json' }),
+			credentials: 'same-origin',
+			body: JSON.stringify({ "file": files[0], "user": userId }),
+		});
+		console.log(testResponse);
+
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
 			const uploadResponse = await uploadExec(expId, files[0]);
