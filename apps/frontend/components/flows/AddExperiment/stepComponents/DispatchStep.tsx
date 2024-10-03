@@ -6,7 +6,7 @@ import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
 
-const BACKEND_PORT = process.env.BACKEND_PORT;
+const BACKEND_PORT = process.env;
 console.log(BACKEND_PORT);
 
 const SUPPORTED_FILE_TYPES = {
