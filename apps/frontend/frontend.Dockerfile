@@ -12,7 +12,7 @@
 
 # CMD ["npm", "start"]
 
-FROM node:20.6 AS base
+FROM node:20-alpine AS base
 
 FROM base AS deps
 
