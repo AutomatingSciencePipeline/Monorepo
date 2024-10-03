@@ -23,6 +23,9 @@ COPY package.json ./
 
 RUN npm update && npm install
 
+# Install this to optimize images
+RUN npm i sharp
+
 # If you want yarn update and  install uncomment the bellow
 
 # RUN yarn install &&  yarn upgrade
@@ -37,7 +40,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

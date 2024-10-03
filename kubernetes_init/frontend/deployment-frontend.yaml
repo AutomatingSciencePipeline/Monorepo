@@ -20,7 +20,7 @@ spec:
         image: gladospipeline/glados-frontend:main
         imagePullPolicy: Always
         env:
-        - name: NEXT_PUBLIC_BACKEND_PORT
+        - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:
               name: secret-env
