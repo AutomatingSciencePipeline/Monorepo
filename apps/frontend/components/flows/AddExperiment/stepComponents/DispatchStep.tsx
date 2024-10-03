@@ -18,26 +18,10 @@ const SUPPORTED_FILE_TYPES = {
 export const DispatchStep = ({ id, form, ...props }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
-	//TODO: Fix the environment variable, its broken and won't work here for some reason
-	const BACKEND_PORT = "5050";
-	console.log(BACKEND_PORT);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
-		// First we need to write the new experiment to the database
-		// Store that in JSON 
-		console.log("Testing backend upload...");
-		var jsonPayload = JSON.stringify({ "file": files[0], "user": userId });
-		console.log(jsonPayload);
-		const testResponse = fetch(`http://glados-service-backend:${BACKEND_PORT}/uploadExperimentFile`, {
-			method: 'POST',
-			headers: new Headers({ 'Content-Type': 'application/json' }),
-			credentials: 'same-origin',
-			body: jsonPayload,
-		});
-		console.log(testResponse);
-
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
 			const uploadResponse = await uploadExec(expId, files[0]);
