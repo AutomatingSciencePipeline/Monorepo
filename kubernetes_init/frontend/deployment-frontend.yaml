@@ -56,5 +56,5 @@ spec:
               name: secret-env
               key: MONGODB_PASSWORD
         ports:
-        - containerPort: 0000
+        - containerPort: 3000
           # hostPort: 0000
