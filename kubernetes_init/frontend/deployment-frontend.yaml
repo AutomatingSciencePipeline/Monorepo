@@ -27,6 +27,11 @@ spec:
             secretKeyRef:
               name: secret-env
               key: BACKEND_PORT
+        - name: NEXT_PUBLIC_BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
         - name: FRONTEND_WEBSERVER_PORT
           valueFrom:
             secretKeyRef:

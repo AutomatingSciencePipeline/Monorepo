@@ -7,7 +7,7 @@ import { ExperimentData } from './db_types';
 import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
 import { getEnvVar } from '../utils/env';
 
-const BACKEND_PORT = getEnvVar('BACKEND_PORT');
+const BACKEND_PORT = getEnvVar('NEXT_PUBLIC_BACKEND_PORT');
 
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
