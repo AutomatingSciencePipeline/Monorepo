@@ -21,7 +21,7 @@ const SUPPORTED_FILE_TYPES = {
 export const DispatchStep = ({ id, form, ...props }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
-	const BACKEND_PORT = env.GLADOS_SERVICE_BACKEND_SERVICE_PORT;
+	const BACKEND_PORT = env.BACKEND_PORT;
 	console.log(BACKEND_PORT);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
