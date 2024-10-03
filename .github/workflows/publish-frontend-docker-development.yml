@@ -11,6 +11,8 @@ name: Publish Dev Frontend Docker image
 
 on:
   push:
+    paths:
+      - 'apps/frontend/**'
     branches: ['development']
 
 env:
