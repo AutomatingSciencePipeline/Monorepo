@@ -104,6 +104,7 @@ def upload_experiment_file():
     userId = json['user']
     print(file)
     print(userId)
+    return Response(status=200)
 
 if __name__ == '__main__':
     flaskApp.run()

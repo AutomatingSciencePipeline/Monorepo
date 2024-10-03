@@ -3,7 +3,7 @@
 # This script is meant to be run on the server to update the code and restart the docker containers
 
 echo "Restarting cubed"
-sudo kubeadm reset --cri-socket /var/run/containerd/containerd.sock
+sudo kubeadm reset --cri-socket unix:///var/run/containerd/containerd.sock
 rm -f $HOME/.kube/config
 
 sudo kubeadm init --config ../kube_config/kubeadm-config.yaml
