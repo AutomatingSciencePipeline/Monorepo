@@ -20,12 +20,13 @@ export const DispatchStep = ({ id, form, ...props }) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	//TODO: Fix the environment variable, its broken and won't work here for some reason
 	const BACKEND_PORT = "5050";
+	console.log(BACKEND_PORT);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
 		// First we need to write the new experiment to the database
-		// Store that in JSON
+		// Store that in JSON 
 		console.log("Testing backend upload...");
 		var jsonPayload = JSON.stringify({ "file": files[0], "user": userId });
 		console.log(jsonPayload);
