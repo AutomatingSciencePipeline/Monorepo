@@ -5,9 +5,6 @@ import { Group, Text } from '@mantine/core';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
-import { env } from 'process';
-
-
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -21,8 +18,8 @@ const SUPPORTED_FILE_TYPES = {
 export const DispatchStep = ({ id, form, ...props }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
-	const BACKEND_PORT = env.BACKEND_PORT;
-	console.log(BACKEND_PORT);
+	//TODO: Fix the environment variable, its broken and won't work here for some reason
+	const BACKEND_PORT = "5050";
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
