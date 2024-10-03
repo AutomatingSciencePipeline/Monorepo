@@ -27,11 +27,13 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		// First we need to write the new experiment to the database
 		// Store that in JSON
 		console.log("Testing backend upload...");
+		var jsonPayload = JSON.stringify({ "file": files[0], "user": userId });
+		console.log(jsonPayload);
 		const testResponse = fetch(`http://glados-service-backend:${BACKEND_PORT}/uploadExperimentFile`, {
 			method: 'POST',
 			headers: new Headers({ 'Content-Type': 'application/json' }),
 			credentials: 'same-origin',
-			body: JSON.stringify({ "file": files[0], "user": userId }),
+			body: jsonPayload,
 		});
 		console.log(testResponse);
 
