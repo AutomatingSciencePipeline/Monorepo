@@ -27,6 +27,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		console.log('Submitting Experiment');
 		// First we need to write the new experiment to the database
 		// Store that in JSON
+		console.log("Testing backend upload...");
 		const testResponse = fetch(`http://glados-service-backend:${BACKEND_PORT}/uploadExperimentFile`, {
 			method: 'POST',
 			headers: new Headers({ 'Content-Type': 'application/json' }),
