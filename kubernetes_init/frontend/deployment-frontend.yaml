@@ -18,7 +18,9 @@ spec:
       containers:
       - name: container-test-frontend
         image: gladospipeline/glados-frontend:main
-        imagePullPolicy: Always
+        ports:
+        - containerPort: 0000
+          # hostPort: 0000
         env:
         - name: BACKEND_PORT
           valueFrom:
@@ -55,6 +57,4 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
-        ports:
-        - containerPort: 0000
-          # hostPort: 0000
+        
