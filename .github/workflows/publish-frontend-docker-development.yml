@@ -46,7 +46,7 @@ jobs:
 
       - name: Build and push Docker image
         id: push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: ./apps/frontend
           file: ./apps/frontend/frontend.Dockerfile
