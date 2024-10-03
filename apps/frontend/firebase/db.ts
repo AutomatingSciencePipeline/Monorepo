@@ -5,6 +5,9 @@ import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/fire
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ExperimentData } from './db_types';
 import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
+import { getEnvVar } from '../utils/env';
+
+const BACKEND_PORT = getEnvVar('BACKEND_PORT');
 
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
@@ -49,23 +52,37 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	return newExperimentDocument.id;
 };
 
-
+//TODO: Refactor to use MongoDB
 export const uploadExec = async (id: ExperimentDocumentId, file) => {
-	const fileRef = ref(storage, `experiment${id}`);
-	return await uploadBytes(fileRef, file).then((snapshot) => {
-		console.log('Uploaded file. Updating doc...');
-		const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, id);
-		updateDoc(experimentRef, {
-			file: `experiment${id}`,
-		}).then(() => {
-			console.log(`Uploaded file for experiment ${id}`);
-			return true;
-		}).catch((error) => console.log('Upload doc error: ', error));
-		return true;
-	}).catch((error) => {
-		console.log('Upload bytes error: ', error);
-		return false;
+	//Create the payload to send to the backend API
+	console.log("Inside uploadEXEC!");
+	console.log(`File is: ${file}`);
+
+	var url = `http://glados-service-backend:${BACKEND_PORT}/experiment`
+	var payload = JSON.stringify({"id": id, "file": file});
+	const response = await fetch(``, {
+		method: 'POST',
+		headers: new Headers({ 'Content-Type': 'application/json' }),
+		body: payload,
 	});
+	console.log(response);
+	return response;
+
+	// const fileRef = ref(storage, `experiment${id}`);
+	// return await uploadBytes(fileRef, file).then((snapshot) => {
+	// 	console.log('Uploaded file. Updating doc...');
+	// 	const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, id);
+	// 	updateDoc(experimentRef, {
+	// 		file: `experiment${id}`,
+	// 	}).then(() => {
+	// 		console.log(`Uploaded file for experiment ${id}`);
+	// 		return true;
+	// 	}).catch((error) => console.log('Upload doc error: ', error));
+	// 	return true;
+	// }).catch((error) => {
+	// 	console.log('Upload bytes error: ', error);
+	// 	return false;
+	// });
 };
 
 const downloadArbitraryFile = (url: string, name: string) => {
