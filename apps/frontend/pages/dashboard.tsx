@@ -22,7 +22,6 @@ import { ExperimentListing as ExperimentListing } from '../components/flows/View
 import { ExperimentData } from '../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from './api/queue';
-import { useRouter } from 'next/router';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -130,7 +129,7 @@ const Navbar = (props) => {
 													</Menu.Item>
 												))}
 											</Menu.Items>
-										</Transition>
+										</Transition>ro
 									</Menu>
 								</div>
 							</div>
@@ -183,7 +182,6 @@ const Navbar = (props) => {
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
-	const router = useRouter();
 
 	useEffect(() => {
 		if (!userId) {
@@ -212,9 +210,6 @@ export default function DashboardPage() {
 		});
 	};
 
-	const handleShowDefaultExperimentOptions = () => {
-		router.push('/defaultexperiment');
-	};
 
 	// const QUEUE_RECHECK_INTERVAL_MS = 4000;
 	useEffect(() => {
@@ -246,6 +241,18 @@ export default function DashboardPage() {
 			setLabel('Continue Experiment');
 		}
 	}, [formState]);
+
+	const handleDefaultExperiment = () => {
+		setFormState(FormStates.Params);
+		setCopyId('AddNums');
+		<NewExperiment
+			formState={formState}
+			setFormState={setFormState}
+			copyID = {copyID}
+			setCopyId = {setCopyId}
+		/>
+	};
+
 
 	return (
 		<>
@@ -350,7 +357,8 @@ export default function DashboardPage() {
 											<div className='flex items-center space-x-2'>
 											<button type="button"
 														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-														onClick={handleShowDefaultExperimentOptions}>
+														onClick={handleDefaultExperiment}>
+														
 													Run a Default Experiment
 												</button>
 											</div>

@@ -15,6 +15,7 @@ import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS } from '../../../firebase/db';
+import { addNumsExpData } from '../RunDefaultExperiment/DefaultExperimentJSONs/AddNumsDefaultExperiment';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
 
@@ -26,6 +27,7 @@ export const FormStates = {
 	ProcessStep: 3,
 	Confirmation: 4,
 	Dispatch: 5,
+	DefaultExp: 6,
 };
 
 const Steps = ({ steps }) => {
@@ -84,7 +86,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	});
 
 	useEffect(() => {
-		if (copyID != null) {
+		if (copyID != null && copyID !== "AddNums") {
 			const db = getFirestore(firebaseApp);
 			getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
 				if (docSnap.exists()) {
@@ -108,13 +110,41 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 					setCopyId(null);
 					setStatus(FormStates.Info);
 					console.log('Copied!');
+					console.log(expInfo);
 				} else {
 					console.log('No such document!');
 				}
 			});
 		}
+		else {
+			handleDefaultExperiment();
+		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
+	const handleDefaultExperiment = () => {
+		const expInfo = addNumsExpData;
+		const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+		form.setValues({
+			hyperparameters: formList(hyperparameters),
+			name: expInfo['name'],
+			description: expInfo['description'],
+			trialExtraFile: expInfo['trialExtraFile'],
+			trialResult: expInfo['trialResult'],
+			verbose: expInfo['verbose'],
+			workers: expInfo['workers'],
+			scatter: expInfo['scatter'],
+			dumbTextArea: expInfo['dumbTextArea'],
+			scatterIndVar: expInfo['scatterIndVar'],
+			scatterDepVar: expInfo['scatterDepVar'],
+			timeout: expInfo['timeout'],
+			keepLogs: expInfo['keepLogs'],
+		});
+		setCopyId(null);
+		setStatus(FormStates.Info);
+		console.log('Default Experiment Copied!');
+
+	
+	};
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
