@@ -22,6 +22,7 @@ import { ExperimentListing as ExperimentListing } from '../components/flows/View
 import { ExperimentData } from '../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from './api/queue';
+import { useRouter } from 'next/router';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -182,6 +183,7 @@ const Navbar = (props) => {
 export default function DashboardPage() {
 	const { userId, authService } = useAuth();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
+	const router = useRouter();
 
 	useEffect(() => {
 		if (!userId) {
@@ -208,6 +210,10 @@ export default function DashboardPage() {
 		}).catch((err) => {
 			console.error('Error fetching queue length', err);
 		});
+	};
+
+	const handleShowDefaultExperimentOptions = () => {
+		router.push('/defaultexperiment');
 	};
 
 	// const QUEUE_RECHECK_INTERVAL_MS = 4000;
@@ -341,11 +347,19 @@ export default function DashboardPage() {
 													TEMP Manual Query
 												</button>
 											</div>
+											<div className='flex items-center space-x-2'>
+											<button type="button"
+														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+														onClick={handleShowDefaultExperimentOptions}>
+													Run a Default Experiment
+												</button>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
+						
 
 						<ExperimentList
 							experiments={experiments}
