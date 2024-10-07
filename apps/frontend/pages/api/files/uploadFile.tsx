@@ -1,6 +1,5 @@
 import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS, COLLECTION_EXPERIMENT_FILES } from '../../../lib/mongodb';
 import { NextApiHandler } from 'next';
-import { ResultsCsv } from '../../../lib/mongodb_types';
 
 const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
     const { fileToUpload } = req.query;
