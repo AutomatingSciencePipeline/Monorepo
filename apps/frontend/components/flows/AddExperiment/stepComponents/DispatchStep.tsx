@@ -24,7 +24,12 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		console.log('Submitting Experiment');
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
-			const uploadResponse = await uploadExec(expId, files[0]);
+			const uploadResponse = await fetch('/api/files/uploadFile', {
+				method: 'POST',
+				headers: new Headers({ 'Content-Type': 'application/json' }),
+				credentials: 'same-origin',
+				body: JSON.stringify({file: files[0]})
+			})
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
 				const response = await fetch(`/api/experiments/${expId}`, {
