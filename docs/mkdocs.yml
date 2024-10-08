@@ -55,3 +55,4 @@ markdown_extensions:
   - def_list
   # # https://yakworks.github.io/docmark/extensions/permalinks/
   # - toc(permalink=true)
+  - tables
