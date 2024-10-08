@@ -24,3 +24,21 @@ The glados host name will only run the control plane because it will be able to 
 Glados-db will run the MongoDB, this means that it may need quite a bit of persistent storage. Therefore we need quite a bit of storage on this VM. MongoDB also appears to be quite resource intensive.
 
 Glados worker nodes can all be the same specs and can be spun up/down as they are needed. When adding/removing nodes you will have to instruct the control plane to do so.
+
+## Development Environment
+
+We would also like a VM to run a development version of GLADOS for our own testing.
+
+### Hostname
+
+glados-dev
+
+### Description
+
+Run the cluster on a single machine for testing purposes.
+
+### Specs
+
+4 CPU cores, 8 GB RAM, 100GB storage
+
+We might need a little extra storage due to kubernetes caching old images. We will have to make sure we clean this up periodically. 
