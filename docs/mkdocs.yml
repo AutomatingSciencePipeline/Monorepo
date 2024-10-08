@@ -21,6 +21,7 @@ nav:
     - Updating Documentation: documentation/guide.md
   - Infrastructure:
     - Kubernetes: infrastructure/kubernetes.md
+    - VMs: infrastructure/vms.md
   - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
 
