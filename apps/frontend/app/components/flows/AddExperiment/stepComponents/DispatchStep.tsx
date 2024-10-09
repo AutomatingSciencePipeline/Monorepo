@@ -1,8 +1,10 @@
+'use client'
+
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { submitExperiment, uploadExec } from '../../../../firebase/db';
+import { submitExperiment, uploadExec } from '../../../../../firebase/db';
 import { Group, Text } from '@mantine/core';
 
-import { useAuth } from '../../../../firebase/fbAuth';
+import { useAuth } from '../../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
 
