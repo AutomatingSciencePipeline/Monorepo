@@ -46,4 +46,4 @@ We might need a little extra storage due to kubernetes caching old images. We wi
 
 ## Physical Server
 
-We would like to use the physical server as a worker node. The physical server will now have the hostname glados-w0.
+We will continue to use the physical GLADOS server in the cluster. We will use the physical server as a worker node (worker 0). The physical server will now have the hostname glados-w0.
