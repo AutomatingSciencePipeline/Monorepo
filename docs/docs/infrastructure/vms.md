@@ -43,3 +43,7 @@ Run the cluster on a single machine for testing purposes.
 4 CPU cores, 8 GB RAM, 100GB storage
 
 We might need a little extra storage due to kubernetes caching old images. We will have to make sure we clean this up periodically. 
+
+## Physical Server
+
+We would like to use the physical server as a worker node. 
