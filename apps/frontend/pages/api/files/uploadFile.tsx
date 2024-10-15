@@ -30,6 +30,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
                     chunkSizeBytes: 1048576,
                     metadata: { field: 'expId', value: experimentId }
                 }) as any);
+                
 
             res.status(200).json({ response: 'Successfully wrote file!' } as any);
             return;
