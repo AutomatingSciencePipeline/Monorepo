@@ -29,8 +29,8 @@ export const DispatchStep = ({ id, form, ...props }) => {
 				headers: new Headers({ 'Content-Type': 'application/json' }),
 				credentials: 'same-origin',
 				body: JSON.stringify({
-					fileToUpload: files[0],
-					experimentId: expId
+					"fileToUpload": files[0],
+					"experimentId": expId
 				})
 			})
 			if (uploadResponse) {
