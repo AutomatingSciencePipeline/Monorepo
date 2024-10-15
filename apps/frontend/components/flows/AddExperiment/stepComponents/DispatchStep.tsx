@@ -28,7 +28,10 @@ export const DispatchStep = ({ id, form, ...props }) => {
 				method: 'POST',
 				headers: new Headers({ 'Content-Type': 'application/json' }),
 				credentials: 'same-origin',
-				body: JSON.stringify({file: files[0]})
+				body: JSON.stringify({
+					fileToUpload: files[0],
+					experimentId: expId
+				})
 			})
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
