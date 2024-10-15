@@ -19,6 +19,7 @@ export type FirebaseUserId = FirebaseId;
 
 export type ExperimentDocumentId = FirebaseDocumentId;
 
+// Should be working with MondoDB in pages\api\storage\storeExp.tsx
 export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId): Promise<FirebaseId> => {
 	const newExperimentDocument = doc(experiments);
 	console.log('Experiment submitted. Values:', values);
@@ -49,7 +50,7 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	return newExperimentDocument.id;
 };
 
-
+// TODO: Change to use MongoDB
 export const uploadExec = async (id: ExperimentDocumentId, file) => {
 	const fileRef = ref(storage, `experiment${id}`);
 	return await uploadBytes(fileRef, file).then((snapshot) => {
@@ -129,6 +130,7 @@ export interface ExperimentSubscribeCallback {
 	(data: Partial<ExperimentData>): any;
 }
 
+// TODO: Convert from Firestore to MongoDB
 export const subscribeToExp = (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
 	const unsubscribe = onSnapshot(doc(db, DB_COLLECTION_EXPERIMENTS, id), (doc) => {
 		console.log(`exp ${id} data updated: `, doc.data());
@@ -142,6 +144,7 @@ export interface MultipleExperimentSubscribeCallback {
 	(data: Partial<ExperimentData>[]): any;
 }
 
+// TODO: Convert from Firestore MongoDB
 export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExperimentSubscribeCallback) => {
 	const q = query(experiments, where('creator', '==', uid));
 	const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -152,6 +155,7 @@ export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExper
 	return unsubscribe;
 };
 
+// TODO: Convert from Firestore to MongoDB
 export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 	const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, expId);
 	console.log(`Deleting ${expId} from firestore...`);
@@ -162,20 +166,25 @@ export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 	return false;
 };
 
-export const updateProjectNameInFirebase = async (projectId, updatedName) => {
-	try {
-	  // Reference the project document in Firebase
-	  const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, projectId);
-
-	  // Update the project name
-	  await updateDoc(experimentRef, { name: updatedName });
-	} catch (error) {
-	  console.error('Error updating project name:', error);
-	}
+// Done: Convert from Firestore to MongoDB
+// TODO: Test this!
+export const updateExperimentName = async (expId, updatedName) => {
+	await fetch(`/api/experiments/update/${expId}/${updatedName}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((expId: String) => {
+		console.log(expId);
+	}).catch((response: Response) => {
+		// might need this
+	});
 };
 
 
 // Function to get the project name from Firebase
+// TODO: Convert from Firestore to MongoDB
+// Not being used right now; we have [expIdToGet].tsx, which might render this useless anyway.
 export const getCurrentProjectName = async (projectId) => {
 	try {
 	  // Reference the project document in Firebase

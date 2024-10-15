@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName } from '../../../firebase/db';
+import { ExperimentDocumentId, subscribeToExp, updateExperimentName, getCurrentProjectName } from '../../../firebase/db';
 import { ExperimentData } from '../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
@@ -46,7 +46,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		updateProjectNameInFirebase(project.expId, projectName);
+		updateExperimentName(project.expId, projectName);
 
 		// Exit the editing mode
 		setIsEditing(false);

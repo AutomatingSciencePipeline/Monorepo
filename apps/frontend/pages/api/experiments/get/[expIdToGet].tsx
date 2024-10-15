@@ -1,6 +1,6 @@
-import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../lib/mongodb';
+import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
-import { ExperimentData } from '../../../firebase/db_types';
+import { ExperimentData } from '../../../../firebase/db_types';
 
 const mongoExpHandler: NextApiHandler<ExperimentData> = async (req, res) => {
 	const { expIdToGet } = req.query;
@@ -9,7 +9,6 @@ const mongoExpHandler: NextApiHandler<ExperimentData> = async (req, res) => {
 		return;
 	}
 
-	let results;
 	try {
 		const client = await clientPromise;
 		const db = client.db(DB_NAME);
