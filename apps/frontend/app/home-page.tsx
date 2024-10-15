@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => {
-  //const router = useRouter();
+  const router = useRouter();
   const { userId } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -128,7 +128,7 @@ const HomePage = () => {
                     <SignUpModal afterSignUp={() => {
                       setLoading(true);
                       console.log("pushing to dash");
-                      //router.push('/dashboard');
+                      router.push('/dashboard');
                     }}/>
                   }
                 </div>
