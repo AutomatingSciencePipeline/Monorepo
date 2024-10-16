@@ -1,3 +1,5 @@
+'use client'
+
 import { Fragment } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../../../InputSection';
