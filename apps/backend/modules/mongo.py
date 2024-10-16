@@ -2,6 +2,7 @@ import json
 import pymongo
 from pymongo.errors import ConnectionFailure
 from bson import Binary
+from gridfs import GridFSBucket
 
 def verify_mongo_connection(mongoClient: pymongo.MongoClient):
     try:
@@ -69,3 +70,23 @@ def check_insert_default_experiments(mongoClient: pymongo.MongoClient):
     except:
         # keep trying
         check_insert_default_experiments(mongoClient)
+        
+def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
+    # we are going to have to get the binary data from mongo here
+    # setup the bucket
+    db = mongoClient["gladosDb"]
+    bucket = GridFSBucket(db, bucket_name='fileBucket')
+    files = bucket.find({'metadata.expId': expId})
+    num_files = 0
+    file_name = ""
+    for file in files:
+        num_files += 1
+        if num_files > 1:
+            raise Exception("There are more than 1 file for a single experiment!")        
+        file_name = file['filename']
+    if file_name == "":
+        raise Exception("No file found!")
+    file = bucket.open_download_stream_by_name(file_name)
+    contents = file.read()
+    return contents
+    

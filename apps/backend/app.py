@@ -1,4 +1,5 @@
 """Module that uses flask to host endpoints for the backend"""
+import threading
 import base64
 from concurrent.futures import ProcessPoolExecutor
 import os
@@ -6,8 +7,7 @@ import bson
 from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
 import pymongo
-from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments
-import threading
+from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -97,14 +97,11 @@ def check_mongo():
     except Exception:
         return Response(status=500)
     
-@flaskApp.post("/uploadExperimentFile")
-def upload_experiment_file():
+@flaskApp.post("/downloadExpFile")
+def download_exp_file():
     json = request.get_json()
-    file = bson.Binary(base64.b64decode(json['file']))
-    userId = json['user']
-    print(file)
-    print(userId)
-    return Response(status=200)
+    experimentId = json['experimentId']
+    return {'contents': download_experiment_file(experimentId, mongoClient)}
 
 if __name__ == '__main__':
     flaskApp.run()
