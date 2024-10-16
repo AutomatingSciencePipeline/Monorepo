@@ -38,7 +38,7 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	});
 };
 
-// TODO: Change to use MongoDB
+// TODO: will use mongo gridfs
 export const uploadExec = async (id: ExperimentDocumentId, file) => {
 	const fileRef = ref(storage, `experiment${id}`);
 	return await uploadBytes(fileRef, file).then((snapshot) => {
