@@ -23,7 +23,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
             readableStream.
                 pipe(bucket.openUploadStream(`experimentFile${experimentId}`, {
                     chunkSizeBytes: 1048576,
-                    metadata: { field: 'expId', value: experimentId }
+                    metadata: { expId: experimentId }
                 }) as any);
 
 
