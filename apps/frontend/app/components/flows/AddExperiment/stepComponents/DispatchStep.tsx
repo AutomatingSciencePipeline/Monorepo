@@ -34,7 +34,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 					"fileToUpload": arrayBufferToBase64(await files[0].arrayBuffer()),
 					"experimentId": expId
 				})
-			})
+			});
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
 				const response = await fetch(`/api/experiments/${expId}`, {
