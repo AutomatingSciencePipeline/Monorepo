@@ -75,9 +75,11 @@ def check_insert_default_experiments(mongoClient: pymongo.MongoClient):
 def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
     # we are going to have to get the binary data from mongo here
     # setup the bucket
+    print(expId)
     db = mongoClient["gladosDb"]
     bucket = GridFSBucket(db, bucket_name='fileBucket')
     files = bucket.find({'metadata.expId': expId})
+    print(files)
     num_files = 0
     file_name = ""
     for file in files:
