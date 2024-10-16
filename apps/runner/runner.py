@@ -6,6 +6,9 @@ import sys
 import json
 import time
 import typing
+import base64
+
+import requests
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
@@ -193,8 +196,16 @@ def download_experiment_files(experiment: ExperimentData):
     experiment.file = filepath
     explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
-        filedata = firebaseBucket.blob(filepath)
-        filedata.download_to_filename(filepath)
+        # filedata = firebaseBucket.blob(filepath)
+        # filedata.download_to_filename(filepath)
+        # try to call the backend to download
+        url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?={experiment.expId}'
+        response = requests.get(url)
+        file_contents = response.json()["contents"]
+        # write the file contents to file path
+        with open(filepath) as file:
+            file.write(file_contents)
+        
     except Exception as err:
         explogger.error(f"Error {err} occurred while trying to download experiment file")
         raise GladosInternalError('Failed to download experiment files') from err
