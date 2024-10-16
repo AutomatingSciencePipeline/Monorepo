@@ -19,35 +19,23 @@ export type FirebaseUserId = FirebaseId;
 
 export type ExperimentDocumentId = FirebaseDocumentId;
 
-// Should be working with MondoDB in pages\api\storage\storeExp.tsx
-export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId): Promise<FirebaseId> => {
-	const newExperimentDocument = doc(experiments);
-	console.log('Experiment submitted. Values:', values);
-	setDoc(newExperimentDocument, {
-		creator: userId,
-		name: values.name,
-		description: values.description,
-		verbose: values.verbose,
-		workers: values.workers,
-		expId: newExperimentDocument.id,
-		trialExtraFile: values.trialExtraFile,
-		trialResult: values.trialResult,
-		timeout: values.timeout,
-		keepLogs: values.keepLogs,
-		scatter: values.scatter,
-		scatterIndVar: values.scatterIndVar,
-		scatterDepVar: values.scatterDepVar,
-		dumbTextArea: values.dumbTextArea,
-		created: Date.now(),
-		hyperparameters: JSON.stringify({
-			hyperparameters: values.hyperparameters,
-		}),
-		finished: false,
-		estimatedTotalTimeMinutes: 0,
-		totalExperimentRuns: 0,
+// test
+export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId) => {
+	await fetch(`/api/experiments/storeExp`,
+		{
+			method: "POST",
+			body: JSON.stringify(values)
+		}
+	).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((expId: String) => {
+		console.log(expId);
+	}).catch((response: Response) => {
+		// might need this
 	});
-	console.log(`Created Experiment: ${newExperimentDocument.id}`);
-	return newExperimentDocument.id;
 };
 
 // TODO: Change to use MongoDB
@@ -155,7 +143,7 @@ export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExper
 	return unsubscribe;
 };
 
-// TODO: Convert from Firestore to MongoDB
+// TODO: Test this!
 export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 	await fetch(`/api/experiments/delete/${expId}`).then((response) => {
 		if (response?.ok) {
@@ -169,7 +157,6 @@ export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 	});
 };
 
-// Done: Convert from Firestore to MongoDB
 // TODO: Test this!
 export const updateExperimentName = async (expId, updatedName) => {
 	await fetch(`/api/experiments/update/${expId}/${updatedName}`).then((response) => {
