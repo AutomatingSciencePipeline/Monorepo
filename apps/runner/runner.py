@@ -200,7 +200,7 @@ def download_experiment_files(experiment: ExperimentData):
         # filedata.download_to_filename(filepath)
         # try to call the backend to download
         url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?expId={experiment.expId}'
-        response = requests.get(url)
+        response = requests.get(url, timeout=60)
         file_contents = response.json()["contents"]
         # write the file contents to file path
         with open(filepath) as file:
