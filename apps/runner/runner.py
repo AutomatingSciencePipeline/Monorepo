@@ -203,7 +203,7 @@ def download_experiment_files(experiment: ExperimentData):
         response = requests.get(url, timeout=60)
         file_contents = response.json()["contents"]
         # write the file contents to file path
-        with open(filepath) as file:
+        with open(filepath, "x") as file:
             file.write(file_contents)
         
     except Exception as err:
