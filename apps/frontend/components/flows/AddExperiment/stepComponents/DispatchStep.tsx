@@ -25,7 +25,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
 			console.log(JSON.stringify({
-				"fileToUpload": files[0].arrayBuffer,
+				"fileToUpload": arrayBufferToBase64(files[0].arrayBuffer),
 				"experimentId": expId
 			}));
 			const uploadResponse = await fetch('/api/files/uploadFile', {
@@ -33,7 +33,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 				headers: new Headers({ 'Content-Type': 'application/json' }),
 				credentials: 'same-origin',
 				body: JSON.stringify({
-					"fileToUpload": files[0],
+					"fileToUpload": arrayBufferToBase64(files[0].arrayBuffer),
 					"experimentId": expId
 				})
 			})
@@ -110,3 +110,13 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		</Dropzone>
 	);
 };
+
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return Buffer.from(binary).toString("base64");
+}
+

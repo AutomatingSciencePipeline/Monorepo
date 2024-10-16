@@ -15,7 +15,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
             const client = await clientPromise;
             const db = client.db(DB_NAME);
             const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
-
+            
             const readableStream = new Readable();
             readableStream.push(fileToUpload);
             readableStream.push(null);
@@ -37,6 +37,5 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
         }
     }
 }
-
 
 export default mongoFileUploader;
