@@ -157,13 +157,16 @@ export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExper
 
 // TODO: Convert from Firestore to MongoDB
 export const deleteExperiment = async (expId: ExperimentDocumentId) => {
-	const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, expId);
-	console.log(`Deleting ${expId} from firestore...`);
-	deleteDoc(experimentRef).then(() => {
-		console.log(`Deleted experiment ${expId}`);
-		return true;
-	}).catch((error) => console.log('Delete experiment error: ', error));
-	return false;
+	await fetch(`/api/experiments/delete/${expId}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((expId: String) => {
+		console.log(expId);
+	}).catch((response: Response) => {
+		// might need this
+	});
 };
 
 // Done: Convert from Firestore to MongoDB
