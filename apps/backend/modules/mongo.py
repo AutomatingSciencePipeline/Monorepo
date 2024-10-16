@@ -1,3 +1,4 @@
+import base64
 import json
 import pymongo
 from pymongo.errors import ConnectionFailure
@@ -88,5 +89,5 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
         raise Exception("No file found!")
     file = bucket.open_download_stream_by_name(file_name)
     contents = file.read()
-    return contents
+    return base64.b64encode(contents)
     

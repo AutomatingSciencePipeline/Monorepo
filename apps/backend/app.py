@@ -97,10 +97,9 @@ def check_mongo():
     except Exception:
         return Response(status=500)
     
-@flaskApp.post("/downloadExpFile")
+@flaskApp.get("/downloadExpFile")
 def download_exp_file():
-    json = request.get_json()
-    experimentId = json['experimentId']
+    experimentId = request.args.get('expId', default='', type=str)
     return {'contents': download_experiment_file(experimentId, mongoClient)}
 
 if __name__ == '__main__':
