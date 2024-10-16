@@ -78,7 +78,7 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
     print(expId)
     db = mongoClient["gladosDb"]
     bucket = GridFSBucket(db, bucket_name='fileBucket')
-    files = bucket.find({'metadata.expId': expId})
+    files = bucket.find({"metadata.expId": expId}).to_list()
     print(files)
     num_files = 0
     file_name = ""
@@ -86,7 +86,7 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
         num_files += 1
         if num_files > 1:
             raise Exception("There are more than 1 file for a single experiment!")        
-        file_name = file['filename']
+        file_name = file.filename
     if file_name == "":
         raise Exception("No file found!")
     file = bucket.open_download_stream_by_name(file_name)
