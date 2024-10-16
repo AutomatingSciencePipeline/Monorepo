@@ -99,8 +99,11 @@ def check_mongo():
     
 @flaskApp.get("/downloadExpFile")
 def download_exp_file():
-    experiment_id = request.args.get('expId', default='', type=str)
-    return {'contents': download_experiment_file(experiment_id, mongoClient)}
+    try:
+        experiment_id = request.args.get('expId', default='', type=str)
+        return {'contents': download_experiment_file(experiment_id, mongoClient)}
+    except Exception:
+        return Response(status=500)
 
 if __name__ == '__main__':
     flaskApp.run()
