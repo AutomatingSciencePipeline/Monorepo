@@ -6,6 +6,9 @@ import sys
 import json
 import time
 import typing
+import base64
+
+import requests
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore, storage
@@ -39,7 +42,6 @@ explogger = logging.getLogger(EXPERIMENT_LOGGER)
 firebaseCredentials = credentials.Certificate(json.loads(_get_env(ENV_FIREBASE_CREDENTIALS)))
 firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
 firebaseDb = firestore.client()
-firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 syslogger.info("GLADOS Runner Started")
 
@@ -193,8 +195,14 @@ def download_experiment_files(experiment: ExperimentData):
     experiment.file = filepath
     explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
-        filedata = firebaseBucket.blob(filepath)
-        filedata.download_to_filename(filepath)
+        # try to call the backend to download
+        url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?expId={experiment.expId}'
+        response = requests.get(url, timeout=60)
+        file_contents = base64.b64decode(response.json()["contents"]).decode()
+        # write the file contents to file path
+        with open(filepath, "x") as file:
+            file.write(file_contents)
+        
     except Exception as err:
         explogger.error(f"Error {err} occurred while trying to download experiment file")
         raise GladosInternalError('Failed to download experiment files') from err
@@ -220,12 +228,6 @@ def remove_downloaded_directory(experimentId: DocumentId):
 def upload_experiment_results(experiment: ExperimentData):
     explogger.info('Uploading Experiment Results...')
 
-    try:
-        uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
-        uploadBlob.upload_from_filename('results.csv')
-    except Exception as err:
-        raise DatabaseConnectionError("Error uploading aggregated experiment results to firebase") from err
-
     explogger.info('Uploading to MongoDB')
     verify_mongo_connection()
 
@@ -248,13 +250,6 @@ def upload_experiment_results(experiment: ExperimentData):
                 encoded = Binary(file.read())
         except Exception as err:
             raise GladosInternalError("Error preparing experiment results zip") from err
-
-        # TODO remove firebase usage once transition to mongo file storage is complete
-        try:
-            uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
-            uploadBlob.upload_from_filename('ResultCsvs.zip')
-        except Exception as err:
-            raise DatabaseConnectionError("Error uploading experiment results zip to firebase") from err
 
         upload_experiment_zip(experiment, encoded)
 

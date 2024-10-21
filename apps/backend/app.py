@@ -1,4 +1,5 @@
 """Module that uses flask to host endpoints for the backend"""
+import threading
 import base64
 from concurrent.futures import ProcessPoolExecutor
 import os
@@ -6,7 +7,7 @@ import bson
 from flask import Flask, Response, request, jsonify
 from kubernetes import client, config
 import pymongo
-from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection
+from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -29,6 +30,10 @@ mongoClient = pymongo.MongoClient(
 )
 # connect to the glados database
 gladosDB = mongoClient["gladosdb"]
+# call the function to check if the documents for default experiments exist
+# start that in a different thread so that it can do its thing in peace
+addDefaultExpsThread = threading.Thread(target=check_insert_default_experiments, args={mongoClient})
+addDefaultExpsThread.start()
 
 # setup the mongo collections
 experimentsCollection = gladosDB.experiments
@@ -89,6 +94,14 @@ def check_mongo():
     try:
         verify_mongo_connection(mongoClient)
         return Response(status=200)
+    except Exception:
+        return Response(status=500)
+    
+@flaskApp.get("/downloadExpFile")
+def download_exp_file():
+    try:
+        experiment_id = request.args.get('expId', default='', type=str)
+        return {'contents': download_experiment_file(experiment_id, mongoClient)}
     except Exception:
         return Response(status=500)
 
