@@ -12,6 +12,8 @@ import { SignUpModal } from './components/auth/SignUpModal';
 import { useAuth } from '../firebase/fbAuth';
 import { AlreadySignedInModal } from './components/auth/AlreadySignedInModal';
 import { useState } from 'react';
+import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react"
 
 export const metadata: Metadata = {
   title: 'Glados',
@@ -19,11 +21,12 @@ export const metadata: Metadata = {
 
 const HomePage = () => {
   const router = useRouter();
-  const { userId } = useAuth();
+  // const { userId } = useAuth();
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
 
-  console.log('userId', userId);
-  console.log(loading, userId);
+  console.log('userId', session?.user?.id);
+  console.log(loading, session?.user?.id);
 
   return (
     <div className={'w-full h-full'}>
@@ -68,11 +71,12 @@ const HomePage = () => {
                   </div>
                 </div>
                 <div className='hidden md:flex'>
-                  <Link
+                  <button className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700' onClick={() => signIn("github")}>Sign In</button>
+                  {/* <Link
                     href={'/signin'}
                     className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
-                      Log in
-                  </Link>
+                    Log in
+                  </Link> */}
                 </div>
               </nav>
             </Popover>
@@ -120,7 +124,7 @@ const HomePage = () => {
                       </div>
                     </div>
                   </div>
-                  {userId && !loading ?
+                  {session && !loading ?
                     <AlreadySignedInModal
                       continueButtonMessage={'Continue to the Dashboard'}
                       linkTarget={'/dashboard'}
@@ -129,7 +133,7 @@ const HomePage = () => {
                       setLoading(true);
                       console.log("pushing to dash");
                       router.push('/dashboard');
-                    }}/>
+                    }} />
                   }
                 </div>
               </div>

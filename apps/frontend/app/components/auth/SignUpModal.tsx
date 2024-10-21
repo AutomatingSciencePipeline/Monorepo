@@ -4,8 +4,8 @@ import { joiResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AiOutlineGithub, AiOutlineGoogle, AiOutlineTwitter } from 'react-icons/ai';
-import { useAuth } from '../../../firebase/fbAuth';
 import { signUpSchema } from '../../../utils/validators';
+import { useSession } from "next-auth/react";
 
 export const SignUpModal = ({ afterSignUp }) => {
 	const form = useForm({
@@ -18,7 +18,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 	});
 	const DEFAULT_SIGN_UP_TEXT = 'Create your account';
 	const SIGN_UP_LOADING_TEXT = 'Loading...';
-	const { authService } = useAuth();
+	const { data: session } = useSession();
 	const [buttonDisabled, setButtonDisabled] = useState(false);
 	const [buttonText, setButtonText] = useState(DEFAULT_SIGN_UP_TEXT);
 

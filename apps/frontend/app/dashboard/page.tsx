@@ -24,6 +24,8 @@ import { ExperimentListing as ExperimentListing } from '../components/flows/View
 import { ExperimentData } from '../../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from '../../pages/api/queue';
+import { auth } from '../../auth';
+import { useSession, signOut } from "next-auth/react"
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -53,7 +55,8 @@ const activityItems = [
 ];
 
 const Navbar = (props) => {
-	const { authService } = useAuth();
+	// const { authService } = useAuth();
+	const { data: session } = useSession();
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -92,7 +95,7 @@ const Navbar = (props) => {
 												<span className='sr-only'>Open user menu</span>
 												<Image
 													className='h-8 w-8 rounded-full'
-													src={authService.userPhotoUrl}
+													src={""}
 													alt='User Photo'
 												/>
 											</Menu.Button>
@@ -115,9 +118,10 @@ const Navbar = (props) => {
 																onClick={() => {
 																	return (
 																		item.name === 'Sign out' &&
-																		authService
-																			.signOut()
-																			.catch((err) => console.log('Sign out error', err))
+																		signOut()
+																		// authService
+																		// 	.signOut()
+																		// 	.catch((err) => console.log('Sign out error', err))
 																	);
 																}}
 																className={classNames(
@@ -164,7 +168,7 @@ const Navbar = (props) => {
 										key={item.name}
 										as='a'
 										onClick={() => {
-											return authService.signOut();
+											return signOut();
 										}}
 										href={item.href}
 										className='block px-3 py-2 rounded-md text-base font-medium text-blue-200 hover:text-blue-100 hover:bg-blue-600'
@@ -182,15 +186,22 @@ const Navbar = (props) => {
 };
 
 export default function DashboardPage() {
-	const { userId, authService } = useAuth();
+	const { data: session } = useSession();
+	// const { userId, authService } = useAuth();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
 	useEffect(() => {
-		if (!userId) {
+		if (!session) {
 			return;
 		}
-		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
-	}, [userId]);
+		if (!session.user){
+			return;
+		}
+		if (!session.user.id){
+			return;
+		}
+		return listenToExperiments(session.user.id, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
+	}, [session]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
 	const QUEUE_ERROR_LENGTH = -2;
@@ -274,13 +285,13 @@ export default function DashboardPage() {
 												<div className='flex-shrink-0 h-12 w-12'>
 													<Image
 														className='h-12 w-12 rounded-full'
-														src={authService.userPhotoUrl}
+														src={""}
 														alt='User Photo'
 													/>
 												</div>
 												<div className='space-y-1'>
 													<div className='text-sm font-medium text-gray-900'>
-														{ authService.userEmail }
+														{ session?.user?.email }
 													</div>
 												</div>
 											</div>
@@ -375,7 +386,7 @@ export default function DashboardPage() {
 											<div className='flex space-x-3'>
 												<Image
 													className='h-6 w-6 rounded-full'
-													src={authService.userPhotoUrl}
+													src={""}
 													alt='User Photo'
 													layout='fixed'
 												/>
@@ -734,4 +745,3 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		</ul>
 	</div>);
 };
-

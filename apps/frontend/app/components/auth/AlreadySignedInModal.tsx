@@ -1,8 +1,9 @@
 'use client'
 
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Router from 'next/router';
-import { useAuth } from '../../../firebase/fbAuth';
+
 
 export interface AlreadySignedInModalProps {
 	continueButtonMessage: string,
@@ -10,7 +11,8 @@ export interface AlreadySignedInModalProps {
 }
 
 export const AlreadySignedInModal = ({ continueButtonMessage, linkTarget }: AlreadySignedInModalProps) => {
-	const { authService } = useAuth();
+	// const { authService } = useAuth();
+	const { data: session } = useSession();
 
 	return (
 		<div className='mt-16 sm:mt-24 lg:mt-0 lg:col-span-6'>
@@ -21,7 +23,7 @@ export const AlreadySignedInModal = ({ continueButtonMessage, linkTarget }: Alre
 							{"You're already signed in as"}
 						</p>
 						<span className='px-2 bg-white text-gray-500'>
-							{authService.userEmail}
+							{session?.user?.email}
 						</span>
 					</div>
 
@@ -53,8 +55,7 @@ export const AlreadySignedInModal = ({ continueButtonMessage, linkTarget }: Alre
 							className='space-x-6 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
 							onClick={() => {
 								return (
-									authService
-										.signOut()
+										signOut()
 										.then(() => {
 											Router.reload();
 										})

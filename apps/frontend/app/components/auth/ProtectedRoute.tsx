@@ -2,19 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
-import { useAuth } from '../../../firebase/fbAuth';
+import { useSession } from "next-auth/react"
 
 const ProtectedRoute = ({ children }) => {
-	const { user } = useAuth();
+	const { data: session } = useSession();
 	const router = useRouter();
 	useEffect(() => {
-		if (!user) {
+		if (!session) {
 			console.log('User is not signed in; redirecting them to /signin');
 			router.push('/signin');
 		}
-	}, [user, router]);
+	}, [session, router]);
 
-	return <>{user ? children : 'Not logged in'}</>;
+	return <>{session ? children : 'Not logged in'}</>;
 };
 
 export default ProtectedRoute;
