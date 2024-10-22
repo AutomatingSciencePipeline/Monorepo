@@ -58,4 +58,24 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
+        - name: AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: AUTH_SECRET
+        - name: AUTH_GITHUB_ID
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: AUTH_GITHUB_ID
+        - name: AUTH_GITHUB_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: AUTH_GITHUB_SECRET
+        - name: AUTH_TRUST_HOST
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: AUTH_TRUST_HOST
         
