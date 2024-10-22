@@ -23,7 +23,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
-		console.log(session?.user?.id);
+		console.log(session);
 		console.log('Submitting Experiment');
 		submitExperiment(form.values, session?.user?.id as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);

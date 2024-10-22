@@ -4,9 +4,9 @@ import { getEnvVar } from '../utils/env';
 
 // Adapted from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 
-const MONGODB_PORT = getEnvVar('MONGODB_PORT');
-const USERNAME = getEnvVar('MONGODB_USERNAME');
-const PASSWORD = getEnvVar('MONGODB_PASSWORD');
+const MONGODB_PORT = getEnvVar('MONGODB_PORT') || 'placeholder';
+const USERNAME = getEnvVar('MONGODB_USERNAME') || 'placeholder';
+const PASSWORD = getEnvVar('MONGODB_PASSWORD') || 'placeholder';
 
 const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
 const MONGODB_OPTIONS = {};
