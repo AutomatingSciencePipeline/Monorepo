@@ -9,7 +9,6 @@ import { Bars3Icon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Logo } from './components/Logo';
 import { SignUpModal } from './components/auth/SignUpModal';
-import { useAuth } from '../firebase/fbAuth';
 import { AlreadySignedInModal } from './components/auth/AlreadySignedInModal';
 import { useState } from 'react';
 import { signIn } from "next-auth/react";

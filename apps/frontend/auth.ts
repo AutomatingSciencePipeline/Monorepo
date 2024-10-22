@@ -5,7 +5,7 @@ import clientPromise from "./lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
-  providers: [GitHub],
+  providers: [GitHub, ],
   callbacks: {
     authorized: async ({ auth }) => {
       // Logged in users are authenticated, otherwise redirect to login page

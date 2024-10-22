@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AiOutlineGithub, AiOutlineGoogle, AiOutlineTwitter } from 'react-icons/ai';
 import { signUpSchema } from '../../../utils/validators';
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export const SignUpModal = ({ afterSignUp }) => {
 	const form = useForm({
@@ -40,13 +40,10 @@ export const SignUpModal = ({ afterSignUp }) => {
 						<p className='text-sm font-medium text-gray-700'>
 							Sign in with
 						</p>
-						<span className='px-2 bg-white text-gray-500'>
-							(OAuth login support coming soon™)
-						</span>
 						<div className='pt-3 grid grid-cols-3 gap-3'>
 							{/* TODO implement OAuth sign in */}
 
-							{/* <div>
+							<div>
 								<a
 									href='#'
 									className='w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'
@@ -74,17 +71,18 @@ export const SignUpModal = ({ afterSignUp }) => {
 								<a
 									href='#'
 									className='w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'
+									onClick={() => signIn("github", { redirectTo: "/dashboard" })}
 								>
 									<span className='sr-only'>
 										Sign in with GitHub
 									</span>
 									<AiOutlineGithub className='w-5 h-5' />
 								</a>
-							</div> */}
+							</div>
 						</div>
 					</div>
 
-					<div className='mt-3 relative'>
+					{/* <div className='mt-3 relative'>
 						<div
 							className='absolute inset-0 flex items-center'
 							aria-hidden='true'
@@ -96,9 +94,9 @@ export const SignUpModal = ({ afterSignUp }) => {
 								Or
 							</span>
 						</div>
-					</div>
+					</div> */}
 
-					<div className='mt-2'>
+					{/* <div className='mt-2'>
 						<div className='mb-3'>
 							<p className='text-sm font-medium text-gray-700'>
 								Create an Account
@@ -114,10 +112,10 @@ export const SignUpModal = ({ afterSignUp }) => {
 								setButtonDisabled(true);
 								setButtonText(SIGN_UP_LOADING_TEXT);
 								try {
-									await authService.signUpWithEmailAndPassword(
-										email,
-										password
-									);
+									// await authService.signUpWithEmailAndPassword(
+									// 	email,
+									// 	password
+									// );
 									afterSignUp();
 								} catch (error) {
 									console.log('Sign up error', error);
@@ -182,7 +180,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 							</div>
 
 							<div className='text-red-500'>
-								{ formHasError ?
+								{formHasError ?
 									<ul>
 										{Object.entries(form.errors).map((error) => {
 											return (
@@ -195,7 +193,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 									null}
 							</div>
 						</form>
-					</div>
+					</div> */}
 					<div className='mt-3 relative'>
 						<div
 							className='absolute inset-0 flex items-center'
@@ -214,7 +212,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 							href={'/signin'}
 							className='space-x-6 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 
-									Go to the Login Page
+							Go to the Login Page
 
 						</Link>
 					</div>

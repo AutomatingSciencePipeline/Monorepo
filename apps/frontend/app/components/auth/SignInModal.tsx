@@ -3,8 +3,8 @@
 import { joiResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAuth } from '../../../firebase/fbAuth';
 import { emailSchema, signInSchema } from '../../../utils/validators';
+import { signIn, useSession } from "next-auth/react";
 
 export const DEFAULT_SIGN_IN_TEXT = 'Sign in';
 export const SIGN_IN_LOADING_TEXT = 'Loading...';
@@ -22,29 +22,29 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 		schema: joiResolver(signInSchema),
 	});
 
-	const { authService } = useAuth();
+	const { data: session } = useSession();
 	const [buttonDisabled, setButtonDisabled] = useState(false);
 	const [buttonText, setButtonText] = useState(DEFAULT_SIGN_IN_TEXT);
 
 	return (
 		<div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
 			<div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
-				<form
+				{/* <form
 					className='space-y-6'
 					onSubmit={form.onSubmit(async (values) => {
 						const { email, password } = values;
 						setButtonDisabled(true);
 						setButtonText(SIGN_IN_LOADING_TEXT);
-						await authService.signInWithEmailAndPassword(
-							email,
-							password
-						).then(() => {
-							afterSignIn();
-						}).catch((error) => {
-							alert(`Problem logging in: ${error}`);
-							setButtonText(DEFAULT_SIGN_IN_TEXT);
-							setButtonDisabled(false);
-						});
+						// await authService.signInWithEmailAndPassword(
+						// 	email,
+						// 	password
+						// ).then(() => {
+						// 	afterSignIn();
+						// }).catch((error) => {
+						// 	alert(`Problem logging in: ${error}`);
+						// 	setButtonText(DEFAULT_SIGN_IN_TEXT);
+						// 	setButtonDisabled(false);
+						// });
 					})}
 				>
 					<div>
@@ -103,7 +103,7 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 										alert('Please enter a valid email address');
 									} else {
 										try {
-											await authService.sendPasswordResetEmail(validatedEmail);
+											// await authService.sendPasswordResetEmail(validatedEmail);
 											alert('Password reset email sent');
 										} catch (error) {
 											alert(`Problem sending password reset email: ${error}`);
@@ -115,10 +115,10 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 							</a>
 						</div>
 					</div>
-				</form>
+				</form> */}
 
 				<div className='mt-6'>
-					<div className='relative'>
+					{/* <div className='relative'>
 						<div className='absolute inset-0 flex items-center'>
 							<div className='w-full border-t border-gray-300' />
 						</div>
@@ -127,14 +127,14 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 								Or continue with
 							</span>
 						</div>
-					</div>
+					</div> */}
 
-					<span className='px-2 bg-white text-gray-500'>
+					{/* <span className='px-2 bg-white text-gray-500'>
 						(OAuth login support coming soon™)
-					</span>
+					</span> */}
 
 					{/* TODO implement OAuth sign in */}
-					{/* <div className='mt-6 grid grid-cols-3 gap-3'>
+					<div className='mt-6 grid grid-cols-3 gap-3'>
 						<div>
 							<a
 								href='#'
@@ -176,6 +176,7 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 							<a
 								href='#'
 								className='w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'
+								onClick={() => signIn("github", { redirectTo: "/dashboard" })}
 							>
 								<span className='sr-only'>Sign in with GitHub</span>
 								<svg
@@ -191,21 +192,21 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 								</svg>
 							</a>
 						</div>
-					</div> */}
+					</div> 
 				</div>
-				<div className='mt-3 relative'>
+				{/* <div className='mt-3 relative'>
 					<div
 						className='absolute inset-0 flex items-center'
 						aria-hidden='true'
 					>
 						<div className='w-full border-t border-gray-300' />
 					</div>
-					<div className='relative flex justify-center text-sm'>
+					{/* <div className='relative flex justify-center text-sm'>
 						<span className='px-2 bg-white text-gray-500'>
 							No account yet?
 						</span>
-					</div>
-				</div>
+					</div> 
+				</div> 
 				<div className='mt-3'>
 					<Link
 						href={'/'}
@@ -214,7 +215,7 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 							Go to the Sign Up Page
 
 					</Link>
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);
