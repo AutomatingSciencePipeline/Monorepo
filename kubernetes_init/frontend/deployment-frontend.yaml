@@ -16,75 +16,75 @@ spec:
         tier: frontend
     spec:
       containers:
-      - name: container-test-frontend
-        image: gladospipeline/glados-frontend:main
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 0000
-          # hostPort: 0000
-        env:
-        - name: BACKEND_PORT
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: BACKEND_PORT
-        - name: FRONTEND_WEBSERVER_PORT
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: FRONTEND_WEBSERVER_PORT
-        - name: MONGODB_PORT
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: MONGODB_PORT
-        - name: SERVICE_ROLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: SERVICE_ROLE_KEY
-        - name: FIREBASE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: FIREBASE_KEY
-        - name: MONGODB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: MONGODB_USERNAME
-        - name: MONGODB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: MONGODB_PASSWORD
-        - name: AUTH_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: AUTH_SECRET
-        - name: AUTH_GITHUB_ID
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: AUTH_GITHUB_ID
-        - name: AUTH_GITHUB_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: AUTH_GITHUB_SECRET
-        - name: AUTH_TRUST_HOST
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: AUTH_TRUST_HOST
-        - name: AUTH_URL
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: AUTH_URL
-        - name: AUTH_REDIRECT_PROXY_URL
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: AUTH_REDIRECT_PROXY_URL
+        - name: container-test-frontend
+          image: gladospipeline/glados-frontend:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 0000
+              # hostPort: 0000
+          env:
+            - name: BACKEND_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: BACKEND_PORT
+            - name: FRONTEND_WEBSERVER_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: FRONTEND_WEBSERVER_PORT
+            - name: MONGODB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: MONGODB_PORT
+            - name: SERVICE_ROLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: SERVICE_ROLE_KEY
+            - name: FIREBASE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: FIREBASE_KEY
+            - name: MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: MONGODB_USERNAME
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: MONGODB_PASSWORD
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_SECRET
+            - name: AUTH_GITHUB_ID
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_GITHUB_ID
+            - name: AUTH_GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_GITHUB_SECRET
+            - name: AUTH_TRUST_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_TRUST_HOST
+            - name: AUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_URL
+            - name: AUTH_REDIRECT_PROXY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_REDIRECT_PROXY_URL
