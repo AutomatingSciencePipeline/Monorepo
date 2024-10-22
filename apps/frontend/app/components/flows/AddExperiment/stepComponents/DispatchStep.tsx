@@ -4,9 +4,9 @@ import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { submitExperiment, uploadExec } from '../../../../../firebase/db';
 import { Group, Text } from '@mantine/core';
 
-import { useAuth } from '../../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -18,13 +18,13 @@ const SUPPORTED_FILE_TYPES = {
 };
 
 export const DispatchStep = ({ id, form, ...props }) => {
-	const { userId } = useAuth();
+	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
-		submitExperiment(form.values, userId as string).then(async (expId) => {
+		submitExperiment(form.values, session!.user!.id as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
 			const uploadResponse = await fetch('/api/files/uploadFile', {
 				method: 'POST',
