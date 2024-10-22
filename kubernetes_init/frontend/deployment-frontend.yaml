@@ -78,4 +78,13 @@ spec:
             secretKeyRef:
               name: secret-env
               key: AUTH_TRUST_HOST
-        
+        - name: AUTH_URL
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: AUTH_URL
+        - name: AUTH_REDIRECT_PROXY_URL
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: AUTH_REDIRECT_PROXY_URL
