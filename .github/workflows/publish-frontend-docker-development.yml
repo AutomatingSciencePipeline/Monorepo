@@ -55,6 +55,10 @@ jobs:
         with:
           context: ./apps/frontend
           file: ./apps/frontend/frontend.Dockerfile
+          secrets: | 
+            "MONGODB_PORT=${{ secrets.MONGODB_PORT }}"
+            "MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}"
+            "MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}"
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
