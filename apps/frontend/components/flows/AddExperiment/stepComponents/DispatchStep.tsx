@@ -27,7 +27,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 			const uploadResponse = await uploadExec(expId, files[0]);
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
-				const response = await fetch(`/api/experiments/${expId}`, {
+				const response = await fetch(`/api/experiments/start/${expId}`, {
 					method: 'POST',
 					headers: new Headers({ 'Content-Type': 'application/json' }),
 					credentials: 'same-origin',

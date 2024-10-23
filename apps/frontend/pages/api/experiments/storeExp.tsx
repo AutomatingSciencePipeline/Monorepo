@@ -36,13 +36,4 @@ const mongoExpHandler: NextApiHandler = async (req, res) => {
     }
 };
 
-// TODO: In DispatchStep.tsx:
-// fetch('/api/storage/storeExp', {
-//   method: 'POST',
-//   headers: {
-//    'Content-Type': 'application/json',
-//   },
-//   body: JSON.stringify(objectWithData)
-// })
-
 export default mongoExpHandler;

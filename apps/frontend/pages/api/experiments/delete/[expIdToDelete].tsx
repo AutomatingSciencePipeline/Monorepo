@@ -13,15 +13,15 @@ const mongoExpHandler: NextApiHandler<ExperimentData> = async (req, res) => {
 		const client = await clientPromise;
 		const db = client.db(DB_NAME);
 
-		const experiment = await db
+		const result = await db
             .collection(COLLECTION_EXPERIMENTS)
             .deleteOne({ '_id': expIdToDelete as any }); // Assuming expId is the unique identifier in the collection
 
-        if (!experiment) {
+        if (result.deletedCount === 0) {
             return res.status(404).json({ response: 'Experiment not found' } as any);
         }
 
-        res.status(200).json(experiment as unknown as ExperimentData);
+        res.status(200);
 	} catch (error) {
 		const message = 'Failed to delete the experiment';
 		console.error('Error contacting server: ', error);

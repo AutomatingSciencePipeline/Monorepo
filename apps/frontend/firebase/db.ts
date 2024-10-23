@@ -21,6 +21,11 @@ export type ExperimentDocumentId = FirebaseDocumentId;
 
 // test
 export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId) => {
+	values.creator = userId;
+	values.created = Date.now();
+	values.finished = false;
+	values.estimatedTotalTimeMinutes = 0;
+	values.totalExperimentRuns = 0;
 	await fetch(`/api/experiments/storeExp`,
 		{
 			method: "POST",
