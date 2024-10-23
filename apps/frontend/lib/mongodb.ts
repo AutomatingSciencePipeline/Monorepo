@@ -18,7 +18,6 @@ export const COLLECTION_RESULTS_CSVS = 'results';
 export const COLLECTION_EXPERIMENTS = 'experiments';
 export const COLLECTION_EXPERIMENT_FILES = 'files';
 
-
 let client: MongoClient;
 let clientPromise: Promise<MongoClient> = new Promise((success) => {
 	return true;
