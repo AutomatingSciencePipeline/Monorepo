@@ -32,18 +32,8 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 			body: JSON.stringify(values)
 		});
 	if (response.ok){
-		return JSON.parse(await response.json()).id;
+		return (await response.json()).id;
 	}
-	// ).then(async (response) => {
-	// 	if (response?.ok) {
-	// 		return JSON.parse(await response.json()).id;
-	// 	}
-	// 	return Promise.reject(response);
-	// }).then((expId: String) => {
-	// 	console.log(expId);
-	// }).catch((response: Response) => {
-	// 	// might need this
-	// });
 };
 
 // TODO: will use mongo gridfs
