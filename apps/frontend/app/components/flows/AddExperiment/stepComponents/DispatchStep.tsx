@@ -1,8 +1,10 @@
+'use client'
+
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { submitExperiment, uploadExec } from '../../../../firebase/db';
+import { submitExperiment, uploadExec } from '../../../../../firebase/db';
 import { Group, Text } from '@mantine/core';
 
-import { useAuth } from '../../../../firebase/fbAuth';
+import { useAuth } from '../../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
 
@@ -24,7 +26,15 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		console.log('Submitting Experiment');
 		submitExperiment(form.values, userId as string).then(async (expId) => {
 			console.log(`Uploading file for ${expId}:`, files);
-			const uploadResponse = await uploadExec(expId, files[0]);
+			const uploadResponse = await fetch('/api/files/uploadFile', {
+				method: 'POST',
+				headers: new Headers({ 'Content-Type': 'application/json' }),
+				credentials: 'same-origin',
+				body: JSON.stringify({
+					"fileToUpload": arrayBufferToBase64(await files[0].arrayBuffer()),
+					"experimentId": expId
+				})
+			});
 			if (uploadResponse) {
 				console.log(`Handing experiment ${expId} to the backend`);
 				const response = await fetch(`/api/experiments/start/${expId}`, {
@@ -98,3 +108,13 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		</Dropzone>
 	);
 };
+
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return Buffer.from(binary).toString("base64");
+}
+
