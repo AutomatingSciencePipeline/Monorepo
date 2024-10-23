@@ -4,7 +4,7 @@ import GitHub from "next-auth/providers/github";
 import clientPromise from "./lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(clientPromise, {databaseName: 'gladosdb'}),
   providers: [GitHub, ],
   callbacks: {
     authorized: async ({ auth }) => {
