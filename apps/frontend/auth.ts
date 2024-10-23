@@ -12,6 +12,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Handled in ProtectedRoute
       return !!auth
     },
+    session({ session, user }) {
+      session.user.id = user.id
+      return session
+    },
   },
 })
  
