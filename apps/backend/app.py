@@ -108,7 +108,7 @@ def download_exp_file():
 @flaskApp.post("/getExperiment")
 def get_experiment_post():
     try:
-        experiment_id = request.args.get('expId', default='', type=str)
+        experiment_id = request.get_json()['experimentId']
         return {'contents': get_experiment(experiment_id, mongoClient)}
     except Exception:
         return Response(status=500)
