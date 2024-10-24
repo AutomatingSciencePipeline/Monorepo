@@ -23,7 +23,7 @@ from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
-from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
+from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -83,9 +83,10 @@ def run_batch(data: IncomingStartRequest):
 
     # Retrieve experiment details from the backend api
     try:
-        experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-        expRef = experiments.document(expId)
-        experimentData = expRef.get().to_dict()
+        # experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
+        # expRef = experiments.document(expId)
+        # experimentData = expRef.get().to_dict()
+        experimentData = get_experiment_with_id(expId).to_dict()
         
         
     except Exception as err:  # pylint: disable=broad-exception-caught
