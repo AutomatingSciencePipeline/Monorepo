@@ -95,4 +95,5 @@ def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
     if experiment is None:
         raise Exception("Could not find experiment!")
     experiment["id"] = expId
+    experiment["expId"] = expId
     return experiment
