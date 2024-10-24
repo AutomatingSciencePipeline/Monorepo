@@ -1,5 +1,5 @@
 import { NextApiHandler } from 'next';
-import { getEnvVar } from '../../../utils/env';
+import { getEnvVar } from '../../../../utils/env';
 
 const BACKEND_PORT = getEnvVar('BACKEND_PORT');
 

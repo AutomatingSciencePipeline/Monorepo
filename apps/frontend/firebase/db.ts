@@ -19,37 +19,31 @@ export type FirebaseUserId = FirebaseId;
 
 export type ExperimentDocumentId = FirebaseDocumentId;
 
-export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId): Promise<FirebaseId> => {
-	const newExperimentDocument = doc(experiments);
-	console.log('Experiment submitted. Values:', values);
-	setDoc(newExperimentDocument, {
-		creator: userId,
-		name: values.name,
-		description: values.description,
-		verbose: values.verbose,
-		workers: values.workers,
-		expId: newExperimentDocument.id,
-		trialExtraFile: values.trialExtraFile,
-		trialResult: values.trialResult,
-		timeout: values.timeout,
-		keepLogs: values.keepLogs,
-		scatter: values.scatter,
-		scatterIndVar: values.scatterIndVar,
-		scatterDepVar: values.scatterDepVar,
-		dumbTextArea: values.dumbTextArea,
-		created: Date.now(),
-		hyperparameters: JSON.stringify({
-			hyperparameters: values.hyperparameters,
-		}),
-		finished: false,
-		estimatedTotalTimeMinutes: 0,
-		totalExperimentRuns: 0,
+// test
+export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId) => {
+	values.creator = userId;
+	values.created = Date.now();
+	values.finished = false;
+	values.estimatedTotalTimeMinutes = 0;
+	values.totalExperimentRuns = 0;
+	await fetch(`/api/experiments/storeExp`,
+		{
+			method: "POST",
+			body: JSON.stringify(values)
+		}
+	).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((expId: String) => {
+		console.log(expId);
+	}).catch((response: Response) => {
+		// might need this
 	});
-	console.log(`Created Experiment: ${newExperimentDocument.id}`);
-	return newExperimentDocument.id;
 };
 
-
+// TODO: will use mongo gridfs
 export const uploadExec = async (id: ExperimentDocumentId, file) => {
 	const fileRef = ref(storage, `experiment${id}`);
 	return await uploadBytes(fileRef, file).then((snapshot) => {
@@ -125,23 +119,14 @@ export const downloadExperimentProjectZip = async (expId: ExperimentDocumentId) 
 	});
 };
 
-export interface ExperimentSubscribeCallback {
-	(data: Partial<ExperimentData>): any;
-}
 
-export const subscribeToExp = (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
-	const unsubscribe = onSnapshot(doc(db, DB_COLLECTION_EXPERIMENTS, id), (doc) => {
-		console.log(`exp ${id} data updated: `, doc.data());
-		callback(doc.data() as Partial<ExperimentData>);
-	});
-	return unsubscribe;
-};
 
 
 export interface MultipleExperimentSubscribeCallback {
 	(data: Partial<ExperimentData>[]): any;
 }
 
+// TODO: Convert from Firestore MongoDB
 export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExperimentSubscribeCallback) => {
 	const q = query(experiments, where('creator', '==', uid));
 	const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -152,30 +137,38 @@ export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExper
 	return unsubscribe;
 };
 
+// TODO: Test this!
 export const deleteExperiment = async (expId: ExperimentDocumentId) => {
-	const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, expId);
-	console.log(`Deleting ${expId} from firestore...`);
-	deleteDoc(experimentRef).then(() => {
-		console.log(`Deleted experiment ${expId}`);
-		return true;
-	}).catch((error) => console.log('Delete experiment error: ', error));
-	return false;
+	await fetch(`/api/experiments/delete/${expId}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((expId: String) => {
+		console.log(expId);
+	}).catch((response: Response) => {
+		// might need this
+	});
 };
 
-export const updateProjectNameInFirebase = async (projectId, updatedName) => {
-	try {
-	  // Reference the project document in Firebase
-	  const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, projectId);
-
-	  // Update the project name
-	  await updateDoc(experimentRef, { name: updatedName });
-	} catch (error) {
-	  console.error('Error updating project name:', error);
-	}
+// TODO: Test this!
+export const updateExperimentName = async (expId, updatedName) => {
+	await fetch(`/api/experiments/updatename/${expId}/${updatedName}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((expId: String) => {
+		console.log(expId);
+	}).catch((response: Response) => {
+		// might need this
+	});
 };
 
 
 // Function to get the project name from Firebase
+// TODO: Convert from Firestore to MongoDB
+// Not being used right now; we have [expIdToGet].tsx, which might render this useless anyway.
 export const getCurrentProjectName = async (projectId) => {
 	try {
 	  // Reference the project document in Firebase
