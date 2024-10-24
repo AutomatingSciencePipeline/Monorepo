@@ -18,7 +18,7 @@ const mongoLogHandler: NextApiHandler<String> = async (req, res) => {
 		results = await db
 			.collection(COLLECTION_LOGS)
 			// TODO correct mongodb typescript type for id
-			.find({ '_id': idOfLogFile as any }).toArray();
+			.find({ 'experimentId': idOfLogFile as any }).toArray();
 	} catch (error) {
 		const message = 'Failed to download the log file';
 		console.error('Error contacting server: ', error);

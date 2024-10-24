@@ -12,7 +12,7 @@ def verify_mongo_connection(mongoClient: pymongo.MongoClient):
         raise Exception("MongoDB server not available/unreachable") from err
     
 def upload_experiment_aggregated_results(experimentId: str, results: str, mongoClient: pymongo.MongoClient):
-    experimentResultEntry = {"_id": experimentId, "resultContent": results}
+    experimentResultEntry = {"experimentId": experimentId, "resultContent": results}
     # Get the results connection
     resultsCollection = mongoClient["gladosdb"].results
     try:
@@ -25,7 +25,7 @@ def upload_experiment_aggregated_results(experimentId: str, results: str, mongoC
         raise Exception("Encountered error while storing aggregated results in MongoDB") from err
     
 def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient: pymongo.MongoClient):
-    experimentZipEntry = {"_id": experimentId, "fileContent": encoded}
+    experimentZipEntry = {"experimentId": experimentId, "fileContent": encoded}
     zipCollection = mongoClient["gladosdb"].zips
     try:
         resultZipId = zipCollection.insert_one(experimentZipEntry).inserted_id
@@ -34,7 +34,7 @@ def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient: pymon
         raise Exception("Encountered error while storing results zip in MongoDB") from err
     
 def upload_log_file(experimentId: str, contents: str, mongoClient: pymongo.MongoClient):
-    logFileEntry = {"_id": experimentId, "fileContent": contents}
+    logFileEntry = {"experimentId": experimentId, "fileContent": contents}
     logCollection = mongoClient["gladosdb"].logs
     try:
         resultId = logCollection.insert_one(logFileEntry).inserted_id
