@@ -81,11 +81,13 @@ def run_batch(data: IncomingStartRequest):
 
     open_experiment_logger(expId)
 
-    # Retrieve experiment details from firebase
+    # Retrieve experiment details from the backend api
     try:
         experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
         expRef = experiments.document(expId)
         experimentData = expRef.get().to_dict()
+        
+        
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from firebase, aborting")
         explogger.exception(err)

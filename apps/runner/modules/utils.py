@@ -41,7 +41,7 @@ def upload_experiment_aggregated_results(experiment: ExperimentData, resultConte
     payload = {
         "experimentId": experiment.expId,
         "results": resultContent
-    } 
+    }
     _callBackend(url, payload, "inserted result csv into mongodb with id")
 
 
@@ -51,7 +51,7 @@ def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
     payload = {
         "experimentId": experiment.expId,
         "encoded": base64.b64encode(encoded).decode("utf-8")
-    } 
+    }
     _callBackend(url, payload, "inserted zip into mongodb with id")
 
 def upload_experiment_log(experimentId: DocumentId):
@@ -73,8 +73,15 @@ def upload_experiment_log(experimentId: DocumentId):
     payload = {
         "experimentId": experimentId,
         "logContents": contents
-    } 
+    }
     _callBackend(url, payload, "inserted log file into mongodb with id")
+    
+def get_experiment_with_id(experimentId: str):
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/getExperiment'
+    payload = {
+        "experimentId": experimentId
+    }
+    _callBackend(url, payload, "got experiment data")
 
 def _callBackend(url, payload, logMsg):
     try:

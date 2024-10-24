@@ -28,7 +28,6 @@ def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient: pymon
     experimentZipEntry = {"_id": experimentId, "fileContent": encoded}
     zipCollection = mongoClient["gladosdb"].zips
     try:
-        # TODO: Refactor to call the backend
         resultZipId = zipCollection.insert_one(experimentZipEntry).inserted_id
         return resultZipId
     except Exception as err:
@@ -89,4 +88,8 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
     file = bucket.open_download_stream_by_name(file_name)
     contents = file.read()
     return contents.decode("utf-8")
-    
+
+def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
+    experimentsCollection = mongoClient["gladosdb"].experiments
+    experiment = experimentsCollection.find_one({"_id": expId})
+    return experiment
