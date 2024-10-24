@@ -86,6 +86,19 @@ def get_experiment_with_id(experimentId: str):
         return response.json()['contents']
     else:
         raise DatabaseConnectionError("Error while getting experiment from backend!")
+    
+def update_exp_value(experimentId: str, field: str, newValue):
+    url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/updateExperiment'
+    payload = {
+        "experimentId": experimentId,
+        "field": field,
+        "newValue": newValue
+    }
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        return
+    else:
+        raise DatabaseConnectionError("Error updating experiment document!")
 
 def _callBackend(url, payload, logMsg):
     try:

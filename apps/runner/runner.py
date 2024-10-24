@@ -23,7 +23,7 @@ from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
-from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id
+from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id, update_exp_value
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -104,7 +104,7 @@ def run_batch(data: IncomingStartRequest):
         else:
             explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
-        # close_experiment_run(expId, expRef)
+        close_experiment_run(expId)
         return
     experimentData['hyperparameters'] = hyperparameters
 
@@ -115,7 +115,7 @@ def run_batch(data: IncomingStartRequest):
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)
-        # close_experiment_run(expId, expRef)
+        close_experiment_run(expId)
         return
 
     #Downloading Experiment File
@@ -130,7 +130,7 @@ def run_batch(data: IncomingStartRequest):
         explogger.error("This is not a supported experiment file type, aborting")
         explogger.exception(err)
         os.chdir('../..')
-        # close_experiment_run(expId, expRef)
+        close_experiment_run(expId)
         return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
@@ -139,15 +139,16 @@ def run_batch(data: IncomingStartRequest):
     if totalExperimentRuns == 0:
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
-        # close_experiment_run(expId, expRef)
+        close_experiment_run(expId)
         return
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
-    expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
+    # expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
+    update_exp_value(expId, "totalExperimentRuns", experiment.totalExperimentRuns)
 
     try:
-        conduct_experiment(experiment, expRef)
+        conduct_experiment(experiment)
         post_process_experiment(experiment)
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
@@ -159,14 +160,15 @@ def run_batch(data: IncomingStartRequest):
     finally:
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
-        # close_experiment_run(expId, expRef)
+        # close_experiment_run(expId)
 
-def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
+def close_experiment_run(expId: DocumentId):
     explogger.info(f'Exiting experiment {expId}')
-    if expRef:
-        expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
-    else:
-        syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
+    # if expRef:
+    #     expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
+    # else:
+    #     syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
+    update_exp_value(expId, 'finished', True)
     close_experiment_logger()
     upload_experiment_log(expId)
     remove_downloaded_directory(expId)

@@ -97,3 +97,8 @@ def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
     experiment["id"] = expId
     experiment["expId"] = expId
     return experiment
+
+def update_exp_value(expId: str, field: str, newValue: str, mongoClient: pymongo.MongoClient):
+    experimentsCollection = mongoClient["gladosdb"].experiments
+    experimentsCollection.update_one({"_id": ObjectId(expId)}, {"$set": {field: newValue}})
+    return
