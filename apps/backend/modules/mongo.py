@@ -1,7 +1,7 @@
 import json
 import pymongo
 from pymongo.errors import ConnectionFailure
-from bson import Binary
+from bson import Binary, ObjectId
 from gridfs import GridFSBucket
 
 def verify_mongo_connection(mongoClient: pymongo.MongoClient):
@@ -91,5 +91,5 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
 
 def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
     experimentsCollection = mongoClient["gladosdb"].experiments
-    experiment = experimentsCollection.find_one({"_id": expId})
+    experiment = experimentsCollection.find_one({"_id": ObjectId(expId)})
     return experiment
