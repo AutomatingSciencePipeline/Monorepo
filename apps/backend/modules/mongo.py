@@ -92,4 +92,4 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
 def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
     experimentsCollection = mongoClient["gladosdb"].experiments
     experiment = experimentsCollection.find_one({"_id": ObjectId(expId)})
-    return experiment
+    return "found exp!"
