@@ -87,11 +87,11 @@ def _callBackend(url, payload, logMsg):
     try:
         response = requests.post(url, json=payload)
         if response.status_code == 200:
-            resultId = response.json().get('id')
+            resultId = response.json().get('_id')
             if resultId:
                 explogger.info(f"{logMsg}: {resultId}")
             else:
-                raise DatabaseConnectionError("Encountered error while writing document to MongoDB")
+                raise DatabaseConnectionError("Encountered error while contacting the backend!")
     except Exception as err:
-        raise DatabaseConnectionError("Encountered error while writing document to MongoDB") from err
+        raise DatabaseConnectionError("Encountered error while contacting the backend!") from err
 
