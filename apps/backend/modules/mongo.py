@@ -94,5 +94,4 @@ def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
     experiment = experimentsCollection.find_one({"_id": ObjectId(expId)})
     if experiment is None:
         raise Exception("Could not find experiment!")
-    print(experiment)
-    return "found exp!"
+    return experiment["name"]
