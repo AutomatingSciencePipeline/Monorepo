@@ -86,7 +86,7 @@ def run_batch(data: IncomingStartRequest):
         # experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
         # expRef = experiments.document(expId)
         # experimentData = expRef.get().to_dict()
-        experimentData = get_experiment_with_id(expId).to_dict()
+        experimentData = get_experiment_with_id(expId)
         
         
     except Exception as err:  # pylint: disable=broad-exception-caught
