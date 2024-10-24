@@ -83,7 +83,7 @@ def get_experiment_with_id(experimentId: str):
     }
     response = requests.post(url, json=payload)
     if response.status_code == 200:
-        return response.json()
+        return response.json()['contents']
     else:
         raise DatabaseConnectionError("Error while getting experiment from backend!")
 
