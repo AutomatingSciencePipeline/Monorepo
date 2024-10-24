@@ -81,7 +81,11 @@ def get_experiment_with_id(experimentId: str):
     payload = {
         "experimentId": experimentId
     }
-    _callBackend(url, payload, "got experiment data")
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        return response
+    else:
+        raise DatabaseConnectionError("Error while getting experiment from backend!")
 
 def _callBackend(url, payload, logMsg):
     try:
