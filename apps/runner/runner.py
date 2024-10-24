@@ -92,7 +92,7 @@ def run_batch(data: IncomingStartRequest):
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from firebase, aborting")
         explogger.exception(err)
-        close_experiment_run(expId, None)
+        # close_experiment_run(expId, None)
         return
 
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
@@ -104,7 +104,7 @@ def run_batch(data: IncomingStartRequest):
         else:
             explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
-        close_experiment_run(expId, expRef)
+        # close_experiment_run(expId, expRef)
         return
     experimentData['hyperparameters'] = hyperparameters
 
@@ -115,7 +115,7 @@ def run_batch(data: IncomingStartRequest):
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)
-        close_experiment_run(expId, expRef)
+        # close_experiment_run(expId, expRef)
         return
 
     #Downloading Experiment File
@@ -130,7 +130,7 @@ def run_batch(data: IncomingStartRequest):
         explogger.error("This is not a supported experiment file type, aborting")
         explogger.exception(err)
         os.chdir('../..')
-        close_experiment_run(expId, expRef)
+        # close_experiment_run(expId, expRef)
         return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
@@ -139,7 +139,7 @@ def run_batch(data: IncomingStartRequest):
     if totalExperimentRuns == 0:
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
-        close_experiment_run(expId, expRef)
+        # close_experiment_run(expId, expRef)
         return
 
     experiment.totalExperimentRuns = totalExperimentRuns
@@ -159,7 +159,7 @@ def run_batch(data: IncomingStartRequest):
     finally:
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
-        close_experiment_run(expId, expRef)
+        # close_experiment_run(expId, expRef)
 
 def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     explogger.info(f'Exiting experiment {expId}')
