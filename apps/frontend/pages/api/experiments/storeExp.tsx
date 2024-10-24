@@ -8,7 +8,7 @@ const mongoExpHandler: NextApiHandler = async (req, res) => {
         return;
     }
 
-    const experimentData: ExperimentData = req.body;
+    const experimentData: Partial<ExperimentData> = JSON.parse(req.body);
 
     if (!experimentData || typeof experimentData !== 'object') {
         res.status(400).json({ response: 'Invalid experiment data provided' } as any);

@@ -119,18 +119,7 @@ export const downloadExperimentProjectZip = async (expId: ExperimentDocumentId) 
 	});
 };
 
-export interface ExperimentSubscribeCallback {
-	(data: Partial<ExperimentData>): any;
-}
 
-// TODO: Convert from Firestore to MongoDB
-export const subscribeToExp = (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
-	const unsubscribe = onSnapshot(doc(db, DB_COLLECTION_EXPERIMENTS, id), (doc) => {
-		console.log(`exp ${id} data updated: `, doc.data());
-		callback(doc.data() as Partial<ExperimentData>);
-	});
-	return unsubscribe;
-};
 
 
 export interface MultipleExperimentSubscribeCallback {
@@ -164,7 +153,7 @@ export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 
 // TODO: Test this!
 export const updateExperimentName = async (expId, updatedName) => {
-	await fetch(`/api/experiments/update/${expId}/${updatedName}`).then((response) => {
+	await fetch(`/api/experiments/updatename/${expId}/${updatedName}`).then((response) => {
 		if (response?.ok) {
 			return response.json();
 		}
