@@ -108,6 +108,9 @@ export const getExperimentDataForGraph = async (expId: ExperimentDocumentId) => 
 			return response.json();
 		}
 		return Promise.reject(response);
+	}).then((record: ResultsCsv) => {
+		console.log(record);
+		return record;
 	}).catch((response: Response) => {
 		console.warn('Error getting experiment results', response.status);
 		response.json().then((json: any) => {

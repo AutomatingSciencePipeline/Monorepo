@@ -318,7 +318,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 				}
 				{
                 (showGraphModal && project.finished) && (
-                    <Chart onClose={closeGraphModal} />
+                    <Chart onClose={closeGraphModal} project={project}/>
                 )
             }
 			</div>
