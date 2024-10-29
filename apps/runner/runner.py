@@ -180,6 +180,7 @@ def determine_experiment_file_type(filepath: str):
             contents = file.read()
             if "META-INF/MANIFEST.MF" in contents:
                 filetype = ExperimentType.JAVA
+            file.close()
         except FileNotFoundError as e:
             explogger.error(f"{filepath} could not be read to determine if it is a jar file!")
             raise e
