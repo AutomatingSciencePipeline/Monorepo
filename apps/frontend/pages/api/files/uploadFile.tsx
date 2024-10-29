@@ -3,6 +3,14 @@ import { NextApiHandler } from 'next';
 import { GridFSBucket } from 'mongodb';
 import { Readable } from 'stream';
 
+export const config = {
+    api: {
+      bodyParser: {
+        sizeLimit: '1000mb'
+      }
+    },
+  }
+
 const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
     if (req.method === 'POST') {
         const { fileToUpload, experimentId } = req.body;
