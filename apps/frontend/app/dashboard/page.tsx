@@ -3,8 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../../firebase/fbAuth';
 import { deleteExperiment } from '../../firebase/db';
-import { downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
-import { listenToExperiments } from '../../lib/mongo_listener';
+import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -190,11 +189,7 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		const fetchExps = async () =>{
-			return await listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
-		}
-		fetchExps();
-
+		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;

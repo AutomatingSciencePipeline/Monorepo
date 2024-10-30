@@ -1,5 +1,5 @@
 // THIS IS CURRENTLY UNUSED, FIGURE OUT HOW TO IMPORT IT INTO api/experiments/
-import { MongoClient, ChangeStream, WithId, Document } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { getEnvVar } from '../utils/env';
 import { ExperimentData } from '../firebase/db_types';
 import { ExperimentDocumentId } from '../firebase/db';
@@ -63,7 +63,6 @@ export const subscribeToExp = async (id: ExperimentDocumentId, callback: Experim
 		}
 	});
 };
-
 
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
