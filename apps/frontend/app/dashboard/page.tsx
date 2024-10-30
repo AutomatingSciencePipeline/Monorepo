@@ -190,7 +190,7 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		const run = async () => {
+		async () => {
 			return await listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 		}
 		
@@ -454,6 +454,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
+		console.log(experiments);
 		switch (sortBy) {
 		case SortingOptions.NAME:
 			setSortedExperiments([...experiments].sort(sortByName));
