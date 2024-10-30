@@ -167,7 +167,6 @@ def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
     close_experiment_logger()
     upload_experiment_log(expId)
     remove_downloaded_directory(expId)
-    
 
 def determine_experiment_file_type(filepath: str):
     rawfiletype = magic.from_file(filepath)
