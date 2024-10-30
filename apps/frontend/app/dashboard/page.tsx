@@ -191,7 +191,11 @@ export default function DashboardPage() {
 			return;
 		}
 		async () => {
-			return await listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
+			console.log("getting exps");
+			const toReturn =  await listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
+			console.log(experiments);
+			console.log(toReturn);
+			return toReturn;
 		}
 		
 	}, [userId]);
