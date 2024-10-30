@@ -70,7 +70,7 @@ const Navbar = (props) => {
 							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
 								function (newValue: string): void {
 									console.log(`SearchBar.onValueChanged: ${newValue}`);
-								} } />
+								}} />
 							{/* Links section */}
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
@@ -190,14 +190,10 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		async () => {
-			console.log("getting exps");
-			const toReturn =  await listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
-			console.log(experiments);
-			console.log(toReturn);
-			return toReturn;
-		}
-		
+		console.log("getting exps");
+		listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
+		console.log(experiments);
+
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
@@ -288,7 +284,7 @@ export default function DashboardPage() {
 												</div>
 												<div className='space-y-1'>
 													<div className='text-sm font-medium text-gray-900'>
-														{ authService.userEmail }
+														{authService.userEmail}
 													</div>
 												</div>
 											</div>
@@ -300,7 +296,7 @@ export default function DashboardPage() {
 													onClick={() => {
 														setFormState(1);
 													}}
-													// onClick
+												// onClick
 												>
 													{label}
 												</button>
@@ -345,7 +341,7 @@ export default function DashboardPage() {
 															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
 													}
 												</span>
-												<button type= "button"
+												<button type="button"
 													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
 													onClick={queryQueueLength}>
 													TEMP Manual Query
@@ -362,10 +358,10 @@ export default function DashboardPage() {
 							onCopyExperiment={(experimentId) => {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
-							} }
+							}}
 							onDeleteExperiment={async (experimentId) => {
 								deleteExperiment(experimentId);
-							}}/>
+							}} />
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -414,8 +410,8 @@ export default function DashboardPage() {
 					<NewExperiment
 						formState={formState}
 						setFormState={setFormState}
-						copyID = {copyID}
-						setCopyId = {setCopyId}
+						copyID={copyID}
+						setCopyId={setCopyId}
 					/>
 				</div>
 			</div>
@@ -460,32 +456,32 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	useEffect(() => {
 		console.log(experiments);
 		switch (sortBy) {
-		case SortingOptions.NAME:
-			setSortedExperiments([...experiments].sort(sortByName));
-			break;
+			case SortingOptions.NAME:
+				setSortedExperiments([...experiments].sort(sortByName));
+				break;
 
-		case SortingOptions.NAME_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByNameReverse));
-			break;
+			case SortingOptions.NAME_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByNameReverse));
+				break;
 
-		case SortingOptions.DATE_MODIFIED:
-			setSortedExperiments([...experiments].sort(sortByDateModified));
-			break;
+			case SortingOptions.DATE_MODIFIED:
+				setSortedExperiments([...experiments].sort(sortByDateModified));
+				break;
 
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
-			break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
+				break;
 
-		case SortingOptions.DATE_CREATED:
-			setSortedExperiments([...experiments].sort(sortByDateCreated));
-			break;
+			case SortingOptions.DATE_CREATED:
+				setSortedExperiments([...experiments].sort(sortByDateCreated));
+				break;
 
-		case SortingOptions.DATE_CREATED_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
-			break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+				break;
 
-		default:
-			break;
+			default:
+				break;
 		}
 	}, [sortBy, experiments]);
 
@@ -497,27 +493,27 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		console.log('in toggle order: ', { sortBy });
 
 		switch (sortBy) {
-		case SortingOptions.NAME:
-			newSortBy = SortingOptions.NAME_REVERSE;
-			break;
-		case SortingOptions.NAME_REVERSE:
-			newSortBy = SortingOptions.NAME;
-			break;
-		case SortingOptions.DATE_MODIFIED:
-			newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
-			break;
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			newSortBy = SortingOptions.DATE_MODIFIED;
-			break;
-		case SortingOptions.DATE_CREATED:
-			newSortBy = SortingOptions.DATE_CREATED_REVERSE;
-			break;
-		case SortingOptions.DATE_CREATED_REVERSE:
-			newSortBy = SortingOptions.DATE_CREATED;
-			break;
-		default:
-			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
-			break;
+			case SortingOptions.NAME:
+				newSortBy = SortingOptions.NAME_REVERSE;
+				break;
+			case SortingOptions.NAME_REVERSE:
+				newSortBy = SortingOptions.NAME;
+				break;
+			case SortingOptions.DATE_MODIFIED:
+				newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
+				break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				newSortBy = SortingOptions.DATE_MODIFIED;
+				break;
+			case SortingOptions.DATE_CREATED:
+				newSortBy = SortingOptions.DATE_CREATED_REVERSE;
+				break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				newSortBy = SortingOptions.DATE_CREATED;
+				break;
+			default:
+				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				break;
 		}
 
 		console.log('in toggle order new sort: ', { newSortBy });
@@ -531,27 +527,27 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		let newSortBy;
 
 		switch (sortBy) {
-		case SortingOptions.NAME:
-			newSortBy = sortArrowUp ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
-			break;
-		case SortingOptions.NAME_REVERSE:
-			newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
-			break;
-		case SortingOptions.DATE_MODIFIED:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
-			break;
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
-			break;
-		case SortingOptions.DATE_CREATED:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
-			break;
-		case SortingOptions.DATE_CREATED_REVERSE:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
-			break;
-		default:
-			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
-			break;
+			case SortingOptions.NAME:
+				newSortBy = sortArrowUp ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
+				break;
+			case SortingOptions.NAME_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
+				break;
+			case SortingOptions.DATE_MODIFIED:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
+				break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
+				break;
+			case SortingOptions.DATE_CREATED:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
+				break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
+				break;
+			default:
+				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				break;
 		}
 
 		handleSortChange(newSortBy);
@@ -682,25 +678,25 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 											initialValue={includeCompleted}
 											onChange={(newValue) => {
 												setIncludeCompleted(newValue);
-											} } />
+											}} />
 									</div>
 								)}
 							</Menu.Item>
 							<Menu.Item>
 								{({ active }) => (
-									<a href='#'className={menuHoverActiveCss(active)}>
+									<a href='#' className={menuHoverActiveCss(active)}>
 										<Toggle
 											label={'Include Archived'}
 											initialValue={includeArchived}
 											onChange={(newValue) => {
 												setIncludeArchived(newValue);
-											} } />
+											}} />
 									</a>
 								)}
 							</Menu.Item>
 							<Menu.Item>
 								{({ active }) => (
-									<a href='#'className={menuHoverActiveCss(active)}>
+									<a href='#' className={menuHoverActiveCss(active)}>
 										TODO AnotherOption
 									</a>
 								)}
