@@ -6,9 +6,8 @@ metadata:
   labels:
     app: GLADOS
 spec:
+  clusterIP: None  # This makes the service headless
   selector:
     app: glados-mongodb
   ports:
-    - protocol: TCP
-      port: 0000
-      targetPort: 0000
+    - port: 27017

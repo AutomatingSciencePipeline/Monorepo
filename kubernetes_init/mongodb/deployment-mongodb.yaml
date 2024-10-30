@@ -1,50 +1,27 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  labels:
-    app: glados-mongodb
-  name: mongo
+  name: glados-mongo
+  namespace: mongodb
 spec:
-  replicas: 1
+  serviceName: "glados-service-mongodb"
+  replicas: 3
   selector:
     matchLabels:
       app: glados-mongodb
-  strategy: {}
   template:
     metadata:
       labels:
         app: glados-mongodb
     spec:
       containers:
-      - image: mongo
-        name: mongo
-        args: ["--dbpath","/data/db"]
-        livenessProbe:
-          exec:
-            command:
-              - mongosh
-              - --norc
-              - --quiet
-              - --eval
-              - "db.getMongo()"
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 6
-        readinessProbe:
-          exec:
-            command:
-              - mongosh
-              - --norc
-              - --quiet
-              - --eval
-              - "db.getMongo()"
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 6
+      - name: mongo
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /srv/data/db
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
           valueFrom:
@@ -56,11 +33,12 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
-        volumeMounts:
-        - name: "mongo-data-dir"
-          mountPath: "/data/db"
-      volumes:
-      - name: "mongo-data-dir"
-        persistentVolumeClaim:
-          claimName: "pvc"
-      nodeName: glados-db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: 
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi

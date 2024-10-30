@@ -54,6 +54,7 @@ export const listenToExperiments = async (
 
 	// Return function to close the change stream and client connection
 	return () => {
+		"use server";
 		changeStream.close();
 		client.close();
 	};
