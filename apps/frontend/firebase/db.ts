@@ -131,7 +131,7 @@ export interface ExperimentSubscribeCallback {
 
 export const subscribeToExp = (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
 	const unsubscribe = onSnapshot(doc(db, DB_COLLECTION_EXPERIMENTS, id), (doc) => {
-		console.log(`exp ${id} data updated: `, doc.data());
+		//console.log(`exp ${id} data updated: `, doc.data());
 		callback(doc.data() as Partial<ExperimentData>);
 	});
 	return unsubscribe;

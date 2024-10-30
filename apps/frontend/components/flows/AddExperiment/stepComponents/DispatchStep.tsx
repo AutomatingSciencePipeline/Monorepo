@@ -5,6 +5,7 @@ import { Group, Text } from '@mantine/core';
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
+import LinkDispatch from './LinkDispatch';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -15,7 +16,7 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, ...props }) => {
+export const DispatchStep = ({ id, form, file, isDefault, ...props }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -54,6 +55,8 @@ export const DispatchStep = ({ id, form, ...props }) => {
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
 
 	return (
+		<>
+		<LinkDispatch fileLink={file} isDefault={isDefault}/>
 		<Dropzone
 			onDrop={onDropFile}
 			onReject={(rejections) => {
@@ -96,5 +99,6 @@ export const DispatchStep = ({ id, form, ...props }) => {
 				</div>
 			</Group>
 		</Dropzone>
+		</>
 	);
 };

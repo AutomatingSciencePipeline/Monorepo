@@ -31,6 +31,7 @@ export const FormStates = {
 };
 
 const Steps = ({ steps }) => {
+
 	return (
 		<ol className='grow space-y-4 md:flex md:space-y-0 md:space-x-8'>
 			{steps.map((step) => (
@@ -64,7 +65,8 @@ const Steps = ({ steps }) => {
 	);
 };
 
-const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
+const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, setIsDefault, ...rest }) => {
+
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
@@ -116,7 +118,8 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 				}
 			});
 		}
-		else {
+		else if (isDefault) {
+			console.log("in handle default experiment")
 			handleDefaultExperiment();
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
@@ -141,6 +144,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 		});
 		setCopyId(null);
 		setStatus(FormStates.Info);
+		setFileLink(addNumsExpData.file)
 		console.log('Default Experiment Copied!');
 
 	
@@ -152,6 +156,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	const [open, setOpen] = useState(true);
 	const [status, setStatus] = useState(0);
+	const [fileLink, setFileLink] = useState('');
 	const [id, setId] = useState(null);
 
 	useLayoutEffect(() => {
@@ -221,7 +226,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form = {form} id={id} />
+										<DispatchStep form = {form} id={id} file={fileLink} isDefault={isDefault} />
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -249,6 +254,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 														() => {
 															localStorage.removeItem('ID');
 															setFormState(-1);
+															setIsDefault(false);
 														} :
 														() => {
 															setStatus(status - 1);
@@ -264,7 +270,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 														setFormState(-1);
 														localStorage.removeItem('ID');
 														setStatus(FormStates.Info);
-													} } :
+														setIsDefault(false);													} } :
 													{
 														type: 'button',
 														onClick: () => setStatus(status + 1),

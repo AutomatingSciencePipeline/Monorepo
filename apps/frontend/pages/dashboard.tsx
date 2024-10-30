@@ -234,6 +234,8 @@ export default function DashboardPage() {
 	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
+	const [isDefault, setIsDefault] = useState(false);
+
 	useEffect(() => {
 		if (formState === FormStates.Closed) {
 			setLabel('New Experiment');
@@ -245,11 +247,14 @@ export default function DashboardPage() {
 	const handleDefaultExperiment = () => {
 		setFormState(FormStates.Params);
 		setCopyId('AddNums');
+		setIsDefault(true);
 		<NewExperiment
 			formState={formState}
 			setFormState={setFormState}
 			copyID = {copyID}
 			setCopyId = {setCopyId}
+			isDefault = {isDefault}
+			setIsDefault = {setIsDefault}
 		/>
 	};
 
@@ -428,6 +433,8 @@ export default function DashboardPage() {
 						setFormState={setFormState}
 						copyID = {copyID}
 						setCopyId = {setCopyId}
+						isDefault={isDefault}
+						setIsDefault={setIsDefault}
 					/>
 				</div>
 			</div>
