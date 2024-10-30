@@ -46,24 +46,6 @@ if (process.env.NODE_ENV === 'development') {
 	clientPromise = client.connect();
 }
 
-export interface ExperimentSubscribeCallback {
-	(data: Partial<ExperimentData>): any;
-}
-
-// TODO: Convert from Firestore to MongoDB
-export const subscribeToExp = async (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
-	const db = client.db(DB_NAME);
-	const collection = db.collection(COLLECTION_EXPERIMENTS);
-	const changeStream = collection.watch();
-	changeStream.on('change', next => {
-		if (next.operationType === 'update' && next.documentKey._id.toString() === id)
-		{
-			const data = collection.findOne({ '_id': id as any }) as Partial<ExperimentData>;
-			callback(data);
-		}
-	});
-};
-
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;

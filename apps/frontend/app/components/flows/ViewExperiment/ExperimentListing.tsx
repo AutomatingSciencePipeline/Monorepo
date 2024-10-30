@@ -1,7 +1,8 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp, updateExperimentName, getCurrentProjectName } from '../../../../firebase/db';
+import { ExperimentDocumentId, updateExperimentName, getCurrentProjectName } from '../../../../firebase/db';
+import { subscribeToExp } from '../../../../lib/mongo_funcs';
 import { ExperimentData } from '../../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
