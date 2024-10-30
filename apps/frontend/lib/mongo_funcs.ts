@@ -24,10 +24,10 @@ export const subscribeToExp = async (id: ExperimentDocumentId, callback: Experim
 };
 
 
-export const listenToExperiments = async (
+export async function listenToExperiments(
 	uid: string,
 	callback: (experiments: Partial<ExperimentData>[]) => void
-) => {
+){
 	const client = await clientPromise;
 	const db = client.db(DB_NAME);
 	const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
