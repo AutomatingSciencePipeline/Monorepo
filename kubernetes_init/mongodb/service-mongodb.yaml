@@ -2,12 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: glados-service-mongodb
-  namespace: default
-  labels:
-    app: GLADOS
 spec:
-  clusterIP: None  # This makes the service headless
-  selector:
-    app: glados-mongodb
+  clusterIP: None  # This makes it a headless service
   ports:
     - port: 27017
+      targetPort: 27017
+  selector:
+    app: glados-mongodb
