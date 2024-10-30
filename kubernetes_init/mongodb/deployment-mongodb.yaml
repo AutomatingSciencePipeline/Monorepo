@@ -34,7 +34,7 @@ spec:
               key: MONGODB_PASSWORD
   volumeClaimTemplates:
   - metadata:
-      name: mongo-data
+      name: local-storage
     spec:
       accessModes: 
         - ReadWriteOnce
