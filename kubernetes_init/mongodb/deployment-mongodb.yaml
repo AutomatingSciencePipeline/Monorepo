@@ -1,28 +1,50 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: glados-mongo
-  namespace: mongodb
+  labels:
+    app: glados-mongodb
+  name: mongo
 spec:
-  serviceName: "glados-service-mongodb"
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: glados-mongodb
+  strategy: {}
   template:
     metadata:
       labels:
         app: glados-mongodb
     spec:
       containers:
-      - name: mongo
-        image: mongo:latest
-        command: ["mongod", "--replSet", "rs0", "--bind_ip", "0.0.0.0"]  # Enable replication
-        ports:
-        - containerPort: 27017
-        volumeMounts:
-        - name: local-storage
-          mountPath: /srv/data/db  # MongoDB default data directory is /data/db
+      - image: mongo
+        name: mongo
+        args: ["--dbpath","/data/db"]
+        livenessProbe:
+          exec:
+            command:
+              - mongosh
+              - --norc
+              - --quiet
+              - --eval
+              - "db.getMongo()"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+              - mongosh
+              - --norc
+              - --quiet
+              - --eval
+              - "db.getMongo()"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
           valueFrom:
@@ -34,12 +56,11 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
-  volumeClaimTemplates:
-  - metadata:
-      name: mongo-data
-    spec:
-      accessModes: 
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 5Gi
+        volumeMounts:
+        - name: "mongo-data-dir"
+          mountPath: "/data/db"
+      volumes:
+      - name: "mongo-data-dir"
+        persistentVolumeClaim:
+          claimName: "pvc"
+      nodeName: glados-db

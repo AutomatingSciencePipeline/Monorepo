@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mongo-pv-0
+  name: pv
 spec:
   storageClassName: local-storage
   accessModes:
@@ -11,37 +11,14 @@ spec:
   capacity:
     storage: 1Gi
   volumeMode: Filesystem
+  # local: # minikube only supports hostPath, so switch out "local" with "hostPath" and comment out the nodeAffinity while on minikube
   hostPath:
-    path: "/srv/data/mongo-1" # change to where it is locally (For minikube, may need to mount: https://stackoverflow.com/questions/63559779/kubernetes-minikube-persistent-volume-local-filesystem-storage-location)
----
-# kinda building off of this https://kubernetes.io/docs/concepts/storage/volumes/#local
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mongo-pv-1
-spec:
-  storageClassName: local-storage
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  capacity:
-    storage: 1Gi
-  volumeMode: Filesystem
-  hostPath:
-    path: "/srv/data/mongo-2" # change to where it is locally (For minikube, may need to mount: https://stackoverflow.com/questions/63559779/kubernetes-minikube-persistent-volume-local-filesystem-storage-location)
----
-# kinda building off of this https://kubernetes.io/docs/concepts/storage/volumes/#local
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mongo-pv-2
-spec:
-  storageClassName: local-storage
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  capacity:
-    storage: 1Gi
-  volumeMode: Filesystem
-  hostPath:
-    path: "/srv/data/mongo-3" # change to where it is locally (For minikube, may need to mount: https://stackoverflow.com/questions/63559779/kubernetes-minikube-persistent-volume-local-filesystem-storage-location)
+    path: "/srv/data/mongo" # change to where it is locally (For minikube, may need to mount: https://stackoverflow.com/questions/63559779/kubernetes-minikube-persistent-volume-local-filesystem-storage-location)
+  # nodeAffinity:
+  #   required:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/hostname
+  #         operator: In
+  #         values:
+  #         - example-node
