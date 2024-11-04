@@ -4,7 +4,7 @@ import { Group, Text } from '@mantine/core';
 
 import { useAuth } from '../../../../firebase/fbAuth';
 import { Upload, FileCode } from 'tabler-icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LinkDispatch from './LinkDispatch';
 
 const SUPPORTED_FILE_TYPES = {
@@ -16,9 +16,75 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, file, isDefault, ...props }) => {
+export const DispatchStep = ({ id, form, file, isDefault, uploadFile, ...props }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
+
+	async function handleHttpsRequest(url: string) {
+		try {
+		  const response = await fetch(url);
+		  
+		  if (!response.ok) {
+			throw new Error(`HTTP error! Status: ${response.status}`);
+		  }
+	  
+		  const fileContent = await response.text(); // Read the file content as text
+	  
+		  // Now you have the file content; you can process it as needed.
+		  console.log("File Content:", fileContent);
+
+		} catch (error) {
+			console.error("Error fetching file:", error);
+		}
+
+	}
+
+	useEffect(() => {
+		setLoading(true);
+		console.log("handling link upload");
+
+		async function fetchLink() {
+			// You can await here
+			const response = await handleHttpsRequest(file);
+			// ...
+			return response;
+		}
+		  let fileData = fetchLink();
+
+		  console.log("resulting file data:")
+		  console.log(fileData);
+
+		//   submitExperiment(form.values, userId as string).then(async (expId) => {
+		// 	console.log(`Uploading file for ${expId}:`, files);
+		// 	const uploadResponse = await uploadExec(expId, files[0]);
+		// 	if (uploadResponse) {
+		// 		console.log(`Handing experiment ${expId} to the backend`);
+		// 		const response = await fetch(`/api/experiments/${expId}`, {
+		// 			method: 'POST',
+		// 			headers: new Headers({ 'Content-Type': 'application/json' }),
+		// 			credentials: 'same-origin',
+		// 			body: JSON.stringify({ id: expId }),
+		// 		});
+		// 		if (response.ok) {
+		// 			console.log('Response from backend received', response);
+		// 		} else {
+		// 			const responseText = await response.text();
+		// 			console.log('Upload failed', responseText, response);
+		// 			throw new Error(`Upload failed: ${response.status}: ${responseText}`);
+		// 		}
+		// 	} else {
+		// 		throw new Error('Failed to upload experiment file to the backend server, is it running?');
+		// 	}
+		// }).catch((error) => {
+		// 	console.log('Error uploading experiment: ', error);
+		// 	alert(`Error uploading experiment: ${error.message}`);
+		// }).finally(() => {
+		// 	setLoading(false);
+		// });
+
+		
+
+	}, [uploadFile]);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
@@ -57,7 +123,7 @@ export const DispatchStep = ({ id, form, file, isDefault, ...props }) => {
 	return (
 		<>
 		<LinkDispatch fileLink={file} isDefault={isDefault}/>
-		<Dropzone
+		{!isDefault && <Dropzone
 			onDrop={onDropFile}
 			onReject={(rejections) => {
 				console.log('File rejection details', rejections);
@@ -98,7 +164,7 @@ export const DispatchStep = ({ id, form, file, isDefault, ...props }) => {
 					</Text>
 				</div>
 			</Group>
-		</Dropzone>
+		</Dropzone>}
 		</>
 	);
 };

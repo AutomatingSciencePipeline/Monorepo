@@ -1,4 +1,4 @@
-import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
+import { Fragment, useState, useLayoutEffect, useEffect, use } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
@@ -14,7 +14,7 @@ import { ParamStep } from './stepComponents/ParamStep';
 import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
-import { DB_COLLECTION_EXPERIMENTS } from '../../../firebase/db';
+import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../firebase/db';
 import { addNumsExpData } from '../RunDefaultExperiment/DefaultExperimentJSONs/AddNumsDefaultExperiment';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
@@ -147,6 +147,9 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 		setFileLink(addNumsExpData.file)
 		console.log('Default Experiment Copied!');
 
+		//check if the file exists in the database
+		
+
 	
 	};
 
@@ -158,6 +161,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 	const [status, setStatus] = useState(0);
 	const [fileLink, setFileLink] = useState('');
 	const [id, setId] = useState(null);
+	const [uploadFile, setUploadFile] = useState(false);
 
 	useLayoutEffect(() => {
 		if (formState === FormStates.Info) {
@@ -226,7 +230,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form = {form} id={id} file={fileLink} isDefault={isDefault} />
+										<DispatchStep form = {form} id={id} file={fileLink} isDefault={isDefault} uploadFile={uploadFile}/>
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -270,7 +274,14 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 														setFormState(-1);
 														localStorage.removeItem('ID');
 														setStatus(FormStates.Info);
-														setIsDefault(false);													} } :
+
+														if(isDefault) {
+															// handleHttpsRequest(fileLink);
+															setUploadFile(true);
+														}
+														setIsDefault(false);
+														setUploadFile(false);
+												} 	} :
 													{
 														type: 'button',
 														onClick: () => setStatus(status + 1),
@@ -291,3 +302,5 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 };
 
 export default NewExperiment;
+
+
