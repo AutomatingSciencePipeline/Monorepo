@@ -1,9 +1,11 @@
+'use client'
+
 import { joiResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AiOutlineGithub, AiOutlineGoogle, AiOutlineTwitter } from 'react-icons/ai';
-import { useAuth } from '../../firebase/fbAuth';
-import { signUpSchema } from '../../utils/validators';
+import { useAuth } from '../../../firebase/fbAuth';
+import { signUpSchema } from '../../../utils/validators';
 
 export const SignUpModal = ({ afterSignUp }) => {
 	const form = useForm({

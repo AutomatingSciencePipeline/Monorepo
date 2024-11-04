@@ -1,3 +1,5 @@
+'use client'
+
 import { Code } from '@mantine/core';
 
 export const ConfirmationStep = ({ form, ...props }) => {

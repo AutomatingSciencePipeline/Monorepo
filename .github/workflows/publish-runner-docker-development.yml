@@ -11,6 +11,8 @@ name: Publish Dev Runner Docker image
 
 on:
   push:
+    paths:
+      - 'apps/runner/**'
     branches: ['development']
 
 env:

@@ -52,7 +52,7 @@ def upload_experiment_zip(experiment: ExperimentData, encoded: Binary):
         "experimentId": experiment.expId,
         "encoded": base64.b64encode(encoded).decode("utf-8")
     } 
-    _callBackend(url, payload, "inserted result csv into mongodb with id")
+    _callBackend(url, payload, "inserted zip into mongodb with id")
 
 def upload_experiment_log(experimentId: DocumentId):
     filePath = get_filepath_for_experiment_log(experimentId)

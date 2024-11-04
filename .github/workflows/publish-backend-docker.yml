@@ -11,6 +11,8 @@ name: Publish Production Backend Docker image
 
 on:
   push:
+    paths:
+      - 'apps/backend/**'
     branches: ['main']
 
 env:

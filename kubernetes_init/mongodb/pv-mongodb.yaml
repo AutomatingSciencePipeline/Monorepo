@@ -13,7 +13,7 @@ spec:
   volumeMode: Filesystem
   # local: # minikube only supports hostPath, so switch out "local" with "hostPath" and comment out the nodeAffinity while on minikube
   hostPath:
-    path: "/data/mongo" # change to where it is locally (For minikube, may need to mount: https://stackoverflow.com/questions/63559779/kubernetes-minikube-persistent-volume-local-filesystem-storage-location)
+    path: "/srv/data/mongo" # change to where it is locally (For minikube, may need to mount: https://stackoverflow.com/questions/63559779/kubernetes-minikube-persistent-volume-local-filesystem-storage-location)
   # nodeAffinity:
   #   required:
   #     nodeSelectorTerms:

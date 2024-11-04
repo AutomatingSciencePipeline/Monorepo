@@ -11,6 +11,8 @@ name: Publish Production Runner Docker image
 
 on:
   push:
+    paths:
+      - 'apps/runner/**'
     branches: ['main']
 
 env:

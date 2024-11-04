@@ -1,6 +1,8 @@
+'use client'
+
 import Link from 'next/link';
 import Router from 'next/router';
-import { useAuth } from '../../firebase/fbAuth';
+import { useAuth } from '../../../firebase/fbAuth';
 
 export interface AlreadySignedInModalProps {
 	continueButtonMessage: string,

@@ -18,6 +18,7 @@ spec:
       containers:
       - name: container-test-frontend
         image: gladospipeline/glados-frontend:main
+        imagePullPolicy: Always
         ports:
         - containerPort: 0000
           # hostPort: 0000

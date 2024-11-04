@@ -1,8 +1,10 @@
+'use client'
+
 import { joiResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAuth } from '../../firebase/fbAuth';
-import { emailSchema, signInSchema } from '../../utils/validators';
+import { useAuth } from '../../../firebase/fbAuth';
+import { emailSchema, signInSchema } from '../../../utils/validators';
 
 export const DEFAULT_SIGN_IN_TEXT = 'Sign in';
 export const SIGN_IN_LOADING_TEXT = 'Loading...';

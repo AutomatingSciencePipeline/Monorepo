@@ -11,6 +11,8 @@ name: Publish Dev Backend Docker image
 
 on:
   push:
+    paths:
+      - 'apps/backend/**'
     branches: ['development']
 
 env:

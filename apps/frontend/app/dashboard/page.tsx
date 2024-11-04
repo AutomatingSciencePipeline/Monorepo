@@ -1,7 +1,9 @@
+'use client'
+
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
-import { useAuth } from '../firebase/fbAuth';
-import { deleteExperiment } from '../firebase/db';
-import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../firebase/db';
+import { useAuth } from '../../firebase/fbAuth';
+import { deleteExperiment } from '../../firebase/db';
+import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -19,9 +21,9 @@ import classNames from 'classnames';
 import Image from 'next/image';
 import { SearchBar } from '../components/SearchBar';
 import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
-import { ExperimentData } from '../firebase/db_types';
+import { ExperimentData } from '../../firebase/db_types';
 import { Toggle } from '../components/Toggle';
-import { QueueResponse } from './api/queue';
+import { QueueResponse } from '../../pages/api/queue';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
