@@ -1,4 +1,4 @@
-import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS, COLLECTION_EXPERIMENT_FILES } from '../../../lib/mongodb';
+import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS } from '../../../lib/mongodb';
 import { NextApiHandler } from 'next';
 import { GridFSBucket } from 'mongodb';
 import { Readable } from 'stream';

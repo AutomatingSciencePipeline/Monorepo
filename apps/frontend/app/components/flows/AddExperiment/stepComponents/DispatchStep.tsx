@@ -21,6 +21,8 @@ const SUPPORTED_FILE_TYPES = {
 export const DispatchStep = ({ id, form, file, isDefault, uploadFile, ...props }) => {
 	const { userId } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
+	const [fileData, setFileData] = useState<string>("");
+	const [canUpload, setCanUpload] = useState<boolean>(false);
 
 	async function handleHttpsRequest(url: string) {
 		try {
@@ -33,7 +35,7 @@ export const DispatchStep = ({ id, form, file, isDefault, uploadFile, ...props }
 		  const fileContent = await response.text(); // Read the file content as text
 	  
 		  // Now you have the file content; you can process it as needed.
-		  console.log("File Content:", fileContent);
+		  //console.log("File Content:", fileContent);
 
 		} catch (error) {
 			console.error("Error fetching file:", error);
@@ -51,42 +53,70 @@ export const DispatchStep = ({ id, form, file, isDefault, uploadFile, ...props }
 			// ...
 			return response;
 		}
-		  let fileData = fetchLink();
+		const fileData = fetchLink();
 
-		  console.log("resulting file data:")
-		  console.log(fileData);
-
-		//   submitExperiment(form.values, userId as string).then(async (expId) => {
-		// 	console.log(`Uploading file for ${expId}:`, files);
-		// 	const uploadResponse = await uploadExec(expId, files[0]);
-		// 	if (uploadResponse) {
-		// 		console.log(`Handing experiment ${expId} to the backend`);
-		// 		const response = await fetch(`/api/experiments/${expId}`, {
-		// 			method: 'POST',
-		// 			headers: new Headers({ 'Content-Type': 'application/json' }),
-		// 			credentials: 'same-origin',
-		// 			body: JSON.stringify({ id: expId }),
-		// 		});
-		// 		if (response.ok) {
-		// 			console.log('Response from backend received', response);
-		// 		} else {
-		// 			const responseText = await response.text();
-		// 			console.log('Upload failed', responseText, response);
-		// 			throw new Error(`Upload failed: ${response.status}: ${responseText}`);
-		// 		}
-		// 	} else {
-		// 		throw new Error('Failed to upload experiment file to the backend server, is it running?');
-		// 	}
-		// }).catch((error) => {
-		// 	console.log('Error uploading experiment: ', error);
-		// 	alert(`Error uploading experiment: ${error.message}`);
-		// }).finally(() => {
-		// 	setLoading(false);
-		// });
-
-		
-
+		console.log("resulting file data:")
+		//console.log(fileData);
+		setFileData(fileData?.toString());
+		setCanUpload(true);
+		setLoading(false);
 	}, [uploadFile]);
+
+	useEffect(() => {
+
+		if(canUpload) {
+			try {
+				console.log("in default link upload");
+				const fileBase64 = Buffer.from(fileData).toString('base64');
+				console.log("file base64:", fileBase64);
+	
+				setLoading(true);
+				console.log('Submitting Experiment from link');
+				submitExperiment(form.values, userId as string).then(async (expId) => {
+					console.log(`Uploading file for ${expId}:`);
+					const uploadResponse = await fetch('/api/files/uploadFile', {
+						method: 'POST',
+						headers: new Headers({ 'Content-Type': 'application/json' }),
+						credentials: 'same-origin',
+						body: JSON.stringify({
+							"fileToUpload": fileBase64,
+							"experimentId": expId
+						})
+					});
+					if (uploadResponse) {
+						console.log(`Handing experiment ${expId} to the backend`);
+						const response = await fetch(`/api/experiments/${expId}`, {
+							method: 'POST',
+							headers: new Headers({ 'Content-Type': 'application/json' }),
+							credentials: 'same-origin',
+							body: JSON.stringify({ id: expId }),
+						});
+						if (response.ok) {
+							console.log('Response from backend received', response);
+						} else {
+							const responseText = await response.text();
+							console.log('Upload from link failed', responseText, response);
+							throw new Error(`Upload from link failed: ${response.status}: ${responseText}`);
+						}
+					} else {
+						throw new Error('Failed to upload experiment file from link to the backend server, is it running?');
+					}
+				}).catch((error) => {
+					console.log('Error uploading experiment from link: ', error);
+					alert(`Error uploading experiment from link: ${error.message}`);
+				}).finally(() => {
+					setLoading(false);
+				});
+			}
+			catch (error) {
+				console.error("Error fetching file data from link:", error);
+			}
+			
+			setCanUpload(false);
+
+		}
+		
+	}, [canUpload]);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
