@@ -7,6 +7,10 @@ export const dynamic = "force-dynamic";
 export default async function handler(req, res) {
     const { uid } = req.query;
 
+    if (!uid){
+        return;
+    }
+
     // Connect to MongoDB
     const client = await clientPromise;
     const db = client.db(DB_NAME);
