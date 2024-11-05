@@ -204,11 +204,21 @@ export default function DashboardPage() {
 
 		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
 
+		eventSource.onopen = () => {
+			console.log("SSE open!");
+		}
+
 		eventSource.onmessage = (event) => {
 			console.log("received change!");
-			setExperiments(JSON.parse(event.data));
+			console.log("data was:" + event.data);
+			if (!JSON.parse(event.data).toString().contains("heartbeat")) {
+				setExperiments(JSON.parse(event.data) as ExperimentData[]);
+			}
 		}
-		
+
+		eventSource.onerror = (event) => {
+			console.error('SSE Error:', event);
+		};
 
 		return () => eventSource.close();
 
