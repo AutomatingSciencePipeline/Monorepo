@@ -4,11 +4,6 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "./mongodb";
 import { ExperimentData } from "../firebase/db_types"; // Adjust the path
 import { ChangeStream, Document, WithId } from "mongodb";
 
-// This callback will be triggered with all experiments for the given user
-export interface ExperimentSubscribeCallback {
-  (data: ExperimentData[]): void;  // Full list of ExperimentData objects for the user
-}
-
 // Function to listen to all experiments for a specific user and get the latest data every time there's a change
 export async function fetchExperiments(
   uid: string // User ID to filter experiments by

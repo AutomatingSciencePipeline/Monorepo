@@ -196,7 +196,9 @@ export default function DashboardPage() {
 
 		//Initial get of experiments
 		async () => {
-			setExperiments(await fetchExperiments(userId));
+			var experiments = await fetchExperiments(userId);
+			console.log(experiments);
+			setExperiments(experiments);
 		}
 		
 
