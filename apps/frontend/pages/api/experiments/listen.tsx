@@ -31,14 +31,14 @@ export default async function handler(req, res) {
         const HEARTBEAT_INTERVAL = 5000; // 5 seconds (adjust this as needed)
         const intervalId = setInterval(() => {
             // Send a heartbeat message to keep the connection alive
-            res.write(': heartbeat\n\n');
+            writer.write(encoder.encode(': heartbeat'));
         }, HEARTBEAT_INTERVAL);
 
         const initDocs = await experimentsCollection
             .find({ 'creator': uid })
             .toArray();
         const initArray = convertToExpsArray(initDocs);
-        writer.write(encoder.encode(JSON.stringify(`data: ${initArray}`)))
+        writer.write(encoder.encode(JSON.stringify(`data: ${initArray}`)));
         // res.write(`data: ${JSON.stringify(initArray)}\n\n`);
 
         // Listen to changes in the collection
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             const result = convertToExpsArray(updatedDocuments);
             // Send the updated experiments to the client
             // res.write(`data: ${JSON.stringify(result)}\n\n`);
-            writer.write(encoder.encode(JSON.stringify(`data: ${updatedDocuments}`)))
+            writer.write(encoder.encode(JSON.stringify(`data: ${updatedDocuments}`)));
         });
 
         // Close the change stream and client connection when the request ends
