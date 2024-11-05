@@ -18,13 +18,10 @@ export default async function handler(req, res) {
         const changeStream = experimentsCollection.watch(pipeline, options);
 
         // Set up real-time streaming of changes to the client using SSE
-        res.set({
-            "Access-Control-Allow-Origin": "*",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive", // allowing TCP connection to remain open for multiple HTTP requests/responses
-            "Content-Type": "text/event-stream", // media type for Server Sent Events (SSE)
-        });
-        res.flushHeaders();
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+        res.setHeader("Content-Type", "text/event-stream");
 
         const initDocs = await experimentsCollection
             .find({ creator: uid })
@@ -53,7 +50,7 @@ export default async function handler(req, res) {
     }
 }
 
-function convertToExpsArray(arr){
+function convertToExpsArray(arr) {
     return arr.map((doc: WithId<Document>) => ({
         id: doc._id.toString(),
         name: doc.name || "Untitled",
