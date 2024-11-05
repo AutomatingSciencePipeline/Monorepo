@@ -194,17 +194,31 @@ export default function DashboardPage() {
 		// listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 		// console.log(experiments);
 
-		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
+		const fetchInitialExperiments = async () => {
+			// Fetch the initial set of experiments from the server
+			const response = await fetch(`/api/experiments?uid=${uid}`);
+			const initialExperiments = await response.json();
+			setExperiments(initialExperiments);
+		};
+
+		const eventSource = new EventSource(`/api/experiments?uid=${uid}`);
+
+		// Set up an event listener to update experiments in real-time
 		eventSource.onmessage = (event) => {
 			const updatedExperiments = JSON.parse(event.data);
 			setExperiments(updatedExperiments);
 		};
 
+		// Error handling
 		eventSource.onerror = (err) => {
 			console.error("Error with SSE:", err);
 			eventSource.close();
 		};
 
+		// Fetch initial experiments when the component mounts
+		fetchInitialExperiments();
+
+		// Cleanup when the component unmounts
 		return () => {
 			eventSource.close();
 		};
