@@ -26,7 +26,8 @@ mongoClient = pymongo.MongoClient(
     username=str(os.getenv("MONGODB_USERNAME")),
     password=str(os.getenv("MONGODB_PASSWORD")),
     authMechanism='SCRAM-SHA-256',
-    serverSelectionTimeoutMS=1000
+    serverSelectionTimeoutMS=1000,
+    replicaSet='rs0'
 )
 # connect to the glados database
 gladosDB = mongoClient["gladosdb"]
