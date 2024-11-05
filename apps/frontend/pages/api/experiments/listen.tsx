@@ -27,6 +27,7 @@ export default async function handler(req, res) {
         res.setHeader("Cache-Control", "no-cache");
         res.setHeader("Connection", "keep-alive");
         res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("X-Accel-Buffering", "no")
 
         const HEARTBEAT_INTERVAL = 2000; // 2 seconds (adjust this as needed)
         const intervalId = setInterval(() => {
