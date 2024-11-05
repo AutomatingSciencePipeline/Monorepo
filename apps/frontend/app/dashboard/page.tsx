@@ -190,15 +190,23 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		// console.log("getting exps");
+		console.log("getting exps");
 		// listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 		// console.log(experiments);
 
 		//Initial get of experiments
 		async () => {
 			var experiments = await fetchExperiments(userId);
+			console.log("experiments are")
 			console.log(experiments);
 			setExperiments(experiments);
+		}
+
+		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
+
+		eventSource.onmessage = (event) => {
+			console.log("received change!");
+			setExperiments(JSON.parse(event.data));
 		}
 		
 
