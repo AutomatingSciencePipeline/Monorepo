@@ -1,9 +1,6 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
 
-export const runtime = 'nodejs';
-export const dynamic = "force-dynamic";
-
 export default async function handler(req, res) {
     const { uid } = req.query;
 
