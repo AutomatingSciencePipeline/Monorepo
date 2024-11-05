@@ -196,12 +196,12 @@ export default function DashboardPage() {
 
 		const fetchInitialExperiments = async () => {
 			// Fetch the initial set of experiments from the server
-			const response = await fetch(`/api/experiments?uid=${userId}`);
+			const response = await fetch(`/api/experiments/listen?uid=${userId}`);
 			const initialExperiments = await response.json();
 			setExperiments(initialExperiments);
 		};
 
-		const eventSource = new EventSource(`/api/experiments?uid=${userId}`);
+		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
 
 		// Set up an event listener to update experiments in real-time
 		eventSource.onmessage = (event) => {
