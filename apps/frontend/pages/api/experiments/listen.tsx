@@ -1,7 +1,5 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
-import { ExperimentData } from "../../../firebase/db_types";
-import { ChangeStream, WithId, Document } from "mongodb";
-import { array } from "joi";
+import { WithId, Document } from "mongodb";
 
 export default async function handler(req, res) {
     const { uid } = req.query;
@@ -24,7 +22,7 @@ export default async function handler(req, res) {
         res.setHeader("Content-Type", "text/event-stream");
 
         const initDocs = await experimentsCollection
-            .find({ creator: uid })
+            .find({ 'creator': uid })
             .toArray();
         const initArray = convertToExpsArray(initDocs);
         res.write(`data: ${JSON.stringify(initArray)}\n\n`);
@@ -32,7 +30,7 @@ export default async function handler(req, res) {
         // Listen to changes in the collection
         changeStream.on("change", async () => {
             const updatedDocuments = await experimentsCollection
-                .find({ creator: uid })
+                .find({ 'creator': uid })
                 .toArray();
 
             const result = convertToExpsArray(updatedDocuments);
