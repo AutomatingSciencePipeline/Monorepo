@@ -64,7 +64,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			const eventSource = new EventSource(`/api/experiments/listen?uid=${project.expId}`);
+			const eventSource = new EventSource(`/api/experiments/subscribe?expId=${project.expId}`);
 			eventSource.onmessage = (event) => {
 				console.log("received change!");
 				setProject(JSON.parse(event.data) as ExperimentData);
