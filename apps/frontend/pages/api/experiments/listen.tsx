@@ -56,7 +56,6 @@ export default async function handler(req, res) {
         // Close the change stream and client connection when the request ends
         req.socket.on("close", () => {
             changeStream.close();
-            client.close();
             clearInterval(intervalId);
             res.end()
         });
