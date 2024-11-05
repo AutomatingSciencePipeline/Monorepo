@@ -203,6 +203,7 @@ export default function DashboardPage() {
 		// }
 
 		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
+		console.log(eventSource);
 
 		eventSource.onopen = () => {
 			console.log("SSE open!");

@@ -52,6 +52,7 @@ export default async function handler(req, res) {
         // res.write(`data: ${JSON.stringify(result)}\n\n`);
         writer.write(encoder.encode(JSON.stringify(`data: ${updatedDocuments}`)));
     });
+    res.end();
 
     // Close the change stream and client connection when the request ends
     req.socket.on("close", () => {
