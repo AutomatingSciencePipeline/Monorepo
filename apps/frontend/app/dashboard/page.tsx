@@ -4,7 +4,7 @@ import NewExperiment, { FormStates } from '../components/flows/AddExperiment/New
 import { useAuth } from '../../firebase/fbAuth';
 import { deleteExperiment } from '../../firebase/db';
 import { downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
-import { listenToExperiments } from '../../lib/mongo_funcs';
+import { fetchExperiments } from '../../lib/mongo_funcs';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -194,25 +194,11 @@ export default function DashboardPage() {
 		// listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 		// console.log(experiments);
 
-		// Subscribe to all experiments for the given user (uid)
-		const subscribe = async () => {
-			const unsubscribe = await listenToExperiments(userId, (updatedExperiments: ExperimentData[]) => {
-				setExperiments(updatedExperiments);  // Update the state with the latest list of experiments
-			});
-
-			// Cleanup the listener when the component unmounts or uid changes
-			return unsubscribe; // Make sure the cleanup function is returned
-		};
-
-		// Start the subscription and await the result (cleanup function)
-		subscribe();
-
-		// Cleanup on unmount or when `uid` changes
-		return () => {
-			// In case you need to await unsubscribe explicitly
-			// (cleanup function returned from listenToExperiments)
-			subscribe().then((unsubscribe) => unsubscribe());
-		};
+		//Initial get of experiments
+		async () => {
+			setExperiments(await fetchExperiments(userId));
+		}
+		
 
 	}, [userId]);
 
