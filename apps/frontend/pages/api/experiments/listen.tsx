@@ -27,10 +27,34 @@ export default async function handler(req, res) {
                 .find({ creator: uid })
                 .toArray();
 
-            const result = updatedDocuments.map((doc: WithId<Document>) => {
-                const { _id, ...rest } = doc;
-                return { id: _id.toString(), ...rest } as Partial<ExperimentData>;
-            });
+            const result = updatedDocuments.map((doc: WithId<Document>) => ({
+                id: doc._id.toString(),
+                name: doc.name || "Untitled",
+                creator: doc.creator || "Unknown",
+                description: doc.description || "No description",
+                verbose: doc.verbose ?? false,
+                workers: doc.workers ?? 0,
+                expId: doc.expId || "",
+                trialExtraFile: doc.trialExtraFile || "",
+                trialResult: doc.trialResult || "",
+                timeout: doc.timeout ?? 0,
+                keepLogs: doc.keepLogs ?? false,
+                scatter: doc.scatter ?? false,
+                scatterIndVar: doc.scatterIndVar || "",
+                scatterDepVar: doc.scatterDepVar || "",
+                dumbTextArea: doc.dumbTextArea || "",
+                created: doc.created?.toString() || "0",
+                hyperparameters: doc.hyperparameters ?? {},
+                finished: doc.finished ?? false,
+                estimatedTotalTimeMinutes: doc.estimatedTotalTimeMinutes ?? 0,
+                expToRun: doc.expToRun ?? 0,
+                file: doc.file || "",
+                startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
+                finishedAtEpochMilliseconds: doc.finishedAtEpochMilliseconds ?? 0,
+                passes: doc.passes ?? 0,
+                fails: doc.fails ?? 0,
+                totalExperimentRuns: doc.totalExperimentRuns ?? 0,
+              }));
 
             // Send the updated experiments to the client
             res.write(`data: ${JSON.stringify(result)}\n\n`);
