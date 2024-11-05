@@ -1,12 +1,17 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
 
+export const runtime = 'nodejs';
 export const dynamic = "force-dynamic";
 
 export default async function handler(req, res) {
     const { uid } = req.query;
 
     if (req.method === "GET") {
+        let responseStream = new TransformStream();
+        const writer = responseStream.writable.getWriter();
+        const encoder = new TextEncoder();
+
         // Connect to MongoDB
         const client = await clientPromise;
         const db = client.db(DB_NAME);
@@ -33,7 +38,8 @@ export default async function handler(req, res) {
             .find({ 'creator': uid })
             .toArray();
         const initArray = convertToExpsArray(initDocs);
-        res.write(`data: ${JSON.stringify(initArray)}\n\n`);
+        writer.write(encoder.encode(JSON.stringify(`data: ${initArray}`)))
+        // res.write(`data: ${JSON.stringify(initArray)}\n\n`);
 
         // Listen to changes in the collection
         changeStream.on("change", async () => {
@@ -43,7 +49,8 @@ export default async function handler(req, res) {
 
             const result = convertToExpsArray(updatedDocuments);
             // Send the updated experiments to the client
-            res.write(`data: ${JSON.stringify(result)}\n\n`);
+            // res.write(`data: ${JSON.stringify(result)}\n\n`);
+            writer.write(encoder.encode(JSON.stringify(`data: ${updatedDocuments}`)))
         });
 
         // Close the change stream and client connection when the request ends
@@ -52,6 +59,14 @@ export default async function handler(req, res) {
             client.close();
             clearInterval(intervalId);
             res.end()
+        });
+
+        return new Response(responseStream.readable, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                Connection: 'keep-alive',
+                'Cache-Control': 'no-cache, no-transform',
+            },
         });
     } else {
         res.status(405).json({ message: "Method Not Allowed" });
