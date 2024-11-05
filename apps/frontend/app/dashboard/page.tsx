@@ -194,33 +194,24 @@ export default function DashboardPage() {
 		// listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 		// console.log(experiments);
 
-		const fetchInitialExperiments = async () => {
-			// Fetch the initial set of experiments from the server
-			const response = await fetch(`/api/experiments/listen?uid=${userId}`);
-			const initialExperiments = await response.json();
-			setExperiments(initialExperiments);
+		// Subscribe to all experiments for the given user (uid)
+		const subscribe = async () => {
+			const unsubscribe = await listenToExperiments(userId, (updatedExperiments: ExperimentData[]) => {
+				setExperiments(updatedExperiments);  // Update the state with the latest list of experiments
+			});
+
+			// Cleanup the listener when the component unmounts or uid changes
+			return unsubscribe; // Make sure the cleanup function is returned
 		};
 
-		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
+		// Start the subscription and await the result (cleanup function)
+		subscribe();
 
-		// Set up an event listener to update experiments in real-time
-		eventSource.onmessage = (event) => {
-			const updatedExperiments = JSON.parse(event.data);
-			setExperiments(updatedExperiments);
-		};
-
-		// Error handling
-		eventSource.onerror = (err) => {
-			console.error("Error with SSE:", err);
-			eventSource.close();
-		};
-
-		// Fetch initial experiments when the component mounts
-		fetchInitialExperiments();
-
-		// Cleanup when the component unmounts
+		// Cleanup on unmount or when `uid` changes
 		return () => {
-			eventSource.close();
+			// In case you need to await unsubscribe explicitly
+			// (cleanup function returned from listenToExperiments)
+			subscribe().then((unsubscribe) => unsubscribe());
 		};
 
 	}, [userId]);

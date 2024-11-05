@@ -1,64 +1,106 @@
 'use server'
-import { ExperimentDocumentId } from "../firebase/db";
-import { ExperimentData } from "../firebase/db_types";
-import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "./mongodb";
-import { ChangeStream, WithId, Document } from "mongodb";
 
+import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "./mongodb";
+import { ExperimentData } from "../firebase/db_types"; // Adjust the path
+import { ChangeStream, Document, WithId } from "mongodb";
+
+// This callback will be triggered with all experiments for the given user
 export interface ExperimentSubscribeCallback {
-	(data: Partial<ExperimentData>): any;
+  (data: ExperimentData[]): void;  // Full list of ExperimentData objects for the user
 }
 
-// TODO: Convert from Firestore to MongoDB
-export const subscribeToExp = async (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
-	"use server";
-    const client = await clientPromise;
-	const db = client.db(DB_NAME);
-	const collection = db.collection(COLLECTION_EXPERIMENTS);
-	const changeStream = collection.watch();
-	changeStream.on('change', next => {
-		if (next.operationType === 'update' && next.documentKey._id.toString() === id)
-		{
-			const data = collection.findOne({ '_id': id as any }) as Partial<ExperimentData>;
-			callback(data);
-		}
-	});
-};
-
-
+// Function to listen to all experiments for a specific user and get the latest data every time there's a change
 export async function listenToExperiments(
-	uid: string,
-	callback: (experiments: Partial<ExperimentData>[]) => void
-){
-	"use server";
-	const client = await clientPromise;
-	const db = client.db(DB_NAME);
-	const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
+  uid: string, // User ID to filter experiments by
+  callback: ExperimentSubscribeCallback
+) {
+  const client = await clientPromise;
+  const db = client.db(DB_NAME);
+  const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
-	// Match documents where 'creator' field equals 'uid'
-	const pipeline = [{ $match: { "fullDocument.creator": uid } }];
+  // Fetch all experiments for the given user ID (creator field matches uid) on initial load
+  const userExperiments = await experimentsCollection
+    .find({ creator: uid })  // Filter experiments by user ID (creator)
+    .toArray();
 
-	// Listen to changes in the experiments collection
-	const changeStream: ChangeStream = experimentsCollection.watch(pipeline);
+  // Map the initial experiments to the correct format
+  const experimentsData: ExperimentData[] = userExperiments.map((doc: WithId<Document>) => ({
+    id: doc._id.toString(),
+    name: doc.name || "Untitled",
+    creator: doc.creator || "Unknown",
+    description: doc.description || "No description",
+    verbose: doc.verbose ?? false,
+    workers: doc.workers ?? 0,
+    expId: doc.expId || "",
+    trialExtraFile: doc.trialExtraFile || "",
+    trialResult: doc.trialResult || "",
+    timeout: doc.timeout ?? 0,
+    keepLogs: doc.keepLogs ?? false,
+    scatter: doc.scatter ?? false,
+    scatterIndVar: doc.scatterIndVar || "",
+    scatterDepVar: doc.scatterDepVar || "",
+    dumbTextArea: doc.dumbTextArea || "",
+    created: doc.created?.toString() || "0",
+    hyperparameters: doc.hyperparameters ?? {},
+    finished: doc.finished ?? false,
+    estimatedTotalTimeMinutes: doc.estimatedTotalTimeMinutes ?? 0,
+    expToRun: doc.expToRun ?? 0,
+    file: doc.file || "",
+    startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
+    finishedAtEpochMilliseconds: doc.finishedAtEpochMilliseconds ?? 0,
+    passes: doc.passes ?? 0,
+    fails: doc.fails ?? 0,
+    totalExperimentRuns: doc.totalExperimentRuns ?? 0,
+  }));
 
-	changeStream.on("change", async () => {
-		const updatedDocuments = await experimentsCollection
-			.find({ creator: uid })
-			.toArray();
+  // Trigger the callback with the initial set of experiments
+  callback(experimentsData);
 
-		// Map documents to Partial<ExperimentData>[]
-		const result: Partial<ExperimentData>[] = updatedDocuments.map((doc: WithId<Document>) => {
-			const { _id, ...rest } = doc;
-			return { id: _id.toString(), ...rest } as Partial<ExperimentData>;
-		});
+  // Listen for changes in the experiments collection (insert, update, delete)
+  const changeStream: ChangeStream = experimentsCollection.watch();
 
-		callback(result);
-	});
+  changeStream.on("change", async () => {
+    // Fetch all experiments for the given user ID (creator field matches uid)
+    const updatedUserExperiments = await experimentsCollection
+      .find({ creator: uid })
+      .toArray();
 
-	// Return function to close the change stream and client connection
-	return async () => {
-		"use server";
-		changeStream.close();
-		client.close();
-	};
-};
+    const updatedExperimentsData: ExperimentData[] = updatedUserExperiments.map((doc: WithId<Document>) => ({
+      id: doc._id.toString(),
+      name: doc.name || "Untitled",
+      creator: doc.creator || "Unknown",
+      description: doc.description || "No description",
+      verbose: doc.verbose ?? false,
+      workers: doc.workers ?? 0,
+      expId: doc.expId || "",
+      trialExtraFile: doc.trialExtraFile || "",
+      trialResult: doc.trialResult || "",
+      timeout: doc.timeout ?? 0,
+      keepLogs: doc.keepLogs ?? false,
+      scatter: doc.scatter ?? false,
+      scatterIndVar: doc.scatterIndVar || "",
+      scatterDepVar: doc.scatterDepVar || "",
+      dumbTextArea: doc.dumbTextArea || "",
+      created: doc.created?.toString() || "0",
+      hyperparameters: doc.hyperparameters ?? {},
+      finished: doc.finished ?? false,
+      estimatedTotalTimeMinutes: doc.estimatedTotalTimeMinutes ?? 0,
+      expToRun: doc.expToRun ?? 0,
+      file: doc.file || "",
+      startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
+      finishedAtEpochMilliseconds: doc.finishedAtEpochMilliseconds ?? 0,
+      passes: doc.passes ?? 0,
+      fails: doc.fails ?? 0,
+      totalExperimentRuns: doc.totalExperimentRuns ?? 0,
+    }));
 
+    // Trigger the callback with the updated list of experiments
+    callback(updatedExperimentsData);
+  });
+
+  // Return a cleanup function to close the change stream and client connection
+  return async () => {
+    changeStream.close();
+    client.close();
+  };
+}
