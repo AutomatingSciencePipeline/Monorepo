@@ -31,9 +31,12 @@ export default async function handler(req, res) {
         const initDocs = await experimentsCollection
             .find({ '_id': new ObjectId(expId) })
             .toArray();
+        console.log(initDocs.length);
         const initArray = convertToExpsArray(initDocs)[0];
         res.write(`data: ${JSON.stringify(initArray)}\n\n`);
-
+        
+        console.log("creating change stream");
+        console.log(changeStream);
         // Listen to changes in the collection
         changeStream.on("change", async () => {
             const updatedDocuments = await experimentsCollection
