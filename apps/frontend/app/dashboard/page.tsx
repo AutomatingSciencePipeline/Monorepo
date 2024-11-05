@@ -190,9 +190,24 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		console.log("getting exps");
-		listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
-		console.log(experiments);
+		// console.log("getting exps");
+		// listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
+		// console.log(experiments);
+
+		const eventSource = new EventSource(`/api/experiments?uid=${userId}`);
+		eventSource.onmessage = (event) => {
+			const updatedExperiments = JSON.parse(event.data);
+			setExperiments(updatedExperiments);
+		};
+
+		eventSource.onerror = (err) => {
+			console.error("Error with SSE:", err);
+			eventSource.close();
+		};
+
+		return () => {
+			eventSource.close();
+		};
 
 	}, [userId]);
 
