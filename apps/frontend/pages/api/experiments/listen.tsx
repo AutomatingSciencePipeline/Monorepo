@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     }
 }
 
-function convertToExpsArray(arr) {
+function convertToExpsArray(arr: WithId<Document>[]) {
     return arr.map((doc: WithId<Document>) => ({
         id: doc._id.toString(),
         name: doc.name || "Untitled",

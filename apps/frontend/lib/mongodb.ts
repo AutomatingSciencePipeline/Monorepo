@@ -10,7 +10,7 @@ const MONGODB_PORT = getEnvVar('MONGODB_PORT');
 const USERNAME = getEnvVar('MONGODB_USERNAME');
 const PASSWORD = getEnvVar('MONGODB_PASSWORD');
 
-const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
+const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}/?replicaSet=rs0`;
 const MONGODB_OPTIONS = {};
 
 export const DB_NAME = 'gladosdb';
