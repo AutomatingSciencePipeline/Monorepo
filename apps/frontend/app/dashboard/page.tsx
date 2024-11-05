@@ -194,7 +194,7 @@ export default function DashboardPage() {
 		// listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
 		// console.log(experiments);
 
-		const eventSource = new EventSource(`/api/experiments?uid=${userId}`);
+		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
 		eventSource.onmessage = (event) => {
 			const updatedExperiments = JSON.parse(event.data);
 			setExperiments(updatedExperiments);
