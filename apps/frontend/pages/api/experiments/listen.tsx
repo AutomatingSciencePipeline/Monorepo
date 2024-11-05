@@ -18,10 +18,16 @@ export default async function handler(req, res) {
     const changeStream = experimentsCollection.watch(pipeline, options);
 
     // Set up real-time streaming of changes to the client using SSE
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    res.setHeader("Content-Type", "text/event-stream");
+    // res.setHeader("Access-Control-Allow-Origin", "*");
+    // res.setHeader("Cache-Control", "no-cache");
+    // res.setHeader("Connection", "keep-alive");
+    // res.setHeader("Content-Type", "text/event-stream");
+    res.writeHead(200, {
+        Connection: 'keep-alive',
+        'Content-Encoding': 'none',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+    });
 
     const HEARTBEAT_INTERVAL = 5000; // 5 seconds (adjust this as needed)
     const intervalId = setInterval(() => {
