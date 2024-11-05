@@ -1,6 +1,8 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
 
+export const dynamic = "force-dynamic";
+
 export default async function handler(req, res) {
     const { uid } = req.query;
 
@@ -21,6 +23,12 @@ export default async function handler(req, res) {
         res.setHeader("Connection", "keep-alive");
         res.setHeader("Content-Type", "text/event-stream");
 
+        const HEARTBEAT_INTERVAL = 5000; // 5 seconds (adjust this as needed)
+        const intervalId = setInterval(() => {
+            // Send a heartbeat message to keep the connection alive
+            res.write(': heartbeat\n\n');
+        }, HEARTBEAT_INTERVAL);
+
         const initDocs = await experimentsCollection
             .find({ 'creator': uid })
             .toArray();
@@ -39,9 +47,11 @@ export default async function handler(req, res) {
         });
 
         // Close the change stream and client connection when the request ends
-        req.on("close", () => {
+        req.socket.on("close", () => {
             changeStream.close();
             client.close();
+            clearInterval(intervalId);
+            res.end()
         });
     } else {
         res.status(405).json({ message: "Method Not Allowed" });
