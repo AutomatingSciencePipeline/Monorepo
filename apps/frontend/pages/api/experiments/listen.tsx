@@ -1,12 +1,11 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
 
+export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+
 export default async function handler(req, res) {
     const { uid } = req.query;
-
-    let responseStream = new TransformStream();
-    const writer = responseStream.writable.getWriter();
-    const encoder = new TextEncoder();
 
     // Connect to MongoDB
     const client = await clientPromise;
@@ -23,20 +22,18 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("X-Accel-Buffering", "no")
 
-    const HEARTBEAT_INTERVAL = 2000; // 2 seconds (adjust this as needed)
+    const HEARTBEAT_INTERVAL = 5000; // 5 seconds (adjust this as needed)
     const intervalId = setInterval(() => {
         // Send a heartbeat message to keep the connection alive
-        writer.write(encoder.encode(': heartbeat'));
+        res.write(': heartbeat\n\n');
     }, HEARTBEAT_INTERVAL);
 
     const initDocs = await experimentsCollection
         .find({ 'creator': uid })
         .toArray();
     const initArray = convertToExpsArray(initDocs);
-    writer.write(encoder.encode(JSON.stringify(`data: ${initArray}`)));
-    // res.write(`data: ${JSON.stringify(initArray)}\n\n`);
+    res.write(`data: ${JSON.stringify(initArray)}\n\n`);
 
     // Listen to changes in the collection
     changeStream.on("change", async () => {
@@ -46,24 +43,15 @@ export default async function handler(req, res) {
 
         const result = convertToExpsArray(updatedDocuments);
         // Send the updated experiments to the client
-        // res.write(`data: ${JSON.stringify(result)}\n\n`);
-        writer.write(encoder.encode(JSON.stringify(`data: ${updatedDocuments}`)));
+        res.write(`data: ${JSON.stringify(result)}\n\n`);
     });
-    res.end();
 
     // Close the change stream and client connection when the request ends
     req.socket.on("close", () => {
         changeStream.close();
+        client.close();
         clearInterval(intervalId);
         res.end()
-    });
-
-    return new Response(responseStream.readable, {
-        headers: {
-            'Content-Type': 'text/event-stream',
-            Connection: 'keep-alive',
-            'Cache-Control': 'no-cache, no-transform',
-        },
     });
 
 }

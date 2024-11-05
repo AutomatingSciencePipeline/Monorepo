@@ -14,10 +14,8 @@ export async function fetchExperiments(
 
 	// Fetch all experiments for the given user ID (creator field matches uid) on initial load
 	const userExperiments = await experimentsCollection
-		.find({ creator: uid })  // Filter experiments by user ID (creator)
+		.find({ 'creator': uid })  // Filter experiments by user ID (creator)
 		.toArray();
-
-	console.log(userExperiments);
 
 	// Map the initial experiments to the correct format
 	const experimentsData: ExperimentData[] = userExperiments.map((doc: WithId<Document>) => ({

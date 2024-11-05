@@ -202,6 +202,12 @@ export default function DashboardPage() {
 		// 	setExperiments(experiments);
 		// }
 
+		// // Create interval to get experiments
+		// const interval = setInterval( async () => {
+		// 	var experiments = await fetchExperiments(userId);
+		// 	setExperiments(experiments);
+		// }, 2500)
+
 		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
 		console.log(eventSource);
 
@@ -223,6 +229,7 @@ export default function DashboardPage() {
 
 		return () => eventSource.close();
 
+		// return () => clearInterval(interval);
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
