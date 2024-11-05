@@ -10,6 +10,7 @@ export interface ExperimentSubscribeCallback {
 
 // TODO: Convert from Firestore to MongoDB
 export const subscribeToExp = async (id: ExperimentDocumentId, callback: ExperimentSubscribeCallback) => {
+	"use server";
     const client = await clientPromise;
 	const db = client.db(DB_NAME);
 	const collection = db.collection(COLLECTION_EXPERIMENTS);
@@ -28,6 +29,7 @@ export async function listenToExperiments(
 	uid: string,
 	callback: (experiments: Partial<ExperimentData>[]) => void
 ){
+	"use server";
 	const client = await clientPromise;
 	const db = client.db(DB_NAME);
 	const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
