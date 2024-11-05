@@ -218,7 +218,7 @@ export default function DashboardPage() {
 		eventSource.onmessage = (event) => {
 			console.log("received change!");
 			console.log("data was:" + event.data);
-			if (!JSON.parse(event.data)) {
+			if (JSON.parse(event.data) !== ':heartbeat') {
 				setExperiments(JSON.parse(event.data) as ExperimentData[]);
 			}
 		}
