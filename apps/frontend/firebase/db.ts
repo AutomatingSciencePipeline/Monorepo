@@ -31,9 +31,9 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 			method: "POST",
 			body: JSON.stringify(values)
 		}
-	).then((response) => {
+	).then(async (response) => {
 		if (response?.ok) {
-			console.log(response.json());
+			console.log(await response.json());
 			return response.json()['id'];
 		}
 		return Promise.reject(response);
