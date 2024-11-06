@@ -173,17 +173,8 @@ def determine_experiment_file_type(filepath: str):
     filetype = ExperimentType.UNKNOWN
     if 'Python script' in rawfiletype or 'python3' in rawfiletype:
         filetype = ExperimentType.PYTHON
-    elif 'Zip archive data' in rawfiletype:
-        # check for META-INF/MANIFEST.MF in file
-        try:
-            file = open(filepath, "r")
-            contents = file.read()
-            if "META-INF/MANIFEST.MF" in contents:
-                filetype = ExperimentType.JAVA
-            file.close()
-        except FileNotFoundError as e:
-            explogger.error(f"{filepath} could not be read to determine if it is a jar file!")
-            raise e
+    elif 'Java archive data (JAR)' in rawfiletype:
+        filetype = ExperimentType.JAVA
     elif 'ELF 64-bit LSB' in rawfiletype:
         filetype = ExperimentType.C
 
