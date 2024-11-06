@@ -25,8 +25,8 @@ const parseForm = async (req: NextApiRequest): Promise<{ fields: Fields; files: 
 const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
     if (req.method === 'POST') {
         const { fields, files } = await parseForm(req);
-        const expId = Array.isArray(fields.id) ? fields.id[0] : fields.id;
-
+        const expId = Array.isArray(fields.expId) ? fields.expId[0] : fields.expId;
+        
         if (!files.file || !expId) {
             return res.status(400).json({ response: "Not enough arguments!" } as any);
         }
