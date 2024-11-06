@@ -173,19 +173,10 @@ def determine_experiment_file_type(filepath: str):
     filetype = ExperimentType.UNKNOWN
     if 'Python script' in rawfiletype or 'python3' in rawfiletype:
         filetype = ExperimentType.PYTHON
+    elif 'Java archive data (JAR)' in rawfiletype:
+        filetype = ExperimentType.JAVA
     elif 'ELF 64-bit LSB' in rawfiletype:
         filetype = ExperimentType.C
-    else:
-        # check if it is a jar file, they can have multiple rawfiletypes
-        try:
-            file = open(filepath, "r")
-            contents = file.read()
-            if "META-INF/MANIFEST.MF" in contents:
-                filetype = ExperimentType.JAVA
-            file.close()
-        except FileNotFoundError as e:
-            explogger.error(f"{filepath} could not be read to determine if it is a jar file!")
-            raise e
 
     explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
 
@@ -207,9 +198,9 @@ def download_experiment_files(experiment: ExperimentData):
         # try to call the backend to download
         url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?expId={experiment.expId}'
         response = requests.get(url, timeout=60)
-        file_contents = base64.b64decode(response.json()["contents"]).decode()
+        file_contents = response.content
         # write the file contents to file path
-        with open(filepath, "x") as file:
+        with open(filepath, "xb") as file:
             file.write(file_contents)
         
     except Exception as err:

@@ -1,10 +1,11 @@
 """Module that uses flask to host endpoints for the backend"""
+import io
 import threading
 import base64
 from concurrent.futures import ProcessPoolExecutor
 import os
 import bson
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, jsonify, send_file
 from kubernetes import client, config
 import pymongo
 from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file
@@ -101,7 +102,9 @@ def check_mongo():
 def download_exp_file():
     try:
         experiment_id = request.args.get('expId', default='', type=str)
-        return {'contents': download_experiment_file(experiment_id, mongoClient)}
+        file_data = download_experiment_file(experiment_id, mongoClient)
+        file_stream = io.BytesIO(file_data)
+        return send_file(file_stream, as_attachment=True, download_name="experiment_file", mimetype="application/octet-stream")
     except Exception:
         return Response(status=500)
 
