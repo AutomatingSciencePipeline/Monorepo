@@ -223,9 +223,9 @@ export default function DashboardPage() {
 			}
 		}
 
-		eventSource.onerror = (event) => {
-			console.error('SSE Error:', event);
-		};
+		// eventSource.onerror = (event) => {
+		// 	console.error('SSE Error:', event);
+		// };
 
 		return () => eventSource.close();
 

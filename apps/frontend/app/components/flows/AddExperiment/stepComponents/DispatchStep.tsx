@@ -24,7 +24,9 @@ export const DispatchStep = ({ id, form, ...props }) => {
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
 		console.log('Submitting Experiment');
-		submitExperiment(form.values, userId as string).then(async (expId) => {
+		submitExperiment(form.values, userId as string).then(async (json) => {
+			console.log(json);
+			const expId = json['id'];
 			console.log(`Uploading file for ${expId}:`, files);
 			const uploadResponse = await fetch('/api/files/uploadFile', {
 				method: 'POST',
