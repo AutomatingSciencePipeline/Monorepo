@@ -33,6 +33,7 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 		}
 	).then((response) => {
 		if (response?.ok) {
+			console.log(response.json()['id']);
 			return response.json()['id'];
 		}
 		return Promise.reject(response);
