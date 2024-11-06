@@ -73,7 +73,7 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         description: doc.description || "No description",
         verbose: doc.verbose ?? false,
         workers: doc.workers ?? 0,
-        expId: doc.expId || "",
+        expId: doc._id || "",
         trialExtraFile: doc.trialExtraFile || "",
         trialResult: doc.trialResult || "",
         timeout: doc.timeout ?? 0,
