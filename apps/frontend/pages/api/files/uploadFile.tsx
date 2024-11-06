@@ -1,21 +1,33 @@
 import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS, COLLECTION_EXPERIMENT_FILES } from '../../../lib/mongodb';
-import { NextApiHandler } from 'next';
+import { NextApiHandler, NextApiRequest } from 'next';
 import { GridFSBucket } from 'mongodb';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
+import formidable, { Fields, Files } from "formidable";
+import fs from "fs";
 
 export const config = {
     api: {
-      bodyParser: {
-        sizeLimit: '1000mb'
-      }
+        bodyParser: false
     },
-  }
+}
+
+// Helper function to parse form data with formidable
+const parseForm = async (req: NextApiRequest): Promise<{ fields: Fields; files: Files }> =>
+    new Promise((resolve, reject) => {
+        const form = formidable({ keepExtensions: true });
+        form.parse(req, (err, fields, files) => {
+            if (err) reject(err);
+            resolve({ fields, files });
+        });
+    });
+
 
 const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
     if (req.method === 'POST') {
-        const { fileToUpload, experimentId } = req.body;
+        const { fields, files } = await parseForm(req);
+        const expId = Array.isArray(fields.id) ? fields.id[0] : fields.id;
 
-        if (!fileToUpload || !experimentId) {
+        if (!files.file || !expId) {
             return res.status(400).json({ response: "Not enough arguments!" } as any);
         }
 
@@ -23,19 +35,20 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
             const client = await clientPromise;
             const db = client.db(DB_NAME);
             const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
-            
-            const readableStream = new Readable();
-            readableStream.push(fileToUpload);
-            readableStream.push(null);
 
-            readableStream.
-                pipe(bucket.openUploadStream(`experimentFile${experimentId}`, {
-                    chunkSizeBytes: 1048576,
-                    metadata: { expId: experimentId }
-                }) as any);
+            const file = Array.isArray(files.file) ? files.file[0] : files.file;
+            const fileStream = fs.createReadStream(file.filepath);
+
+            // Upload the file to GridFS
+            const uploadStream = bucket.openUploadStream(file.originalFilename || "uploadedFile", {
+                metadata: { expId: expId },
+            }) as Writable;
 
 
-            res.status(200).json({ response: 'Successfully wrote file!' } as any);
+            // Pipe the file stream to GridFS
+            fileStream.pipe(uploadStream).on("finish", () => {
+                res.status(200).json({ message: "File and ID uploaded successfully." } as any);
+            });
             return;
         }
         catch (error) {
