@@ -1,7 +1,14 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
+import { Server } from 'ws'
 
-export function SOCKET(
+export const config = {
+    api: {
+        bodyParser: false, // Disable body parser to handle WebSocket upgrade
+    },
+};
+
+export default function SOCKET(
     client: import('ws').WebSocket,
     request: import('http').IncomingMessage,
     server: import('ws').WebSocketServer
