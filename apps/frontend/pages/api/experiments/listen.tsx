@@ -10,9 +10,38 @@ export default async function handler(req, res) {
     }
 
     const wss = new WebSocket.Server({ noServer: true });
-    wss.on('connection'), () => {
+
+    wss.on('connection', async (ws) => {
         console.log("Made Websocket connection!");
-    }
+
+        const HEARTBEAT_INTERVAL = 2500; // 5 seconds (adjust this as needed)
+        const intervalId = setInterval(() => {
+            // Send a heartbeat message to keep the connection alive
+            ws.send(":heartbeat");
+        }, HEARTBEAT_INTERVAL);
+
+        const initDocs = await experimentsCollection
+            .find({ 'creator': uid })
+            .toArray();
+        const initArray = convertToExpsArray(initDocs);
+        ws.send(`data: ${JSON.stringify(initArray)}\n\n`);
+
+        // Listen to changes in the collection
+        changeStream.on("change", async () => {
+            const updatedDocuments = await experimentsCollection
+                .find({ 'creator': uid })
+                .toArray();
+
+            const result = convertToExpsArray(updatedDocuments);
+            // Send the updated experiments to the client
+            ws.send(`data: ${JSON.stringify(result)}\n\n`);
+        });
+
+        ws.on('close', () => {
+            changeStream.close();
+            clearInterval(intervalId);
+        });
+    });
 
     // Connect to MongoDB
     const client = await clientPromise;
@@ -39,36 +68,11 @@ export default async function handler(req, res) {
     });
 
 
-    const HEARTBEAT_INTERVAL = 2500; // 5 seconds (adjust this as needed)
-    const intervalId = setInterval(() => {
-        // Send a heartbeat message to keep the connection alive
-        wss.send(":heartbeat");
-    }, HEARTBEAT_INTERVAL);
 
-    //Create function to listen
-
-
-    const initDocs = await experimentsCollection
-        .find({ 'creator': uid })
-        .toArray();
-    const initArray = convertToExpsArray(initDocs);
-    wss.send(`data: ${JSON.stringify(initArray)}\n\n`);
-
-    // Listen to changes in the collection
-    changeStream.on("change", async () => {
-        const updatedDocuments = await experimentsCollection
-            .find({ 'creator': uid })
-            .toArray();
-
-        const result = convertToExpsArray(updatedDocuments);
-        // Send the updated experiments to the client
-        wss.send(`data: ${JSON.stringify(result)}\n\n`);
-    });
 
     // Close the change stream and client connection when the request ends
     req.on("close", () => {
-        changeStream.close();
-        clearInterval(intervalId);
+        wss.close();
     });
 
 }
