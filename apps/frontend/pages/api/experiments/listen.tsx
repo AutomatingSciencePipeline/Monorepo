@@ -1,80 +1,77 @@
+// pages/api/experiments/listen.js
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
-import { WithId, Document } from "mongodb";
-import WebSocket from 'ws';
+import { WebSocketServer } from 'ws';
 
-export default async function handler(req, res) {
-    const { uid } = req.query;
+let wss; // WebSocket server instance
 
-    if (!uid) {
-        return;
-    }
+export const config = {
+    api: {
+        bodyParser: false, // Disable body parsing for WebSocket handling
+    },
+};
 
-    const wss = new WebSocket.Server({ noServer: true });
-    wss.on('connection'), () => {
-        console.log("Made Websocket connection!");
-    }
+async function handler(req, res) {
+    if (!wss) {
+        // Initialize WebSocket server
+        wss = new WebSocketServer({ noServer: true });
 
-    // Connect to MongoDB
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
+        wss.on('connection', async (ws, request) => {
+            const uid = new URL(request.url, `http://${request.headers.host}`).searchParams.get('uid');
+            if (!uid) {
+                ws.close();
+                return;
+            }
 
-    // Set up a Change Stream for real-time updates
-    const pipeline = [{ $match: { "fullDocument.creator": uid } }];
-    const options = { fullDocument: "updateLookup" };
-    const changeStream = experimentsCollection.watch(pipeline, options);
+            console.log(`WebSocket connection established for user: ${uid}`);
 
-    if (!res.writableEnded) {
-        res.writeHead(101, {
-            Connection: 'upgrade',
-            'Content-Encoding': 'none',
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'text/plain',
-            'Upgrade': 'websocket'
+            // MongoDB Change Stream setup
+            const client = await clientPromise;
+            const db = client.db(DB_NAME);
+            const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
+
+            const pipeline = [{ $match: { "fullDocument.creator": uid } }];
+            const options = { fullDocument: "updateLookup" };
+            const changeStream = experimentsCollection.watch(pipeline, options);
+
+            // Initial data fetch and send to client
+            const initDocs = await experimentsCollection.find({ creator: uid }).toArray();
+            ws.send(JSON.stringify(initDocs.map(doc => formatExperiment(doc))));
+
+            // Listen for MongoDB changes
+            changeStream.on('change', async () => {
+                const updatedDocuments = await experimentsCollection.find({ creator: uid }).toArray();
+                ws.send(JSON.stringify(updatedDocuments.map(doc => formatExperiment(doc))));
+            });
+
+            ws.on('close', () => {
+                console.log(`WebSocket connection closed for user: ${uid}`);
+                changeStream.close();
+            });
         });
     }
 
-    wss.handleUpgrade(req, req.socket, Buffer.alloc(0), function done(ws) {
-        wss.emit('connection', ws, req);
-    });
-
-
-    const HEARTBEAT_INTERVAL = 2500; // 5 seconds (adjust this as needed)
-    const intervalId = setInterval(() => {
-        // Send a heartbeat message to keep the connection alive
-        wss.send(":heartbeat");
-    }, HEARTBEAT_INTERVAL);
-
-    //Create function to listen
-
-
-    const initDocs = await experimentsCollection
-        .find({ 'creator': uid })
-        .toArray();
-    const initArray = convertToExpsArray(initDocs);
-    wss.send(`data: ${JSON.stringify(initArray)}\n\n`);
-
-    // Listen to changes in the collection
-    changeStream.on("change", async () => {
-        const updatedDocuments = await experimentsCollection
-            .find({ 'creator': uid })
-            .toArray();
-
-        const result = convertToExpsArray(updatedDocuments);
-        // Send the updated experiments to the client
-        wss.send(`data: ${JSON.stringify(result)}\n\n`);
-    });
-
-    // Close the change stream and client connection when the request ends
-    req.on("close", () => {
-        changeStream.close();
-        clearInterval(intervalId);
-    });
-
+    if (req.method === 'GET') {
+        res.status(200).send('WebSocket server is running');
+    } else {
+        res.status(405).end(); // Method Not Allowed
+    }
 }
 
-function convertToExpsArray(arr: WithId<Document>[]) {
-    return arr.map((doc: WithId<Document>) => ({
+// Upgrade WebSocket connection
+export function webSocketUpgrade(server) {
+    server.on('upgrade', (req, socket, head) => {
+        if (req.url.startsWith('/api/experiments/listen')) {
+            wss.handleUpgrade(req, socket, head, (ws) => {
+                wss.emit('connection', ws, req);
+            });
+        } else {
+            socket.destroy();
+        }
+    });
+}
+
+function formatExperiment(doc) {
+    return {
         id: doc._id.toString(),
         name: doc.name || "Untitled",
         creator: doc.creator || "Unknown",
@@ -101,5 +98,5 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         passes: doc.passes ?? 0,
         fails: doc.fails ?? 0,
         totalExperimentRuns: doc.totalExperimentRuns ?? 0,
-    }));
+    };
 }

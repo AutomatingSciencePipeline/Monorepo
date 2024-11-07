@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+
+const { webSocketUpgrade } = require('./pages/api/experiments/listen');
+
 const nextConfig = {
     reactStrictMode: true,
 	output: 'standalone', // For deployment, https://nextjs.org/docs/advanced-features/output-file-tracing
@@ -11,7 +14,13 @@ const nextConfig = {
 				pathname: '/img/**'
 			},
 		],
-	}
+	},
+	webpack: (config, { isServer }) => {
+        if (isServer) {
+            require('./pages/api/experiments/listen').webSocketUpgrade(config);
+        }
+        return config;
+    },
 };
 
 export default nextConfig;
