@@ -4,6 +4,12 @@ import { WithId, Document } from "mongodb";
 export const runtime = 'nodejs';
 export const dynamic = "force-dynamic";
 
+export const config = {
+  api: {
+    bodyParser: false, // Disables body parsing
+  },
+};
+
 export default async function handler(req, res) {
     const { uid } = req.query;
 
