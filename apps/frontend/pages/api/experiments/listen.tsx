@@ -39,11 +39,13 @@ export default async function handler(req, res) {
         res.write(': heartbeat\n\n');
     }, HEARTBEAT_INTERVAL);
 
+    //Create function to listen
+
+
     const initDocs = await experimentsCollection
         .find({ 'creator': uid })
         .toArray();
     const initArray = convertToExpsArray(initDocs);
-    res.write(': heartbeat\n\n');
     res.write(`data: ${JSON.stringify(initArray)}\n\n`);
 
     // Listen to changes in the collection
