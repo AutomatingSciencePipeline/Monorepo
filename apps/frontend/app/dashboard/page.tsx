@@ -208,27 +208,25 @@ export default function DashboardPage() {
 		// 	setExperiments(experiments);
 		// }, 2500)
 
-		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
-		console.log(eventSource);
+		const socket = new WebSocket(`ws://${window.location.host}/api/experiments/listen?uid=${userId}`);
 
-		eventSource.onopen = () => {
-			console.log("SSE open!");
-		}
+		socket.onopen = () => {
+			console.log('Connected to WebSocket server');
+		};
 
-		eventSource.onmessage = (event) => {
-			console.log("received change!");
-			// console.log("data was:" + event.data);
-			if (event.data) {
-				setExperiments(JSON.parse(event.data) as ExperimentData[]);
-			}
+		socket.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+			console.log('Received data:', data);
+			// Here you can update your component state with the received data
+		};
 
-		}
+		socket.onclose = () => {
+			console.log('WebSocket connection closed');
+		};
 
-		// eventSource.onerror = (event) => {
-		// 	console.error('SSE Error:', event);
-		// };
-
-		return () => eventSource.close();
+		return () => {
+			socket.close();
+		};
 
 		// return () => clearInterval(interval);
 	}, [userId]);
