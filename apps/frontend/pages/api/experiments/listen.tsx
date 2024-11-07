@@ -43,10 +43,8 @@ export default async function handler(req, res) {
         .find({ 'creator': uid })
         .toArray();
     const initArray = convertToExpsArray(initDocs);
-    setTimeout(() => {
-        res.write(`data: ${JSON.stringify(initArray)}\n\n`);
-    }, 500);
-    
+    res.write(': heartbeat\n\n');
+    res.write(`data: ${JSON.stringify(initArray)}\n\n`);
 
     // Listen to changes in the collection
     changeStream.on("change", async () => {
