@@ -21,10 +21,10 @@ export default async function handler(req, res) {
         'Content-Type': 'text/event-stream',
     });
 
-    const HEARTBEAT_INTERVAL = 5000; // 5 seconds (adjust this as needed)
+    const HEARTBEAT_INTERVAL = 2500; // 5 seconds (adjust this as needed)
     const intervalId = setInterval(() => {
         // Send a heartbeat message to keep the connection alive
-        res.write(': heartbeat\n\n');
+        res.write('data: heartbeat\n\n');
     }, HEARTBEAT_INTERVAL);
 
     const initDocs = await experimentsCollection
