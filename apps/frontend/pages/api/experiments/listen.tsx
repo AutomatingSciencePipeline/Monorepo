@@ -45,9 +45,6 @@ export default async function handler(req, res) {
         res.write(': heartbeat\n\n');
     }, HEARTBEAT_INTERVAL);
 
-    //Create function to listen
-
-
     const initDocs = await experimentsCollection
         .find({ 'creator': uid })
         .toArray();
