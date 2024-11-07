@@ -207,8 +207,7 @@ export default function DashboardPage() {
 		// 	var experiments = await fetchExperiments(userId);
 		// 	setExperiments(experiments);
 		// }, 2500)
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"; // Use wss if HTTPS
-		const socket = new WebSocket(`${protocol}//${window.location.host}/api/experiments/listen?uid=${userId}`);
+		const socket = new WebSocket(`http://${window.location.host}/api/experiments/listen?uid=${userId}`);
 
 		socket.onopen = () => {
 			console.log('Connected to WebSocket server');
