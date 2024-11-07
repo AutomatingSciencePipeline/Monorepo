@@ -2,19 +2,46 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mon
 import { WithId, Document } from "mongodb";
 import WebSocket from 'ws';
 
-export const config = {
-    api: {
-        bodyParser: false, // Disable body parser to handle WebSocket upgrade
-    },
-};
-
 export default async function handler(req, res) {
     const { uid } = req.query;
 
     if (!uid) {
-        res.status(400).send('User ID is required');
         return;
     }
+
+    const wss = new WebSocket.Server({ noServer: true });
+
+    wss.on('connection', async (ws) => {
+        console.log("Made Websocket connection!");
+
+        const HEARTBEAT_INTERVAL = 2500; // 5 seconds (adjust this as needed)
+        const intervalId = setInterval(() => {
+            // Send a heartbeat message to keep the connection alive
+            ws.send(":heartbeat");
+        }, HEARTBEAT_INTERVAL);
+
+        const initDocs = await experimentsCollection
+            .find({ 'creator': uid })
+            .toArray();
+        const initArray = convertToExpsArray(initDocs);
+        ws.send(`data: ${JSON.stringify(initArray)}\n\n`);
+
+        // Listen to changes in the collection
+        changeStream.on("change", async () => {
+            const updatedDocuments = await experimentsCollection
+                .find({ 'creator': uid })
+                .toArray();
+
+            const result = convertToExpsArray(updatedDocuments);
+            // Send the updated experiments to the client
+            ws.send(`data: ${JSON.stringify(result)}\n\n`);
+        });
+
+        ws.on('close', () => {
+            changeStream.close();
+            clearInterval(intervalId);
+        });
+    });
 
     // Connect to MongoDB
     const client = await clientPromise;
@@ -26,60 +53,30 @@ export default async function handler(req, res) {
     const options = { fullDocument: "updateLookup" };
     const changeStream = experimentsCollection.watch(pipeline, options);
 
-    // Create a new WebSocket server with `noServer` set to true
-    const wss = new WebSocket.Server({ noServer: true });
-
-    wss.on('connection', async (ws) => {
-        console.log("Made WebSocket connection!");
-
-        // Set up heartbeat to keep connection alive
-        const HEARTBEAT_INTERVAL = 2500; // Adjust this as needed (in milliseconds)
-        const intervalId = setInterval(() => {
-            ws.send("heartbeat"); // Send heartbeat message
-        }, HEARTBEAT_INTERVAL);
-
-        // Initial data fetch and send it to the client
-        const initDocs = await experimentsCollection.find({ creator: uid }).toArray();
-        const initArray = convertToExpsArray(initDocs);
-        ws.send(JSON.stringify(initArray));
-
-        // Listen to changes in the collection
-        changeStream.on('change', async () => {
-            const updatedDocuments = await experimentsCollection.find({ creator: uid }).toArray();
-            const result = convertToExpsArray(updatedDocuments);
-            // Send the updated experiments to the client
-            ws.send(JSON.stringify(result));
-        });
-
-        // Clean up when WebSocket closes
-        ws.on('close', () => {
-            clearInterval(intervalId); // Clear heartbeat interval
-            changeStream.close(); // Close change stream when connection is closed
-        });
-    });
-
-    // Handle WebSocket upgrade request
     if (!res.writableEnded) {
         res.writeHead(101, {
-            'Connection': 'Upgrade',
-            'Upgrade': 'websocket',
+            Connection: 'upgrade',
+            'Content-Encoding': 'none',
             'Cache-Control': 'no-cache',
             'Content-Type': 'text/plain',
+            'Upgrade': 'websocket'
         });
     }
 
-    // Handle the WebSocket upgrade and pass the request to the WebSocket server
-    wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
+    wss.handleUpgrade(req, req.socket, Buffer.alloc(0), function done(ws) {
         wss.emit('connection', ws, req);
     });
 
-    // Clean up when request ends
+
+
+
+    // Close the change stream and client connection when the request ends
     req.on("close", () => {
         wss.close();
     });
+
 }
 
-// Utility function to convert MongoDB documents to the desired structure
 function convertToExpsArray(arr: WithId<Document>[]) {
     return arr.map((doc: WithId<Document>) => ({
         id: doc._id.toString(),
