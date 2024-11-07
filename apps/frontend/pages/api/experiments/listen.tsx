@@ -1,6 +1,6 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
-import { WebSocket } from 'ws';
+import { Server } from 'ws'
 
 export const config = {
     api: {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     const changeStream = experimentsCollection.watch(pipeline, options);
 
     // Create a new WebSocket server with `noServer` set to true
-    const wss = new WebSocket.Server({ noServer: true });
+    const wss = new Server({ noServer: true });
 
     wss.on('connection', async (ws) => {
         console.log("Made WebSocket connection!");
