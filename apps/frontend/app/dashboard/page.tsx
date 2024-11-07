@@ -212,6 +212,7 @@ export default function DashboardPage() {
 
 		socket.onopen = () => {
 			console.log('Connected to WebSocket server');
+			socket.send("hello socket!");
 		};
 
 		socket.onmessage = (event) => {
