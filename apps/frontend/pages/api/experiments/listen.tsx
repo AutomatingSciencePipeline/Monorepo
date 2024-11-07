@@ -1,6 +1,6 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from "../../../lib/mongodb";
 import { WithId, Document } from "mongodb";
-import { WebSocket } from 'ws';
+import WebSocket from 'ws';
 
 export const config = {
     api: {
