@@ -211,14 +211,15 @@ export default function DashboardPage() {
 		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
 		console.log(eventSource);
 
-		eventSource.onopen = () => {
+		eventSource.onopen = (event) => {
 			console.log("SSE open!");
+			console.log(event);
 		}
 
 		eventSource.onmessage = (event) => {
 			console.log("received change!");
 			console.log("data was:" + event.data);
-			if (JSON.parse(event.data) !== ':heartbeat') {
+			if (JSON.parse(event.data) !== ': heartbeat') {
 				setExperiments(JSON.parse(event.data) as ExperimentData[]);
 			}
 		}
