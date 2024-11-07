@@ -12,11 +12,11 @@
 
 # CMD ["npm", "start"]
 
-FROM node:latest AS base
+FROM node:20-alpine AS base
 
 FROM base AS deps
 
-# RUN apk add --no-cache bash libc6-compat
+RUN apk add --no-cache bash libc6-compat
 WORKDIR /app
 
 COPY package.json ./
