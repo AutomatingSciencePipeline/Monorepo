@@ -8,7 +8,7 @@ export const config = {
     },
 };
 
-export function SOCKET(
+export default function SOCKET(
     client: import('ws').WebSocket,
     request: import('http').IncomingMessage,
     server: import('ws').WebSocketServer
