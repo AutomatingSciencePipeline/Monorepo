@@ -216,7 +216,7 @@ export default function DashboardPage() {
 		}
 
 		eventSource.onmessage = (event) => {
-			console.log("received change!");
+			console.log("event.data");
 			// console.log("data was:" + event.data);
 			if (event.data) {
 				setExperiments(JSON.parse(event.data) as ExperimentData[]);

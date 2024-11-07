@@ -43,7 +43,6 @@ export default async function handler(req, res) {
     const intervalId = setInterval(() => {
         // Send a heartbeat message to keep the connection alive
         res.write(': heartbeat\n\n');
-        res.flush();
     }, HEARTBEAT_INTERVAL);
 
     //Create function to listen
@@ -54,7 +53,6 @@ export default async function handler(req, res) {
         .toArray();
     const initArray = convertToExpsArray(initDocs);
     res.write(`data: ${JSON.stringify(initArray)}\n\n`);
-    res.flush();
 
     // Listen to changes in the collection
     changeStream.on("change", async () => {
