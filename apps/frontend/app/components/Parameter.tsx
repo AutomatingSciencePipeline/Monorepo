@@ -1,17 +1,19 @@
-import { Fragment } from 'react';
-import { Switch, ActionIcon, Center } from '@mantine/core';
+import { Fragment, useState } from 'react';
+import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
-import { GripVertical } from 'tabler-icons-react';
+import { GripVertical, Plus } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 
 const Parameter = ({ form, type, index, ...rest }) => {
 	const remains = {
-		string: StringParam,
+		strings: StringParam,
 		integer: NumberParam,
 		float: NumberParam,
 		bool: BoolParam,
 	};
 	const Component = remains[type];
+	const [opened, setOpened] = useState(false);
+	
 	return (
 		<Draggable key={index} index={index} draggableId={index.toString()}>
 			{(provided) => {
@@ -79,17 +81,62 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 };
 
 const StringParam = ({ form, type, index, ...rest }) => {
-	return (
-		<>
-			<input
-				type='text'
-				placeholder={`${type} value`}
-				className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-				{...form.getListInputProps('hyperparameters', index, 'default')}
-				required
-			/>
-		</>
-	);
+	const [opened, setOpened] = useState(false);
+	const [values, setValues] = useState(['']);
+
+    const handleAddValue = () => {
+        setValues([...values, '']);
+    };
+
+    const handleChange = (e, idx) => {
+        const newValues = [...values];
+        newValues[idx] = e.target.value;
+        setValues(newValues);
+    };
+
+	const handleDelete = (idx) => {
+        const newValues = values.filter((_, i) => i !== idx);
+        setValues(newValues);
+    };
+
+    const handleClose = () => {
+		
+        form.setFieldValue(`hyperparameters.${index}.default`, values);
+        setOpened(false);
+    };
+
+    return (
+        <>
+            <Button onClick={() => setOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                Edit Strings
+            </Button>
+            <Modal
+                opened={opened}
+                onClose={handleClose}
+                title="Edit String Values"
+            >
+                {values.map((value, idx) => (
+                    <div key={idx} className='flex items-center mb-2'>
+                        <input
+                            type='text'
+                            placeholder={`Value ${idx + 1}`}
+                            className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+                            value={value}
+                            onChange={(e) => handleChange(e, idx)}
+                            required
+                        />
+                        <ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
+                            <Trash />
+                        </ActionIcon>
+                    </div>
+                ))}
+                <ActionIcon onClick={handleAddValue} color='blue'>
+                    <Plus />
+                </ActionIcon>
+            </Modal>
+        </>
+    );
 };
 
 export default Parameter;
+

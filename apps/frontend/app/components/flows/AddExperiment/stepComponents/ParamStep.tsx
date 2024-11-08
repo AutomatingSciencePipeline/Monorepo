@@ -4,7 +4,7 @@ import { Fragment } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../../../InputSection';
 
-export const ParameterOptions = ['integer', 'float', 'bool', 'string'] as const;
+export const ParameterOptions = ['integer', 'float', 'bool', 'strings'] as const;
 
 export const ParamStep = ({ form, ...props }) => {
 	return (
