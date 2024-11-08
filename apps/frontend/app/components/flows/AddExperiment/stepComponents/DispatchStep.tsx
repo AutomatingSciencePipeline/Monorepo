@@ -1,7 +1,7 @@
 'use client'
 
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { submitExperiment, uploadExec } from '../../../../../firebase/db';
+import { submitExperiment } from '../../../../../firebase/db';
 import { Group, Text } from '@mantine/core';
 
 import { useAuth } from '../../../../../firebase/fbAuth';
@@ -27,7 +27,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		submitExperiment(form.values, userId as string).then(async (json) => {
 			console.log(json);
 			const expId = json['id'];
-			console.log(`Uploading file for ${expId}:`, files);
+			console.log(`Uploading file for ${expId}:`);
 			const formData = new FormData();
 			formData.set("file", files[0]);
 			formData.set("expId", expId);
@@ -109,13 +109,3 @@ export const DispatchStep = ({ id, form, ...props }) => {
 		</Dropzone>
 	);
 };
-
-function arrayBufferToBase64(buffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return Buffer.from(binary).toString("base64");
-}
-

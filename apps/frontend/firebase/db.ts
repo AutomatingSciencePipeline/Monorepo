@@ -35,24 +35,6 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	return await response.json();
 };
 
-// TODO: will use mongo gridfs
-export const uploadExec = async (id: ExperimentDocumentId, file) => {
-	const fileRef = ref(storage, `experiment${id}`);
-	return await uploadBytes(fileRef, file).then((snapshot) => {
-		console.log('Uploaded file. Updating doc...');
-		const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, id);
-		updateDoc(experimentRef, {
-			file: `experiment${id}`,
-		}).then(() => {
-			console.log(`Uploaded file for experiment ${id}`);
-			return true;
-		}).catch((error) => console.log('Upload doc error: ', error));
-		return true;
-	}).catch((error) => {
-		console.log('Upload bytes error: ', error);
-		return false;
-	});
-};
 
 const downloadArbitraryFile = (url: string, name: string) => {
 	const anchor = document.createElement('a');

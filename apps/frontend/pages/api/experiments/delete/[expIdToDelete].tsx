@@ -1,6 +1,7 @@
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
 import { ExperimentData } from '../../../../firebase/db_types';
+import { ObjectId } from 'mongodb';
 
 const mongoExpHandler: NextApiHandler<ExperimentData> = async (req, res) => {
 	const { expIdToDelete } = req.query;
@@ -15,7 +16,7 @@ const mongoExpHandler: NextApiHandler<ExperimentData> = async (req, res) => {
 
 		const result = await db
             .collection(COLLECTION_EXPERIMENTS)
-            .deleteOne({ '_id': expIdToDelete as any }); // Assuming expId is the unique identifier in the collection
+            .deleteOne({ '_id': new ObjectId(expIdToDelete) }); // Assuming expId is the unique identifier in the collection
 
         if (result.deletedCount === 0) {
             return res.status(404).json({ response: 'Experiment not found' } as any);
