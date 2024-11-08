@@ -4,7 +4,6 @@ import NewExperiment, { FormStates } from '../components/flows/AddExperiment/New
 import { useAuth } from '../../firebase/fbAuth';
 import { deleteExperiment } from '../../firebase/db';
 import { downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
-import { fetchExperiments } from '../../lib/mongo_funcs';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
