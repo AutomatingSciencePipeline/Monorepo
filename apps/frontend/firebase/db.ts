@@ -26,17 +26,13 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	values.finished = false;
 	values.estimatedTotalTimeMinutes = 0;
 	values.totalExperimentRuns = 0;
-	await fetch(`/api/experiments/storeExp`,
+	const response = await fetch(`/api/experiments/storeExp`,
 		{
 			method: "POST",
 			body: JSON.stringify(values)
 		}
-	).then(async (response) => {
-		if (response?.ok) {
-			return response.json();
-		}
-		return Promise.reject(response);
-	});
+	)
+	return await response.json();
 };
 
 // TODO: will use mongo gridfs
