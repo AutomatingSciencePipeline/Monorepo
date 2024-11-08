@@ -1,12 +1,13 @@
 'use client'
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../../../InputSection';
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'strings'] as const;
 
 export const ParamStep = ({ form, ...props }) => {
+
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>

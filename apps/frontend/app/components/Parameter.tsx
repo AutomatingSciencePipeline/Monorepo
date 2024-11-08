@@ -3,8 +3,9 @@ import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical, Plus } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
+import { string } from 'joi';
 
-const Parameter = ({ form, type, index, ...rest }) => {
+const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
 	const remains = {
 		strings: StringParam,
 		integer: NumberParam,
@@ -12,13 +13,25 @@ const Parameter = ({ form, type, index, ...rest }) => {
 		bool: BoolParam,
 	};
 	const Component = remains[type];
-	const [opened, setOpened] = useState(false);
+
+	const handleConfirm = (values) => {
+        const updatedValues = confirmedValues.map((item) =>
+            item.index === index ? { ...item, values: values } : item
+        );
+        if (!updatedValues.some((item) => item.index === index)) {
+            updatedValues.push({ index, values: values });
+        }
+        setConfirmedValues(updatedValues);
+    };
+
+	const currentConfirmedValues = confirmedValues.find((item) => item.index === index)?.values || [];
 	
 	return (
 		<Draggable key={index} index={index} draggableId={index.toString()}>
 			{(provided) => {
 				return (
-					<div
+					<div>
+						<div
 						ref={provided.innerRef}
 						{...provided.draggableProps}
 						// className={'mt-8 justify-start'}
@@ -35,7 +48,7 @@ const Parameter = ({ form, type, index, ...rest }) => {
 							{...form.getListInputProps('hyperparameters', index, 'name')}
 							required
 						/>
-						<Component form={form} type={type} index={index} {...rest} />
+						<Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} />
 						<ActionIcon
 							color='red'
 							onClick={() => form.removeListItem('hyperparameters', index)}
@@ -43,6 +56,15 @@ const Parameter = ({ form, type, index, ...rest }) => {
 						>
 							<Trash/>
 						</ActionIcon>
+					</div>
+						{currentConfirmedValues.length > 0 && (
+                            <div className='mt-4'>
+                                <h3>Values:</h3>
+                                {currentConfirmedValues.map((value, idx) => (
+                                    <p key={idx}>{value}</p>
+                                ))}
+                            </div>
+                        )}
 					</div>
 				);
 			}}
@@ -80,7 +102,7 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 	);
 };
 
-const StringParam = ({ form, type, index, ...rest }) => {
+const StringParam = ({ form, type, index, onConfirm, ...rest }) => {
 	const [opened, setOpened] = useState(false);
 	const [values, setValues] = useState(['']);
 
@@ -105,8 +127,18 @@ const StringParam = ({ form, type, index, ...rest }) => {
         setOpened(false);
     };
 
+	const handleConfirm = () => {
+        onConfirm(values);
+		setOpened(false);
+    };
     return (
         <>
+			 {/* <div className='mt-4'>
+                <h3>Confirmed Values:</h3>
+                {confirmedValues.map((value, idx) => (
+                    <p key={idx}>{value}</p>
+                ))}
+            </div> */}
             <Button onClick={() => setOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
                 Edit Strings
             </Button>
@@ -133,6 +165,9 @@ const StringParam = ({ form, type, index, ...rest }) => {
                 <ActionIcon onClick={handleAddValue} color='blue'>
                     <Plus />
                 </ActionIcon>
+				<button onClick={handleConfirm} className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-md'>
+                Confirm
+            </button>
             </Modal>
         </>
     );
