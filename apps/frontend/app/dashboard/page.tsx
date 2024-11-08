@@ -190,13 +190,7 @@ export default function DashboardPage() {
 		if (!userId) {
 			return;
 		}
-		console.log("getting exps");
-		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`)
-		console.log(eventSource);
-
-		eventSource.onopen = () => {
-			console.log("SSE open!");
-		}
+		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
 
 		eventSource.onmessage = (event) => {
 			console.log(event.data);
@@ -207,13 +201,7 @@ export default function DashboardPage() {
 
 		}
 
-		// eventSource.onerror = (event) => {
-		// 	console.error('SSE Error:', event);
-		// };
-
 		return () => eventSource.close();
-
-		// return () => clearInterval(interval);
 	}, [userId]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
