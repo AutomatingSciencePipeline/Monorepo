@@ -88,8 +88,9 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	useEffect(() => {
 		if (copyID != null) {
 			const expInfo = getDocumentFromId(copyID);
+			console.log(expInfo);
 			if (expInfo) {
-				const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+				const hyperparameters = JSON.parse(expInfo['hyperparameters']);
 				form.setValues({
 					hyperparameters: formList(hyperparameters),
 					name: expInfo['name'],
