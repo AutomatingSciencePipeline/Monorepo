@@ -36,10 +36,6 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 			return response.json();
 		}
 		return Promise.reject(response);
-	}).then((expId: String) => {
-		console.log(expId);
-	}).catch((response: Response) => {
-		// might need this
 	});
 };
 

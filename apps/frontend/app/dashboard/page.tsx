@@ -192,8 +192,6 @@ export default function DashboardPage() {
 		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
 
 		eventSource.onmessage = (event) => {
-			console.log(event.data);
-			// console.log("data was:" + event.data);
 			if (event.data !== 'heartbeat') {
 				setExperiments(JSON.parse(event.data) as ExperimentData[]);
 			}
