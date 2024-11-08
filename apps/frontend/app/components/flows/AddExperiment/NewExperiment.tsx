@@ -87,31 +87,34 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	useEffect(() => {
 		if (copyID != null) {
-			const expInfo = getDocumentFromId(copyID);
-			console.log(expInfo);
-			if (expInfo) {
-				const hyperparameters = JSON.parse(expInfo['hyperparameters']);
-				form.setValues({
-					hyperparameters: formList(hyperparameters),
-					name: expInfo['name'],
-					description: expInfo['description'],
-					trialExtraFile: expInfo['trialExtraFile'],
-					trialResult: expInfo['trialResult'],
-					verbose: expInfo['verbose'],
-					workers: expInfo['workers'],
-					scatter: expInfo['scatter'],
-					dumbTextArea: expInfo['dumbTextArea'],
-					scatterIndVar: expInfo['scatterIndVar'],
-					scatterDepVar: expInfo['scatterDepVar'],
-					timeout: expInfo['timeout'],
-					keepLogs: expInfo['keepLogs'],
-				});
-				setCopyId(null);
-				setStatus(FormStates.Info);
-				console.log('Copied!');
-			} else {
-				console.log('No such document!');
+			async () => {
+				const expInfo = await getDocumentFromId(copyID);
+				console.log(expInfo);
+				if (expInfo) {
+					const hyperparameters = JSON.parse(expInfo['hyperparameters']);
+					form.setValues({
+						hyperparameters: formList(hyperparameters),
+						name: expInfo['name'],
+						description: expInfo['description'],
+						trialExtraFile: expInfo['trialExtraFile'],
+						trialResult: expInfo['trialResult'],
+						verbose: expInfo['verbose'],
+						workers: expInfo['workers'],
+						scatter: expInfo['scatter'],
+						dumbTextArea: expInfo['dumbTextArea'],
+						scatterIndVar: expInfo['scatterIndVar'],
+						scatterDepVar: expInfo['scatterDepVar'],
+						timeout: expInfo['timeout'],
+						keepLogs: expInfo['keepLogs'],
+					});
+					setCopyId(null);
+					setStatus(FormStates.Info);
+					console.log('Copied!');
+				} else {
+					console.log('No such document!');
+				}
 			}
+
 			// getDocumentFromId(copyID).then((docSnap) => {
 			// 	if (docSnap.exists()) {
 			// 		const expInfo = docSnap.data();
