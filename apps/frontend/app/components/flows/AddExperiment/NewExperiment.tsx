@@ -16,7 +16,9 @@ import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS } from '../../../../firebase/db';
 
-const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5*60*60; // 5 hours in seconds
+import { getDocumentFromId } from '../../../../lib/mongodb_funcs';
+
+const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
 
 export const FormStates = {
 	Closed: -1,
@@ -85,39 +87,60 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	useEffect(() => {
 		if (copyID != null) {
-			const db = getFirestore(firebaseApp);
-			getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
-				if (docSnap.exists()) {
-					const expInfo = docSnap.data();
-					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
-					form.setValues({
-						hyperparameters: formList(hyperparameters),
-						name: expInfo['name'],
-						description: expInfo['description'],
-						trialExtraFile: expInfo['trialExtraFile'],
-						trialResult: expInfo['trialResult'],
-						verbose: expInfo['verbose'],
-						workers: expInfo['workers'],
-						scatter: expInfo['scatter'],
-						dumbTextArea: expInfo['dumbTextArea'],
-						scatterIndVar: expInfo['scatterIndVar'],
-						scatterDepVar: expInfo['scatterDepVar'],
-						timeout: expInfo['timeout'],
-						keepLogs: expInfo['keepLogs'],
-					});
-					setCopyId(null);
-					setStatus(FormStates.Info);
-					console.log('Copied!');
-				} else {
-					console.log('No such document!');
-				}
-			});
+			const expInfo = getDocumentFromId(copyID);
+			if (expInfo) {
+				const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+				form.setValues({
+					hyperparameters: formList(hyperparameters),
+					name: expInfo['name'],
+					description: expInfo['description'],
+					trialExtraFile: expInfo['trialExtraFile'],
+					trialResult: expInfo['trialResult'],
+					verbose: expInfo['verbose'],
+					workers: expInfo['workers'],
+					scatter: expInfo['scatter'],
+					dumbTextArea: expInfo['dumbTextArea'],
+					scatterIndVar: expInfo['scatterIndVar'],
+					scatterDepVar: expInfo['scatterDepVar'],
+					timeout: expInfo['timeout'],
+					keepLogs: expInfo['keepLogs'],
+				});
+				setCopyId(null);
+				setStatus(FormStates.Info);
+				console.log('Copied!');
+			} else {
+				console.log('No such document!');
+			}
+			// getDocumentFromId(copyID).then((docSnap) => {
+			// 	if (docSnap.exists()) {
+			// 		const expInfo = docSnap.data();
+			// 		const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+			// 		form.setValues({
+			// 			hyperparameters: formList(hyperparameters),
+			// 			name: expInfo['name'],
+			// 			description: expInfo['description'],
+			// 			trialExtraFile: expInfo['trialExtraFile'],
+			// 			trialResult: expInfo['trialResult'],
+			// 			verbose: expInfo['verbose'],
+			// 			workers: expInfo['workers'],
+			// 			scatter: expInfo['scatter'],
+			// 			dumbTextArea: expInfo['dumbTextArea'],
+			// 			scatterIndVar: expInfo['scatterIndVar'],
+			// 			scatterDepVar: expInfo['scatterDepVar'],
+			// 			timeout: expInfo['timeout'],
+			// 			keepLogs: expInfo['keepLogs'],
+			// 		});
+			// 		setCopyId(null);
+			// 		setStatus(FormStates.Info);
+			// 		console.log('Copied!');
+			// 	}
+			// });
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
-		return <Parameter key = {index} form={form} type={type} index={index} {...rest} />;
+		return <Parameter key={index} form={form} type={type} index={index} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);
@@ -191,7 +214,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form = {form} id={id} />
+										<DispatchStep form={form} id={id} />
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -230,11 +253,13 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 											<button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												{...(status === FormStates.Dispatch ?
-													{ type: 'submit', onClick: () => {
-														setFormState(-1);
-														localStorage.removeItem('ID');
-														setStatus(FormStates.Info);
-													} } :
+													{
+														type: 'submit', onClick: () => {
+															setFormState(-1);
+															localStorage.removeItem('ID');
+															setStatus(FormStates.Info);
+														}
+													} :
 													{
 														type: 'button',
 														onClick: () => setStatus(status + 1),
