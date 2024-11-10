@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     // Set up a Change Stream for real-time updates
     const pipeline = [];
-    const options = { fullDocument: "updateLookup" };
+    const options = {};
     const changeStream = experimentsCollection.watch(pipeline, options);
 
     // Set up real-time streaming of changes to the client using SSE
