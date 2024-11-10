@@ -23,7 +23,16 @@ export default async function handler(req, res) {
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
     // Set up a Change Stream for real-time updates
-    const pipeline = [];
+    const pipeline = [
+        {
+            $match: {
+                $or: [
+                    { "fullDocument.creator": uid },          // Match insert or update with the creator field
+                    { operationType: "delete", "documentKey._id": { $exists: true } }  // Handle deletion events
+                ]
+            }
+        }
+    ];
     const options = {};
     const changeStream = experimentsCollection.watch(pipeline, options);
 
