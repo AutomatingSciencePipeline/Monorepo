@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
     // Set up a Change Stream for real-time updates
-    const pipeline = [{ $match: { "fullDocument._id": expId } }];
+    const pipeline = [{ $match: { "fullDocument._id": new ObjectId(expId) } }];
     const changeStream = experimentsCollection.watch(pipeline);
 
     // Set up real-time streaming of changes to the client using SSE
