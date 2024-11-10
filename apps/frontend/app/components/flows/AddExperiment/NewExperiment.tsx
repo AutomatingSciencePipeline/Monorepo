@@ -87,11 +87,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	useEffect(() => {
 		if (copyID != null) {
-			console.log("Getting expinfo!")
 			getDocumentFromId(copyID).then((expInfo) => {
-				console.log(expInfo);
-				console.log("that was the exp info that was retrieved!");
-				console.log(expInfo['hyperparamters']);
 				if (expInfo) {
 					const hyperparameters = expInfo['hyperparameters'];
 					form.setValues({
@@ -111,66 +107,11 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 					});
 					setCopyId(null);
 					setStatus(FormStates.Info);
-					console.log("copied exp!");
 				}
 				else {
 					console.log("Could not get expInfo!!!");
 				}
 			})
-			// async () => {
-			// 	const expInfo = await getDocumentFromId(copyID);
-			// 	console.log("Getting expinfo!")
-			// 	console.log(expInfo);
-			// 	console.log("that was the exp info that was retrieved!");
-			// 	if (expInfo) {
-			// 		const hyperparameters = JSON.parse(expInfo['hyperparameters']);
-			// 		form.setValues({
-			// 			hyperparameters: formList(hyperparameters),
-			// 			name: expInfo['name'],
-			// 			description: expInfo['description'],
-			// 			trialExtraFile: expInfo['trialExtraFile'],
-			// 			trialResult: expInfo['trialResult'],
-			// 			verbose: expInfo['verbose'],
-			// 			workers: expInfo['workers'],
-			// 			scatter: expInfo['scatter'],
-			// 			dumbTextArea: expInfo['dumbTextArea'],
-			// 			scatterIndVar: expInfo['scatterIndVar'],
-			// 			scatterDepVar: expInfo['scatterDepVar'],
-			// 			timeout: expInfo['timeout'],
-			// 			keepLogs: expInfo['keepLogs'],
-			// 		});
-			// 		setCopyId(null);
-			// 		setStatus(FormStates.Info);
-			// 		console.log('Copied!');
-			// 	} else {
-			// 		console.log('No such document!');
-			// 	}
-			// }
-
-			// getDocumentFromId(copyID).then((docSnap) => {
-			// 	if (docSnap.exists()) {
-			// 		const expInfo = docSnap.data();
-			// 		const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
-			// 		form.setValues({
-			// 			hyperparameters: formList(hyperparameters),
-			// 			name: expInfo['name'],
-			// 			description: expInfo['description'],
-			// 			trialExtraFile: expInfo['trialExtraFile'],
-			// 			trialResult: expInfo['trialResult'],
-			// 			verbose: expInfo['verbose'],
-			// 			workers: expInfo['workers'],
-			// 			scatter: expInfo['scatter'],
-			// 			dumbTextArea: expInfo['dumbTextArea'],
-			// 			scatterIndVar: expInfo['scatterIndVar'],
-			// 			scatterDepVar: expInfo['scatterDepVar'],
-			// 			timeout: expInfo['timeout'],
-			// 			keepLogs: expInfo['keepLogs'],
-			// 		});
-			// 		setCopyId(null);
-			// 		setStatus(FormStates.Info);
-			// 		console.log('Copied!');
-			// 	}
-			// });
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 

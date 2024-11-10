@@ -194,8 +194,13 @@ export default function DashboardPage() {
 
 		eventSource.onmessage = (event) => {
 			if (event.data !== 'heartbeat') {
-				console.log(event.data);
-				setExperiments(JSON.parse(event.data) as ExperimentData[]);
+				try {
+					setExperiments(JSON.parse(event.data) as ExperimentData[]);
+				}
+				catch{
+					console.log(`${event.data} was not valid JSON!`);
+				}
+				
 			}
 
 		}
