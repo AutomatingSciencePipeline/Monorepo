@@ -91,8 +91,9 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			getDocumentFromId(copyID).then((expInfo) => {
 				console.log(expInfo);
 				console.log("that was the exp info that was retrieved!");
+				console.log(expInfo['hyperparamters']);
 				if (expInfo) {
-					const hyperparameters = JSON.parse(expInfo['hyperparameters']);
+					const hyperparameters = expInfo['hyperparameters'];
 					form.setValues({
 						hyperparameters: formList(hyperparameters),
 						name: expInfo['name'],
