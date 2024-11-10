@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     // Set up a Change Stream for real-time updates
     const pipeline = [
         { $match: { "documentKey._id": new ObjectId(expId) } }
-      ];
+    ];
     const changeStream = experimentsCollection.watch(pipeline);
 
     // Set up real-time streaming of changes to the client using SSE
@@ -36,7 +36,15 @@ export default async function handler(req, res) {
     res.write(`data: ${JSON.stringify(initArray)}\n\n`);
 
     // Listen to changes in the collection
-    changeStream.on("change", async () => {
+    changeStream.on("change", async (change) => {
+        if (change.operationType === "delete") {
+            res.write('event: close\n');
+            res.write('data: Connection closed\n\n');
+            res.end();  // Close the SSE connection
+            clearInterval(intervalId);
+            changeStream.close();
+        }
+
         const updatedDocuments = await experimentsCollection
             .find({ '_id': new ObjectId(expId) })
             .toArray();
