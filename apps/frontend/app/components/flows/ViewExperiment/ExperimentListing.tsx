@@ -60,6 +60,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 	useEffect(() => {
+		console.log(project.creator);
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
@@ -68,6 +69,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			eventSource.onmessage = (event) => {
 				if (event.data !== 'heartbeat') {
 					setProject(JSON.parse(event.data) as ExperimentData);
+					console.log(project.creator);
 				}
 
 			}

@@ -717,7 +717,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		>
 
 			{sortedExperiments?.map((project: ExperimentData) => {
-				console.log(project.created);
 				if (!includeCompleted && project.finished) {
 					return null;
 				}
