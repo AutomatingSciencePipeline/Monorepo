@@ -47,7 +47,9 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		updateExperimentNameById(project.expId, newProjectName);
+		updateExperimentNameById(project.expId, newProjectName).catch((reason) =>{
+			console.log(`Failed to update experiment name, reason: ${reason}`);
+		});
 		// Exit the editing mode
 		setIsEditing(false);
 	};
