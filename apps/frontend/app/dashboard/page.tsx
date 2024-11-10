@@ -364,7 +364,7 @@ export default function DashboardPage() {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
 							}}
-							onDeleteExperiment={async (experimentId) => {
+							onDeleteExperiment={(experimentId) => {
 								deleteExperiment(experimentId);
 							}} />
 					</div>
