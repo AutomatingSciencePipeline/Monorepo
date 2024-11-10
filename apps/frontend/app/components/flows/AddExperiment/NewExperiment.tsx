@@ -91,6 +91,30 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			getDocumentFromId(copyID).then((expInfo) => {
 				console.log(expInfo);
 				console.log("that was the exp info that was retrieved!");
+				if (expInfo) {
+					const hyperparameters = JSON.parse(expInfo['hyperparameters']);
+					form.setValues({
+						hyperparameters: formList(hyperparameters),
+						name: expInfo['name'],
+						description: expInfo['description'],
+						trialExtraFile: expInfo['trialExtraFile'],
+						trialResult: expInfo['trialResult'],
+						verbose: expInfo['verbose'],
+						workers: expInfo['workers'],
+						scatter: expInfo['scatter'],
+						dumbTextArea: expInfo['dumbTextArea'],
+						scatterIndVar: expInfo['scatterIndVar'],
+						scatterDepVar: expInfo['scatterDepVar'],
+						timeout: expInfo['timeout'],
+						keepLogs: expInfo['keepLogs'],
+					});
+					setCopyId(null);
+					setStatus(FormStates.Info);
+					console.log("copied exp!");
+				}
+				else {
+					console.log("Could not get expInfo!!!");
+				}
 			})
 			// async () => {
 			// 	const expInfo = await getDocumentFromId(copyID);
