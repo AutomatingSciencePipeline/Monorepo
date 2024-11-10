@@ -115,7 +115,7 @@ export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExper
 export const deleteExperiment = async (expId: ExperimentDocumentId) => {
 	await fetch(`/api/experiments/delete/${expId}`).then((response) => {
 		if (response.ok) {
-			return response.json();
+			return response;
 		}
 		return Promise.reject(response);
 	});
