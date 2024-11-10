@@ -15,3 +15,17 @@ export async function getDocumentFromId(expId: string) {
     //just return the document
     return expDoc;
 }
+
+export async function deleteDocumentById(expId: string){
+    'use server';
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+
+    const deleted = await collection.deleteOne({"_id": new ObjectId(expId)});
+
+    if(deleted.deletedCount == 0){
+        return Promise.reject(`Could not find document with id: ${expId}`);
+    }
+
+    return Promise.resolve();
+}

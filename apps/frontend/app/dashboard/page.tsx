@@ -24,6 +24,7 @@ import { ExperimentListing as ExperimentListing } from '../components/flows/View
 import { ExperimentData } from '../../firebase/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from '../../pages/api/queue';
+import { deleteDocumentById } from '../../lib/mongodb_funcs';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -365,7 +366,10 @@ export default function DashboardPage() {
 								setCopyId(experimentId);
 							}}
 							onDeleteExperiment={(experimentId) => {
-								deleteExperiment(experimentId);
+								// deleteExperiment(experimentId);
+								deleteDocumentById(experimentId).catch((reason) => {
+									console.log(`Failed delete, reason: ${reason}`);
+								})
 							}} />
 					</div>
 					{/* Activity feed */}
