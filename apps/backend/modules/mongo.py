@@ -1,7 +1,7 @@
 import json
 import pymongo
 from pymongo.errors import ConnectionFailure
-from bson import Binary
+from bson import Binary, ObjectId
 from gridfs import GridFSBucket
 
 def verify_mongo_connection(mongoClient: pymongo.MongoClient):
@@ -12,7 +12,7 @@ def verify_mongo_connection(mongoClient: pymongo.MongoClient):
         raise Exception("MongoDB server not available/unreachable") from err
     
 def upload_experiment_aggregated_results(experimentId: str, results: str, mongoClient: pymongo.MongoClient):
-    experimentResultEntry = {"_id": experimentId, "resultContent": results}
+    experimentResultEntry = {"experimentId": experimentId, "resultContent": results}
     # Get the results connection
     resultsCollection = mongoClient["gladosdb"].results
     try:
@@ -25,17 +25,16 @@ def upload_experiment_aggregated_results(experimentId: str, results: str, mongoC
         raise Exception("Encountered error while storing aggregated results in MongoDB") from err
     
 def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient: pymongo.MongoClient):
-    experimentZipEntry = {"_id": experimentId, "fileContent": encoded}
+    experimentZipEntry = {"experimentId": experimentId, "fileContent": encoded}
     zipCollection = mongoClient["gladosdb"].zips
     try:
-        # TODO: Refactor to call the backend
         resultZipId = zipCollection.insert_one(experimentZipEntry).inserted_id
         return resultZipId
     except Exception as err:
         raise Exception("Encountered error while storing results zip in MongoDB") from err
     
 def upload_log_file(experimentId: str, contents: str, mongoClient: pymongo.MongoClient):
-    logFileEntry = {"_id": experimentId, "fileContent": contents}
+    logFileEntry = {"experimentId": experimentId, "fileContent": contents}
     logCollection = mongoClient["gladosdb"].logs
     try:
         resultId = logCollection.insert_one(logFileEntry).inserted_id
@@ -89,4 +88,17 @@ def download_experiment_file(expId: str, mongoClient: pymongo.MongoClient):
     file = bucket.open_download_stream_by_name(file_name)
     contents = file.read()
     return contents
-    
+
+def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
+    experimentsCollection = mongoClient["gladosdb"].experiments
+    experiment = experimentsCollection.find_one({"_id": ObjectId(expId)}, {"_id": 0})
+    if experiment is None:
+        raise Exception("Could not find experiment!")
+    experiment["id"] = expId
+    experiment["expId"] = expId
+    return experiment
+
+def update_exp_value(expId: str, field: str, newValue: str, mongoClient: pymongo.MongoClient):
+    experimentsCollection = mongoClient["gladosdb"].experiments
+    experimentsCollection.update_one({"_id": ObjectId(expId)}, {"$set": {field: newValue}})
+    return

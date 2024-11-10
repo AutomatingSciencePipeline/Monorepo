@@ -8,7 +8,7 @@ import bson
 from flask import Flask, Response, request, jsonify, send_file
 from kubernetes import client, config
 import pymongo
-from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file
+from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file, get_experiment, update_exp_value
 
 from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
@@ -106,6 +106,26 @@ def download_exp_file():
         file_data = download_experiment_file(experiment_id, mongoClient)
         file_stream = io.BytesIO(file_data)
         return send_file(file_stream, as_attachment=True, download_name="experiment_file", mimetype="application/octet-stream")
+    except Exception:
+        return Response(status=500)
+    
+@flaskApp.post("/getExperiment")
+def get_experiment_post():
+    try:
+        experiment_id = request.get_json()['experimentId']
+        return {'contents': get_experiment(experiment_id, mongoClient)}
+    except Exception:
+        return Response(status=500)
+    
+@flaskApp.post("/updateExperiment")
+def update_experiment():
+    try:
+        json = request.get_json()
+        experiment_id = json['experimentId']
+        field = json['field']
+        newVal = json['newValue']
+        update_exp_value(experiment_id, field, newVal, mongoClient)
+        return Response(status=200)
     except Exception:
         return Response(status=500)
 
