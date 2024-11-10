@@ -68,8 +68,8 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			const eventSource = new EventSource(`/api/experiments/subscribe?expId=${project.expId}`);
 			eventSource.onmessage = (event) => {
 				if (event.data !== 'heartbeat') {
+					console.log(event.data);
 					setProject(JSON.parse(event.data) as ExperimentData);
-					console.log(project.creator);
 				}
 
 			}

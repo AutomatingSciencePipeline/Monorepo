@@ -7,7 +7,7 @@ const mongoExpHandler: NextApiHandler = async (req, res) => {
         res.status(405).json({ response: 'Method not allowed, use POST' } as any);
         return;
     }
-
+    console.log(req.body);
     const experimentData: Partial<ExperimentData> = JSON.parse(req.body);
 
     if (!experimentData || typeof experimentData !== 'object') {
