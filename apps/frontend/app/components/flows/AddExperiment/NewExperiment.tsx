@@ -5,9 +5,6 @@ import Parameter from '../../Parameter';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../../utils/validators';
 
-import { firebaseApp } from '../../../../firebase/firebaseClient';
-import { getDoc, getFirestore, doc } from 'firebase/firestore';
-
 import { DispatchStep } from './stepComponents/DispatchStep';
 import { InformationStep } from './stepComponents/InformationStep';
 import { ParamStep } from './stepComponents/ParamStep';

@@ -1,8 +1,6 @@
 // THIS IS CURRENTLY UNUSED, FIGURE OUT HOW TO IMPORT IT INTO api/experiments/
 import { MongoClient } from 'mongodb';
 import { getEnvVar } from '../utils/env';
-import { ExperimentData } from '../firebase/db_types';
-import { ExperimentDocumentId } from '../firebase/db';
 
 // Adapted from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 

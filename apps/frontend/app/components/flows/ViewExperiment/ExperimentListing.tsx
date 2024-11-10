@@ -1,7 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId} from '../../../../firebase/db';
 import { ExperimentData } from '../../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
@@ -9,10 +8,10 @@ import { updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
-	onCopyExperiment: (experimentId: ExperimentDocumentId) => void;
-	onDownloadResults: (experimentId: ExperimentDocumentId) => Promise<void>;
-	onDownloadProjectZip: (experimentId: ExperimentDocumentId) => Promise<void>;
-	onDeleteExperiment: (experimentId: ExperimentDocumentId) => void;
+	onCopyExperiment: (experimentId: string) => void;
+	onDownloadResults: (experimentId: string) => Promise<void>;
+	onDownloadProjectZip: (experimentId: string) => Promise<void>;
+	onDeleteExperiment: (experimentId: string) => void;
 }
 
 
