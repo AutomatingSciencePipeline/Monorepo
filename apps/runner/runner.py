@@ -94,7 +94,7 @@ def run_batch(data: IncomingStartRequest):
 
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
-        hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
+        hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(experimentData['hyperparameters'])
     except (KeyError, ValueError) as err:
         if isinstance(err, KeyError):
             explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
