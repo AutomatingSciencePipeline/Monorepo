@@ -288,7 +288,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toLocaleString()}</span>
+					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
