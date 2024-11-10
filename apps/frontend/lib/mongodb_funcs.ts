@@ -11,20 +11,34 @@ export async function getDocumentFromId(expId: string) {
     if (!expDoc) {
         return Promise.reject(`Could not find document with id: ${expId}`);
     }
-    
+
     //just return the document
     return expDoc;
 }
 
-export async function deleteDocumentById(expId: string){
+export async function deleteDocumentById(expId: string) {
     'use server';
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
-    const deleted = await collection.deleteOne({"_id": new ObjectId(expId)});
+    const deleted = await collection.deleteOne({ "_id": new ObjectId(expId) });
 
-    if(deleted.deletedCount == 0){
+    if (deleted.deletedCount == 0) {
         return Promise.reject(`Could not find document with id: ${expId}`);
+    }
+
+    return Promise.resolve();
+}
+
+export async function updateExperimentNameById(expId: string, newExpName: string) {
+    'use server';
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+
+    const experiment = await collection.updateOne({ '_id': expId as any }, { 'name': newExpName });
+    
+    if(experiment.modifiedCount == 0){
+        return Promise.reject(`Could not update document with id: ${expId}`);
     }
 
     return Promise.resolve();

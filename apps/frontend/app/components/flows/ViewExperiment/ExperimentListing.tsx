@@ -5,6 +5,7 @@ import { ExperimentDocumentId, updateExperimentName, getCurrentProjectName } fro
 import { ExperimentData } from '../../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
+import { updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
@@ -46,8 +47,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		updateExperimentName(project.expId, projectName);
-
+		updateExperimentNameById(project.expId, newProjectName);
 		// Exit the editing mode
 		setIsEditing(false);
 	};
