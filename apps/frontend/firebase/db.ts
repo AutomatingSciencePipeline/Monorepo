@@ -1,26 +1,11 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { firebaseApp } from './firebaseClient';
-import { getFirestore, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
-import { collection, setDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
-import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ExperimentData } from './db_types';
 import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
 
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(firebaseApp);
-const storage = getStorage(firebaseApp);
-const experiments = collection(db, DB_COLLECTION_EXPERIMENTS);
-
-export type FirebaseId = string;
-export type FirebaseDocumentId = FirebaseId;
-export type FirebaseUserId = FirebaseId;
-
-export type ExperimentDocumentId = FirebaseDocumentId;
-
 // test
-export const submitExperiment = async (values: Partial<ExperimentData>, userId: FirebaseUserId) => {
+export const submitExperiment = async (values: Partial<ExperimentData>, userId: string) => {
 	values.creator = userId;
 	values.created = Date.now();
 	values.finished = false;
@@ -45,7 +30,7 @@ const downloadArbitraryFile = (url: string, name: string) => {
 	document.body.removeChild(anchor);
 };
 
-export const downloadExperimentResults = async (expId: ExperimentDocumentId) => {
+export const downloadExperimentResults = async (expId: string) => {
 	console.log(`Downloading results for ${expId}...`);
 	await fetch(`/api/download/csv/${expId}`).then((response) => {
 		if (response?.ok) {
@@ -69,7 +54,7 @@ export const downloadExperimentResults = async (expId: ExperimentDocumentId) => 
 	});
 };
 
-export const downloadExperimentProjectZip = async (expId: ExperimentDocumentId) => {
+export const downloadExperimentProjectZip = async (expId: string) => {
 	console.log(`Downloading project zip for ${expId}...`);
 	await fetch(`/api/download/zip/${expId}`).then((response) => {
 		if (response?.ok) {
@@ -91,71 +76,4 @@ export const downloadExperimentProjectZip = async (expId: ExperimentDocumentId) 
 			}
 		});
 	});
-};
-
-
-
-
-export interface MultipleExperimentSubscribeCallback {
-	(data: Partial<ExperimentData>[]): any;
-}
-
-// TODO: Convert from Firestore MongoDB
-export const listenToExperiments = (uid: FirebaseUserId, callback: MultipleExperimentSubscribeCallback) => {
-	const q = query(experiments, where('creator', '==', uid));
-	const unsubscribe = onSnapshot(q, (snapshot) => {
-		const result = [] as unknown as Partial<ExperimentData>[];
-		snapshot.forEach((doc) => result.push(doc.data()));
-		callback(result);
-	});
-	return unsubscribe;
-};
-
-// TODO: Test this!
-export const deleteExperiment = async (expId: ExperimentDocumentId) => {
-	await fetch(`/api/experiments/delete/${expId}`).then((response) => {
-		if (response.ok) {
-			return response;
-		}
-		return Promise.reject(response);
-	});
-};
-
-// TODO: Test this!
-export const updateExperimentName = async (expId, updatedName) => {
-	await fetch(`/api/experiments/updatename/${expId}/${updatedName}`).then((response) => {
-		if (response?.ok) {
-			return response.json();
-		}
-		return Promise.reject(response);
-	}).then((expId: String) => {
-		console.log(expId);
-	}).catch((response: Response) => {
-		// might need this
-	});
-};
-
-
-// Function to get the project name from Firebase
-// TODO: Convert from Firestore to MongoDB
-// Not being used right now; we have [expIdToGet].tsx, which might render this useless anyway.
-export const getCurrentProjectName = async (projectId) => {
-	try {
-	  // Reference the project document in Firebase
-	  const experimentRef = doc(db, DB_COLLECTION_EXPERIMENTS, projectId);
-
-	  // Get the project document
-	  const docSnapshot = await getDoc(experimentRef);
-
-	  if (docSnapshot.exists()) {
-		// Extract and return the project name
-			return docSnapshot.data().name;
-	  } else {
-			console.error('Project document does not exist.');
-			return null;
-	  }
-	} catch (error) {
-	  console.error('Error getting project name:', error);
-	  return null;
-	}
 };

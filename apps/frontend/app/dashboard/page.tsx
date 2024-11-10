@@ -2,8 +2,7 @@
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { useAuth } from '../../firebase/fbAuth';
-import { deleteExperiment } from '../../firebase/db';
-import { downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
+import { downloadExperimentResults, downloadExperimentProjectZip } from '../../firebase/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -248,7 +247,7 @@ export default function DashboardPage() {
 	}, []);
 
 
-	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
+	const [copyID, setCopyId] = useState<string>(null as unknown as string); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
 	useEffect(() => {
@@ -436,8 +435,8 @@ export default function DashboardPage() {
 
 export interface ExperimentListProps {
 	experiments: ExperimentData[];
-	onCopyExperiment: (experiment: ExperimentDocumentId) => void;
-	onDeleteExperiment: (experiment: ExperimentDocumentId) => void;
+	onCopyExperiment: (experiment: string) => void;
+	onDeleteExperiment: (experiment: string) => void;
 }
 
 const SortingOptions = {
@@ -469,7 +468,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
-		console.log(experiments);
 		switch (sortBy) {
 			case SortingOptions.NAME:
 				setSortedExperiments([...experiments].sort(sortByName));

@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, updateExperimentName, getCurrentProjectName } from '../../../../firebase/db';
+import { ExperimentDocumentId} from '../../../../firebase/db';
 import { ExperimentData } from '../../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
@@ -69,8 +69,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		} else {
 			const eventSource = new EventSource(`/api/experiments/subscribe?expId=${project.expId}`);
 			eventSource.onmessage = (event) => {
-				if (event.data !== 'heartbeat') {
-					console.log(event.data);
+				if (event.data !== 'heartbeat' && event.data) {
 					setProject(JSON.parse(event.data) as ExperimentData);
 				}
 
