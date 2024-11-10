@@ -35,9 +35,9 @@ export async function updateExperimentNameById(expId: string, newExpName: string
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
-    const experiment = await collection.updateOne({ '_id': expId as any }, { 'name': newExpName });
-    
-    if(experiment.modifiedCount == 0){
+    const experiment = await collection.updateOne({ '_id': expId as any }, { $set: { 'name': newExpName } });
+
+    if (experiment.modifiedCount == 0) {
         return Promise.reject(`Could not update document with id: ${expId}`);
     }
 
