@@ -9,7 +9,7 @@ export async function getDocumentFromId(expId: string) {
 
     const expDoc = await collection.findOne({ "_id": new ObjectId(expId) });
     if (!expDoc) {
-        return;
+        return Promise.reject(`Could not find document with id: ${expId}`);
     }
     
     //just return the document
