@@ -4,10 +4,9 @@ metadata:
   name: glados-service-frontend
 spec:
   selector:
-    app: GLADOS  # This should match the pod labels
+    app: GLADOS # Ensure this matches the pod label
   ports:
     - protocol: TCP
-      port: 3000       # The service port (accessible inside the cluster)
-      targetPort: 3000  # The container's port
-      nodePort: 30000   # The external port
-  type: NodePort
+      port: 3000 # The service port
+      targetPort: 3000 # The container port where Next.js listens
+  type: LoadBalancer # Expose service with a load balancer
