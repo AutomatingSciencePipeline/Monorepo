@@ -3,22 +3,22 @@ architecture: replicaset
 
 replicaSet:
   enabled: true
-  replicas: 3  # Set the number of replicas
+  replicas: 3 # Set the number of replicas
   waitForPrimary: true
 
 persistence:
   enabled: true
-  storageClass: nfs-client  # Use the storage class created earlier
+  storageClass: nfs-client # Use the storage class created earlier
   accessModes:
     - ReadWriteOnce
-  size: 10Gi  # Adjust the size as needed
+  size: 10Gi # Adjust the size as needed
 
 auth:
   enabled: true
-  rootPassword: 'password123'
-  usernames: ['adminuser']
-  passwords: ['password123']
-  databases: ['admin']
+  rootPassword: "password123"
+  usernames: ["adminuser"]
+  passwords: ["password123"]
+  databases: ["admin"]
 
 service:
   nameOverride: glados-service-mongodb
@@ -28,3 +28,14 @@ externalAccess:
   service:
     type: NodePort
     nodePorts: [30000, 30001]
+
+## Node affinity settings
+nodeAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+    nodeSelectorTerms:
+      - matchExpressions:
+          - key: "kubernetes.io/hostname" # This is the label you want to match
+            operator: In
+            values:
+              - "glados-db" # Replace with the node name you want to run MongoDB
+
