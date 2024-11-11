@@ -1,17 +1,17 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentDocumentId, subscribeToExp, updateProjectNameInFirebase, getCurrentProjectName } from '../../../../firebase/db';
 import { ExperimentData } from '../../../../firebase/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
+import { updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 
 export interface ExperimentListingProps {
 	projectinit: ExperimentData;
-	onCopyExperiment: (experimentId: ExperimentDocumentId) => void;
-	onDownloadResults: (experimentId: ExperimentDocumentId) => Promise<void>;
-	onDownloadProjectZip: (experimentId: ExperimentDocumentId) => Promise<void>;
-	onDeleteExperiment: (experimentId: ExperimentDocumentId) => void;
+	onCopyExperiment: (experimentId: string) => void;
+	onDownloadResults: (experimentId: string) => Promise<void>;
+	onDownloadProjectZip: (experimentId: string) => Promise<void>;
+	onDeleteExperiment: (experimentId: string) => void;
 }
 
 
@@ -46,8 +46,9 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 
 	const handleSave = (newProjectName) => {
 		// Update the project name in Firebase with the edited name
-		updateProjectNameInFirebase(project.expId, projectName);
-
+		updateExperimentNameById(project.expId, newProjectName).catch((reason) =>{
+			console.log(`Failed to update experiment name, reason: ${reason}`);
+		});
 		// Exit the editing mode
 		setIsEditing(false);
 	};
@@ -60,13 +61,18 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 	useEffect(() => {
+		console.log(project.creator);
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			subscribeToExp(project.expId, (data) => {
-				setProject(data as ExperimentData);
-			});
+			const eventSource = new EventSource(`/api/experiments/subscribe?expId=${project.expId}`);
+			eventSource.onmessage = (event) => {
+				if (event.data !== 'heartbeat' && event.data) {
+					setProject(JSON.parse(event.data) as ExperimentData);
+				}
+
+			}
 		}
 	}, [editingCanceled, originalProjectName, project.expId]);
 
@@ -171,7 +177,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							<span
 								className="hidden sm:inline-block sm:align-middle sm:h-screen"
 								aria-hidden="true">
-							&#8203;
+								&#8203;
 							</span>
 
 							<div
@@ -233,7 +239,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={openDeleteModal}
 				>
-        		Delete Experiment
+					Delete Experiment
 				</button>
 			</div>
 			<div className='sm:hidden'>
@@ -282,7 +288,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					null
 				}
 				<p className='flex text-gray-500 text-sm space-x-2'>
-					<span>Uploaded at {new Date(project['created']).toLocaleString()}</span>
+					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
@@ -300,4 +306,5 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 		</div>
 	);
 };
+
 

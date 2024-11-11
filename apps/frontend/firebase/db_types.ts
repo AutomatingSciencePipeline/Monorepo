@@ -1,5 +1,4 @@
 import { StorageReference } from 'firebase/storage';
-import { ExperimentDocumentId, FirebaseUserId } from './db';
 
 
 export type FileName = string;
@@ -53,12 +52,12 @@ export interface StringHyperparameter extends GenericHyperparameter {
 
 export interface ExperimentData {
     // TODO make sure these match what python expects as well
-    creator: FirebaseUserId;
+    creator: string;
     name: string;
     description: string;
     verbose: boolean;
     workers: number;
-    expId: ExperimentDocumentId; // TODO do we want to ensure this doesn't get stored in fb itself?
+    expId: string; // TODO do we want to ensure this doesn't get stored in fb itself?
     trialExtraFile: FileName;
     trialResult: FileName;
     timeout: number;
