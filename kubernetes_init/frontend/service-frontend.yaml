@@ -9,11 +9,8 @@ spec:
   selector:
     app: GLADOS
     tier: frontend
-  type: LoadBalancer
+  # type: LoadBalancer
   ports:
-  - name: https
-    port: 80
-    targetPort: 3000
-  - name: http
+  - protocol: TCP
     port: 3000
     targetPort: 3000
