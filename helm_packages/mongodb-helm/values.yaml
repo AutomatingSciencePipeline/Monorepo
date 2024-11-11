@@ -8,7 +8,7 @@ replicaSet:
 
 persistence:
   enabled: true
-  storageClass: nfs-client # Use the storage class created earlier
+  storageClass: local-storage # Use the storage class created earlier
   accessModes:
     - ReadWriteOnce
   size: 10Gi # Adjust the size as needed
