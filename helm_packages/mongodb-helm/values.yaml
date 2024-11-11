@@ -29,13 +29,14 @@ externalAccess:
     type: NodePort
     nodePorts: [30000, 30001]
 
-## Node affinity settings
-nodeAffinity:
-  requiredDuringSchedulingIgnoredDuringExecution:
-    nodeSelectorTerms:
-      - matchExpressions:
-          - key: "kubernetes.io/hostname" # This is the label you want to match
-            operator: In
-            values:
-              - "glados-db" # Replace with the node name you want to run MongoDB
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: "kubernetes.io/hostname"  # Key for the node selector
+              operator: In
+              values:
+                - "glados-db"  # Replace with the name of the node you want to use
+
 
