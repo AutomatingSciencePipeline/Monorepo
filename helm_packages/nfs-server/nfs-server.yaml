@@ -24,7 +24,7 @@ spec:
           name: exports-volume
       containers:
       - name: nfs-server
-        image: quay.io/external_storage/nfs-server-provisioner:latest
+        image: itsthenetwork/nfs-server-alpine:latest
         volumeMounts:
         - mountPath: /exports
           name: exports-volume
