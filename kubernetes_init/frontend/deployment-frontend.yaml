@@ -21,7 +21,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
-          # hostPort: 0000
+          hostPort: 3000 
         env:
         - name: BACKEND_PORT
           valueFrom:
