@@ -27,7 +27,7 @@ externalAccess:
   enabled: true
   service:
     type: NodePort
-    nodePorts: [30000, 30001]
+    nodePorts: [30001, 30002]
 
 affinity:
   nodeAffinity:
