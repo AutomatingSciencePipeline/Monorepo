@@ -1,0 +1,11 @@
+# storage-class.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: glados-storage
+provisioner: gp2
+parameters:
+  type: gp2
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+

@@ -1,0 +1,30 @@
+# values.yaml
+architecture: replicaset
+
+replicaSet:
+  enabled: true
+  replicas: 3  # Set the number of replicas
+  waitForPrimary: true
+
+persistence:
+  enabled: true
+  storageClass: nfs-client  # Use the storage class created earlier
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi  # Adjust the size as needed
+
+auth:
+  enabled: true
+  rootPassword: 'password123'
+  usernames: ['adminuser']
+  passwords: ['password123']
+  databases: ['admin']
+
+service:
+  nameOverride: glados-service-mongodb
+
+externalAccess:
+  enabled: true
+  service:
+    type: NodePort
+    nodePorts: [30000, 30001]
