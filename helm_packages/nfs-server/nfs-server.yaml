@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nfs-server
-  labels:
-    app: nfs-server
 spec:
   replicas: 1
   selector:
@@ -14,22 +12,27 @@ spec:
       labels:
         app: nfs-server
     spec:
+      initContainers:
+      - name: create-exports-dir
+        image: busybox
+        command:
+          - sh
+          - -c
+          - "mkdir -p /exports && chmod 777 /exports"
+        volumeMounts:
+        - mountPath: /exports
+          name: exports-volume
       containers:
       - name: nfs-server
-        image: itsthenetwork/nfs-server-alpine:latest
-        ports:
-        - name: nfs
-          containerPort: 2049
-        securityContext:
-          privileged: true
-        env:
-        - name: SHARED_DIRECTORY
-          value: /exports
+        image: quay.io/external_storage/nfs-server-provisioner:latest
         volumeMounts:
-        - name: nfs-storage
-          mountPath: /exports
+        - mountPath: /exports
+          name: exports-volume
+        ports:
+        - containerPort: 2049
+        - containerPort: 111
+        - containerPort: 20048
+        - containerPort: 32765
       volumes:
-      - name: nfs-storage
-        persistentVolumeClaim:
-          claimName: nfs-pvc
-      nodeName: glados-db
+      - name: exports-volume
+        emptyDir: {}

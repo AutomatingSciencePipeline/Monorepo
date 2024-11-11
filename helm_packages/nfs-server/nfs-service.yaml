@@ -9,4 +9,3 @@ spec:
     - protocol: TCP
       port: 2049
       targetPort: 2049
-  clusterIP: None  # Creates a headless service
