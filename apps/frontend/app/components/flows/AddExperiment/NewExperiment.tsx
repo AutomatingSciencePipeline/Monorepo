@@ -1,8 +1,8 @@
 import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, TransitionChild } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
-import { useForm, formList, joiResolver } from '@mantine/form';
+import { useForm, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../../utils/validators';
 
 import { firebaseApp } from '../../../../firebase/firebaseClient';
@@ -66,7 +66,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
-			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
+			hyperparameters: [] as any[], // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			trialExtraFile: '',
@@ -80,7 +80,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			keepLogs: true,
 			workers: 1,
 		},
-		schema: joiResolver(experimentSchema),
+		validate: joiResolver(experimentSchema),
 	});
 
 	useEffect(() => {
@@ -91,7 +91,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 					const expInfo = docSnap.data();
 					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
 					form.setValues({
-						hyperparameters: formList(hyperparameters),
+						hyperparameters: hyperparameters,
 						name: expInfo['name'],
 						description: expInfo['description'],
 						trialExtraFile: expInfo['trialExtraFile'],
@@ -144,10 +144,20 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 				onClose={() => setFormState(0)}
 			>
 				<div className='absolute inset-0 overflow-hidden'>
-					<Dialog.Overlay className='absolute inset-0' />
+					<TransitionChild
+						as={Fragment}
+						enter="ease-out duration-300"
+						enterFrom="opacity-0"
+						enterTo="opacity-100"
+						leave="ease-in duration-200"
+						leaveFrom="opacity-100"
+						leaveTo="opacity-0"
+					>
+						<div className='absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+					</TransitionChild>
 
 					<div className='pointer-events-none fixed inset-y-0 right-0 flex pl-20 sm:pl-16'>
-						<Transition.Child
+						<TransitionChild
 							as={Fragment}
 							enter='transform transition ease-in-out duration-500 sm:duration-700'
 							enterFrom='translate-x-full'
@@ -247,7 +257,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									</div>
 								</form>
 							</div>
-						</Transition.Child>
+						</TransitionChild>
 					</div>
 				</div>
 			</Dialog>
