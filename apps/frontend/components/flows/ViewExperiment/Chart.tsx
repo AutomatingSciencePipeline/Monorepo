@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Chart, registerables, ChartTypeRegistry } from 'chart.js';
+import {IBoxPlot} from '@sgratzl/chartjs-chart-boxplot';
 import Modal from './Modal'; // Assuming you have a Modal component
 import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../firebase/db_types';
@@ -22,6 +23,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const setLineChart = () => setChartType('line');
     const setBarChart = () => setChartType('bar');
     const setPieChart = () => setChartType('pie');
+    const setBoxPlot = () => setChartType('boxplot');
+    const setViolin = () => setChartType('violin');
 
     useEffect(() => {
         fetch(`/api/download/csv/671a908532c499e45424f25c`).then((response) => response.json()).then((record) => {
@@ -126,6 +129,12 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 </button>
                 <button onClick={setPieChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
                     Pie Chart
+                </button>
+                <button onClick={setBoxPlot} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                    Box Plot
+                </button>
+                <button onClick={setViolin} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                    Violin
                 </button>
             </div>
             <div className='p-4'>
