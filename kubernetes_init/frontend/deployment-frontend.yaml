@@ -20,8 +20,8 @@ spec:
         image: gladospipeline/glados-frontend:main
         imagePullPolicy: Always
         ports:
-        - containerPort: 0000
-          # hostPort: 0000
+        - containerPort: 3000
+          hostPort: 3000 
         env:
         - name: BACKEND_PORT
           valueFrom:

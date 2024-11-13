@@ -4,6 +4,7 @@
 extension-pkg-allow-list=pydantic  # Updated from 'extension-pkg-whitelist'
 disable=
     C0301,  # line too long
+    C0303,  # trailing whitespace
     C0114,  # missing-module-docstring
     C0116,  # missing-function-docstring
     C0115,  # missing-class-docstring
