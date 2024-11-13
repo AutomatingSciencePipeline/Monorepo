@@ -31,3 +31,51 @@ This corresponds to outcome d), which is "Stakeholders needs are defined." The X
 ### c. Prioritize and down-select needs
 
 This corresponds to outcome ), which is "Stakeholders needs are defined." The XP implementation of this task is
+
+# 6.4.4 Architecture Definition Process
+
+## 1. Prepare for Architecture Definition.
+
+### a. Review pertinent information and identify key drivers of the architecture.
+
+This corresponds to outcome c), which is "Context, boundaries, and external interfaces of the system are defined." The XP implementation of this task is Stories, since once the information and key drivers are identified, teams will want to put them on stories for convenience.
+
+### b. Identify stakeholder concerns.
+
+This corresponds to outcome a), which is "Identified stakeholder concerns are addressed by this architecture." The XP implementation of this task is Real Customer Involvement; learning the concerns of the stakeholder is much easier if they are a part of the process.
+
+### d. Define architecture evaluation criteria based on stakeholder concerns and key requirements.
+
+This corresponds to outcome k), which is "Traceability of architecture elements to stakeholder and system/software requirements is developed." The XP implementation of this task is also Real Customer Involvement, since those concerns and requirements can only be identified if the customer is involved in the process.
+
+### e. Identify and plan for the necessary enabling systems or services needed to support the Architecture Definition process.
+
+This corresponds to outcome j), which is "Any enabling systems or services needed for architecture definition are available." The XP implementation of this task is Negotiated Scope Contract, as this is the part of the Architecture Definition process where scope is being established.
+
+## 2. Develop architecture viewpoints.
+
+### a. Select, adapt, or develop viewpoints and model kinds based on stakeholder concerns.
+
+This corresponds to outcome b), which is "Architecture viewpoints are developed." The XP implementation of this task is Real Customer Involvement. If we need the stakeholder, they need to get involved.
+
+### b. Establish or identify potential architecture framework(s) to be used in developing models and views.
+
+This corresponds to outcome d), which is "Architecture views and models of the system are developed." The XP implementation of this task is Negotiated Scope Contract; exactly what will be developed is a part of defining the scope.
+
+## 3. Develop models and views of candidate architectures.
+
+### a. Define the software system context and boundaries in terms of interfaces and interactions with external entities.
+
+This corresponds to outcome f), which is "System elements and their interfaces are identified." The XP implementation of this task is Pair Programming, as with collaboration, defining the system and its boundaries will be more consistent throughout the team.
+
+### b. Identify architectural entities and relationships between entities that address key stakeholder concerns and critical software system requirements.
+
+This corresponds to outcome i), which is "Alignment of the architecture with requirements and design characteristics is achieved." The XP implementation of this task is Incremental Design, which will evolve the architecture and its relationships slowly, to ensure that the progress is productive.
+
+### c. Allocate concepts, properties, characteristics, behaviors, functions, or constraints that are significant to architecture decisions of the software system to architectural entities.
+
+This corresponds to outcome e), which is "Concepts, properties, characteristics, behaviors, functions, or constraints that are significant to architecture decisions of the system are allocated to architectural entities." The XP implementation of this task is Test-First Programming, which will allow all of these to be incremented into the system, and be modified based on feedback.
+
+### d. Select, adapt, or develop models of the candidate architectures of the software system.
+
+This corresponds to outcome g), which is "Architecture candidates are assessed." The XP implementation of this task is Code and Tests, as this will let the candidate architectures be as concise as possible, not cluttering up the code with unnecessary artifacts, and let anything wasteful be cleared out easily.
