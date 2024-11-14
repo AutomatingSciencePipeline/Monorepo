@@ -10,10 +10,6 @@
 name: Publish Production Backend Docker image
 
 on:
-  push:
-    paths:
-      - 'apps/backend/**'
-    branches: ['main']
   pull_request:
     paths:
       - 'apps/backend/**'
