@@ -10,7 +10,7 @@
 name: Publish Production Frontend Docker image
 
 on:
-  pull_request:
+  push:
     paths:
       - 'apps/frontend/**'
     branches: ['main']
