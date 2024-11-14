@@ -32,7 +32,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
-          ref: development
+          ref: main
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
