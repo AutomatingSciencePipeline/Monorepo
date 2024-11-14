@@ -14,6 +14,10 @@ on:
     paths:
       - 'apps/runner/**'
     branches: ['main']
+  pull_request:
+    paths:
+      - 'apps/runner/**'
+    branches: ['main']
 
 env:
   REGISTRY: gladospipeline
