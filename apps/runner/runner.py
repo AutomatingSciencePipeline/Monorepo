@@ -9,9 +9,6 @@ import typing
 import base64
 
 import requests
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore, storage
 from bson.binary import Binary
 
 from modules.data.types import DocumentId, IncomingStartRequest
@@ -31,7 +28,6 @@ except ImportError:
     logging.error("Failed to import the 'magic' package, you're probably missing a system level dependency")
     sys.exit(1)
 
-ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
 DB_COLLECTION_EXPERIMENTS = "Experiments"
 
 # set up logger
@@ -39,9 +35,6 @@ configure_root_logger()
 syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
-firebaseCredentials = credentials.Certificate(json.loads(_get_env(ENV_FIREBASE_CREDENTIALS)))
-firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
-firebaseDb = firestore.client()
 
 syslogger.info("GLADOS Runner Started")
 
@@ -87,7 +80,7 @@ def run_batch(data: IncomingStartRequest):
         
         
     except Exception as err:  # pylint: disable=broad-exception-caught
-        explogger.error("Error retrieving experiment data from firebase, aborting")
+        explogger.error("Error retrieving experiment data from mongo, aborting")
         explogger.exception(err)
         close_experiment_run(exp_id)
         return
