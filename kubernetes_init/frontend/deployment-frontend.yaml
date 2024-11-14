@@ -38,16 +38,6 @@ spec:
                 secretKeyRef:
                   name: secret-env
                   key: MONGODB_PORT
-            - name: SERVICE_ROLE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: secret-env
-                  key: SERVICE_ROLE_KEY
-            - name: FIREBASE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: secret-env
-                  key: FIREBASE_KEY
             - name: MONGODB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -73,6 +63,16 @@ spec:
                 secretKeyRef:
                   name: secret-env
                   key: AUTH_GITHUB_SECRET
+            - name: AUTH_GOOGLE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_GOOGLE_ID
+            - name: AUTH_GOOGLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: AUTH_GOOGLE_SECRET
             - name: AUTH_TRUST_HOST
               valueFrom:
                 secretKeyRef:
