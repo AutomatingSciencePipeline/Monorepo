@@ -11,7 +11,6 @@ export interface AlreadySignedInModalProps {
 }
 
 export const AlreadySignedInModal = ({ continueButtonMessage, linkTarget }: AlreadySignedInModalProps) => {
-	// const { authService } = useAuth();
 	const { data: session } = useSession();
 
 	return (

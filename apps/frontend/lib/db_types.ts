@@ -1,6 +1,3 @@
-import { StorageReference } from 'firebase/storage';
-
-
 export type FileName = string;
 
 export type EpochMilliseconds = number;
@@ -71,7 +68,7 @@ export interface ExperimentData {
     finished: boolean;
     estimatedTotalTimeMinutes: number;
     expToRun: number; // TODO is this used?
-    file: StorageReference; // TODO rename to something more unique
+    file: string; // TODO rename to something more unique
     startedAtEpochMillis: EpochMilliseconds;
     finishedAtEpochMilliseconds: EpochMilliseconds;
     passes: number;

@@ -1,10 +1,10 @@
 'use client'
 
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { submitExperiment } from '../../../../../firebase/db';
+import { submitExperiment } from '../../../../../lib/db';
 import { Group, Text } from '@mantine/core';
 
-import { useAuth } from '../../../../../firebase/fbAuth';
+import { useSession } from "next-auth/react";
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
 
@@ -18,12 +18,12 @@ const SUPPORTED_FILE_TYPES = {
 };
 
 export const DispatchStep = ({ id, form, ...props }) => {
-	const { userId } = useAuth();
+	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const onDropFile = (files: Parameters<DropzoneProps['onDrop']>[0]) => {
 		setLoading(true);
-		submitExperiment(form.values, userId as string).then(async (json) => {
+		submitExperiment(form.values, session?.user?.id as string).then(async (json) => {
 			const expId = json['id'];
 			const formData = new FormData();
 			formData.set("file", files[0]);

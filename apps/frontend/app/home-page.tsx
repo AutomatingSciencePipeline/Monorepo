@@ -20,7 +20,6 @@ export const metadata: Metadata = {
 
 const HomePage = () => {
   const router = useRouter();
-  // const { userId } = useAuth();
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
 
@@ -68,14 +67,6 @@ const HomePage = () => {
                       </Popover.Button>
                     </div>
                   </div>
-                </div>
-                <div className='hidden md:flex'>
-                  <button className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700' onClick={() => signIn("github")}>Sign In</button>
-                  {/* <Link
-                    href={'/signin'}
-                    className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
-                    Log in
-                  </Link> */}
                 </div>
               </nav>
             </Popover>
