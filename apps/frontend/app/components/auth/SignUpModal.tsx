@@ -42,10 +42,11 @@ export const SignUpModal = ({ afterSignUp }) => {
 						</p>
 						<div className='pt-3 grid grid-cols-3 gap-3'>
 
-							{/* <div>
+							<div>
 								<a
 									href='#'
 									className='w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'
+									onClick={() => signIn("google", { redirectTo: "/dashboard" })}
 								>
 									<span className='sr-only'>
 										Sign in with Google
@@ -54,7 +55,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 								</a>
 							</div>
 
-							<div>
+							{/* <div>
 								<a
 									href='#'
 									className='w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'
