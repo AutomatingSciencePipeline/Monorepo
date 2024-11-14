@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: runner
-        image: gladospipeline/glados-runner:main
+        image: gladospipeline/glados-runner:development
         imagePullPolicy: Always
         command: []
         env:
@@ -19,16 +19,6 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PORT
-        - name: SERVICE_ROLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: SERVICE_ROLE_KEY
-        - name: FIREBASE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: FIREBASE_KEY
         - name: MONGODB_USERNAME
           valueFrom:
             secretKeyRef:
