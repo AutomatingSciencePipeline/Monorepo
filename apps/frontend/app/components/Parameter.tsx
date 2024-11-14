@@ -7,10 +7,11 @@ import { string } from 'joi';
 
 const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
 	const remains = {
-		strings: StringParam,
+		string: StringParam,
 		integer: NumberParam,
 		float: NumberParam,
 		bool: BoolParam,
+		multistring: MultiStringParam,
 	};
 	const Component = remains[type];
 
@@ -22,7 +23,25 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 			updatedValues.push({ index, values: values });
 		}
 		setConfirmedValues(updatedValues);
+
+		const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
+			idx === index ? { ...param, values: values } : param
+		);
+		form.setFieldValue('hyperparameters', updatedHyperparameters);
+
+
 	};
+
+	const handleRemove = () => {
+		setConfirmedValues(confirmedValues.filter(item => item.index !== index));
+		form.removeListItem('hyperparameters', index);
+		console.log('remove', index);
+		console.log('hyperparams: ' + JSON.stringify(form.values.hyperparameters));
+		//setDummyState(prev => !prev);
+	};
+
+
+	//const [dummyState, setDummyState] = useState(false);
 
 	const currentConfirmedValues = confirmedValues.find((item) => item.index === index)?.values || [];
 
@@ -51,13 +70,13 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							<Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} />
 							<ActionIcon
 								color='red'
-								onClick={() => form.removeListItem('hyperparameters', index)}
+								onClick={handleRemove}
 								className='ml-2'
 							>
 								<Trash />
 							</ActionIcon>
 						</div>
-						{currentConfirmedValues.length > 0 && (
+						{(currentConfirmedValues.length > 0 && type === 'multistring') && (
 							<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
 								<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
 								{currentConfirmedValues.map((value, idx) => (
@@ -106,9 +125,25 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 	);
 };
 
-const StringParam = ({ form, type, index, onConfirm, ...rest }) => {
+const StringParam = ({ form, type, index, ...rest }) => {
+	return (
+		<>
+			<input
+				type='text'
+				placeholder={`${type} value`}
+				className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+				{...form.getListInputProps('hyperparameters', index, 'default')}
+				required
+			/>
+		</>
+	);
+};
+
+const MultiStringParam = ({ form, type, index, onConfirm, ...rest }) => {
 	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(['']);
+	const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
+	const [name, setName] = useState(form.values.hyperparameters[index].name || '');
+	
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
@@ -126,8 +161,7 @@ const StringParam = ({ form, type, index, onConfirm, ...rest }) => {
 	};
 
 	const handleClose = () => {
-
-		form.setFieldValue(`hyperparameters.${index}.default`, values);
+		// form.setFieldValue(`hyperparameters.${index}.values`, values);
 		setOpened(false);
 	};
 
@@ -137,12 +171,6 @@ const StringParam = ({ form, type, index, onConfirm, ...rest }) => {
 	};
 	return (
 		<>
-			{/* <div className='mt-4'>
-                <h3>Confirmed Values:</h3>
-                {confirmedValues.map((value, idx) => (
-                    <p key={idx}>{value}</p>
-                ))}
-            </div> */}
 			<Button onClick={() => setOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
 				Edit Strings
 			</Button>

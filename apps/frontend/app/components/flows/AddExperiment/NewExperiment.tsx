@@ -1,9 +1,12 @@
 import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
-import { Dialog, Transition, TransitionChild } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
-import { useForm, joiResolver } from '@mantine/form';
+import { useForm, formList, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../../utils/validators';
+
+import { firebaseApp } from '../../../../firebase/firebaseClient';
+import { getDoc, getFirestore, doc, serverTimestamp } from 'firebase/firestore';
 
 import { DispatchStep } from './stepComponents/DispatchStep';
 import { InformationStep } from './stepComponents/InformationStep';
@@ -12,8 +15,6 @@ import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS } from '../../../../firebase/db';
-
-import { getDocumentFromId } from '../../../../lib/mongodb_funcs';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
 
@@ -65,7 +66,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
-			hyperparameters: [] as any[], // TODO type for parameters will remove the need for `any` here
+			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			trialExtraFile: '',
@@ -79,16 +80,18 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			keepLogs: true,
 			workers: 1,
 		},
-		validate: joiResolver(experimentSchema),
+		schema: joiResolver(experimentSchema),
 	});
 
 	useEffect(() => {
 		if (copyID != null) {
-			getDocumentFromId(copyID).then((expInfo) => {
-				if (expInfo) {
-					const hyperparameters = expInfo['hyperparameters'];
+			const db = getFirestore(firebaseApp);
+			getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
+				if (docSnap.exists()) {
+					const expInfo = docSnap.data();
+					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
 					form.setValues({
-						hyperparameters: hyperparameters,
+						hyperparameters: formList(hyperparameters),
 						name: expInfo['name'],
 						description: expInfo['description'],
 						trialExtraFile: expInfo['trialExtraFile'],
@@ -104,18 +107,18 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 					});
 					setCopyId(null);
 					setStatus(FormStates.Info);
+					console.log('Copied!');
+				} else {
+					console.log('No such document!');
 				}
-				else {
-					console.log("Could not get expInfo!!!");
-				}
-			})
+			});
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
-	const [confirmedValues, setConfirmedValues]	= useState<string[]>([]);
+	const [confirmedValues, setConfirmedValues] = useState<string[]>([]);
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
-		return <Parameter key = {index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;
+		return <Parameter key={index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);
@@ -141,20 +144,10 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 				onClose={() => setFormState(0)}
 			>
 				<div className='absolute inset-0 overflow-hidden'>
-					<TransitionChild
-						as={Fragment}
-						enter="ease-out duration-300"
-						enterFrom="opacity-0"
-						enterTo="opacity-100"
-						leave="ease-in duration-200"
-						leaveFrom="opacity-100"
-						leaveTo="opacity-0"
-					>
-						<div className='absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-					</TransitionChild>
+					<Dialog.Overlay className='absolute inset-0' />
 
 					<div className='pointer-events-none fixed inset-y-0 right-0 flex pl-20 sm:pl-16'>
-						<TransitionChild
+						<Transition.Child
 							as={Fragment}
 							enter='transform transition ease-in-out duration-500 sm:duration-700'
 							enterFrom='translate-x-full'
@@ -256,7 +249,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									</div>
 								</form>
 							</div>
-						</TransitionChild>
+						</Transition.Child>
 					</div>
 				</div>
 			</Dialog>
