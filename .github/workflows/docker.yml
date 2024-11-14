@@ -44,7 +44,7 @@ jobs:
                   MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
                   MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
     runner-prod:
-        name: Frontend Production Container
+        name: Runner Production Container
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
