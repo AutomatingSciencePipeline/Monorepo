@@ -79,3 +79,27 @@ This corresponds to outcome e), which is "Concepts, properties, characteristics,
 ### d. Select, adapt, or develop models of the candidate architectures of the software system.
 
 This corresponds to outcome g), which is "Architecture candidates are assessed." The XP implementation of this task is Code and Tests, as this will let the candidate architectures be as concise as possible, not cluttering up the code with unnecessary artifacts, and let anything wasteful be cleared out easily.
+
+## 4. Relate the architecture to design.
+
+### a. Identify software system elements that relate to architectural entities and the nature of these relationships.
+
+This corresponds to outcome f) because it relates to identifying system elements. This relates to the extreme programming practice of incremental design: “If small, safe steps are how to design, the next question is where in the system to improve the design.” It is necessary to consider where in the system relates to the architectural design.
+
+### b. Define the interfaces and interactions among the software system elements and external entities.
+
+This corresponds to outcome f) because it talks about system elements and their interfaces. 
+In extreme programming, you do this every day as part of incremental design: “Invest in the design of the system every day.” As part of this, you need to understand the interactions between system elements.
+
+### c. Partition, align and allocate requirements to architectural entities and system elements.
+
+This corresponds to outcome k) because it connects requirements to the architectural entities. In extreme programming, this is implemented as part of weekly cycles: “Break the stories into tasks. Team members sign up for tasks and estimate them.” You partition the requirements and allocate them to system elements.
+
+### d. Map software system elements and architectural entities to design characteristics.
+
+This corresponds to outcome i) because it aligns architecture with design. This is implemented in extreme programming as part of incremental design. “Refactoring is a discipline of design that codifies these recurring patterns of changes.” By refactoring, you map recurring changes, which are the design characteristics.
+
+### e. Define principles for the software system design and evolution.
+
+This corresponds to outcome h) because it relates to the evolution or life cycle of the system. This is implemented in extreme programming through incremental design: “XP teams are confident in their ability to adapt the design to future requirements.” As the system evolves, new principles are designed and defined.
+
