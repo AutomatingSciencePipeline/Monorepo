@@ -14,10 +14,6 @@ on:
     paths:
       - 'apps/frontend/**'
     branches: ['development']
-  pull_request:
-    paths:
-      - 'apps/frontend/**'
-    branches: ['development']
 
 env:
   REGISTRY: gladospipeline
