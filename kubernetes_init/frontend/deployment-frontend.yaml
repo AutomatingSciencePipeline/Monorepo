@@ -16,7 +16,7 @@ spec:
         tier: frontend
     spec:
       containers:
-        - name: container-test-frontend
+        - name: glados-frontend
           image: gladospipeline/glados-frontend:main
           imagePullPolicy: Always
           ports:
