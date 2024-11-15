@@ -46,7 +46,7 @@ const Parameter = ({ form, type, index, ...rest }) => {
 	}, [confirmedValues, form.values.hyperparameters]);
 
 	return (
-		<Draggable key={index} index={index} draggableId={index.toString()}>
+        <Draggable key={index} index={index} draggableId={index.toString()}>
     {(provided) => (
         <div
             ref={provided.innerRef}
@@ -89,7 +89,7 @@ const Parameter = ({ form, type, index, ...rest }) => {
         </div>
     )}
 </Draggable>
-	);
+    );
 };
 
 const NumberParam = ({ form, type, index, ...rest }) => {

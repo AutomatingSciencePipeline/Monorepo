@@ -8,6 +8,20 @@ export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringli
 
 export const ParamStep = ({ form, ...props }) => {
 
+	const [isDropDisabled, setIsDropDisabled] = useState(false);
+
+    const onDragStart = (task) => {
+        setIsDropDisabled(false); // <= your condition goes here
+    };
+
+    const onDragEnd = ({ destination, source }) => {
+        if (!destination) return;
+        form.reorderListItem('hyperparameters', {
+            from: source.index,
+            to: destination.index,
+        });
+    };
+
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>
@@ -44,23 +58,13 @@ export const ParamStep = ({ form, ...props }) => {
 				</InputSection>
 
 				<div className={'flex-0 p-4 h-full grow-0'}>
-					<DragDropContext
-						onDragEnd={({ destination, source }) => {
-							console.log('Destination:', destination);
-        					console.log('Source:', source);
-							form.reorderListItem('hyperparameters', {
-								from: source.index,
-								to: destination.index,
-							});
-							console.log('hyperparameters:', form.values.hyperparameters);
-						}}
-					>
+					<DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
 						<div
 							className='h-full grow-0 max-h-fit mb-4 overflow-y-scroll p-4 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400'
 							style={{ maxHeight: '60vh' }}
 
 						>
-							<Droppable
+							<Droppable isDropDisabled={isDropDisabled}
 								as='div'
 								droppableId='dnd-list'
 								direction='vertical'
