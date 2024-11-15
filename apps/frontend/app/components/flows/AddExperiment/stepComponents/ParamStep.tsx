@@ -16,20 +16,15 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
     };
 
     const onDragEnd = ({ destination, source }) => {
-        if (!destination) return;
+		if (!destination) return;
 
         const hyperparameters = form.values.hyperparameters;
         const [movedItem] = hyperparameters.splice(source.index, 1);
         hyperparameters.splice(destination.index, 0, movedItem);
 
-        // Ensure stringlist items are always at the bottom
-        const stringlistItems = hyperparameters.filter(item => item.type === 'stringlist');
-        const otherItems = hyperparameters.filter(item => item.type !== 'stringlist');
-        const updatedHyperparameters = [...otherItems, ...stringlistItems];
+        form.setFieldValue('hyperparameters', hyperparameters);
 
-        form.setFieldValue('hyperparameters', updatedHyperparameters);
-
-		// Update confirmedValues indices
+        // Update confirmedValues indices
         const updatedConfirmedValues = confirmedValues.map(item => {
             if (item.index === source.index) {
                 return { ...item, index: destination.index };
