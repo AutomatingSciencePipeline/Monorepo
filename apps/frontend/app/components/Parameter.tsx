@@ -16,9 +16,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	const Component = remains[type];
 
 	const handleConfirm = (values) => {
-		const updatedValues = confirmedValues?.map((item) =>
+		let updatedValues = confirmedValues?.map((item) =>
 			item.index === index ? { ...item, values: values } : item
-		);
+		) || [];
 		if (!updatedValues.some((item) => item.index === index)) {
 			updatedValues.push({ index, values: values });
 		}
