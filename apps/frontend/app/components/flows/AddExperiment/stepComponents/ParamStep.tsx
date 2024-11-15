@@ -3,10 +3,13 @@
 import { Fragment, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../../../InputSection';
+import React from 'react';
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist'] as const;
 
 export const ParamStep = ({ form, ...props }) => {
+
+	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
 
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
@@ -47,11 +50,18 @@ export const ParamStep = ({ form, ...props }) => {
 					<DragDropContext
 						onDragEnd={({ destination, source }) => {
 							console.log('Destination:', destination);
-        					console.log('Source:', source);
+							console.log('Source:', source);
 							form.reorderListItem('hyperparameters', {
 								from: source.index,
 								to: destination.index,
 							});
+							
+							// Update confirmedValues state
+							const updatedConfirmedValues = [...confirmedValues];
+							const [movedItem] = updatedConfirmedValues.splice(source.index, 1);
+							updatedConfirmedValues.splice(destination.index, 0, movedItem);
+							setConfirmedValues(updatedConfirmedValues);
+
 							console.log('hyperparameters:', form.values.hyperparameters);
 						}}
 					>
@@ -66,11 +76,17 @@ export const ParamStep = ({ form, ...props }) => {
 								direction='vertical'
 							>
 								{(provided) => (
-									<div {...provided.droppableProps} ref={provided.innerRef}>
-										{props.children}
-										{provided.placeholder}
-									</div>
-								)}
+                                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                                        {props.children.map((child, index) =>
+                                            React.cloneElement(child, {
+                                                confirmedValues,
+                                                setConfirmedValues,
+                                                index,
+                                            })
+                                        )}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
 							</Droppable>
 						</div>
 					</DragDropContext>
