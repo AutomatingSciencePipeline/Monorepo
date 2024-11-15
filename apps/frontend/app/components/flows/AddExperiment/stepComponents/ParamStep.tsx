@@ -10,16 +10,24 @@ export const ParamStep = ({ form, ...props }) => {
 
 	const [isDropDisabled, setIsDropDisabled] = useState(false);
 
-    const onDragStart = (task) => {
-        setIsDropDisabled(false); // <= your condition goes here
+	const onDragStart = () => {
+        // Reset any state related to dragging if needed
+        setIsDropDisabled(false);
     };
 
     const onDragEnd = ({ destination, source }) => {
         if (!destination) return;
-        form.reorderListItem('hyperparameters', {
-            from: source.index,
-            to: destination.index,
-        });
+
+        const hyperparameters = form.values.hyperparameters;
+        const [movedItem] = hyperparameters.splice(source.index, 1);
+        hyperparameters.splice(destination.index, 0, movedItem);
+
+        // Ensure stringlist items are always at the bottom
+        const stringlistItems = hyperparameters.filter(item => item.type === 'stringlist');
+        const otherItems = hyperparameters.filter(item => item.type !== 'stringlist');
+        const updatedHyperparameters = [...otherItems, ...stringlistItems];
+
+        form.setFieldValue('hyperparameters', updatedHyperparameters);
     };
 
 	return (

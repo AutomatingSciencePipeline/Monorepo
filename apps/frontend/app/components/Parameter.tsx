@@ -45,7 +45,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	}, [confirmedValues, form.values.hyperparameters]);
 
 	return (
-        <Draggable key={index} index={index} draggableId={index.toString()}>
+    <Draggable key={index} index={index} draggableId={index.toString()} isDragDisabled={type === 'stringlist'}>
     {(provided) => (
         <div
             ref={provided.innerRef}
