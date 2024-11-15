@@ -16,7 +16,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	const Component = remains[type];
 
 	const handleConfirm = (values) => {
-		const updatedValues = confirmedValues.map((item) =>
+		const updatedValues = confirmedValues?.map((item) =>
 			item.index === index ? { ...item, values: values } : item
 		);
 		if (!updatedValues.some((item) => item.index === index)) {
@@ -33,7 +33,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 
 	const handleRemove = () => {
-		setConfirmedValues(confirmedValues.filter(item => item.index !== index));
+		if (confirmedValues) {
+			setConfirmedValues(confirmedValues.filter(item => item.index !== index));
+		}
 		form.removeListItem('hyperparameters', index);
 		console.log('remove', index);
 		console.log('hyperparams: ' + JSON.stringify(form.values.hyperparameters));
