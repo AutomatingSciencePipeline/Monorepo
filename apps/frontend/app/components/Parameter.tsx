@@ -11,7 +11,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		integer: NumberParam,
 		float: NumberParam,
 		bool: BoolParam,
-		multistring: MultiStringParam,
+		stringlist: MultiStringParam,
 	};
 	const Component = remains[type];
 
@@ -76,7 +76,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 								<Trash />
 							</ActionIcon>
 						</div>
-						{(currentConfirmedValues.length > 0 && type === 'multistring') && (
+						{(currentConfirmedValues.length > 0 && type === 'stringlist') && (
 							<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
 								<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
 								{currentConfirmedValues.map((value, idx) => (

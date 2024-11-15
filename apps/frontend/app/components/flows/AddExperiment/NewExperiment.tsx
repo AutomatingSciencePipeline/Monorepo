@@ -5,9 +5,6 @@ import Parameter from '../../Parameter';
 import { useForm, formList, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../../utils/validators';
 
-import { firebaseApp } from '../../../../firebase/firebaseClient';
-import { getDoc, getFirestore, doc, serverTimestamp } from 'firebase/firestore';
-
 import { DispatchStep } from './stepComponents/DispatchStep';
 import { InformationStep } from './stepComponents/InformationStep';
 import { ParamStep } from './stepComponents/ParamStep';
@@ -15,6 +12,8 @@ import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS } from '../../../../lib/db';
+
+import { getDocumentFromId } from '../../../../lib/mongodb_funcs';
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
 
@@ -85,11 +84,9 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 
 	useEffect(() => {
 		if (copyID != null) {
-			const db = getFirestore(firebaseApp);
-			getDoc(doc(db, DB_COLLECTION_EXPERIMENTS, copyID)).then((docSnap) => {
-				if (docSnap.exists()) {
-					const expInfo = docSnap.data();
-					const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+			getDocumentFromId(copyID).then((expInfo) => {
+				if (expInfo) {
+					const hyperparameters = expInfo['hyperparameters'];
 					form.setValues({
 						hyperparameters: formList(hyperparameters),
 						name: expInfo['name'],
@@ -107,18 +104,17 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 					});
 					setCopyId(null);
 					setStatus(FormStates.Info);
-					console.log('Copied!');
-				} else {
-					console.log('No such document!');
 				}
-			});
+				else {
+					console.log("Could not get expInfo!!!");
+				}
+			})
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
-	const [confirmedValues, setConfirmedValues] = useState<string[]>([]);
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
-		return <Parameter key={index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;
+		return <Parameter key={index} form={form} type={type} index={index} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);

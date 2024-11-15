@@ -4,7 +4,7 @@ import os
 from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 
-from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter
+from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter, StringListParameter
 from modules.exceptions import GladosInternalError
 from modules.logging.gladosLogging import get_experiment_logger
 
@@ -31,6 +31,9 @@ def generate_list(param: Parameter, paramName):
         return [(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)]
     elif param.type == ParamType.BOOL:
         return [(paramName, val) for val in [True, False]]
+    elif param.type == ParamType.STRING_LIST:
+        stringListParam = StringListParameter(**param.dict())
+        return [(paramName, val) for val in stringListParam.values]
     else: #This will never happen
         return []
 
@@ -110,6 +113,8 @@ def get_default(parameter: Parameter):
         return BoolParameter(**parameter.dict()).default
     elif parameter.type == ParamType.STRING:
         return StringParameter(**parameter.dict()).default
+    elif parameter.type == ParamType.STRING_LIST:
+        return StringListParameter(**parameter.dict()).default
     else:
         raise GladosInternalError(f'Parameter {parameter} has an unsupported type')
 
@@ -134,6 +139,11 @@ def gather_parameters(hyperparams, constants, parameters):
                 stringParam = StringParameter(**hyperparameter.dict())
                 explogger.warning(f'param {parameterKey} is a string, adding to constants')
                 constants[parameterKey] = stringParam.default
+            elif parameterType == ParamType.STRING_LIST:  #Strings never vary technically should be in the constants section now
+                stringListParam = StringListParameter(**hyperparameter.dict())
+                explogger.info(f'param {parameterKey} is a string list, adding each to params')
+                # set param key to list in parameters
+                parameters[parameterKey] = stringListParam
             elif parameterType == ParamType.BOOL:
                 explogger.info(f'param {parameterKey} varies, adding to batch')
                 parameters[parameterKey] = hyperparameter

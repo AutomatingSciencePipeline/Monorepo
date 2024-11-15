@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../../../InputSection';
 
-export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'multistring'] as const;
+export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist'] as const;
 
 export const ParamStep = ({ form, ...props }) => {
 
@@ -26,7 +26,7 @@ export const ParamStep = ({ form, ...props }) => {
 										form.addListItem('hyperparameters', {
 											name: '',
 											default: '',
-											...((type === 'multistring') && { values: [''] }),
+											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {
 												min: '',
 												max: '',

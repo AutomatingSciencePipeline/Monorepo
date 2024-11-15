@@ -1,5 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, validator, root_validator
+from typing import List
 
 from modules.exceptions import GladosInternalError
 
@@ -9,6 +10,7 @@ class ParamType(Enum):
     INTEGER = "integer"
     FLOAT = "float"
     STRING = "string"
+    STRING_LIST = "string_list"
 
 
 class Parameter(BaseModel):
@@ -23,6 +25,11 @@ class BoolParameter(Parameter):
 class StringParameter(Parameter):
     type = ParamType.STRING
     default: str
+
+class StringListParameter(Parameter):
+    type = ParamType.STRING
+    default: str
+    values: List[str]
 
 
 def _check_bounds(values):
