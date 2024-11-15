@@ -16,7 +16,7 @@ spec:
         tier: backend
     spec:
       containers:
-      - name: container-test-backend
+      - name: glados-backend
         image: gladospipeline/glados-backend:main
         imagePullPolicy: Always
         ports:
@@ -33,16 +33,6 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PORT
-        - name: SERVICE_ROLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: SERVICE_ROLE_KEY
-        - name: FIREBASE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: FIREBASE_KEY
         - name: MONGODB_USERNAME
           valueFrom:
             secretKeyRef:

@@ -18,6 +18,7 @@ export const COLLECTION_RESULTS_CSVS = 'results';
 export const COLLECTION_EXPERIMENTS = 'experiments';
 export const COLLECTION_EXPERIMENT_FILES = 'files';
 
+//Also export the client for use with authjs, authjs recommends using this instead of a promise.
 let client: MongoClient;
 let clientPromise: Promise<MongoClient> = new Promise((success) => {
 	return true;
@@ -47,3 +48,4 @@ if (process.env.NODE_ENV === 'development') {
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;
+
