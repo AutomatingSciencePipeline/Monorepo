@@ -52,6 +52,7 @@ export const ParamStep = ({ form, ...props }) => {
 								from: source.index,
 								to: destination.index,
 							});
+							console.log('hyperparameters:', form.values.hyperparameters);
 						}}
 					>
 						<div
