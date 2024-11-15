@@ -46,6 +46,8 @@ export const ParamStep = ({ form, ...props }) => {
 				<div className={'flex-0 p-4 h-full grow-0'}>
 					<DragDropContext
 						onDragEnd={({ destination, source }) => {
+							console.log('Destination:', destination);
+        					console.log('Source:', source);
 							form.reorderListItem('hyperparameters', {
 								from: source.index,
 								to: destination.index,
