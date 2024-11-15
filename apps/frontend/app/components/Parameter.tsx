@@ -43,7 +43,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 
 	//const [dummyState, setDummyState] = useState(false);
 
-	const currentConfirmedValues = confirmedValues.find((item) => item.index === index)?.values || [];
+	const currentConfirmedValues = confirmedValues?.find((item) => item.index === index)?.values || [];
 
 	return (
 		<Draggable key={index} index={index} draggableId={index.toString()}>
