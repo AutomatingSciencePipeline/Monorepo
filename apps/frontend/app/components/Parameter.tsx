@@ -6,104 +6,90 @@ import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
 
 const Parameter = ({ form, type, index, ...rest }) => {
-	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
-	const remains = {
-		string: StringParam,
-		integer: NumberParam,
-		float: NumberParam,
-		bool: BoolParam,
-		stringlist: MultiStringParam,
-	};
-	const Component = remains[type];
+    const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
+    const remains = {
+        string: StringParam,
+        integer: NumberParam,
+        float: NumberParam,
+        bool: BoolParam,
+        stringlist: MultiStringParam,
+    };
+    const Component = remains[type];
 
-	const handleConfirm = (values) => {
-		let updatedValues = confirmedValues?.map((item) =>
-			item.index === index ? { ...item, values: values } : item
-		) || [];
-		console.log('updatedValues: ' + JSON.stringify(updatedValues));
-		if (!updatedValues.some((item) => item.index === index)) {
-			updatedValues.push({ index, values: values });
-		}
-		setConfirmedValues(updatedValues);
-		console.log('confirmedValues: ' + JSON.stringify(confirmedValues));
+    const handleConfirm = (values) => {
+        let updatedValues = confirmedValues?.map((item) =>
+            item.index === index ? { ...item, values: values } : item
+        ) || [];
+        if (!updatedValues.some((item) => item.index === index)) {
+            updatedValues.push({ index, values: values });
+        }
+        setConfirmedValues(updatedValues);
 
-		console.log(values.length);
-		if (values.length === 0) {
-			return;
-		}
+        if (values.length === 0) {
+            return;
+        }
 
-		const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
-			idx === index ? { ...param, values: values } : param
-		);
-		console.log('updatedHyperparameters: ' + JSON.stringify(updatedHyperparameters));
-		form.setFieldValue('hyperparameters', updatedHyperparameters);
+        const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
+            idx === index ? { ...param, values: values } : param
+        );
+        form.setFieldValue('hyperparameters', updatedHyperparameters);
+    };
 
+    const handleRemove = () => {
+        setConfirmedValues(confirmedValues.filter(item => item.index !== index));
+        form.removeListItem('hyperparameters', index);
+    };
 
-	};
+    useEffect(() => {
+        console.log('confirmedValues:', confirmedValues);
+        console.log('hyperparameters:', form.values.hyperparameters);
+    }, [confirmedValues, form.values.hyperparameters]);
 
-	const handleRemove = () => {
-		if (confirmedValues) {
-			setConfirmedValues(confirmedValues.filter(item => item.index !== index));
-		}
-		form.removeListItem('hyperparameters', index);
-		console.log('remove', index);
-		console.log('hyperparams: ' + JSON.stringify(form.values.hyperparameters));
-		//setDummyState(prev => !prev);
-	};
-
-
-	//const [dummyState, setDummyState] = useState(false);
-
-	const currentConfirmedValues = confirmedValues?.find((item) => item.index === index)?.values || [];
-
-	return (
-		<Draggable key={index} index={index} draggableId={index.toString()}>
-			{(provided) => {
-				return (
-					<div>
-						<div
-							ref={provided.innerRef}
-							{...provided.draggableProps}
-							// className={'mt-8 justify-start'}
-							className={'flex items-center mb-2'}
-						>
-							<Center {...provided.dragHandleProps}>
-								<GripVertical className='mr-2' />
-							</Center>
-							<span className='text-gray-500 mr-2'>{type}</span>
-							<input
-								type='text'
-								placeholder='name'
-								className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-								{...form.getListInputProps('hyperparameters', index, 'name')}
-								required
-							/>
-							<Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} />
-							<ActionIcon
-								color='red'
-								onClick={handleRemove}
-								className='ml-2'
-							>
-								<Trash />
-							</ActionIcon>
-						</div>
-						{(currentConfirmedValues.length > 0 && type === 'stringlist') && (
-							<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
-								<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
-								{currentConfirmedValues.map((value, idx) => (
-									<div key={idx} className='flex items-center mb-2'>
-										<span className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white'>
-											{value}
-										</span>
-									</div>
-								))}
-							</div>
-						)}
-					</div>
-				);
-			}}
-		</Draggable>
-	);
+    return (
+        <Draggable key={index} index={index} draggableId={index.toString()}>
+            {(provided) => (
+                <div>
+                    <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={'flex items-center mb-2'}
+                    >
+                        <Center {...provided.dragHandleProps}>
+                            <GripVertical className='mr-2' />
+                        </Center>
+                        <span className='text-gray-500 mr-2'>{type}</span>
+                        <input
+                            type='text'
+                            placeholder='name'
+                            className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+                            {...form.getListInputProps('hyperparameters', index, 'name')}
+                            required
+                        />
+                        <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} />
+                        <ActionIcon
+                            color='red'
+                            onClick={handleRemove}
+                            className='ml-2'
+                        >
+                            <Trash />
+                        </ActionIcon>
+                    </div>
+                    {(confirmedValues.find(item => item.index === index)?.values.length > 0 && type === 'stringlist') && (
+                        <div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
+                            <h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
+                            {confirmedValues.find(item => item.index === index)?.values.map((value, idx) => (
+                                <div key={idx} className='flex items-center mb-2'>
+                                    <span className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white'>
+                                        {value}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </Draggable>
+    );
 };
 
 const NumberParam = ({ form, type, index, ...rest }) => {
