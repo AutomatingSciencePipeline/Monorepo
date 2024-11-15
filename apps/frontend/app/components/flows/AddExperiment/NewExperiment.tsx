@@ -185,7 +185,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									) : status === FormStates.DumbTextArea ? (
 										<DumbTextArea form={form}></DumbTextArea>
 									) : status === FormStates.Params ? (
-										<ParamStep form={form}>{fields}</ParamStep>
+										<ParamStep form={form} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues}>{fields}</ParamStep>
 									) : status === FormStates.ProcessStep ? (
 										<PostProcessStep form={form}>{fields}</PostProcessStep>
 									) : status === FormStates.Confirmation ? (

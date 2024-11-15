@@ -6,7 +6,7 @@ import { InputSection } from '../../../InputSection';
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist'] as const;
 
-export const ParamStep = ({ form, ...props }) => {
+export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props }) => {
 
 	const [isDropDisabled, setIsDropDisabled] = useState(false);
 
@@ -28,6 +28,20 @@ export const ParamStep = ({ form, ...props }) => {
         const updatedHyperparameters = [...otherItems, ...stringlistItems];
 
         form.setFieldValue('hyperparameters', updatedHyperparameters);
+
+		// Update confirmedValues indices
+        const updatedConfirmedValues = confirmedValues.map(item => {
+            if (item.index === source.index) {
+                return { ...item, index: destination.index };
+            } else if (item.index > source.index && item.index <= destination.index) {
+                return { ...item, index: item.index - 1 };
+            } else if (item.index < source.index && item.index >= destination.index) {
+                return { ...item, index: item.index + 1 };
+            }
+            return item;
+        });
+
+        setConfirmedValues(updatedConfirmedValues);
     };
 
 	return (

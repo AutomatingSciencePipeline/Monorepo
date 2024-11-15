@@ -35,9 +35,15 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 
 	const handleRemove = () => {
-		setConfirmedValues(confirmedValues.filter(item => item.index !== index));
-		form.removeListItem('hyperparameters', index);
-	};
+        // Check if there are any confirmed values at this index
+        const hasConfirmedValues = confirmedValues.some(item => item.index === index);
+        if (hasConfirmedValues) {
+            // Remove the confirmed values at this index
+            setConfirmedValues(confirmedValues.filter(item => item.index !== index));
+        }
+        // Remove the hyperparameter at this index
+        form.removeListItem('hyperparameters', index);
+    };
 
 	useEffect(() => {
 		console.log('confirmedValues:', confirmedValues);
