@@ -74,17 +74,17 @@ const Parameter = ({ form, type, index, ...rest }) => {
                             <Trash />
                         </ActionIcon>
                     </div>
-                    {(confirmedValues?.find(item => item.index === index)?.values?.length ?? 0 > 0 && type === 'stringlist') && (
-    					<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
-       					<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
+                    {((confirmedValues?.find(item => item.index === index)?.values?.length ?? 0) > 0 && type === 'stringlist') && (
+    						<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
+       						<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
         				{confirmedValues.find(item => item.index === index)?.values.map((value, idx) => (
-         					<div key={idx} className='flex items-center mb-2'>
+           					<div key={idx} className='flex items-center mb-2'>
                 			<span className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white'>
-                    	{value}
-               		 </span>
-           			 </div>
+                    			{value}
+                			</span>
+            			</div>
         			))}
-    			</div>
+    </div>
 )}
                 </div>
             )}
