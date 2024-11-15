@@ -5,8 +5,7 @@ import { GripVertical, Plus } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
 
-const Parameter = ({ form, type, index, ...rest }) => {
-	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
+const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
 	const remains = {
 		string: StringParam,
 		integer: NumberParam,
@@ -153,9 +152,9 @@ const MultiStringParam = ({ form, type, index, onConfirm, ...rest }) => {
 	};
 
 	const handleDelete = (idx) => {
-		const newValues = values.filter((_, i) => i !== idx);
-		setValues(newValues);
-	};
+        const newValues = values.filter((_, i) => i !== idx);
+        setValues(newValues);
+    };
 
 	const handleClose = () => {
 		// form.setFieldValue(`hyperparameters.${index}.values`, values);

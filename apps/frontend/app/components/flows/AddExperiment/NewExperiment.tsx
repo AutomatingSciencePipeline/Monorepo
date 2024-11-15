@@ -113,9 +113,11 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
+	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
+
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
-		return <Parameter key={index} form={form} type={type} index={index} {...rest} />;
+		return <Parameter key={index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);
