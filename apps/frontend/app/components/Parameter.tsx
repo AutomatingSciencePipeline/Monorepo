@@ -19,18 +19,22 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		let updatedValues = confirmedValues?.map((item) =>
 			item.index === index ? { ...item, values: values } : item
 		) || [];
+		console.log('updatedValues: ' + JSON.stringify(updatedValues));
 		if (!updatedValues.some((item) => item.index === index)) {
 			updatedValues.push({ index, values: values });
 		}
 		setConfirmedValues(updatedValues);
+		console.log('confirmedValues: ' + JSON.stringify(confirmedValues));
 
+		console.log(values.length);
 		if (values.length === 0) {
 			return;
 		}
-		
+
 		const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
 			idx === index ? { ...param, values: values } : param
 		);
+		console.log('updatedHyperparameters: ' + JSON.stringify(updatedHyperparameters));
 		form.setFieldValue('hyperparameters', updatedHyperparameters);
 
 
