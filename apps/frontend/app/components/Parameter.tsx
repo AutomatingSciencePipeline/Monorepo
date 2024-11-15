@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical, Plus } from 'tabler-icons-react';
