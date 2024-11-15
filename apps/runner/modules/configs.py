@@ -42,6 +42,9 @@ def generate_config_files(experiment: ExperimentData):
     constants = {}
     parameters = {}
     gather_parameters(experiment.hyperparameters, constants, parameters)
+    explogger.info("param list: " + str(parameters))
+    explogger.info("const list: " + str(constants))
+    
 
     configDict = {}
     configIdNumber = 0

@@ -61,6 +61,7 @@ const Steps = ({ steps }) => {
 	);
 };
 
+
 const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
