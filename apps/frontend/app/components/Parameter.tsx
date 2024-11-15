@@ -5,7 +5,8 @@ import { GripVertical, Plus } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
 
-const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
+const Parameter = ({ form, type, index, ...rest }) => {
+	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
 	const remains = {
 		string: StringParam,
 		integer: NumberParam,
