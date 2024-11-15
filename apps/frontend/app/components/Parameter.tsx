@@ -24,6 +24,10 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		}
 		setConfirmedValues(updatedValues);
 
+		if (values.length === 0) {
+			return;
+		}
+		
 		const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
 			idx === index ? { ...param, values: values } : param
 		);
