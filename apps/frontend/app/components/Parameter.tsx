@@ -74,7 +74,7 @@ const Parameter = ({ form, type, index, ...rest }) => {
                             <Trash />
                         </ActionIcon>
                     </div>
-                    {(confirmedValues.find(item => item.index === index)?.values.length > 0 && type === 'stringlist') && (
+                    {(confirmedValues?.find(item => item.index === index)?.values.length > 0 && type === 'stringlist') && (
                         <div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
                             <h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
                             {confirmedValues.find(item => item.index === index)?.values.map((value, idx) => (
