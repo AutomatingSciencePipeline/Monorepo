@@ -30,7 +30,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 
 		console.log('setting values:', values);
 		form.setFieldValue(`hyperparameters[${index}].values`, values);
-		console.log('form.values.hyperparameters after confirm:', form.getValues().hyperparameters);
+		console.log('form.values.hyperparameters after confirm:', form.values.hyperparameters);
 
 		// const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
 		// 			idx === index ? { ...param, values: values } : param
@@ -194,9 +194,11 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
+		form.addListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
+		form.setFieldValue(`hyperparameters[${index}].values[${idx}]`, e.target.value);
 		const newValues = [...values];
 		newValues[idx] = e.target.value;
 		setValues(newValues);
@@ -206,6 +208,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const handleDelete = (idx) => {
 		const newValues = values.filter((_, i) => i !== idx);
 		setValues(newValues);
+		form.removeListItem(`hyperparameters[${index}].values`, idx);
 	};
 
 	const handleClose = () => {
