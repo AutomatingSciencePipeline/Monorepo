@@ -15,6 +15,17 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 	const Component = remains[type];
 
+	const updateConfirmedValues = (index, values) => {
+		let updatedValues = confirmedValues?.map((item) =>
+					item.index === index ? { ...item, values: values } : item
+				) || [];
+				if (!updatedValues.some((item) => item.index === index)) {
+					updatedValues.push({ index, values: values });
+				}
+				setConfirmedValues(updatedValues);
+	}
+		
+
 	// const handleConfirm = (values) => {
 	// 	let updatedValues = confirmedValues?.map((item) =>
 	// 		item.index === index ? { ...item, values: values } : item
@@ -90,7 +101,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
                     required
                 />
                 {/* <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} /> */}
-				<Component form={form} type={type} index={index} {...rest} />
+				<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
                 <ActionIcon
                     color='red'
                     onClick={handleRemove}
@@ -163,7 +174,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 	);
 };
 
-const MultiStringParam = ({ form, type, index, ...rest }) => {
+const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest }) => {
     const [opened, setOpened] = useState(false);
     const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
 
@@ -183,7 +194,11 @@ const MultiStringParam = ({ form, type, index, ...rest }) => {
     };
 
     const handleClose = () => {
-		form.setFieldValue(`hyperparameters[${index}].values`, values);
+		const updatedHyperparameters = [...form.values.hyperparameters];
+        updatedHyperparameters[index].values = values;
+        form.setFieldValue('hyperparameters', updatedHyperparameters);
+
+		updateConfirmedValues(index, values);
         setOpened(false);
     };
 
