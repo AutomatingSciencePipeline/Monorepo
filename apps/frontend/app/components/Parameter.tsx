@@ -49,20 +49,20 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	// form.getListInputProps = getListInputProps;
 
 	const handleRemove = () => {
-		// Check if there are any confirmed values at this index
-		const hasConfirmedValues = confirmedValues.some(item => item.index === index);
-		if (hasConfirmedValues) {
-			// Remove the confirmed values at this index
-			console.log('confirmedValues before remove:', confirmedValues);
-			const newConfirmedValues = confirmedValues.filter(item => item.index !== index);
-			setConfirmedValues(newConfirmedValues);
-			console.log('confirmedValues after remove:', newConfirmedValues);
-		}
-		// Remove the hyperparameter at this index using removeListItem
-		console.log('form.values.hyperparameters before remove:', form.values.hyperparameters);
-		form.removeListItem('hyperparameters', index);
-		console.log('form.values.hyperparameters after remove:', form.values.hyperparameters);
-	};
+    // Check if there are any confirmed values at this index
+    const hasConfirmedValues = confirmedValues.some(item => item.index === index);
+    if (hasConfirmedValues) {
+        // Remove the confirmed values at this index
+        console.log('confirmedValues before remove:', confirmedValues);
+        const newConfirmedValues = confirmedValues.filter(item => item.index !== index);
+        setConfirmedValues(newConfirmedValues);
+        console.log('confirmedValues after remove:', newConfirmedValues);
+    }
+    // Remove the hyperparameter at this index using removeListItem
+    console.log('form.values.hyperparameters before remove:', form.values.hyperparameters);
+    form.removeListItem('hyperparameters', index);
+    console.log('form.values.hyperparameters after remove:', form.values.hyperparameters);
+};
 
 	useEffect(() => {
 		console.log('confirmedValues:', confirmedValues);
@@ -204,15 +204,20 @@ const MultiStringParam = ({ form, type, index, ...rest }) => {
                                 type='text'
                                 placeholder={`Value ${idx + 1}`}
                                 className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-                                value={value}
-                                onChange={(e) => handleChange(e, idx)}
+								value={value}
+								onChange={(e) => handleChange(e, idx)}
                                 {...inputProps}
+                                required
                             />
-                            <button type="button" onClick={() => handleDelete(idx)} className='ml-2 text-red-500'>Delete</button>
+                            <ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
+                                <Trash />
+                            </ActionIcon>
                         </div>
                     );
                 })}
-                <button type="button" onClick={handleAddValue} className='mt-2 text-blue-500'>Add Value</button>
+                <ActionIcon onClick={handleAddValue} color='blue'>
+                    <Plus />
+                </ActionIcon>
             </Modal>
         </>
     );
