@@ -15,24 +15,24 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 	const Component = remains[type];
 
-	const handleConfirm = (values) => {
-		let updatedValues = confirmedValues?.map((item) =>
-			item.index === index ? { ...item, values: values } : item
-		) || [];
-		if (!updatedValues.some((item) => item.index === index)) {
-			updatedValues.push({ index, values: values });
-		}
-		setConfirmedValues(updatedValues);
+	// const handleConfirm = (values) => {
+	// 	let updatedValues = confirmedValues?.map((item) =>
+	// 		item.index === index ? { ...item, values: values } : item
+	// 	) || [];
+	// 	if (!updatedValues.some((item) => item.index === index)) {
+	// 		updatedValues.push({ index, values: values });
+	// 	}
+	// 	setConfirmedValues(updatedValues);
 
-		if (values.length === 0) {
-			return;
-		}
+	// 	if (values.length === 0) {
+	// 		return;
+	// 	}
 
-		const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
-			idx === index ? { ...param, values: values } : param
-		);
-		form.setFieldValue('hyperparameters', updatedHyperparameters);
-	};
+	// 	const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
+	// 		idx === index ? { ...param, values: values } : param
+	// 	);
+	// 	form.setFieldValue('hyperparameters', updatedHyperparameters);
+	// };
 
 	// const getListInputProps = (field, index, subField) => {
 	// 	console.log("in custom getListInputProps");
@@ -90,7 +90,8 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
                     {...form.getListInputProps('hyperparameters', index, 'name')}
                     required
                 />
-                <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} />
+                {/* <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} /> */}
+				<Component form={form} type={type} index={index} {...rest} />
                 <ActionIcon
                     color='red'
                     onClick={handleRemove}
@@ -163,70 +164,62 @@ const StringParam = ({ form, type, index, ...rest }) => {
 	);
 };
 
-const MultiStringParam = ({ form, type, index, onConfirm, ...rest }) => {
-	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
-	const [name, setName] = useState(form.values.hyperparameters[index].name || '');
+const MultiStringParam = ({ form, type, index, ...rest }) => {
+    const [opened, setOpened] = useState(false);
+    const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
 
+    const handleAddValue = () => {
+        setValues([...values, '']);
+    };
 
-	const handleAddValue = () => {
-		setValues([...values, '']);
-	};
+    const handleChange = (e, idx) => {
+        const newValues = [...values];
+        newValues[idx] = e.target.value;
+        setValues(newValues);
+    };
 
-	const handleChange = (e, idx) => {
-		const newValues = [...values];
-		newValues[idx] = e.target.value;
-		setValues(newValues);
-	};
-
-	const handleDelete = (idx) => {
+    const handleDelete = (idx) => {
         const newValues = values.filter((_, i) => i !== idx);
         setValues(newValues);
     };
 
-	const handleClose = () => {
-		// form.setFieldValue(`hyperparameters.${index}.values`, values);
-		setOpened(false);
-	};
+    const handleClose = () => {
+        setOpened(false);
+    };
 
-	const handleConfirm = () => {
-		onConfirm(values);
-		setOpened(false);
-	};
-	return (
-		<>
-			<Button onClick={() => setOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
-				Edit Strings
-			</Button>
-			<Modal
-				opened={opened}
-				onClose={handleClose}
-				title="Edit String Values"
-			>
-				{values.map((value, idx) => (
-					<div key={idx} className='flex items-center mb-2'>
-						<input
-							type='text'
-							placeholder={`Value ${idx + 1}`}
-							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-							value={value}
-							onChange={(e) => handleChange(e, idx)}
-							required
-						/>
-						<ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
-							<Trash />
-						</ActionIcon>
-					</div>
-				))}
-				<ActionIcon onClick={handleAddValue} color='blue'>
-					<Plus />
-				</ActionIcon>
-				<button onClick={handleConfirm} className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-md'>
-					Confirm
-				</button>
-			</Modal>
-		</>
-	);
+    return (
+        <>
+            <Button onClick={() => setOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                Edit Strings
+            </Button>
+            <Modal
+                opened={opened}
+                onClose={handleClose}
+                title="Edit String Values"
+            >
+                {values.map((value, idx) => {
+                    const inputProps = form.getListInputProps('hyperparameters', index, `values[${idx}]`);
+                    return (
+                        <div key={idx} className='flex items-center mb-2'>
+                            <input
+                                type='text'
+                                placeholder={`Value ${idx + 1}`}
+                                className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+                                {...inputProps}
+                                required
+                            />
+                            <ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
+                                <Trash />
+                            </ActionIcon>
+                        </div>
+                    );
+                })}
+                <ActionIcon onClick={handleAddValue} color='blue'>
+                    <Plus />
+                </ActionIcon>
+            </Modal>
+        </>
+    );
 };
 
 export default Parameter;
