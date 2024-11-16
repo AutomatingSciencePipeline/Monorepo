@@ -52,7 +52,8 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
             type: type,
         };
 
-        form.addListItem('hyperparameters', newItem);
+        const updatedHyperparameters = [...form.values.hyperparameters, newItem];
+        form.setFieldValue('hyperparameters', updatedHyperparameters);
     };
 
 	return (

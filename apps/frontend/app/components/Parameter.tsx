@@ -46,11 +46,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
         }
         // Remove the hyperparameter at this index
         console.log('form.values.hyperparameters before remove:', form.values.hyperparameters);
-        // const newHyperparameters = form.values.hyperparameters.filter((_, idx) => idx !== index);
-        // form.setFieldValue('hyperparameters', newHyperparameters);
-        // console.log('form.values.hyperparameters after remove:', newHyperparameters);
-		form.removeListItem('hyperparameters', index);
-		console.log('form.values.hyperparameters after remove:', form.values.hyperparameters);
+        const newHyperparameters = form.values.hyperparameters.filter((_, idx) => idx !== index);
+        form.setFieldValue('hyperparameters', newHyperparameters);
+        console.log('form.values.hyperparameters after remove:', newHyperparameters);
     };
 
 	useEffect(() => {
@@ -109,6 +107,8 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 	return (
 		<Fragment>
 			{['default', 'min', 'max', 'step'].map((label, i) => {
+				const inputProps = form.getListInputProps('hyperparameters', index, label);
+				console.log('inputProps for index: ', index, inputProps);
 				return (
 					<input
 						key={`number_${type}_${label}`}
@@ -116,7 +116,7 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 						placeholder={`${label}`}
 						className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 						required
-						{...form.getListInputProps('hyperparameters', index, label)}
+						{...inputProps}
 					/>
 				);
 			})}
