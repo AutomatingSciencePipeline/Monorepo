@@ -30,62 +30,18 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		setConfirmedValues(updatedValues);
 
 		
-	}
-
-
-	// const handleConfirm = (values) => {
-	// 	let updatedValues = confirmedValues?.map((item) =>
-	// 		item.index === index ? { ...item, values: values } : item
-	// 	) || [];
-	// 	if (!updatedValues.some((item) => item.index === index)) {
-	// 		updatedValues.push({ index, values: values });
-	// 	}
-	// 	setConfirmedValues(updatedValues);
-
-	// 	if (values.length === 0) {
-	// 		return;
-	// 	}
-
-	// 	const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
-	// 		idx === index ? { ...param, values: values } : param
-	// 	);
-	// 	form.setFieldValue('hyperparameters', updatedHyperparameters);
-	// };
-
-	// const getListInputProps = (field, index, subField) => {
-	// 	console.log("in custom getListInputProps");
-	// 	console.log('field:', field);
-	// 	console.log('index:', index);
-	// 	console.log('subField:', subField);
-	// 	return {
-	// 		name: `${field}[${index}].${subField}`,
-	// 		value: form.values[field][index][subField],
-	// 		onChange: (e) => form.setFieldValue(`${field}[${index}].${subField}`, e.target.value),
-	// 	};
-	// };
-
-	// form.getListInputProps = getListInputProps;
-
-	const handleRemove = () => {
-		// Check if there are any confirmed values at this index
-		const hasConfirmedValues = confirmedValues.some(item => item.index === index);
-		if (hasConfirmedValues) {
-			// Remove the confirmed values at this index
-			console.log('confirmedValues before remove:', confirmedValues);
-			const newConfirmedValues = confirmedValues.filter(item => item.index !== index);
-			setConfirmedValues(newConfirmedValues);
-			console.log('confirmedValues after remove:', newConfirmedValues);
-		}
-		// Remove the hyperparameter at this index using removeListItem
-		console.log('form.values.hyperparameters before remove:', form.values.hyperparameters);
-		form.removeListItem('hyperparameters', index);
-		console.log('form.values.hyperparameters after remove:', form.values.hyperparameters);
 	};
 
-	useEffect(() => {
-		console.log('confirmedValues:', confirmedValues);
-		console.log('hyperparameters:', form.values.hyperparameters);
-	}, [confirmedValues, form.values.hyperparameters]);
+	const handleRemove = () => {
+		const hasConfirmedValues = confirmedValues.some(item => item.index === index);
+		if (hasConfirmedValues) {
+			const newConfirmedValues = confirmedValues.filter(item => item.index !== index);
+			setConfirmedValues(newConfirmedValues);
+
+		}
+		// Remove the hyperparameter at this index using removeListItem
+		form.removeListItem('hyperparameters', index);
+	};
 
 	return (
 		<Draggable key={index} index={index} draggableId={index.toString()} isDragDisabled={true}>
@@ -107,9 +63,8 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
-						{/* <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} /> */}
 						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
-						{/* <Component form={form} type={type} index={index} {...rest} /> */}
+						
 						<ActionIcon
 							color='red'
 							onClick={handleRemove}
@@ -205,16 +160,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleClose = () => {
-		// const updatedHyperparameters = [...form.values.hyperparameters];
-		// updatedHyperparameters[index].values = values;
-		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-		// const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
-		// 	idx === index ? { ...param, values: values } : param
-		// );
-		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-		// form.setFieldValue(`hyperparameters[${index}].values`, values);
 		updateConfirmedValues(index, values);
-		
 		setOpened(false);
 	};
 
