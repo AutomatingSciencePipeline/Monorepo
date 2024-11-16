@@ -34,6 +34,20 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		form.setFieldValue('hyperparameters', updatedHyperparameters);
 	};
 
+	const getListInputProps = (field, index, subField) => {
+		console.log("in custom getListInputProps");
+		console.log('field:', field);
+		console.log('index:', index);
+		console.log('subField:', subField);
+		return {
+			name: `${field}[${index}].${subField}`,
+			value: form.values[field][index][subField],
+			onChange: (e) => form.setFieldValue(`${field}[${index}].${subField}`, e.target.value),
+		};
+	};
+
+	form.getListInputProps = getListInputProps;
+
 	const handleRemove = () => {
         // Check if there are any confirmed values at this index
         const hasConfirmedValues = confirmedValues.some(item => item.index === index);
