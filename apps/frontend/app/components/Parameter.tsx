@@ -202,8 +202,10 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		// 	idx === index ? { ...param, values: values } : param
 		// );
 		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-		const inputProps = form.getInputProps(`hyperparameters[${index}].values`);
-        inputProps.onChange({ target: { value: values } });
+		values.forEach((value, idx) => {
+			const inputProps = form.getListInputProps('hyperparameters', index, `values[${idx}]`);
+			inputProps.onChange({ target: { value } });
+		});
 		setOpened(false);
 	};
 
