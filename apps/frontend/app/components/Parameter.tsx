@@ -4,6 +4,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical, Plus } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
+import { formList } from '@mantine/form';
 
 const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
 	const remains = {
@@ -15,21 +16,24 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 	const Component = remains[type];
 
-	const updateConfirmedValues = (index, values) => {
-		let updatedValues = confirmedValues?.map((item) =>
-			item.index === index ? { ...item, values: values } : item
-		) || [];
-		if (!updatedValues.some((item) => item.index === index)) {
-			updatedValues.push({ index, values: values });
-		}
-		setConfirmedValues(updatedValues);
+	// const updateConfirmedValues = (index, values) => {
+	// 	let updatedValues = confirmedValues?.map((item) =>
+	// 		item.index === index ? { ...item, values: values } : item
+	// 	) || [];
+	// 	if (!updatedValues.some((item) => item.index === index)) {
+	// 		updatedValues.push({ index, values: values });
+	// 	}
+	// 	setConfirmedValues(updatedValues);
 
-		if (values.length === 0) {
-			return;
-		}
+	// 	if (values.length === 0) {
+	// 		return;
+	// 	}
 
-		form.setFieldValue(`hyperparameters[${index}].values`, confirmedValues);
-	}
+	// 	const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
+	// 				idx === index ? { ...param, values: values } : param
+	// 			);
+	// 			form.setFieldValue('hyperparameters', updatedHyperparameters);
+	// }
 
 
 	// const handleConfirm = (values) => {
@@ -107,7 +111,8 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							required
 						/>
 						{/* <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} /> */}
-						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
+						{/* <Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} /> */}
+						<Component form={form} type={type} index={index} {...rest} />
 						<ActionIcon
 							color='red'
 							onClick={handleRemove}
@@ -182,36 +187,50 @@ const StringParam = ({ form, type, index, ...rest }) => {
 
 const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest }) => {
 	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
+	// const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
 
-	const handleAddValue = () => {
-		setValues([...values, '']);
-	};
+	// const handleAddValue = () => {
+	// 	setValues([...values, '']);
+	// };
 
-	const handleChange = (e, idx) => {
-		const newValues = [...values];
-		newValues[idx] = e.target.value;
-		setValues(newValues);
-		console.log('newValues:', newValues);
-	};
+	// const handleChange = (e, idx) => {
+	// 	const newValues = [...values];
+	// 	newValues[idx] = e.target.value;
+	// 	setValues(newValues);
+	// 	console.log('newValues:', newValues);
+	// };
 
-	const handleDelete = (idx) => {
-		const newValues = values.filter((_, i) => i !== idx);
-		setValues(newValues);
-	};
+	// const handleDelete = (idx) => {
+	// 	const newValues = values.filter((_, i) => i !== idx);
+	// 	setValues(newValues);
+	// };
 
-	const handleClose = () => {
-		// const updatedHyperparameters = [...form.values.hyperparameters];
-		// updatedHyperparameters[index].values = values;
-		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-		// const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
-		// 	idx === index ? { ...param, values: values } : param
-		// );
-		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-		// form.setFieldValue(`hyperparameters[${index}].values`, values);
-		updateConfirmedValues(index, values);
-		setOpened(false);
-	};
+	// const handleClose = () => {
+	// 	updateConfirmedValues(index, values);
+	// 	values.forEach(element => {
+
+	// 	});
+	// 	setOpened(false);
+	// };
+
+	const values = form.values.hyperparameters[index].values || formList(['']);
+
+    const handleAddValue = () => {
+        form.addListItem(`hyperparameters[${index}].values`, '');
+    };
+
+    const handleChange = (e, idx) => {
+        form.setFieldValue(`hyperparameters[${index}].values[${idx}]`, e.target.value);
+    };
+
+    const handleDelete = (idx) => {
+        form.removeListItem(`hyperparameters[${index}].values`, idx);
+    };
+
+    const handleClose = () => {
+        updateConfirmedValues(index, values);
+        setOpened(false);
+    };
 
 	return (
 		<>
