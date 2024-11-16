@@ -3,7 +3,7 @@
 import { Fragment, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { InputSection } from '../../../InputSection';
-import { formList } from '@mantine/form';
+//import { formList } from '@mantine/form';
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist'] as const;
 
@@ -56,10 +56,10 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
 									onClick={() =>{
 										console.log("add new item" + type + " to hyperparameters")
-										form.addListItem('hyperparameters', {
+										form.insertListItem('hyperparameters', {
 											name: '',
 											default: '',
-											...((type === 'stringlist') && { values: formList([] as any[]) }),
+											...((type === 'stringlist') && { values: [] }),
 											...((type === 'integer' || type === 'float') && {
 												min: '',
 												max: '',

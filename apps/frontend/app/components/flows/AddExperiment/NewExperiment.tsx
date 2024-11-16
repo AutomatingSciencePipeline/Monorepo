@@ -2,7 +2,7 @@ import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
-import { useForm, formList, joiResolver } from '@mantine/form';
+import { useForm, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../../utils/validators';
 
 import { DispatchStep } from './stepComponents/DispatchStep';
@@ -66,7 +66,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
-			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
+			hyperparameters: [] as any[], // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			trialExtraFile: '',
@@ -80,16 +80,16 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			keepLogs: true,
 			workers: 1,
 		},
-		schema: joiResolver(experimentSchema),
+		validate: joiResolver(experimentSchema),
 	});
 
 	useEffect(() => {
 		if (copyID != null) {
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
-					const hyperparameters = expInfo['hyperparameters'];
+					const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
 					form.setValues({
-						hyperparameters: formList(hyperparameters),
+						hyperparameters: hyperparameters,
 						name: expInfo['name'],
 						description: expInfo['description'],
 						trialExtraFile: expInfo['trialExtraFile'],

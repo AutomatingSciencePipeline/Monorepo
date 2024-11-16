@@ -15,27 +15,21 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 	const Component = remains[type];
 
-	const updateConfirmedValues = (index, values) => {
+	const updateConfirmedValues = (index) => {
+		//get values from form
+		const values = form.values.hyperparameters[index].values;
+		//update confirmed values
 		let updatedValues = confirmedValues?.map((item) =>
 			item.index === index ? { ...item, values: values } : item
 		) || [];
+
 		if (!updatedValues.some((item) => item.index === index)) {
 			updatedValues.push({ index, values: values });
 		}
+
 		setConfirmedValues(updatedValues);
 
-		if (values.length === 0) {
-			return;
-		}
-
-		console.log('setting values:', values);
-		form.setFieldValue(`hyperparameters[${index}].values`, values);
-		console.log('form.values.hyperparameters after confirm:', form.values.hyperparameters);
-
-		// const updatedHyperparameters = form.values.hyperparameters.map((param, idx) =>
-		// 			idx === index ? { ...param, values: values } : param
-		// 		);
-		// form.setFieldValue('hyperparameters', updatedHyperparameters);
+		
 	}
 
 
@@ -110,7 +104,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							type='text'
 							placeholder='name'
 							className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-							{...form.getListInputProps('hyperparameters', index, 'name')}
+							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
 						{/* <Component form={form} type={type} index={index} onConfirm={handleConfirm} {...rest} /> */}
@@ -124,7 +118,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							<Trash />
 						</ActionIcon>
 					</div>
-					{/* {((confirmedValues?.find(item => item.index === index)?.values?.length ?? 0) > 0 && type === 'stringlist') && (
+					{((confirmedValues?.find(item => item.index === index)?.values?.length ?? 0) > 0 && type === 'stringlist') && (
 						<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
 							<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
 							{confirmedValues.find(item => item.index === index)?.values.map((value, idx) => (
@@ -135,7 +129,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 								</div>
 							))}
 						</div>
-					)} */}
+					)}
 				</div>
 			)}
 		</Draggable>
@@ -146,8 +140,8 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 	return (
 		<Fragment>
 			{['default', 'min', 'max', 'step'].map((label, i) => {
-				const inputProps = form.getListInputProps('hyperparameters', index, label);
-				console.log('inputProps for index: ', index, inputProps);
+				
+				//console.log('inputProps for index: ', index);
 				return (
 					<input
 						key={`number_${type}_${label}`}
@@ -155,7 +149,7 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 						placeholder={`${label}`}
 						className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 						required
-						{...inputProps}
+						{...form.getInputProps(`hyperparameters.${index}.${label}`)}
 					/>
 				);
 			})}
@@ -169,7 +163,7 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 			label={'value'}
 			onLabel={'True'}
 			offLabel={'False'}
-			{...form.getListInputProps('hyperparameters', index, 'default')}
+			{...form.getInputProps(`hyperparameters.${index}.default`)}
 		/>
 	);
 };
@@ -181,7 +175,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 				type='text'
 				placeholder={`${type} value`}
 				className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-				{...form.getListInputProps('hyperparameters', index, 'default')}
+				{...form.getInputProps(`hyperparameters.${index}.default`)}
 				required
 			/>
 		</>
@@ -194,13 +188,12 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
-		form.addListItem(`hyperparameters[${index}].values`, '');
+		form.insertListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
-		form.setFieldValue(`hyperparameters[${index}].values[${idx}]`, e.target.value);
 		const newValues = [...values];
-		newValues[idx] = e.target.value;
+		//newValues[idx] = e.target.value;
 		setValues(newValues);
 		console.log('newValues:', newValues);
 	};
@@ -221,6 +214,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		// form.setFieldValue('hyperparameters', updatedHyperparameters);
 		// form.setFieldValue(`hyperparameters[${index}].values`, values);
 		updateConfirmedValues(index, values);
+		
 		setOpened(false);
 	};
 
@@ -235,7 +229,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				title="Edit String Values"
 			>
 				{values.map((value, idx) => {
-					const inputProps = form.getListInputProps('hyperparameters', index, `values[${idx}]`);
+					const inputProps = form.getInputProps(`hyperparameters.${index}.values.${idx}`);
 					return (
 						<div key={idx} className='flex items-center mb-2'>
 							<input
