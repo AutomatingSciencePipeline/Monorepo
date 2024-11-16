@@ -39,6 +39,23 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
         setConfirmedValues(updatedConfirmedValues);
     };
 
+	const addNewItem = (type) => {
+        const newItem = {
+            name: '',
+            default: '',
+            ...((type === 'stringlist') && { values: [''] }),
+            ...((type === 'integer' || type === 'float') && {
+                min: '',
+                max: '',
+                step: '',
+            }),
+            type: type,
+        };
+
+        const updatedHyperparameters = [...form.values.hyperparameters, newItem];
+        form.setFieldValue('hyperparameters', updatedHyperparameters);
+    };
+
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>
@@ -54,18 +71,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									key={`addNew_${type}`}
 									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
 									onClick={() => {
-										console.log("add new item" + type + " to hyperparameters")
-										form.addListItem('hyperparameters', {
-											name: '',
-											default: '',
-											...((type === 'stringlist') && { values: [''] }),
-											...((type === 'integer' || type === 'float') && {
-												min: '',
-												max: '',
-												step: '',
-											}),
-											type: type,
-										})
+										addNewItem(type);
 									}
 								}
 								>
