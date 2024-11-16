@@ -194,11 +194,12 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
     };
 
     const handleClose = () => {
-		const updatedHyperparameters = [...form.values.hyperparameters];
-        updatedHyperparameters[index].values = values;
-        form.setFieldValue('hyperparameters', updatedHyperparameters);
+		// const updatedHyperparameters = [...form.values.hyperparameters];
+        // updatedHyperparameters[index].values = values;
+        // form.setFieldValue('hyperparameters', updatedHyperparameters);
+		form.setFieldValue(`hyperparameters[${index}].values`, values);
 
-		updateConfirmedValues(index, values);
+		//updateConfirmedValues(index, values);
         setOpened(false);
     };
 
