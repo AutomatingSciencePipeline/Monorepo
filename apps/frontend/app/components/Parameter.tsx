@@ -46,9 +46,11 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
         }
         // Remove the hyperparameter at this index
         console.log('form.values.hyperparameters before remove:', form.values.hyperparameters);
-        const newHyperparameters = form.values.hyperparameters.filter((_, idx) => idx !== index);
-        form.setFieldValue('hyperparameters', newHyperparameters);
-        console.log('form.values.hyperparameters after remove:', newHyperparameters);
+        // const newHyperparameters = form.values.hyperparameters.filter((_, idx) => idx !== index);
+        // form.setFieldValue('hyperparameters', newHyperparameters);
+        // console.log('form.values.hyperparameters after remove:', newHyperparameters);
+		form.removeListItem('hyperparameters', index);
+		console.log('form.values.hyperparameters after remove:', form.values.hyperparameters);
     };
 
 	useEffect(() => {
