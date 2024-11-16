@@ -183,6 +183,7 @@ const MultiStringParam = ({ form, type, index, ...rest }) => {
     };
 
     const handleClose = () => {
+		form.setFieldValue(`hyperparameters[${index}].values`, values);
         setOpened(false);
     };
 
