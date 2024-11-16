@@ -23,6 +23,12 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 			updatedValues.push({ index, values: values });
 		}
 		setConfirmedValues(updatedValues);
+
+		if (values.length === 0) {
+			return;
+		}
+
+		form.setFieldValue(`hyperparameters[${index}].values`, confirmedValues);
 	}
 
 
@@ -110,7 +116,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							<Trash />
 						</ActionIcon>
 					</div>
-					{((confirmedValues?.find(item => item.index === index)?.values?.length ?? 0) > 0 && type === 'stringlist') && (
+					{/* {((confirmedValues?.find(item => item.index === index)?.values?.length ?? 0) > 0 && type === 'stringlist') && (
 						<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
 							<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
 							{confirmedValues.find(item => item.index === index)?.values.map((value, idx) => (
@@ -121,7 +127,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 								</div>
 							))}
 						</div>
-					)}
+					)} */}
 				</div>
 			)}
 		</Draggable>
@@ -202,7 +208,8 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		// 	idx === index ? { ...param, values: values } : param
 		// );
 		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-		form.setFieldValue(`hyperparameters[${index}].values`, values);
+		// form.setFieldValue(`hyperparameters[${index}].values`, values);
+		updateConfirmedValues(index, values);
 		setOpened(false);
 	};
 
