@@ -124,6 +124,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	const [status, setStatus] = useState(0);
 	const [id, setId] = useState(null);
 
+	const onDropComplete = () => {
+		setFormState(-1);
+		localStorage.removeItem('ID');
+		setStatus(FormStates.Info);
+	};
+
 	useLayoutEffect(() => {
 		if (formState === FormStates.Info) {
 			setOpen(false);
@@ -191,7 +197,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form={form} id={id} />
+										<DispatchStep form={form} id={id} onDropComplete={onDropComplete}/>
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>

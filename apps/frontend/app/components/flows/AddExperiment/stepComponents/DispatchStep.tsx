@@ -7,6 +7,7 @@ import { Group, Text } from '@mantine/core';
 import { useSession } from "next-auth/react";
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useState } from 'react';
+import { on } from 'events';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -17,7 +18,7 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, ...props }) => {
+export const DispatchStep = ({ id, form, onDropComplete, ...props }) => {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -56,6 +57,7 @@ export const DispatchStep = ({ id, form, ...props }) => {
 			alert(`Error uploading experiment: ${error.message}`);
 		}).finally(() => {
 			setLoading(false);
+			onDropComplete();
 		});
 	};
 
