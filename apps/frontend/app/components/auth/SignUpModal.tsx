@@ -68,7 +68,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 								</a>
 							</div>
 							{/* For dev testing!!! */}
-							<button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button>
+							{/* <button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button> */}
 						</div>
 					</div>
 				</div>
