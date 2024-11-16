@@ -202,16 +202,8 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		// 	idx === index ? { ...param, values: values } : param
 		// );
 		// form.setFieldValue('hyperparameters', updatedHyperparameters);
-
-		 // Create a copy of the hyperparameters array
-		 const updatedHyperparameters = [...form.values.hyperparameters];
-
-		 // Update the values of the specific hyperparameter
-		 updatedHyperparameters[index].values = values;
-	 
-		 // Set the updated array back to the form's values
-		 form.values.hyperparameters = updatedHyperparameters;
-
+		const inputProps = form.getInputProps(`hyperparameters[${index}].values`);
+        inputProps.onChange({ target: { value: values } });
 		setOpened(false);
 	};
 
