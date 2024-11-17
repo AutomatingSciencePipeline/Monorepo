@@ -8,7 +8,7 @@ Definitions:
 
 ## Accessing the System
 
-When on the Rose-Hulman network, you can access the live copy at <http://glados-lb.csse.rose-hulman.edu/> (note: this is **not** https).
+When on the Rose-Hulman network, you can access the live copy at <https://glados.csse.rose-hulman.edu/>.
 
 If you need a local copy the system, view the [installation guide](installation.md).
 
@@ -81,9 +81,17 @@ This will bring up the Experiment Information pane.
 
 Field Specifications:
 
-* **Trial Result (This field is required):** If your project creates a two-line csv file to store the output of the trial, specify the name and extension of the csv file in the Trial Result textbox. (This can be the same as Extra Trial File)
+* **Name**: The name of this experiment.
+* **Description**: What this experiment is aiming to accomplish.
+* **Trial Result:** If your project creates a two-line csv file to store the output of the trial, specify the name and extension of the csv file in the Trial Result textbox. (This can be the same as Extra Trial File) **This field is required.**
 * **Trial Extra File:** If your project creates an extra file as its result, specify the name and extension of the file in the Extra Trial File textbox so that the system knows how to find it. (This can be the same as Trial Result)
+* **Trial Timeout (seconds)**: How long the experiment will run before manually stopping itself. Defaults to 18000 seconds.
 * **Keep Logs**: If you want to store any system prints from a trial, leave this checked, otherwise uncheck it.
+
+At the bottom left of the information page, there are a few more options.
+
+* **Experiment Count**: How many times you want this experiment to run. Represented by the number adjacent to the "Verbose?" button. **Not certain about this yet.**
+* **Verbose?**: **Not certain about this yet.**
 
 Here's an example of a filled out information page:
 
@@ -95,14 +103,21 @@ Clicking next will bring you to the parameter input page:
 
 There are 4 supported parameter types; Integers, Floats, Strings, and Booleans. Strings and booleans are treated as constants and are not iterated upon.
 
-* Integers and floats have 4 fields, default, min, max, and step. default is the default value the variable will have when not being iterated. min, max, and step determine how the variable will be iterated.
-* Strings and Booleans are constants
+* **Integers** and **floats** have 4 fields:
+* * **default:** The value the variable will have when not being iterated on. There is some unique syntax:
+* * * default = * or default = ””: All versions of that parameter are swept for all other permutations.
+* * **min:** The minimum value the variable will hold.
+* * **max:** The maximum value the variable will hold.
+* * **step:** The size each increment applied to the variable.
+* **Strings** and **booleans** each hold a name and a value.
+* * String arrays are supported.
+* * Booleans are limited to **true** or **false** as values.
 
-To add a parameter to the experiment click on the box that contains the name of desired type of parameter. This will add a form item that you can enter more information into like so.
+To add a parameter to the experiment, click on the box that contains the name of desired type of parameter. This will add a plain version of it, which you can enter more information into like so:
 
 ![emptyParams](https://user-images.githubusercontent.com/23245825/223882117-d28d2a96-c3af-425b-97cb-16005c3b7a42.png)
 
-You can then enter in the required information.
+Then you can enter the required information.
 
 Here's an example of a filled parameter page:
 
@@ -133,7 +148,8 @@ Clicking next will bring you to the Post Process page:
 
 ![postProcess](https://user-images.githubusercontent.com/23245825/223883336-350b4a7a-f85a-4763-9d52-4cfc33425e20.png)
 
-There is currently only one post processing option: it generates a Scatter Plot with a line of best fit using the data from the results of the experiment. The dependent and independent variables can be any of the user defined variables or constants. You can also use any of the headers that are defined in the TrialResults csv
+There is currently only one postprocessing option:
+* **Scatter Plot**: Generates a line of best fit using the data from the results of the experiment. The dependent and independent variables can be any of the user defined variables or constants. You can also use any of the headers that are defined in the TrialResults csv
 
 Clicking next will bring up the confirmation page:
 
@@ -142,17 +158,23 @@ Clicking next will bring up the confirmation page:
 This contains a json file of what will be passed to the backend you can check it again here.
 Clicking next will bring up the Dispatch Page. Drop the .py or .jar file that you want the experiment to run on and click Dispatch to start the experiment.
 
+**Currently, does not tell you if the file is already in. So once you drag it in once, it should be processed.**
+
 ### Results
 
 While the system is generating the config files, this is what will appear on the dashboard:
 
 ![awaitingExpStart](https://user-images.githubusercontent.com/23245825/223901376-b047a2bc-9dc2-40d2-9d0e-6a0185f7f6cb.png)
 
-Once the experiment starts running trials the item on the dashboard will provide; how many trials are to be run, how many trials have been run so far, the number of successes and failures, and an estimation of how long it will take the experiment to complete.
+Once the experiment starts running trials the item on the dashboard will show the following:
+* The number of successes and failures
+* An estimation of how long it will take the experiment to complete
+* How many trials have been run so far
+* How many trials are to be run
 
 ![experimentInProgress](https://user-images.githubusercontent.com/23245825/223901790-f6476518-b0bf-4745-814a-c621dc564ac3.png)
 
-Once the experiment has completed you will be able to download the result.csv from the "Download Results" button which contains the output and the configuration used to get said result for each trial run.
+Once the experiment has completed, you will be able to download the result.csv from the "Download Results" button which contains the output and the configuration used to get said result for each trial run.
 
 If you had an extra file produced by the experiment, chose to keep the logs from the experiment, or chose to do any post processing, you will also be able to download a zip containing those files.
 
@@ -164,4 +186,4 @@ If you wish to run the same experiment again while changing parameters you can c
 
 ## Known bugs
 
-* If something catastrophically goes wrong and the experiment cannot continue, the user is not notified. So if an experiment is stuck on "Experiment Awaiting Start" or stuck on a trial run for a long period of time it is likely that the experiment has crashed. This is currently being addressed and should be fixed in the future.
+* **(This should be fixed now!)** If something catastrophically goes wrong and the experiment cannot continue, the user is not notified. So if an experiment is stuck on "Experiment Awaiting Start" or stuck on a trial run for a long period of time it is likely that the experiment has crashed. This is currently being addressed and should be fixed in the future.
