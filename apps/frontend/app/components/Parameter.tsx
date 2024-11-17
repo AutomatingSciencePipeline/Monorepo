@@ -16,9 +16,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	const Component = remains[type];
 
 	const updateConfirmedValues = (index, newValues) => {
-		// Update the hyperparameters object
-        form.replaceListItem(`hyperparameters[${index}].values`, newValues);
-
+	
         // Update confirmed values
         let updatedValues = confirmedValues?.map((item) =>
             item.index === index ? { ...item, values: newValues } : item
@@ -145,7 +143,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 
 const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest }) => {
 	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
+	const [values, setValues] = useState(form.getValues(`hyperparameters[${index}].values`) || []);
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
@@ -171,6 +169,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleConfirm = () => {
 		updateConfirmedValues(index, values);
+		form.replaceListItem(`hyperparameters[${index}].values`, values);
 		setOpened(false);
 	};
 
