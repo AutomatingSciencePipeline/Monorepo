@@ -15,9 +15,13 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 	const Component = remains[type];
 
-	const updateConfirmedValues = (index) => {
+	const updateConfirmedValues = (index, newValues) => {
 		//get values from form
 		const values = form.values.hyperparameters[index].values;
+
+		//set the new values
+
+		form.replaceListItem(`hyperparameters[${index}].values`, newValues);
 		//update confirmed values
 		let updatedValues = confirmedValues?.map((item) =>
 			item.index === index ? { ...item, values: values } : item
