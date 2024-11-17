@@ -143,7 +143,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 
 const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest }) => {
 	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(form.values.hyperparameters[index].values || []);
+	const [values, setValues] = useState(form.values.hyperparameters[index]?.values || []);
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
