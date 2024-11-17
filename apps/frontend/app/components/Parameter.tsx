@@ -143,7 +143,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 
 const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest }) => {
 	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(form.values.hyperparameters[index]?.values || []);
+	const [values, setValues] = useState(form.values.hyperparameters[index]?.values || ['']);
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
@@ -160,7 +160,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const handleDelete = (idx) => {
 		const newValues = values.filter((_, i) => i !== idx);
 		setValues(newValues);
-		form.removeListItem(`hyperparameters[${index}].values`, idx);
+		form.setFieldValue(`hyperparameters[${index}].values`, newValues);
 		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
