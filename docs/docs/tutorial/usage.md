@@ -88,11 +88,6 @@ Field Specifications:
 * **Trial Timeout (seconds)**: How long the experiment will run before manually stopping itself. Defaults to 18000 seconds.
 * **Keep Logs**: If you want to store any system prints from a trial, leave this checked, otherwise uncheck it.
 
-At the bottom left of the information page, there are a few more options.
-
-* **Experiment Count**: How many times you want this experiment to run. Represented by the number adjacent to the "Verbose?" button. **Not certain about this yet.**
-* **Verbose?**: **Not certain about this yet.**
-
 Here's an example of a filled out information page:
 
 ![filledInformationPage](https://user-images.githubusercontent.com/23245825/223881669-9d3790fa-115b-498b-9751-346b6047820f.png)
@@ -149,7 +144,7 @@ Clicking next will bring you to the Post Process page:
 ![postProcess](https://user-images.githubusercontent.com/23245825/223883336-350b4a7a-f85a-4763-9d52-4cfc33425e20.png)
 
 There is currently only one postprocessing option:
-* **Scatter Plot**: Generates a line of best fit using the data from the results of the experiment. The dependent and independent variables can be any of the user defined variables or constants. You can also use any of the headers that are defined in the TrialResults csv
+* **Scatter Plot**: Generates a line of best fit using the data from the results of the experiment. The dependent and independent variables can be any of the user defined variables or constants. You can also use any of the headers that are defined in the TrialResults.csv.
 
 Clicking next will bring up the confirmation page:
 
