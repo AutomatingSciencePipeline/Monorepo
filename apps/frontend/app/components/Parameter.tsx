@@ -36,6 +36,12 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		
 	};
 
+	useEffect(() => {
+		console.log('confirmedValues:', confirmedValues);
+		console.log('hyperparameters:', form.values.hyperparameters);
+	}
+	, [confirmedValues, form.values.hyperparameters]);
+
 	const handleRemove = () => {
 		const hasConfirmedValues = confirmedValues.some(item => item.index === index);
 		if (hasConfirmedValues) {
@@ -164,6 +170,10 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleClose = () => {
+		setOpened(false);
+	};
+
+	const handleConfirm = () => {
 		updateConfirmedValues(index, values);
 		setOpened(false);
 	};
@@ -199,6 +209,9 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				})}
 				<ActionIcon onClick={handleAddValue} color='blue'>
 					<Plus />
+				</ActionIcon>
+				<ActionIcon onClick={handleConfirm} color='blue'>
+					Confirm
 				</ActionIcon>
 			</Modal>
 		</>
