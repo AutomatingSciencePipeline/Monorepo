@@ -16,23 +16,19 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	const Component = remains[type];
 
 	const updateConfirmedValues = (index, newValues) => {
-		//get values from form
-		const values = form.values.hyperparameters[index].values;
+		// Update the hyperparameters object
+        form.replaceListItem(`hyperparameters[${index}].values`, newValues);
 
-		//set the new values
+        // Update confirmed values
+        let updatedValues = confirmedValues?.map((item) =>
+            item.index === index ? { ...item, values: newValues } : item
+        ) || [];
 
-		form.replaceListItem(`hyperparameters[${index}].values`, newValues);
-		//update confirmed values
-		let updatedValues = confirmedValues?.map((item) =>
-			item.index === index ? { ...item, values: values } : item
-		) || [];
+        if (!updatedValues.some((item) => item.index === index)) {
+            updatedValues.push({ index, values: newValues });
+        }
 
-		if (!updatedValues.some((item) => item.index === index)) {
-			updatedValues.push({ index, values: values });
-		}
-
-		setConfirmedValues(updatedValues);
-
+        setConfirmedValues(updatedValues);
 		
 	};
 
@@ -210,9 +206,12 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				<ActionIcon onClick={handleAddValue} color='blue'>
 					<Plus />
 				</ActionIcon>
-				<ActionIcon onClick={handleConfirm} color='blue'>
+				<button
+					className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+					onClick={handleConfirm}
+				>
 					Confirm
-				</ActionIcon>
+				</button>
 			</Modal>
 		</>
 	);
