@@ -154,13 +154,14 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		const newValues = [...values];
 		newValues[idx] = e.target.value;
 		setValues(newValues);
-		console.log('newValues:', newValues);
+		console.log('newValues:', values);
 	};
 
 	const handleDelete = (idx) => {
 		const newValues = values.filter((_, i) => i !== idx);
 		setValues(newValues);
 		form.removeListItem(`hyperparameters[${index}].values`, idx);
+		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
 	const handleClose = () => {
@@ -169,7 +170,9 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleConfirm = () => {
 		updateConfirmedValues(index, values);
-		form.replaceListItem(`hyperparameters[${index}].values`, values);
+		console.log("before: ", form.values.hyperparameters[index].values);
+		form.setFieldValue(`hyperparameters[${index}].values`, values);
+		console.log("after: ", form.values.hyperparameters[index].values);
 		setOpened(false);
 	};
 
