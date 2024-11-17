@@ -154,7 +154,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleChange = (e, idx) => {
 		const newValues = [...values];
-		//newValues[idx] = e.target.value;
+		newValues[idx] = e.target.value;
 		setValues(newValues);
 		console.log('newValues:', newValues);
 	};
@@ -206,12 +206,14 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				<ActionIcon onClick={handleAddValue} color='blue'>
 					<Plus />
 				</ActionIcon>
-				<button
-					className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-					onClick={handleConfirm}
-				>
-					Confirm
-				</button>
+				<div>
+					<button
+						className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+						onClick={handleConfirm}
+					>
+						Confirm
+					</button>
+				</div>
 			</Modal>
 		</>
 	);
