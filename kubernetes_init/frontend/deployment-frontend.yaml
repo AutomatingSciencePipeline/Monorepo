@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-test-frontend
+  name: glados-frontend
   namespace: default
 spec:
   replicas: 1
