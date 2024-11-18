@@ -188,9 +188,14 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
         console.log("before confirm: ", form.values.hyperparameters[index].values);
 		console.log("before confirm values: ", values);
 
-        form.setFieldValue(`hyperparameters[${index}]`, {
-			...form.values.hyperparameters[index],
-			values: values,
+		// Clear the existing values array
+		const currentValues = form.values.hyperparameters[index].values;
+		for (let i = currentValues.length - 1; i >= 0; i--) {
+			 form.removeListItem(`hyperparameters[${index}].values`, i);
+		}
+
+        values.forEach((value, idx) => {
+			form.insertListItem(`hyperparameters[${index}].values`, value, idx);
 		});
 
         console.log("after confirm: ", form.values.hyperparameters[index].values);
