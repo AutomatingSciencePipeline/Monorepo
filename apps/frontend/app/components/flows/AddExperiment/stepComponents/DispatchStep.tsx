@@ -131,7 +131,7 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 								</td>
 								<td className="border border-gray-300 px-4 py-2">{file.filename}</td>
 								<td className="border border-gray-300 px-4 py-2">
-									{new Date(file.uploadDate).toLocaleString()}
+									{new Date(file.metadata.lastUsedDate).toLocaleString()}
 								</td>
 							</tr>
 						))}
