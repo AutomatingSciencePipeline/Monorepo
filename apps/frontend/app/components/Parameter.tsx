@@ -188,14 +188,10 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
         console.log("before confirm: ", form.values.hyperparameters[index].values);
 		console.log("before confirm values: ", values);
 
-        // Ensure each value is added to the form's hyperparameters if it doesn't already exist
-        values.forEach((value, idx) => {
-            const existingValues = form.values.hyperparameters[index]?.values || [];
-            if (!existingValues.includes(value)) {
-				console.log('adding:', value);
-                form.insertListItem(`hyperparameters[${index}].values`, value);
-            }
-        });
+        form.setFieldValue(`hyperparameters[${index}]`, {
+			...form.values.hyperparameters[index],
+			values: values,
+		});
 
         console.log("after confirm: ", form.values.hyperparameters[index].values);
 		updateConfirmedValues(index, values);
