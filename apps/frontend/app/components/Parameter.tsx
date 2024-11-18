@@ -151,6 +151,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
+		form.insertListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
@@ -210,7 +211,6 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				title="Edit String Values"
 			>
 				{values.map((value, idx) => {
-					const inputProps = form.getInputProps(`hyperparameters.${index}.values.${idx}`);
 					return (
 						<div key={idx} className='flex items-center mb-2'>
 							<input
@@ -219,7 +219,6 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 								value={value}
 								onChange={(e) => handleChange(e, idx)}
-								{...inputProps}
 								required
 							/>
 							<ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
