@@ -7,7 +7,7 @@ import clientPromise from "./lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise, {databaseName: 'gladosdb'}),
-  providers: [GitHub, Google, Keycloak], //Add Keycloak here to do local testing
+  providers: [GitHub, Google], //Add Keycloak here to do local testing
   callbacks: {
     authorized: async ({ auth }) => {
       // Logged in users are authenticated, otherwise redirect to login page
