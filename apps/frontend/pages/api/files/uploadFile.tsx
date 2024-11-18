@@ -1,10 +1,8 @@
 import clientPromise, { DB_NAME, COLLECTION_RESULTS_CSVS, COLLECTION_EXPERIMENT_FILES } from '../../../lib/mongodb';
 import { NextApiHandler, NextApiRequest } from 'next';
 import { GridFSBucket } from 'mongodb';
-import { Readable, Writable } from 'stream';
 import formidable, { Fields, Files } from "formidable";
 import fs from "fs";
-import CryptoJS from "crypto-js";
 
 export const config = {
     api: {
