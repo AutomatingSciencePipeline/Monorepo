@@ -159,6 +159,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const handleChange = (e, idx) => {
 		console.log('replacing list item:', idx, e.target.value);
         form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
+		console.log('after replace:', form.values.hyperparameters[index].values);
 		const newValues = [...values];
 		newValues[idx] = e.target.value;
 		setValues(newValues);
@@ -188,15 +189,21 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
         console.log("before confirm: ", form.values.hyperparameters[index].values);
 		console.log("before confirm values: ", values);
 
-		// Clear the existing values array
-		const currentValues = form.values.hyperparameters[index].values;
-		for (let i = currentValues.length - 1; i >= 0; i--) {
-			 form.removeListItem(`hyperparameters[${index}].values`, i);
-		}
+		// // Clear the existing values array
+		// const currentValues = form.values.hyperparameters[index].values;
+		// for (let i = currentValues.length - 1; i >= 0; i--) {
+		// 	 form.removeListItem(`hyperparameters[${index}].values`, i);
+		// }
 
-        values.forEach((value, idx) => {
-			form.insertListItem(`hyperparameters[${index}].values`, value, idx);
-		});
+		// console.log("after clear: ", form.values.hyperparameters[index].values);
+
+        // values.forEach((value, idx) => {
+		// 	form.insertListItem(`hyperparameters[${index}].values`, value, idx);
+		// });
+
+		//try manual setting
+
+		form.values.hyperparameters[index].values = values;
 
         console.log("after confirm: ", form.values.hyperparameters[index].values);
 		updateConfirmedValues(index, values);
