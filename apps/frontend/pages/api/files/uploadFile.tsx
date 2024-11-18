@@ -50,7 +50,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
 
             // Upload the file to GridFS
             const uploadStream = bucket.openUploadStream(file.originalFilename || "uploadedFile", {
-                metadata: { userId: userId, hash: file.hash },
+                metadata: { userId: userId, hash: file.hash, lastUsedDate: new Date()},
             });
 
 
