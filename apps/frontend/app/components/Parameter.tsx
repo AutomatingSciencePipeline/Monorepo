@@ -68,8 +68,8 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
-						{/* <Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} /> */}
-						<Component form={form} type={type} index={index} {...rest} />
+						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
+						{/* <Component form={form} type={type} index={index} {...rest} /> */}
 						
 						<ActionIcon
 							color='red'
@@ -195,6 +195,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
         });
 
         console.log("after confirm: ", form.values.hyperparameters[index].values);
+		updateConfirmedValues(index, values);
         setOpened(false);
     };
 
