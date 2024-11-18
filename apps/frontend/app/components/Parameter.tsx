@@ -37,10 +37,16 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 
 	useEffect(() => {
-		console.log('confirmedValues:', confirmedValues);
-		console.log('hyperparameters:', form.values.hyperparameters);
-	}
-	, [confirmedValues, form.values.hyperparameters]);
+		if(form.values.hyperparameters[index].values) {
+			updateConfirmedValues(index, form.values.hyperparameters[index].values);
+		}
+	}, []);
+
+	// useEffect(() => {
+	// 	console.log('confirmedValues:', confirmedValues);
+	// 	console.log('hyperparameters:', form.values.hyperparameters);
+	// }
+	// , [confirmedValues, form.values.hyperparameters]);
 
 	const handleRemove = () => {
 		form.removeListItem('hyperparameters', index);
