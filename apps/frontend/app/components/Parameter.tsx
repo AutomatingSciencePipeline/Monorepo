@@ -145,6 +145,10 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const [opened, setOpened] = useState(false);
 	const [values, setValues] = useState(form.values.hyperparameters[index]?.values || ['']);
 
+	useEffect(() => {
+        console.log('Updated values:', values);
+    }, [values]);
+
 	const handleAddValue = () => {
 		setValues([...values, '']);
 	};
@@ -153,7 +157,6 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		const newValues = [...values];
 		newValues[idx] = e.target.value;
 		setValues(newValues);
-		console.log('newValues:', values);
 	};
 
 	const handleDelete = (idx) => {
@@ -177,9 +180,17 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleConfirm = () => {
 		updateConfirmedValues(index, values);
-		console.log("before: ", form.values.hyperparameters[index].values);
-		form.setFieldValue(`hyperparameters[${index}].values`, values);
-		console.log("after: ", form.values.hyperparameters[index].values);
+		console.log("before confirm: ", form.values.hyperparameters[index].values);
+	
+		// Ensure each value is added to the form's hyperparameters if it doesn't already exist
+		values.forEach((value, idx) => {
+			const existingValues = form.values.hyperparameters[index]?.values || [];
+			if (!existingValues.includes(value)) {
+				form.insertListItem(`hyperparameters[${index}].values`, value);
+			}
+		});
+	
+		console.log("after confirm: ", form.values.hyperparameters[index].values);
 		setOpened(false);
 	};
 
