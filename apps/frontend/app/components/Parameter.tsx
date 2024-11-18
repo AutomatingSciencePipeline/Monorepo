@@ -154,12 +154,12 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleChange = (e, idx) => {
-		const newValues = [...values];
-		console.log('idx:', idx);
-		console.log('e.target.value:', e.target.value);
-		newValues[idx] = e.target.value;
-		setValues(newValues);
-	};
+        const newValues = [...values];
+        newValues[idx] = e.target.value;
+        setValues(newValues);
+		console.log('replacing list item:', idx, e.target.value);
+        form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
+    };
 
 	const handleDelete = (idx) => {
 		const newValues = values.filter((_, i) => i !== idx);
@@ -169,6 +169,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		const originalValues = form.values.hyperparameters[index]?.values || [];
 		for (let i = originalValues.length - 1; i >= 0; i--) {
 			if (!newValues.includes(originalValues[i])) {
+				console.log('deleting:', originalValues[i]);
 				form.removeListItem(`hyperparameters[${index}].values`, i);
 			}
 		}
@@ -181,18 +182,20 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleConfirm = () => {
-		updateConfirmedValues(index, values);
+		
 		console.log("before confirm: ", form.values.hyperparameters[index].values);
 	
 		// Ensure each value is added to the form's hyperparameters if it doesn't already exist
 		values.forEach((value, idx) => {
 			const existingValues = form.values.hyperparameters[index]?.values || [];
 			if (!existingValues.includes(value)) {
+				console.log('inserting:', value);
 				form.insertListItem(`hyperparameters[${index}].values`, value);
 			}
 		});
 	
 		console.log("after confirm: ", form.values.hyperparameters[index].values);
+		updateConfirmedValues(index, form.values.hyperparameters[index].values);
 		setOpened(false);
 	};
 
