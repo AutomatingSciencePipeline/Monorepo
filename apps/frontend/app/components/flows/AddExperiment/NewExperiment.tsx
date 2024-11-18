@@ -128,7 +128,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	const [status, setStatus] = useState(0);
 	const [id, setId] = useState(null);
 
-	const [fileId, setFileId] = useState(null);
+	const [fileId, setFileId] = useState<string>();
 
 	useLayoutEffect(() => {
 		if (formState === FormStates.Info) {
@@ -140,10 +140,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			form.reset();
 		}
 	}, [formState]); // TODO adding 'form' causes an update loop
-
-	useEffect(() => {
-		console.log("FileID", fileId);
-	}, [fileId]);
 
 	return (
 		<div>
