@@ -112,7 +112,7 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 						<tr className="bg-gray-200">
 							<th className="border border-gray-300 px-4 py-2">Select</th>
 							<th className="border border-gray-300 px-4 py-2">Filename</th>
-							<th className="border border-gray-300 px-4 py-2">Upload Date</th>
+							<th className="border border-gray-300 px-4 py-2">Last Use Date</th>
 						</tr>
 					</thead>
 					<tbody>

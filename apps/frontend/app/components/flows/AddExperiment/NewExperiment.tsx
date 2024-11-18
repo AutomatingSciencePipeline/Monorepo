@@ -13,7 +13,7 @@ import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../../lib/db';
 
-import { getDocumentFromId } from '../../../../lib/mongodb_funcs';
+import { getDocumentFromId, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -240,13 +240,10 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 													{...(status === FormStates.Dispatch ?
 														{
 															type: 'submit', onClick: () => {
-																console.log(fileId);
 																if (fileId != null && fileId.length > 0) {
 																	setFormState(-1);
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
-																	console.log("ID WAS!");
-																	console.log(fileId);
 																	submitExperiment(form.values as any, session?.user?.id as string, fileId).then(async (json) => {
 																		const expId = json['id'];
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
@@ -263,6 +260,11 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 																		{
 																			toast.error("Failed to start experiment!", {duration: 1500});
 																		}
+																	}).then(() =>{
+																		//Use this to set the new last used date of the file
+																		updateLastUsedDateFile(fileId);
+																	}).catch((error) => {
+																		toast.error(`Error while starting experiment: ${error}`, {duration: 1500});
 																	});
 																	setFileId("");
 																}

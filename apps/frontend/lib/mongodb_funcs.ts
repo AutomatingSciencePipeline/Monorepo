@@ -67,7 +67,7 @@ export async function getRecentFiles(userId: string) {
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
 
     const userFiles = await bucket.find({ "metadata.userId": userId })
-        .sort({ uploadDate: -1 })
+        .sort({ "metadata.lastUsedDate": -1 })
         .limit(5)
         .toArray();
 
@@ -82,5 +82,22 @@ export async function getRecentFiles(userId: string) {
     }));
 
     return serializedFiles;
+}
+
+export async function updateLastUsedDateFile(fileId: string) {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
+
+    const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+    if (file.length === 0) {
+        return;
+    }
+
+    await db.collection('fileBucket.files').updateOne(
+        { _id: new ObjectId(fileId) },
+        { $set: { 'metadata.lastUsedDate': new Date() } }
+    );
 }
 
