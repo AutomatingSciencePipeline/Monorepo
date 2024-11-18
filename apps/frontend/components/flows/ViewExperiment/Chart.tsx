@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Chart, registerables, ChartTypeRegistry } from 'chart.js';
-import {IBoxPlot} from '@sgratzl/chartjs-chart-boxplot';
+import { BoxPlotController, BoxAndWiskers, ViolinController } from '@sgratzl/chartjs-chart-boxplot';
 import Modal from './Modal'; // Assuming you have a Modal component
 import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../firebase/db_types';
 import { getExperimentDataForGraph } from '../../../firebase/db';
 
 Chart.register(...registerables);
+Chart.register(BoxPlotController, BoxAndWiskers, ViolinController);
 
 interface ChartModalProps {
     onClose: () => void;
@@ -26,7 +27,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const setBoxPlot = () => setChartType('boxplot');
     const setViolin = () => setChartType('violin');
 
-    useEffect(() => {
+    /*useEffect(() => {
         fetch(`/api/download/csv/671a908532c499e45424f25c`).then((response) => response.json()).then((record) => {
             setExperimentChartData(record);
             setLoading(false);
@@ -41,6 +42,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             });
         }
         );
+    }, [project.expId]);*/
+
+    useEffect(() => {
+        setExperimentChartData({_id: '3', experimentId: project.expId, resultContent: 'xData,yData,Classification\n1,7,A\n2,16,B\n3,12,C\n4,10,D\n5,9,A\n6,18,B\n7,12,C\n8,11,D\n9,7,A\n10,5,B\n11,16,C\n12,20,D\n13,0,A\n14,12,B\n15,18,C\n16,3,D\n17,7,A\n18,8,B\n19,19,C\n20,4,D'});
+        setLoading(false);
     }, [project.expId]);
 
     console.log(experimentChartData.resultContent);
@@ -55,8 +61,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
-            xList.push(cols[3]); // Assuming x values are in the 4th column
-            yList.push(Number(cols[4])); // Assuming y values are in the 5th column
+            xList.push(cols[0]); // Assuming x values are in the 4th column
+            yList.push(Number(cols[1])); // Assuming y values are in the 5th column
         }
 
         return { xList, yList };
@@ -82,10 +88,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             const newChartInstance = new Chart(ctx, {
                 type: chartType,
                 data: {
-                    labels: xList,
+                    labels: ['X','Y'],//xList,
                     datasets: [{
                         label: 'Experiment Data',
-                        data: yList,
+                        data: [xList, yList],
                         borderColor: colors,
                         backgroundColor: colors,
                     }]
