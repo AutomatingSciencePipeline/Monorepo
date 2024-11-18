@@ -145,7 +145,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 
 const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest }) => {
 	const [opened, setOpened] = useState(false);
-	const [values, setValues] = useState(form.getFieldValue(`hyperparameters[${index}].values`) || ['']);
+	const [values, setValues] = useState(form.values.hyperparameters[index]?.values || ['']);
 
     useEffect(() => {
         console.log('Updated values:', values);
@@ -158,7 +158,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const handleChange = (e, idx) => {
 		console.log('replacing list item:', idx, e.target.value);
         form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
-		const updatedHyperparameters = form.getFieldValue(`hyperparameters[${index}].values`);
+		const updatedHyperparameters = form.values.hyperparameters[index].values;
 		const newValues = [...updatedHyperparameters];
 		setValues(newValues);
     };
@@ -168,7 +168,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		setValues(newValues);
 	
 		// Remove the list items that have been removed from the values list
-		const originalValues = form.getFieldValue(`hyperparameters[${index}].values`) || [];
+		const originalValues = form.values.hyperparameters[index]?.values || [];
 		for (let i = originalValues.length - 1; i >= 0; i--) {
 			if (!newValues.includes(originalValues[i])) {
 				console.log('deleting:', originalValues[i]);
@@ -176,7 +176,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 			}
 		}
 	
-		console.log('after delete:', form.getFieldValue(`hyperparameters[${index}].values`));
+		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
 	const handleClose = () => {
@@ -184,23 +184,23 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleConfirm = () => {
-        console.log("before confirm: ", form.getFieldValue(`hyperparameters[${index}].values`));
+        console.log("before confirm: ", form.values.hyperparameters[index].values);
 
         // Ensure each value is added to the form's hyperparameters if it doesn't already exist
         values.forEach((value, idx) => {
-            const existingValues = form.getFieldValue(`hyperparameters[${index}].values`) || [];
+            const existingValues = form.values.hyperparameters[index]?.values || [];
             if (!existingValues.includes(value)) {
                 form.insertListItem(`hyperparameters[${index}].values`, value);
             }
         });
 
-        console.log("after confirm: ", form.getFieldValue(`hyperparameters[${index}].values`));
+        console.log("after confirm: ", form.values.hyperparameters[index].values);
 		updateConfirmedValues(index, values);
         setOpened(false);
     };
 
 	const handleOpen = () => {
-        setValues(form.getFieldValue(`hyperparameters[${index}].values`) || ['']);
+        setValues(form.values.hyperparameters[index]?.values || ['']);
         setOpened(true);
     };
 
