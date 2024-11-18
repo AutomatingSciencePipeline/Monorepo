@@ -15,34 +15,34 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 	const Component = remains[type];
 
-	const updateConfirmedValues = (index, newValues) => {
-	
-        // Update confirmed values
-        let updatedValues = confirmedValues?.map((item) =>
-            item.index === index ? { ...item, values: newValues } : item
-        ) || [];
+	// const updateConfirmedValues = (index, newValues) => {
 
-        if (!updatedValues.some((item) => item.index === index)) {
-            updatedValues.push({ index, values: newValues });
-        }
+	//     // Update confirmed values
+	//     let updatedValues = confirmedValues?.map((item) =>
+	//         item.index === index ? { ...item, values: newValues } : item
+	//     ) || [];
 
-        setConfirmedValues(updatedValues);
-		
-	};
+	//     if (!updatedValues.some((item) => item.index === index)) {
+	//         updatedValues.push({ index, values: newValues });
+	//     }
+
+	//     setConfirmedValues(updatedValues);
+
+	// };
 
 	useEffect(() => {
-		console.log('confirmedValues:', confirmedValues);
+		//console.log('confirmedValues:', confirmedValues);
 		console.log('hyperparameters:', form.values.hyperparameters);
 	}
-	, [confirmedValues, form.values.hyperparameters]);
+		, [confirmedValues, form.values.hyperparameters]);
 
 	const handleRemove = () => {
-		const hasConfirmedValues = confirmedValues.some(item => item.index === index);
-		if (hasConfirmedValues) {
-			const newConfirmedValues = confirmedValues.filter(item => item.index !== index);
-			setConfirmedValues(newConfirmedValues);
+		// const hasConfirmedValues = confirmedValues.some(item => item.index === index);
+		// if (hasConfirmedValues) {
+		// 	const newConfirmedValues = confirmedValues.filter(item => item.index !== index);
+		// 	setConfirmedValues(newConfirmedValues);
 
-		}
+		// }
 		// Remove the hyperparameter at this index using removeListItem
 		form.removeListItem('hyperparameters', index);
 	};
@@ -67,8 +67,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
-						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
-						
+						{/* <Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} /> */}
+						<Component form={form} type={type} index={index} {...rest} />
+
 						<ActionIcon
 							color='red'
 							onClick={handleRemove}
@@ -77,10 +78,10 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							<Trash />
 						</ActionIcon>
 					</div>
-					{((confirmedValues?.find(item => item.index === index)?.values?.length ?? 0) > 0 && type === 'stringlist') && (
+					{((form.values.hyperparameters[index]?.values?.length ?? 0) > 0 && type === 'stringlist') && (
 						<div className='mt-4 p-4 bg-gray-100 rounded-md shadow-sm'>
 							<h3 className='text-lg font-medium text-gray-700 mb-2'>Values:</h3>
-							{confirmedValues.find(item => item.index === index)?.values.map((value, idx) => (
+							{form.values.hyperparameters[index]?.values.map((value, idx) => (
 								<div key={idx} className='flex items-center mb-2'>
 									<span className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white'>
 										{value}
@@ -99,7 +100,7 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 	return (
 		<Fragment>
 			{['default', 'min', 'max', 'step'].map((label, i) => {
-				
+
 				//console.log('inputProps for index: ', index);
 				return (
 					<input
@@ -146,26 +147,21 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const [values, setValues] = useState(form.values.hyperparameters[index]?.values || ['']);
 
 	useEffect(() => {
-        console.log('Updated values:', values);
-    }, [values]);
+		setValues(form.values.hyperparameters[index]?.values || ['']);
+	}, [form.values.hyperparameters[index]?.values]);
 
 	const handleAddValue = () => {
-		setValues([...values, '']);
 		form.insertListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
-        const newValues = [...values];
-        newValues[idx] = e.target.value;
-        setValues(newValues);
-		console.log('replacing list item:', idx, e.target.value);
-        form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
-    };
+		form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
+	};
 
 	const handleDelete = (idx) => {
 		const newValues = values.filter((_, i) => i !== idx);
 		setValues(newValues);
-	
+
 		// Remove the list items that have been removed from the values list
 		const originalValues = form.values.hyperparameters[index]?.values || [];
 		for (let i = originalValues.length - 1; i >= 0; i--) {
@@ -174,7 +170,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				form.removeListItem(`hyperparameters[${index}].values`, i);
 			}
 		}
-	
+
 		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
@@ -183,26 +179,28 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleConfirm = () => {
-		
 		console.log("before confirm: ", form.values.hyperparameters[index].values);
-	
+
 		// Ensure each value is added to the form's hyperparameters if it doesn't already exist
 		values.forEach((value, idx) => {
 			const existingValues = form.values.hyperparameters[index]?.values || [];
 			if (!existingValues.includes(value)) {
-				console.log('inserting:', value);
 				form.insertListItem(`hyperparameters[${index}].values`, value);
 			}
 		});
-	
+
 		console.log("after confirm: ", form.values.hyperparameters[index].values);
-		updateConfirmedValues(index, values);
 		setOpened(false);
+	};
+
+	const handleOpen = () => {
+		setValues(form.values.hyperparameters[index]?.values || ['']);
+		setOpened(true);
 	};
 
 	return (
 		<>
-			<Button onClick={() => setOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+			<Button onClick={handleOpen} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
 				Edit Strings
 			</Button>
 			<Modal
