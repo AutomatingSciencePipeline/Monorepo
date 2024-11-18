@@ -2,7 +2,7 @@ import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
-import { useForm, formList, joiResolver } from '@mantine/form';
+import { useForm, joiResolver } from '@mantine/form';
 import { experimentSchema } from '../../../../utils/validators';
 
 import { DispatchStep } from './stepComponents/DispatchStep';
@@ -61,11 +61,12 @@ const Steps = ({ steps }) => {
 	);
 };
 
+
 const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
 		initialValues: {
-			hyperparameters: formList([] as any[]), // TODO type for parameters will remove the need for `any` here
+			hyperparameters: [] as any[], // TODO type for parameters will remove the need for `any` here
 			name: '',
 			description: '',
 			trialExtraFile: '',
@@ -79,16 +80,16 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			keepLogs: true,
 			workers: 1,
 		},
-		schema: joiResolver(experimentSchema),
+		validate: joiResolver(experimentSchema),
 	});
 
 	useEffect(() => {
 		if (copyID != null) {
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
-					const hyperparameters = expInfo['hyperparameters'];
+					const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
 					form.setValues({
-						hyperparameters: formList(hyperparameters),
+						hyperparameters: hyperparameters,
 						name: expInfo['name'],
 						description: expInfo['description'],
 						trialExtraFile: expInfo['trialExtraFile'],
@@ -112,14 +113,22 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
+	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
+
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
-		return <Parameter key={index} form={form} type={type} index={index} {...rest} />;
+		return <Parameter key={index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;
 	});
 
 	const [open, setOpen] = useState(true);
 	const [status, setStatus] = useState(0);
 	const [id, setId] = useState(null);
+
+	const onDropComplete = () => {
+		setFormState(-1);
+		localStorage.removeItem('ID');
+		setStatus(FormStates.Info);
+	};
 
 	useLayoutEffect(() => {
 		if (formState === FormStates.Info) {
@@ -182,13 +191,13 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 									) : status === FormStates.DumbTextArea ? (
 										<DumbTextArea form={form}></DumbTextArea>
 									) : status === FormStates.Params ? (
-										<ParamStep form={form}>{fields}</ParamStep>
+										<ParamStep form={form} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues}>{fields}</ParamStep>
 									) : status === FormStates.ProcessStep ? (
 										<PostProcessStep form={form}>{fields}</PostProcessStep>
 									) : status === FormStates.Confirmation ? (
 										<ConfirmationStep form={form} />
 									) : (
-										<DispatchStep form={form} id={id} />
+										<DispatchStep form={form} id={id} onDropComplete={onDropComplete}/>
 									)}
 
 									<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -224,7 +233,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 											>
 												{status === FormStates.Info ? 'Cancel' : 'Back'}
 											</button>
-											<button
+											{!(status === FormStates.Dispatch) && <button
 												className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 												{...(status === FormStates.Dispatch ?
 													{
@@ -240,7 +249,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 													})}
 											>
 												{status === FormStates.Dispatch ? 'Dispatch' : 'Next'}
-											</button>
+											</button>}
 										</div>
 									</div>
 								</form>

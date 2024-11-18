@@ -19,7 +19,7 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 			email: '',
 			password: '',
 		},
-		schema: joiResolver(signInSchema),
+		validate: joiResolver(signInSchema),
 	});
 
 	const { data: session } = useSession();
@@ -194,8 +194,7 @@ export const SignInModal = ({ afterSignIn }: SignInModalProps) => {
 						</div>
 					</div> 
 				</div>
-				{/* For dev testing!!! */}
-				{/* <button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button> */}
+				
 			</div>
 		</div>
 	);

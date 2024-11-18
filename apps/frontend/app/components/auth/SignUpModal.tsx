@@ -14,7 +14,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 			password: '',
 			passwordRepeat: '',
 		},
-		schema: joiResolver(signUpSchema),
+		validate: joiResolver(signUpSchema),
 	});
 	const DEFAULT_SIGN_UP_TEXT = 'Create your account';
 	const SIGN_UP_LOADING_TEXT = 'Loading...';
@@ -67,6 +67,8 @@ export const SignUpModal = ({ afterSignUp }) => {
 									<AiOutlineGithub className='w-5 h-5' />
 								</a>
 							</div>
+							{/* For dev testing!!! */}
+							{/* <button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button> */}
 						</div>
 					</div>
 				</div>
