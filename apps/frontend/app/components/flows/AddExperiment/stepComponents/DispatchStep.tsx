@@ -18,7 +18,7 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, updateId, ...props }) => {
+export const DispatchStep = ({ initSelectedFile, form, updateId, ...props }) => {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -27,6 +27,7 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 	const [selectedFile, setSelectedFile] = useState<string>("");
 
 	useEffect(() => {
+
 		getRecentFiles(session?.user?.id!).then((files) => {
 			setUserFiles(files);
 		}).catch((error) => console.error("Error fetching files:", error));
@@ -55,41 +56,6 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 			const json = await uploadFileResponse.json();
 			console.log(`Failed to upload file: ${json['message']}`);
 		}
-		// submitExperiment(form.values, session?.user?.id as string).then(async (json) => {
-		// 	const expId = json['id'];
-		// 	updateId(expId);
-		// 	const formData = new FormData();
-		// 	formData.set("file", files[0]);
-		// 	formData.set("expId", expId);
-		// 	const uploadResponse = await fetch('/api/files/uploadFile', {
-		// 		method: 'POST',
-		// 		credentials: 'same-origin',
-		// 		body: formData
-		// 	});
-		// 	if (uploadResponse.ok) {
-		// 		console.log(`Handing experiment ${expId} to the backend`);
-		// 		const response = await fetch(`/api/experiments/start/${expId}`, {
-		// 			method: 'POST',
-		// 			headers: new Headers({ 'Content-Type': 'application/json' }),
-		// 			credentials: 'same-origin',
-		// 			body: JSON.stringify({ id: expId }),
-		// 		});
-		// 		if (response.ok) {
-		// 			console.log('Response from backend received', response);
-		// 		} else {
-		// 			const responseText = await response.text();
-		// 			console.log('Upload failed', responseText, response);
-		// 			throw new Error(`Upload failed: ${response.status}: ${responseText}`);
-		// 		}
-		// 	} else {
-		// 		throw new Error('Failed to upload experiment file to the backend server, is it running?');
-		// 	}
-		// }).catch((error) => {
-		// 	console.log('Error uploading experiment: ', error);
-		// 	alert(`Error uploading experiment: ${error.message}`);
-		// }).finally(() => {
-		// 	setLoading(false);
-		// });
 	};
 
 	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;

@@ -246,7 +246,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
 																	console.log("ID WAS!");
-																	console.log(id);
+																	console.log(fileId);
 																	submitExperiment(form.values as any, session?.user?.id as string, fileId).then(async (json) => {
 																		const expId = json['id'];
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
@@ -263,7 +263,8 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 																		{
 																			toast.error("Failed to start experiment!", {duration: 1500});
 																		}
-																	})
+																	});
+																	setFileId("");
 																}
 																else {
 																	toast.error("No file selected!", {duration: 1500})
