@@ -195,7 +195,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		});
 	
 		console.log("after confirm: ", form.values.hyperparameters[index].values);
-		updateConfirmedValues(index, form.values.hyperparameters[index].values);
+		updateConfirmedValues(index, values);
 		setOpened(false);
 	};
 
