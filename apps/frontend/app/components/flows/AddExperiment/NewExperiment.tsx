@@ -241,7 +241,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 														{
 															type: 'submit', onClick: () => {
 																console.log(fileId);
-																if (fileId) {
+																if (fileId != null && fileId.length > 0) {
 																	setFormState(-1);
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
