@@ -147,7 +147,6 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleAddValue = () => {
 		setValues([...values, '']);
-		form.insertListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
@@ -160,7 +159,15 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const handleDelete = (idx) => {
 		const newValues = values.filter((_, i) => i !== idx);
 		setValues(newValues);
-		form.setFieldValue(`hyperparameters[${index}].values`, newValues);
+	
+		// Remove the list items that have been removed from the values list
+		const originalValues = form.values.hyperparameters[index]?.values || [];
+		for (let i = originalValues.length - 1; i >= 0; i--) {
+			if (!newValues.includes(originalValues[i])) {
+				form.removeListItem(`hyperparameters[${index}].values`, i);
+			}
+		}
+	
 		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
@@ -210,7 +217,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				</ActionIcon>
 				<div>
 					<button
-						className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+						className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 whitespace-nowrap'
 						onClick={handleConfirm}
 					>
 						Confirm
