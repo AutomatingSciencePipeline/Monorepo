@@ -12,8 +12,24 @@ export async function getDocumentFromId(expId: string) {
         return Promise.reject(`Could not find document with id: ${expId}`);
     }
 
+    const expInfo = {
+        hyperparameters: Array.isArray(expDoc.hyperparameters) ? expDoc.hyperparameters : [],
+        name: expDoc.name || '',
+        description: expDoc.description || '',
+        trialExtraFile: expDoc.trialExtraFile || '',
+        trialResult: expDoc.trialResult || '',
+        verbose: expDoc.verbose || false,
+        workers: expDoc.workers || 0,
+        scatter: expDoc.scatter || '',
+        dumbTextArea: expDoc.dumbTextArea || '',
+        scatterIndVar: expDoc.scatterIndVar || '',
+        scatterDepVar: expDoc.scatterDepVar || '',
+        timeout: expDoc.timeout || 0,
+        keepLogs: expDoc.keepLogs || false,
+    };
+
     //just return the document
-    return expDoc;
+    return expDoc
 }
 
 export async function deleteDocumentById(expId: string) {
