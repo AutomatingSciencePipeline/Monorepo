@@ -26,6 +26,7 @@
 		"@testing-library/react": "^13.4.0",
 		"@types/formidable": "^3.4.5",
 		"classnames": "^2.3.2",
+		"crypto-js": "^4.2.0",
 		"dayjs": "^1.11.6",
 		"encoding": "^0.1.13",
 		"firebase": "^9.12.1",
@@ -38,6 +39,7 @@
 		"react": "^18.3.1",
 		"react-beautiful-dnd": "^13.1.1",
 		"react-dom": "^18.3.1",
+		"react-hot-toast": "^2.4.1",
 		"react-icons": "^4.6.0",
 		"tabler-icons-react": "^1.55.0",
 		"uuid": "^9.0.0"

@@ -186,7 +186,7 @@ def download_experiment_files(experiment: ExperimentData):
     explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
         # try to call the backend to download
-        url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?expId={experiment.expId}'
+        url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?fileId={experiment.file}'
         response = requests.get(url, timeout=60)
         file_contents = response.content
         # write the file contents to file path

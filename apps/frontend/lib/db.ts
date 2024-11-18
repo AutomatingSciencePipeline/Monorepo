@@ -5,12 +5,13 @@ import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
 // test
-export const submitExperiment = async (values: Partial<ExperimentData>, userId: string) => {
+export const submitExperiment = async (values: Partial<ExperimentData>, userId: string, fileId: string) => {
 	values.creator = userId;
 	values.created = Date.now();
 	values.finished = false;
 	values.estimatedTotalTimeMinutes = 0;
 	values.totalExperimentRuns = 0;
+	values.file = fileId;
 	const response = await fetch(`/api/experiments/storeExp`,
 		{
 			method: "POST",
