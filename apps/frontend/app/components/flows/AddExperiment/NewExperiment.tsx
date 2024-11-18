@@ -240,6 +240,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 													{...(status === FormStates.Dispatch ?
 														{
 															type: 'submit', onClick: () => {
+																console.log(fileId);
 																if (fileId) {
 																	setFormState(-1);
 																	localStorage.removeItem('ID');
