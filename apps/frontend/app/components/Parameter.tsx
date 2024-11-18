@@ -155,6 +155,8 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 
 	const handleChange = (e, idx) => {
 		const newValues = [...values];
+		console.log('idx:', idx);
+		console.log('e.target.value:', e.target.value);
 		newValues[idx] = e.target.value;
 		setValues(newValues);
 	};
