@@ -38,48 +38,6 @@ def generate_list(param: Parameter, paramName):
         return []
 
 
-# def generate_config_files(experiment: ExperimentData):
-#     constants = {}
-#     parameters = {}
-#     gather_parameters(experiment.hyperparameters, constants, parameters)
-#     explogger.info("param list: " + str(parameters))
-#     explogger.info("const list: " + str(constants))
-    
-
-#     configDict = {}
-#     configIdNumber = 0
-#     for varyingKey, varyingVar in parameters.items():
-#         explogger.info(f'Keeping {varyingVar} constant')
-#         possibleParamVals = []
-
-#         #Required to do the cross product, since each config is made by
-#         #doing a cross product of lists of name value pairs the default variable needs to be
-#         #a single item list so that there is only one possible value for the default variable
-#         possibleParamVals.append(generate_list(varyingVar, varyingKey))
-
-#         for otherKey, otherVar in parameters.items():
-#             if otherKey != varyingKey:
-#                 possibleParamVals.append([(otherKey, get_default(otherVar))])
-#         try:
-#             permutations = list(itertools.product(*possibleParamVals))
-#         except Exception as err:
-#             raise GladosInternalError("Error while making permutations") from err
-
-#         for thisPermutation in permutations:
-#             configItems = {}
-#             for item in thisPermutation:
-#                 name = item[0]
-#                 value = item[1]
-#                 configItems[name] = value
-#             configItems.update(constants)
-#             configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
-#             explogger.info(f'Generated config {configIdNumber}')
-#             configIdNumber += 1
-
-#     explogger.info("Finished generating configs")
-#     experiment.configs = configDict
-#     return configIdNumber
-
 def generate_config_files(experiment: ExperimentData):
     constants = {}
     parameters = {}
