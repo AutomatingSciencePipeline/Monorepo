@@ -181,8 +181,7 @@ def download_experiment_files(experiment: ExperimentData):
         os.makedirs('ResCsvs')
     explogger.info(f'Downloading file for {experiment.expId}')
 
-    filepath = f'experiment{experiment.expId}'
-    experiment.file = filepath
+    filepath = experiment.file
     explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
         # try to call the backend to download
