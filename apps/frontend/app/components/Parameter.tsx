@@ -37,7 +37,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 	};
 
 	useEffect(() => {
-		if(form.values.hyperparameters[index].values) {
+		if(form.values.hyperparameters[index].values && (form.values.hyperparameters[index].values.length != 1 && form.values.hyperparameters[index].values[0] != '')) {
 			updateConfirmedValues(index, form.values.hyperparameters[index].values);
 		}
 	}, []);
