@@ -18,7 +18,7 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, updateId, onDropComplete, ...props }) => {
+export const DispatchStep = ({ id, form, updateId, ...props }) => {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -50,7 +50,6 @@ export const DispatchStep = ({ id, form, updateId, onDropComplete, ...props }) =
 			updateId(fileId);
 			setSelectedFile(fileName);
 			setLoading(false);
-			onDropComplete();
 		}
 		else {
 			const json = await uploadFileResponse.json();
