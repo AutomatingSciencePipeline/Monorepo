@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Chart, registerables, ChartTypeRegistry } from 'chart.js';
-import { BoxPlotController, BoxAndWiskers, ViolinController } from '@sgratzl/chartjs-chart-boxplot';
+import { BoxPlotController, BoxAndWiskers, ViolinController, Violin } from '@sgratzl/chartjs-chart-boxplot';
 import Modal from './Modal'; // Assuming you have a Modal component
 import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../firebase/db_types';
 import { getExperimentDataForGraph } from '../../../firebase/db';
 
 Chart.register(...registerables);
-Chart.register(BoxPlotController, BoxAndWiskers, ViolinController);
+Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
 
 interface ChartModalProps {
     onClose: () => void;
