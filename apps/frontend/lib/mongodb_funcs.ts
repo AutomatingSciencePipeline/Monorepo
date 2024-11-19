@@ -1,5 +1,5 @@
 'use server';
-import { ObjectId } from "mongodb";
+import { GridFSBucket, ObjectId } from "mongodb";
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from "./mongodb";
 
 export async function getDocumentFromId(expId: string) {
@@ -12,8 +12,24 @@ export async function getDocumentFromId(expId: string) {
         return Promise.reject(`Could not find document with id: ${expId}`);
     }
 
+    const expInfo = {
+        hyperparameters: Array.isArray(expDoc.hyperparameters) ? expDoc.hyperparameters : [],
+        name: expDoc.name || '',
+        description: expDoc.description || '',
+        trialExtraFile: expDoc.trialExtraFile || '',
+        trialResult: expDoc.trialResult || '',
+        verbose: expDoc.verbose || false,
+        workers: expDoc.workers || 0,
+        scatter: expDoc.scatter || '',
+        dumbTextArea: expDoc.dumbTextArea || '',
+        scatterIndVar: expDoc.scatterIndVar || '',
+        scatterDepVar: expDoc.scatterDepVar || '',
+        timeout: expDoc.timeout || 0,
+        keepLogs: expDoc.keepLogs || false,
+    };
+
     //just return the document
-    return expDoc;
+    return expDoc
 }
 
 export async function deleteDocumentById(expId: string) {
@@ -43,3 +59,45 @@ export async function updateExperimentNameById(expId: string, newExpName: string
 
     return Promise.resolve();
 }
+
+export async function getRecentFiles(userId: string) {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
+
+    const userFiles = await bucket.find({ "metadata.userId": userId })
+        .sort({ "metadata.lastUsedDate": -1 })
+        .limit(5)
+        .toArray();
+
+    // Transform the data to be JSON-serializable
+    const serializedFiles = userFiles.map(file => ({
+        _id: file._id.toString(), // Convert ObjectId to string
+        length: file.length,
+        chunkSize: file.chunkSize,
+        uploadDate: file.uploadDate.toISOString(), // Convert Date to ISO string
+        filename: file.filename,
+        metadata: file.metadata, // Assuming metadata is already serializable
+    }));
+
+    return serializedFiles;
+}
+
+export async function updateLastUsedDateFile(fileId: string) {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
+
+    const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+    if (file.length === 0) {
+        return;
+    }
+
+    await db.collection('fileBucket.files').updateOne(
+        { _id: new ObjectId(fileId) },
+        { $set: { 'metadata.lastUsedDate': new Date() } }
+    );
+}
+

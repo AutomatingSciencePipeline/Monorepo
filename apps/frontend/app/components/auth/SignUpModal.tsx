@@ -67,9 +67,9 @@ export const SignUpModal = ({ afterSignUp }) => {
 									<AiOutlineGithub className='w-5 h-5' />
 								</a>
 							</div>
-							{/* For dev testing!!! */}
-							{/* <button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button> */}
 						</div>
+						{/* For dev testing!!! */}
+						{/* <button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button> */}
 					</div>
 				</div>
 				<div className='px-4 py-6 bg-gray-50 border-t-2 border-gray-200 sm:px-10'>

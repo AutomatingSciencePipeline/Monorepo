@@ -24,6 +24,7 @@ import { Toggle } from '../components/Toggle';
 import { QueueResponse } from '../../pages/api/queue';
 import { deleteDocumentById } from '../../lib/mongodb_funcs';
 import { signOut, useSession } from "next-auth/react";
+import toast, { Toaster } from 'react-hot-toast';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -265,6 +266,7 @@ export default function DashboardPage() {
 
 	return (
 		<>
+			<Toaster />
 			{/* Background color split screen for large screens */}
 			<div
 				className='fixed top-0 left-0 w-1/2 h-full bg-white'
@@ -384,9 +386,12 @@ export default function DashboardPage() {
 							}}
 							onDeleteExperiment={(experimentId) => {
 								// deleteExperiment(experimentId);
-								deleteDocumentById(experimentId).catch((reason) => {
+								deleteDocumentById(experimentId).then(() => {
+									toast.success("Deleted experiment!", {duration: 1500});
+								}).catch((reason) => {
+									toast.error(`Failed delete, reason: ${reason}`, {duration: 1500});
 									console.log(`Failed delete, reason: ${reason}`);
-								})
+								});
 							}} />
 					</div>
 					{/* Activity feed */}
