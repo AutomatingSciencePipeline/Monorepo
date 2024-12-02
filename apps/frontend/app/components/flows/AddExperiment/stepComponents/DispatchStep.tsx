@@ -31,7 +31,7 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 		getRecentFiles(session?.user?.id!).then((files) => {
 			setUserFiles(files);
 		}).catch((error) => console.error("Error fetching files:", error));
-	}, [session?.user?.id, setSelectedFile]);
+	}, [session?.user?.id, selectedFileId]);
 
 
 	const onDropFile = async (files: Parameters<DropzoneProps['onDrop']>[0]) => {
@@ -122,7 +122,9 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 							<tr key={file._id.toString()} className="text-center">
 								<td className="border border-gray-300 px-4 py-2">
 									<button
-										className='rounded-md w-1/2 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2'
+										className={`rounded-md w-1/2 border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2 ${
+											selectedFileId === file._id.toString() ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-700'
+										}`}
 										id={file._id.toString()}
 										onClick={() => {
 											updateId(file._id.toString());
@@ -142,11 +144,11 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 					</tbody>
 				</table>
 			</div>
-			<div className='mt-auto p-5 text-center text-lg'>
+			{/* <div className='mt-auto p-5 text-center text-lg'>
 				{
 					selectedFile ? 'Current selected file: ' + selectedFile : <></>
 				} 
-			</div>
+			</div> */}
 		</div>
 
 	);
