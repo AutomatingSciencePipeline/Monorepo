@@ -24,7 +24,6 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 
 	const [userFiles, setUserFiles] = useState<any[]>([]);
 
-	const [selectedFile, setSelectedFile] = useState<string>("");
 	const [selectedFileId, setSelectedFileId] = useState<string>("");
 
 	useEffect(() => {
@@ -47,9 +46,7 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 		if (uploadFileResponse.ok) {
 			const json = await uploadFileResponse.json();
 			const fileId = json['fileId'];
-			const fileName = json['fileName'];
 			updateId(fileId);
-			setSelectedFile(fileName);
 			setSelectedFileId(fileId);
 			setLoading(false);
 		}
@@ -123,12 +120,11 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 								<td className="border border-gray-300 px-4 py-2">
 									<button
 										className={`rounded-md w-1/2 border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2 ${
-											selectedFileId === file._id.toString() ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-700'
+											selectedFileId === file._id.toString() ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-700'
 										}`}
 										id={file._id.toString()}
 										onClick={() => {
 											updateId(file._id.toString());
-											setSelectedFile(file.filename);
 											setSelectedFileId(file._id.toString());
 										}}
 									>
@@ -144,11 +140,6 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 					</tbody>
 				</table>
 			</div>
-			{/* <div className='mt-auto p-5 text-center text-lg'>
-				{
-					selectedFile ? 'Current selected file: ' + selectedFile : <></>
-				} 
-			</div> */}
 		</div>
 
 	);
