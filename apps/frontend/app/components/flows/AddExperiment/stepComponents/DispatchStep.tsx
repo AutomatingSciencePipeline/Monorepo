@@ -25,12 +25,13 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 	const [userFiles, setUserFiles] = useState<any[]>([]);
 
 	const [selectedFile, setSelectedFile] = useState<string>("");
+	const [selectedFileId, setSelectedFileId] = useState<string>("");
 
 	useEffect(() => {
 		getRecentFiles(session?.user?.id!).then((files) => {
 			setUserFiles(files);
 		}).catch((error) => console.error("Error fetching files:", error));
-	}, [session?.user?.id]);
+	}, [session?.user?.id, setSelectedFile]);
 
 
 	const onDropFile = async (files: Parameters<DropzoneProps['onDrop']>[0]) => {
@@ -49,6 +50,7 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 			const fileName = json['fileName'];
 			updateId(fileId);
 			setSelectedFile(fileName);
+			setSelectedFileId(fileId);
 			setLoading(false);
 		}
 		else {
@@ -121,12 +123,14 @@ export const DispatchStep = ({ id, form, updateId, ...props }) => {
 								<td className="border border-gray-300 px-4 py-2">
 									<button
 										className='rounded-md w-1/2 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2'
+										id={file._id.toString()}
 										onClick={() => {
 											updateId(file._id.toString());
 											setSelectedFile(file.filename);
+											setSelectedFileId(file._id.toString());
 										}}
 									>
-										Use
+										{selectedFileId === file._id.toString() ? 'Selected' : 'Select'}
 									</button>
 								</td>
 								<td className="border border-gray-300 px-4 py-2">{file.filename}</td>
