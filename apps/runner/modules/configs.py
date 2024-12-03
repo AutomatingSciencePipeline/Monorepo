@@ -38,10 +38,10 @@ def generate_list(param: Parameter, paramName):
         return []
 
 def expand_values(param):
-    if param.type == ParamType.INTEGER:
-        return list(range(param.min, param.max + 1, param.step))
-    elif param.type == ParamType.STRING_LIST:
-        return param.values
+    if param['type'] == ParamType.INTEGER:
+        return list(range(param['min'], param['max'] + 1, param['step']))
+    elif param['type'] == ParamType.STRING_LIST:
+        return param['values']
     return []
 
 def cartesian_product(params_dict):
