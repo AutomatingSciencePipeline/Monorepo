@@ -10,9 +10,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <Head>
-        <title>GLADOS</title>
-      </Head>
       <body className="h-full">
         <RouteHandler>{children}</RouteHandler>
       </body>
