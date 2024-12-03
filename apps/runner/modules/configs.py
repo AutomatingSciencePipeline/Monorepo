@@ -71,7 +71,9 @@ def generate_permutations(parameters):
             for perm in expanded_permutations:
                 perm[current_param['name']] = value
                 all_permutations.append(perm)
-    return all_permutations
+
+    print("all permutations: ", all_permutations)
+    return all_permutations 
 
 # def generate_config_files(experiment: ExperimentData):
 #     constants = {}
