@@ -1,8 +1,6 @@
 'use client'
 
-import { Metadata } from 'next';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import { Popover } from '@headlessui/react';
 import { Bars3Icon } from '@heroicons/react/24/outline';
@@ -13,10 +11,6 @@ import { AlreadySignedInModal } from './components/auth/AlreadySignedInModal';
 import { useState } from 'react';
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react"
-
-export const metadata: Metadata = {
-  title: 'Glados',
-};
 
 const HomePage = () => {
   const router = useRouter();
