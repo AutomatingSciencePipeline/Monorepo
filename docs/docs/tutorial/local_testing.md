@@ -135,4 +135,88 @@ Then you must expose the newly created service on minkube to actually access the
 minikube service glados-frontend-nodeport --url
 ```
 
-There you have it! A locally running version of GLADOS. See Changing the Local Version to see how to make changes and test them before pushing to the development branch.
+This will have a version of the mainline glados running in your minikube environment.
+
+## Push and Use Docker Images
+
+In order to use the code in your local environment, you will need to build and push the docker images you have made changes to. 
+
+### Building and Pushing Docker Images
+
+In a terminal CD to the component you wish to test. For example, if I made changes to the frontend I would
+
+```bash
+cd apps/frontend
+```
+
+Next we need to build the docker image. This is done with the following command:
+
+```bash
+docker build -t {DOCKER HUB USERNAME}/glados-frontend:main . -f frontend.Dockerfile
+```
+
+This may make a couple of minutes to build.
+
+You can do the same for the backend and runner.
+
+Next we need to push our docker images to docker hub. Sign into your docker hub account with the following command:
+
+```bash
+docker login
+```
+
+Follow the instructions in the terminal to login.
+
+Now we can push this image!
+
+```bash
+docker push {DOCKER HUB USERNAME}/glados-frontend:main
+```
+
+Our image is now on docker's image library!
+
+### Using our published docker images
+Inside of the kubernetes_init folder, there are a couple of items of interest.
+
+1. backend/deployment-backend.yaml
+2. frontend/deployment-frontend.yaml
+
+If you open these files you will see that on line 20 the image is set. Change this to your image that you published to your docker hub.
+
+Now we need to make sure we are in the project root in our terminal and execute:
+
+```bash
+python3 ./kubernetes_init/init.py --hard
+```
+
+You can then use the command:
+
+```bash
+kubectl get pods
+```
+
+Which will show something like
+
+```bash
+NAME                                        READY   STATUS    RESTARTS       AGE
+glados-backend-687fc6b7ff-dld2p    1/1     Running   0              74s
+glados-frontend-5f575b99b7-9q9ml   1/1     Running   0              74s
+glados-mongodb-0                            1/1     Running   1 (2m9s ago)   20d
+glados-mongodb-1                            1/1     Running   1 (2m9s ago)   20d
+glados-mongodb-arbiter-0                    1/1     Running   2 (20d ago)    20d
+```
+
+Using the image that you replaced run:
+
+```bash
+kubectl describe pod {POD NAME FROM LAST STEP}
+```
+
+This will then show the image information. Make sure this points to your docker hub.
+
+!!! Warning
+    Make sure to change the deployment yaml back before merging!!!!
+
+In order to update the runner image, go to the apps/backend folder, and update the image in job-runner.yaml following the steps above.
+
+Now you can use locally built images to run GLADOS!
