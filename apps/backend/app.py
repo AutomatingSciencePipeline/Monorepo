@@ -102,8 +102,8 @@ def check_mongo():
 @flaskApp.get("/downloadExpFile")
 def download_exp_file():
     try:
-        experiment_id = request.args.get('expId', default='', type=str)
-        file_data = download_experiment_file(experiment_id, mongoClient)
+        file_id = request.args.get('fileId', default='', type=str)
+        file_data = download_experiment_file(file_id, mongoClient)
         file_stream = io.BytesIO(file_data)
         return send_file(file_stream, as_attachment=True, download_name="experiment_file", mimetype="application/octet-stream")
     except Exception:

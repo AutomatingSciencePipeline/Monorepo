@@ -1,8 +1,7 @@
 'use client'
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
-import { useAuth } from '../../firebase/fbAuth';
-import { downloadExperimentResults, downloadExperimentProjectZip } from '../../firebase/db';
+import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -20,10 +19,12 @@ import classNames from 'classnames';
 import Image from 'next/image';
 import { SearchBar } from '../components/SearchBar';
 import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
-import { ExperimentData } from '../../firebase/db_types';
+import { ExperimentData } from '../../lib/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from '../../pages/api/queue';
 import { deleteDocumentById } from '../../lib/mongodb_funcs';
+import { signOut, useSession } from "next-auth/react";
+import toast, { Toaster } from 'react-hot-toast';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -53,7 +54,7 @@ const activityItems = [
 ];
 
 const Navbar = (props) => {
-	const { authService } = useAuth();
+	const { data: session } = useSession();
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -90,11 +91,18 @@ const Navbar = (props) => {
 										<div>
 											<Menu.Button className='bg-blue-700 flex text-sm rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-700 focus:ring-white'>
 												<span className='sr-only'>Open user menu</span>
-												<Image
-													className='h-8 w-8 rounded-full'
-													src={authService.userPhotoUrl}
-													alt='User Photo'
-												/>
+												{session?.user?.image ? (
+													<Image
+														className='h-8 w-8 rounded-full'
+														src={session.user.image}
+														alt='User Photo'
+														width={32} // specify width
+														height={32} // specify height
+													/>
+												) : (
+													// Optionally, you could add a placeholder or leave this empty
+													<></>
+												)}
 											</Menu.Button>
 										</div>
 										<Transition
@@ -115,9 +123,7 @@ const Navbar = (props) => {
 																onClick={() => {
 																	return (
 																		item.name === 'Sign out' &&
-																		authService
-																			.signOut()
-																			.catch((err) => console.log('Sign out error', err))
+																		signOut()
 																	);
 																}}
 																className={classNames(
@@ -164,7 +170,7 @@ const Navbar = (props) => {
 										key={item.name}
 										as='a'
 										onClick={() => {
-											return authService.signOut();
+											return signOut();
 										}}
 										href={item.href}
 										className='block px-3 py-2 rounded-md text-base font-medium text-blue-200 hover:text-blue-100 hover:bg-blue-600'
@@ -182,30 +188,30 @@ const Navbar = (props) => {
 };
 
 export default function DashboardPage() {
-	const { userId, authService } = useAuth();
+	const { data: session } = useSession();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
 	useEffect(() => {
-		if (!userId) {
+		if (!session) {
 			return;
 		}
-		const eventSource = new EventSource(`/api/experiments/listen?uid=${userId}`);
+		const eventSource = new EventSource(`/api/experiments/listen?uid=${session.user?.id}`);
 
 		eventSource.onmessage = (event) => {
 			if (event.data !== 'heartbeat') {
 				try {
 					setExperiments(JSON.parse(event.data) as ExperimentData[]);
 				}
-				catch{
+				catch {
 					console.log(`${event.data} was not valid JSON!`);
 				}
-				
+
 			}
 
 		}
 
 		return () => eventSource.close();
-	}, [userId]);
+	}, [session]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
 	const QUEUE_ERROR_LENGTH = -2;
@@ -260,6 +266,7 @@ export default function DashboardPage() {
 
 	return (
 		<>
+			<Toaster />
 			{/* Background color split screen for large screens */}
 			<div
 				className='fixed top-0 left-0 w-1/2 h-full bg-white'
@@ -287,15 +294,22 @@ export default function DashboardPage() {
 											{/* Profile */}
 											<div className='flex items-center space-x-3'>
 												<div className='flex-shrink-0 h-12 w-12'>
-													<Image
-														className='h-12 w-12 rounded-full'
-														src={authService.userPhotoUrl}
-														alt='User Photo'
-													/>
+													{session?.user?.image ? (
+														<Image
+															className='h-12 w-12 rounded-full'
+															src={session.user.image}
+															alt='User Photo'
+															width={48} // specify width to match h-12
+															height={48} // specify height to match w-12
+														/>
+													) : (
+														<></>
+													)}
+
 												</div>
 												<div className='space-y-1'>
 													<div className='text-sm font-medium text-gray-900'>
-														{authService.userEmail}
+														{session?.user?.email || ""}
 													</div>
 												</div>
 											</div>
@@ -372,9 +386,12 @@ export default function DashboardPage() {
 							}}
 							onDeleteExperiment={(experimentId) => {
 								// deleteExperiment(experimentId);
-								deleteDocumentById(experimentId).catch((reason) => {
+								deleteDocumentById(experimentId).then(() => {
+									toast.success("Deleted experiment!", {duration: 1500});
+								}).catch((reason) => {
+									toast.error(`Failed delete, reason: ${reason}`, {duration: 1500});
 									console.log(`Failed delete, reason: ${reason}`);
-								})
+								});
 							}} />
 					</div>
 					{/* Activity feed */}
@@ -391,12 +408,19 @@ export default function DashboardPage() {
 											className='py-4'
 										>
 											<div className='flex space-x-3'>
-												<Image
-													className='h-6 w-6 rounded-full'
-													src={authService.userPhotoUrl}
-													alt='User Photo'
-													layout='fixed'
-												/>
+												{session?.user?.image ? (
+													<Image
+														className='h-6 w-6 rounded-full'
+														src={session.user.image}
+														alt='User Photo'
+														layout='fixed'
+														width={24} // specify width to match h-6
+														height={24} // specify height to match w-6
+													/>
+												) : (
+													<></>
+												)}
+
 												<div className='flex-1 space-y-1'>
 													<div className='flex items-center justify-between'>
 														<h3 className='text-sm font-medium'>You</h3>

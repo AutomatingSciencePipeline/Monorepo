@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
-import { ExperimentData } from '../../../../firebase/db_types';
+import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
 import { updateExperimentNameById } from '../../../../lib/mongodb_funcs';
@@ -45,7 +45,6 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 	const handleSave = (newProjectName) => {
-		// Update the project name in Firebase with the edited name
 		updateExperimentNameById(project.expId, newProjectName).catch((reason) =>{
 			console.log(`Failed to update experiment name, reason: ${reason}`);
 		});

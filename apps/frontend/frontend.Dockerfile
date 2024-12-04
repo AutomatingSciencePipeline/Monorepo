@@ -17,7 +17,7 @@ FROM node:20-alpine AS base
 FROM base AS deps
 
 RUN apk add --no-cache bash libc6-compat
-WORKDIR /app
+WORKDIR /app 
 
 COPY package.json ./
 
@@ -34,6 +34,15 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+
+# Setup env vars
+ARG MONGODB_PORT
+ARG MONGODB_USERNAME
+ARG MONGODB_PASSWORD
+ENV MONGODB_PORT=${MONGODB_PORT}
+ENV MONGODB_USERNAME=${MONGODB_USERNAME}
+ENV MONGODB_PASSWORD=${MONGODB_PASSWORD}
 
 RUN npm run build
 

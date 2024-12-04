@@ -30,6 +30,13 @@ const boolschema = Joi.object().keys({
 	type: Joi.string().valid('bool'),
 });
 
+const stringlistschema = Joi.object().keys({
+	name: Joi.string().required(),
+	default: Joi.string().required(),
+	type: Joi.string().valid('stringlist'),
+	values: Joi.array().items(Joi.string().required()),
+});
+
 export const emailSchema = Joi.string()
 	.email({ tlds: { allow: false } });
 
@@ -37,7 +44,7 @@ export const experimentSchema = Joi.object().keys({
 	name: Joi.string().required(),
 	description: Joi.string(),
 	verbose: Joi.boolean(),
-	hyperparameters: Joi.array().items(intschema, floatschema, boolschema, strschema),
+	hyperparameters: Joi.array().items(intschema, floatschema, boolschema, strschema, stringlistschema),
 	workers: Joi.number().integer().required(),
 });
 
