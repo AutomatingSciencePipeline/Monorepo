@@ -5,6 +5,7 @@ import Modal from './Modal'; // Assuming you have a Modal component
 import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../firebase/db_types';
 import { getExperimentDataForGraph } from '../../../firebase/db';
+import HeaderDropdown from './Dropdown';
 
 Chart.register(...registerables);
 Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
@@ -20,6 +21,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [chartType, setChartType] = useState<keyof ChartTypeRegistry>('line');
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
+    const [column1, setColumn1] = useState('X');
+    const [column2, setColumn2] = useState('Y');
+    const [headers, setHeaders] = useState<String[]>([]);
 
     const setLineChart = () => setChartType('line');
     const setBarChart = () => setChartType('bar');
@@ -49,7 +53,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         setLoading(false);
     }, [project.expId]);
 
-    console.log(experimentChartData.resultContent);
+    //console.log(experimentChartData.resultContent);
 
    
     const parseCSV = (data) => {
@@ -65,7 +69,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             yList.push(Number(cols[1])); // Assuming y values are in the 5th column
         }
 
-        return { xList, yList };
+        return { headers, xList, yList };
     };
 
     const generateColors = (numColors) => {
@@ -79,7 +83,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { xList, yList } = parseCSV(experimentChartData.resultContent);
+            const { headers, xList, yList } = parseCSV(experimentChartData.resultContent);
             const colors = generateColors(xList.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
@@ -117,6 +121,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 }
             });
             setChartInstance(newChartInstance);
+
+            setHeaders(headers);
         }
     }, [loading, experimentChartData, chartType]);
 
@@ -153,6 +159,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 )}
             </div>
+            <HeaderDropdown headers={headers}/>
         </Modal>
     );
 };
