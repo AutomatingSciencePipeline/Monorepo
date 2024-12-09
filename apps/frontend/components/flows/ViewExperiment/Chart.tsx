@@ -74,18 +74,20 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             }
         }
 
-        console.log(xIndex, " ", yIndex);
+        console.log(xIndex, yIndex);
 
-        const xList = [] as any[];
-        const yList = [] as any[];
+        //const xList = [] as any[];
+        //const yList = [] as any[];
+        const dataObj = [] as any[];
 
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
-            xList.push(cols[xIndex]); // Assuming x values are in the 4th column
-            yList.push(Number(cols[yIndex])); // Assuming y values are in the 5th column
+            //xList.push(cols[xIndex]); // Assuming x values are in the 4th column
+            //yList.push(cols[yIndex]); // Assuming y values are in the 5th column
+            dataObj.push({x: cols[xIndex], y: cols[yIndex]});
         }
 
-        return { headers, xList, yList };
+        return { headers, dataObj };
     };
 
     const generateColors = (numColors) => {
@@ -99,8 +101,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { headers, xList, yList } = parseCSV(experimentChartData.resultContent);
-            const colors = generateColors(xList.length);
+            const { headers, dataObj } = parseCSV(experimentChartData.resultContent);
+            const colors = generateColors(dataObj.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
                 chartInstance.destroy();
@@ -108,10 +110,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             const newChartInstance = new Chart(ctx, {
                 type: chartType,
                 data: {
-                    labels: ['X','Y'],//xList,
+                    //labels: xList,
                     datasets: [{
                         label: 'Experiment Data',
-                        data: [xList, yList],
+                        data: dataObj,
                         borderColor: colors,
                         backgroundColor: colors,
                     }]
