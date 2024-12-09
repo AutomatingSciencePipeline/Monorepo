@@ -12,66 +12,117 @@ FilePath = str
 
 explogger = get_experiment_logger()
 
-def float_range(start: float, stop: float, step=1.0):
-    count = 0
-    while True:
-        temp = float(start + count * step)
-        if temp >= stop:
-            break
-        yield temp
-        count += 1
+# def float_range(start: float, stop: float, step=1.0):
+#     count = 0
+#     while True:
+#         temp = float(start + count * step)
+#         if temp >= stop:
+#             break
+#         yield temp
+#         count += 1
 
 
-def generate_list(param: Parameter, paramName):
-    if param.type == ParamType.INTEGER:
-        intParam = IntegerParam(**param.dict())
-        return [(paramName, i) for i in range(intParam.min, intParam.max, intParam.step)]
-    elif param.type == ParamType.FLOAT:
-        floatParam = FloatParam(**param.dict())
-        return [(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)]
-    elif param.type == ParamType.BOOL:
-        return [(paramName, val) for val in [True, False]]
-    elif param.type == ParamType.STRING_LIST:
-        stringListParam = StringListParameter(**param.dict())
-        return [(paramName, val) for val in stringListParam.values]
-    else: #This will never happen
-        return []
+# def generate_list(param: Parameter, paramName):
+#     if param.type == ParamType.INTEGER:
+#         intParam = IntegerParam(**param.dict())
+#         return [(paramName, i) for i in range(intParam.min, intParam.max, intParam.step)]
+#     elif param.type == ParamType.FLOAT:
+#         floatParam = FloatParam(**param.dict())
+#         return [(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)]
+#     elif param.type == ParamType.BOOL:
+#         return [(paramName, val) for val in [True, False]]
+#     elif param.type == ParamType.STRING_LIST:
+#         stringListParam = StringListParameter(**param.dict())
+#         return [(paramName, val) for val in stringListParam.values]
+#     else: #This will never happen
+#         return []
+
+def float_range(start, stop, step, decimals):
+    """Helper for expanding values with floats, ensuring truncation."""
+    current = start
+    while round(current, decimals) < round(stop, decimals):  # Use rounded values for comparison
+        yield round(current, decimals)  # Ensure consistent decimal places
+        current += step
+        
+def get_decimal_places(number):
+    """Returns the number of decimal places in a float."""
+    if isinstance(number, int):
+        return 0
+    return max(0, len(str(number).split(".")[1]))
 
 def expand_values(param):
-    if param.type == ParamType.INTEGER:
-        return list(range(param.min, param.max + 1, param.step))
-    elif param.type == ParamType.STRING_LIST:
-        return param.values
-    return []
-
-def cartesian_product(params_dict):
-    if not params_dict:
-        return [{}]
-    keys, values = zip(*params_dict.items())
-    return [dict(zip(keys, v)) for v in itertools.product(*values)]
-
+    """Expands possible values for a parameter with appropriate decimal precision."""
+    if param["type"] == "integer":
+        return list(range(param["min"], param["max"] + 1, param["step"]))
+    elif param["type"] == "float":
+        decimals = max(
+            get_decimal_places(param["min"]),
+            get_decimal_places(param["max"]),
+            get_decimal_places(param["step"]),
+        )
+        return list(float_range(param["min"], param["max"] + param["step"], param["step"], decimals))
+    elif param["type"] == "stringlist":
+        return param.get("values", [])
+    elif param["type"] == "string":
+        return [param["default"]] 
+    elif param["type"] == "bool":
+        return [True, False]
+    else:
+        return []
 def generate_permutations(parameters):
-    all_permutations = []
-    for current_param_index, current_param in enumerate(parameters):
-        fixed_values = {}
-        current_values = []
-        for i, param in enumerate(parameters):
-            if i == current_param_index:
-                if param['default'] == -1:
-                    current_values = expand_values(param)
-                else:
-                    current_values = [param['default']]
-            else:
-                if param['default'] != -1:
-                    fixed_values[param['name']] = [param['default']]
-                else:
-                    fixed_values[param['name']] = expand_values(param)
-        for value in current_values:
-            expanded_permutations = cartesian_product(fixed_values)
-            for perm in expanded_permutations:
-                perm[current_param['name']] = value
-                all_permutations.append(perm)
-    return all_permutations
+    """Generates permutations dynamically based on parameter definitions, 
+       using itertools.product and filtering based on default values."""
+    
+    # Prepare all possible values for parameters, including default and expanded ranges
+    all_values = []
+    base_vals = {}
+    default_vals = {}
+    
+    
+    for param in parameters:
+      if param["type"] == 'integer' or param["type"] == 'float':
+        base_vals[param["name"]] = param["min"]
+      elif param["type"] == 'stringlist':
+        base_vals[param['name']] = param['values'][0]
+      elif param["type"] == 'bool':
+        base_vals[param["name"]] = param["default"]
+
+          
+    for param in parameters:
+        if param["default"] != -1:
+            default_vals[param["name"]] = [param["default"]]
+        else:
+            default_vals[param["name"]] = expand_values(param)
+          
+    print(base_vals)
+    print(default_vals)
+
+    for param in parameters:
+        all_values.append(expand_values(param))
+    
+    # Generate all permutations using itertools.product
+    all_permutations = list(itertools.product(*all_values))
+    
+    # Now filter permutations based on the constraints: Default values should remain fixed.
+    filtered_permutations = []
+    for perm in all_permutations:
+        perm_dict = {parameters[i]["name"]: perm[i] for i in range(len(parameters))}
+        
+        num_defaults_changed = 0
+        for param in parameters:
+            if param["default"] != -1:
+                if perm_dict[param["name"]] != param["default"]:
+                    num_defaults_changed += 1
+        # else:
+        #     # If all constraints are satisfied, add the permutation
+        #     filtered_permutations.append(perm_dict)
+        
+        if num_defaults_changed <= 1:
+            filtered_permutations.append(perm_dict)
+
+    print("len filtered: ", len(filtered_permutations))
+            
+    return filtered_permutations
 
 # def generate_config_files(experiment: ExperimentData):
 #     constants = {}

@@ -26,6 +26,8 @@ def expand_values(param):
         return list(float_range(param["min"], param["max"] + param["step"], param["step"], decimals))
     elif param["type"] == "stringlist":
         return param.get("values", [])
+    elif param["type"] == "string":
+        return [param["default"]] 
     elif param["type"] == "bool":
         return [True, False]
     else:
@@ -57,8 +59,8 @@ def generate_permutations(parameters):
             default_vals[param["name"]] = expand_values(param)
           
     print(base_vals)
-    print(default_vals
-          )
+    print(default_vals)
+
     for param in parameters:
         all_values.append(expand_values(param))
     
@@ -92,22 +94,27 @@ parameters = [
     # {"name": "a", "type": "integer", "default": -1, "min": 1, "max": 10, "step": 1},
     # {"name": "b", "type": "integer", "default": -1, "min": 11, "max": 20, "step": 1},
     # {"name": "c", "type": "integer", "default": 21, "min": 21, "max": 30, "step": 1},
-    {"name": "a", "type": "float", "default": -1, "min": 0.1, "max": 1.0, "step": 0.1},
-    {"name": "b", "type": "float", "default": -1, "min": 1.1, "max": 2.0, "step": 0.1},
-    {"name": "c", "type": "float", "default": 2.1, "min": 2.1, "max": 3.0, "step": 0.1},
+    # {"name": "a", "type": "float", "default": -1, "min": 0.1, "max": 1.0, "step": 0.1},
+    # {"name": "b", "type": "float", "default": -1, "min": 1.1, "max": 2.0, "step": 0.1},
+    # {"name": "c", "type": "float", "default": 2.1, "min": 2.1, "max": 3.0, "step": 0.1},
     # {
     #   "name": "test",
     #   "default": False,
     #   "type": "bool"
     # },
-    #  {
-    #         "name": "seed",
-    #         "type": "integer",
-    #         "default": 1,
-    #         "min": 1,
-    #         "max": 10,
-    #         "step": 1
-    #     },
+     {
+      "name": "test",
+      "default": "testing",
+      "type": "string"
+    },
+     {
+            "name": "seed",
+            "type": "integer",
+            "default": 1,
+            "min": 1,
+            "max": 10,
+            "step": 1
+        },
     #     {
     #         "name": "steps",
     #         "type": "stringlist",
