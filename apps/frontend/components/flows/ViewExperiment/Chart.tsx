@@ -76,18 +76,21 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
         console.log(xIndex, yIndex);
 
-        //const xList = [] as any[];
-        //const yList = [] as any[];
-        const dataObj = [] as any[];
+        const xList = [] as any[];
+        const yList = [] as any[];
+        //const dataObj = [] as any[];
 
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
-            //xList.push(cols[xIndex]); // Assuming x values are in the 4th column
-            //yList.push(cols[yIndex]); // Assuming y values are in the 5th column
-            dataObj.push({x: cols[xIndex], y: cols[yIndex]});
+            xList.push(cols[xIndex]); // Assuming x values are in the 4th column
+            yList.push(cols[yIndex]); // Assuming y values are in the 5th column
+            //dataObj.push({x: cols[xIndex], y: cols[yIndex]});
         }
 
-        return { headers, dataObj };
+        console.log(xList);
+        console.log(yList);
+
+        return { headers, xList, yList };
     };
 
     const generateColors = (numColors) => {
@@ -101,8 +104,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { headers, dataObj } = parseCSV(experimentChartData.resultContent);
-            const colors = generateColors(dataObj.length);
+            const { headers, xList, yList } = parseCSV(experimentChartData.resultContent);
+            const colors = generateColors(xList.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
                 chartInstance.destroy();
@@ -110,10 +113,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             const newChartInstance = new Chart(ctx, {
                 type: chartType,
                 data: {
-                    //labels: xList,
+                    labels: xList,
                     datasets: [{
                         label: 'Experiment Data',
-                        data: dataObj,
+                        data: yList,
                         borderColor: colors,
                         backgroundColor: colors,
                     }]
