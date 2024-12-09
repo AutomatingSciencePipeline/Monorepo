@@ -5,7 +5,7 @@ import Modal from './Modal'; // Assuming you have a Modal component
 import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../firebase/db_types';
 import { getExperimentDataForGraph } from '../../../firebase/db';
-import HeaderDropdown from './Dropdown';
+import { Menu } from '@headlessui/react'
 
 Chart.register(...registerables);
 Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
@@ -21,9 +21,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [chartType, setChartType] = useState<keyof ChartTypeRegistry>('line');
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
-    const [column1, setColumn1] = useState('X');
-    const [column2, setColumn2] = useState('Y');
-    const [headers, setHeaders] = useState<String[]>([]);
+    const [xAxis, setXAxis] = useState('X');
+    const [yAxis, setYAxis] = useState('Y');
+    const [headers, setHeaders] = useState<string[]>([]);
 
     const setLineChart = () => setChartType('line');
     const setBarChart = () => setChartType('bar');
@@ -60,13 +60,29 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const rows = data.trim().split('\n');
         const headers = rows[0].split(',');
 
+        var xIndex = 0;
+        var yIndex = 0;
+        for (let i = 0; i < headers.length; i++)
+        {
+            if (headers[i] === xAxis)
+            {
+                xIndex = i;
+            }
+            if (headers[i] === yAxis)
+            {
+                yIndex = i;
+            }
+        }
+
+        console.log(xIndex, " ", yIndex);
+
         const xList = [] as any[];
         const yList = [] as any[];
 
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
-            xList.push(cols[0]); // Assuming x values are in the 4th column
-            yList.push(Number(cols[1])); // Assuming y values are in the 5th column
+            xList.push(cols[xIndex]); // Assuming x values are in the 4th column
+            yList.push(Number(cols[yIndex])); // Assuming y values are in the 5th column
         }
 
         return { headers, xList, yList };
@@ -124,7 +140,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
             setHeaders(headers);
         }
-    }, [loading, experimentChartData, chartType]);
+    }, [loading, experimentChartData, chartType, xAxis, yAxis]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
@@ -159,7 +175,30 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 )}
             </div>
-            <HeaderDropdown headers={headers}/>
+            <Menu>
+                <Menu.Button>X Axis</Menu.Button>
+                <Menu.Items>
+                    {headers.map((header) => (
+                        <Menu.Item key={header}>
+                            <button onClick={() => setXAxis(header)} className="block data-[focus]:bg-blue-100">
+                                {header}
+                            </button>
+                        </Menu.Item>
+                    ))}
+                </Menu.Items>
+            </Menu>
+            <Menu>
+                <Menu.Button>Y Axis</Menu.Button>
+                <Menu.Items>
+                    {headers.map((header) => (
+                        <Menu.Item key={header}>
+                            <button onClick={() => setYAxis(header)} className="block data-[focus]:bg-blue-100">
+                                {header}
+                            </button>
+                        </Menu.Item>
+                    ))}
+                </Menu.Items>
+            </Menu>
         </Modal>
     );
 };
