@@ -69,6 +69,12 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
+						<input
+							type='text'
+							placeholder='Default String (Leave Blank for all Permutations)'
+							className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+							{...form.getInputProps(`hyperparameters.${index}.default`)}
+						/>
 						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
 
 						<ActionIcon

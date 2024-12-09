@@ -89,7 +89,7 @@ def generate_permutations(parameters):
 
           
     for param in parameters:
-        if param["default"] != -1:
+        if param["default"] != -1 or param["default"] != "":
             default_vals[param["name"]] = [param["default"]]
         else:
             default_vals[param["name"]] = expand_values(param)
@@ -110,7 +110,7 @@ def generate_permutations(parameters):
         
         num_defaults_changed = 0
         for param in parameters:
-            if param["default"] != -1:
+            if param["default"] != -1 or param["default"] != "":
                 if perm_dict[param["name"]] != param["default"]:
                     num_defaults_changed += 1
         # else:
