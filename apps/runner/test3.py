@@ -1,13 +1,33 @@
 import itertools
 
+def float_range(start, stop, step, decimals):
+    """Helper for expanding values with floats, ensuring truncation."""
+    current = start
+    while round(current, decimals) < round(stop, decimals):  # Use rounded values for comparison
+        yield round(current, decimals)  # Ensure consistent decimal places
+        current += step
+        
+def get_decimal_places(number):
+    """Returns the number of decimal places in a float."""
+    if isinstance(number, int):
+        return 0
+    return max(0, len(str(number).split(".")[1]))
+
 def expand_values(param):
-    """Expands possible values for a parameter."""
+    """Expands possible values for a parameter with appropriate decimal precision."""
     if param["type"] == "integer":
         return list(range(param["min"], param["max"] + 1, param["step"]))
+    elif param["type"] == "float":
+        decimals = max(
+            get_decimal_places(param["min"]),
+            get_decimal_places(param["max"]),
+            get_decimal_places(param["step"]),
+        )
+        return list(float_range(param["min"], param["max"] + param["step"], param["step"], decimals))
     elif param["type"] == "stringlist":
         return param.get("values", [])
-    elif param["type"] == 'bool':
-        return param.get("default")
+    elif param["type"] == "bool":
+        return [True, False]
     else:
         return []
 
@@ -19,14 +39,15 @@ def generate_permutations(parameters):
     all_values = []
     base_vals = {}
     default_vals = {}
-    num_non_default_vals = 0
     
     
     for param in parameters:
-      if param["type"] == 'integer':
+      if param["type"] == 'integer' or param["type"] == 'float':
         base_vals[param["name"]] = param["min"]
       elif param["type"] == 'stringlist':
         base_vals[param['name']] = param['values'][0]
+      elif param["type"] == 'bool':
+        base_vals[param["name"]] = param["default"]
 
           
     for param in parameters:
@@ -34,21 +55,16 @@ def generate_permutations(parameters):
             default_vals[param["name"]] = [param["default"]]
         else:
             default_vals[param["name"]] = expand_values(param)
-            num_non_default_vals = num_non_default_vals + 1
           
     print(base_vals)
+    print(default_vals
+          )
     for param in parameters:
         all_values.append(expand_values(param))
-        
-    print(num_non_default_vals)
     
     # Generate all permutations using itertools.product
     all_permutations = list(itertools.product(*all_values))
     
-    # if num_non_default_vals + 1 == len(parameters):
-    #     return all_permutations
-    
-
     # Now filter permutations based on the constraints: Default values should remain fixed.
     filtered_permutations = []
     for perm in all_permutations:
@@ -67,40 +83,27 @@ def generate_permutations(parameters):
             filtered_permutations.append(perm_dict)
 
     print("len filtered: ", len(filtered_permutations))
-    
-    # print(base_vals)
-    # base_vals_popped = base_vals.copy()
-    # base_vals_popped.pop(param["name"])
-    # print(base_vals_popped)
-    
-    # for param in parameters:
-    #     if param['default'] != -1:
-    #         if param["type"] == 'integer':
-    #         #then add the iteration of each var that has a default value
-    #             for value in range(param["min"], param["max"] + 1, param["step"]):
-    #                 filtered_permutations.append({**base_vals_popped, param["name"]: value})
-    #         elif param["type"] == 'stringlist':
-    #             for value in param["values"]:
-    #                 # print('adding in elif: ', {**base_vals_popped, param['name']: value})
-    #                 filtered_permutations.append({**base_vals_popped, param["name"]: value})
             
     return filtered_permutations
 
 
 # Example input
 parameters = [
-    {"name": "a", "type": "integer", "default": -1, "min": 1, "max": 10, "step": 1},
-    {"name": "b", "type": "integer", "default": 11, "min": 11, "max": 20, "step": 1},
-    {"name": "c", "type": "integer", "default": 21, "min": 21, "max": 30, "step": 1},
+    # {"name": "a", "type": "integer", "default": -1, "min": 1, "max": 10, "step": 1},
+    # {"name": "b", "type": "integer", "default": -1, "min": 11, "max": 20, "step": 1},
+    # {"name": "c", "type": "integer", "default": 21, "min": 21, "max": 30, "step": 1},
+    {"name": "a", "type": "float", "default": -1, "min": 0.1, "max": 1.0, "step": 0.1},
+    {"name": "b", "type": "float", "default": -1, "min": 1.1, "max": 2.0, "step": 0.1},
+    {"name": "c", "type": "float", "default": 2.1, "min": 2.1, "max": 3.0, "step": 0.1},
     # {
     #   "name": "test",
-    #   "default": "false",
+    #   "default": False,
     #   "type": "bool"
     # },
     #  {
     #         "name": "seed",
     #         "type": "integer",
-    #         "default": -1,
+    #         "default": 1,
     #         "min": 1,
     #         "max": 10,
     #         "step": 1
@@ -108,7 +111,7 @@ parameters = [
     #     {
     #         "name": "steps",
     #         "type": "stringlist",
-    #         "default": -1,
+    #         "default": "one",
     #         "values": ["one", "two"]
     #     },
     #     {
