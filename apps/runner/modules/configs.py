@@ -226,6 +226,8 @@ def generate_config_files(experiment: ExperimentData):
         param_dict['name'] = key
         param_list.append(param_dict)
 
+    print("param_list: ", param_list)
+    
     permutations = generate_permutations(param_list)
 
     for permutation in permutations:
