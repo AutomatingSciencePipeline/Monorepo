@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { AuthProvider } from '../firebase/fbAuth';
+import AuthProvider from './components/auth/AuthProvider';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const noAuthRequired = ['/', '/signin'];

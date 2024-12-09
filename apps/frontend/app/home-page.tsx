@@ -1,29 +1,24 @@
 'use client'
 
-import { Metadata } from 'next';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import { Popover } from '@headlessui/react';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Logo } from './components/Logo';
 import { SignUpModal } from './components/auth/SignUpModal';
-import { useAuth } from '../firebase/fbAuth';
 import { AlreadySignedInModal } from './components/auth/AlreadySignedInModal';
 import { useState } from 'react';
-
-export const metadata: Metadata = {
-  title: 'Glados',
-};
+import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react"
 
 const HomePage = () => {
   const router = useRouter();
-  const { userId } = useAuth();
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
 
-  console.log('userId', userId);
-  console.log(loading, userId);
+  console.log('userId', session?.user?.id);
+  console.log(loading, session?.user?.id);
 
   return (
     <div className={'w-full h-full'}>
@@ -66,13 +61,6 @@ const HomePage = () => {
                       </Popover.Button>
                     </div>
                   </div>
-                </div>
-                <div className='hidden md:flex'>
-                  <Link
-                    href={'/signin'}
-                    className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700'>
-                      Log in
-                  </Link>
                 </div>
               </nav>
             </Popover>
@@ -120,7 +108,7 @@ const HomePage = () => {
                       </div>
                     </div>
                   </div>
-                  {userId && !loading ?
+                  {session && !loading ?
                     <AlreadySignedInModal
                       continueButtonMessage={'Continue to the Dashboard'}
                       linkTarget={'/dashboard'}
@@ -129,7 +117,7 @@ const HomePage = () => {
                       setLoading(true);
                       console.log("pushing to dash");
                       router.push('/dashboard');
-                    }}/>
+                    }} />
                   }
                 </div>
               </div>

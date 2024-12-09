@@ -1,5 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, validator, root_validator
+from typing import List
 
 from modules.exceptions import GladosInternalError
 
@@ -9,6 +10,7 @@ class ParamType(Enum):
     INTEGER = "integer"
     FLOAT = "float"
     STRING = "string"
+    STRING_LIST = "stringlist"
 
 
 class Parameter(BaseModel):
@@ -23,6 +25,11 @@ class BoolParameter(Parameter):
 class StringParameter(Parameter):
     type = ParamType.STRING
     default: str
+
+class StringListParameter(Parameter):
+    type = ParamType.STRING
+    default: str
+    values: List[str]
 
 
 def _check_bounds(values):
@@ -91,6 +98,9 @@ def parseRawHyperparameterData(hyperparameters):
         elif entryType == 'string':
             entry['type'] = ParamType.STRING
             result[entryName] = StringParameter(**entry)
+        elif entryType == 'stringlist':
+            entry['type'] = ParamType.STRING_LIST
+            result[entryName] = StringListParameter(**entry)
         else:
             raise GladosInternalError(f"{entryType} (used by '{entryName}') is not a supported hyperparameter type")
     return result

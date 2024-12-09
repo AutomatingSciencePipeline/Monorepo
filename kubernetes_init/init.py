@@ -12,8 +12,8 @@ def clean_up():
     init_frontend.cleanup_deployment()
     print("- Backend")
     init_backend.cleanup_backend()
-    print("- MongoDB")
-    init_mongodb.cleanup_deployment()
+    # print("- MongoDB")
+    # init_mongodb.cleanup_deployment()
 
     print("Cleaning up: Endpoints")
     if "--production" in argv[1:]:
@@ -21,18 +21,18 @@ def clean_up():
         init_frontend.cleanup_service()
     print("- Backend")
     init_backend.cleanup_service()
-    print("- MongoDB")
-    init_mongodb.cleanup_service()
+    # print("- MongoDB")
+    # init_mongodb.cleanup_service()
 
     print("Cleaning up: Secrets")
     init_secret.cleanup_secret()
 
-    print("Cleaning up: MongoDB Storage Class")
-    init_mongodb.cleanup_storage_class()
+    # print("Cleaning up: MongoDB Storage Class")
+    # init_mongodb.cleanup_storage_class()
 
-    print("Cleaning up: MongoDB Persistent Volume")
-    init_mongodb.cleanup_persistent_volume()
-    init_mongodb.cleanup_persistent_volume_claim()
+    # print("Cleaning up: MongoDB Persistent Volume")
+    # init_mongodb.cleanup_persistent_volume()
+    # init_mongodb.cleanup_persistent_volume_claim()
 
     print("Cleaning up: Backend Job Creation Cluster Permissions")
     init_backend.cleanup_cluster_role()
@@ -51,8 +51,8 @@ def set_up():
     init_frontend.setup_deployment()
     print("- Backend")
     init_backend.setup_deployment()
-    print("- MongoDB")
-    init_mongodb.setup_deployment()
+    # print("- MongoDB")
+    # init_mongodb.setup_deployment()
 
     print("Setting up: Endpoints")
     if "--production" in argv[1:]:
@@ -60,15 +60,15 @@ def set_up():
         init_frontend.setup_service()
     print("- Backend")
     init_backend.setup_service()
-    print("- MongoDB")
-    init_mongodb.setup_service()
+    # print("- MongoDB")
+    # init_mongodb.setup_service()
 
-    print("Setting up: MongoDB Storage Class")
-    init_mongodb.setup_storage_class()
+    # print("Setting up: MongoDB Storage Class")
+    # init_mongodb.setup_storage_class()
 
-    print("Setting up: MongoDB Persistent Volume")
-    init_mongodb.setup_persistent_volume()
-    init_mongodb.setup_persistent_volume_claim()
+    # print("Setting up: MongoDB Persistent Volume")
+    # init_mongodb.setup_persistent_volume()
+    # init_mongodb.setup_persistent_volume_claim()
 
 def main():
     """Function that gets called when the file is ran"""

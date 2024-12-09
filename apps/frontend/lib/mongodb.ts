@@ -9,15 +9,17 @@ import { getEnvVar } from '../utils/env';
 // const PASSWORD = getEnvVar('MONGODB_PASSWORD');
 
 // const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
-const MONGODB_URI = 'mongodb://adminuser:password123@glados-dev.csse.rose-hulman.edu:30751/';
+const MONGODB_URI = "mongodb://root:password123@137.112.104.86:30000/";
 const MONGODB_OPTIONS = {};
 
 export const DB_NAME = 'gladosdb';
 export const COLLECTION_LOGS = 'logs';
 export const COLLECTION_ZIPS = 'zips';
 export const COLLECTION_RESULTS_CSVS = 'results';
-export const COLLECTION_FILE_BUCKET = 'fileBucket.files';
+export const COLLECTION_EXPERIMENTS = 'experiments';
+export const COLLECTION_EXPERIMENT_FILES = 'files';
 
+//Also export the client for use with authjs, authjs recommends using this instead of a promise.
 let client: MongoClient;
 let clientPromise: Promise<MongoClient> = new Promise((success) => {
 	return true;
@@ -47,3 +49,4 @@ if (process.env.NODE_ENV === 'development') {
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;
+

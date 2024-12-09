@@ -19,7 +19,7 @@ const mongoCSVHandler: NextApiHandler<ResultsCsv> = async (req, res) => {
 		results = await db
 			.collection(COLLECTION_RESULTS_CSVS)
 			// TODO correct mongodb typescript type for id
-			.find({ '_id': expIdToCsvDownload as any }).toArray();
+			.find({ 'experimentId': expIdToCsvDownload as any }).toArray();
 	} catch (error) {
 		const message = 'Failed to download the csv';
 		console.error('Error contacting server: ', error);

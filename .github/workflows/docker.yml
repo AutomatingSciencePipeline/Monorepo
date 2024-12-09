@@ -3,8 +3,6 @@ name: Docker Container Build
 # Adapted from https://docs.docker.com/build/ci/github-actions/
 
 on:
-    push:
-        branches: [ main ]
     pull_request:
         branches: [ main ]
 
@@ -41,35 +39,22 @@ jobs:
                 context: ./apps/frontend
                 file: ./apps/frontend/frontend.Dockerfile
                 # target: runner # this has been commented out due to simpler Dockerfile
-
-    # Below has been commented out due to simpler Dockerfile, as we shift towards Kubernetes
-
-    # # Development containers get the settings from docker-compose.dev.yml layered on top of docker-compose.yml
-    # backend-dev:
-    #   name: Backend Development Container
-    #   runs-on: ubuntu-latest
-    #   steps:
-    #       - name: Checkout
-    #         uses: actions/checkout@v3
-    #       - name: Set up Docker Buildx
-    #         uses: docker/setup-buildx-action@v2
-    #       - name: Build
-    #         uses: docker/build-push-action@v4
-    #         with:
-    #           context: ./apps/backend
-    #           file: ./apps/backend/backend.Dockerfile
-    #           target: development
-    # frontend-dev:
-    #   name: Frontend Development Container
-    #   runs-on: ubuntu-latest
-    #   steps:
-    #       - name: Checkout
-    #         uses: actions/checkout@v3
-    #       - name: Set up Docker Buildx
-    #         uses: docker/setup-buildx-action@v2
-    #       - name: Build
-    #         uses: docker/build-push-action@v4
-    #         with:
-    #           context: ./apps/frontend
-    #           file: ./apps/frontend/frontend.Dockerfile
-    #           target: development
+                build-args: |
+                  MONGODB_PORT=${{ secrets.MONGODB_PORT }}
+                  MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
+                  MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+    runner-prod:
+        name: Runner Production Container
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v2
+            - name: Build
+              uses: docker/build-push-action@v4
+              with:
+                # Should match the "build" subsection's settings in docker-compose.yml
+                context: ./apps/runner
+                file: ./apps/runner/runner.Dockerfile
+                # target: runner # this has been commented out due to simpler Dockerfile

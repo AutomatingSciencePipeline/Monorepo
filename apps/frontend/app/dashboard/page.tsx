@@ -1,9 +1,7 @@
 'use client'
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
-import { useAuth } from '../../firebase/fbAuth';
-import { deleteExperiment } from '../../firebase/db';
-import { listenToExperiments, downloadExperimentResults, downloadExperimentProjectZip, ExperimentDocumentId } from '../../firebase/db';
+import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import {
@@ -21,9 +19,12 @@ import classNames from 'classnames';
 import Image from 'next/image';
 import { SearchBar } from '../components/SearchBar';
 import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
-import { ExperimentData } from '../../firebase/db_types';
+import { ExperimentData } from '../../lib/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from '../../pages/api/queue';
+import { deleteDocumentById } from '../../lib/mongodb_funcs';
+import { signOut, useSession } from "next-auth/react";
+import toast, { Toaster } from 'react-hot-toast';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -53,7 +54,7 @@ const activityItems = [
 ];
 
 const Navbar = (props) => {
-	const { authService } = useAuth();
+	const { data: session } = useSession();
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -69,7 +70,7 @@ const Navbar = (props) => {
 							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
 								function (newValue: string): void {
 									console.log(`SearchBar.onValueChanged: ${newValue}`);
-								} } />
+								}} />
 							{/* Links section */}
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
@@ -90,11 +91,18 @@ const Navbar = (props) => {
 										<div>
 											<Menu.Button className='bg-blue-700 flex text-sm rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-700 focus:ring-white'>
 												<span className='sr-only'>Open user menu</span>
-												<Image
-													className='h-8 w-8 rounded-full'
-													src={authService.userPhotoUrl}
-													alt='User Photo'
-												/>
+												{session?.user?.image ? (
+													<Image
+														className='h-8 w-8 rounded-full'
+														src={session.user.image}
+														alt='User Photo'
+														width={32} // specify width
+														height={32} // specify height
+													/>
+												) : (
+													// Optionally, you could add a placeholder or leave this empty
+													<></>
+												)}
 											</Menu.Button>
 										</div>
 										<Transition
@@ -115,9 +123,7 @@ const Navbar = (props) => {
 																onClick={() => {
 																	return (
 																		item.name === 'Sign out' &&
-																		authService
-																			.signOut()
-																			.catch((err) => console.log('Sign out error', err))
+																		signOut()
 																	);
 																}}
 																className={classNames(
@@ -164,7 +170,7 @@ const Navbar = (props) => {
 										key={item.name}
 										as='a'
 										onClick={() => {
-											return authService.signOut();
+											return signOut();
 										}}
 										href={item.href}
 										className='block px-3 py-2 rounded-md text-base font-medium text-blue-200 hover:text-blue-100 hover:bg-blue-600'
@@ -182,15 +188,30 @@ const Navbar = (props) => {
 };
 
 export default function DashboardPage() {
-	const { userId, authService } = useAuth();
+	const { data: session } = useSession();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 
 	useEffect(() => {
-		if (!userId) {
+		if (!session) {
 			return;
 		}
-		return listenToExperiments(userId, (newExperimentList) => setExperiments(newExperimentList as ExperimentData[])); // TODO this assumes that all values will be present, which is not true
-	}, [userId]);
+		const eventSource = new EventSource(`/api/experiments/listen?uid=${session.user?.id}`);
+
+		eventSource.onmessage = (event) => {
+			if (event.data !== 'heartbeat') {
+				try {
+					setExperiments(JSON.parse(event.data) as ExperimentData[]);
+				}
+				catch {
+					console.log(`${event.data} was not valid JSON!`);
+				}
+
+			}
+
+		}
+
+		return () => eventSource.close();
+	}, [session]);
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
 	const QUEUE_ERROR_LENGTH = -2;
@@ -233,7 +254,7 @@ export default function DashboardPage() {
 	}, []);
 
 
-	const [copyID, setCopyId] = useState<ExperimentDocumentId>(null as unknown as ExperimentDocumentId); // TODO refactor copy system to not need this middleman
+	const [copyID, setCopyId] = useState<string>(null as unknown as string); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
 	const [isDefault, setIsDefault] = useState(false);
@@ -263,6 +284,7 @@ export default function DashboardPage() {
 
 	return (
 		<>
+			<Toaster />
 			{/* Background color split screen for large screens */}
 			<div
 				className='fixed top-0 left-0 w-1/2 h-full bg-white'
@@ -290,15 +312,22 @@ export default function DashboardPage() {
 											{/* Profile */}
 											<div className='flex items-center space-x-3'>
 												<div className='flex-shrink-0 h-12 w-12'>
-													<Image
-														className='h-12 w-12 rounded-full'
-														src={authService.userPhotoUrl}
-														alt='User Photo'
-													/>
+													{session?.user?.image ? (
+														<Image
+															className='h-12 w-12 rounded-full'
+															src={session.user.image}
+															alt='User Photo'
+															width={48} // specify width to match h-12
+															height={48} // specify height to match w-12
+														/>
+													) : (
+														<></>
+													)}
+
 												</div>
 												<div className='space-y-1'>
 													<div className='text-sm font-medium text-gray-900'>
-														{ authService.userEmail }
+														{session?.user?.email || ""}
 													</div>
 												</div>
 											</div>
@@ -310,7 +339,7 @@ export default function DashboardPage() {
 													onClick={() => {
 														setFormState(1);
 													}}
-													// onClick
+												// onClick
 												>
 													{label}
 												</button>
@@ -355,7 +384,7 @@ export default function DashboardPage() {
 															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
 													}
 												</span>
-												<button type= "button"
+												<button type="button"
 													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
 													onClick={queryQueueLength}>
 													TEMP Manual Query
@@ -381,10 +410,16 @@ export default function DashboardPage() {
 							onCopyExperiment={(experimentId) => {
 								setFormState(FormStates.Params);
 								setCopyId(experimentId);
-							} }
-							onDeleteExperiment={async (experimentId) => {
-								deleteExperiment(experimentId);
-							}}/>
+							}}
+							onDeleteExperiment={(experimentId) => {
+								// deleteExperiment(experimentId);
+								deleteDocumentById(experimentId).then(() => {
+									toast.success("Deleted experiment!", {duration: 1500});
+								}).catch((reason) => {
+									toast.error(`Failed delete, reason: ${reason}`, {duration: 1500});
+									console.log(`Failed delete, reason: ${reason}`);
+								});
+							}} />
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -400,12 +435,19 @@ export default function DashboardPage() {
 											className='py-4'
 										>
 											<div className='flex space-x-3'>
-												<Image
-													className='h-6 w-6 rounded-full'
-													src={authService.userPhotoUrl}
-													alt='User Photo'
-													layout='fixed'
-												/>
+												{session?.user?.image ? (
+													<Image
+														className='h-6 w-6 rounded-full'
+														src={session.user.image}
+														alt='User Photo'
+														layout='fixed'
+														width={24} // specify width to match h-6
+														height={24} // specify height to match w-6
+													/>
+												) : (
+													<></>
+												)}
+
 												<div className='flex-1 space-y-1'>
 													<div className='flex items-center justify-between'>
 														<h3 className='text-sm font-medium'>You</h3>
@@ -433,8 +475,8 @@ export default function DashboardPage() {
 					<NewExperiment
 						formState={formState}
 						setFormState={setFormState}
-						copyID = {copyID}
-						setCopyId = {setCopyId}
+						copyID={copyID}
+						setCopyId={setCopyId}
 						isDefault={isDefault}
 						setIsDefault={setIsDefault}
 					/>
@@ -446,8 +488,8 @@ export default function DashboardPage() {
 
 export interface ExperimentListProps {
 	experiments: ExperimentData[];
-	onCopyExperiment: (experiment: ExperimentDocumentId) => void;
-	onDeleteExperiment: (experiment: ExperimentDocumentId) => void;
+	onCopyExperiment: (experiment: string) => void;
+	onDeleteExperiment: (experiment: string) => void;
 }
 
 const SortingOptions = {
@@ -480,32 +522,32 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
 		switch (sortBy) {
-		case SortingOptions.NAME:
-			setSortedExperiments([...experiments].sort(sortByName));
-			break;
+			case SortingOptions.NAME:
+				setSortedExperiments([...experiments].sort(sortByName));
+				break;
 
-		case SortingOptions.NAME_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByNameReverse));
-			break;
+			case SortingOptions.NAME_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByNameReverse));
+				break;
 
-		case SortingOptions.DATE_MODIFIED:
-			setSortedExperiments([...experiments].sort(sortByDateModified));
-			break;
+			case SortingOptions.DATE_MODIFIED:
+				setSortedExperiments([...experiments].sort(sortByDateModified));
+				break;
 
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
-			break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
+				break;
 
-		case SortingOptions.DATE_CREATED:
-			setSortedExperiments([...experiments].sort(sortByDateCreated));
-			break;
+			case SortingOptions.DATE_CREATED:
+				setSortedExperiments([...experiments].sort(sortByDateCreated));
+				break;
 
-		case SortingOptions.DATE_CREATED_REVERSE:
-			setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
-			break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+				break;
 
-		default:
-			break;
+			default:
+				break;
 		}
 	}, [sortBy, experiments]);
 
@@ -517,27 +559,27 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		console.log('in toggle order: ', { sortBy });
 
 		switch (sortBy) {
-		case SortingOptions.NAME:
-			newSortBy = SortingOptions.NAME_REVERSE;
-			break;
-		case SortingOptions.NAME_REVERSE:
-			newSortBy = SortingOptions.NAME;
-			break;
-		case SortingOptions.DATE_MODIFIED:
-			newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
-			break;
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			newSortBy = SortingOptions.DATE_MODIFIED;
-			break;
-		case SortingOptions.DATE_CREATED:
-			newSortBy = SortingOptions.DATE_CREATED_REVERSE;
-			break;
-		case SortingOptions.DATE_CREATED_REVERSE:
-			newSortBy = SortingOptions.DATE_CREATED;
-			break;
-		default:
-			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
-			break;
+			case SortingOptions.NAME:
+				newSortBy = SortingOptions.NAME_REVERSE;
+				break;
+			case SortingOptions.NAME_REVERSE:
+				newSortBy = SortingOptions.NAME;
+				break;
+			case SortingOptions.DATE_MODIFIED:
+				newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
+				break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				newSortBy = SortingOptions.DATE_MODIFIED;
+				break;
+			case SortingOptions.DATE_CREATED:
+				newSortBy = SortingOptions.DATE_CREATED_REVERSE;
+				break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				newSortBy = SortingOptions.DATE_CREATED;
+				break;
+			default:
+				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				break;
 		}
 
 		console.log('in toggle order new sort: ', { newSortBy });
@@ -551,27 +593,27 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		let newSortBy;
 
 		switch (sortBy) {
-		case SortingOptions.NAME:
-			newSortBy = sortArrowUp ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
-			break;
-		case SortingOptions.NAME_REVERSE:
-			newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
-			break;
-		case SortingOptions.DATE_MODIFIED:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
-			break;
-		case SortingOptions.DATE_MODIFIED_REVERSE:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
-			break;
-		case SortingOptions.DATE_CREATED:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
-			break;
-		case SortingOptions.DATE_CREATED_REVERSE:
-			newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
-			break;
-		default:
-			newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
-			break;
+			case SortingOptions.NAME:
+				newSortBy = sortArrowUp ? SortingOptions.NAME_REVERSE : SortingOptions.NAME;
+				break;
+			case SortingOptions.NAME_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
+				break;
+			case SortingOptions.DATE_MODIFIED:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
+				break;
+			case SortingOptions.DATE_MODIFIED_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
+				break;
+			case SortingOptions.DATE_CREATED:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
+				break;
+			case SortingOptions.DATE_CREATED_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
+				break;
+			default:
+				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				break;
 		}
 
 		handleSortChange(newSortBy);
@@ -702,25 +744,25 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 											initialValue={includeCompleted}
 											onChange={(newValue) => {
 												setIncludeCompleted(newValue);
-											} } />
+											}} />
 									</div>
 								)}
 							</Menu.Item>
 							<Menu.Item>
 								{({ active }) => (
-									<a href='#'className={menuHoverActiveCss(active)}>
+									<a href='#' className={menuHoverActiveCss(active)}>
 										<Toggle
 											label={'Include Archived'}
 											initialValue={includeArchived}
 											onChange={(newValue) => {
 												setIncludeArchived(newValue);
-											} } />
+											}} />
 									</a>
 								)}
 							</Menu.Item>
 							<Menu.Item>
 								{({ active }) => (
-									<a href='#'className={menuHoverActiveCss(active)}>
+									<a href='#' className={menuHoverActiveCss(active)}>
 										TODO AnotherOption
 									</a>
 								)}

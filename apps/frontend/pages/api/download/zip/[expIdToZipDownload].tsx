@@ -19,7 +19,7 @@ const mongoZipHandler: NextApiHandler<ProjectZip> = async (req, res) => {
 		results = await db
 			.collection(COLLECTION_ZIPS)
 			// TODO correct mongodb typescript type for id
-			.find({ '_id': expIdToZipDownload as any }).toArray();
+			.find({ 'experimentId': expIdToZipDownload as any }).toArray();
 	} catch (error) {
 		const message = 'Failed to download the zip';
 		console.error('Error contacting server: ', error);
