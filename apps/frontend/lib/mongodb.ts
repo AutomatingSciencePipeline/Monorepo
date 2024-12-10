@@ -9,7 +9,6 @@ const USERNAME = process.env.MONGODB_USERNAME || 'user';
 const PASSWORD = process.env.MONGODB_PASSWORD || 'pass';
 
 const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
-console.log(MONGODB_URI);
 const MONGODB_OPTIONS = {};
 
 export const DB_NAME = 'gladosdb';
