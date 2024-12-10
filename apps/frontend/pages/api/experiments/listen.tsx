@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             }
         }
     ];
-    const options = {};
+    const options = { fullDocument: "updateLookup" };
     const changeStream = experimentsCollection.watch(pipeline, options);
 
     // Set up real-time streaming of changes to the client using SSE

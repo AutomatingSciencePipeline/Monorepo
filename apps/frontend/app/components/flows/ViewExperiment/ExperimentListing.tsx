@@ -7,7 +7,7 @@ import { Timestamp } from 'mongodb';
 import { updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 
 export interface ExperimentListingProps {
-	projectinit: ExperimentData;
+	projectData: ExperimentData;
 	onCopyExperiment: (experimentId: string) => void;
 	onDownloadResults: (experimentId: string) => Promise<void>;
 	onDownloadProjectZip: (experimentId: string) => Promise<void>;
@@ -15,8 +15,8 @@ export interface ExperimentListingProps {
 }
 
 
-export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
-	const [project, setProject] = useState<ExperimentData>(projectinit);
+export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
+	const [project, setProject] = useState<ExperimentData>(projectData);
 
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
@@ -31,10 +31,10 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
 
-	const [projectName, setProjectName] = useState(projectinit.name); // New state for edited project name
+	const [projectName, setProjectName] = useState(projectData.name); // New state for edited project name
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
-	const [originalProjectName, setOriginalProjectName] = useState(projectinit.name); // State to store the original project name
+	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
@@ -65,15 +65,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			const eventSource = new EventSource(`/api/experiments/subscribe?expId=${project.expId}`);
-			eventSource.onmessage = (event) => {
-				if (event.data !== 'heartbeat' && event.data) {
-					setProject(JSON.parse(event.data) as ExperimentData);
-				}
-
-			}
+			// Do nothing here?
 		}
 	}, [editingCanceled, originalProjectName, project.expId]);
+
+	//Update the project when data is changed
+	useEffect(() => {
+		setProject(projectData);
+	}, [projectData]);
 
 
 	const handleKeyUp = (e) => {

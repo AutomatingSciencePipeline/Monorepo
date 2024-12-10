@@ -765,7 +765,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
 					>
 						<ExperimentListing
-							projectinit={project}
+							projectData={project}
 							onCopyExperiment={onCopyExperiment}
 							onDownloadResults={downloadExperimentResults}
 							onDownloadProjectZip={downloadExperimentProjectZip}

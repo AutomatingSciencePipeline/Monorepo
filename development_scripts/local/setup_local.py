@@ -55,13 +55,7 @@ def setup(args):
     
     print("Setting up kubernetes")
     
-    os.system("python3 kubernetes_init\\init.py")
-    
-    # try to delete the old service
-    # do this so that the old minikube service dies
-    os.system("kubectl delete svc glados-frontend")
-    
-    os.system("kubectl expose deployment glados-frontend --type LoadBalancer --port 80 --target-port 3000")
+    os.system("python3 kubernetes_init\\init.py --hard")
     
     # in a new thread we need to run the following command
     # minikube service glados-frontend --url
@@ -70,6 +64,7 @@ def setup(args):
     def run_minikube_service():
         process = subprocess.Popen(["minikube", "service", "glados-frontend", "--url"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         for line in process.stdout: # type: ignore
+            print(line)
             url = line.strip()
             port = url.split(":")[-1]
             
@@ -111,6 +106,15 @@ def setup(args):
             print(f"Frontend is now running at: http://localhost:{port}")        
                 
             break
+    if "skip" in args:
+            print("Skipping redeploy")
+            print("Frontend is available where it was before...")
+            return
+    
+    # try to delete the old service
+    # do this so that the old minikube service dies
+    os.system("kubectl delete svc glados-frontend")
+    os.system("kubectl expose deployment glados-frontend --type LoadBalancer --port 80 --target-port 3000")
         
     thread = threading.Thread(target=run_minikube_service)
     thread.start()
