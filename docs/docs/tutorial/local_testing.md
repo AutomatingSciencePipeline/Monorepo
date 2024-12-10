@@ -199,8 +199,8 @@ Which will show something like
 
 ```bash
 NAME                                        READY   STATUS    RESTARTS       AGE
-glados-backend-687fc6b7ff-dld2p    1/1     Running   0              74s
-glados-frontend-5f575b99b7-9q9ml   1/1     Running   0              74s
+glados-backend-687fc6b7ff-dld2p             1/1     Running   0              74s
+glados-frontend-5f575b99b7-9q9ml            1/1     Running   0              74s
 glados-mongodb-0                            1/1     Running   1 (2m9s ago)   20d
 glados-mongodb-1                            1/1     Running   1 (2m9s ago)   20d
 glados-mongodb-arbiter-0                    1/1     Running   2 (20d ago)    20d
@@ -220,3 +220,32 @@ This will then show the image information. Make sure this points to your docker 
 In order to update the runner image, go to the apps/backend folder, and update the image in job-runner.yaml following the steps above.
 
 Now you can use locally built images to run GLADOS!
+
+## Prebuilt Script for Docker Image Management
+
+Due to the complexity of getting Minikube to behave, I have created a python script to run the needed commands for you. 
+
+From the root of the Monorepo run the command:
+
+```bash
+python3 .\development_scripts\local\setup_local.py <args>
+```
+
+You can provide arguments for which elements of the project you would like to build.
+
+Options are: frontend, backend, runner, all
+
+In the python3 file you will need to set a couple of values to make sure that it is setup for your environment. Update those values and run the python script with the pieces you would like to build and push.
+
+Note: You still need to make sure to follow the steps above for changing the image which you are running the cluster from.
+
+After running the python script you will see something like:
+
+```bash
+Frontend is now running at: http://localhost:64068
+```
+
+Opening that link will bring you to a local version of GLADOS.
+
+!!!Warning
+    With the local version of GLADOS being HTTP you may have weird networking issues due to the max number of connections to an HTTP/1.1 host. This will be fixed in a later update.
