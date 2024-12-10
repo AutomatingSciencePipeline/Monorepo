@@ -180,30 +180,36 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 )}
             </div>
-            <Menu>
-                <Menu.Button>X Axis</Menu.Button>
-                <Menu.Items>
-                    {headers.map((header) => (
-                        <Menu.Item key={header}>
-                            <button onClick={() => setXAxis(header)} className="block data-[focus]:bg-blue-100">
-                                {header}
-                            </button>
-                        </Menu.Item>
-                    ))}
-                </Menu.Items>
-            </Menu>
-            <Menu>
-                <Menu.Button>Y Axis</Menu.Button>
-                <Menu.Items>
-                    {headers.map((header) => (
-                        <Menu.Item key={header}>
-                            <button onClick={() => setYAxis(header)} className="block data-[focus]:bg-blue-100">
-                                {header}
-                            </button>
-                        </Menu.Item>
-                    ))}
-                </Menu.Items>
-            </Menu>
+            <div className='container flex items-center justify-between px-20'>
+                <div>
+                    <Menu>
+                        <Menu.Button className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>X Axis</Menu.Button>
+                        <Menu.Items>
+                            {headers.map((header) => (
+                                <Menu.Item key={header}>
+                                    <button onClick={() => setXAxis(header)} className="block data-[focus]:bg-blue-100">
+                                        {header}
+                                    </button>
+                                </Menu.Item>
+                            ))}
+                        </Menu.Items>
+                    </Menu>
+                </div>
+                <div>
+                    <Menu>
+                        <Menu.Button className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>Y Axis</Menu.Button>
+                        <Menu.Items>
+                            {headers.map((header) => (
+                                <Menu.Item key={header}>
+                                    <button onClick={() => setYAxis(header)} className="block data-[focus]:bg-blue-100">
+                                        {header}
+                                    </button>
+                                </Menu.Item>
+                            ))}
+                        </Menu.Items>
+                    </Menu>
+                </div>
+            </div>
         </Modal>
     );
 };
