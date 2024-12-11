@@ -69,7 +69,7 @@ export const SignUpModal = ({ afterSignUp }) => {
 							</div>
 						</div>
 						{/* For dev testing!!! */}
-						{/* <button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button> */}
+						<button onClick={() => {signIn("keycloak", {redirectTo: "/dashboard"})}}>Keycloak</button>
 					</div>
 				</div>
 				<div className='px-4 py-6 bg-gray-50 border-t-2 border-gray-200 sm:px-10'>

@@ -1,6 +1,6 @@
 'use server';
 import { GridFSBucket, ObjectId } from "mongodb";
-import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from "./mongodb";
+import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS } from "./mongodb";
 
 export async function getDocumentFromId(expId: string) {
     'use server';
@@ -101,3 +101,58 @@ export async function updateLastUsedDateFile(fileId: string) {
     );
 }
 
+export async function addShareLink(expId: string) {
+    'use server';
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_SHARE_LINKS);
+
+    const shareLink = {
+        experimentId: expId,
+        link: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+        expiration: new Date(Date.now() + 1000 * 60 * 60 * 24) // 24 hours from now
+    };
+
+
+    await collection.insertOne(shareLink);
+
+    return shareLink.link;
+}
+
+export async function redeemShareLink(link: string, userId: string) {
+    'use server';
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_SHARE_LINKS);
+
+    const shareLink = await collection.findOne({ link: link });
+
+    if (!shareLink) {
+        return Promise.reject(`Could not find share link with link: ${link}`);
+    }
+
+    if (shareLink.expiration < new Date()) {
+        return Promise.reject(`Share link with link: ${link} has expired`);
+    }
+
+    // Delete the share link
+    await collection.deleteOne({ _id: shareLink._id });
+
+    // Give the user access to the experiment
+    const collectionExperiments = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+
+    //Check if the user is already in the sharedUsers array
+    const experiment = await collectionExperiments.findOne({ '_id': ObjectId.createFromHexString(shareLink.experimentId) });
+    //Check if the array exists first
+    if (!experiment) {
+        return Promise.reject(`Could not find experiment with id: ${shareLink.experimentId}`);
+    }
+    if (experiment.sharedUsers) {
+        if (experiment.sharedUsers.includes(userId)) {
+            return Promise.reject(`User already has access to this experiment`);
+        }
+    }
+
+    //Append that user to the sharedUsers array
+    await collectionExperiments.updateOne({ '_id': ObjectId.createFromHexString(shareLink.experimentId) }, { $push: { 'sharedUsers': userId as any } });
+
+    return Promise.resolve();
+}

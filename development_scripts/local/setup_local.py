@@ -4,6 +4,7 @@ import subprocess
 import sys
 import pathlib
 import threading
+from time import sleep
 
 def setup(args):
     if len(args) == 0:
@@ -17,13 +18,13 @@ def setup(args):
     print("Setting up local environment")
     
     # SET YOUR DOCKER HUB USERNAME HERE!
-    docker_hub_username = "YOUR_DOCKER_HUB_USERNAME"
+    docker_hub_username = "rhitwindsors"
     
     # SET KEYCLOAK INFO HERE!
     # Ask Riley how to set this up
     keycloak_url = "http://glados-w0.csse.rose-hulman.edu:8080/realms/master"
-    keycloak_client_id = "YOUR_KEYCLOAK_CLIENT_ID"
-    keycloak_client_secret = "YOUR_KEYCLOAK_CLIENT_SECRET"
+    keycloak_client_id = "GladosClient"
+    keycloak_client_secret = "0beChP27T7zfKQbXZ0vdPg73f1zLXJhw"
     
     if "frontend" in args:
         print("Building and pushing frontend image")
@@ -115,6 +116,9 @@ def setup(args):
     # do this so that the old minikube service dies
     os.system("kubectl delete svc glados-frontend")
     os.system("kubectl expose deployment glados-frontend --type LoadBalancer --port 80 --target-port 3000")
+    
+    # wait a second or two here
+    sleep(2)
         
     thread = threading.Thread(target=run_minikube_service)
     thread.start()
