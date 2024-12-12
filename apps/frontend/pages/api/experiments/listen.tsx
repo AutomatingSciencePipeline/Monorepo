@@ -28,7 +28,12 @@ export default async function handler(req, res) {
             $match: {
                 $or: [
                     { "fullDocument.creator": uid },          // Match insert or update with the creator field
-                    { operationType: "delete", "documentKey._id": { $exists: true } }  // Handle deletion events
+                    { operationType: "delete", "documentKey._id": { $exists: true } },  // Handle deletion events
+                    //Check if uid is in the sharedUsers array
+                    { "fullDocument.sharedUsers": { $in: [uid] } },
+                    //Check if uid is removed
+                    { operationType: "update", "updateDescription.updatedFields.sharedUsers": { $nin: [uid] } }
+
                 ]
             }
         }
@@ -55,7 +60,7 @@ export default async function handler(req, res) {
     }, HEARTBEAT_INTERVAL);
 
     const initDocs = await experimentsCollection
-        .find({ 'creator': uid })
+        .find({ $or: [{ 'creator': uid }, { 'sharedUsers': { $in: [uid] } }] })
         .toArray();
     const initArray = convertToExpsArray(initDocs);
     res.write(`data: ${JSON.stringify(initArray)}\n\n`);
@@ -63,7 +68,7 @@ export default async function handler(req, res) {
     // Listen to changes in the collection
     changeStream.on("change", async () => {
         const updatedDocuments = await experimentsCollection
-            .find({ 'creator': uid })
+            .find({ $or: [{ 'creator': uid }, { 'sharedUsers': { $in: [uid] } }] })
             .toArray();
 
         const result = convertToExpsArray(updatedDocuments);

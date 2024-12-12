@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: glados-frontend
-          image: rhitwindsors/glados-frontend:main
+          image: gladospipeline/glados-frontend:main
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
-import { addShareLink, updateExperimentNameById } from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 export interface ExperimentListingProps {
 	projectData: ExperimentData;
@@ -17,6 +18,8 @@ export interface ExperimentListingProps {
 
 
 export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
+	const { data: session } = useSession();
+
 	const [project, setProject] = useState<ExperimentData>(projectData);
 
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
@@ -115,14 +118,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							<>
 								<span
 									className="editable-text"
-									onClick={handleEdit}
 								>
 									{project.name}
 								</span>
-								<MdEdit
+								{project.creator == session?.user?.id! ? <MdEdit
 									className="icon edit-icon"
 									onClick={handleEdit}
-								/>
+								/> : <></>}
+
 							</>
 						)}
 					</span>
@@ -233,14 +236,29 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					}}>
 					Delete Experiment
 				</button> */}
-				<button
-					type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={openDeleteModal}
-				>
-					Delete Experiment
-				</button>
-				<button
+				{
+					project.creator == session?.user?.id! ?
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={() => {
+								onDeleteExperiment(project.expId);
+							}}>
+							Delete Experiment
+						</button> :
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								onClick={() => {
+									toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
+										success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
+										loading: "Unfollowing experiment..."
+									});
+								}}>	
+							Unfollow Experiment
+						</button>
+				}
+				{
+					project.creator == session?.user?.id! ?
+					<button
 					type="button"
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={
@@ -254,7 +272,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					}
 				>
 					Share Experiment
-				</button>
+				</button> : null
+				}
 			</div>
 			<div className='sm:hidden'>
 				<ChevronRightIcon

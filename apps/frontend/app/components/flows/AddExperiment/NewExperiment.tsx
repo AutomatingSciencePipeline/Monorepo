@@ -13,7 +13,7 @@ import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../../lib/db';
 
-import { getDocumentFromId, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
+import { copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -83,6 +83,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			scatter: false,
 			keepLogs: true,
 			workers: 1,
+			file: '',
 		},
 		validate: joiResolver(experimentSchema),
 	});
@@ -92,6 +93,17 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
 					const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
+					setFileId("");
+					if (expInfo['creator'] !== session?.user?.id) {
+						//We need to copy the file to the user's files and use the new ID
+						copyFile(expInfo['file'], session?.user?.id!).then((newFileId) => {
+							setFileId(newFileId);
+						});
+					}
+					else{
+						refreshFileTimestamp(expInfo['file']);
+					}
+
 					form.setValues({
 						hyperparameters: hyperparameters,
 						name: expInfo['name'],
@@ -106,7 +118,17 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 						scatterDepVar: expInfo['scatterDepVar'],
 						timeout: expInfo['timeout'],
 						keepLogs: expInfo['keepLogs'],
+						file: fileId ? fileId : expInfo['file'],
 					});
+					
+					if (!fileId){
+						setFileId(expInfo['file']);
+					}
+
+					if (fileId?.length === 0) {
+						setFileId(expInfo['file']);
+					}
+					
 					setCopyId(null);
 					setStatus(FormStates.Info);
 				}
@@ -199,7 +221,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 										) : status === FormStates.Confirmation ? (
 											<ConfirmationStep form={form} />
 										) : (
-											<DispatchStep form={form} id={id} updateId={setFileId}/>
+											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId}/>
 										)}
 
 										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
