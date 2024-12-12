@@ -18,13 +18,13 @@ def setup(args):
     print("Setting up local environment")
     
     # SET YOUR DOCKER HUB USERNAME HERE!
-    docker_hub_username = "rhitwindsors"
+    docker_hub_username = "DOCKER_HUB_USERNAME"
     
     # SET KEYCLOAK INFO HERE!
     # Ask Riley how to set this up
     keycloak_url = "http://glados-w0.csse.rose-hulman.edu:8080/realms/master"
-    keycloak_client_id = "GladosClient"
-    keycloak_client_secret = "0beChP27T7zfKQbXZ0vdPg73f1zLXJhw"
+    keycloak_client_id = "CLIENT_ID"
+    keycloak_client_secret = "CLIENT_SECRET"
     
     if "frontend" in args:
         print("Building and pushing frontend image")
