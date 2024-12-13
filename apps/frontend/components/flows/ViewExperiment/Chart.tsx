@@ -22,7 +22,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
     const [xAxis, setXAxis] = useState('X');
-    const [yAxis, setYAxis] = useState('Y');
+    //const [yAxis, setYAxis] = useState('Y');
     const [headers, setHeaders] = useState<string[]>([]);
 
     const setLineChart = () => setChartType('line');
@@ -49,7 +49,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     }, [project.expId]);*/
 
     useEffect(() => {
-        setExperimentChartData({_id: '3', experimentId: project.expId, resultContent: 'xData,yData,Classification\n1,7,A\n2,16,B\n3,12,C\n4,10,D\n5,9,A\n6,18,B\n7,12,C\n8,11,D\n9,7,A\n10,5,B\n11,16,C\n12,20,D\n13,0,A\n14,12,B\n15,18,C\n16,3,D\n17,7,A\n18,8,B\n19,19,C\n20,4,D'});
+        setExperimentChartData({_id: '3', experimentId: project.expId, resultContent: 'time,max,avg,min\n0,0.8,0.54,0.3\n10,0.8,0.58,0.4\n20,0.8,0.66,0.5\n30,0.8,0.65,0.4\n40,0.8,0.63,0.5\n50,0.8,0.68,0.5\n60,0.8,0.61,0.3\n70,0.8,0.67,0.4\n80,0.9,0.67,0.4\n90,0.9,0.72,0.4'});
         setLoading(false);
     }, [project.expId]);
 
@@ -60,37 +60,45 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const rows = data.trim().split('\n');
         const headers = rows[0].split(',');
 
+        const xList = [] as any[];
+        const yLists = [] as any[];
+
         var xIndex = 0;
-        var yIndex = 0;
         for (let i = 0; i < headers.length; i++)
         {
+            yLists.push([]);
             if (headers[i] === xAxis)
             {
                 xIndex = i;
             }
-            if (headers[i] === yAxis)
-            {
-                yIndex = i;
-            }
         }
 
-        console.log(xIndex, yIndex);
+        console.log("Ylist before", yLists);
 
-        const xList = [] as any[];
-        const yList = [] as any[];
-        //const dataObj = [] as any[];
+        headers.splice(xIndex, 1);
+        yLists.splice(xIndex, 1);
 
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
-            xList.push(cols[xIndex]); // Assuming x values are in the 4th column
-            yList.push(cols[yIndex]); // Assuming y values are in the 5th column
-            //dataObj.push({x: cols[xIndex], y: cols[yIndex]});
+            xList.push(cols[xIndex]);
+            for (let j = 0; j < cols.length; j++)
+            {
+                if (j < xIndex)
+                {
+                    yLists[j].push(cols[j]);
+                }
+                else if (j > xIndex)
+                {
+                    yLists[j - 1].push(cols[j]);
+                }
+            }
         }
 
-        console.log(xList);
-        console.log(yList);
+        console.log("Headers:", headers);
+        console.log("X List:", xList);
+        console.log("Y Lists:", yLists);
 
-        return { headers, xList, yList };
+        return { headers, xList, yLists };
     };
 
     const generateColors = (numColors) => {
@@ -104,22 +112,26 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { headers, xList, yList } = parseCSV(experimentChartData.resultContent);
+            const { headers, xList, yLists } = parseCSV(experimentChartData.resultContent);
             const colors = generateColors(xList.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
                 chartInstance.destroy();
             }
+
+            const datasetsObj = headers.map((header, i) => ({
+                label: header,
+                data: yLists[i],
+                borderColor: colors,
+                backgroundColor: colors
+            }));
+            
+
             const newChartInstance = new Chart(ctx, {
                 type: chartType,
                 data: {
                     labels: xList,
-                    datasets: [{
-                        label: 'Experiment Data',
-                        data: yList,
-                        borderColor: colors,
-                        backgroundColor: colors,
-                    }]
+                    datasets: datasetsObj
                 },
                 options: {
                     responsive: true,
@@ -145,7 +157,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
             setHeaders(headers);
         }
-    }, [loading, experimentChartData, chartType, xAxis, yAxis]);
+    }, [loading, experimentChartData, chartType, xAxis]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
@@ -181,34 +193,18 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 )}
             </div>
             <div className='container flex items-center justify-between px-20'>
-                <div>
-                    <Menu>
-                        <Menu.Button className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>X Axis</Menu.Button>
-                        <Menu.Items>
-                            {headers.map((header) => (
-                                <Menu.Item key={header}>
-                                    <button onClick={() => setXAxis(header)} className="block data-[focus]:bg-blue-100">
-                                        {header}
-                                    </button>
-                                </Menu.Item>
-                            ))}
-                        </Menu.Items>
-                    </Menu>
-                </div>
-                <div>
-                    <Menu>
-                        <Menu.Button className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>Y Axis</Menu.Button>
-                        <Menu.Items>
-                            {headers.map((header) => (
-                                <Menu.Item key={header}>
-                                    <button onClick={() => setYAxis(header)} className="block data-[focus]:bg-blue-100">
-                                        {header}
-                                    </button>
-                                </Menu.Item>
-                            ))}
-                        </Menu.Items>
-                    </Menu>
-                </div>
+                <Menu>
+                    <Menu.Button className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>X Axis</Menu.Button>
+                    <Menu.Items>
+                        {headers.map((header) => (
+                            <Menu.Item key={header}>
+                                <button onClick={() => setXAxis(header)} className="block data-[focus]:bg-blue-100">
+                                    {header}
+                                </button>
+                            </Menu.Item>
+                        ))}
+                    </Menu.Items>
+                </Menu>
             </div>
         </Modal>
     );
