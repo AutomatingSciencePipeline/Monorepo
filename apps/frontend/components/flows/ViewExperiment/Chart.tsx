@@ -73,9 +73,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             }
         }
 
-        console.log("Ylist before", yLists);
-
-        headers.splice(xIndex, 1);
         yLists.splice(xIndex, 1);
 
         for (let i = 1; i < rows.length; i++) {
@@ -98,7 +95,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         console.log("X List:", xList);
         console.log("Y Lists:", yLists);
 
-        return { headers, xList, yLists };
+        return { headers, xList, yLists, xIndex };
     };
 
     const generateColors = (numColors) => {
@@ -112,14 +109,24 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { headers, xList, yLists } = parseCSV(experimentChartData.resultContent);
+            const { headers, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
             const colors = generateColors(xList.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
                 chartInstance.destroy();
             }
 
-            const datasetsObj = headers.map((header, i) => ({
+            const totalLength = headers.length;
+            const newHeaders = [] as any[];
+            for (let i = 0; i < totalLength; i++)
+            {
+                if (i != xIndex)
+                {
+                    newHeaders.push(headers[i]);
+                }
+            }
+
+            const datasetsObj = newHeaders.map((header, i) => ({
                 label: header,
                 data: yLists[i],
                 borderColor: colors,
@@ -162,6 +169,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
     };
+    
 
     return (
         <Modal onClose={() => { onClose(); regenerateCanvas(); }}>
@@ -192,20 +200,20 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 )}
             </div>
-            <div className='container flex items-center justify-between px-20'>
-                <Menu>
-                    <Menu.Button className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>X Axis</Menu.Button>
-                    <Menu.Items>
-                        {headers.map((header) => (
-                            <Menu.Item key={header}>
-                                <button onClick={() => setXAxis(header)} className="block data-[focus]:bg-blue-100">
-                                    {header}
-                                </button>
-                            </Menu.Item>
-                        ))}
-                    </Menu.Items>
-                </Menu>
-            </div>
+            <fieldset>
+                {headers.map((header) => (
+                    <div key={header}>
+                    <input
+                        type="radio"
+                        id={header}
+                        onChange={() => setXAxis(header)}
+                        name = "xaxis"
+                        value={header}
+                    />
+                    <label htmlFor={header}>{header}</label>
+                    </div>
+                ))}
+            </fieldset>
         </Modal>
     );
 };
