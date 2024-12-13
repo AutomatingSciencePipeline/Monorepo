@@ -43,6 +43,15 @@ export async function deleteDocumentById(expId: string) {
         return Promise.reject(`Could not find document with id: ${expId}`);
     }
 
+    //Since we found it, make sure to delete data from logs, results, and zips
+    const db = client.db(DB_NAME);
+    //Delete logs
+    await db.collection('logs').deleteMany({ "experimentId": expId });
+    //Delete results
+    await db.collection('results').deleteMany({ "experimentId": expId });
+    //Delete zips
+    await db.collection('zips').deleteMany({ "experimentId": expId });
+
     return Promise.resolve();
 }
 
