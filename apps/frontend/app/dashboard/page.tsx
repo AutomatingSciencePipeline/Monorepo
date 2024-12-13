@@ -26,7 +26,10 @@ import { deleteDocumentById } from '../../lib/mongodb_funcs';
 import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 
-const navigation = [{ name: 'Admin', href: '#', current: false }];
+const navigation = [
+	{ name: 'Help', href: '#', current: false },// onClick: toggleHelpTab,
+	{ name: 'Users', href: '#', current: false }// CHANGE BACK TO ADMIN
+];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
 	{ name: 'Sign out', href: '#' },
@@ -52,6 +55,19 @@ const activityItems = [
 		time: '3h',
 	},
 ];
+
+// const toggleHelpTab = () => {
+// 	setIsHelpOpen(!isHelpOpen);
+// };
+//
+// const [isHelpOpen, setIsHelpOpen] = useState(false);
+//
+// <Disclosure.Button
+// 	onClick={toggleHelpTab}
+// 	className="block px-3 py-2 rounded-md text-base font-medium"
+// >
+// 	Help
+// </Disclosure.Button>
 
 const Navbar = (props) => {
 	const { data: session } = useSession();
