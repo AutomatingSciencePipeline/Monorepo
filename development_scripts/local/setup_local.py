@@ -4,6 +4,7 @@ import subprocess
 import sys
 import pathlib
 import threading
+from time import sleep
 
 def setup(args):
     if len(args) == 0:
@@ -17,13 +18,13 @@ def setup(args):
     print("Setting up local environment")
     
     # SET YOUR DOCKER HUB USERNAME HERE!
-    docker_hub_username = "YOUR_DOCKER_HUB_USERNAME"
+    docker_hub_username = "DOCKER_HUB_USERNAME"
     
     # SET KEYCLOAK INFO HERE!
     # Ask Riley how to set this up
     keycloak_url = "http://glados-w0.csse.rose-hulman.edu:8080/realms/master"
-    keycloak_client_id = "YOUR_KEYCLOAK_CLIENT_ID"
-    keycloak_client_secret = "YOUR_KEYCLOAK_CLIENT_SECRET"
+    keycloak_client_id = "CLIENT_ID"
+    keycloak_client_secret = "CLIENT_SECRET"
     
     if "frontend" in args:
         print("Building and pushing frontend image")
@@ -77,11 +78,14 @@ def setup(args):
             f.close()
             
             for i in range(len(lines)):
-                if "AUTH_URL" in lines[i] or "AUTH_REDIRECT_PROXY_URL" in lines[i]:
+                if "AUTH_URL" in lines[i]:
                     # base 64 encode the url
                     b64Url = base64.b64encode(f"http://localhost:{port}/api/auth".encode()).decode()
                     lines[i] = f"  AUTH_URL: {b64Url}\n"
-                    break
+                
+                if "AUTH_REDIRECT_PROXY_URL" in lines[i]:
+                    b64Url = base64.b64encode(f"http://localhost:{port}/api/auth".encode()).decode()
+                    lines[i] = f"  AUTH_REDIRECT_PROXY_URL: {b64Url}\n"
                 
                 if "AUTH_KEYCLOAK_ISSUER" in lines[i]:
                     b64Url = base64.b64encode(keycloak_url.encode()).decode()
@@ -101,7 +105,7 @@ def setup(args):
             f.close()
             
             # apply the new secrets
-            os.system("python3 kubernetes_init\\init.py")
+            os.system("python3 kubernetes_init\\init.py --hard")
                 
             print(f"Frontend is now running at: http://localhost:{port}")        
                 
@@ -115,6 +119,9 @@ def setup(args):
     # do this so that the old minikube service dies
     os.system("kubectl delete svc glados-frontend")
     os.system("kubectl expose deployment glados-frontend --type LoadBalancer --port 80 --target-port 3000")
+    
+    # wait a second or two here
+    sleep(5)
         
     thread = threading.Thread(target=run_minikube_service)
     thread.start()

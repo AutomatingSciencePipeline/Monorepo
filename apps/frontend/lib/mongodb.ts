@@ -17,6 +17,7 @@ export const COLLECTION_ZIPS = 'zips';
 export const COLLECTION_RESULTS_CSVS = 'results';
 export const COLLECTION_EXPERIMENTS = 'experiments';
 export const COLLECTION_EXPERIMENT_FILES = 'files';
+export const COLLECTION_SHARE_LINKS = 'shareLinks';
 
 //Also export the client for use with authjs, authjs recommends using this instead of a promise.
 let client: MongoClient;

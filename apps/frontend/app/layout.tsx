@@ -1,7 +1,12 @@
 import '../styles/globals.css';
 import '../styles/experimentListing.css';
 import RouteHandler from './RouteHandler';
-import Head from 'next/head';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'GLADOS',
+  description: 'GLADOS: A platform for running experiments',
+};
 
 export default function RootLayout({
   children,

@@ -18,13 +18,13 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, updateId, ...props }) => {
+export const DispatchStep = ({ id, form, fileId, updateId, ...props }) => {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const [userFiles, setUserFiles] = useState<any[]>([]);
 
-	const [selectedFileId, setSelectedFileId] = useState<string>("");
+	const [selectedFileId, setSelectedFileId] = useState<string>(fileId);
 
 	useEffect(() => {
 		getRecentFiles(session?.user?.id!).then((files) => {
