@@ -273,6 +273,8 @@ export default function DashboardPage() {
 	const [copyID, setCopyId] = useState<string>(null as unknown as string); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
+	const [isDefault, setIsDefault] = useState(false);
+
 	useEffect(() => {
 		if (formState === FormStates.Closed) {
 			setLabel('New Experiment');
@@ -280,6 +282,20 @@ export default function DashboardPage() {
 			setLabel('Continue Experiment');
 		}
 	}, [formState]);
+
+	const handleDefaultExperiment = () => {
+		setFormState(FormStates.Params);
+		setCopyId('AddNums');
+		setIsDefault(true);
+		<NewExperiment
+			formState={formState}
+			setFormState={setFormState}
+			copyID = {copyID}
+			setCopyId = {setCopyId}
+			isDefault = {isDefault}
+			setIsDefault = {setIsDefault}
+		/>
+	};
 
 	return (
 		<>
@@ -389,6 +405,14 @@ export default function DashboardPage() {
 													TEMP Manual Query
 												</button>
 											</div>
+											<div className='flex items-center space-x-2'>
+											<button type="button"
+														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+														onClick={handleDefaultExperiment}>
+														
+													Run a Default Experiment
+												</button>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -465,8 +489,10 @@ export default function DashboardPage() {
 					<NewExperiment
 						formState={formState}
 						setFormState={setFormState}
-						copyID={copyID}
-						setCopyId={setCopyId}
+						copyID = {copyID}
+						setCopyId = {setCopyId}
+						isDefault={isDefault}
+						setIsDefault={setIsDefault}
 					/>
 				</div>
 			</div>

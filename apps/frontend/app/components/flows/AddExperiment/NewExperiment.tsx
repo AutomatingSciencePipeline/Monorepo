@@ -221,7 +221,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 										) : status === FormStates.Confirmation ? (
 											<ConfirmationStep form={form} />
 										) : (
-											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId}/>
+											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined}/>
 										)}
 
 										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
