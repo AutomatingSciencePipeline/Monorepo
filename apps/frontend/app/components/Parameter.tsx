@@ -54,14 +54,6 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 
 	const handleSwitchChange = () => {
 		setUseDefault(!useDefault);
-		// if (!useDefault) {
-		//     // Check if the default value already exists
-		//     const defaultValue = form.values.hyperparameters[index].default;
-		//     if (!defaultValue) {
-		//         // Add default value to the form
-		//         form.insertListItem(`hyperparameters.${index}.default`, '');
-		//     }
-		// }
 		form.setFieldValue(`hyperparameters.${index}.useDefault`, !useDefault);
 	};
 
