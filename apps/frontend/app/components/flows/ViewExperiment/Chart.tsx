@@ -31,7 +31,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
-      };
+    };
 
     const setLineChart = () => setChartType('line');
     const setBarChart = () => setChartType('bar');
@@ -39,8 +39,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const setBoxPlot = () => setChartType('boxplot');
     const setViolin = () => setChartType('violin');
 
-    /*useEffect(() => {
-        fetch(`/api/download/csv/671a908532c499e45424f25c`).then((response) => response.json()).then((record) => {
+    useEffect(() => {
+        fetch(`/api/download/csv/${project.expId}`).then((response) => response.json()).then((record) => {
             setExperimentChartData(record);
             setLoading(false);
         }).catch((response) => {
@@ -54,14 +54,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             });
         }
         );
-    }, [project.expId]);*/
-
-    useEffect(() => {
-        setExperimentChartData({_id: '3', experimentId: project.expId, resultContent: 'time,max,avg,min\n0,0.8,0.54,0.3\n10,0.8,0.58,0.4\n20,0.8,0.66,0.5\n30,0.8,0.65,0.4\n40,0.8,0.63,0.5\n50,0.8,0.68,0.5\n60,0.8,0.61,0.3\n70,0.8,0.67,0.4\n80,0.9,0.67,0.4\n90,0.9,0.72,0.4'});
-        setLoading(false);
     }, [project.expId]);
-
-    //console.log(experimentChartData.resultContent);
 
     const downloadImage = () => {
         const a = document.createElement('a');
@@ -69,7 +62,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         a.download = 'downloaded-chart-image.png';
         a.click();
     };
-   
+
     const parseCSV = (data) => {
         const rows = data.trim().split('\n');
         const headers = rows[0].split(',');
@@ -78,11 +71,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const yLists = [] as any[];
 
         var xIndex = 0;
-        for (let i = 0; i < headers.length; i++)
-        {
+        for (let i = 0; i < headers.length; i++) {
             yLists.push([]);
-            if (headers[i] === xAxis)
-            {
+            if (headers[i] === xAxis) {
                 xIndex = i;
             }
         }
@@ -92,14 +83,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
             xList.push(cols[xIndex]);
-            for (let j = 0; j < cols.length; j++)
-            {
-                if (j < xIndex)
-                {
+            for (let j = 0; j < cols.length; j++) {
+                if (j < xIndex) {
                     yLists[j].push(cols[j]);
                 }
-                else if (j > xIndex)
-                {
+                else if (j > xIndex) {
                     yLists[j - 1].push(cols[j]);
                 }
             }
@@ -132,10 +120,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
             const totalLength = headers.length;
             const newHeaders = [] as any[];
-            for (let i = 0; i < totalLength; i++)
-            {
-                if (i != xIndex)
-                {
+            for (let i = 0; i < totalLength; i++) {
+                if (i != xIndex) {
                     newHeaders.push(headers[i]);
                 }
             }
@@ -146,7 +132,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 borderColor: colors,
                 backgroundColor: colors
             }));
-            
+
 
             const newChartInstance = new Chart(ctx, {
                 type: chartType,
@@ -173,7 +159,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         }
                     },
                     animation: {
-                        onComplete: function() {
+                        onComplete: function () {
                             setImg(newChartInstance.toBase64Image());
                         }
                     }
@@ -188,7 +174,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
     };
-    
+
 
     return (
         <Modal onClose={() => { onClose(); regenerateCanvas(); }}>
@@ -235,7 +221,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                     onChange={() => setXAxis(header)}
                                     name="xaxis"
                                     value={header}
-                                    
+
                                 />
                                 <label htmlFor={header} className="font-bold pl-2">{header}</label>
                             </div>
