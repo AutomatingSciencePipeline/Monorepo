@@ -157,7 +157,7 @@ const Navbar = (props) => {
 									key={item.name}
 									as='a'
 									href={item.href}
-									target={item.name === 'Help' ? '_blank' : '_self'}		// Experiment to see if I need both to be changed
+									target={item.name === 'Help' ? '_blank' : '_self'}
 									className={classNames(
 										item.current ?
 											'text-white bg-blue-800' :
