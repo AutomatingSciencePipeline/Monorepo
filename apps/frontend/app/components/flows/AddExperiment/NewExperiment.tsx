@@ -16,6 +16,8 @@ import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../../lib/db'
 import { copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
+import { addNumsExpData, multistringPy, geneticalgo } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
+import { useDebouncedCallback } from "use-debounce";
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
 
@@ -63,9 +65,38 @@ const Steps = ({ steps }) => {
 	);
 };
 
+function selectDefaultExpFile(selectedExperiment: number) {
+	switch (selectedExperiment) {
+		case 1:
+			return addNumsExpData;
+		case 2:
+			return multistringPy;
+		case 3:
+			return geneticalgo;
+		default:
+			return addNumsExpData;
+	}
+}
 
-const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) => {
+
+
+const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, setIsDefault, selectedExperiment, ...rest }) => {
 	const { data: session } = useSession();
+
+	 // Debounced function to handle selectedExperiment
+	 const debouncedHandleExperimentChange = useDebouncedCallback(async (selectedExperiment) => {
+		console.log("Debounced selectedExperiment value:", selectedExperiment);
+	
+		// Call logic that requires selectedExperiment to be stable
+		if (isDefault) {
+		  await handleDefaultExperiment(selectedExperiment);
+		}
+	  }, 500); // Delay in ms (500ms in this example)
+	
+	  useEffect(() => {
+		// Call the debounced function whenever selectedExperiment changes
+		debouncedHandleExperimentChange(selectedExperiment);
+	  }, [selectedExperiment]);
 
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
@@ -89,7 +120,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	});
 
 	useEffect(() => {
-		if (copyID != null) {
+		if (copyID != null && copyID != "DefaultExp") {
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
 					const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
@@ -137,7 +168,84 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 				}
 			})
 		}
+		else if (isDefault) {
+			console.log("in handle default experiment")
+			handleDefaultExperiment(selectedExperiment);
+		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
+
+	const handleDefaultExperiment = async (selectedExperiment) => {
+		const currentExp = selectDefaultExpFile(selectedExperiment);
+		console.log("currentExp", currentExp);
+		const expInfo = currentExp;
+		const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+		console.log("hyperparameters in default", hyperparameters);
+	
+		form.setValues({
+			hyperparameters: hyperparameters,
+			name: expInfo['name'],
+			description: expInfo['description'],
+			trialExtraFile: expInfo['trialExtraFile'],
+			trialResult: expInfo['trialResult'],
+			verbose: expInfo['verbose'],
+			workers: expInfo['workers'],
+			scatter: expInfo['scatter'],
+			dumbTextArea: expInfo['dumbTextArea'],
+			scatterIndVar: expInfo['scatterIndVar'],
+			scatterDepVar: expInfo['scatterDepVar'],
+			timeout: expInfo['timeout'],
+			keepLogs: expInfo['keepLogs'],
+		});
+	
+		setCopyId(null);
+		setStatus(FormStates.Info);
+		console.log('Default Experiment Copied!');
+		// Handle the raw GitHub link
+		const fileUrl = currentExp.file;
+		if (fileUrl) {
+			debouncedUploadFile(fileUrl);
+		} else {
+			console.warn('No valid link provided in the form.');
+		}
+	};
+	
+	// Debounced API call
+	const debouncedUploadFile = useDebouncedCallback(async (fileUrl) => {
+		try {
+			const response = await fetch(fileUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch file: ${response.statusText}`);
+			}
+	
+			const blob = await response.blob();
+			const fileName = fileUrl.split('/').pop() || 'uploadedFile.tsx';
+	
+			const formData = new FormData();
+			formData.append("file", blob, fileName);
+			formData.append("userId", session?.user?.id!);
+	
+			const uploadFileResponse = await fetch('/api/files/uploadFile', {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: formData,
+			});
+
+	
+			if (uploadFileResponse.ok) {
+				const json = await uploadFileResponse.json();
+				console.log(json);
+				const fileId = json['fileId'];
+				setFileId(fileId);
+				console.log(`File uploaded successfully with ID: ${fileId}`);
+			} else {
+				const errorJson = await uploadFileResponse.json();
+				console.error(`Failed to upload file: ${errorJson['message']}`);
+			}
+		} catch (error) {
+			console.error(`Error processing the file: ${error.message}`);
+		}
+	}, 500); // 500ms delay
+	
 
 	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
 
@@ -151,6 +259,10 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 	const [id, setId] = useState(null);
 
 	const [fileId, setFileId] = useState<string>();
+
+	useEffect(() => {
+		console.log("status", status);
+	}, [status]);
 
 	useLayoutEffect(() => {
 		if (formState === FormStates.Info) {
@@ -221,7 +333,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 										) : status === FormStates.Confirmation ? (
 											<ConfirmationStep form={form} />
 										) : (
-											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined}/>
+											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined} isDefault={isDefault}/>
 										)}
 
 										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -249,6 +361,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 															() => {
 																localStorage.removeItem('ID');
 																setFormState(-1);
+																setIsDefault(false);
 															} :
 															() => {
 																setStatus(status - 1);
@@ -266,6 +379,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 																	setFormState(-1);
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
+																	setIsDefault(false);
 																	submitExperiment(form.values as any, session?.user?.id as string, fileId).then(async (json) => {
 																		const expId = json['id'];
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
@@ -316,3 +430,5 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, ...rest }) 
 };
 
 export default NewExperiment;
+
+
