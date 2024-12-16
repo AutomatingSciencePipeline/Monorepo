@@ -27,9 +27,11 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/'
+
 const navigation = [
-	{ name: 'Help', href: '#', current: false },
-	{ name: 'USERS', href: '#', current: false }
+	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false },
+	{ name: 'Admin', href: '#', current: false }
 ];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
