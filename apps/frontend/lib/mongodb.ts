@@ -8,8 +8,7 @@ const MONGODB_PORT = process.env.MONGODB_PORT || '1234';
 const USERNAME = process.env.MONGODB_USERNAME || 'user';
 const PASSWORD = process.env.MONGODB_PASSWORD || 'pass';
 
-// const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
-const MONGODB_URI = 'mongodb://adminuser:password123@glados-dev.csse.rose-hulman.edu:30751/';
+const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
 const MONGODB_OPTIONS = {};
 
 export const DB_NAME = 'gladosdb';
