@@ -6,9 +6,9 @@ import sys
 import json
 import time
 import typing
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore, storage
+import base64
+
+import requests
 from bson.binary import Binary
 
 from modules.data.types import DocumentId, IncomingStartRequest
@@ -20,7 +20,7 @@ from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
-from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
+from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id, update_exp_value
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -28,7 +28,6 @@ except ImportError:
     logging.error("Failed to import the 'magic' package, you're probably missing a system level dependency")
     sys.exit(1)
 
-ENV_FIREBASE_CREDENTIALS = "FIREBASE_KEY"
 DB_COLLECTION_EXPERIMENTS = "Experiments"
 
 # set up logger
@@ -36,10 +35,6 @@ configure_root_logger()
 syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
-firebaseCredentials = credentials.Certificate(json.loads(_get_env(ENV_FIREBASE_CREDENTIALS)))
-firebaseApp = firebase_admin.initialize_app(firebaseCredentials)
-firebaseDb = firestore.client()
-firebaseBucket = storage.bucket("gladosbase.appspot.com")
 
 syslogger.info("GLADOS Runner Started")
 
@@ -74,49 +69,49 @@ def run_batch(data: IncomingStartRequest):
     syslogger.info('Run_Batch starting with data %s', data)
 
     # Obtain most basic experiment info
-    expId = data['experiment']['id']
-    syslogger.debug('received %s', expId)
+    exp_id = data['experiment']['id']
+    syslogger.debug('received %s', exp_id)
 
-    open_experiment_logger(expId)
+    open_experiment_logger(exp_id)
 
-    # Retrieve experiment details from firebase
+    # Retrieve experiment details from the backend api
     try:
-        experiments = firebaseDb.collection(DB_COLLECTION_EXPERIMENTS)
-        expRef = experiments.document(expId)
-        experimentData = expRef.get().to_dict()
+        experiment_data = get_experiment_with_id(exp_id)
+        
+        
     except Exception as err:  # pylint: disable=broad-exception-caught
-        explogger.error("Error retrieving experiment data from firebase, aborting")
+        explogger.error("Error retrieving experiment data from mongo, aborting")
         explogger.exception(err)
-        close_experiment_run(expId, None)
+        close_experiment_run(exp_id)
         return
 
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
     try:
-        hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(json.loads(experimentData['hyperparameters'])['hyperparameters'])
+        hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(experiment_data['hyperparameters'])
     except (KeyError, ValueError) as err:
         if isinstance(err, KeyError):
             explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
         else:
             explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
-        close_experiment_run(expId, expRef)
+        close_experiment_run(exp_id)
         return
-    experimentData['hyperparameters'] = hyperparameters
+    experiment_data['hyperparameters'] = hyperparameters
 
     # Parsing into Datatype
     try:
-        experiment = ExperimentData(**experimentData)
+        experiment = ExperimentData(**experiment_data)
         experiment.postProcess = experiment.scatter
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)
-        close_experiment_run(expId, expRef)
+        close_experiment_run(exp_id)
         return
 
     #Downloading Experiment File
     # If the program errors here after you just deleted the ExperimentFiles on your dev machine, restart the docker container, seems to be volume mount weirdness
-    os.makedirs(f'ExperimentFiles/{expId}')
-    os.chdir(f'ExperimentFiles/{expId}')
+    os.makedirs(f'ExperimentFiles/{exp_id}')
+    os.chdir(f'ExperimentFiles/{exp_id}')
     filepath = download_experiment_files(experiment)
 
     try:
@@ -125,28 +120,28 @@ def run_batch(data: IncomingStartRequest):
         explogger.error("This is not a supported experiment file type, aborting")
         explogger.exception(err)
         os.chdir('../..')
-        close_experiment_run(expId, expRef)
+        close_experiment_run(exp_id)
         return
 
-    explogger.info(f"Generating configs and downloading to ExperimentFiles/{expId}/configFiles")
+    explogger.info(f"Generating configs and downloading to ExperimentFiles/{exp_id}/configFiles")
 
     totalExperimentRuns = generate_config_files(experiment)
     if totalExperimentRuns == 0:
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
-        close_experiment_run(expId, expRef)
+        close_experiment_run(exp_id)
         return
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
-    expRef.update({"totalExperimentRuns": experiment.totalExperimentRuns})
+    update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
 
     try:
-        conduct_experiment(experiment, expRef)
+        conduct_experiment(experiment)
         post_process_experiment(experiment)
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
-        explogger.error(f'Experiment {expId} critical failure, not doing any result uploading or post processing')
+        explogger.error(f'Experiment {exp_id} critical failure, not doing any result uploading or post processing')
         explogger.exception(err)
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error('Uncaught exception while running an experiment. The GLADOS code needs to be changed to handle this in a cleaner manner')
@@ -154,14 +149,11 @@ def run_batch(data: IncomingStartRequest):
     finally:
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
-        close_experiment_run(expId, expRef)
+        close_experiment_run(exp_id)
 
-def close_experiment_run(expId: DocumentId, expRef: "typing.Any | None"):
+def close_experiment_run(expId: DocumentId):
     explogger.info(f'Exiting experiment {expId}')
-    if expRef:
-        expRef.update({'finished': True, 'finishedAtEpochMillis': int(time.time() * 1000)})
-    else:
-        syslogger.warning(f'No experiment ref supplied when closing {expId} , could not update it to finished')
+    update_exp_value(expId, 'finished', True)
     close_experiment_logger()
     upload_experiment_log(expId)
     remove_downloaded_directory(expId)
@@ -189,12 +181,17 @@ def download_experiment_files(experiment: ExperimentData):
         os.makedirs('ResCsvs')
     explogger.info(f'Downloading file for {experiment.expId}')
 
-    filepath = f'experiment{experiment.expId}'
-    experiment.file = filepath
+    filepath = experiment.file
     explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
-        filedata = firebaseBucket.blob(filepath)
-        filedata.download_to_filename(filepath)
+        # try to call the backend to download
+        url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?fileId={experiment.file}'
+        response = requests.get(url, timeout=60)
+        file_contents = response.content
+        # write the file contents to file path
+        with open(filepath, "xb") as file:
+            file.write(file_contents)
+        
     except Exception as err:
         explogger.error(f"Error {err} occurred while trying to download experiment file")
         raise GladosInternalError('Failed to download experiment files') from err
@@ -220,12 +217,6 @@ def remove_downloaded_directory(experimentId: DocumentId):
 def upload_experiment_results(experiment: ExperimentData):
     explogger.info('Uploading Experiment Results...')
 
-    try:
-        uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.csv")
-        uploadBlob.upload_from_filename('results.csv')
-    except Exception as err:
-        raise DatabaseConnectionError("Error uploading aggregated experiment results to firebase") from err
-
     explogger.info('Uploading to MongoDB')
     verify_mongo_connection()
 
@@ -248,13 +239,6 @@ def upload_experiment_results(experiment: ExperimentData):
                 encoded = Binary(file.read())
         except Exception as err:
             raise GladosInternalError("Error preparing experiment results zip") from err
-
-        # TODO remove firebase usage once transition to mongo file storage is complete
-        try:
-            uploadBlob = firebaseBucket.blob(f"results/result{experiment.expId}.zip")
-            uploadBlob.upload_from_filename('ResultCsvs.zip')
-        except Exception as err:
-            raise DatabaseConnectionError("Error uploading experiment results zip to firebase") from err
 
         upload_experiment_zip(experiment, encoded)
 

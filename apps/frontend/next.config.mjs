@@ -10,6 +10,16 @@ const nextConfig = {
 				hostname: 'tailwindui.com',
 				pathname: '/img/**'
 			},
+			{
+				protocol: 'https',
+				hostname: 'avatars.githubusercontent.com',
+				pathname: '/u/**'
+			},
+			{
+				protocol: 'https',
+				hostname: 'lh3.googleusercontent.com',
+				pathname: '/a/**'
+			}
 		],
 	}
 };

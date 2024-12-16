@@ -4,9 +4,9 @@ import { getEnvVar } from '../utils/env';
 
 // Adapted from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 
-// const MONGODB_PORT = getEnvVar('MONGODB_PORT');
-// const USERNAME = getEnvVar('MONGODB_USERNAME');
-// const PASSWORD = getEnvVar('MONGODB_PASSWORD');
+const MONGODB_PORT = process.env.MONGODB_PORT || '1234';
+const USERNAME = process.env.MONGODB_USERNAME || 'user';
+const PASSWORD = process.env.MONGODB_PASSWORD || 'pass';
 
 // const MONGODB_URI = `mongodb://${USERNAME}:${PASSWORD}@glados-service-mongodb:${MONGODB_PORT}`;
 const MONGODB_URI = 'mongodb://adminuser:password123@glados-dev.csse.rose-hulman.edu:30751/';
@@ -16,7 +16,11 @@ export const DB_NAME = 'gladosdb';
 export const COLLECTION_LOGS = 'logs';
 export const COLLECTION_ZIPS = 'zips';
 export const COLLECTION_RESULTS_CSVS = 'results';
+export const COLLECTION_EXPERIMENTS = 'experiments';
+export const COLLECTION_EXPERIMENT_FILES = 'files';
+export const COLLECTION_SHARE_LINKS = 'shareLinks';
 
+//Also export the client for use with authjs, authjs recommends using this instead of a promise.
 let client: MongoClient;
 let clientPromise: Promise<MongoClient> = new Promise((success) => {
 	return true;
@@ -46,3 +50,4 @@ if (process.env.NODE_ENV === 'development') {
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;
+

@@ -13,12 +13,16 @@ nav:
   - Tutorial:
     - Usage: tutorial/usage.md
     - Installation: tutorial/installation.md
+    - Local GLADOS Installation (Updated Nov 2024): tutorial/local_testing.md
     - Developer Installation: tutorial/developer_installation.md
+    - Deployment: tutorial/deployment.md
+    - Developer Deployment: tutorial/developer_deployment.md
     - Troubleshooting: tutorial/troubleshooting.md
   - Documentation:
     - Updating Documentation: documentation/guide.md
   - Infrastructure:
     - Kubernetes: infrastructure/kubernetes.md
+    - VMs: infrastructure/vms.md
   - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
 
@@ -53,3 +57,4 @@ markdown_extensions:
   - def_list
   # # https://yakworks.github.io/docmark/extensions/permalinks/
   # - toc(permalink=true)
+  - tables

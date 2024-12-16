@@ -1,23 +1,15 @@
-import ProtectedRoute from '../components/auth/ProtectedRoute';
-import '../styles/globals.css';
-import '../styles/experimentListing.css';
-import { AuthProvider } from '../firebase/fbAuth';
+import type { AppProps } from "next/app"
+import { SessionProvider } from "next-auth/react"
 
-const noAuthRequired = ['/', '/signin'];
+console.log("in _app...");
 
-function GladosApp({ Component, pageProps, router }) {
-	return (
-		<AuthProvider>
-			{noAuthRequired.includes(router.pathname) ? (
-				<Component {...pageProps} key={router.route} />
-			) : (
-				<ProtectedRoute>
-					<Component {...pageProps} key={router.route} />
-				</ProtectedRoute>
-			)}
-		</AuthProvider>
-	);
+export default function MyApp({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppProps) {
+  return (
+    <SessionProvider session={session}>
+      <Component {...pageProps} />;
+    </SessionProvider>
+  )
 }
-
-export default GladosApp;
-

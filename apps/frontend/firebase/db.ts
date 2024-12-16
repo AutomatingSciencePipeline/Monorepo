@@ -218,3 +218,4 @@ export const getCurrentProjectName = async (projectId) => {
 	  return null;
 	}
 };
+

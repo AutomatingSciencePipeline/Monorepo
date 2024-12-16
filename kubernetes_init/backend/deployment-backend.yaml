@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-test-backend
+  name: glados-backend
   namespace: default
 spec:
   replicas: 1
@@ -16,8 +16,8 @@ spec:
         tier: backend
     spec:
       containers:
-      - name: container-test-backend
-        image: gladospipeline/glados-backend:latest
+      - name: glados-backend
+        image: gladospipeline/glados-backend:main
         imagePullPolicy: Always
         ports:
         - containerPort: 0000
@@ -33,16 +33,6 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PORT
-        - name: SERVICE_ROLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: SERVICE_ROLE_KEY
-        - name: FIREBASE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: FIREBASE_KEY
         - name: MONGODB_USERNAME
           valueFrom:
             secretKeyRef:
