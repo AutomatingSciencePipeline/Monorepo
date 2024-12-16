@@ -52,20 +52,20 @@ def get_decimal_places(number):
 
 def expand_values(param):
     """Expands possible values for a parameter with appropriate decimal precision."""
-    if param["type"] == "integer":
+    if param["type"] == ParamType.INTEGER:
         return list(range(param["min"], param["max"] + 1, param["step"]))
-    elif param["type"] == "float":
+    elif param["type"] == ParamType.FLOAT:
         decimals = max(
             get_decimal_places(param["min"]),
             get_decimal_places(param["max"]),
             get_decimal_places(param["step"]),
         )
         return list(float_range(param["min"], param["max"] + param["step"], param["step"], decimals))
-    elif param["type"] == "stringlist":
+    elif param["type"] == ParamType.STRING_LIST:
         return param.get("values", [])
-    elif param["type"] == "string":
+    elif param["type"] == ParamType.STRING:
         return [param["default"]] 
-    elif param["type"] == "bool":
+    elif param["type"] == ParamType.BOOL:
         return [True, False]
     else:
         return []
@@ -80,22 +80,22 @@ def generate_permutations(parameters):
     
     
     for param in parameters:
-      if param["type"] == 'integer' or param["type"] == 'float':
+      if param["type"] == ParamType.INTEGER or param["type"] == ParamType.FLOAT:
         base_vals[param["name"]] = param["min"]
-      elif param["type"] == 'stringlist':
+      elif param["type"] == ParamType.STRING_LIST:
         base_vals[param['name']] = param['values'][0]
-      elif param["type"] == 'bool':
+      elif param["type"] == ParamType.BOOL:
         base_vals[param["name"]] = param["default"]
 
           
     for param in parameters:
-        if param["default"] != -1:
+        if param["default"] != -1 and param["default"] != '':
             default_vals[param["name"]] = [param["default"]]
         else:
             default_vals[param["name"]] = expand_values(param)
           
-    print(base_vals)
-    print(default_vals)
+    print("base vals", base_vals)
+    print("default vals", default_vals)
 
     for param in parameters:
         all_values.append(expand_values(param))
@@ -110,7 +110,7 @@ def generate_permutations(parameters):
         
         num_defaults_changed = 0
         for param in parameters:
-            if param["default"] != -1:
+            if param["default"] != -1 and param["default"] != '':
                 if perm_dict[param["name"]] != param["default"]:
                     num_defaults_changed += 1
         # else:

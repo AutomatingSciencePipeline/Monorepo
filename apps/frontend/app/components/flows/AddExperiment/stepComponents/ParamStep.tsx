@@ -27,7 +27,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 										console.log("add new item" + type + " to hyperparameters")
 										form.insertListItem('hyperparameters', {
 											name: '',
-											default: '',
+											default: -1,
 											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {
 												min: '',
@@ -35,6 +35,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 												step: '',
 											}),
 											type: type,
+											useDefault: false,
 										})
 									}}
 								>

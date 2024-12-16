@@ -6,6 +6,9 @@ import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
 
 const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
+
+	const [useDefault, setUseDefault] = useState(form.values.hyperparameters[index].useDefault || false);
+
 	const remains = {
 		string: StringParam,
 		integer: NumberParam,
@@ -49,8 +52,22 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		setConfirmedValues(newConfirmedValues);
 	};
 
+	const handleSwitchChange = () => {
+		setUseDefault(!useDefault);
+		// if (!useDefault) {
+		//     // Check if the default value already exists
+		//     const defaultValue = form.values.hyperparameters[index].default;
+		//     if (!defaultValue) {
+		//         // Add default value to the form
+		//         form.insertListItem(`hyperparameters.${index}.default`, '');
+		//     }
+		// }
+		form.setFieldValue(`hyperparameters.${index}.useDefault`, !useDefault);
+	};
+
 	return (
 		<Draggable key={index} index={index} draggableId={index.toString()} isDragDisabled={true}>
+
 			{(provided) => (
 				<div
 					ref={provided.innerRef}
@@ -69,7 +86,26 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
+						{useDefault && (
+							<input
+								type='text'
+								placeholder='default'
+								className='ml-2 block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
+								{...form.getInputProps(`hyperparameters.${index}.default`)}
+								required
+							/>
+						)}
+
 						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
+						
+						<div className='flex flex-col items-center ml-2'>
+							<Switch
+								checked={useDefault}
+								onChange={handleSwitchChange}
+								className={'ml-2'}
+							/>
+							<span className='text-sm text-gray-500'>Default?</span>
+						</div>
 
 						<ActionIcon
 							color='red'
@@ -100,7 +136,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 const NumberParam = ({ form, type, index, ...rest }) => {
 	return (
 		<Fragment>
-			{['default', 'min', 'max', 'step'].map((label, i) => {
+			{['min', 'max', 'step'].map((label, i) => {
 
 				return (
 					<input
