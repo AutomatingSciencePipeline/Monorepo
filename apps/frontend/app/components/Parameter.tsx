@@ -43,7 +43,20 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 		if (form.values.hyperparameters[index].values && (form.values.hyperparameters[index].values.length != 1 && form.values.hyperparameters[index].values[0] != '')) {
 			updateConfirmedValues(index, form.values.hyperparameters[index].values);
 		}
+
+		if (form.values.hyperparameters[index].default && form.values.hyperparameters[index].default != -1) {
+			setUseDefault(true);
+		}
+		else {
+			setUseDefault(false);
+		}
 	}, []);
+
+	useEffect(() => {
+		if (form.values.hyperparameters[index].useDefault == false) {
+			form.setFieldValue(`hyperparameters.${index}.default`, -1);
+		}
+	}, [useDefault]);
 
 
 	const handleRemove = () => {
@@ -54,7 +67,15 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 
 	const handleSwitchChange = () => {
 		setUseDefault(!useDefault);
-		form.setFieldValue(`hyperparameters.${index}.useDefault`, !useDefault);
+		// @ts-ignore
+		if(`hyperparameters.${index}.default` != -1){
+			form.setFieldValue(`hyperparameters.${index}.useDefault`, !useDefault);
+		}
+		else {
+			form.setFieldValue(`hyperparameters.${index}.useDefault`, false);
+		}
+
+
 	};
 
 	return (
@@ -89,7 +110,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 						)}
 
 						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} {...rest} />
-						
+
 						<div className='flex flex-col items-center ml-2'>
 							<Switch
 								checked={useDefault}
