@@ -27,7 +27,11 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const navigation = [{ name: 'Admin', href: '#', current: false }];
+const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/'
+
+const navigation = [
+	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false }
+];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
 	{ name: 'Sign out', href: '#' },
@@ -80,6 +84,7 @@ const Navbar = (props) => {
 											<a
 												key={item.name}
 												href={item.href}
+												target={item.name === 'Help' ? '_blank' : '_self'}
 												className='px-3 py-2 rounded-md text-sm font-medium text-blue-200 hover:text-white'
 												aria-current={item.current ? 'page' : undefined}
 											>
@@ -152,6 +157,7 @@ const Navbar = (props) => {
 									key={item.name}
 									as='a'
 									href={item.href}
+									target={item.name === 'Help' ? '_blank' : '_self'}
 									className={classNames(
 										item.current ?
 											'text-white bg-blue-800' :
