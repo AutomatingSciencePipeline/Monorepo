@@ -27,7 +27,10 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const navigation = [{ name: 'Admin', href: '#', current: false }];
+const navigation = [
+	{ name: 'Help', href: '#', current: false },
+	{ name: 'USERS', href: '#', current: false }
+];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
 	{ name: 'Sign out', href: '#' },
