@@ -85,6 +85,7 @@ const Navbar = (props) => {
 											<a
 												key={item.name}
 												href={item.href}
+												target={item.name === 'Help' ? '_blank' : '_self'}
 												className='px-3 py-2 rounded-md text-sm font-medium text-blue-200 hover:text-white'
 												aria-current={item.current ? 'page' : undefined}
 											>
@@ -157,6 +158,7 @@ const Navbar = (props) => {
 									key={item.name}
 									as='a'
 									href={item.href}
+									target={item.name === 'Help' ? '_blank' : '_self'}		// Experiment to see if I need both to be changed
 									className={classNames(
 										item.current ?
 											'text-white bg-blue-800' :
