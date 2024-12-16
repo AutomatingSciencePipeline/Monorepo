@@ -6,6 +6,8 @@ import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../firebase/db_types';
 import { getExperimentDataForGraph } from '../../../firebase/db';
 import { Menu } from '@headlessui/react'
+import ModalContent from './ModalContent';
+import ChartContent from './ChartContent';
 
 Chart.register(...registerables);
 Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
@@ -25,6 +27,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     //const [yAxis, setYAxis] = useState('Y');
     const [headers, setHeaders] = useState<string[]>([]);
     const [img, setImg] = useState<Base64URLString>('');
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    const toggleFullscreen = () => {
+        setIsFullscreen(!isFullscreen);
+      };
 
     const setLineChart = () => setChartType('line');
     const setBarChart = () => setChartType('bar');
@@ -164,18 +171,19 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                 text: 'Y Axis'
                             }
                         }
+                    },
+                    animation: {
+                        onComplete: function() {
+                            setImg(newChartInstance.toBase64Image());
+                        }
                     }
                 }
             });
             setChartInstance(newChartInstance);
 
             setHeaders(headers);
-
-            setImg(newChartInstance.toBase64Image());
-            
-
         }
-    }, [loading, experimentChartData, chartType, xAxis]);
+    }, [loading, experimentChartData, chartType, xAxis, isFullscreen]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
@@ -184,52 +192,58 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     return (
         <Modal onClose={() => { onClose(); regenerateCanvas(); }}>
-            <div className='container flex items-center justify-between space-x-3'>
-                <button onClick={setBarChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
-                    Bar Chart
-                </button>
-                <button onClick={setLineChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
-                    Line Chart
-                </button>
-                <button onClick={setPieChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
-                    Pie Chart
-                </button>
-                <button onClick={setBoxPlot} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
-                    Box Plot
-                </button>
-                <button onClick={setViolin} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
-                    Violin
-                </button>
-            </div>
-            <div className='p-4'>
-                <h2 className='text-xl font-bold mb-4'>{project.name}&apos;s Chart</h2>
-                {loading ? (
-                    <p>Loading data...</p>
-                ) : (
-                    <div key={canvasKey}>
-                        <canvas id='myChart'></canvas>
-                    </div>
-                )}
-            </div>
-            <div>
-                <fieldset>
-                    {headers.map((header) => (
-                        <div key={header}>
-                            <input
-                                type="radio"
-                                id={header}
-                                onChange={() => setXAxis(header)}
-                                name = "xaxis"
-                                value={header}
-                            />
-                            <label htmlFor={header}>{header}</label>
+            <ModalContent>
+                <div className='container flex items-center justify-between space-x-3'>
+                    <button onClick={setBarChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                        Bar Chart
+                    </button>
+                    <button onClick={setLineChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                        Line Chart
+                    </button>
+                    <button onClick={setPieChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                        Pie Chart
+                    </button>
+                    <button onClick={setBoxPlot} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                        Box Plot
+                    </button>
+                    <button onClick={setViolin} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                        Violin
+                    </button>
+                </div>
+            </ModalContent>
+            <ChartContent toggleFullscreen={toggleFullscreen}>
+                <div className='p-4'>
+                    <h2 className='text-xl font-bold mb-4'>{project.name}&apos;s Chart</h2>
+                    {loading ? (
+                        <p>Loading data...</p>
+                    ) : (
+                        <div key={canvasKey}>
+                            <canvas id='myChart'></canvas>
                         </div>
-                    ))}
-                </fieldset>
-                <button onClick={downloadImage} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
-                    Download Image
-                </button>
-            </div>
+                    )}
+                </div>
+            </ChartContent>
+            <ModalContent>
+                <div>
+                    <fieldset>
+                        {headers.map((header) => (
+                            <div key={header}>
+                                <input
+                                    type="radio"
+                                    id={header}
+                                    onChange={() => setXAxis(header)}
+                                    name="xaxis"
+                                    value={header}
+                                />
+                                <label htmlFor={header}>{header}</label>
+                            </div>
+                        ))}
+                    </fieldset>
+                </div>
+            </ModalContent>
+            <button onClick={downloadImage} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                Download Image
+            </button>
         </Modal>
     );
 };
