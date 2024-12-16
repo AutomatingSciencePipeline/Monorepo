@@ -67,6 +67,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 
 	const handleSwitchChange = () => {
 		setUseDefault(!useDefault);
+		//tslint:disable-next-line
 		if(`hyperparameters.${index}.default` != -1){
 			form.setFieldValue(`hyperparameters.${index}.useDefault`, !useDefault);
 		}
