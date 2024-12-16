@@ -163,6 +163,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             setChartInstance(newChartInstance);
 
             setHeaders(headers);
+
+            const img = newChartInstance.toBase64Image();
+
         }
     }, [loading, experimentChartData, chartType, xAxis]);
 
@@ -203,14 +206,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             <fieldset>
                 {headers.map((header) => (
                     <div key={header}>
-                    <input
-                        type="radio"
-                        id={header}
-                        onChange={() => setXAxis(header)}
-                        name = "xaxis"
-                        value={header}
-                    />
-                    <label htmlFor={header}>{header}</label>
+                        <input
+                            type="radio"
+                            id={header}
+                            onChange={() => setXAxis(header)}
+                            name = "xaxis"
+                            value={header}
+                        />
+                        <label htmlFor={header}>{header}</label>
                     </div>
                 ))}
             </fieldset>
