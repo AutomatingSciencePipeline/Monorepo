@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
+import GraphModal from './Modal';
+import Modal from './Modal';
+import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
@@ -41,6 +44,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [showGraphModal, setShowGraphModal] = useState(false);
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -96,6 +100,15 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const closeDeleteModal = () => {
 		setDeleteModalOpen(false);
 	};
+
+	const openGraphModal = () => {
+		setShowGraphModal(true);
+	};
+
+	const closeGraphModal = () => {
+		setShowGraphModal(false);
+	}
+
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -247,32 +260,40 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</button> :
 						<button type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-								onClick={() => {
-									toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
-										success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
-										loading: "Unfollowing experiment..."
-									});
-								}}>	
+							onClick={() => {
+								toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
+									success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
+									loading: "Unfollowing experiment..."
+								});
+							}}>
 							Unfollow Experiment
 						</button>
 				}
+				{project.finished &&
+				 <button type="button"
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+					onClick={openGraphModal}
+				>
+					See Graph
+				</button>
+				}
 				{
 					project.creator == session?.user?.id! ?
-					<button
-					type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={
-						async () => {
-							//Get the link
-							const link = await addShareLink(project.expId);
-							//Copy the link to the clipboard
-							navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
-							toast.success('Link copied to clipboard!', { duration: 1500 });
-						}
-					}
-				>
-					Share Experiment
-				</button> : null
+						<button
+							type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={
+								async () => {
+									//Get the link
+									const link = await addShareLink(project.expId);
+									//Copy the link to the clipboard
+									navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+									toast.success('Link copied to clipboard!', { duration: 1500 });
+								}
+							}
+						>
+							Share Experiment
+						</button> : null
 				}
 			</div>
 			<div className='sm:hidden'>
@@ -334,6 +355,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						<span>Finished at {new Date(project['finishedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
+				}
+				{
+					(showGraphModal && project.finished) && (
+						<Chart onClose={closeGraphModal} project={project} />
+					)
 				}
 			</div>
 		</div>
