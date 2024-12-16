@@ -30,8 +30,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/'
 
 const navigation = [
-	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false },
-	{ name: 'USERS', href: '#', current: false }
+	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false }
 ];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
