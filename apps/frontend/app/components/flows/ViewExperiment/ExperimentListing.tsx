@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit, MdPadding } from 'react-icons/md';
 import { Timestamp } from 'mongodb';
-import { updateExperimentNameById } from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById } from '../../../../lib/mongodb_funcs';
+import toast from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 export interface ExperimentListingProps {
-	projectinit: ExperimentData;
+	projectData: ExperimentData;
 	onCopyExperiment: (experimentId: string) => void;
 	onDownloadResults: (experimentId: string) => Promise<void>;
 	onDownloadProjectZip: (experimentId: string) => Promise<void>;
@@ -15,8 +17,10 @@ export interface ExperimentListingProps {
 }
 
 
-export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
-	const [project, setProject] = useState<ExperimentData>(projectinit);
+export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
+	const { data: session } = useSession();
+
+	const [project, setProject] = useState<ExperimentData>(projectData);
 
 	const [busyDownloadingResults, setBusyDownloadingResults] = useState<boolean>(false);
 	const [busyDownloadingZip, setBusyDownloadingZip] = useState<boolean>(false);
@@ -31,10 +35,10 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	const expectedFinishTime = experimentInProgress ? new Date(project['startedAtEpochMillis'] + expectedTimeToRun * 60000) : null;
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
 
-	const [projectName, setProjectName] = useState(projectinit.name); // New state for edited project name
+	const [projectName, setProjectName] = useState(projectData.name); // New state for edited project name
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
-	const [originalProjectName, setOriginalProjectName] = useState(projectinit.name); // State to store the original project name
+	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
@@ -45,7 +49,7 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 	};
 
 	const handleSave = (newProjectName) => {
-		updateExperimentNameById(project.expId, newProjectName).catch((reason) =>{
+		updateExperimentNameById(project.expId, newProjectName).catch((reason) => {
 			console.log(`Failed to update experiment name, reason: ${reason}`);
 		});
 		// Exit the editing mode
@@ -65,15 +69,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
 		} else {
-			const eventSource = new EventSource(`/api/experiments/subscribe?expId=${project.expId}`);
-			eventSource.onmessage = (event) => {
-				if (event.data !== 'heartbeat' && event.data) {
-					setProject(JSON.parse(event.data) as ExperimentData);
-				}
-
-			}
+			// Do nothing here?
 		}
 	}, [editingCanceled, originalProjectName, project.expId]);
+
+	//Update the project when data is changed
+	useEffect(() => {
+		setProject(projectData);
+	}, [projectData]);
 
 
 	const handleKeyUp = (e) => {
@@ -115,14 +118,14 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 							<>
 								<span
 									className="editable-text"
-									onClick={handleEdit}
 								>
 									{project.name}
 								</span>
-								<MdEdit
+								{project.creator == session?.user?.id! ? <MdEdit
 									className="icon edit-icon"
 									onClick={handleEdit}
-								/>
+								/> : <></>}
+
 							</>
 						)}
 					</span>
@@ -233,13 +236,44 @@ export const ExperimentListing = ({ projectinit, onCopyExperiment, onDownloadRes
 					}}>
 					Delete Experiment
 				</button> */}
-				<button
+				{
+					project.creator == session?.user?.id! ?
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={() => {
+								onDeleteExperiment(project.expId);
+							}}>
+							Delete Experiment
+						</button> :
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								onClick={() => {
+									toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
+										success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
+										loading: "Unfollowing experiment..."
+									});
+								}}>	
+							Unfollow Experiment
+						</button>
+				}
+				{
+					project.creator == session?.user?.id! ?
+					<button
 					type="button"
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={openDeleteModal}
+					onClick={
+						async () => {
+							//Get the link
+							const link = await addShareLink(project.expId);
+							//Copy the link to the clipboard
+							navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+							toast.success('Link copied to clipboard!', { duration: 1500 });
+						}
+					}
 				>
-					Delete Experiment
-				</button>
+					Share Experiment
+				</button> : null
+				}
 			</div>
 			<div className='sm:hidden'>
 				<ChevronRightIcon

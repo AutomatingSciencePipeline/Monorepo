@@ -25,6 +25,7 @@ import { QueueResponse } from '../../pages/api/queue';
 import { deleteDocumentById } from '../../lib/mongodb_funcs';
 import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const navigation = [{ name: 'Admin', href: '#', current: false }];
 const userNavigation = [
@@ -190,6 +191,22 @@ const Navbar = (props) => {
 export default function DashboardPage() {
 	const { data: session } = useSession();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
+	const router = useRouter();
+	const searchParams = useSearchParams();
+
+	useEffect(() => {
+		const toastMessage = searchParams!.get('toastMessage');
+		const toastType = searchParams!.get('toastType');
+		if (toastMessage && toastType) {
+			toast[toastType === 'success' ? 'success' : 'error'](decodeURIComponent(toastMessage), { duration: 5000 });
+		
+			// Clear the query params
+			const newUrl = new URL(window.location.href);
+			newUrl.searchParams.delete('toastMessage');
+			newUrl.searchParams.delete('toastType');
+			router.replace(newUrl.toString());
+		}
+	}, [router, searchParams]);
 
 	useEffect(() => {
 		if (!session) {
@@ -765,7 +782,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
 					>
 						<ExperimentListing
-							projectinit={project}
+							projectData={project}
 							onCopyExperiment={onCopyExperiment}
 							onDownloadResults={downloadExperimentResults}
 							onDownloadProjectZip={downloadExperimentProjectZip}
