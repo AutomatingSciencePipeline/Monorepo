@@ -91,7 +91,7 @@ def generate_permutations(parameters):
 
 # Example input
 parameters = [
-    # {"name": "a", "type": "integer", "default": -1, "min": 1, "max": 10, "step": 1},
+    {"name": "x", "type": "integer", "default": -1, "min": 1, "max": 10, "step": 1},
     # {"name": "b", "type": "integer", "default": -1, "min": 11, "max": 20, "step": 1},
     # {"name": "c", "type": "integer", "default": 21, "min": 21, "max": 30, "step": 1},
     # {"name": "a", "type": "float", "default": -1, "min": 0.1, "max": 1.0, "step": 0.1},
@@ -102,31 +102,31 @@ parameters = [
     #   "default": False,
     #   "type": "bool"
     # },
-     {
-      "name": "test",
-      "default": "testing",
-      "type": "string"
-    },
-     {
-            "name": "seed",
-            "type": "integer",
-            "default": 1,
-            "min": 1,
-            "max": 10,
-            "step": 1
-        },
-    #     {
-    #         "name": "steps",
-    #         "type": "stringlist",
-    #         "default": "one",
-    #         "values": ["one", "two"]
+    #  {
+    #   "name": "test",
+    #   "default": "testing",
+    #   "type": "string"
+    # },
+    #  {
+    #         "name": "seed",
+    #         "type": "integer",
+    #         "default": 1,
+    #         "min": 1,
+    #         "max": 10,
+    #         "step": 1
     #     },
-    #     {
-    #         "name": "steps2",
-    #         "type": "stringlist",
-    #         "default": -1,
-    #         "values": ["a", "b"]
-    #     }
+        {
+            "name": "steps",
+            "type": "stringlist",
+            "default": "one",
+            "values": ["one", "two"]
+        },
+        {
+            "name": "steps2",
+            "type": "stringlist",
+            "default": -1,
+            "values": ["a", "b", "c"]
+        }
 ]
 
 # Generate permutations
