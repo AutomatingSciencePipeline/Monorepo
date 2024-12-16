@@ -225,17 +225,19 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             </ChartContent>
             <ModalContent>
                 <div>
+                    <p className="font-bold">X-Axis Column:</p>
                     <fieldset>
                         {headers.map((header) => (
-                            <div key={header}>
+                            <div key={header} className="p-1">
                                 <input
                                     type="radio"
                                     id={header}
                                     onChange={() => setXAxis(header)}
                                     name="xaxis"
                                     value={header}
+                                    
                                 />
-                                <label htmlFor={header}>{header}</label>
+                                <label htmlFor={header} className="font-bold pl-2">{header}</label>
                             </div>
                         ))}
                     </fieldset>
