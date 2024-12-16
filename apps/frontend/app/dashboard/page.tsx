@@ -31,7 +31,7 @@ const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/t
 
 const navigation = [
 	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false },
-	{ name: 'Admin', href: '#', current: false }
+	{ name: 'USERS', href: '#', current: false }
 ];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
