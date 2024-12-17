@@ -69,8 +69,8 @@ def generate_permutations(parameters):
         else:
             default_vals[param["name"]] = expand_values(param)
           
-    print("base vals", base_vals)
-    print("default vals", default_vals)
+    explogger.info("base vals", str(base_vals))
+    explogger.info("default vals", str(default_vals))
 
     for param in parameters:
         all_values.append(expand_values(param))
@@ -92,7 +92,7 @@ def generate_permutations(parameters):
         if num_defaults_changed <= 1:
             filtered_permutations.append(perm_dict)
 
-    print("len filtered: ", len(filtered_permutations))
+    
             
     return filtered_permutations
 
@@ -113,6 +113,8 @@ def generate_config_files(experiment: ExperimentData):
         param_dict['name'] = key
         param_list.append(param_dict)
 
+    explogger.info("param list: " + str(param_list))
+    explogger.info("Generating configs")
     permutations = generate_permutations(param_list)
 
     for permutation in permutations:

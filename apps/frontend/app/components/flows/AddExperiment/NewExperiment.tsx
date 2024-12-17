@@ -120,6 +120,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 	});
 
 	useEffect(() => {
+		console.log("copyID", copyID);
 		if (copyID != null && copyID != "DefaultExp") {
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
@@ -237,6 +238,8 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 				const fileId = json['fileId'];
 				setFileId(fileId);
 				console.log(`File uploaded successfully with ID: ${fileId}`);
+
+				form.setFieldValue('file', fileId);
 			} else {
 				const errorJson = await uploadFileResponse.json();
 				console.error(`Failed to upload file: ${errorJson['message']}`);
