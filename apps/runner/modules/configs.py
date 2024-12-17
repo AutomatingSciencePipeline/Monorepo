@@ -69,8 +69,8 @@ def generate_permutations(parameters):
         else:
             default_vals[param["name"]] = expand_values(param)
           
-    explogger.info("base vals", str(base_vals))
-    explogger.info("default vals", str(default_vals))
+    explogger.info("base vals: %s", str(base_vals))
+    explogger.info("default vals: %s", str(default_vals))
 
     for param in parameters:
         all_values.append(expand_values(param))
