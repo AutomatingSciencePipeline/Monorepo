@@ -248,7 +248,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 	
 
 	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
-
+	
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key={index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;

@@ -78,3 +78,25 @@ export const downloadExperimentProjectZip = async (expId: string) => {
 		});
 	});
 };
+
+export const getExperimentDataForGraph = async (expId: string) => {
+	console.log(`Getting results for ${expId} to use in graph modal...`);
+	await fetch(`/api/download/csv/${expId}`).then((response) => {
+		if (response?.ok) {
+			return response.json();
+		}
+		return Promise.reject(response);
+	}).then((record: ResultsCsv) => {
+		console.log(record);
+		return record;
+	}).catch((response: Response) => {
+		console.warn('Error getting experiment results', response.status);
+		response.json().then((json: any) => {
+			console.warn(json?.response ?? json);
+			const message = json?.response;
+			if (message) {
+				alert(`Error getting experiment results: ${message}`);
+			}
+		});
+	});
+}
