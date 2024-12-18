@@ -18,7 +18,7 @@ def setup(args):
     print("Setting up local environment")
     
     # SET YOUR DOCKER HUB USERNAME HERE!
-    docker_hub_username = "bveal"
+    docker_hub_username = "DOCKER_HUB_USERNAME"
     
     # SET KEYCLOAK INFO HERE!
     # Ask Riley how to set this up
