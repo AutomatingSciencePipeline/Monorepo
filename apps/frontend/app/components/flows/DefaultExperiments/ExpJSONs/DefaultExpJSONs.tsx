@@ -1,6 +1,25 @@
 
 export const addNumsExpData = {
-    "hyperparameters": "{\"hyperparameters\":[{\"name\":\"x\",\"default\":\"1\",\"min\":\"1\",\"max\":\"10\",\"step\":\"1\",\"type\":\"integer\"},{\"name\":\"y\",\"default\":\"1\",\"min\":\"1\",\"max\":\"10\",\"step\":\"1\",\"type\":\"integer\"}]}",
+    "hyperparameters": [
+        {
+          "name": "x",
+          "default": -"1",
+          "min": "1",
+          "max": "10",
+          "step": "1",
+          "type": "integer",
+          "useDefault": false
+        },
+        {
+            "name": "y",
+            "default": -"1",
+            "min": "1",
+            "max": "10",
+            "step": "1",
+            "type": "integer",
+            "useDefault": false
+          },
+    ],
     "timeout": 18000,
     "trialExtraFile": "AddNumResult.csv",
     "workers": 1,
@@ -18,7 +37,38 @@ export const addNumsExpData = {
 }
 
 export const multistringPy = {
-    "hyperparameters": "{\"hyperparameters\":[{\"name\":\"x\",\"default\":\"1\",\"min\":\"1\",\"max\":\"10\",\"step\":\"1\",\"type\":\"integer\"},{\"name\":\"values\",\"default\":-1,\"values\":[\"a\",\"b\"],\"type\":\"stringlist\"},{\"name\":\"values2\",\"default\":-1,\"values\":[\"one\",\"two\"],\"type\":\"stringlist\"}]}",
+    "hyperparameters": [
+        {
+          "name": "x",
+          "default": -1,
+          "min": "1",
+          "max": "10",
+          "step": "1",
+          "type": "integer",
+          "useDefault": false
+        },
+        {
+          "name": "values",
+          "default": -1,
+          "values": [
+            "a",
+            "b"
+          ],
+          "type": "stringlist",
+          "useDefault": false
+        },
+        {
+          "name": "values2",
+          "default": -1,
+          "values": [
+            "one",
+            "two",
+            "three"
+          ],
+          "type": "stringlist",
+          "useDefault": false
+        }
+      ],
     "timeout": 18000,
     "trialExtraFile": "stringResult.csv",
     "scatterDepVar": "",
@@ -36,7 +86,53 @@ export const multistringPy = {
 }
 
 export const geneticalgo = {
-    "hyperparameters": "{\"hyperparameters\":[{\"name\":\"p\",\"default\":\"1\",\"min\":\"1\",\"max\":\"10\",\"step\":\"1\",\"type\":\"integer\"},{\"name\":\"g\",\"default\":\"60\",\"min\":\"60\",\"max\":\"100\",\"step\":\"20\",\"type\":\"integer\"}, {\"name\":\"gl\",\"default\":\"1\",\"min\":\"1\",\"max\":\"20\",\"step\":\"1\",\"type\":\"integer\"}, {\"name\":\"mr\",\"default\":\"0.2\",\"min\":\"0.1\",\"max\":\"0.8\",\"step\":\"0.1\",\"type\":\"float\"}, {\"name\":\"seed\",\"default\":-1,\"min\":\"1\",\"max\":\"10\",\"step\":\"1\",\"type\":\"integer\"}]}",
+    "hyperparameters": [
+    {
+      "name": "g",
+      "default": "1",
+      "min": "1",
+      "max": "10",
+      "step": "1",
+      "type": "integer",
+      "useDefault": true
+    },
+    {
+      "name": "p",
+      "default": "60",
+      "min": "60",
+      "max": "100",
+      "step": "20",
+      "type": "integer",
+      "useDefault": true
+    },
+    {
+      "name": "gl",
+      "default": "1",
+      "min": "1",
+      "max": "20",
+      "step": "1",
+      "type": "integer",
+      "useDefault": true
+    },
+    {
+      "name": "seed",
+      "default": "-1",
+      "min": "1",
+      "max": "10",
+      "step": "1",
+      "type": "integer",
+      "useDefault": false
+    },
+    {
+      "name": "mr",
+      "default": "0.2",
+      "min": "0.1",
+      "max": "0.8",
+      "step": "0.1",
+      "type": "float",
+      "useDefault": true
+    }
+  ],
     "timeout": 18000,
     "trialExtraFile": "geneticRes.csv",
     "scatterDepVar": "",

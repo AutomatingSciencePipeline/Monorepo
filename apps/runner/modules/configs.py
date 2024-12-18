@@ -62,9 +62,11 @@ def generate_permutations(parameters):
       elif param["type"] == ParamType.BOOL:
         base_vals[param["name"]] = param["default"]
 
+    explogger.info("base vals: %s", str(base_vals))
+    explogger.info("default vals: %s", str(default_vals))
           
     for param in parameters:
-        if param["default"] != -1 and param["default"] != '':
+        if param["default"] != -1 and param["default"] != "-1" and param["default"] != '':
             default_vals[param["name"]] = [param["default"]]
         else:
             default_vals[param["name"]] = expand_values(param)
@@ -85,7 +87,7 @@ def generate_permutations(parameters):
         
         num_defaults_changed = 0
         for param in parameters:
-            if param["default"] != -1 and param["default"] != '':
+            if param["default"] != -1  and param["default"] != "-1" and param["default"] != '':
                 if perm_dict[param["name"]] != param["default"]:
                     num_defaults_changed += 1
         

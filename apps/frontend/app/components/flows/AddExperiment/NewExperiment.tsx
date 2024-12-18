@@ -179,7 +179,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 		const currentExp = selectDefaultExpFile(selectedExperiment);
 		console.log("currentExp", currentExp);
 		const expInfo = currentExp;
-		const hyperparameters = JSON.parse(expInfo['hyperparameters'])['hyperparameters'];
+		const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
 		console.log("hyperparameters in default", hyperparameters);
 	
 		form.setValues({

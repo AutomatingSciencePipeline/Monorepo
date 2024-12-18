@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: runner
-        image: bveal/glados-runner:main
+        image: gladospipeline/glados-runner:main
         imagePullPolicy: Always
         command: []
         env:
