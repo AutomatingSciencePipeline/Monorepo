@@ -74,7 +74,7 @@ Now, use Helm to install the GLADOS MongoDB registry from DockerHub. This is nec
 ### Ensure that Mongo Replica Set Has Proper Permissions
 
 ```bash
-run minkube ssh
+minkube ssh
 
 cd /srv/data
 
