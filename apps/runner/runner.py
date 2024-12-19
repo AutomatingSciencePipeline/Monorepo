@@ -11,6 +11,8 @@ import base64
 import requests
 from bson.binary import Binary
 
+from pipreqs import pipreqs
+
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.data.parameters import Parameter, parseRawHyperparameterData
@@ -122,6 +124,30 @@ def run_batch(data: IncomingStartRequest):
         os.chdir('../..')
         close_experiment_run(exp_id)
         return
+    
+    # If it is a python file get the pipreqs
+    if experiment.experimentType == ExperimentType.PYTHON:
+        try:
+            os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+        except Exception as err:
+            explogger.error("Failed to generate pip requirements")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
+
+    # check if the new requirements exists
+    if os.path.exists("userProvidedFileReqs.txt"):
+        # do pip install -r userProvidedFileReqs.txt
+        try:
+            os.system(f"pip install -r userProvidedFileReqs.txt")
+        except Exception as err:
+            explogger.error("Failed to install pip requirements")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
+      
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{exp_id}/configFiles")
 
