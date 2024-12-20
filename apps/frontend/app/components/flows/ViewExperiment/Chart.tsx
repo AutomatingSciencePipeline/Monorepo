@@ -60,7 +60,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     };
 
     const parseCSV = (data) => {
-        console.log(data);
         const rows = data.trim().split('\n');
         const headers = rows[0].split(',') as string[];
         //Create a dictionary to store the data
@@ -92,11 +91,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             }
         }
 
-        console.log(dataDict);
+        const returnHeaders = Object.keys(dataDict);
         const xIndex = headers.indexOf(xAxis);
         const xList = headers.includes(xAxis) ? dataDict[xAxis] : dataDict[headers[0]];
         const yLists = headers.map((header) => dataDict[header]);
-        return { headers, xList, yLists, xIndex };
+        return { returnHeaders, xList, yLists, xIndex };
     };
 
 
@@ -111,7 +110,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { headers, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
+            const { returnHeaders, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
+            const headers = returnHeaders;
             const colors = generateColors(xList.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
