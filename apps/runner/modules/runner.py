@@ -13,6 +13,8 @@ from modules.configs import get_config_paramNames
 from modules.logging.gladosLogging import get_experiment_logger
 from modules.utils import update_exp_value
 
+from concurrent.futures import ProcessPoolExecutor
+
 PROCESS_OUT_STREAM = 0
 PROCESS_ERROR_STREAM = 1
 
@@ -98,6 +100,20 @@ def conduct_experiment(experiment: ExperimentData):
         paramNames = []
         writer = csv.writer(expResults)
         explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
+        
+        # Key is the trial number and the value is parameters
+        experimentRuns = {}
+        paramNames = get_config_paramNames('configFiles/0.ini')
+        
+        for trialNum in range(0, experiment.totalExperimentRuns):
+            try:
+                configFileName = create_config_from_data(experiment, trialNum)
+            except Exception as err:
+                raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
+            experimentRuns[trialNum] = get_configs_ordered(f'configFiles/{configFileName}', paramNames)
+            
+        
+        
         for trialNum in range(0, experiment.totalExperimentRuns):
             startSeconds = time.time()
             if trialNum == 0:
@@ -109,7 +125,10 @@ def conduct_experiment(experiment: ExperimentData):
                 paramNames = get_config_paramNames('configFiles/0.ini')
             except Exception as err:
                 raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
-
+            
+            
+            
+            
             try:
                 _run_trial(experiment, f'configFiles/{configFileName}', trialNum)
             except (TrialTimeoutError, InternalTrialFailedError) as err:
