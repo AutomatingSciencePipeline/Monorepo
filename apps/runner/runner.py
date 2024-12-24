@@ -253,7 +253,6 @@ def upload_experiment_results(experiment: ExperimentData):
     except Exception as err:
         raise GladosInternalError("Failed to read aggregated result file data for upload to mongodb") from err
 
-
     upload_experiment_aggregated_results(experiment, resultContent)
 
     if experiment.has_extra_files() or experiment.postProcess or experiment.keepLogs:
