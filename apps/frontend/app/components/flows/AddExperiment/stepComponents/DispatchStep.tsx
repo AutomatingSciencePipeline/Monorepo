@@ -18,7 +18,7 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, fileId, updateId, ...props }) => {
+export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props }) => {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 

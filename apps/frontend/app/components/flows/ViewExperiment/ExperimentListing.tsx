@@ -2,10 +2,7 @@
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
-import { MdEdit, MdPadding } from 'react-icons/md';
-import { Timestamp } from 'mongodb';
-import GraphModal from './Modal';
-import Modal from './Modal';
+import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
@@ -254,7 +251,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						<button type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 							onClick={() => {
-								onDeleteExperiment(project.expId);
+								openDeleteModal();
 							}}>
 							Delete Experiment
 						</button> :
@@ -269,13 +266,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							Unfollow Experiment
 						</button>
 				}
-				{project.finished &&
+				{project.finished ?
 				 <button type="button"
 					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 					onClick={openGraphModal}
 				>
 					See Graph
-				</button>
+				</button> : null
 				}
 				{
 					project.creator == session?.user?.id! ?

@@ -31,7 +31,7 @@ mr: float, default: 0.2, min: 0.1, max: 0.8, step: 0.1 this is the mutationrate 
 
 User Defined Constants
 seed = 1
-
+ 
 PostProcess:
 Scatter Plot: checked
 Independent Variable: gl
@@ -89,7 +89,7 @@ def genToString(gen):
 #determine fitness of all chromosomes in a population
 def evaluateFitness(chroms):
     for chrom in chroms:
-        chrom.chromFitness()
+        chrom.chromosomeFitness()
 
 
 #determine chromosome fitness for sorting
