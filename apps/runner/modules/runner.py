@@ -91,25 +91,23 @@ def _add_to_output_batch(trialExtraFile, ExpRun: int):
     except Exception as err:
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
+   
     
 def _run_trial_zero(experiment: ExperimentData, trialNum: int):
     with open('results.csv', 'w', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
         explogger.info(f"Running Trial {trialNum}")
-        print(f"Running Trial {trialNum}")
         paramNames = get_config_paramNames('configFiles/0.ini')
         numOutputs = 0
         
         startSeconds = time.time()
         if trialNum == 0:
-            # expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
             update_exp_value(experiment.expId, "startedAtEpochMillis", int(startSeconds * 1000))
         try:
             configFileName = create_config_from_data(experiment, trialNum)
             paramNames = get_config_paramNames('configFiles/0.ini')
         except Exception as err:
             raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
-                
                 
         try:
             _run_trial(experiment, f'../configFiles/{configFileName}', trialNum)
@@ -119,8 +117,6 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
 
         endSeconds = time.time()
         timeTakenMinutes = (endSeconds - startSeconds) / 60
-        
-        print(f"Trial {trialNum} took {timeTakenMinutes} minutes")
 
         if trialNum == 0:
             estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
@@ -142,8 +138,6 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
             except FileHandlingError as err:
                 _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
                 return
-            
-        print(f"Getting results for Trial {trialNum}")
 
         try:
             output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
@@ -154,16 +148,12 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
 
         explogger.info(f'Trial#{trialNum} completed')
         experiment.passes += 1
-        # expRef.update({'passes': experiment.passes})
         update_exp_value(experiment.expId, 'passes', experiment.passes)
+     
         
-        
-        
-
 def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
     explogger.info(f"Running Trial {trialNum}")
     paramNames = get_config_paramNames('configFiles/0.ini')
-    explogger.info(f"params: {get_config_paramNames('configFiles/0.ini')}")
     numOutputs = 0
 
     try:
@@ -171,8 +161,7 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         paramNames = get_config_paramNames('configFiles/0.ini')
     except Exception as err:
         raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
-            
-            
+               
     try:
         _run_trial(experiment, f'../configFiles/{configFileName}', trialNum)
     except (TrialTimeoutError, InternalTrialFailedError) as err:
@@ -185,8 +174,6 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         except FileHandlingError as err:
             _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
             return
-        
-    print(f"Getting results for Trial {trialNum}")
 
     try:
         output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
@@ -194,12 +181,9 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
         return
     
-    explogger.info(get_configs_ordered(f'config/{trialNum}.ini', paramNames))
-    
     # return the object that will be written to a row
-    return [trialNum] + output + get_configs_ordered(f'config/{trialNum}.ini', paramNames)
-        
-        
+    return [trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames)
+
 
 def conduct_experiment(experiment: ExperimentData):
     """
@@ -207,7 +191,6 @@ def conduct_experiment(experiment: ExperimentData):
     """
     os.mkdir('configFiles')
     explogger.info(f"Running Experiment {experiment.expId}")
-
     explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
     
     trialNums = []
@@ -221,30 +204,25 @@ def conduct_experiment(experiment: ExperimentData):
     results = []
     
     with ProcessPoolExecutor() as executor:
-        explogger.info("Inside of ProcessPoolExecutor")
         # run all of the experiments
-        futures = [executor.submit(_run_trial_wrapper, experiment, trialNum) for trialNum in range(experiment.totalExperimentRuns)]
+        futures = [executor.submit(_run_trial_wrapper, experiment, trialNum) for trialNum in trialNums]
         # Wait for all tasks to complete
         for future in as_completed(futures):
             try:
-                explogger.info(f"Task completed with result: {future.result()}")
                 results.append(future.result())
-                # increment that data in mongo
+                # increment the passes on the experiment
                 experiment.passes += 1
-                explogger.info(experiment.passes)
                 update_exp_value(experiment.expId, 'passes', experiment.passes)
             except Exception as e:
                 explogger.error(f"Task failed with exception: {e}")
-    explogger.info(results)
+        
     with open('results.csv', 'a', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
         # sort results by the first item in the array
         results.sort(key=lambda x: x[0])
         writer.writerows(results)
         
-            
-        
-        explogger.info("Finished running Trials")
+    explogger.info("Finished running Trials")
 
 
 def _handle_trial_error(experiment: ExperimentData, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
