@@ -51,8 +51,6 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     # set the paths
     os.mkdir(f'trial{trialRun}')
     os.chdir(f'trial{trialRun}')
-    explogger.info(f'active dir: {os.getcwd()}')
-    explogger.info(f'expfile: {experiment.file}')
     if experiment.experimentType == ExperimentType.PYTHON:
         with Popen(['python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
