@@ -5,6 +5,8 @@ metadata:
   namespace: default
 spec:
   replicas: 1
+  nodeSelector:
+    env: frontend-backend
   selector:
     matchLabels:
       app: GLADOS
