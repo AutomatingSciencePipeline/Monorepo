@@ -119,7 +119,6 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
         if trialNum == 0:
             estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
             explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-            # expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
             update_exp_value(experiment.expId, 'estimatedTotalTimeMinutes', estimatedTotalTimeMinutes)
 
             try:
