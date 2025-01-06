@@ -13,6 +13,8 @@ from modules.configs import get_config_paramNames
 from modules.logging.gladosLogging import get_experiment_logger
 from modules.utils import update_exp_value
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
 PROCESS_OUT_STREAM = 0
 PROCESS_ERROR_STREAM = 1
 
@@ -23,7 +25,7 @@ def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout
     try:
         data = process.communicate(timeout=trialTimeout)
         if keepLogs:
-            os.chdir('ResCsvs')
+            os.chdir('../ResCsvs')
             with open(f"log{trialRun}.txt", 'w', encoding='utf8') as trialLogFile:
                 trialLogFile.write(data[PROCESS_OUT_STREAM])
                 if data[1]:
@@ -44,17 +46,20 @@ def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout
 
 def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     """
-    make sure that the cwd is ExperimentsFiles/{ExperimentId}
+    make sure that the cwd is ExperimentsFiles/{ExperimentId}/trial{trialNum}
     """
+    # set the paths
+    os.mkdir(f'trial{trialRun}')
+    os.chdir(f'trial{trialRun}')
     if experiment.experimentType == ExperimentType.PYTHON:
-        with Popen(['python', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+        with Popen(['python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
     elif experiment.experimentType == ExperimentType.JAVA:
-        with Popen(['java', '-jar', experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+        with Popen(['java', '-jar', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
     elif experiment.experimentType == ExperimentType.C:
-        Popen(['chmod', '+x', experiment.file], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8')
-        with Popen(['./' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+        Popen(['chmod', '+x', "../" + experiment.file], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8')
+        with Popen(['../' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
 
 
@@ -84,6 +89,97 @@ def _add_to_output_batch(trialExtraFile, ExpRun: int):
     except Exception as err:
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
+   
+    
+def _run_trial_zero(experiment: ExperimentData, trialNum: int):
+    with open('results.csv', 'w', encoding="utf8") as expResults:
+        writer = csv.writer(expResults)
+        explogger.info(f"Running Trial {trialNum}")
+        paramNames = get_config_paramNames('configFiles/0.ini')
+        numOutputs = 0
+        
+        startSeconds = time.time()
+        if trialNum == 0:
+            update_exp_value(experiment.expId, "startedAtEpochMillis", int(startSeconds * 1000))
+        try:
+            configFileName = create_config_from_data(experiment, trialNum)
+            paramNames = get_config_paramNames('configFiles/0.ini')
+        except Exception as err:
+            raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
+                
+        try:
+            _run_trial(experiment, f'../configFiles/{configFileName}', trialNum)
+        except (TrialTimeoutError, InternalTrialFailedError) as err:
+            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+            return
+
+        endSeconds = time.time()
+        timeTakenMinutes = (endSeconds - startSeconds) / 60
+
+        if trialNum == 0:
+            estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
+            explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
+            update_exp_value(experiment.expId, 'estimatedTotalTimeMinutes', estimatedTotalTimeMinutes)
+
+            try:
+                csvHeader = _get_line_n_of_trial_results_csv(0, f"trial{trialNum}/" + experiment.trialResult)
+            except GladosUserError as err:
+                _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+                return
+            numOutputs = len(csvHeader)
+            writer.writerow(["Experiment Run"] + csvHeader + paramNames)
+
+        if experiment.has_extra_files():
+            try:
+                _add_to_output_batch(experiment.trialExtraFile, trialNum)
+            except FileHandlingError as err:
+                _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+                return
+
+        try:
+            output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
+        except GladosUserError as err:
+            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+            return
+        writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+
+        explogger.info(f'Trial#{trialNum} completed')
+        experiment.passes += 1
+        update_exp_value(experiment.expId, 'passes', experiment.passes)
+     
+        
+def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
+    explogger.info(f"Running Trial {trialNum}")
+    paramNames = get_config_paramNames('configFiles/0.ini')
+    numOutputs = 0
+
+    try:
+        configFileName = create_config_from_data(experiment, trialNum)
+        paramNames = get_config_paramNames('configFiles/0.ini')
+    except Exception as err:
+        raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
+               
+    try:
+        _run_trial(experiment, f'../configFiles/{configFileName}', trialNum)
+    except (TrialTimeoutError, InternalTrialFailedError) as err:
+        _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+        return
+
+    if experiment.has_extra_files():
+        try:
+            _add_to_output_batch(experiment.trialExtraFile, trialNum)
+        except FileHandlingError as err:
+            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+            return
+
+    try:
+        output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
+    except GladosUserError as err:
+        _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+        return
+    
+    # return the object that will be written to a row
+    return [trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames)
 
 
 def conduct_experiment(experiment: ExperimentData):
@@ -92,66 +188,38 @@ def conduct_experiment(experiment: ExperimentData):
     """
     os.mkdir('configFiles')
     explogger.info(f"Running Experiment {experiment.expId}")
-
-    numOutputs = 0
-    with open('results.csv', 'w', encoding="utf8") as expResults:
-        paramNames = []
+    explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
+    
+    trialNums = []
+    
+    for i in range(experiment.totalExperimentRuns):
+        if i != 0:
+            trialNums.append(i)
+            
+    # run trial run 0
+    _run_trial_zero(experiment, 0)
+    results = []
+    
+    with ProcessPoolExecutor() as executor:
+        # run all of the experiments
+        futures = [executor.submit(_run_trial_wrapper, experiment, trialNum) for trialNum in trialNums]
+        # Wait for all tasks to complete
+        for future in as_completed(futures):
+            try:
+                results.append(future.result())
+                # increment the passes on the experiment
+                experiment.passes += 1
+                update_exp_value(experiment.expId, 'passes', experiment.passes)
+            except Exception as e:
+                explogger.error(f"Task failed with exception: {e}")
+        
+    with open('results.csv', 'a', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
-        explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
-        for trialNum in range(0, experiment.totalExperimentRuns):
-            startSeconds = time.time()
-            if trialNum == 0:
-                # expRef.update({"startedAtEpochMillis": int(startSeconds * 1000)})
-                update_exp_value(experiment.expId, "startedAtEpochMillis", int(startSeconds * 1000))
-
-            try:
-                configFileName = create_config_from_data(experiment, trialNum)
-                paramNames = get_config_paramNames('configFiles/0.ini')
-            except Exception as err:
-                raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
-
-            try:
-                _run_trial(experiment, f'configFiles/{configFileName}', trialNum)
-            except (TrialTimeoutError, InternalTrialFailedError) as err:
-                _handle_trial_error(experiment, numOutputs, paramNames, writer, trialNum, err)
-                continue
-
-            endSeconds = time.time()
-            timeTakenMinutes = (endSeconds - startSeconds) / 60
-
-            if trialNum == 0:
-                estimatedTotalTimeMinutes = timeTakenMinutes * experiment.totalExperimentRuns
-                explogger.info(f"Estimated minutes to run: {estimatedTotalTimeMinutes}")
-                # expRef.update({'estimatedTotalTimeMinutes': estimatedTotalTimeMinutes})
-                update_exp_value(experiment.expId, 'estimatedTotalTimeMinutes', estimatedTotalTimeMinutes)
-
-                try:
-                    csvHeader = _get_line_n_of_trial_results_csv(0, experiment.trialResult)
-                except GladosUserError as err:
-                    _handle_trial_error(experiment, numOutputs, paramNames, writer, trialNum, err)
-                    return
-                numOutputs = len(csvHeader)
-                writer.writerow(["Experiment Run"] + csvHeader + paramNames)
-
-            if experiment.has_extra_files():
-                try:
-                    _add_to_output_batch(experiment.trialExtraFile, trialNum)
-                except FileHandlingError as err:
-                    _handle_trial_error(experiment, numOutputs, paramNames, writer, trialNum, err)
-                    continue
-
-            try:
-                output = _get_line_n_of_trial_results_csv(1, experiment.trialResult)
-            except GladosUserError as err:
-                _handle_trial_error(experiment, numOutputs, paramNames, writer, trialNum, err)
-                continue
-            writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
-
-            explogger.info(f'Trial#{trialNum} completed')
-            experiment.passes += 1
-            # expRef.update({'passes': experiment.passes})
-            update_exp_value(experiment.expId, 'passes', experiment.passes)
-        explogger.info("Finished running Trials")
+        # sort results by the first item in the array
+        results.sort(key=lambda x: x[0])
+        writer.writerows(results)
+        
+    explogger.info("Finished running Trials")
 
 
 def _handle_trial_error(experiment: ExperimentData, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
