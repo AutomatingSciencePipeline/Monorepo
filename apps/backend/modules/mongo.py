@@ -12,11 +12,14 @@ def verify_mongo_connection(mongoClient: pymongo.MongoClient):
         raise Exception("MongoDB server not available/unreachable") from err
     
 def upload_experiment_aggregated_results(experimentId: str, results: str, mongoClient: pymongo.MongoClient):
+    # change this to use GridFS bucket
     experimentResultEntry = {"experimentId": experimentId, "resultContent": results}
     # Get the results connection
-    resultsCollection = mongoClient["gladosdb"].results
+    resultsBucket = GridFSBucket(mongoClient["gladosdb"], bucket_name='resultsBucket')
     try:
-        resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
+        # resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
+        # Now we need to store the results in the GridFS bucket
+        resultId = resultsBucket.upload_from_stream(f"results{experimentId}", results, metadata={"experimentId": experimentId})
         # return the resultID
         return resultId
         
