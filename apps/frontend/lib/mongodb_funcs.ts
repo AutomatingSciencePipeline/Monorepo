@@ -45,12 +45,24 @@ export async function deleteDocumentById(expId: string) {
 
     //Since we found it, make sure to delete data from logs, results, and zips
     const db = client.db(DB_NAME);
-    //Delete logs
-    await db.collection('logs').deleteMany({ "experimentId": expId });
-    //Delete results
-    await db.collection('results').deleteMany({ "experimentId": expId });
-    //Delete zips
-    await db.collection('zips').deleteMany({ "experimentId": expId });
+    //Delete logs from bucket
+    const logsBucket = new GridFSBucket(db, { bucketName: 'logsBucket' });
+    const filesToDelete = await logsBucket.find({ "metadata.experimentId": expId }).toArray();
+    for (const file of filesToDelete) {
+        await logsBucket.delete(file._id);
+    }
+    //Delete results from bucket
+    const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
+    const resultsToDelete = await resultsBucket.find({ "metadata.experimentId": expId }).toArray();
+    for (const file of resultsToDelete) {
+        await resultsBucket.delete(file._id);
+    }
+    //Delete zips from bucket
+    const zipsBucket = new GridFSBucket(db, { bucketName: 'zipsBucket' });
+    const zipsToDelete = await zipsBucket.find({ "metadata.experimentId": expId }).toArray();
+    for (const file of zipsToDelete) {
+        await zipsBucket.delete(file._id);
+    }
 
     return Promise.resolve();
 }
