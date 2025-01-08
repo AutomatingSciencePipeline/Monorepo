@@ -66,6 +66,15 @@ def spawn_job(experiment_data):
     job = create_job_object(experiment_data)
     create_job(BATCH_API, job)
     
+@flaskApp.post("/cancelExperiment")
+def cancel_experiment():
+    """The query to cancel an experiment"""
+    data = request.get_json()
+    job_name = data['jobName']
+    # kill the job
+    BATCH_API.delete_namespaced_job(job_name, "default", propagation_policy="Background")
+    return Response(status=200)
+    
 @flaskApp.post("/uploadResults")
 def upload_results():
     json = request.get_json()
