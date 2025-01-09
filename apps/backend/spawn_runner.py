@@ -12,7 +12,8 @@ RUNNER_PATH = "./job-runner.yaml"
 def create_job_object(experiment_data):
     """Function that creates the job object for the runner"""
     # Configure Pod template container
-    job_name = "runner-" + str(time.time())
+    job_name = "runner-" + experiment_data['experiment']['id']
+    
     job_command = ["python3", "runner.py", json.dumps(experiment_data)]
 
     runner_body = get_yaml_file_body(RUNNER_PATH)
