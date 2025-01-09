@@ -1,3 +1,4 @@
+import { GridFSBucket } from 'mongodb';
 import clientPromise, { COLLECTION_LOGS, DB_NAME } from '../../../../lib/mongodb';
 import { NextApiHandler } from 'next';
 
@@ -11,27 +12,49 @@ const mongoLogHandler: NextApiHandler<String> = async (req, res) => {
 	}
 
 	let results;
+	const client = await clientPromise;
+	const db = client.db(DB_NAME);
+	const logsBucket = new GridFSBucket(db, { bucketName: 'logsBucket' });
 	try {
-		const client = await clientPromise;
-		const db = client.db(DB_NAME);
+		//First check that the file exists
+		results = await logsBucket.find({ "metadata.experimentId": idOfLogFile }).toArray();
+		if (results.length === 0) {
+			console.warn(`Experiment ${idOfLogFile} Log not found`);
+			res.status(404).json({ response: `Experiment Log '${idOfLogFile}' not found. Please contact the GLADOS team for further troubleshooting.` } as any);
+			return;
+		}
 
-		results = await db
-			.collection(COLLECTION_LOGS)
-			// TODO correct mongodb typescript type for id
-			.find({ 'experimentId': idOfLogFile as any }).toArray();
+		if (results.length !== 1) {
+			console.warn(`Experiment ${idOfLogFile} Log not found`);
+			res.status(404).json({ response: `Experiment Log '${idOfLogFile}' not found. Please contact the GLADOS team for further troubleshooting.` } as any);
+		} else {
+			//Download the file
+			const downloadStream = logsBucket.openDownloadStream(results[0]._id);
+			//This has to return the csv contents
+			const chunks: Buffer[] = [];
+			downloadStream.on('data', (chunk) => {
+				chunks.push(chunk);
+			});
+
+			downloadStream.on('end', () => {
+				const contents = Buffer.concat(chunks as unknown as Uint8Array[]).toString('utf-8');
+				if (contents.length === 0) {
+					console.warn(`Experiment ${idOfLogFile} Log was empty`);
+					res.send(`Experiment Log '${idOfLogFile}' was empty.`);
+				}
+				else {
+					res.send(contents);
+				}
+
+			});
+		}
+
 	} catch (error) {
 		const message = 'Failed to download the log file';
 		console.error('Error contacting server: ', error);
 		res.status(500).json({ response: message } as any);
 	}
-	if (results.length !== 1) {
-		console.warn(`Experiment ${idOfLogFile} Log not found`);
-		res.status(404).json({ response: `Experiment Log '${idOfLogFile}' not found. Remember, the production database doesn't have the logs of experiments from dev!` } as any);
-	} else {
-		const result = results[0];
-		const contents = `${result?.fileContent ?? 'The log file was empty, or an error occurred'}`;
-		res.send(contents);
-	}
+
 };
 
 export default mongoLogHandler;
