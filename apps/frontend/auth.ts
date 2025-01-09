@@ -6,8 +6,15 @@ import Google from "next-auth/providers/google";
 import clientPromise from "./lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: MongoDBAdapter(clientPromise, {databaseName: 'gladosdb'}),
-  providers: [GitHub, Google], //Add Keycloak here to do local testing
+  adapter: MongoDBAdapter(clientPromise, { databaseName: 'gladosdb' }),
+  providers:
+    [
+      GitHub({
+        profile(profile) {
+          return { role: profile.role ?? "user", image: profile.avatar_url, email: profile.email }
+        }}),
+      Google
+    ],
   callbacks: {
     authorized: async ({ auth }) => {
       // Logged in users are authenticated, otherwise redirect to login page
@@ -15,9 +22,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return !!auth
     },
     session({ session, user }) {
-      session.user.id = user.id
+      session.user.id = user.id;
+      (session.user as any).role = (user as any).role
       return session
     },
   },
 })
- 
