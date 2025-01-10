@@ -65,13 +65,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const headers = rows[0].split(',') as string[];
         //Create a dictionary to store the data
         const dataDict = {} as any;
+        const splitRows = [] as any;
 
-        // Iterate through the rows and put them under the correct header
-        for (let i = 0; i < headers.length; i++) {
-            dataDict[headers[i]] = [];
-        }
-
-        // Iterate through the rows and put them under the correct header
         for (let i = 1; i < rows.length; i++) {
             // Split the row by commas when not inside quotes
             const row = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
@@ -80,23 +75,71 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 // If the value is a number, convert it to a number
                 if (!isNaN(val)) {
                     row[j] = parseFloat(val);
-                    dataDict[headers[j]].push(row[j]);
                 }
             }
+            splitRows.push(row);
         }
 
-        //Remove items with empty arrays
+        // Initialize dataDict with arrays
         for (let i = 0; i < headers.length; i++) {
-            if (dataDict[headers[i]].length == 0) {
-                delete dataDict[headers[i]];
-            }
+            dataDict[headers[i]] = [];
         }
 
-        const returnHeaders = Object.keys(dataDict);
-        const xIndex = headers.indexOf(xAxis);
-        const xList = headers.includes(xAxis) ? dataDict[xAxis] : dataDict[headers[0]];
-        const yLists = headers.map((header) => dataDict[header]);
-        return { returnHeaders, xList, yLists, xIndex };
+        if (aggregateData)
+        {
+            const xList = [] as any;
+            const xIndex = headers.includes(xAxis) ? headers.indexOf(xAxis) : 0;
+
+            //initialize xList with all of the x values
+            for (let i = 0; i < splitRows.length; i++)
+            {
+                const xValue = splitRows[i][xIndex];
+                if (!xList.includes(xValue))
+                {
+                    xList.push(xValue);
+                    //add new array for aggregate data
+                    for (let j = 0; j < headers.length; j++) {
+                        dataDict[headers[j]].push([]);
+                    }
+                }
+            }
+
+            for (let i = 0; i < splitRows.length; i++)
+            {
+                const xValue = splitRows[i][xIndex];
+                const xValueIndex = xList.indexOf(xValue);
+                for (let j = 0; j < splitRows.length; j++)
+                {
+                    dataDict[headers[j]][xValueIndex].push(splitRows[i][j]);
+                }
+            }
+
+            const returnHeaders = Object.keys(dataDict);
+            const yLists = headers.map((header) => dataDict[header]);
+            return { returnHeaders, xList, yLists, xIndex };
+        }
+        else
+        {
+
+            // Iterate through the rows and put them under the correct header
+            for (let i = 1; i < splitRows.length; i++) {
+                for (let j = 0; j < splitRows[i].length; j++) {
+                        dataDict[headers[j]].push(splitRows[i][j]);
+            }
+
+            //Remove items with empty arrays
+            for (let i = 0; i < headers.length; i++) {
+                if (dataDict[headers[i]].length == 0) {
+                    delete dataDict[headers[i]];
+                }
+            }
+
+            const returnHeaders = Object.keys(dataDict);
+            const xIndex = headers.indexOf(xAxis);
+            const xList = headers.includes(xAxis) ? dataDict[xAxis] : dataDict[headers[0]];
+            const yLists = headers.map((header) => dataDict[header]);
+            return { returnHeaders, xList, yLists, xIndex };
+        }
     };
 
 
@@ -171,7 +214,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
             setHeaders(headers);
         }
-    }, [loading, experimentChartData, chartType, xAxis, isFullscreen]);
+    }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
