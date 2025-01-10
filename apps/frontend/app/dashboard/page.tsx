@@ -27,7 +27,7 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const REPORT_GOOGLE_FORM_LINK = 'https://forms.gle/HYB64Wusp1bKvgZc9';
+const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
 
 const REPORT_DESCRIPT = 'Report an issue you have encountered to our Google Forms.';
