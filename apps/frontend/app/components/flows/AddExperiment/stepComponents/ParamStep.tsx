@@ -22,7 +22,6 @@ function calcPermutations(parameters: HyperparametersCollection) {
 			totalObjs++;
 			if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
 
-				//if hyperparameter.step is not a number, set it to 1
 				if (isNaN(hyperparameter.step) || hyperparameter.step == 0) {
 					hyperparameter.step = 1;
 					return -1;
