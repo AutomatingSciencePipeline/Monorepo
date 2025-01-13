@@ -15,7 +15,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 	var totalObjs = 0;
 
 	var allInts = true;
-	console.log(parameters.hyperparameters);
+	
 	if (parameters.hyperparameters.length > 0) {
 
 		parameters.hyperparameters.forEach(hyperparameter => {
@@ -30,21 +30,13 @@ function calcPermutations(parameters: HyperparametersCollection) {
 				if (hyperparameter.type == HyperparameterTypes.FLOAT)
 					allInts = false;
 
-				console.log("hyperparemeter: ", hyperparameter);
-
 				let hyper = hyperparameter;
 				let numObjs = 0;
-
-				console.log(hyper);
-				console.log(hyper.min);
-				console.log(hyper.max);
-				console.log(hyper.step);
 
 				for (let i = hyper.min * 100; i <= hyper.max * 100; i += hyper.step * 100) {
 					numObjs++;
 				}
 
-				console.log(numObjs);
 
 				if (hyper.default == -1) {
 					noDefaultCount = noDefaultCount * numObjs;
@@ -74,17 +66,12 @@ function calcPermutations(parameters: HyperparametersCollection) {
 			}
 		});
 
-		console.log(noDefaultCount);
-		console.log(defaultCount);
-
 		if (totalObjs < 3 && allInts && countDefaults > 0) {
 			const total = (noDefaultCount + defaultCount) - 1;
-			console.log(total);
 			return total;
 		}
 		else {
 			const total = (noDefaultCount * defaultCount) - (noDefaultCount * (countDefaults - 1));
-			console.log(total);
 			return total;
 		}
 	}
@@ -100,7 +87,6 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 	const [debouncedFormValues] = useDebounce(form.values, 300);
 
     useEffect(() => {
-        console.log("confirmedValues: ", confirmedValues);
         const permutations = calcPermutations(debouncedFormValues);
         setText(permutations !== undefined ? permutations.toString() : 'Permutations Unable to be Calculated');
         setPermutations(permutations ?? 0);
