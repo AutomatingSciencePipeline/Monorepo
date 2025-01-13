@@ -82,7 +82,7 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
-def _add_to_output_batch(trialExtraFile, ExpRun: int):
+def _add_to_output_batch(trialExtraFile: str, ExpRun: int):
     try:
         # Currently only extra CSV files are supported, this will need to be adapted for other file types
         shutil.copy2(f'{trialExtraFile}', f'ResCsvs/Result{ExpRun}.csv')
@@ -129,9 +129,9 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
             numOutputs = len(csvHeader)
             writer.writerow(["Experiment Run"] + csvHeader + paramNames)
 
-        if experiment.has_extra_files():
+        if experiment.has_extra_files() and experiment.trialExtraFile != None:
             try:
-                _add_to_output_batch(experiment.trialExtraFile, trialNum)
+                _add_to_output_batch(f"trial{trialNum}/" + experiment.trialExtraFile, trialNum)
             except FileHandlingError as err:
                 _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
                 return
