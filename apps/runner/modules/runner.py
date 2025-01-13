@@ -165,9 +165,9 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
         return
 
-    if experiment.has_extra_files():
+    if experiment.has_extra_files() and experiment.trialExtraFile != None:
         try:
-            _add_to_output_batch(experiment.trialExtraFile, trialNum)
+            _add_to_output_batch(f"trial{trialNum}/" + experiment.trialExtraFile, trialNum)
         except FileHandlingError as err:
             _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
             return
