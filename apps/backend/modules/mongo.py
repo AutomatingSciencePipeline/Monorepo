@@ -12,33 +12,33 @@ def verify_mongo_connection(mongoClient: pymongo.MongoClient):
         raise Exception("MongoDB server not available/unreachable") from err
     
 def upload_experiment_aggregated_results(experimentId: str, results: str, mongoClient: pymongo.MongoClient):
-    experimentResultEntry = {"experimentId": experimentId, "resultContent": results}
     # Get the results connection
-    resultsCollection = mongoClient["gladosdb"].results
+    resultsBucket = GridFSBucket(mongoClient["gladosdb"], bucket_name='resultsBucket')
     try:
-        resultId = resultsCollection.insert_one(experimentResultEntry).inserted_id
+        # Encode the results string to bytes
+        results_bytes = results.encode('utf-8')
+        # Now we need to store the results in the GridFS bucket
+        resultId = resultsBucket.upload_from_stream(f"results{experimentId}", results_bytes, metadata={"experimentId": experimentId})
         # return the resultID
-        return resultId
+        return str(resultId)
         
     except Exception as err:
         # Change to generic exception
         raise Exception("Encountered error while storing aggregated results in MongoDB") from err
     
 def upload_experiment_zip(experimentId: str, encoded: Binary, mongoClient: pymongo.MongoClient):
-    experimentZipEntry = {"experimentId": experimentId, "fileContent": encoded}
-    zipCollection = mongoClient["gladosdb"].zips
+    zipsBucket = GridFSBucket(mongoClient["gladosdb"], bucket_name='zipsBucket')
     try:
-        resultZipId = zipCollection.insert_one(experimentZipEntry).inserted_id
-        return resultZipId
+        resultId = zipsBucket.upload_from_stream(f"results{experimentId}.zip", encoded, metadata={"experimentId": experimentId})
+        return str(resultId)
     except Exception as err:
         raise Exception("Encountered error while storing results zip in MongoDB") from err
     
 def upload_log_file(experimentId: str, contents: str, mongoClient: pymongo.MongoClient):
-    logFileEntry = {"experimentId": experimentId, "fileContent": contents}
-    logCollection = mongoClient["gladosdb"].logs
+    logsBucket = GridFSBucket(mongoClient["gladosdb"], bucket_name='logsBucket')
     try:
-        resultId = logCollection.insert_one(logFileEntry).inserted_id
-        return resultId
+        resultId = logsBucket.upload_from_stream(f"log{experimentId}.txt", contents.encode('utf-8'), metadata={"experimentId": experimentId})
+        return str(resultId)
     except Exception as err:
         raise Exception("Encountered error while storing log file in MongoDB") from err
     
