@@ -335,17 +335,17 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) :
 					null
 				}
-				<p className='flex text-gray-500 text-sm space-x-2'>
+				<p className='flex text-centertext-gray-500 text-sm space-x-2'>
 					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
 				{project['startedAtEpochMillis'] ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
+					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
 				{project['finishedAtEpochMillis'] ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
+					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Finished at {new Date(project['finishedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
