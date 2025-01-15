@@ -1,0 +1,1341 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for GLADOS - Automated Science Pipeline">
+      
+      
+      
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/developer_installation/">
+      
+      
+        <link rel="prev" href="../local_testing/">
+      
+      
+        <link rel="next" href="../deployment/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>Developer Installation - GLADOS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#developer-installation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GLADOS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Developer Installation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GLADOS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About GLADOS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorial
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local_testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Local GLADOS Installation (Updated Nov 2024)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Developer Installation
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Developer Installation
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependencies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Required Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#git" class="md-nav__link">
+    <span class="md-ellipsis">
+      Git
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wsl-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      WSL Error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retrieve-the-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrieve the Code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-the-env-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get the .env file(s)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Get the .env file(s)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alternative-set-up-your-own-env-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternative: Set up your own .env file
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-minikube-and-related-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install Minikube and related tools
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ide-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDE Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IDE Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-linter-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Linter Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#launching-the-project-with-minikube" class="md-nav__link">
+    <span class="md-ellipsis">
+      Launching the project with Minikube
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-launching-with-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Launching with Docker
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extras" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extras
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extras">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remote-development-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remote Development Extensions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer_deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Updating Documentation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Infrastructure
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Infrastructure
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/kubernetes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kubernetes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/vms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    VMs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developer Help
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developerhelp/helpful_commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helpful Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cheatsheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cheatsheet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    (Old) Repository Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependencies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Required Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#git" class="md-nav__link">
+    <span class="md-ellipsis">
+      Git
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wsl-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      WSL Error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retrieve-the-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrieve the Code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-the-env-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get the .env file(s)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Get the .env file(s)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alternative-set-up-your-own-env-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternative: Set up your own .env file
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-minikube-and-related-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install Minikube and related tools
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ide-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDE Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IDE Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-linter-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Linter Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#launching-the-project-with-minikube" class="md-nav__link">
+    <span class="md-ellipsis">
+      Launching the project with Minikube
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-launching-with-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Launching with Docker
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extras" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extras
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extras">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remote-development-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remote Development Extensions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="developer-installation">Developer Installation</h1>
+<p>This guide contains a short tutorial on getting a local development environment up and running.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of March 2024, we have shifted towards running the system on Kubernetes, rather than Docker. These steps still work with the current codebase, but as we fully migrate the codebase to our Kubernetes version, these steps will need to be updated accordingly.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These steps mainly concern developing on a Windows computer, with Git Bash. Steps on other OS's, or with WSL terminal, will have the same steps, although the specific steps on installation, as well as configuration, may differ.</p>
+</div>
+<h2 id="dependencies">Dependencies</h2>
+<p>If you have already followed the <a href="../installation/">Installation guide</a>, <a href="./#tool-installation">skip ahead</a>. If not, continue reading.</p>
+<h2 id="required-tools">Required Tools</h2>
+<h3 id="git">Git</h3>
+<p>Git is a code version management tool that integrates with Github, where our codebase is stored. </p>
+<p>If you don't already have it installed, you can download it on the <a href="https://git-scm.com/downloads">git website</a>.</p>
+<h3 id="docker">Docker</h3>
+<p>Docker is a utility that manages small virtual machine "containers."</p>
+<p>To install it, follow the instructions on <a href="https://docs.docker.com/get-docker/">Docker's documentation</a>.
+Alternatively, running our install script will install Docker for you.</p>
+<p>You might encounter a permissions error on Windows
+mentioning not being part of the docker-users group.
+Directions to fix that can be found <a href="https://icij.gitbook.io/datashare/faq-errors/you-are-not-allowed-to-use-docker-you-must-be-in-the-docker-users-group-.-what-should-i-do">here</a>.</p>
+<h4 id="wsl-error">WSL Error</h4>
+<p>To get Docker to work properly, you will need to install WSL.
+This may fail for Windows. In this case, check that virtualization is enabled in the BIOS.</p>
+<h2 id="retrieve-the-code">Retrieve the Code</h2>
+<p>In a location of your choice in a drive with at least 1 GB of free space,
+use Git to clone the repo.</p>
+<p>Your command will probably look like this:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/AutomatingSciencePipeline/Monorepo.git
+</code></pre></div>
+<p>Or this if you have <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">ssh keys</a> set up (Recommended):</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>git@github.com:AutomatingSciencePipeline/Monorepo.git
+</code></pre></div>
+<p>The <code>--recurse-submodules</code> can be omitted if you don't want to download a copy of the docs as well.</p>
+<p>If cloning isn't working for some reason,
+you can download a zip from <a href="https://github.com/AutomatingSciencePipeline/Monorepo/archive/refs/heads/main.zip">here</a> instead.
+Note that, if you download a zip, Windows or antivirus programs may block you from running the code,
+in which case you will have to navigate various security dialogs to unblock it.
+It may also not have the correct line endings (CRLF vs LF) for your system.</p>
+<h2 id="get-the-env-files">Get the .env file(s)</h2>
+<p>The system keeps track of private keys (strings that act as passwords to various services) in a <code>.env</code> file.
+To maintain privacy, these cannot be publicly distributed with the rest of the code.</p>
+<p>You can get a copy of our <code>.env</code> file from our private Discord in the <a href="https://discord.com/channels/1017208818989539368/1042935101601873970">#env-files channel</a>. Note that you must already be a member of the Discord to open this link; contact us if you need access.</p>
+<p>The file should be named exactly <code>.env</code> and placed in the root folder of the repository.</p>
+<h4 id="alternative-set-up-your-own-env-file">Alternative: Set up your own .env file</h4>
+<p>You can create your own <code>.env</code> file, if you want to set up your own GLADOS system. There is an <code>.example.env</code> file in the repository that has sample fields to fill in. During this process, you will need to set up a Firebase project for account management. Note that the frontend code has the Firebase public key in it, which does not need to be secure, but will need to be replaced when hosting your own GLADOS system.</p>
+<h2 id="tool-installation">Tool Installation</h2>
+<p>We include a <code>dev-install.sh</code> script that assists in the process of installing everything needed to develop on the system. This setup process includes:</p>
+<ul>
+<li>Installing Docker</li>
+<li>Installing Python 3.8 via pyenv</li>
+<li>Creating pipenvs for both the backend and documentation packages, containing project dependencies</li>
+<li>Installing Node.JS via npm, with project dependencies</li>
+</ul>
+<p>Of course, it is recommended to look through the scripts themselves, before running it, for a sanity check.</p>
+<p>To run the script, run the following command with a Git Bash terminal in the root folder of the repository:</p>
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>dev-install.sh
+</code></pre></div>
+<p>This process may require you to close and reopen the terminal, uninstall programs you may have, or restart your computer. You may need to run the script multiple times, as a result.</p>
+<h2 id="install-minikube-and-related-tools">Install Minikube and related tools</h2>
+<p>Minikube allows you to easily run a Kubernetes cluster locally on your machine, mainly for learning and testing purposes. </p>
+<p>To install it, follow the instructions on <a href="https://minikube.sigs.k8s.io/docs/start/">Minikube's documentation</a>. You must have Docker installed already, unless you have another <a href="https://minikube.sigs.k8s.io/docs/drivers/">minikube driver</a> you prefer.</p>
+<p>Additionally, some tools are required to work with kubernetes. 
+Kubectl allows you to interact with the cluster through the command line. To install it, <a href="https://kubernetes.io/docs/tasks/tools/#kubectl">follow the instructions here</a>, for your OS.
+Python Kubernetes Client works the same way, but through Python instead of the command line. This is used to set up the system easily. To install it, <a href="https://github.com/kubernetes-client/python?tab=readme-ov-file#installation">follow the instructions here</a>. If preferred, you may also set this up in a separate pyenv, much like what is done in the <code>dev-install.sh</code> script.</p>
+<p>Ensure you can start minikube and interact with the cluster with kubectl before continuing.</p>
+<h2 id="ide-setup">IDE Setup</h2>
+<p>We strongly suggest using Visual Studio Code (VSCode) as your IDE.
+Numerous configuration files and utilities, such as suggested extensions, are already included with the repo.</p>
+<p>It can be downloaded <a href="https://code.visualstudio.com/download">here</a>.</p>
+<p>After installing VSCode, you should install the recommended extensions after opening the repository in VSCode. A prompt may appear after opening the project, but if not, you can also go to the Extensions view, filter by '@recommended', and install the extensions under 'Workspace Recommendations'.</p>
+<p>Configure the python interpreter via Ctrl+Shift+P &gt; <code>Python: Select Interpreter</code> &gt; <code>Use Python from 'python.defaultInterpreterPath' setting</code></p>
+<h3 id="check-linter-setup">Check Linter Setup</h3>
+<p>In order to test the frontend linter, we'll introduce a syntax error and make sure that it reports it as a problem. You can undo this change after you're done.</p>
+<ul>
+<li>Open <code>/apps/frontend/pages/_app.tsx</code></li>
+<li>Add the line <code>var unused = 'hi';</code> as shown in the screenshot below and confirm that the same 3 errors are reported when you hover over the symbol <code>unused</code>.</li>
+</ul>
+<p><img alt="Intentional Error" src="https://i.imgur.com/6at100I.png" /></p>
+<p>If the linter doesn't detect 3 errors, make sure the recommended extensions are installed, and check the VSCode "Output" View, select ESLint from the dropdown, and check for any errors.</p>
+<p>You may run into CI issues, with build failures, without a working linter.</p>
+<p>You are now fully set up to develop on the system!</p>
+<h2 id="launching-the-project-with-minikube">Launching the project with Minikube</h2>
+<p>To launch GLADOS locally, first start minikube. Then, you can run our <code>kubernetes/init.py</code> script to start all the resources. Here are the commands:</p>
+<div class="highlight"><pre><span></span><code>minikube<span class="w"> </span>start
+python3<span class="w"> </span>kubernetes/init.py<span class="w"> </span>--hard
+</code></pre></div>
+<p>Sometimes it fails to create all the resources. To fix this, run the script again.</p>
+<p>To ensure it is running, list all resources via:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>all
+</code></pre></div>
+<p>There should be four deployments. They may take a while to start up, so be patient. To debug, you may also use the minikube dashboard via:</p>
+<div class="highlight"><pre><span></span><code>minikube<span class="w"> </span>dashboard
+</code></pre></div>
+<p>Once all the deployments are ready, you will need to port forward the frontend manually, via:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>port-forward<span class="w"> </span>deployment/deployment-test-backend<span class="w"> </span><span class="m">3000</span>:3000
+</code></pre></div>
+<p>This will allow you to view the frontend on http://localhost:3000.</p>
+<p>To update the system, you will need to rebuild and push the images, then recreate the system, using <code>python3 kubernetes/init.py --hard</code>. Ensure it is building using the same images you just pushed, within each deployment manifest.</p>
+<h2 id="quick-launching-with-docker">Quick Launching with Docker</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Docker is used to run an older version of GLADOS that does not allow multiple experiments to be ran at the same time. However, some of our current development is done through running on Docker, as the system has not fully migrated to Kubernetes. As of May 15, 2024, the <code>main</code> branch is ran via Kubernetes, and all other branches are ran via Docker.</p>
+</div>
+<p>You can quickly build and launch all service containers via VSCode Tasks.</p>
+<p>Ctrl+Shift+P &gt; <code>Tasks: Run Task</code> &gt; <code>DEVELOPMENT Docker Compose Up (Attached)</code></p>
+<p>If you don't want to use VSCode tasks to start the commands, look at the <code>.vscode/tasks.json</code> file to see what commands are run behind the scenes.</p>
+<p>This supports enable hot reloading for the backend and frontend.
+Once the docker containers are built (this will take a while for the first run) you should start seeing log messages from the containers.</p>
+<p>The Docker Desktop application will tell you what port the frontend is accessible from, but it should match the port specified in your <code>.env</code> file.</p>
+<p><img alt="Docker Desktop screenshot" src="https://i.imgur.com/W8zJPks.png" /></p>
+<p>Click on the link shown in the screenshot and it should open a page to the frontend in your browser.
+Once you try to connect, the frontend will start to build for hot reloading.</p>
+<p>The frontend's hot reloading is really slow at first but gets better after its first builds are done. It may take up to <strong>a few minutes</strong> to turn on for the first time.
+While it is building, your browser will be sitting on a blank page still trying to connect. This is normal.</p>
+<p>After it finishes loading, you should be taken to the homepage.</p>
+<h2 id="extras">Extras</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These are optional resources that you may consider using, although we have found a simpler setup to work better.</p>
+</div>
+<h3 id="remote-development-extensions">Remote Development Extensions</h3>
+<p>The Remote Development extension pack for VS Code allows you to connect your IDE to connect to remote servers, or containers, and develop from them as if they were your local computer.</p>
+<p>It can be installed with <a href="vscode:extension/ms-vscode-remote.vscode-remote-extensionpack">this quick install link</a>
+or downloaded via its <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack">marketplace page</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>

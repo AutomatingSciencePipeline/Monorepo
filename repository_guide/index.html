@@ -1,0 +1,1695 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for GLADOS - Automated Science Pipeline">
+      
+      
+      
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/repository_guide/">
+      
+      
+        <link rel="prev" href="../cheatsheet/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>(Old) Repository Guide - GLADOS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#repository-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GLADOS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              (Old) Repository Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GLADOS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About GLADOS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorial
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/usage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/local_testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Local GLADOS Installation (Updated Nov 2024)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/developer_installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/developer_deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation/guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Updating Documentation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Infrastructure
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Infrastructure
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../infrastructure/kubernetes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kubernetes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../infrastructure/vms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    VMs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developer Help
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developerhelp/helpful_commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helpful Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cheatsheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cheatsheet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    (Old) Repository Guide
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    (Old) Repository Guide
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#github-projects-task-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      Github Projects Task Board
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions-continuous-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Actions Continuous Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub Actions Continuous Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#node-testyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      node-test.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-testyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      python-test.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dockeryml" class="md-nav__link">
+    <span class="md-ellipsis">
+      docker.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staleyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      stale.yml
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repo-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repo Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#typescript" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typescript
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next.js
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodejs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node.js
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-version-manager-and-its-windows-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node Version Manager (and its windows variant)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-package-manager-npm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node Package Manager NPM
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Node Package Manager NPM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#updating-project-node-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Project Node Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mantine-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mantine forms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailwind-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tailwind CSS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eslint" class="md-nav__link">
+    <span class="md-ellipsis">
+      ESLint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backend
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-38-basic-types-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python (3.8, basic types support)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pyenv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipenv-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pipenv and dependencies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pipenv and dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#updating-project-python-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Project Python Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pylint-linter" class="md-nav__link">
+    <span class="md-ellipsis">
+      pylint (linter)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yapf-auto-formatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      yapf (auto-formatter)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Runner
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java Runner
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Firebase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Firebase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firestore-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Firestore Database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firestore" class="md-nav__link">
+    <span class="md-ellipsis">
+      Firestore
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mongodb-experiment-data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      MongoDB Experiment Data Storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-swarm-vs-kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Swarm vs Kubernetes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glados-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      GLADOS Server
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#github-projects-task-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      Github Projects Task Board
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions-continuous-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Actions Continuous Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub Actions Continuous Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#node-testyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      node-test.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-testyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      python-test.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dockeryml" class="md-nav__link">
+    <span class="md-ellipsis">
+      docker.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staleyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      stale.yml
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repo-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repo Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#typescript" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typescript
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next.js
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodejs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node.js
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-version-manager-and-its-windows-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node Version Manager (and its windows variant)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-package-manager-npm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node Package Manager NPM
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Node Package Manager NPM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#updating-project-node-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Project Node Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mantine-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mantine forms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailwind-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tailwind CSS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eslint" class="md-nav__link">
+    <span class="md-ellipsis">
+      ESLint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backend
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-38-basic-types-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python (3.8, basic types support)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pyenv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipenv-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pipenv and dependencies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pipenv and dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#updating-project-python-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Project Python Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pylint-linter" class="md-nav__link">
+    <span class="md-ellipsis">
+      pylint (linter)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yapf-auto-formatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      yapf (auto-formatter)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Runner
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java Runner
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Firebase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Firebase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firestore-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Firestore Database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firestore" class="md-nav__link">
+    <span class="md-ellipsis">
+      Firestore
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mongodb-experiment-data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      MongoDB Experiment Data Storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-swarm-vs-kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Swarm vs Kubernetes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glados-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      GLADOS Server
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="repository-guide">Repository Guide</h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This document is out of date, originating from the 2022-23 team, and is currently being migrated. There are some broken links, and some unfinished content. </p>
+</div>
+<p>In order to keep the entire codebase in sync as it is developed,
+we have opted to organize every service into a singular monorepo.</p>
+<p>The top level repository folder does not contain any projects on its own
+outside of various configuration files, convenience scripts, and GitHub actions.</p>
+<!-- As described in the [Development Containers section](#development-containers),
+you can edit a service via its development container,
+which will automatically take care of any required dependencies for you. -->
+
+<p>Next, we'll break down the role of each portion of the system,
+what technologies it uses, and why it exists.</p>
+<blockquote>
+<p>This section is currently partly in the <a href="https://docs.google.com/document/d/1EcsoAmEUo8DS7LGOQmBP4Fj7Hs4RnHHUcwrb0x5Ec6g/edit#heading=h.7ni5k7zcz0fu">Project Plan document</a>, and will be expanded upon here later when the details are finalized.</p>
+</blockquote>
+<p>TODO embed image of system diagram</p>
+<h2 id="github-projects-task-board">Github Projects Task Board</h2>
+<ul>
+<li>New: Needs clarification with teammates and/or client</li>
+<li>Consult Jason: specifically awaiting info from or attention of client</li>
+<li>Backlog: Stuff we could do but don't plan to work on soon</li>
+<li>Ready: Stuff we could do and do plan to work on soon</li>
+<li>In Progress: Stuff we're actively working on (move it back to Ready if you aren't)</li>
+<li>In Review: Stuff we've finished but need to check it over next client meeting</li>
+<li>Done: Stuff we've finished and client has checked it over</li>
+<li>Eventually: Stretch goals and/or stuff that won't happen for a while</li>
+</ul>
+<p>Tried it out over Trello because it would keep the information tied to our repo</p>
+<p>Github Milestones system used to keep track of when tasks are supposed to be due, it kinda sucks because you can't say "I want it due this day" unless you have a milestone for that day. Access it from the Github issues page as a tiny button, or here <a href="https://github.com/AutomatingSciencePipeline/Monorepo/milestones">https://github.com/AutomatingSciencePipeline/Monorepo/milestones</a></p>
+<p>We are using a monorepo partly because Milestones are repo-specific</p>
+<h2 id="github-actions-continuous-integration">GitHub Actions Continuous Integration</h2>
+<p>You can learn more about CI's relevance to our repo here: <a href="./GitHub-CI-Quick-Links">Understanding GitHub CI</a>.</p>
+<p>This section explains each of the files in our repo's <code>/.github/workflows</code> folder and why they exist.</p>
+<h3 id="node-testyml">node-test.yml</h3>
+<p>Success is required before PRs can be merged into main.</p>
+<ul>
+<li>Ensures there are no compile errors</li>
+<li>Runs ESLint (code style and bug early detection)</li>
+<li>Performs typescript type checking (bug early detection)</li>
+<li>Runs our unit tests</li>
+</ul>
+<h3 id="python-testyml">python-test.yml</h3>
+<p>Success is required before PRs can be merged into main.</p>
+<ul>
+<li>Ensures there are no compile errors</li>
+<li>Runs pylint (code style and bug early detection)</li>
+<li>Runs our unit tests</li>
+</ul>
+<h3 id="dockeryml">docker.yml</h3>
+<p>Success is required before PRs can be merged into main.</p>
+<p>Ensures that the production docker images can be built successfully.</p>
+<h3 id="staleyml">stale.yml</h3>
+<p>Posts a comment and applies a label to our GitHub issues if we haven't modified them in a while.</p>
+<h2 id="repo-setup">Repo Setup</h2>
+<p>TODO Talk about why the bash setup scripts exist and why devcontainers only half worked (the editor side needs ALL dependencies of every component installed for editor tooling to work)</p>
+<p>Shellcheck linter for bash scripts</p>
+<p>Check the gitattributes file for various settings and explanations of why they are that way</p>
+<p>Github Wiki as a git sub module so it's easier to edit in editor and as you work (see the Contributing page "Local Copy of the Docs" section)</p>
+<p>Markdownlint</p>
+<p>VSCode with suggested extensions and workspace config as a middle ground</p>
+<h2 id="docker">Docker</h2>
+<p>TODO</p>
+<p>We've been using windows host machines exclusively, it's important to note that windows/linux hosts have different capabilities on some levels, ex. I (Rob) don't think linux machines can run Windows container images, but not certain</p>
+<p>Glados server is a linux host</p>
+<h2 id="frontend">Frontend</h2>
+<h3 id="typescript">Typescript</h3>
+<p>Javascript but better</p>
+<p>Type safety, can get kinda annoying, but catches a lot of mistakes at editor time rather than runtime</p>
+<h3 id="nextjs">Next.js</h3>
+<p>We're using it because the past team was.</p>
+<p>Framework built on top of React</p>
+<p>Offers a bunch of optimization stuff like server-side componenets that we aren't really using</p>
+<h3 id="nodejs">Node.js</h3>
+<p>Server-side javascript, the frontend web server is implemented using this</p>
+<p>Required by Next.js</p>
+<p>The version of Node.js installed by the dev install script is set in <code>variables.sh</code></p>
+<h3 id="node-version-manager-and-its-windows-variant">Node Version Manager (and its windows variant)</h3>
+<p>Installs Node for you without conflicting with other installs on your machine.</p>
+<p>Dev install script should handle it for you.</p>
+<h3 id="node-package-manager-npm">Node Package Manager NPM</h3>
+<p>Installs node dependencies.</p>
+<p>Unclear if using pnpm or yarn would have much of a performance benefit over npm because we already use Node Version Manager</p>
+<h4 id="updating-project-node-dependencies">Updating Project Node Dependencies</h4>
+<p>See the page <a href="https://github.com/AutomatingSciencePipeline/Monorepo/wiki/Updating-Project-Node-Dependencies">Updating Project Node Dependencies</a> for more details.</p>
+<h3 id="mantine-forms">Mantine forms</h3>
+<p>This is currently behind a major versions, we should™ update it</p>
+<h3 id="tailwind-css">Tailwind CSS</h3>
+<p>We're using it because the past team was. Not super attached.</p>
+<p>Sorta like boostrap where it has a bunch of css classes that are named based on what css properties they apply</p>
+<h3 id="eslint">ESLint</h3>
+<h2 id="backend">Backend</h2>
+<p>It currently serves as the only experiment runner</p>
+<h3 id="python-38-basic-types-support">Python (3.8, basic types support)</h3>
+<p>The version of Python installed by the dev install script is set in <code>variables.sh</code></p>
+<h3 id="pyenv">Pyenv</h3>
+<p>We use <code>Pyenv</code> to install python on the host machine, the dev install script will handle it for you.</p>
+<h3 id="pipenv-and-dependencies">Pipenv and dependencies</h3>
+<p>We're using <code>Pipenv</code> to manage our python virtual environment and package installs because:</p>
+<ul>
+<li>We don't always want builds of the containers include the latest versions of packages, or else <a href="https://github.com/AutomatingSciencePipeline/Monorepo/issues/129">stuff like this happens</a>.</li>
+<li>We have a package that only needs to be installed on Windows (see the Pipfile for more info)</li>
+</ul>
+<p>We're using it instead of <code>pip freeze</code> because that approach would need multiple freeze files (normal, windows-specific, etc).</p>
+<h4 id="updating-project-python-dependencies">Updating Project Python Dependencies</h4>
+<p>TODO As described above, we're using <code>pipenv</code> to manage python dependencies. Usage info can be found <a href="https://pipenv.pypa.io/en/latest/basics/#general-recommendations-version-control">here</a>.</p>
+<p>To install new python dependencies,
+make sure you're in the backend app folder, then
+use <code>pipenv install</code> instead of <code>pip install</code>.</p>
+<p>To install new dev dependencies use the <code>--dev</code> flag, for example, <code>pipenv install --dev pytest</code> to add pytest</p>
+<p>The lockfile should be updated automatically when you use <code>pipenv install</code>, but in case you need to make one manually, use <code>pipenv lock</code>.</p>
+<p>If you encounter a merge conflict on Pipfile.lock, regenerate a new copy via <code>pipenv lock</code> (see <a href="https://github.com/pypa/pipenv/issues/1389#issuecomment-423296700">here</a> and <a href="https://dev.to/rrees/resolving-git-conflicts-in-pipenv-lockfiles-2g03">here</a>)</p>
+<h3 id="pylint-linter">pylint (linter)</h3>
+<p>The config file for this is currently in repo root</p>
+<h3 id="yapf-auto-formatter">yapf (auto-formatter)</h3>
+<h2 id="python-runner">Python Runner</h2>
+<p>TODO</p>
+<p>Currently the backend serves this role</p>
+<h2 id="java-runner">Java Runner</h2>
+<p>TODO</p>
+<p>Currently the backend serves this role</p>
+<h2 id="firebase">Firebase</h2>
+<p>Ideally this will be removed from the system eventually because it is not open source</p>
+<p>Free plan</p>
+<p>Our client is a firebase console admin and can add/remove people on the project.</p>
+<p><a href="https://console.firebase.google.com/u/0/project/gladosbase/overview">https://console.firebase.google.com/u/0/project/gladosbase/overview</a></p>
+<p>Replaced self-hosted Supabase used by the past team.</p>
+<p>In the interest of getting a running prototype, since deciphering the past team’s Supabase configuration was blocking meaningful progress elsewhere.</p>
+<h3 id="authentication">Authentication</h3>
+<p>Not the end-goal solution for auth, but a great middle ground for now.</p>
+<h3 id="firestore-database">Firestore Database</h3>
+<p>We are using the firestore 'subscribe to data' feature on the frontend</p>
+<p>Can't keep everything in here because of storage + read/write usage costs</p>
+<p>Some of the data here could be moved to MongoDB</p>
+<h3 id="firestore">Firestore</h3>
+<p>In the process of being replaced with MongoDB</p>
+<p>Holds experiment source code and experiment results/logs for download via the frontend</p>
+<h2 id="mongodb-experiment-data-storage">MongoDB Experiment Data Storage</h2>
+<p>TODO @Brian</p>
+<h2 id="docker-swarm-vs-kubernetes">Docker Swarm vs Kubernetes</h2>
+<p>TODO</p>
+<p>Have to pick which distributed system platform will work best</p>
+<p>We ran into issues with having both linux and windows host machines on docker swarm (which means we couldn't have both Glados Server and our own dev machines contributing computing power), unclear if kube will allow this or not</p>
+<h2 id="glados-server">GLADOS Server</h2>
+<p>Linux machine that is the docker host for the deployed system (nothing runs at system level, it's all inside docker)</p>
+<p>Hosted in the rose CSSE department</p>
+<p>See <a href="./Connecting-To-Glados">Connecting to the GLADOS Server</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
