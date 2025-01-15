@@ -57,6 +57,16 @@ export const InformationStep = ({ form, ...props }) => {
 						/>
 					</div>
 				</InputSection>
+				<InputSection header={"Executable File (leave empty if not using zip)"}>
+					<div className='sm:col-span-4'>
+						<input
+							type='text'
+							placeholder='Name and extension of the executable file, relative to the root of the zip file'
+							{...form.getInputProps('experimentExecutable')}
+							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+						/>
+					</div>
+				</InputSection>
 				<InputSection header={'Keep Logs'}>
 					<div className='sm:col-span-4'>
 						<input
