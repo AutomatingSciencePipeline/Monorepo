@@ -121,9 +121,9 @@ def generate_config_files(experiment: ExperimentData):
 
     for permutation in permutations:
         configItems = {}
+        configItems.update(constants)
         for name, value in permutation.items():
             configItems[name] = value
-        configItems.update(constants)
         configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
         explogger.info(f'Generated config {configIdNumber}')
         configIdNumber += 1
