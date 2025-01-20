@@ -81,4 +81,5 @@ export interface ExperimentData {
     passes: number;
     fails: number;
     totalExperimentRuns: number;
+    experimentExecutable: string;
 }
