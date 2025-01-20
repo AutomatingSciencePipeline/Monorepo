@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -41,6 +41,13 @@ const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
 	{ name: 'Sign out', href: '#' },
 ];
+
+enum ExperimentTypes {
+	AddNums = 1,
+	MultiString = 2,
+	GeneticAlgorithm = 3,
+}
+
 const projects = [
 	{
 		name: 'SwarmNeuralNetwork',
@@ -224,7 +231,7 @@ export default function DashboardPage() {
 		const toastType = searchParams!.get('toastType');
 		if (toastMessage && toastType) {
 			toast[toastType === 'success' ? 'success' : 'error'](decodeURIComponent(toastMessage), { duration: 5000 });
-		
+
 			// Clear the query params
 			const newUrl = new URL(window.location.href);
 			newUrl.searchParams.delete('toastMessage');
@@ -298,6 +305,25 @@ export default function DashboardPage() {
 	const [copyID, setCopyId] = useState<string>(null as unknown as string); // TODO refactor copy system to not need this middleman
 	const [formState, setFormState] = useState(FormStates.Closed);
 	const [label, setLabel] = useState('New Experiment');
+	const [isDefault, setIsDefault] = useState(false);
+	const [selectedExperimentType, setSelectedExperimentType] = useState<ExperimentTypes | null>(null);
+
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const handleDefaultExperiment = () => {
+		setIsModalOpen(true);
+	};
+
+	const selectExperiment = (defaultExpNum: ExperimentTypes) => {
+		setFormState(FormStates.Params);
+		setCopyId("DefaultExp");
+		setIsDefault(true);
+		setIsModalOpen(false);
+		setSelectedExperimentType(defaultExpNum); // Set selected experiment type here
+		console.log("IN SELECT EXPERIMENT");
+		console.log("experimentTypeNum: ", defaultExpNum);
+	};
+
 	useEffect(() => {
 		if (formState === FormStates.Closed) {
 			setLabel('New Experiment');
@@ -414,6 +440,91 @@ export default function DashboardPage() {
 													TEMP Manual Query
 												</button>
 											</div>
+											<div className='flex items-center space-x-2'>
+												<>
+													<button
+														type="button"
+														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+														onClick={handleDefaultExperiment}>
+														Run a Default Experiment
+													</button>
+													<Transition appear show={isModalOpen} as={Fragment}>
+														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
+															<Transition.Child
+																as={Fragment}
+																enter="ease-out duration-300"
+																enterFrom="opacity-0"
+																enterTo="opacity-100"
+																leave="ease-in duration-200"
+																leaveFrom="opacity-100"
+																leaveTo="opacity-0"
+															>
+																<div className="fixed inset-0 bg-black bg-opacity-25" />
+															</Transition.Child>
+
+															<div className="fixed inset-0 overflow-y-auto">
+																<div className="flex min-h-full items-center justify-center p-4 text-center">
+																	<Transition.Child
+																		as={Fragment}
+																		enter="ease-out duration-300"
+																		enterFrom="opacity-0 scale-95"
+																		enterTo="opacity-100 scale-100"
+																		leave="ease-in duration-200"
+																		leaveFrom="opacity-100 scale-100"
+																		leaveTo="opacity-0 scale-95"
+																	>
+																		<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+																			<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+																				Select Default Experiment
+																			</Dialog.Title>
+																			<div className="mt-2">
+																				<p className="text-sm text-gray-500">
+																					Please select the type of default experiment you want to run.
+																				</p>
+																			</div>
+
+																			<div className="mt-4 flex flex-col space-y-2">
+																				<button
+																					type="button"
+																					className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+																					onClick={() => selectExperiment(ExperimentTypes.AddNums)}
+																				>
+																					Add Nums (Python)
+																				</button>
+																				<button
+																					type="button"
+																					className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+																					onClick={() => selectExperiment(ExperimentTypes.MultiString)}
+																				>
+																					Multistring Testing (Python)
+																				</button>
+																				<button
+																					type="button"
+																					className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+																					onClick={() => selectExperiment(ExperimentTypes.GeneticAlgorithm)}
+																				>
+																					Genetic Algorithm
+																				</button>
+																			</div>
+																		</Dialog.Panel>
+																	</Transition.Child>
+																</div>
+															</div>
+														</Dialog>
+													</Transition>
+													{selectedExperimentType && (
+														<NewExperiment
+															formState={formState}
+															setFormState={setFormState}
+															copyID={copyID}
+															setCopyId={setCopyId}
+															isDefault={isDefault}
+															setIsDefault={setIsDefault}
+															selectedExperiment={selectedExperimentType}
+														/>
+													)}
+												</>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -429,9 +540,9 @@ export default function DashboardPage() {
 							onDeleteExperiment={(experimentId) => {
 								// deleteExperiment(experimentId);
 								deleteDocumentById(experimentId).then(() => {
-									toast.success("Deleted experiment!", {duration: 1500});
+									toast.success("Deleted experiment!", { duration: 1500 });
 								}).catch((reason) => {
-									toast.error(`Failed delete, reason: ${reason}`, {duration: 1500});
+									toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
 									console.log(`Failed delete, reason: ${reason}`);
 								});
 							}} />
@@ -487,12 +598,17 @@ export default function DashboardPage() {
 							</div>
 						</div>
 					</div>
-					<NewExperiment
-						formState={formState}
-						setFormState={setFormState}
-						copyID={copyID}
-						setCopyId={setCopyId}
-					/>
+					{!isDefault && (
+						<NewExperiment
+							formState={formState}
+							setFormState={setFormState}
+							copyID={copyID}
+							setCopyId={setCopyId}
+							isDefault={false} // Mark it as regular experiment
+							setIsDefault={setIsDefault}
+							selectedExperiment={null} // or pass existing experiment for editing
+						/>
+					)}
 				</div>
 			</div>
 		</>
