@@ -1,6 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { ExperimentData } from './db_types';
 import { ResultsCsv, ProjectZip } from '../lib/mongodb_types';
+import {getDocumentFromId} from "./mongodb_funcs";
 
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
@@ -31,14 +32,6 @@ const downloadArbitraryFile = (url: string, name: string) => {
 	document.body.removeChild(anchor);
 };
 
-const fetchExperimentDetails = async (expId: string) => {
-	const response = await fetch(`/api/experiments/get/${expId}`);
-	if (!response.ok) {
-		throw new Error(`Failed to fetch experiment details: ${response.status}`);
-	}
-	return response.json();
-};
-
 const formatFilename = (name: string, timestamp: string, extension: string) => {
 	const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
 	const formattedTimestamp = new Date(timestamp).toISOString().replace(/[:.]/g, '-');
@@ -47,8 +40,20 @@ const formatFilename = (name: string, timestamp: string, extension: string) => {
 
 export const downloadExperimentResults = async (expId: string) => {
 	console.log(`Downloading results for ${expId}...`);
-	// TODO: Figure out why it is waiting forever.
-	const { expName, expStartedAt } = await fetchExperimentDetails(expId);
+	// const { expName, expStartedAt } = await fetchExperimentDetails(expId);
+
+	// getDocumentFromId(expId).then(expDoc => {
+	// 	if (expDoc) {
+	// 		const expName = expDoc.name;
+	// 		const expStartedAt = expDoc.startedAt;
+	// 	}
+	// }).catch(error => {
+	// 	console.error(`Error fetching experiment document: ${error}`)
+	// });
+
+	const expDoc = await getDocumentFromId(expId);
+	const expName = expDoc['name'];
+	const expCreated = expDoc['created'];
 
 	await fetch(`/api/download/csv/${expId}`).then((response) => {
 		if (response?.ok) {
@@ -59,9 +64,7 @@ export const downloadExperimentResults = async (expId: string) => {
 		console.log(record);
 		const csvContents = record.resultContent;
 		const url = `data:text/plain;charset=utf-8,${encodeURIComponent(csvContents)}`;
-		const filename = formatFilename(expName, expStartedAt, 'csv');
-		// TODO: Remove console.log
-		console.log(filename)
+		const filename = formatFilename(expName, expCreated, 'csv');
 		downloadArbitraryFile(url, filename);
 	}).catch((response: Response) => {
 		console.warn('Error downloading results', response.status);
@@ -77,7 +80,10 @@ export const downloadExperimentResults = async (expId: string) => {
 
 export const downloadExperimentProjectZip = async (expId: string) => {
 	console.log(`Downloading project zip for ${expId}...`);
-	const { name, startedAt } = await fetchExperimentDetails(expId);
+
+	const expDoc = await getDocumentFromId(expId);
+	const expName = expDoc['name'];
+	const expCreated = expDoc['created'];
 
 	await fetch(`/api/download/zip/${expId}`).then((response) => {
 		if (response?.ok) {
@@ -88,9 +94,7 @@ export const downloadExperimentProjectZip = async (expId: string) => {
 		console.log(record);
 		const zipContents = record.fileContent;
 		const url = `data:text/plain;base64,${encodeURIComponent(zipContents)}`;
-		const filename = formatFilename(name, startedAt, 'zip');
-		// TODO: Remove console.log
-		console.log(filename)
+		const filename = formatFilename(expName, expCreated, 'zip');
 		downloadArbitraryFile(url, filename);
 	}).catch((response: Response) => {
 		console.warn('Error downloading results', response.status);
