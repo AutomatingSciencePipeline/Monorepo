@@ -34,22 +34,24 @@ const downloadArbitraryFile = (url: string, name: string) => {
 
 const formatFilename = (name: string, timestamp: string, extension: string) => {
 	const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
-	const formattedTimestamp = new Date(timestamp).toISOString().replace(/[:.]/g, '-');
-	return `${formattedName}_${formattedTimestamp}.${extension}`;
+	const formattedTimestamp = formatTimestamp(timestamp);
+	return `${formattedName}=>${formattedTimestamp}.${extension}`;
+};
+
+const formatTimestamp = (timestamp: string) => {
+	const partiallyFormattedTimestamp = new Date(timestamp).toISOString().replace(/[:.]/g, '-');
+	let formatted = partiallyFormattedTimestamp.replace(/Z$/, '');
+	formatted = formatted.replace('T', '_');
+	const [date, time] = formatted.split('_');
+	const timeParts = time.split('-');
+	let hours = parseInt(timeParts[0], 10) - 5;
+	timeParts[0] = hours.toString();
+	const formattedTime = timeParts.join('-');
+	return `${date}_${formattedTime}`;
 };
 
 export const downloadExperimentResults = async (expId: string) => {
 	console.log(`Downloading results for ${expId}...`);
-	// const { expName, expStartedAt } = await fetchExperimentDetails(expId);
-
-	// getDocumentFromId(expId).then(expDoc => {
-	// 	if (expDoc) {
-	// 		const expName = expDoc.name;
-	// 		const expStartedAt = expDoc.startedAt;
-	// 	}
-	// }).catch(error => {
-	// 	console.error(`Error fetching experiment document: ${error}`)
-	// });
 
 	const expDoc = await getDocumentFromId(expId);
 	const expName = expDoc['name'];
