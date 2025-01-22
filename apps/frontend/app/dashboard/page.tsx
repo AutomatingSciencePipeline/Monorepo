@@ -27,9 +27,14 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/'
+const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
+const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
+
+const REPORT_DESCRIPT = 'Report an issue you have encountered to our Google Forms.';
+const HELP_DESCRIPT = 'Open the GLADOS docs to learn how to use the application.';
 
 const navigation = [
+	{ name: 'Report', href: REPORT_GOOGLE_FORM_LINK, current: false },
 	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false }
 ];
 const userNavigation = [
@@ -91,9 +96,16 @@ const Navbar = (props) => {
 											<a
 												key={item.name}
 												href={item.href}
-												target={item.name === 'Help' ? '_blank' : '_self'}
+												target={['Help', 'Report'].includes(item.name) ? '_blank' : '_self'}
 												className='px-3 py-2 rounded-md text-sm font-medium text-blue-200 hover:text-white'
 												aria-current={item.current ? 'page' : undefined}
+												title={
+													item.name === 'Help'
+														? HELP_DESCRIPT
+														: item.name === 'Report'
+															? REPORT_DESCRIPT
+															: ''
+												}
 											>
 												{item.name}
 											</a>
@@ -164,7 +176,7 @@ const Navbar = (props) => {
 									key={item.name}
 									as='a'
 									href={item.href}
-									target={item.name === 'Help' ? '_blank' : '_self'}
+									target={['Help', 'Report'].includes(item.name) ? '_blank' : '_self'}
 									className={classNames(
 										item.current ?
 											'text-white bg-blue-800' :
@@ -172,6 +184,13 @@ const Navbar = (props) => {
 										'block px-3 py-2 rounded-md text-base font-medium'
 									)}
 									aria-current={item.current ? 'page' : undefined}
+									title={
+										item.name === 'Help'
+											? HELP_DESCRIPT
+											: item.name === 'Report'
+												? REPORT_DESCRIPT
+												: ''
+									}
 								>
 									{item.name}
 								</Disclosure.Button>
