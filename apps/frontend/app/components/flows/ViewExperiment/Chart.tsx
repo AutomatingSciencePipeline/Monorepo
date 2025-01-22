@@ -20,20 +20,24 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
     const [xAxis, setXAxis] = useState('X');
-    //const [yAxis, setYAxis] = useState('Y');
+    const [aggregateMode, setAggregateMode] = useState('sum');
     const [headers, setHeaders] = useState<string[]>([]);
     const [img, setImg] = useState<string>('');
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [aggregateData, setAggregateData] = useState(false);
+    const [canAggregate, setCanAggregate] = useState(true);
 
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
     };
 
-    const setLineChart = () => setChartType('line');
-    const setBarChart = () => setChartType('bar');
-    const setPieChart = () => setChartType('pie');
-    const setBoxPlot = () => setChartType('boxplot');
-    const setViolin = () => setChartType('violin');
+    const setLineChart = () => { setChartType('line'); setCanAggregate(true); }
+    const setBarChart = () => { setChartType('bar'); setCanAggregate(true); }
+    const setPieChart = () => { setChartType('pie'); setCanAggregate(true); }
+    const setBoxPlot = () => { setChartType('boxplot'); setCanAggregate(false); }
+    const setViolin = () => { setChartType('violin'); setCanAggregate(false); }
+
+    const aggregateModes = ['sum', 'count', 'average', 'median', 'mode']
 
     useEffect(() => {
         fetch(`/api/download/csv/${project.expId}`).then((response) => response.json()).then((record) => {
@@ -61,41 +65,119 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     const parseCSV = (data) => {
         const rows = data.trim().split('\n');
-        const headers = rows[0].split(',');
-
-        const xList = [] as any[];
-        const yLists = [] as any[];
-
-        var xIndex = 0;
-        for (let i = 0; i < headers.length; i++) {
-            yLists.push([]);
-            if (headers[i] === xAxis) {
-                xIndex = i;
-            }
-        }
-
-        yLists.splice(xIndex, 1);
+        const headers = rows[0].split(',') as string[];
+        //Create a dictionary to store the data
+        const dataDict = {} as any;
+        const splitRows = [] as any;
 
         for (let i = 1; i < rows.length; i++) {
-            const cols = rows[i].split(',');
-            xList.push(cols[xIndex]);
-            for (let j = 0; j < cols.length; j++) {
-                if (j < xIndex) {
-                    yLists[j].push(cols[j]);
+            // Split the row by commas when not inside quotes
+            const row = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            for (let j = 0; j < row.length; j++) {
+                const val = row[j].replace(/"/g, '');
+                // If the value is a number, convert it to a number
+                if (!isNaN(val)) {
+                    row[j] = parseFloat(val);
                 }
-                else if (j > xIndex) {
-                    yLists[j - 1].push(cols[j]);
-                }
+            }
+            splitRows.push(row);
+        }
+
+        // Initialize dataDict with arrays
+        for (let i = 0; i < headers.length; i++) {
+            dataDict[headers[i]] = [];
+        }
+
+        // Iterate through the rows and put them under the correct header
+        for (let i = 1; i < splitRows.length; i++) {
+            for (let j = 0; j < splitRows[i].length; j++) {
+                dataDict[headers[j]].push(splitRows[i][j]);
             }
         }
 
-        return { headers, xList, yLists, xIndex };
+        //Remove items with empty arrays
+        for (let i = 0; i < headers.length; i++) {
+            if (dataDict[headers[i]].length == 0) {
+                delete dataDict[headers[i]];
+            }
+        }
+
+        const returnHeaders = Object.keys(dataDict);
+        const xIndex = headers.indexOf(xAxis);
+        const xList = headers.includes(xAxis) ? dataDict[xAxis] : dataDict[headers[0]];
+        const yLists = headers.map((header) => dataDict[header]);
+
+        //If we need to aggregate the data, go through and sum the values of duplicates
+        if (aggregateData && chartType != 'boxplot' && chartType != 'violin') {
+            const uniqueX = Array.from(new Set(xList));
+            const uniqueY = [] as any[];
+            for (let i = 0; i < yLists.length; i++) {
+                const yList = yLists[i];
+                const uniqueYList = [] as any[];
+                for (let j = 0; j < uniqueX.length; j++) {
+                    const x = uniqueX[j];
+                    const indices = xList.reduce((acc, e, i) => (e === x ? acc.concat(i) : acc), []);
+                    if (aggregateMode == 'sum') {
+                        const sum = indices.reduce((acc, e) => acc + yList[e], 0);
+                        uniqueYList.push(sum);
+                    }
+                    else if (aggregateMode == 'count') {
+                        uniqueYList.push(indices.length);
+                    }
+                    else if (aggregateMode == 'average') {
+                        const sum = indices.reduce((acc, e) => acc + yList[e], 0);
+                        uniqueYList.push(sum / indices.length);
+                    }
+                    else if (aggregateMode == 'median') {
+                        const values = indices.map((e) => yList[e]);
+                        values.sort((a, b) => a - b);
+                        const half = Math.floor(values.length / 2);
+                        if (values.length % 2) {
+                            uniqueYList.push(values[half]);
+                        }
+                        else {
+                            uniqueYList.push((values[half - 1] + values[half]) / 2.0);
+                        }
+                    }
+                    else if (aggregateMode == 'mode') {
+                        const values = indices.map((e) => yList[e]);
+                        const mode = values.sort((a, b) =>
+                            values.filter((v) => v === a).length - values.filter((v) => v === b).length
+                        ).pop();
+                        uniqueYList.push(mode);
+                    }
+                }
+                uniqueY.push(uniqueYList);
+            }
+            return { returnHeaders, xList: uniqueX, yLists: uniqueY, xIndex };
+        };
+
+        //These need to be formatted like
+        // {label: 'x1', data: [[1, 2, 3], [3, 4, 5]]}
+        if (chartType == 'boxplot' || chartType == 'violin') {
+            const uniqueX = Array.from(new Set(xList));
+            const uniqueY = [] as any[];
+            for (let i = 0; i < yLists.length; i++) {
+                const yList = yLists[i];
+                const uniqueYList = [] as any[];
+                for (let j = 0; j < uniqueX.length; j++) {
+                    const x = uniqueX[j];
+                    const indices = xList.reduce((acc, e, i) => (e === x ? acc.concat(i) : acc), []);
+                    const values = indices.map((e) => yList[e]);
+                    uniqueYList.push(values);
+                }
+                uniqueY.push(uniqueYList);
+            }
+            return { returnHeaders, xList: uniqueX, yLists: uniqueY, xIndex };
+        }
+        return { returnHeaders, xList, yLists, xIndex };
     };
+
 
     const generateColors = (numColors) => {
         const colors = [] as string[];
         for (let i = 0; i < numColors; i++) {
-            const color = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`;
+            const color = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.4)`;
             colors.push(color);
         }
         return colors;
@@ -103,7 +185,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { headers, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
+            const { returnHeaders, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
+            const headers = returnHeaders;
             const colors = generateColors(xList.length);
             const ctx = document.getElementById('myChart') as HTMLCanvasElement;
             if (chartInstance) {
@@ -124,7 +207,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 borderColor: colors,
                 backgroundColor: colors
             }));
-
 
             const newChartInstance = new Chart(ctx, {
                 type: chartType,
@@ -156,13 +238,42 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                             setImg(newChartInstance.toBase64Image());
                         }
                     }
-                }
+                },
+                //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
+                plugins: [{
+                    id: 'custom_canvas_background_color',
+                    beforeDraw: (chart) => {
+                        const ctx = chart.canvas.getContext('2d') as any;
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'destination-over';
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, chart.canvas.width, chart.canvas.height);
+                        ctx.restore();
+                    }
+                }]
             });
+
+            //Set all of the datasets to be unselected
+            //If it is a pie chart you have to use meta
+            if (chartType == 'pie') {
+                var meta = newChartInstance.getDatasetMeta(0);
+                meta.data.forEach(function (ds) {
+                    (ds as any).hidden = true;
+                });
+            }
+            else {
+                newChartInstance.data.datasets.forEach((dataset) => {
+                    dataset.hidden = true;
+                });
+            }
+            newChartInstance.update();
+            console.log(newChartInstance?.data.datasets);
+
             setChartInstance(newChartInstance);
 
             setHeaders(headers);
         }
-    }, [loading, experimentChartData, chartType, xAxis, isFullscreen]);
+    }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData, aggregateMode]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
@@ -181,12 +292,12 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 <button onClick={setPieChart} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
                     Pie Chart
                 </button>
-                {/* <button onClick={setBoxPlot} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
+                <button onClick={setBoxPlot} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
                     Box Plot
                 </button>
                 <button onClick={setViolin} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
                     Violin Plot
-                </button> */}
+                </button>
             </div>
             <div
                 className={isFullscreen ? 'p-4 h-[65vh]' : 'p-4 h-[50vh]'}>
@@ -201,22 +312,45 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             </div>
             <div className='p-4'>
                 <p className="font-bold">X-Axis Column:</p>
-                <fieldset>
+                <select
+                    className="p-2 border rounded-md font-bold w-auto"
+                    onChange={(e) => setXAxis(e.target.value)}
+                    name="xaxis"
+                    defaultValue={headers[0]}
+                >
                     {headers.map((header) => (
-                        <div key={header} className="p-1">
-                            <input
-                                type="radio"
-                                id={header}
-                                onChange={() => setXAxis(header)}
-                                name="xaxis"
-                                value={header}
-
-                            />
-                            <label htmlFor={header} className="font-bold pl-2">{header}</label>
-                        </div>
+                        <option key={header} value={header}>
+                            {header}
+                        </option>
                     ))}
-                </fieldset>
+                </select>
+
             </div>
+            {canAggregate && <div className='p-4'>
+                <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
+                <input className='p-2' id='aggregate-data-box' type="checkbox" checked={aggregateData} onChange={() => setAggregateData(!aggregateData)}></input>
+                {
+                    aggregateData ?
+                        (<div className='p-4'>
+                            <select
+                                id='aggregate-select'
+                                className="p-2 border rounded-md font-bold w-auto"
+                                disabled={!aggregateData}
+                                name="aggregate"
+                                defaultValue='sum'
+                                onChange={(e) => setAggregateMode(e.target.value)}
+                            >
+                                {aggregateModes.map((mode) => (
+                                    <option key={mode} value={mode}>
+                                        {mode}
+                                    </option>
+                                ))}
+                            </select>
+                            <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
+                        </div>)
+                        : null
+                }
+            </div>}
             <button onClick={downloadImage} className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'>
                 Download Image
             </button>

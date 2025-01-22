@@ -1,59 +1,49 @@
-# FROM node:20.6 AS base
-
-# WORKDIR /app
-
-# COPY . /app
-
-# RUN npm install
-
-# RUN npm run build
-
-# EXPOSE $FRONTEND_WEBSERVER_PORT
-
-# CMD ["npm", "start"]
-
 FROM node:20-alpine AS base
 
-FROM base AS deps
-
+# Add essential utilities
 RUN apk add --no-cache bash libc6-compat
-WORKDIR /app 
 
-COPY package.json ./
+WORKDIR /app
 
-RUN npm update && npm install
+# Install dependencies
+FROM base AS deps
+COPY package.json package-lock.json ./
+RUN npm install -g pnpm
+RUN pnpm import
+RUN pnpm install --frozen-lockfile
 
-# Install this to optimize images
-RUN npm i sharp
+# Install sharp to optimize images
+RUN pnpm add sharp
 
-# If you want yarn update and  install uncomment the bellow
-
-# RUN yarn install &&  yarn upgrade
-
+# Build the application
 FROM base AS builder
+RUN npm install -g pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN pnpm run build
 
-RUN npm run build
-
+# Prepare the production image
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
 
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy necessary files
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Ensure proper ownership for next.js
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
+# Expose the frontend port
 EXPOSE $FRONTEND_WEBSERVER_PORT
 
 CMD ["node", "server.js"]

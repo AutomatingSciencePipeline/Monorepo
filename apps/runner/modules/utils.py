@@ -160,7 +160,7 @@ def _call_backend(url, payload, log_msg):
     try:
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code == 200:
-            result_id = response.json().get('_id')
+            result_id = response.json().get('id')
             if result_id:
                 explogger.info(f"{log_msg}: {result_id}")
             else:

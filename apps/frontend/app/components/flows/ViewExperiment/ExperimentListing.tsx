@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
-import { addShareLink, unfollowExperiment, updateExperimentNameById } from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 
@@ -248,13 +248,28 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				</button> */}
 				{
 					project.creator == session?.user?.id! ?
-						<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={() => {
-								openDeleteModal();
-							}}>
-							Delete Experiment
-						</button> :
+						(
+							project.finished ?
+								<button type="button"
+									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+									onClick={() => {
+										openDeleteModal();
+									}}>
+									Delete Experiment
+								</button>
+								:
+								<button type="button"
+									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+									onClick={() => {
+										toast.promise(cancelExperimentById(project.expId), {
+											success: 'Cancelled experiment', error: 'Failed to cancel experiment', loading: 'Cancelling experiment...'
+										});
+									}}
+								>
+									Cancel Experiment
+								</button>
+						)
+						:
 						<button type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 							onClick={() => {
@@ -267,12 +282,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</button>
 				}
 				{project.finished ?
-				 <button type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={openGraphModal}
-				>
-					See Graph
-				</button> : null
+					<button type="button"
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						onClick={openGraphModal}
+					>
+						See Graph
+					</button> : null
 				}
 				{
 					project.creator == session?.user?.id! ?

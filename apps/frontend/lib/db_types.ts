@@ -3,7 +3,7 @@ export type FileName = string;
 export type EpochMilliseconds = number;
 
 export interface HyperparametersCollection {
-    hyperparameters: [IntegerHyperparameter | FloatHyperparameter | StringHyperparameter | BooleanHyperparameter]
+    hyperparameters: [IntegerHyperparameter | FloatHyperparameter | StringHyperparameter | BooleanHyperparameter | StringListHyperparameter];
 }
 
 export enum HyperparameterTypes {
@@ -11,6 +11,7 @@ export enum HyperparameterTypes {
     FLOAT = 'float',
     STRING = 'string',
     BOOLEAN = 'boolean',
+    STRING_LIST = 'stringlist'
 }
 
 // TODO this duplicates information in validators.ts (the Joi schemas), see https://github.com/AutomatingSciencePipeline/Monorepo/issues/114
@@ -47,6 +48,12 @@ export interface StringHyperparameter extends GenericHyperparameter {
     type: HyperparameterTypes.STRING;
 }
 
+export interface StringListHyperparameter extends GenericHyperparameter {
+    values: string[];
+    default: string;
+    type: HyperparameterTypes.STRING_LIST;
+}
+
 export interface ExperimentData {
     // TODO make sure these match what python expects as well
     creator: string;
@@ -74,4 +81,5 @@ export interface ExperimentData {
     passes: number;
     fails: number;
     totalExperimentRuns: number;
+    experimentExecutable: string;
 }

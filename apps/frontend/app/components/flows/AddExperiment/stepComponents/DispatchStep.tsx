@@ -18,7 +18,7 @@ const SUPPORTED_FILE_TYPES = {
 	'application/x-elf': [], // does nothing atm, from what I can tell
 };
 
-export const DispatchStep = ({ id, form, fileId, updateId, ...props }) => {
+export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props }) => {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -56,7 +56,7 @@ export const DispatchStep = ({ id, form, fileId, updateId, ...props }) => {
 		}
 	};
 
-	const MAXIMUM_SIZE_BYTES = 3 * 1024 ** 2;
+	const MAXIMUM_SIZE_BYTES = 500 * 1024 ** 2;
 
 	return (
 		<div className='flex flex-col h-full'>
