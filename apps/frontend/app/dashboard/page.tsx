@@ -282,23 +282,22 @@ export default function DashboardPage() {
 		});
 	};
 
-	// const QUEUE_RECHECK_INTERVAL_MS = 4000;
+	const QUEUE_RECHECK_INTERVAL_MS = 4000;
 	useEffect(() => {
 		queryQueueLength();
-		// TODO this seems to cause ghost intervals to be left behind, maybe hot reload's fault?
-		// console.log('⏰ Setting up queue length checking timer');
-		// const intervalId = setInterval(() => {
-		// 	fetch('/api/queue').then((res) => res.json()).then((data) => {
-		// 		console.log('Data back is', data);
-		// 		setQueueLength(data.response.queueSize);
-		// 	}).catch((err) => {
-		// 		console.error('Error fetching queue length', err);
-		// 	});
-		// }, QUEUE_RECHECK_INTERVAL_MS);
-		// return () => {
-		// 	console.log('⏰ Clearing queue length checking timer');
-		// 	clearInterval(intervalId);
-		// };
+		console.log('⏰ Setting up queue length checking timer');
+		const intervalId = setTimeout(() => {
+			fetch('/api/queue').then((res) => res.json()).then((data) => {
+				console.log('Data back is', data);
+				setQueueLength(data.response.queueSize);
+			}).catch((err) => {
+				console.error('Error fetching queue length', err);
+			});
+		}, QUEUE_RECHECK_INTERVAL_MS);
+		return () => {
+			console.log('⏰ Clearing queue length checking timer');
+			clearInterval(intervalId);
+		};
 	}, []);
 
 
@@ -434,11 +433,6 @@ export default function DashboardPage() {
 															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
 													}
 												</span>
-												<button type="button"
-													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-													onClick={queryQueueLength}>
-													TEMP Manual Query
-												</button>
 											</div>
 											<div className='flex items-center space-x-2'>
 												<>
