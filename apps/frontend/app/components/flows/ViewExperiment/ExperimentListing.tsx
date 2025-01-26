@@ -106,6 +106,27 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setShowGraphModal(false);
 	}
 
+	const totalTime = project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
+		? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000)
+		: null;
+
+	const formattedTotalTime = totalTime !== null
+		? totalTime < 1
+			? `${(totalTime * 60).toFixed(2)} seconds`
+			: `${totalTime.toFixed(2)} minutes`
+		: null;
+
+
+	// Calculate average time per experiment run
+	const averageTimePerRun = project['passes'] && project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
+		? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000) / Number(project['passes'])
+		: null;
+
+	const formattedAverageTimePerRun = averageTimePerRun !== null
+		? averageTimePerRun < 1
+			? `${(averageTimePerRun * 60).toFixed(2)} seconds`
+			: `${averageTimePerRun.toFixed(2)} minutes`
+		: null;
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -356,15 +377,31 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<p className='flex text-gray-500 text-sm space-x-2'>
 					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
+
+
 				{project['startedAtEpochMillis'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
 						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
-				{project['finishedAtEpochMillis'] ?
+				{project['finishedAtEpochMilliseconds'] ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toLocaleString()}</span>
+						<span>Finished at {new Date(project['finishedAtEpochMilliseconds']).toLocaleString()}</span>
+					</p> :
+					null
+				}
+
+				{project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds'] ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Total Time: {formattedTotalTime}</span>
+					</p> :
+					null
+				}
+
+				{project['passes'] && project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds'] ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Average Time per Experiment Run: {formattedAverageTimePerRun}</span>
 					</p> :
 					null
 				}
