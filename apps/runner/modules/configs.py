@@ -147,12 +147,20 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
         raise GladosInternalError(msg) from err
 
     os.chdir('configFiles')
-    outputConfig = configparser.ConfigParser()
-    outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
-    outputConfig["DEFAULT"] = configData
+    # DONE: Change to custom function to create ini file
+    configFileLines = ["[DEFAULT]"]
+    for line in experiment.dumbTextArea.split('\n'):
+        configFileLines.append(line.replace('\n', ''))
+    
+    for key, value in configData.items():
+        if "{" + key + "}" in experiment.dumbTextArea:
+            for i, line in enumerate(configFileLines):
+                configFileLines[i] = line.replace("{" + key + "}", str(value))
+        else:
+            configFileLines.append(f"{key} = {value}")
+    
     with open(f'{configNum}.ini', 'w', encoding="utf8") as configFile:
-        outputConfig.write(configFile)
-        configFile.write(experiment.dumbTextArea)
+        configFile.write('\n'.join(configFileLines))
         configFile.close()
         explogger.info(f"Wrote config{configNum} to a file")
     os.chdir('..')

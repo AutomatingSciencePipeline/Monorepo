@@ -115,6 +115,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			keepLogs: true,
 			workers: 1,
 			file: '',
+			experimentExecutable: '',
 		},
 		validate: joiResolver(experimentSchema),
 	});
@@ -151,6 +152,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 						timeout: expInfo['timeout'],
 						keepLogs: expInfo['keepLogs'],
 						file: fileId ? fileId : expInfo['file'],
+						experimentExecutable: expInfo['experimentExecutable'],
 					});
 					
 					if (!fileId){
@@ -196,6 +198,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			scatterDepVar: expInfo['scatterDepVar'],
 			timeout: expInfo['timeout'],
 			keepLogs: expInfo['keepLogs'],
+			experimentExecutable: '',
 		});
 	
 		setCopyId(null);
