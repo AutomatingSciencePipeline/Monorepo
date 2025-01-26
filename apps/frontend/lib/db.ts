@@ -6,8 +6,10 @@ import {getDocumentFromId} from "./mongodb_funcs";
 export const DB_COLLECTION_EXPERIMENTS = 'Experiments';
 
 // test
-export const submitExperiment = async (values: Partial<ExperimentData>, userId: string, fileId: string) => {
+export const submitExperiment = async (values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) => {
 	values.creator = userId;
+	values.creatorEmail = userEmail;
+	values.creatorRole = role;
 	values.created = Date.now();
 	values.finished = false;
 	values.estimatedTotalTimeMinutes = 0;

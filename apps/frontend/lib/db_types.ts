@@ -57,6 +57,8 @@ export interface StringListHyperparameter extends GenericHyperparameter {
 export interface ExperimentData {
     // TODO make sure these match what python expects as well
     creator: string;
+    creatorEmail: string;
+    creatorRole: string;
     name: string;
     description: string;
     verbose: boolean;

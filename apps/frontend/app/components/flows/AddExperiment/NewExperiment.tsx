@@ -386,7 +386,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
 																	setIsDefault(false);
-																	submitExperiment(form.values as any, session?.user?.id as string, fileId).then(async (json) => {
+																	submitExperiment(form.values as any, session?.user?.id as string, session?.user?.email as string, session?.user?.role as string, fileId).then(async (json) => {
 																		const expId = json['id'];
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
 																			method: 'POST',

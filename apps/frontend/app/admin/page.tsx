@@ -1,11 +1,14 @@
 "use client";
 
-import { Disclosure, Menu, Transition, Tab, TabGroup, TabList, TabPanel, TabPanels, MenuButton, MenuItems, MenuItem, DisclosureButton, DisclosurePanel } from "@headlessui/react";
+import { Disclosure, Menu, Transition, Tab, TabGroup, TabList, TabPanel, TabPanels, MenuButton, MenuItems, MenuItem, DisclosureButton, DisclosurePanel, DialogPanel, TransitionChild, Dialog, DialogTitle } from "@headlessui/react";
 import Image from 'next/image';
 import { signOut, useSession } from "next-auth/react";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Logo } from "../components/Logo";
 import classNames from "classnames";
+import { useRouter } from "next/navigation";
+import { cancelExperimentById, getUsers, updateUserRole } from "../../lib/mongodb_funcs";
+import toast, { Toaster } from "react-hot-toast";
 
 declare module "next-auth" {
     interface User {
@@ -26,19 +29,66 @@ const userNavigation = [
 
 export default function Page() {
     const { data: session, status } = useSession();
+    const router = useRouter();
+
+    const [users, setUsers] = useState([] as any[]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState("");
+
+    const [runningExperiments, setRunningExperiments] = useState([] as any[]);
+
+    const handleUpdateRole = (str) => {
+        setSelectedUser(str);
+        setIsModalOpen(true);
+    };
 
     useEffect(() => {
-        console.log(session);
+        if (session) {
+            if (session.user?.role === "admin") {
+                getUsers().then((users) => {
+                    setUsers(users);
+                });
+            }
+        }
+    }, [session, isModalOpen]);
+
+    useEffect(() => {
+        if (!session) {
+            return;
+        }
+
+        if(session.user?.role !== "admin") {
+            return;
+        }
+
+        const eventSource = new EventSource(`/api/experiments/adminListen`);
+
+        eventSource.onmessage = (event) => {
+            if (event.data !== 'heartbeat') {
+                try {
+                    setRunningExperiments(JSON.parse(event.data) as any[]);
+                }
+                catch {
+                    console.log(`${event.data} was not valid JSON!`);
+                }
+            }
+        }
+        return () => eventSource.close();
     }, [session]);
 
     // Show loading while session is loading
     if (status === "loading") return <p>Loading...</p>;
 
     // Show not authorized message if user is not logged in or doesn't have the admin role
-    if (!session || session.user?.role !== "admin") return <p>You are not authorized to view this page!</p>;
+    if (!session || session.user?.role !== "admin") {
+        // Redirect to the dashboard
+        router.push('/dashboard');
+        return <p>You are not authorized to view this page!</p>;
+    }
 
     // If the user is authorized
     return <div>
+        <Toaster />
         <Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
             {({ open }) => (
                 <>
@@ -168,6 +218,83 @@ export default function Page() {
                 </>
             )}
         </Disclosure>
+        <Transition appear show={isModalOpen} as={Fragment}>
+            <Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
+                <TransitionChild
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                >
+                    <div className="fixed inset-0 bg-black bg-opacity-25" />
+                </TransitionChild>
+
+                <div className="fixed inset-0 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                        <TransitionChild
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0 scale-95"
+                            enterTo="opacity-100 scale-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100 scale-100"
+                            leaveTo="opacity-0 scale-95"
+                        >
+                            <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                                    Update Role
+                                </DialogTitle>
+                                <div className="mt-2">
+                                    <p className="text-sm text-gray-500">
+                                        Please select the new role for the user
+                                    </p>
+                                </div>
+
+                                <div className="mt-4 justify-center flex">
+                                    <button className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg shadow-md m-2"
+                                        onClick={() => {
+                                            toast.promise(updateUserRole(selectedUser, "admin"), {
+                                                loading: 'Updating role...',
+                                                success: 'Role updated successfully!',
+                                                error: 'Failed to update role!'
+                                            });
+                                            setIsModalOpen(false);
+                                        }}>
+                                        Admin
+                                    </button>
+                                    <button className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow-md m-2"
+                                        onClick={() => {
+                                            toast.promise(updateUserRole(selectedUser, "privileged"), {
+                                                loading: 'Updating role...',
+                                                success: 'Role updated successfully!',
+                                                error: 'Failed to update role!'
+                                            });
+                                            setIsModalOpen(false);
+                                        }}>
+                                        Privileged
+                                    </button>
+                                    <button className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow-md m-2"
+                                        onClick={() => {
+                                            toast.promise(updateUserRole(selectedUser, "user"), {
+                                                loading: 'Updating role...',
+                                                success: 'Role updated successfully!',
+                                                error: 'Failed to update role!'
+                                            });
+                                            setIsModalOpen(false);
+                                        }}>
+                                        User
+                                    </button>
+                                </div>
+
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
+            </Dialog>
+        </Transition>
         {/* Create a place to view running experiments */}
         <TabGroup className="p-4 w-auto h-auto mx-auto">
             <TabList className="p-4 w-auto h-auto mx-auto">
@@ -200,50 +327,101 @@ export default function Page() {
                                         Role
                                     </th>
                                     <th scope="col" className="px-6 py-3">
-                                        Promote
+                                        Manage
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                    <th id="user-id" scope="row" className="hidden">
-                                        123456789
+                                {users.map((user) => (
+                                    <tr
+                                        key={user._id} // Add the key prop here
+                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                                    >
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {user.email}
+                                        </th>
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {user.role}
+                                        </th>
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {
+                                                session.user?.id === user._id ?
+                                                    <></> :
+                                                    <button
+                                                        className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                                                        onClick={() => handleUpdateRole(user._id)}
+                                                    >
+                                                        Change Role
+                                                    </button>
+                                            }
+                                        </th>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </TabPanel>
+                <TabPanel className={"flex"}>
+                    <div className="relative overflow-x-auto">
+                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3">
+                                        Experiment Name
                                     </th>
-                                    <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        windsors@rose-hulman.edu
+                                    <th scope="col" className="px-6 py-3">
+                                        User
                                     </th>
-                                    <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        admin
+                                    <th scope="col" className="px-6 py-3">
+                                        Progress
                                     </th>
-                                    <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        <button className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg shadow-md"
-                                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                                // Get the closest <tr> element
-                                                const row = e.currentTarget.closest("tr");
-                                                if (!row) return;
-
-                                                // Get the hidden <th> with the user-id
-                                                const userIdElement = row.querySelector<HTMLTableCellElement>("#user-id");
-                                                if (!userIdElement) return;
-
-                                                // Extract and log the user ID
-                                                const userId = userIdElement.textContent?.trim();
-                                                console.log("Promote user with id: " + userId);
-                                            }}
-                                        >
-                                            Promote
-                                        </button>
+                                    <th scope="col" className="px-6 py-3">
+                                        Start Time
+                                    </th>
+                                    <th scope="col" className="px-6 py-3">
+                                        Manage
                                     </th>
                                 </tr>
+                            </thead>
+                            <tbody>
+                                {runningExperiments.map((experiment) => (
+                                    <tr
+                                        key={experiment._id} // Add the key prop here
+                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                                    >
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {experiment.name}
+                                        </th>
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {experiment.creatorEmail}
+                                        </th>
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {experiment.passes + experiment.fails} / {experiment.totalExperimentRuns}
+                                        </th>
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {new Date(experiment.startedAtEpochMillis).toLocaleString()}
+                                        </th>
+                                        <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <button
+                                                className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                                                onClick={() => {
+                                                    toast.promise(cancelExperimentById(experiment.id), {
+                                                        loading: 'Cancelling experiment...',
+                                                        success: 'Experiment cancelled successfully!',
+                                                        error: 'Failed to cancel experiment!'
+                                                    });
+                                                }}>
+                                                Stop
+                                            </button>
+                                        </th>
+                                    </tr>))
+                                }
                             </tbody>
                         </table>
                     </div>
                 </TabPanel>
                 <TabPanel>
-                    Content 2
-                </TabPanel>
-                <TabPanel>
-                    Content 3
+                    Work in progress!!!
                 </TabPanel>
             </TabPanels>
         </TabGroup>
