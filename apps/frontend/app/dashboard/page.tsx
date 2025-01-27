@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Transition, TransitionChild } from '@headlessui/react';
+import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -70,18 +70,8 @@ const activityItems = [
 	},
 ];
 
-const Navbar = (props) => {
+const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
-
-	useEffect(() => {
-		if (session?.user?.role === "admin"){
-			//Check to make sure the admin link is not already in the userNavigation
-			if (userNavigation[0].name !== 'Admin'){
-				userNavigation.unshift({ name: 'Admin', href: '/admin' });
-			}
-		}
-	}, [session]);
-
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -94,11 +84,13 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
-							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
-								function (newValue: string): void {
-									console.log(`SearchBar.onValueChanged: ${newValue}`);
-								}} />
-							{/* Links section */}
+							<SearchBar
+								labelText={'Search experiments'}
+								placeholderText={'Search projects'}
+								onValueChanged={(newValue) => {
+									setSearchTerm(newValue);
+								}}
+							/>
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
 									<div className='flex'>
@@ -235,6 +227,7 @@ export default function DashboardPage() {
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [searchTerm, setSearchTerm] = useState('');
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -357,7 +350,7 @@ export default function DashboardPage() {
 
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar />
+				<Navbar setSearchTerm={setSearchTerm} />
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto xl:px-8 lg:flex'>
@@ -399,7 +392,7 @@ export default function DashboardPage() {
 													onClick={() => {
 														setFormState(1);
 													}}
-												// onClick
+													// onClick
 												>
 													{label}
 												</button>
@@ -445,8 +438,8 @@ export default function DashboardPage() {
 													}
 												</span>
 												<button type="button"
-													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-													onClick={queryQueueLength}>
+														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+														onClick={queryQueueLength}>
 													TEMP Manual Query
 												</button>
 											</div>
@@ -460,7 +453,7 @@ export default function DashboardPage() {
 													</button>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
-															<TransitionChild
+															<Transition.Child
 																as={Fragment}
 																enter="ease-out duration-300"
 																enterFrom="opacity-0"
@@ -470,11 +463,11 @@ export default function DashboardPage() {
 																leaveTo="opacity-0"
 															>
 																<div className="fixed inset-0 bg-black bg-opacity-25" />
-															</TransitionChild>
+															</Transition.Child>
 
 															<div className="fixed inset-0 overflow-y-auto">
 																<div className="flex min-h-full items-center justify-center p-4 text-center">
-																	<TransitionChild
+																	<Transition.Child
 																		as={Fragment}
 																		enter="ease-out duration-300"
 																		enterFrom="opacity-0 scale-95"
@@ -483,10 +476,10 @@ export default function DashboardPage() {
 																		leaveFrom="opacity-100 scale-100"
 																		leaveTo="opacity-0 scale-95"
 																	>
-																		<DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-																			<DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
+																		<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+																			<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
 																				Select Default Experiment
-																			</DialogTitle>
+																			</Dialog.Title>
 																			<div className="mt-2">
 																				<p className="text-sm text-gray-500">
 																					Please select the type of default experiment you want to run.
@@ -516,8 +509,8 @@ export default function DashboardPage() {
 																					Genetic Algorithm
 																				</button>
 																			</div>
-																		</DialogPanel>
-																	</TransitionChild>
+																		</Dialog.Panel>
+																	</Transition.Child>
 																</div>
 															</div>
 														</Dialog>
@@ -555,7 +548,9 @@ export default function DashboardPage() {
 									toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
 									console.log(`Failed delete, reason: ${reason}`);
 								});
-							}} />
+							}}
+							searchTerm={searchTerm}
+						/>
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -629,6 +624,7 @@ export interface ExperimentListProps {
 	experiments: ExperimentData[];
 	onCopyExperiment: (experiment: string) => void;
 	onDeleteExperiment: (experiment: string) => void;
+	searchTerm: string;
 }
 
 const SortingOptions = {
@@ -640,7 +636,7 @@ const SortingOptions = {
 	DATE_CREATED_REVERSE: 'dateCreatedReverse',
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -651,12 +647,52 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
 
 	// Sorting functions
-	const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
-	const sortByName = (a, b) => b.name.localeCompare(a.name);
-	const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
-	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
-	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+	const sortByName = (a, b) => {
+		return sortByExperimentState(a, b, b.name.localeCompare(a.name));
+	};
+	const sortByNameReverse = (a, b) => {
+		return sortByExperimentState(a, b, a.name.localeCompare(b.name));
+	};
+	const sortByDateModified = (a, b) => {
+		return sortByExperimentState(a, b, b.finishedAtEpochMillis - a.finishedAtEpochMillis);
+	};
+	const sortByDateModifiedReverse = (a, b) => {
+		return sortByExperimentState(a, b, a.finishedAtEpochMillis - b.finishedAtEpochMillis);
+	};
+	const sortByDateCreated = (a, b) => {
+		return sortByExperimentState(a, b, b.startedAtEpochMillis - a.startedAtEpochMillis);
+	};
+	const sortByDateCreatedReverse = (a, b) => {
+		return sortByExperimentState(a, b, a.startedAtEpochMillis - b.startedAtEpochMillis);
+	};
+
+	const getExperimentState = (exp) => {
+		if (exp.finished) {
+			return exp.fails <= 1 && (exp?.passes ?? 0) === 0 ? 'Aborted' : 'Completed';
+		}
+		if (!exp.finished && exp.startedAtEpochMillis) {
+			return 'In Progress';
+		}
+		return 'Awaiting Start';
+	};
+
+	const sortByExperimentState = (a, b, sort) => {
+		const aStatus = getExperimentState(a);
+		const bStatus = getExperimentState(b);
+
+		// Define priority order for sorting
+		const statusOrder = {
+			'Awaiting Start': 1,
+			'In Progress': 2,
+			'Completed': 3,
+			'Aborted': 4
+		};
+
+		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
+		if (statusOrder[aStatus] > statusOrder[bStatus]) return 1;
+
+		return sort;
+	};
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
@@ -767,7 +803,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		console.log(`in handleSortChange: ${newSortBy}`);
 		handleDisplaySortingOptions(newSortBy);
 	};
-
 
 	const handleDisplaySortingOptions = (newSortBy) => {
 		let sortingOption;
@@ -916,32 +951,39 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
 
-			{sortedExperiments?.map((project: ExperimentData) => {
-				if (!includeCompleted && project.finished) {
-					return null;
-				}
-				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-				const oneHourMilliseconds = 1000 * 60 * 60;
-				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-				if (!includeArchived && projectIsArchived) {
-					return null;
-				}
-				return (
-					<li
-						key={project.expId}
-						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-					>
-						<ExperimentListing
-							projectData={project}
-							onCopyExperiment={onCopyExperiment}
-							onDownloadResults={downloadExperimentResults}
-							onDownloadProjectZip={downloadExperimentProjectZip}
-							onDeleteExperiment={onDeleteExperiment} />
-					</li>
-				);
-			})}
+			{sortedExperiments
+				.filter((project) => {
+					if (searchTerm.trim() === '') {
+						return true;
+					}
+					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
+				})
+				.map((project: ExperimentData) => {
+					if (!includeCompleted && project.finished) {
+						return null;
+					}
+					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+					const oneHourMilliseconds = 1000 * 60 * 60;
+					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+					if (!includeArchived && projectIsArchived) {
+						return null;
+					}
+					return (
+						<li
+							key={project.expId}
+							className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+						>
+							<ExperimentListing
+								projectData={project}
+								onCopyExperiment={onCopyExperiment}
+								onDownloadResults={downloadExperimentResults}
+								onDownloadProjectZip={downloadExperimentProjectZip}
+								onDeleteExperiment={onDeleteExperiment}
+							/>
+						</li>
+					);
+				})}
 		</ul>
 	</div>);
 };
-
