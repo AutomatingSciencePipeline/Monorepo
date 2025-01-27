@@ -306,10 +306,10 @@ export default function Page() {
                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 mx-2 rounded-lg shadow-md data-[selected]:bg-blue-900">
                     Running Experiment Management
                 </Tab>
-                <Tab
+                {/* <Tab
                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 mx-2 rounded-lg shadow-md data-[selected]:bg-blue-900">
                     Default Experiments Tester
-                </Tab>
+                </Tab> */}
             </TabList>
             <TabPanels className={"p-4 w-auto h-auto mx-auto"}>
                 <TabPanel className={"flex"}>
@@ -420,9 +420,9 @@ export default function Page() {
                         </table>
                     </div>
                 </TabPanel>
-                <TabPanel>
+                {/* <TabPanel>
                     Work in progress!!!
-                </TabPanel>
+                </TabPanel> */}
             </TabPanels>
         </TabGroup>
     </div>
