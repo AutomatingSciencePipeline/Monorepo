@@ -79,22 +79,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setProject(projectData);
 	}, [projectData]);
 
-	useEffect(() => {
-		// log the project data whenever the project finishes
-		if (project.finished) {
-			console.log('Project finished:', projectData);
-		}
-		else {
-			console.log('Project not finished:', projectData);
-		}
-	}, [project.finished]);
-
-	useEffect(() => {
-		// print the status from the project when it changes
-		console.log('Project status:', project.status);
-	}
-		, [project.status]);
-
 
 	const handleKeyUp = (e) => {
 		if (e.key === 'Enter') {
