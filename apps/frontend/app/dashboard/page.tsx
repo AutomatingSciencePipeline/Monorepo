@@ -267,10 +267,8 @@ export default function DashboardPage() {
 	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
 
 	const queryQueueLength = () => {
-		console.log('Querying queue length');
 		setQueueLength(QUEUE_UNKNOWN_LENGTH);
 		fetch('/api/queue').then((res) => res.json()).then((data: QueueResponse) => {
-			console.log('Data back is', data);
 			const value = data.response.queueSize;
 			if (typeof value === 'number') {
 				setQueueLength(value);
@@ -284,18 +282,14 @@ export default function DashboardPage() {
 
 	const QUEUE_RECHECK_INTERVAL_MS = 4000;
 	useEffect(() => {
-		queryQueueLength();
-		console.log('⏰ Setting up queue length checking timer');
-		const intervalId = setTimeout(() => {
+		const intervalId = setInterval(() => {
 			fetch('/api/queue').then((res) => res.json()).then((data) => {
-				console.log('Data back is', data);
 				setQueueLength(data.response.queueSize);
 			}).catch((err) => {
 				console.error('Error fetching queue length', err);
 			});
 		}, QUEUE_RECHECK_INTERVAL_MS);
 		return () => {
-			console.log('⏰ Clearing queue length checking timer');
 			clearInterval(intervalId);
 		};
 	}, []);
