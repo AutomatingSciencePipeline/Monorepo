@@ -89,7 +89,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         }
 
         // Iterate through the rows and put them under the correct header
-        for (let i = 1; i < splitRows.length; i++) {
+        for (let i = 0; i < splitRows.length; i++) {
             for (let j = 0; j < splitRows[i].length; j++) {
                 dataDict[headers[j]].push(splitRows[i][j]);
             }
@@ -185,94 +185,95 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
-            const { returnHeaders, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
-            const headers = returnHeaders;
-            const colors = generateColors(xList.length);
-            const ctx = document.getElementById('myChart') as HTMLCanvasElement;
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            const totalLength = headers.length;
-            const newHeaders = [] as any[];
-            for (let i = 0; i < totalLength; i++) {
-                if (i != xIndex) {
-                    newHeaders.push(headers[i]);
+            try {
+                const { returnHeaders, xList, yLists, xIndex } = parseCSV(experimentChartData.resultContent);
+                const headers = returnHeaders;
+                const colors = generateColors(headers.length);
+                const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+                if (chartInstance) {
+                    chartInstance.destroy();
                 }
-            }
-
-            const datasetsObj = newHeaders.map((header, i) => ({
-                label: header,
-                data: yLists[i],
-                borderColor: colors,
-                backgroundColor: colors
-            }));
-
-            const newChartInstance = new Chart(ctx, {
-                type: chartType,
-                data: {
-                    labels: xList,
-                    datasets: datasetsObj
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            display: true,
-                            title: {
+                const totalLength = headers.length;
+                const newHeaders = [] as any[];
+                for (let i = 0; i < totalLength; i++) {
+                    if (i != xIndex) {
+                        newHeaders.push(headers[i]);
+                    }
+                }
+                const datasetsObj = newHeaders.map((header, i) => ({
+                    label: header,
+                    data: yLists[i],
+                    borderColor: colors,
+                    backgroundColor: colors
+                }));
+                const newChartInstance = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: xList,
+                        datasets: datasetsObj
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
                                 display: true,
-                                text: 'X Axis'
+                                title: {
+                                    display: true,
+                                    text: 'X Axis'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Y Axis'
+                                }
                             }
                         },
-                        y: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Y Axis'
+                        animation: {
+                            onComplete: function () {
+                                setImg(newChartInstance.toBase64Image());
                             }
                         }
                     },
-                    animation: {
-                        onComplete: function () {
-                            setImg(newChartInstance.toBase64Image());
+                    //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
+                    plugins: [{
+                        id: 'custom_canvas_background_color',
+                        beforeDraw: (chart) => {
+                            const ctx = chart.canvas.getContext('2d') as any;
+                            ctx.save();
+                            ctx.globalCompositeOperation = 'destination-over';
+                            ctx.fillStyle = 'white';
+                            ctx.fillRect(0, 0, chart.canvas.width, chart.canvas.height);
+                            ctx.restore();
                         }
-                    }
-                },
-                //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
-                plugins: [{
-                    id: 'custom_canvas_background_color',
-                    beforeDraw: (chart) => {
-                        const ctx = chart.canvas.getContext('2d') as any;
-                        ctx.save();
-                        ctx.globalCompositeOperation = 'destination-over';
-                        ctx.fillStyle = 'white';
-                        ctx.fillRect(0, 0, chart.canvas.width, chart.canvas.height);
-                        ctx.restore();
-                    }
-                }]
-            });
-
-            //Set all of the datasets to be unselected
-            //If it is a pie chart you have to use meta
-            if (chartType == 'pie') {
-                var meta = newChartInstance.getDatasetMeta(0);
-                meta.data.forEach(function (ds) {
-                    (ds as any).hidden = true;
+                    }]
                 });
-            }
-            else {
-                newChartInstance.data.datasets.forEach((dataset) => {
-                    dataset.hidden = true;
-                });
-            }
-            newChartInstance.update();
-            console.log(newChartInstance?.data.datasets);
 
-            setChartInstance(newChartInstance);
+                //Set all of the datasets to be unselected
+                //If it is a pie chart you have to use meta
+                if (chartType == 'pie') {
+                    var meta = newChartInstance.getDatasetMeta(0);
+                    meta.data.forEach(function (ds) {
+                        (ds as any).hidden = true;
+                    });
+                }
+                else {
+                    newChartInstance.data.datasets.forEach((dataset) => {
+                        dataset.hidden = true;
+                    });
+                }
+                newChartInstance.update();
 
-            setHeaders(headers);
+                setChartInstance(newChartInstance);
+
+                setHeaders(headers);
+            } catch (e) {
+                console.warn('Error parsing CSV', e);
+            }
         }
+
     }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData, aggregateMode]);
 
     const regenerateCanvas = () => {

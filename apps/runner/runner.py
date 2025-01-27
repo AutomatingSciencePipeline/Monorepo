@@ -192,26 +192,31 @@ def run_batch(data: IncomingStartRequest):
             os.chdir('../..')
             close_experiment_run(exp_id)
             return
+    
+    if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
+        explogger.info("User is admin or privileged, installing packages from packages.txt")
         
-    if os.path.exists("packages.txt"):
-        try:
-            install_packages("packages.txt")
-        except Exception as err:
-            explogger.error("Failed to install packages")
-            explogger.exception(err)
-            os.chdir('../..')
-            close_experiment_run(exp_id)
-            
-    if os.path.exists("commandsToRun.txt"):
-        for line in open("commandsToRun.txt"):
+        if os.path.exists("packages.txt"):
             try:
-                os.system(line)
+                install_packages("packages.txt")
             except Exception as err:
-                explogger.error(f"Failed to run command: {line}")
+                explogger.error("Failed to install packages")
                 explogger.exception(err)
                 os.chdir('../..')
                 close_experiment_run(exp_id)
-                return        
+        
+        explogger.info("User is admin or privileged, running commands from commandsToRun.txt")
+            
+        if os.path.exists("commandsToRun.txt"):
+            for line in open("commandsToRun.txt"):
+                try:
+                    os.system(line)
+                except Exception as err:
+                    explogger.error(f"Failed to run command: {line}")
+                    explogger.exception(err)
+                    os.chdir('../..')
+                    close_experiment_run(exp_id)
+                    return        
             
     # this needs to happen after all dependencies are installed
     if experiment.experimentType == ExperimentType.ZIP:
@@ -261,6 +266,8 @@ def close_experiment_run(expId: DocumentId):
     explogger.info(f'Exiting experiment {expId}')
     update_exp_value(expId, 'finished', True)
     update_exp_value(expId, 'status', "COMPLETED")
+    endSeconds = time.time()
+    update_exp_value(expId, 'finishedAtEpochMilliseconds', int(endSeconds * 1000))
     close_experiment_logger()
     upload_experiment_log(expId)
     remove_downloaded_directory(expId)
