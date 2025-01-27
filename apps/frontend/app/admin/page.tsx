@@ -34,11 +34,13 @@ export default function Page() {
     const [users, setUsers] = useState([] as any[]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState("");
+    const [selectedUserEmail, setSelectedUserEmail] = useState("");
 
     const [runningExperiments, setRunningExperiments] = useState([] as any[]);
 
-    const handleUpdateRole = (str) => {
-        setSelectedUser(str);
+    const handleUpdateRole = (usedId, userEmail) => {
+        setSelectedUser(usedId);
+        setSelectedUserEmail(userEmail);
         setIsModalOpen(true);
     };
 
@@ -346,7 +348,7 @@ export default function Page() {
                                                     <></> :
                                                     <button
                                                         className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg shadow-md"
-                                                        onClick={() => handleUpdateRole(user._id)}
+                                                        onClick={() => handleUpdateRole(user._id, user.email)}
                                                     >
                                                         Change Role
                                                     </button>
