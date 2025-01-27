@@ -640,7 +640,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
 
-	// TODO: Test this!
 	// Sorting functions
 	const sortByName = (a, b) => {
 		return sortByExperimentState(a, b, b.name.localeCompare(a.name));
@@ -660,13 +659,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const sortByDateCreatedReverse = (a, b) => {
 		return sortByExperimentState(a, b, a.startedAtEpochMillis - b.startedAtEpochMillis);
 	};
-
-	// const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
-	// const sortByName = (a, b) => b.name.localeCompare(a.name);
-	// const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	// const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
-	// const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
-	//const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
 
 	const getExperimentState = (exp) => {
 		if (exp.finished) {
@@ -690,11 +682,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			'Aborted': 4
 		};
 
-		// Sort experiments based on state priority
 		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
 		if (statusOrder[aStatus] > statusOrder[bStatus]) return 1;
 
-		// If states are the same, sort by 'sort'
 		return sort;
 	};
 
