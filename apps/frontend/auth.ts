@@ -14,7 +14,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }}),
       Google({
         profile(profile) {
-          return { role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
+          console.log(profile);
+          return { role: (profile as any).role ?? "user", image: profile.picture, email: profile.email }
         }
       })
     ],
