@@ -84,6 +84,10 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
+							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
+								function (newValue: string): void {
+									console.log(`SearchBar.onValueChanged: ${newValue}`);
+								}} />
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
 									<div className='flex'>
@@ -829,13 +833,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
-				<SearchBar
-					labelText={'Search experiments'}
-					placeholderText={'Search projects'}
-					onValueChanged={(newValue) => {
-						setSearchTerm(newValue);
-					}}
-				/>
 				<div
 					className="cursor-pointer"
 					style={{ padding: '0.5rem' }}
@@ -950,12 +947,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		>
 
 			{sortedExperiments
-				.filter((project) => {
-					if (searchTerm.trim() === '') {
-						return true;
-					}
-					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
-				})
 				.map((project: ExperimentData) => {
 					if (!includeCompleted && project.finished) {
 						return null;
