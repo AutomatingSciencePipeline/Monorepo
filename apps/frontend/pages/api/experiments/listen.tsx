@@ -108,6 +108,7 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         estimatedTotalTimeMinutes: doc.estimatedTotalTimeMinutes ?? 0,
         expToRun: doc.expToRun ?? 0,
         file: doc.file || "",
+        status: doc.status || "OK",
         startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
         finishedAtEpochMilliseconds: doc.finishedAtEpochMilliseconds ?? 0,
         passes: doc.passes ?? 0,

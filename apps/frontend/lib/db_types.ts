@@ -73,6 +73,7 @@ export interface ExperimentData {
     created: EpochMilliseconds;
     hyperparameters: HyperparametersCollection;
     finished: boolean;
+    status: string;
     estimatedTotalTimeMinutes: number;
     expToRun: number; // TODO is this used?
     file: string; // TODO rename to something more unique
