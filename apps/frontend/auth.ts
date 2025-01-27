@@ -13,7 +13,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         profile(profile) {
           return { role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
         }}),
-      Google
+      Google({
+        profile(profile) {
+          return { role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
+        }
+      })
     ],
   callbacks: {
     authorized: async ({ auth }) => {

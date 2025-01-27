@@ -296,6 +296,9 @@ export async function getUsers() {
 
 export async function updateUserRole(userId: string, role: string) {
     'use server';
+    if (role !== 'admin' && role !== 'privileged' && role !== 'user') {
+        return Promise.reject(`Invalid role: ${role}`);
+    }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const users = db.collection('users');
