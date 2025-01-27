@@ -21,6 +21,7 @@ class ExperimentData(BaseModel):
     experimentExecutable = ""
     expId: DocumentId
     creator: UserId
+    creatorRole: str
     trialExtraFile: Optional[str]
     trialResult: str
     file = ""  #Will be set either by initializing or by app.py

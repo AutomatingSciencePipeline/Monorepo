@@ -1,5 +1,5 @@
 import { Fragment, useState, useLayoutEffect, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, TransitionChild } from '@headlessui/react';
 import { Toggle } from '../../Toggle';
 import Parameter from '../../Parameter';
 import { useForm, joiResolver } from '@mantine/form';
@@ -284,17 +284,17 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 	return (
 		<div>
 			<Toaster />
-			<Transition.Root show={open} as={Fragment}>
+			<Transition show={open} as={Fragment}>
 				<Dialog
 					as='div'
 					className='fixed inset-0 overflow-hidden'
 					onClose={() => setFormState(0)}
 				>
 					<div className='absolute inset-0 overflow-hidden'>
-						<Dialog.Overlay className='absolute inset-0' />
+						<div className='absolute inset-0' />
 
 						<div className='pointer-events-none fixed inset-y-0 right-0 flex pl-20 sm:pl-16'>
-							<Transition.Child
+							<TransitionChild
 								as={Fragment}
 								enter='transform transition ease-in-out duration-500 sm:duration-700'
 								enterFrom='translate-x-full'
@@ -386,7 +386,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
 																	setIsDefault(false);
-																	submitExperiment(form.values as any, session?.user?.id as string, fileId).then(async (json) => {
+																	submitExperiment(form.values as any, session?.user?.id as string, session?.user?.email as string, session?.user?.role as string, fileId).then(async (json) => {
 																		const expId = json['id'];
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
 																			method: 'POST',
@@ -426,11 +426,11 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 										</div>
 									</form>
 								</div>
-							</Transition.Child>
+							</TransitionChild>
 						</div>
 					</div>
 				</Dialog>
-			</Transition.Root>
+			</Transition>
 		</div>
 	);
 };

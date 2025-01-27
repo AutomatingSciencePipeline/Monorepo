@@ -282,3 +282,28 @@ export async function unfollowExperiment(expId: string, userId: string) {
 
     return Promise.resolve();
 }
+
+export async function getUsers() {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const users = db.collection('users');
+
+    const usersList = await users.find().toArray();
+
+    return usersList;
+}
+
+export async function updateUserRole(userId: string, role: string) {
+    'use server';
+    if (role !== 'admin' && role !== 'privileged' && role !== 'user') {
+        return Promise.reject(`Invalid role: ${role}`);
+    }
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const users = db.collection('users');
+
+    await users.updateOne({ '_id': new ObjectId(userId) }, { $set: { 'role': role } });
+
+    return Promise.resolve();
+}
