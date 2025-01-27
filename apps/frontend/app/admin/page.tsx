@@ -249,7 +249,7 @@ export default function Page() {
                                 </DialogTitle>
                                 <div className="mt-2">
                                     <p className="text-sm text-gray-500">
-                                        Please select the new role for the user
+                                        Please select the new role for {selectedUser}
                                     </p>
                                 </div>
 
