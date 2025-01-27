@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -72,6 +72,16 @@ const activityItems = [
 
 const Navbar = (props) => {
 	const { data: session } = useSession();
+
+	useEffect(() => {
+		if (session?.user?.role === "admin"){
+			//Check to make sure the admin link is not already in the userNavigation
+			if (userNavigation[0].name !== 'Admin'){
+				userNavigation.unshift({ name: 'Admin', href: '/admin' });
+			}
+		}
+	}, [session]);
+
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -438,7 +448,7 @@ export default function DashboardPage() {
 													</button>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
-															<Transition.Child
+															<TransitionChild
 																as={Fragment}
 																enter="ease-out duration-300"
 																enterFrom="opacity-0"
@@ -448,11 +458,11 @@ export default function DashboardPage() {
 																leaveTo="opacity-0"
 															>
 																<div className="fixed inset-0 bg-black bg-opacity-25" />
-															</Transition.Child>
+															</TransitionChild>
 
 															<div className="fixed inset-0 overflow-y-auto">
 																<div className="flex min-h-full items-center justify-center p-4 text-center">
-																	<Transition.Child
+																	<TransitionChild
 																		as={Fragment}
 																		enter="ease-out duration-300"
 																		enterFrom="opacity-0 scale-95"
@@ -461,10 +471,10 @@ export default function DashboardPage() {
 																		leaveFrom="opacity-100 scale-100"
 																		leaveTo="opacity-0 scale-95"
 																	>
-																		<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-																			<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+																		<DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+																			<DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
 																				Select Default Experiment
-																			</Dialog.Title>
+																			</DialogTitle>
 																			<div className="mt-2">
 																				<p className="text-sm text-gray-500">
 																					Please select the type of default experiment you want to run.
@@ -494,8 +504,8 @@ export default function DashboardPage() {
 																					Genetic Algorithm
 																				</button>
 																			</div>
-																		</Dialog.Panel>
-																	</Transition.Child>
+																		</DialogPanel>
+																	</TransitionChild>
 																</div>
 															</div>
 														</Dialog>

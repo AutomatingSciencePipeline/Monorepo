@@ -57,6 +57,8 @@ export interface StringListHyperparameter extends GenericHyperparameter {
 export interface ExperimentData {
     // TODO make sure these match what python expects as well
     creator: string;
+    creatorEmail: string;
+    creatorRole: string;
     name: string;
     description: string;
     verbose: boolean;
@@ -73,6 +75,7 @@ export interface ExperimentData {
     created: EpochMilliseconds;
     hyperparameters: HyperparametersCollection;
     finished: boolean;
+    status: string;
     estimatedTotalTimeMinutes: number;
     expToRun: number; // TODO is this used?
     file: string; // TODO rename to something more unique
