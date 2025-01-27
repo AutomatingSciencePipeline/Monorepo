@@ -640,13 +640,63 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
 
+	// TODO: Test this!
 	// Sorting functions
-	const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
-	const sortByName = (a, b) => b.name.localeCompare(a.name);
-	const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
-	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
-	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+	const sortByName = (a, b) => {
+		return sortByExperimentState(a, b, b.name.localeCompare(a.name));
+	};
+	const sortByNameReverse = (a, b) => {
+		return sortByExperimentState(a, b, a.name.localeCompare(b.name));
+	};
+	const sortByDateModified = (a, b) => {
+		return sortByExperimentState(a, b, b.finishedAtEpochMillis - a.finishedAtEpochMillis);
+	};
+	const sortByDateModifiedReverse = (a, b) => {
+		return sortByExperimentState(a, b, a.finishedAtEpochMillis - b.finishedAtEpochMillis);
+	};
+	const sortByDateCreated = (a, b) => {
+		return sortByExperimentState(a, b, b.startedAtEpochMillis - a.startedAtEpochMillis);
+	};
+	const sortByDateCreatedReverse = (a, b) => {
+		return sortByExperimentState(a, b, a.startedAtEpochMillis - b.startedAtEpochMillis);
+	};
+
+	// const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
+	// const sortByName = (a, b) => b.name.localeCompare(a.name);
+	// const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
+	// const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
+	// const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
+	//const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+
+	const getExperimentState = (exp) => {
+		if (exp.finished) {
+			return exp.fails <= 1 && (exp?.passes ?? 0) === 0 ? 'Aborted' : 'Completed';
+		}
+		if (!exp.finished && exp.startedAtEpochMillis) {
+			return 'In Progress';
+		}
+		return 'Awaiting Start';
+	};
+
+	const sortByExperimentState = (a, b, sort) => {
+		const aStatus = getExperimentState(a);
+		const bStatus = getExperimentState(b);
+
+		// Define priority order for sorting
+		const statusOrder = {
+			'Awaiting Start': 1,
+			'In Progress': 2,
+			'Completed': 3,
+			'Aborted': 4
+		};
+
+		// Sort experiments based on state priority
+		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
+		if (statusOrder[aStatus] > statusOrder[bStatus]) return 1;
+
+		// If states are the same, sort by 'sort'
+		return sort;
+	};
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
