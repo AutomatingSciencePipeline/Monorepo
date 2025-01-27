@@ -84,8 +84,16 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
 
 def _add_to_output_batch(trialExtraFile: str, ExpRun: int):
     try:
-        # Currently only extra CSV files are supported, this will need to be adapted for other file types
-        shutil.copy2(f'{trialExtraFile}', f'ResCsvs/Result{ExpRun}.csv')
+        # check if this is directory
+        if os.path.isdir(trialExtraFile):
+            extraFileName = trialExtraFile.split('/')[-1]
+            if extraFileName == "":
+                extraFileName = trialExtraFile.split('/')[-2]
+            # recursively copy the directory
+            shutil.copytree(trialExtraFile, f'ResCsvs/{extraFileName}{ExpRun}')
+        else:
+            extraFileName = trialExtraFile.split('/')[-1].split('.')[0]
+            shutil.copy2(f'{trialExtraFile}', f'ResCsvs/{extraFileName}{ExpRun}.csv')
     except Exception as err:
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
@@ -133,7 +141,7 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
             try:
                 _add_to_output_batch(f"trial{trialNum}/" + experiment.trialExtraFile, trialNum)
             except FileHandlingError as err:
-                _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+                _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)                    
                 return
 
         try:
@@ -169,7 +177,7 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         try:
             _add_to_output_batch(f"trial{trialNum}/" + experiment.trialExtraFile, trialNum)
         except FileHandlingError as err:
-            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)                    
             return
 
     try:

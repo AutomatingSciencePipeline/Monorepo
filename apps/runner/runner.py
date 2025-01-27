@@ -264,6 +264,9 @@ def run_batch(data: IncomingStartRequest):
 def close_experiment_run(expId: DocumentId):
     explogger.info(f'Exiting experiment {expId}')
     update_exp_value(expId, 'finished', True)
+    endSeconds = time.time()
+    explogger.info(f'Experiment end time: ', int(endSeconds * 1000))
+    update_exp_value(expId, 'finishedAtEpochMilliseconds', int(endSeconds * 1000))
     close_experiment_logger()
     upload_experiment_log(expId)
     remove_downloaded_directory(expId)
