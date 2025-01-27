@@ -640,6 +640,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 
 	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
 
+	const [searchTerm, setSearchTerm] = useState('');
+
 	// Sorting functions
 	const sortByName = (a, b) => {
 		return sortByExperimentState(a, b, b.name.localeCompare(a.name));
@@ -798,7 +800,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		handleDisplaySortingOptions(newSortBy);
 	};
 
-
 	const handleDisplaySortingOptions = (newSortBy) => {
 		let sortingOption;
 
@@ -833,6 +834,13 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
+				<SearchBar
+					labelText={'Search experiments'}
+					placeholderText={'Search projects'}
+					onValueChanged={(newValue) => {
+						setSearchTerm(newValue);
+					}}
+				/>
 				<div
 					className="cursor-pointer"
 					style={{ padding: '0.5rem' }}
@@ -946,31 +954,39 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
 
-			{sortedExperiments?.map((project: ExperimentData) => {
-				if (!includeCompleted && project.finished) {
-					return null;
-				}
-				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-				const oneHourMilliseconds = 1000 * 60 * 60;
-				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-				if (!includeArchived && projectIsArchived) {
-					return null;
-				}
-				return (
-					<li
-						key={project.expId}
-						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-					>
-						<ExperimentListing
-							projectData={project}
-							onCopyExperiment={onCopyExperiment}
-							onDownloadResults={downloadExperimentResults}
-							onDownloadProjectZip={downloadExperimentProjectZip}
-							onDeleteExperiment={onDeleteExperiment} />
-					</li>
-				);
-			})}
+			{sortedExperiments
+				.filter((project) => {
+					if (searchTerm.trim() === '') {
+						return true;
+					}
+					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
+				})
+				.map((project: ExperimentData) => {
+					if (!includeCompleted && project.finished) {
+						return null;
+					}
+					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+					const oneHourMilliseconds = 1000 * 60 * 60;
+					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+					if (!includeArchived && projectIsArchived) {
+						return null;
+					}
+					return (
+						<li
+							key={project.expId}
+							className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+						>
+							<ExperimentListing
+								projectData={project}
+								onCopyExperiment={onCopyExperiment}
+								onDownloadResults={downloadExperimentResults}
+								onDownloadProjectZip={downloadExperimentProjectZip}
+								onDeleteExperiment={onDeleteExperiment}
+							/>
+						</li>
+					);
+				})}
 		</ul>
 	</div>);
 };
