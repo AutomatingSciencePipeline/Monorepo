@@ -84,10 +84,10 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
-							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
-								function (newValue: string): void {
-									console.log(`SearchBar.onValueChanged: ${newValue}`);
-								}} />
+							{/*<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={*/}
+							{/*	function (newValue: string): void {*/}
+							{/*		console.log(`SearchBar.onValueChanged: ${newValue}`);*/}
+							{/*	}} />*/}
 							{/* Links section */}
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
