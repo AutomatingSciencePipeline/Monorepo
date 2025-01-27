@@ -21,6 +21,7 @@ export async function getDocumentFromId(expId: string) {
         verbose: expDoc.verbose || false,
         workers: expDoc.workers || 0,
         scatter: expDoc.scatter || '',
+        status: expDoc.status || '',
         dumbTextArea: expDoc.dumbTextArea || '',
         scatterIndVar: expDoc.scatterIndVar || '',
         scatterDepVar: expDoc.scatterDepVar || '',
@@ -86,6 +87,9 @@ export async function cancelExperimentById(expId: string) {
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
     await collection
         .updateOne({ '_id': new ObjectId(expId) }, { $set: { 'finished': true } });
+
+    await collection
+        .updateOne({ '_id': new ObjectId(expId) }, { $set: { 'status': 'CANCELLED' } });
 
     //If the backend returns a 200 status code, the experiment was successfully cancelled
     if (backendResponse.status === 200) {
@@ -279,6 +283,31 @@ export async function unfollowExperiment(expId: string, userId: string) {
     }
 
     await collection.updateOne({ '_id': new ObjectId(expId) }, { $pull: { 'sharedUsers': userId as any } });
+
+    return Promise.resolve();
+}
+
+export async function getUsers() {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const users = db.collection('users');
+
+    const usersList = await users.find().toArray();
+
+    return usersList;
+}
+
+export async function updateUserRole(userId: string, role: string) {
+    'use server';
+    if (role !== 'admin' && role !== 'privileged' && role !== 'user') {
+        return Promise.reject(`Invalid role: ${role}`);
+    }
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const users = db.collection('users');
+
+    await users.updateOne({ '_id': new ObjectId(userId) }, { $set: { 'role': role } });
 
     return Promise.resolve();
 }

@@ -37,6 +37,27 @@ def clean_up():
     print("Cleaning up: Backend Job Creation Cluster Permissions")
     init_backend.cleanup_cluster_role()
     init_backend.cleanup_role_binding()
+    
+def run_update():
+    """Skips cleaning up the services"""
+    print("Cleaning up: Deployments")
+    print("- Frontend:")
+    init_frontend.cleanup_deployment()
+    print("- Backend")
+    init_backend.cleanup_backend()
+    
+    print("Cleaning up: Secrets")
+    init_secret.cleanup_secret()
+    
+    print("Setting up: Secrets")
+    # TODO: Secrets are split between secret-env and .env. Fix this
+    init_secret.setup_secret()
+    
+    print("Setting up: Deployments")
+    print("- Frontend")
+    init_frontend.setup_deployment()
+    print("- Backend")
+    init_backend.setup_deployment()
 
 def set_up():
     print("Setting up: Backend Job Creation Cluster Permissions")
@@ -74,6 +95,11 @@ def main():
     """Function that gets called when the file is ran"""
     if "--hard" in argv[1:]:
         clean_up()
+    elif "--update" in argv[1:]:
+        run_update()
+        print("Done!")
+        return
+    
     set_up()
 
     print("Done!")
