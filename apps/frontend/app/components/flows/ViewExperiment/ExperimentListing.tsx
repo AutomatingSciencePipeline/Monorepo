@@ -389,7 +389,19 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</p> :
 					null
 				}
-				{project['finishedAtEpochMillis'] && project.status != 'CANCELLED' ?
+				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Finished at {new Date(project['finishedAtEpochMilliseconds']).toLocaleString()}</span>
+					</p> :
+					null
+				}
+				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Total Time: {formattedTotalTime}</span>
+					</p> :
+					null
+				}
+				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
 						<span>Average Time per Experiment Run: {formattedAverageTimePerRun}</span>
 					</p> :
