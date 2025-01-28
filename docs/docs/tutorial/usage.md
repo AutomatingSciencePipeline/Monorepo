@@ -8,11 +8,11 @@ Definitions:
 
 ## Accessing the System
 
-When on the Rose-Hulman network, you can access the live copy at <http://glados-lb.csse.rose-hulman.edu/> (note: this is **not** https).
+When on the Rose-Hulman network, you can access the live copy at <https://glados.csse.rose-hulman.edu/>.
 
 If you need a local copy the system, view the [installation guide](installation.md).
 
-You will need an account to run an experiment.
+You will need to sign in with either a Google or Github account to run an experiment.
 
 ## Prepare your Code
 
@@ -38,6 +38,21 @@ mr = 0.2
 s = 1
 ```
 
+You are able to format the generated ini file by using the user defined constants tab while creating an experiment.
+
+To accomplish this use the parameter name in the constants inside of curly brackets.
+
+Example:
+
+I have a parameter named seed that goes from 1-10 incrementing by 1.
+
+```ini
+[SEED]
+random_seed = {seed}
+```
+
+This allows us to format with extra ini sections.
+
 Additionally, set up your code to output to a two-line csv that consists of headers and results like so:
 
 ```csv
@@ -46,7 +61,7 @@ Result1, Result2
 ```
 
 Java experiments must be packaged into an executable `.jar` file.
-C experiments must be compiled into a Unix binary executable.
+C experiments must be compiled into a Unix binary executable (for basic users).
 Specifics are noted under [Compatability](#compatability).
 
 Once your experiment is set up, continue by [running the experiment](#running-experiments)
@@ -58,6 +73,7 @@ GLADOS supports experiments that:
 * run on Python 3.8 through a single Python file, with no external packages aside from `configparser`, and no multiprocessing/threading features
 * are packaged in a `.jar` executable
 * are compiled into a binary executable for Unix systems, such that a base Debian system can run it
+* zip files that contain one of the file types above
 
 Other experiment types may be supported, though testing is limited. *Try at your own risk*
 
@@ -67,6 +83,96 @@ You can get all the generated files, organized by each run, by downloading the P
 In the future, we plan to add more support for dependencies and other types of experiments.
 
 ## Running Experiments
+
+For our running experiment example, we will use our default experiments feature.
+
+Upon first logged in, this should be what you will see (except you will not have any experiments listed yet).
+
+<!-- ![dashboard](TODO: Put link here) -->
+
+Now we will click the "Run a Default Experiment" button on the right side of the screen.
+
+<!-- ![run_default](TODO: Put link here) -->
+
+You will then be shown a modal where we will select Add Nums (Python).
+
+<!-- ![select_default](TODO: Put link here) -->
+
+You will be shown an already filled out experiment. 
+
+The first tab we will look at in the experiment creation pop out is the "Information" tab.
+
+<!-- ![information_tab](TODO: Put link here) -->
+
+### Information Tab
+
+#### Name - Required
+
+This is the name that will be shown in the UI for this experiment.
+
+#### Description - Optional
+
+This is a description that will be stored with the experiment record.
+
+#### Trail Result - Required
+
+This is the csv file that will be captured into the experiment results.
+
+#### Trial's Extra File - Optional
+
+This can be a folder or a file that will be included inside of the project zip that can be downloaded after experiment completion.
+
+#### Trial Timeout (seconds) - Required
+
+This is how long until the experiment will be automatically timed out.
+
+#### Executable File (leave empty if not using zip) - Required for zip experiments
+
+If using a zip experiment, put the name of the main executable in this text area.
+
+#### Keep Logs - Required
+
+Select to store the logs from the experiment runner pod.
+
+##
+
+The next tab we will look at is the "Parameters" tab.
+
+<!-- ![parameters_tab](TODO: Add link here) -->
+
+### Parameters Tab
+
+Currently there are 5 parameter types.
+
+#### Integer
+
+For an integer you will have 4 or 5 fields, depending on if default is enabled.
+
+If default is not enabled (like the example):
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Min - the min value of the integer.
+
+3. Max - the max value of the integer.
+
+4. Step - the value that the integer parameter will step by.
+
+If default is enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Default - when using a default value this field is what will be used when generating permutations. We will cover permutation generation lated in this guide.
+
+<!-- TODO: Link to permutation section ^^^ -->
+
+3. Min - the min value of the integer.
+
+4. Max - the max value of the integer.
+
+5. Step - the value that the integer parameter will step by.
+
+If default is enabled:
 
 This example will walk through running the Python Genetic Algorithm Experiment, which can be found [in the repository's examples](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/python).
 
