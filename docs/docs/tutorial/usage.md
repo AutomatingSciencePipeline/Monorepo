@@ -38,13 +38,15 @@ mr = 0.2
 s = 1
 ```
 
-You are able to format the generated ini file by using the user defined constants tab while creating an experiment.
+You are able to format the generated ini file by using the "User Defined Constants" tab while creating an experiment.
 
 To accomplish this use the parameter name in the constants inside of curly brackets.
 
 Example:
 
 I have a parameter named seed that goes from 1-10 incrementing by 1.
+
+I then put this inside of the text box on the "User Defined Constants" tab.
 
 ```ini
 [SEED]
@@ -60,6 +62,8 @@ HeaderFor1, HeaderFor2
 Result1, Result2
 ```
 
+Note: If your csv is more than 2 lines, there is a place on the "Information" tab to select which line will be used.
+
 Java experiments must be packaged into an executable `.jar` file.
 C experiments must be compiled into a Unix binary executable (for basic users).
 Specifics are noted under [Compatability](#compatability).
@@ -70,7 +74,7 @@ Once your experiment is set up, continue by [running the experiment](#running-ex
 
 GLADOS supports experiments that:
 
-* run on Python 3.8 through a single Python file, with no external packages aside from `configparser`, and no multiprocessing/threading features
+* run on Python 3.8 through a single Python file
 * are packaged in a `.jar` executable
 * are compiled into a binary executable for Unix systems, such that a base Debian system can run it
 * zip files that contain one of the file types above
@@ -98,13 +102,13 @@ You will then be shown a modal where we will select Add Nums (Python).
 
 <!-- ![select_default](TODO: Put link here) -->
 
-You will be shown an already filled out experiment. 
+You will be shown an already filled out experiment.
 
 The first tab we will look at in the experiment creation pop out is the "Information" tab.
 
-<!-- ![information_tab](TODO: Put link here) -->
-
 ### Information Tab
+
+<!-- ![information_tab](TODO: Put link here) -->
 
 #### Name - Required
 
@@ -136,11 +140,9 @@ Select to store the logs from the experiment runner pod.
 
 ##
 
-The next tab we will look at is the "Parameters" tab.
+### Parameters Tab
 
 <!-- ![parameters_tab](TODO: Add link here) -->
-
-### Parameters Tab
 
 Currently there are 5 parameter types.
 
@@ -162,9 +164,9 @@ If default is enabled:
 
 1. Name - the name of the parameter that will be filled into the ini file.
 
-2. Default - when using a default value this field is what will be used when generating permutations. We will cover permutation generation lated in this guide.
+2. Default - when using a default value this field is what will be used when generating permutations. We will cover [permutation generation](https://glados.csse.rose-hulman.edu) later in this guide.
 
-<!-- TODO: Link to permutation section ^^^ -->
+<!-- TODO: Update link -->
 
 3. Min - the min value of the integer.
 
@@ -172,7 +174,61 @@ If default is enabled:
 
 5. Step - the value that the integer parameter will step by.
 
+#### Float
+
+Exactly the same as an integer, but supports decimal numbers.
+
+#### Bool
+
+If default is not enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Value - true/false
+
 If default is enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Default - [permutation generation](https://glados.csse.rose-hulman.edu) for more explanation.
+
+3. Value - true/false
+
+#### String
+
+If default is not enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Value - a string value.
+
+If default is enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Default - [permutation generation](https://glados.csse.rose-hulman.edu) for more explanation.
+
+3. Value - a string value.
+
+#### Stringlist
+
+If default is not enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Edit String - Click here to edit the strings that will be iterated when generating permutations.
+
+If default is enabled:
+
+1. Name - the name of the parameter that will be filled into the ini file.
+
+2. Default - [permutation generation](https://glados.csse.rose-hulman.edu) for more explanation.
+
+2. Edit String - Click here to edit the strings that will be iterated when generating permutations.
+
+### User Defined Constants Tab
+
+
 
 This example will walk through running the Python Genetic Algorithm Experiment, which can be found [in the repository's examples](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/python).
 
