@@ -16,7 +16,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       Google({
         allowDangerousEmailAccountLinking: true,
         profile(profile) {
-          console.log(profile);
           return { role: (profile as any).role ?? "user", image: profile.picture, email: profile.email }
         }
       })
