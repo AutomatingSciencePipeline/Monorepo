@@ -2,32 +2,31 @@
 
 This section covers how to run an experiment on the system.
 
-Definitions:
+## Definitions
 
-* **Trial**: A single run of submitted code with a corresponding config file
+- **Trial**: A single run of submitted code with a corresponding config file.
 
 ## Accessing the System
 
-When on the Rose-Hulman network, you can access the live copy at <https://glados.csse.rose-hulman.edu/>.
+When connected to the Rose-Hulman network, you can access the live system at <https://glados.csse.rose-hulman.edu/>.
 
-If you need a local copy the system, view the [installation guide](installation.md).
+If you need a local copy of the system, refer to the [installation guide](installation.md).
 
-You will need to sign in with either a Google or Github account to run an experiment.
+You must sign in with either a Google or GitHub account to run an experiment.
 
-## Prepare your Code
+## Preparing Your Code
 
-GLADOS has limited support for experiments. To ensure your experiment may run on GLADOS, check whether it falls under [compatible specs](#compatability).
+GLADOS has limited support for experiments. To ensure your experiment runs properly, check whether it meets the [compatibility requirements](#compatibility).
 
-The main steps a typical experiment will need to take is:
+The main steps to prepare an experiment are:
 
-* Ensure GLADOS supports the experiment. Specific details can be found under [Compatability](#compatability)
-* Have parameters input via a `.ini` file, passed through as a command line argument
-* Have output be written to a csv file
-  * Alternatively, you can have a single return value be captured as the output
+1. Ensure GLADOS supports your experiment. Details are available under [Compatibility](#compatibility).
+2. Use a `.ini` file to input parameters, passed as a command-line argument.
+3. Output results to a CSV file, or return a single value as the output.
 
-We provided simple example experiments [in the repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for how to make your experiment run on GLADOS.
+We provide example experiments in the [repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for formatting your experiment.
 
-For any experiment, you will need to set up your code such that it will accept a .ini config file in the form of:
+Your experiment must be configured to accept a `.ini` config file structured as follows:
 
 ```ini
 [DEFAULT]
@@ -38,203 +37,156 @@ mr = 0.2
 s = 1
 ```
 
-You are able to format the generated ini file by using the "User Defined Constants" tab while creating an experiment.
-
-To accomplish this use the parameter name in the constants inside of curly brackets.
+You can format the generated `.ini` file using the "User Defined Constants" tab while creating an experiment. Use curly brackets `{}` to reference parameter names.
 
 Example:
 
-I have a parameter named seed that goes from 1-10 incrementing by 1.
-
-I then put this inside of the text box on the "User Defined Constants" tab.
+If you have a parameter named `seed` ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as:
 
 ```ini
 [SEED]
 random_seed = {seed}
 ```
 
-This allows us to format with extra ini sections.
+This allows additional `.ini` sections to be included dynamically.
 
-Additionally, set up your code to output to a two-line csv that consists of headers and results like so:
+Your experiment must also output results in a two-line CSV format with headers and corresponding values:
 
 ```csv
 HeaderFor1, HeaderFor2
 Result1, Result2
 ```
 
-Note: If your csv is more than 2 lines, there is a place on the "Information" tab to select which line will be used.
+> **Note:** If your CSV file contains more than two lines, you can specify which line should be used in the "Information" tab.
 
-Java experiments must be packaged into an executable `.jar` file.
+Java experiments must be packaged as an executable `.jar` file.
 C experiments must be compiled into a Unix binary executable (for basic users).
-Specifics are noted under [Compatability](#compatability).
+Specific requirements are outlined under [Compatibility](#compatibility).
 
-Once your experiment is set up, continue by [running the experiment](#running-experiments)
+Once your experiment is set up, proceed to [Running the Experiment](#running-experiments).
 
-### Compatability
+## Compatibility
 
 GLADOS supports experiments that:
 
-* run on Python 3.8 through a single Python file
-* are packaged in a `.jar` executable
-* are compiled into a binary executable for Unix systems, such that a base Debian system can run it
-* zip files that contain one of the file types above
+- Run on Python 3.8 as a single Python file.
+- Are packaged as an executable `.jar` file.
+- Are compiled into a binary executable for Unix systems, runnable on a base Debian system.
+- Are contained in a zip file that includes one of the above file types.
 
-Other experiment types may be supported, though testing is limited. *Try at your own risk*
+Other experiment types may be supported, but testing is limited. *Use at your own risk.*
 
-GLADOS supports more complex outputs, like multiple files. However, currently, data aggregation is only done on a single file.
-You can get all the generated files, organized by each run, by downloading the Project Zip after completion.
+GLADOS supports complex outputs, including multiple files. However, data aggregation is currently limited to a single file.
 
-In the future, we plan to add more support for dependencies and other types of experiments.
+After completion, you can download all generated files, organized by each trial run, in a Project Zip.
+
+Future updates will improve support for dependencies and additional experiment types.
+
+### Extra Features
+
+> **Note:** These files can only be provided inside of zip files!
+
+Users can provide a file called "userProvidedFileReqs.txt". This file is a Python requirements file. When this file is provided all packages will be automatically installed.
+
+Privileged users have the option to provide two files:
+
+- packages.txt - this contains Debian packages to be installed to the runner.
+
+- commandsToRun.txt - this file contains bash commands that will be run on the runner after packages have been installed.
 
 ## Running Experiments
 
-For our running experiment example, we will use our default experiments feature.
+To create a new experiment, click the "New Experiment" button below your email in the top-left corner of the dashboard.
 
-To create your own experiment from scratch press the "New Experiment" button below your email in the top left corner of the dashboard.
-
-Upon first logged in, this should be what you will see (except you will not have any experiments listed yet).
+Upon first login, your dashboard will be empty.
 
 <!-- ![dashboard](TODO: Put link here) -->
 
-Now we will click the "Run a Default Experiment" button on the right side of the screen.
+To run a default experiment, click the "Run a Default Experiment" button on the right side of the screen.
 
 <!-- ![run_default](TODO: Put link here) -->
 
-You will then be shown a modal where we will select Add Nums (Python).
+You will see a modal where you can select "Add Nums (Python)." This will present an already configured experiment.
 
 <!-- ![select_default](TODO: Put link here) -->
 
-You will be shown an already filled out experiment.
-
-The first tab we will look at in the experiment creation pop out is the "Information" tab.
+The experiment creation interface consists of multiple tabs:
 
 ### Information Tab
 
 <!-- ![information_tab](TODO: Put link here) -->
 
-#### Name - Required
+#### Name *(Required)*
 
-This is the name that will be shown in the UI for this experiment.
+The name displayed in the UI for this experiment.
 
-#### Description - Optional
+#### Description *(Optional)*
 
-This is a description that will be stored with the experiment record.
+A description stored with the experiment record.
 
-#### Trail Result - Required
+#### Trial Result *(Required)*
 
-This is the csv file that will be captured into the experiment results.
+The CSV file captured as the experiment result.
 
-#### Trial's Extra File - Optional
+#### Trial's Extra File *(Optional)*
 
-This can be a folder or a file that will be included inside of the project zip that can be downloaded after experiment completion.
+A folder or file included in the downloadable Project Zip after experiment completion.
 
-#### Trial Timeout (seconds) - Required
+#### Trial Timeout (Seconds) *(Required)*
 
-This is how long until the experiment will be automatically timed out.
+The duration before the experiment automatically times out.
 
-#### Executable File (leave empty if not using zip) - Required for zip experiments
+#### Executable File *(Required for zip experiments)*
 
-If using a zip experiment, put the name of the main executable in this text area.
+If using a zip experiment, specify the main executable filename.
 
-#### Keep Logs - Required
+#### Keep Logs *(Required)*
 
-Select to store the logs from the experiment runner pod.
-
-##
+Select this option to store logs from the experiment runner pod.
 
 ### Parameters Tab
 
 <!-- ![parameters_tab](TODO: Add link here) -->
 
-Currently there are 5 parameter types.
+There are five parameter types:
 
 #### Integer
 
-For an integer you will have 4 or 5 fields, depending on if default is enabled.
-
-If default is not enabled (like the example):
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Min - the min value of the integer.
-
-3. Max - the max value of the integer.
-
-4. Step - the value that the integer parameter will step by.
-
-If default is enabled:
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Default - when using a default value this field is what will be used when generating permutations. We will cover [permutation generation](https://glados.csse.rose-hulman.edu) later in this guide.
-
-<!-- TODO: Update link -->
-
-3. Min - the min value of the integer.
-
-4. Max - the max value of the integer.
-
-5. Step - the value that the integer parameter will step by.
+- **Name**: The parameter name used in the `.ini` file.
+- **Min**: Minimum value.
+- **Max**: Maximum value.
+- **Step**: Increment value.
+- **Default** (if enabled): The default value used when generating permutations.
 
 #### Float
 
-Exactly the same as an integer, but supports decimal numbers.
+Similar to Integer but supports decimal values.
 
-#### Bool
+#### Boolean
 
-If default is not enabled:
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Value - true/false
-
-If default is enabled:
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Default - [permutation generation](#permutations) for more explanation.
-
-3. Value - true/false
+- **Name**: The parameter name.
+- **Value**: `true/false`
+- **Default** (if enabled): Used in permutation generation.
 
 #### String
 
-If default is not enabled:
+- **Name**: The parameter name.
+- **Value**: A string value.
+- **Default** (if enabled): Used in permutation generation.
 
-1. Name - the name of the parameter that will be filled into the ini file.
+#### String List
 
-2. Value - a string value.
-
-If default is enabled:
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Default - [permutation generation](#permutations) for more explanation.
-
-3. Value - a string value.
-
-#### Stringlist
-
-If default is not enabled:
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Edit String - Click here to edit the strings that will be iterated when generating permutations.
-
-If default is enabled:
-
-1. Name - the name of the parameter that will be filled into the ini file.
-
-2. Default - [permutation generation](#permutations) for more explanation.
-
-2. Edit String - Click here to edit the strings that will be iterated when generating permutations.
+- **Name**: The parameter name.
+- **Edit String**: Defines a list of strings to iterate over in permutations.
+- **Default** (if enabled): Used in permutation generation.
 
 ### User Defined Constants Tab
 
-<!-- ![user_defined_contants_tab](TODO: Add link here) -->
+<!-- ![user_defined_constants_tab](TODO: Add link here) -->
 
-This tab allows the user to define a text block that will be appended to every config ini that is generated. You can use parameters from the "Parameters" tab in this section if you put the parameter name inside of the text area inside of curly brackets.
+This tab allows defining a text block appended to every generated `.ini` config file. You can use parameters from the "Parameters" tab inside curly brackets.
 
-For example:
+Example:
 
 ```ini
 [DEFAULT]
@@ -245,191 +197,164 @@ test_var = {test}
 
 <!-- ![post_process_tab](TODO: Add link here) -->
 
-This tab allows you to include a scatter plot when the project zip is downloaded. This feature will eventually be superseded by the ChartJS functionality on the dashboard.
+This tab allows you to include a scatter plot in the downloadable Project Zip. This feature will be replaced by ChartJS functionality on the dashboard in future updates.
 
-### Confirmation
+### Confirmation Tab
 
 <!-- ![confirmation_tab](TODO: Add link here) -->
 
-This tab will allow you to confirm all of the hyperparameters and other settings of the experiment.
+This tab allows you to review all hyperparameters and settings before running the experiment.
 
-### Dispatch
+### Dispatch Tab
 
-<!-- ![user_defined_contants_tab](TODO: Add link here) -->
+<!-- ![dispatch_tab](TODO: Add link here) -->
 
-We call this page the "Dispatch" tab because we start the experiment from here.
+You can start an experiment from this tab by either:
 
-You have 2 options here:
+1. Selecting a file from the five most recent ones used.
+2. Uploading a new file.
 
-1. Select a file from the 5 most recent files you have used.
-
-2. Upload a new file.
-
-When you upload a file, it will automatically be selected.
-
-If your experiment was a copy, the file will be preselected for you.
+If you copied an experiment, the file will be preselected.
 
 ## Results
 
-The system will run the experiment and show you progress as it is doing so.
+Once the experiment starts, you can monitor progress in real time.
 
-Below is what the experiment will like when it is running.
+The dashboard will display:
+
+- Total trials.
+- Completed trials.
+- Successes and failures.
+- Estimated time to completion.
+
+Example below:
 
 <!-- ![in_progress_exp](TODO: Add link here) -->
 
-Once the experiment starts running trials the item on the dashboard will provide; how many trials are to be run, how many trials have been run so far, the number of successes and failures, and an estimation of how long it will take the experiment to complete.
+You can cancel an experiment at any time. However, small experiments may finish before cancellation takes effect.
 
-You also have the option to cancel an experiment. This will stop the execution of the experiment and no results will be available.
+> **Note:** The "Expected Total Time" metric does not account for parallel execution, so actual completion may be faster.
 
-Note: Sometime small experiments will finish before the system manages to stop the process. In this case the experiment will be shown as completed and behave like an experiment that was not cancelled.
-
-Note: Currently "Expected Total Time" does not account for the system running the experiments in parallel, so time may be substantially faster than this metric claims.
+Example of completed experiment:
 
 <!-- ![finished_exp](TODO: Add link here) -->
 
-Once the experiment has completed you will be able to download the result.csv from the "Download Results" button which contains the output and the configuration used to get said result for each trial run.
+After completion, you can download the `results.csv` file, which contains output data and configurations for each trial. If extra files were generated, logs were kept, or post-processing was applied, a zip file will also be available.
 
-If you had an extra file produced by the experiment, chose to keep the logs from the experiment, or chose to do any post processing, you will also be able to download a zip containing those files.
+To rerun an experiment with modified parameters, click "Copy Experiment."
 
-If you wish to run the same experiment again while changing parameters you can click on "Copy Experiment" and it will open up a new experiment window with the values from the previous experiment copied over.
+To visualize results, click "See Graph" on the dashboard.
 
-If you wish to view the results on the dashboard page you can click the "See Graph" button and you will have several options for graphing your results.
-
-Users can also share experiments with other users. To accomplish this, click the "Share Experiment" button. A link will be copied to the clipboard, share this link with another user and they can click it and view the experiment on their dashboard.
-
-Shared experiments behave the same as your own experiments, but the shared user cannot delete the experiment. They only have the option to unfollow.
+Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.
 
 ## Permutations
 
-This section will cover permutation generation in detail.
+This section explains how parameter permutations are generated.
 
-When a user creates hyperparameters (in the "Parameters" tab), these are the values that will be iterated through the fill up the ini config file.
+### Example 1: No Defaults
 
-### Example 1
+An integer parameter `test` with:
 
-We will ignore defaults for now.
+- Min: `1`
+- Max: `10`
+- Step: `1`
 
-I have an integer value with the properties following properties:
-
-* Name: test
-
-* Min: 1
-
-* Max: 10
-
-* Step: 1
-
-In the this means we will have 10 permutations, test equals 1-10.
-
-config0
-
-```ini
-[DEFAULT]
-test=0
-```
-
-config1
+will generate 10 configurations:
 
 ```ini
 [DEFAULT]
 test=1
 ```
 
-And so on...
-
-"[DEFAULT]" is the default header values for permutations generated.
-
-### Example 2
-
-Now lets talk about "defaults".
-
-This allows you to lessen the amount permutations generated for your experiment.
-
-Lets say we have the following parameters:
-
-An integer with the following properties:
-
-* Name: x
-
-* Default: 1
-
-* Min: 1
-
-* Max: 10
-
-* Step: 1
-
-Another integer with the following properties:
-
-* Name: y
-
-* Default: 11
-
-* Min: 11
-
-* Max: 20
-
-* Step: 1
-
-Now we also have a stringlist with the following properties:
-
-* Name: test
-
-* Default: "two"
-
-* Values: ["one", "two", "three"]
-
-When generating the config ini it will look like this:
-
-config0
-
 ```ini
-x=1
-y=11
-test=two
+[DEFAULT]
+test=2
 ```
 
-config1
+... up to `test=10`.
+
+> **Note:** Every parameter will go under the [DEFAULT] header unless defined in the "User Defined Constants" tab.
+
+### Example 2: Using Defaults
+
+An integer parameter `x` with:
+
+- Min: `1`
+- Max: `10`
+- Step: `1`
+- Default: `1`
+
+An integer parameter `y` with:
+
+- Min: `11`
+- Max: `20`
+- Step: `1`
+- Default: `11`
+
+An stringlist parameter `test` with:
+
+- Values: `["one", "two", "three"]`
+- Default: `two`
+
+will generate 21 configurations (after duplicates are removed):
 
 ```ini
+[DEFAULT]
+x=1
+y=11
+test="two"
+```
+
+```ini
+[DEFAULT]
 x=2
 y=11
 test="two"
 ```
 
-...
-
-config10
+... up to `x=10, y=11, test="two"`
 
 ```ini
+[DEFAULT]
 x=1
 y=11
 test="two"
 ```
 
-config11
-
 ```ini
+[DEFAULT]
 x=1
 y=12
 test="two"
 ```
 
-...
-
-config20
+... up to `x=1, y=20, test="two"`
 
 ```ini
+[DEFAULT]
 x=1
 y=11
 test="one"
 ```
 
-And so on...
+```ini
+[DEFAULT]
+x=1
+y=11
+test="two"
+```
 
-The thing to notice is that for *ALL* configs generated while iterating x, y will equal 11, and test will equal "two". The default value makes it so permutations are not generated for every value, but defaults are used instead.
+```ini
+[DEFAULT]
+x=1
+y=11
+test="three"
+```
 
-## Known bugs
+That will be all generated permutations.
 
-* If something catastrophically goes wrong and the experiment cannot continue, the user is not notified. So if an experiment is stuck on "Experiment Awaiting Start" or stuck on a trial run for a long period of time it is likely that the experiment has crashed. This is currently being addressed and should be fixed in the future.
+> **Note:** Some of the examples shown were duplicates and would be removed automatically.
 
+## Known Bugs
+
+- If an experiment crashes, users are not notified. If an experiment is stuck on "Experiment Awaiting Start" or a trial takes too long, it has likely failed. A fix is in progress.
