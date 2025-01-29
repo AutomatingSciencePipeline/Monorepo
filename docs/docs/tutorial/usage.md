@@ -90,6 +90,8 @@ In the future, we plan to add more support for dependencies and other types of e
 
 For our running experiment example, we will use our default experiments feature.
 
+To create your own experiment from scratch press the "New Experiment" button below your email in the top left corner of the dashboard.
+
 Upon first logged in, this should be what you will see (except you will not have any experiments listed yet).
 
 <!-- ![dashboard](TODO: Put link here) -->
@@ -190,7 +192,7 @@ If default is enabled:
 
 1. Name - the name of the parameter that will be filled into the ini file.
 
-2. Default - [permutation generation](https://glados.csse.rose-hulman.edu) for more explanation.
+2. Default - [permutation generation](#permutations) for more explanation.
 
 3. Value - true/false
 
@@ -206,7 +208,7 @@ If default is enabled:
 
 1. Name - the name of the parameter that will be filled into the ini file.
 
-2. Default - [permutation generation](https://glados.csse.rose-hulman.edu) for more explanation.
+2. Default - [permutation generation](#permutations) for more explanation.
 
 3. Value - a string value.
 
@@ -222,108 +224,212 @@ If default is enabled:
 
 1. Name - the name of the parameter that will be filled into the ini file.
 
-2. Default - [permutation generation](https://glados.csse.rose-hulman.edu) for more explanation.
+2. Default - [permutation generation](#permutations) for more explanation.
 
 2. Edit String - Click here to edit the strings that will be iterated when generating permutations.
 
 ### User Defined Constants Tab
 
+<!-- ![user_defined_contants_tab](TODO: Add link here) -->
 
+This tab allows the user to define a text block that will be appended to every config ini that is generated. You can use parameters from the "Parameters" tab in this section if you put the parameter name inside of the text area inside of curly brackets.
 
-This example will walk through running the Python Genetic Algorithm Experiment, which can be found [in the repository's examples](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/python).
-
-When first logged in, this should be what you see (except you may not have any experiments listed yet)
-
-![landing page](https://user-images.githubusercontent.com/23245825/201237091-42cd26fa-8649-4ecb-9386-bbabc3a85a01.PNG)
-
-To start an experiment click the blue 'new experiment' button on the top left corner on the page.
-This will bring up the Experiment Information pane.
-
-![informationStep](https://user-images.githubusercontent.com/23245825/223880912-8f234bb7-0958-4a04-ad18-81bd33d3b9cc.png)
-
-Field Specifications:
-
-* **Trial Result (This field is required):** If your project creates a two-line csv file to store the output of the trial, specify the name and extension of the csv file in the Trial Result textbox. (This can be the same as Extra Trial File)
-* **Trial Extra File:** If your project creates an extra file as its result, specify the name and extension of the file in the Extra Trial File textbox so that the system knows how to find it. (This can be the same as Trial Result)
-* **Keep Logs**: If you want to store any system prints from a trial, leave this checked, otherwise uncheck it.
-
-Here's an example of a filled out information page:
-
-![filledInformationPage](https://user-images.githubusercontent.com/23245825/223881669-9d3790fa-115b-498b-9751-346b6047820f.png)
-
-Clicking next will bring you to the parameter input page:
-
-![parameterPage](https://user-images.githubusercontent.com/23245825/223881744-33f91bb3-0eb1-44dd-bff2-4bb2964be5a1.png)
-
-There are 4 supported parameter types; Integers, Floats, Strings, and Booleans. Strings and booleans are treated as constants and are not iterated upon.
-
-* Integers and floats have 4 fields, default, min, max, and step. default is the default value the variable will have when not being iterated. min, max, and step determine how the variable will be iterated.
-* Strings and Booleans are constants
-
-To add a parameter to the experiment click on the box that contains the name of desired type of parameter. This will add a form item that you can enter more information into like so.
-
-![emptyParams](https://user-images.githubusercontent.com/23245825/223882117-d28d2a96-c3af-425b-97cb-16005c3b7a42.png)
-
-You can then enter in the required information.
-
-Here's an example of a filled parameter page:
-
-![filledParams](https://user-images.githubusercontent.com/23245825/223882365-97057fe0-9e48-49ec-bcd4-8ddc88661b02.png)
-
-Once you have entered your parameter information, clicking next will bring you to the user defined constants page.
-
-![constsPage](https://user-images.githubusercontent.com/23245825/223882904-ae4646b3-bcd8-417a-9f74-143c67092bea.png)
-
-On this page you can optionally define the values for the variables that do not need to be iterated upon.
-You must input information into the text area as if it were text inside an .ini or .config file, because it will be appended directly to the end of each trial's input ini file.
-
-Here's an example of a possible valid entry in this field:
+For example:
 
 ```ini
-[const]
-a = -1
-;test comment
-b = 10.5
-invert = False
-[Strings]
-c = Test String
+[DEFAULT]
+test_var = {test}
 ```
 
-Any input to the textarea will not be validated, so make sure that the data is formatted correctly!
+### Post Process Tab
 
-Clicking next will bring you to the Post Process page:
+<!-- ![post_process_tab](TODO: Add link here) -->
 
-![postProcess](https://user-images.githubusercontent.com/23245825/223883336-350b4a7a-f85a-4763-9d52-4cfc33425e20.png)
+This tab allows you to include a scatter plot when the project zip is downloaded. This feature will eventually be superseded by the ChartJS functionality on the dashboard.
 
-There is currently only one post processing option: it generates a Scatter Plot with a line of best fit using the data from the results of the experiment. The dependent and independent variables can be any of the user defined variables or constants. You can also use any of the headers that are defined in the TrialResults csv
+### Confirmation
 
-Clicking next will bring up the confirmation page:
+<!-- ![confirmation_tab](TODO: Add link here) -->
 
-![confirmationPage](https://user-images.githubusercontent.com/23245825/223884249-eab24c91-2b8f-43f9-9423-4c9e156e99df.png)
+This tab will allow you to confirm all of the hyperparameters and other settings of the experiment.
 
-This contains a json file of what will be passed to the backend you can check it again here.
-Clicking next will bring up the Dispatch Page. Drop the .py or .jar file that you want the experiment to run on and click Dispatch to start the experiment.
+### Dispatch
 
-### Results
+<!-- ![user_defined_contants_tab](TODO: Add link here) -->
 
-While the system is generating the config files, this is what will appear on the dashboard:
+We call this page the "Dispatch" tab because we start the experiment from here.
 
-![awaitingExpStart](https://user-images.githubusercontent.com/23245825/223901376-b047a2bc-9dc2-40d2-9d0e-6a0185f7f6cb.png)
+You have 2 options here:
+
+1. Select a file from the 5 most recent files you have used.
+
+2. Upload a new file.
+
+When you upload a file, it will automatically be selected.
+
+If your experiment was a copy, the file will be preselected for you.
+
+## Results
+
+The system will run the experiment and show you progress as it is doing so.
+
+Below is what the experiment will like when it is running.
+
+<!-- ![in_progress_exp](TODO: Add link here) -->
 
 Once the experiment starts running trials the item on the dashboard will provide; how many trials are to be run, how many trials have been run so far, the number of successes and failures, and an estimation of how long it will take the experiment to complete.
 
-![experimentInProgress](https://user-images.githubusercontent.com/23245825/223901790-f6476518-b0bf-4745-814a-c621dc564ac3.png)
+You also have the option to cancel an experiment. This will stop the execution of the experiment and no results will be available.
+
+Note: Sometime small experiments will finish before the system manages to stop the process. In this case the experiment will be shown as completed and behave like an experiment that was not cancelled.
+
+Note: Currently "Expected Total Time" does not account for the system running the experiments in parallel, so time may be substantially faster than this metric claims.
+
+<!-- ![finished_exp](TODO: Add link here) -->
 
 Once the experiment has completed you will be able to download the result.csv from the "Download Results" button which contains the output and the configuration used to get said result for each trial run.
 
 If you had an extra file produced by the experiment, chose to keep the logs from the experiment, or chose to do any post processing, you will also be able to download a zip containing those files.
 
-An example of a completed experiment can be seen here:
-
-![completedExperiment](https://user-images.githubusercontent.com/23245825/223902650-ed63760d-ce95-4f57-a571-a38dda141848.png)
-
 If you wish to run the same experiment again while changing parameters you can click on "Copy Experiment" and it will open up a new experiment window with the values from the previous experiment copied over.
+
+If you wish to view the results on the dashboard page you can click the "See Graph" button and you will have several options for graphing your results.
+
+Users can also share experiments with other users. To accomplish this, click the "Share Experiment" button. A link will be copied to the clipboard, share this link with another user and they can click it and view the experiment on their dashboard.
+
+Shared experiments behave the same as your own experiments, but the shared user cannot delete the experiment. They only have the option to unfollow.
+
+## Permutations
+
+This section will cover permutation generation in detail.
+
+When a user creates hyperparameters (in the "Parameters" tab), these are the values that will be iterated through the fill up the ini config file.
+
+### Example 1
+
+We will ignore defaults for now.
+
+I have an integer value with the properties following properties:
+
+* Name: test
+
+* Min: 1
+
+* Max: 10
+
+* Step: 1
+
+In the this means we will have 10 permutations, test equals 1-10.
+
+config0
+
+```ini
+[DEFAULT]
+test=0
+```
+
+config1
+
+```ini
+[DEFAULT]
+test=1
+```
+
+And so on...
+
+"[DEFAULT]" is the default header values for permutations generated.
+
+### Example 2
+
+Now lets talk about "defaults".
+
+This allows you to lessen the amount permutations generated for your experiment.
+
+Lets say we have the following parameters:
+
+An integer with the following properties:
+
+* Name: x
+
+* Default: 1
+
+* Min: 1
+
+* Max: 10
+
+* Step: 1
+
+Another integer with the following properties:
+
+* Name: y
+
+* Default: 11
+
+* Min: 11
+
+* Max: 20
+
+* Step: 1
+
+Now we also have a stringlist with the following properties:
+
+* Name: test
+
+* Default: "two"
+
+* Values: ["one", "two", "three"]
+
+When generating the config ini it will look like this:
+
+config0
+
+```ini
+x=1
+y=11
+test=two
+```
+
+config1
+
+```ini
+x=2
+y=11
+test="two"
+```
+
+...
+
+config10
+
+```ini
+x=1
+y=11
+test="two"
+```
+
+config11
+
+```ini
+x=1
+y=12
+test="two"
+```
+
+...
+
+config20
+
+```ini
+x=1
+y=11
+test="one"
+```
+
+And so on...
+
+The thing to notice is that for *ALL* configs generated while iterating x, y will equal 11, and test will equal "two". The default value makes it so permutations are not generated for every value, but defaults are used instead.
 
 ## Known bugs
 
 * If something catastrophically goes wrong and the experiment cannot continue, the user is not notified. So if an experiment is stuck on "Experiment Awaiting Start" or stuck on a trial run for a long period of time it is likely that the experiment has crashed. This is currently being addressed and should be fixed in the future.
+
