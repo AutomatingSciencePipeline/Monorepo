@@ -67,6 +67,7 @@ def setup(args):
             
             # Check if port is empty
             if port == "":
+                process.kill()
                 print("Failed to get port, waiting 2 seconds and trying again")
                 sleep(2)
                 run_minikube_service()
