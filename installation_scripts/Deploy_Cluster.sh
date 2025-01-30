@@ -29,4 +29,3 @@ do
    echo 'Waiting for a pod to start....'
 done
 kubectl apply -f ../kube_config/l2advertisement.yaml
-kubectl expose deployment deployment-test-frontend --type LoadBalancer --port 80 --target-port 3000
