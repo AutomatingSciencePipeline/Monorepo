@@ -65,7 +65,7 @@ Now, use Helm to install the GLADOS MongoDB registry from DockerHub. This is nec
                     values:
                         - "glados-db"  # Replace with the name of the node you want to use
     ```
-    Not doing so will result in local testing to be impossible.
+    Not doing so will result in the mongo nodes not being able to be scheduled.
 
 ```bash
     helm install glados-mongodb oci://registry-1.docker.io/bitnamicharts/mongodb -f helm_packages/mongodb-helm/values.yaml
@@ -223,7 +223,7 @@ Now you can use locally built images to run GLADOS!
 
 ## Prebuilt Script for Docker Image Management
 
-Due to the complexity of getting Minikube to behave, I have created a python script to run the needed commands for you. 
+Due to the complexity of getting Minikube to behave, I have created a python script to run the needed commands for you.
 
 From the root of the Monorepo run the command:
 
