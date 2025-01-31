@@ -934,13 +934,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 									</a>
 								)}
 							</Menu.Item>
-							<Menu.Item>
-								{({ active }) => (
-									<a href='#' className={menuHoverActiveCss(active)}>
-										TODO AnotherOption
-									</a>
-								)}
-							</Menu.Item>
 						</div>
 					</Menu.Items>
 				</Menu>
