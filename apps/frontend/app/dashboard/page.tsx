@@ -674,6 +674,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	};
 
 	// TODO: Rework this to by default sort by "Uploaded At", rather than "Started At"
+	// Uploaded at corresponds to new Date(Number(project['created'])) --> project['created'] --> exp.created
 	const sortByExperimentState = (a, b, sort) => {
 		const aStatus = getExperimentState(a);
 		const bStatus = getExperimentState(b);
@@ -682,8 +683,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		const statusOrder = {
 			'Awaiting Start': 1,
 			'In Progress': 2,
-			'Completed': 3,
-			'Aborted': 4
+			'Completed': 3
 		};
 
 		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
