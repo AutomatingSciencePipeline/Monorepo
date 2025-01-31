@@ -683,8 +683,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		const statusOrder = {
 			'Awaiting Start': 1,
 			'In Progress': 2,
+			'Aborted': 3,
 			'Completed': 3
-		};
+		}
 
 		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
 		if (statusOrder[aStatus] > statusOrder[bStatus]) return 1;
