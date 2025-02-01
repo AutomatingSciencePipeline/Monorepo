@@ -1,6 +1,6 @@
 # BioAI HW 8 User Guide
 
-This guide is intended for students in CSSE315 BioAI to utilize the GLADOS system to run their completed code.
+This guide is intended for students in CSSE314 BioAI to utilize the GLADOS system to run their completed code.
 
 ## Step 1: Format the .zip File for the Project
 
