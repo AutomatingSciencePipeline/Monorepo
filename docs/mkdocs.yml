@@ -10,6 +10,8 @@ edit_uri: '' # edit is hidden
 nav:
   - Home: index.md
   - About GLADOS: about.md
+  - BioAI User Guides:
+    - HW8: bioai/hw8.md
   - Tutorial:
     - Usage: tutorial/usage.md
     - Installation: tutorial/installation.md
