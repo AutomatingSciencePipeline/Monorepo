@@ -6,42 +6,31 @@ This guide is intended for students in CSSE314 BioAI to utilize the GLADOS syste
 
 There are a couple things that need to be changed in the HW8 files to ensure that this project runs on GLADOS.
 
-First, add this to the python imports:
- 
-```python
-    import warnings
-```
 
-Then, add this block of code in below the last import statement:
-
-```python
-# Suppress the specific warning from pygad
-warnings.filterwarnings("ignore", message="WARNING: There are no hidden layers however a value is assigned to the parameter 'hidden_activations'")
-```
-
-Next, in `fitness_function`, this line needs to be changed:
+First, in `fitness_function`, this line needs to be changed:
 
 ```python
     BEFORE: robotid = p.loadURDF("./URDF_Files/armsBody.urdf")
     AFTER:  robotid = p.loadURDF("../URDF_Files/armsBody.urdf")
 ```
 
-After that, in the project root folder, a new file has to be included. Name this file `userProvidedFileReqs.txt`. Inside the file, the following information needs to be included:
+!!! note
+    If you do not make the change above, GLADOS will error. The error will look similar to this:
 
-```
-numpy==1.24.4
-pybullet==3.2.7
-pygad==3.4.0
-```
+    ![error](./step1error.png)
 
-Finally, zip all of the project files into a single `.zip` and give it a appropriate name. (e.g. *bioAI_HW8_{RHITUSERNAME}.zip*).
+Then, zip all of the project files into a single `.zip` and give it a appropriate name. (e.g. *bioAI_HW8_{RHITUSERNAME}.zip*).
+
+Here is a screenshot of the files in the source_code folder to be zipped:
+
+![zipfiles](./zipfiles.png)
 
 !!! warning
     HW8 needs to be completed in order for this to run. Only continue if the fitness function for HW8 is completed and does not error.
 
 ## Step 2: Create and Run a New Experiment
 
-First, log in with your Google or GitHub account to access the GLADOS homepage. This is the screen that wil be presented when the user is logged in:
+First, log in with your Google or GitHub account to access the [GLADOS Homepage](https://glados.csse.rose-hulman.edu). This is the screen that wil be presented when the user is logged in:
 
 ![homepage](./homepage.png)
 
@@ -74,7 +63,14 @@ Select `float` from the Parameter list. A new float will appear in the parameter
 * max: 0.5
 * step: 0.1
 
-When completed, it will look like this:
+Now select `integer` from the Parameter list. A new integer will appear in the parameters section below. This `integer` parameter nees to include the following information.
+
+* name: seed
+* min: 0
+* max: 10
+* step: 1
+
+When completed, the parameters section will look like this:
 
 ![param](./param.png)
 
@@ -82,7 +78,7 @@ When completed, click **Next**.
 
 ### User Defined Constants
 
-These constants ensure that GLADOS and the inserted code recognize the correct variables. Copy and paste the following block into the **User Defined Constants** section to map the parameter mr to the mutation_probabilty variable.
+These constants ensure that GLADOS and the inserted code recognize the correct variables. Copy and paste the following block into the **User Defined Constants** section to map the parameter mr to the mutation_probabilty variable and the parameter seed to the random_seed variable.
 
 ```
 num_inputs = 4
@@ -97,6 +93,7 @@ parent_selection_type = rank
 crossover_type = scattered
 mutation_type = random
 keep_parents = 0
+random_seed = {seed}
 ```
 
 When pasted, click **Next**.
@@ -110,7 +107,7 @@ Leave this box unchecked. Click **Next**.
 This step reviews the experiment setup. If the previous steps were followed correctly, the confirmation page should resemble the following:
 
 ```json
- {
+  {
   "hyperparameters": [
     {
       "name": "mr",
@@ -120,21 +117,30 @@ This step reviews the experiment setup. If the previous steps were followed corr
       "step": ".1",
       "type": "float",
       "useDefault": false
+    },
+    {
+      "name": "seed",
+      "default": -1,
+      "min": "0",
+      "max": "10",
+      "step": 1,
+      "type": "integer",
+      "useDefault": false
     }
   ],
-  "name": "BioAI-HW8-6",
+  "name": "BioAI-HW8-{RHITUSERNAME}",
   "description": "",
   "trialExtraFile": "",
   "trialResult": "Homework8_Results.csv",
   "scatterIndVar": "",
   "scatterDepVar": "",
-  "dumbTextArea": "[DEFAULT]\nnum_inputs = 4\nnum_classes = 4\nnum_solutions = 10\nhidden_activations = sigmoid\noutput_activation = sigmoid\nnum_parents_mating = 5\nnum_generations = 2\nmutation_probability = {mr}\nparent_selection_type = rank\ncrossover_type = scattered\nmutation_type = random\nkeep_parents = 0",
+  "dumbTextArea": "\nnum_inputs = 4\nnum_classes = 4\nnum_solutions = 10\nhidden_activations = sigmoid\noutput_activation = sigmoid\nnum_parents_mating = 5\nnum_generations = 2\nmutation_probability = {mr}\nparent_selection_type = rank\ncrossover_type = scattered\nmutation_type = random\nkeep_parents = 0\nrandom_seed = {seed}",
   "timeout": 18000,
   "verbose": false,
   "scatter": false,
   "keepLogs": true,
   "workers": 1,
-  "file": "679e8ef960f8c8d0c659039a",
+  "file": "679e806160f8c8d0c659037d",
   "status": "CREATED",
   "experimentExecutable": "glados_experiment.py"
 }
@@ -160,7 +166,9 @@ After the experiment completes, several buttons appear to review and download da
 
 - **Download Results**: Click to download the raw `.csv` file.
 - **Download Project Zip**: Click to download the `.zip` file containing project and run data.
-- **See Graph**: Click to open an interactive graphing module to visualize variable changes during the experiment.
+- **See Graph**: Click to open an interactive graphing module to visualize variable changes during the experiment. For more detailed informtion, view the gif below:
+
+![graphgif](./glados_graph_demo.gif)
 
 ## 4. FAQ
 
