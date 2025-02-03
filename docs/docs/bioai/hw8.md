@@ -2,6 +2,9 @@
 
 This guide is intended for students in CSSE314 BioAI to utilize the GLADOS system to run their completed code.
 
+!!! warning
+    HW8 needs to be completed in order for this to run. The code needs to have succeeded in running the evolution to completion (but it does not need to be a great behavior, just some *completed* behavior).
+
 ## Step 1: Format the .zip File for the Project
 
 There are a couple things that need to be changed in the HW8 files to ensure that this project runs on GLADOS.
@@ -25,9 +28,6 @@ Here is a screenshot of the files in the source_code folder to be zipped:
 
 ![zipfiles](./zipfiles.png)
 
-!!! warning
-    HW8 needs to be completed in order for this to run. Only continue if the fitness function for HW8 is completed and does not error.
-
 ## Step 2: Create and Run a New Experiment
 
 First, log in with your Google or GitHub account to access the [GLADOS Homepage](https://glados.csse.rose-hulman.edu). This is the screen that wil be presented when the user is logged in:
@@ -42,7 +42,7 @@ Fill in the following details:
 
 - **Name**: Any appropriate name (e.g., *BioAI-HW8_{RHITUSERNAME}*)
 - **Trial Result File**: Set to ***Homework8\_Results.csv***
-- **Trial's Extra File**: Leave blank
+- **Trial's Extra File**: Set to ***./***
 - **Trial Timeout (seconds)**: 18000 (default)
 - **Executable File**: Set to ***glados\_experiment.py***
 
@@ -160,6 +160,17 @@ Once uploaded, the file will appear as successfully selected for the experiment:
 
 Click the **Dispatch** button to send the experiment to GLADOS.
 
+!!! note
+    If the experiment fails, the result on GLADOS will look like this:
+
+    ![gladoserror](./experror.png)
+
+    If this happens, review the above steps to ensure that the experiment was set up correctly. If you are confused why it failed, you can use the **System Log** button to review the logging of the experiment run to see possible reasons for failure.
+
+    **Note**: You will have to scroll through the log file to find where the error happens. It may not be obvious by just briefly scanning the log file.
+
+    See the **FAQ** section if you are repeatedly unable to run an experiment.
+
 ## 3. Reviewing Results
 
 After the experiment completes, several buttons appear to review and download data:
@@ -174,7 +185,6 @@ After the experiment completes, several buttons appear to review and download da
 
 ### GLADOS Dev Team Contact Information
 
-For help with running this project, contact Dr. Yoder via email or Teams and he can forward any concerns or questions to the GLADOS Dev Team. 
+For help with running this project, contact Dr. Yoder via email or Teams and he can forward any concerns or questions to the GLADOS Dev Team.
 
-If there are any errors or bugs with GLADOS, a report can be submitted via the **Report** button at the top right of the GLADOS page. 
-
+If there are any errors or bugs with GLADOS, a report can be submitted via the **Report** button at the top right of the GLADOS page.
