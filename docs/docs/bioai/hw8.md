@@ -166,6 +166,7 @@ Click the **Dispatch** button to send the experiment to GLADOS.
     ![gladoserror](./experror.png)
 
     If this happens, review the above steps to ensure that the experiment was set up correctly. If you are confused why it failed, you can use the **System Log** button to review the logging of the experiment run to see possible reasons for failure.
+    
     **Note**: You will have to scroll through the log file to find where the error happens. It may not be obvious by just briefly scanning the log file.
 
     See the **FAQ** section if you are repeatedly unable to run an experiment.
