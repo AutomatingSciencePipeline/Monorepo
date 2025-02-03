@@ -908,8 +908,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 						return true;
 					}
 					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
-				})
-				.map((project: ExperimentData) => {
+				}).map((project: ExperimentData) => {
 					if (!includeCompleted && project.finished) {
 						return null;
 					}
@@ -934,7 +933,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 							/>
 						</li>
 					);
-				})}
+				})}}
 		</ul>
 	</div>);
 };
