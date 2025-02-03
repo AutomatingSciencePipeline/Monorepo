@@ -173,7 +173,10 @@ def run_batch(data: IncomingStartRequest):
     # If it is a python file get the pipreqs
     if experiment.experimentType == ExperimentType.PYTHON:
         try:
-            os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+            # if the file exists, skip running the command
+            if not os.path.exists("userProvidedFileReqs.txt"):
+                os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+                
         except Exception as err:
             explogger.error("Failed to generate pip requirements")
             explogger.exception(err)
