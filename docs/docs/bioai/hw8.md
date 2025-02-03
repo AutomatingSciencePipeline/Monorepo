@@ -160,6 +160,15 @@ Once uploaded, the file will appear as successfully selected for the experiment:
 
 Click the **Dispatch** button to send the experiment to GLADOS.
 
+!!! note
+    If the experiment fails, the result on GLADOS will look like this:
+
+    ![gladoserror](./experror.png)
+
+    If this happens, review the above steps to ensure that the experiment was set up correctly. If you are confused why it failed, you can use the **System Log** button to review the logging of the experiment run to see possible reasons for failure.
+
+    See the **FAQ** section if you are repeatedly unable to run an experiment.
+
 ## 3. Reviewing Results
 
 After the experiment completes, several buttons appear to review and download data:
@@ -174,7 +183,6 @@ After the experiment completes, several buttons appear to review and download da
 
 ### GLADOS Dev Team Contact Information
 
-For help with running this project, contact Dr. Yoder via email or Teams and he can forward any concerns or questions to the GLADOS Dev Team. 
+For help with running this project, contact Dr. Yoder via email or Teams and he can forward any concerns or questions to the GLADOS Dev Team.
 
-If there are any errors or bugs with GLADOS, a report can be submitted via the **Report** button at the top right of the GLADOS page. 
-
+If there are any errors or bugs with GLADOS, a report can be submitted via the **Report** button at the top right of the GLADOS page.
