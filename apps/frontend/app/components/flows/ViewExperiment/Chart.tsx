@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Chart, registerables, ChartTypeRegistry } from 'chart.js';
 import { BoxPlotController, BoxAndWiskers, ViolinController, Violin } from '@sgratzl/chartjs-chart-boxplot';
 import 'tailwindcss/tailwind.css';
@@ -26,6 +26,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [aggregateData, setAggregateData] = useState(false);
     const [canAggregate, setCanAggregate] = useState(true);
+    const aggregateSpanRef = useRef<HTMLSpanElement>(null);
+    const aggregateSelectRef = useRef<HTMLSelectElement>(null);
+    const headerSpanRef = useRef<HTMLSpanElement>(null);
+    const headerSelectRef = useRef<HTMLSelectElement>(null);
 
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
@@ -39,7 +43,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     const aggregateModes = ['sum', 'count', 'average', 'median', 'mode']
 
-    useEffect(() => {
+    /*useEffect(() => {
         fetch(`/api/download/csv/${project.expId}`).then((response) => response.json()).then((record) => {
             setExperimentChartData(record);
             setLoading(false);
@@ -54,6 +58,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             });
         }
         );
+    }, [project.expId]);*/
+
+    useEffect(() => {
+        setExperimentChartData({_id: '3', experimentId: project.expId, resultContent: 'xData,yData,Classification\n1,7,A\n2,16,B\n3,12,C\n4,10,D\n5,9,A\n6,18,B\n7,12,C\n8,11,D\n9,7,A\n10,5,B\n11,16,C\n12,20,D\n13,0,A\n14,12,B\n15,18,C\n16,3,D\n17,7,A\n18,8,B\n19,19,C\n20,4,D'})
     }, [project.expId]);
 
     const downloadImage = () => {
@@ -280,6 +288,24 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         setCanvasKey(prevKey => prevKey + 1);
     };
 
+    useEffect(() => {
+        if (headerSelectRef.current && headerSpanRef.current) {
+            const spanElement = headerSpanRef.current;
+            spanElement.style.display = 'inline';
+            headerSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
+            spanElement.style.display = 'none';
+        }
+      }, [xAxis]);
+
+    useEffect(() => {
+        if (aggregateSelectRef.current && aggregateSpanRef.current) {
+            const spanElement = aggregateSpanRef.current;
+            spanElement.style.display = 'inline';
+            aggregateSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
+            spanElement.style.display = 'none';
+        }
+      }, [aggregateMode]);
+
 
     return (
         <GraphModal onClose={() => { onClose(); regenerateCanvas(); }} fullScreen={isFullscreen} toggleFullscreen={toggleFullscreen}>
@@ -312,9 +338,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 )}
             </div>
             <div className='p-4'>
+                <span ref={headerSpanRef} className="hidden">{xAxis}</span>
                 <p className="font-bold">X-Axis Column:</p>
                 <select
-                    className="p-2 border rounded-md font-bold w-auto"
+                    ref={headerSelectRef}
+                    className="p-2 border rounded-md font-bold"
                     onChange={(e) => setXAxis(e.target.value)}
                     name="xaxis"
                     defaultValue={headers[0]}
@@ -330,12 +358,17 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
                 <input className='p-2' id='aggregate-data-box' type="checkbox" checked={aggregateData} onChange={() => setAggregateData(!aggregateData)}></input>
+                <span ref={aggregateSpanRef} className="hidden">{aggregateMode}</span>
                 {
                     aggregateData ?
-                        (<div className='p-4'>
+                        (
+                        <div className='p-4'>
+                            <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
+                            <br/>
                             <select
+                                ref={aggregateSelectRef}
                                 id='aggregate-select'
-                                className="p-2 border rounded-md font-bold w-auto"
+                                className="p-2 border rounded-md font-bold"
                                 disabled={!aggregateData}
                                 name="aggregate"
                                 defaultValue='sum'
@@ -347,7 +380,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                     </option>
                                 ))}
                             </select>
-                            <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
                         </div>)
                         : null
                 }
