@@ -933,7 +933,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 							/>
 						</li>
 					);
-				})}}
+				})}
 		</ul>
 	</div>);
 };
