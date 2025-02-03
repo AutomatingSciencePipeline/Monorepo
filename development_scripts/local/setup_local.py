@@ -7,10 +7,6 @@ import threading
 from time import sleep
 
 def setup(args):
-    if len(args) == 0:
-        print("Please provide at least one of the following arguments: frontend, backend, runner, all")
-        return
-    
     if not pathlib.Path().resolve().name == "Monorepo":
         print("Please run this script from the root of the Monorepo")
         return
@@ -56,7 +52,7 @@ def setup(args):
     
     print("Setting up kubernetes")
     
-    os.system("python3 kubernetes_init\\init.py --hard")
+    os.system("python3 kubernetes_init/init.py --hard")
     
     # in a new thread we need to run the following command
     # minikube service glados-frontend --url
@@ -68,6 +64,14 @@ def setup(args):
             print(line)
             url = line.strip()
             port = url.split(":")[-1]
+            
+            # Check if port is empty
+            if port == "":
+                process.kill()
+                print("Failed to get port, waiting 2 seconds and trying again")
+                sleep(2)
+                run_minikube_service()
+                return
             
             # go into the kubernetes_init/secrets folder and then update the auth url line to be
             # http://localhost:<port>/api/auth
@@ -105,7 +109,7 @@ def setup(args):
             f.close()
             
             # apply the new secrets
-            os.system("python3 kubernetes_init\\init.py --hard")
+            os.system("python3 kubernetes_init/init.py --hard")
                 
             print(f"Frontend is now running at: http://localhost:{port}")        
                 

@@ -9,12 +9,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers:
     [
       GitHub({
+        allowDangerousEmailAccountLinking: true,
         profile(profile) {
           return { role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
         }}),
       Google({
+        allowDangerousEmailAccountLinking: true,
         profile(profile) {
-          return { role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
+          return { role: (profile as any).role ?? "user", image: profile.picture, email: profile.email }
         }
       })
     ],

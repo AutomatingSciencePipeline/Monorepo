@@ -170,29 +170,6 @@ def run_batch(data: IncomingStartRequest):
             close_experiment_run(exp_id)
             return
     
-    # If it is a python file get the pipreqs
-    if experiment.experimentType == ExperimentType.PYTHON:
-        try:
-            os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
-        except Exception as err:
-            explogger.error("Failed to generate pip requirements")
-            explogger.exception(err)
-            os.chdir('../..')
-            close_experiment_run(exp_id)
-            return
-
-    # check if the new requirements exists
-    if os.path.exists("userProvidedFileReqs.txt"):
-        # do pip install -r userProvidedFileReqs.txt
-        try:
-            os.system(f"pip install -r userProvidedFileReqs.txt")
-        except Exception as err:
-            explogger.error("Failed to install pip requirements")
-            explogger.exception(err)
-            os.chdir('../..')
-            close_experiment_run(exp_id)
-            return
-    
     if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
         explogger.info("User is admin or privileged, installing packages from packages.txt")
         
@@ -232,6 +209,30 @@ def run_batch(data: IncomingStartRequest):
             close_experiment_run(exp_id)
             return
       
+    # If it is a python file get the pipreqs
+    if experiment.experimentType == ExperimentType.PYTHON:
+        try:
+            # if the file exists, skip running the command
+            if not os.path.exists("userProvidedFileReqs.txt"):
+                os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+        except Exception as err:
+            explogger.error("Failed to generate pip requirements")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
+
+    # check if the new requirements exists
+    if os.path.exists("userProvidedFileReqs.txt"):
+        # do pip install -r userProvidedFileReqs.txt
+        try:
+            os.system(f"pip install -r userProvidedFileReqs.txt")
+        except Exception as err:
+            explogger.error("Failed to install pip requirements")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{exp_id}/configFiles")
 

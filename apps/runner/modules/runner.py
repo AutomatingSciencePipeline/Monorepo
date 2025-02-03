@@ -33,6 +33,11 @@ def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout
                 trialLogFile.close()
             os.chdir('..')
         if data[PROCESS_ERROR_STREAM]:
+            # pybullet build time is a common error that is not an error
+            # the pybullet developers made this output on stderr because they are horrible developers
+            # just ignore it for now, try to find a fix for this later
+            if "pybullet build time" in data[PROCESS_ERROR_STREAM]:
+                return
             errorMessage = f'errors returned from pipe is {data[PROCESS_ERROR_STREAM]}'
             explogger.error(errorMessage)
             raise InternalTrialFailedError(errorMessage)
