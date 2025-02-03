@@ -2,6 +2,9 @@
 
 This guide is intended for students in CSSE314 BioAI to utilize the GLADOS system to run their completed code.
 
+!!! warning
+    HW8 needs to be completed in order for this to run. The code needs to have succeeded in running the evolution to completion (but it does not need to be a great behavior, just some *completed* behavior).
+
 ## Step 1: Format the .zip File for the Project
 
 There are a couple things that need to be changed in the HW8 files to ensure that this project runs on GLADOS.
@@ -24,9 +27,6 @@ Then, zip all of the project files into a single `.zip` and give it a appropriat
 Here is a screenshot of the files in the source_code folder to be zipped:
 
 ![zipfiles](./zipfiles.png)
-
-!!! warning
-    HW8 needs to be completed in order for this to run. Only continue if the fitness function for HW8 is completed and does not error.
 
 ## Step 2: Create and Run a New Experiment
 
@@ -166,7 +166,7 @@ Click the **Dispatch** button to send the experiment to GLADOS.
     ![gladoserror](./experror.png)
 
     If this happens, review the above steps to ensure that the experiment was set up correctly. If you are confused why it failed, you can use the **System Log** button to review the logging of the experiment run to see possible reasons for failure.
-    
+
     **Note**: You will have to scroll through the log file to find where the error happens. It may not be obvious by just briefly scanning the log file.
 
     See the **FAQ** section if you are repeatedly unable to run an experiment.
