@@ -42,7 +42,7 @@ Fill in the following details:
 
 - **Name**: Any appropriate name (e.g., *BioAI-HW8_{RHITUSERNAME}*)
 - **Trial Result File**: Set to ***Homework8\_Results.csv***
-- **Trial's Extra File**: Leave blank
+- **Trial's Extra File**: Set to ***./***
 - **Trial Timeout (seconds)**: 18000 (default)
 - **Executable File**: Set to ***glados\_experiment.py***
 
