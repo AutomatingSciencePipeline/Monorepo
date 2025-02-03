@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -72,6 +72,16 @@ const activityItems = [
 
 const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
+
+	useEffect(() => {
+		if (session?.user?.role === "admin"){
+			//Check to make sure the admin link is not already in the userNavigation
+			if (userNavigation[0].name !== 'Admin'){
+				userNavigation.unshift({ name: 'Admin', href: '/admin' });
+			}
+		}
+	}, [session]);
+
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -441,7 +451,7 @@ export default function DashboardPage() {
 													</button>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
-															<Transition.Child
+															<TransitionChild
 																as={Fragment}
 																enter="ease-out duration-300"
 																enterFrom="opacity-0"
@@ -451,11 +461,11 @@ export default function DashboardPage() {
 																leaveTo="opacity-0"
 															>
 																<div className="fixed inset-0 bg-black bg-opacity-25" />
-															</Transition.Child>
+															</TransitionChild>
 
 															<div className="fixed inset-0 overflow-y-auto">
 																<div className="flex min-h-full items-center justify-center p-4 text-center">
-																	<Transition.Child
+																	<TransitionChild
 																		as={Fragment}
 																		enter="ease-out duration-300"
 																		enterFrom="opacity-0 scale-95"
@@ -464,10 +474,10 @@ export default function DashboardPage() {
 																		leaveFrom="opacity-100 scale-100"
 																		leaveTo="opacity-0 scale-95"
 																	>
-																		<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-																			<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+																		<DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+																			<DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
 																				Select Default Experiment
-																			</Dialog.Title>
+																			</DialogTitle>
 																			<div className="mt-2">
 																				<p className="text-sm text-gray-500">
 																					Please select the type of default experiment you want to run.
@@ -497,8 +507,8 @@ export default function DashboardPage() {
 																					Genetic Algorithm
 																				</button>
 																			</div>
-																		</Dialog.Panel>
-																	</Transition.Child>
+																		</DialogPanel>
+																	</TransitionChild>
 																</div>
 															</div>
 														</Dialog>
@@ -635,52 +645,12 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
 
 	// Sorting functions
-	const sortByName = (a, b) => {
-		return sortByExperimentState(a, b, b.name.localeCompare(a.name));
-	};
-	const sortByNameReverse = (a, b) => {
-		return sortByExperimentState(a, b, a.name.localeCompare(b.name));
-	};
-	const sortByDateModified = (a, b) => {
-		return sortByExperimentState(a, b, b.finishedAtEpochMillis - a.finishedAtEpochMillis);
-	};
-	const sortByDateModifiedReverse = (a, b) => {
-		return sortByExperimentState(a, b, a.finishedAtEpochMillis - b.finishedAtEpochMillis);
-	};
-	const sortByDateCreated = (a, b) => {
-		return sortByExperimentState(a, b, b.startedAtEpochMillis - a.startedAtEpochMillis);
-	};
-	const sortByDateCreatedReverse = (a, b) => {
-		return sortByExperimentState(a, b, a.startedAtEpochMillis - b.startedAtEpochMillis);
-	};
-
-	const getExperimentState = (exp) => {
-		if (exp.finished) {
-			return exp.fails <= 1 && (exp?.passes ?? 0) === 0 ? 'Aborted' : 'Completed';
-		}
-		if (!exp.finished && exp.startedAtEpochMillis) {
-			return 'In Progress';
-		}
-		return 'Awaiting Start';
-	};
-
-	const sortByExperimentState = (a, b, sort) => {
-		const aStatus = getExperimentState(a);
-		const bStatus = getExperimentState(b);
-
-		// Define priority order for sorting
-		const statusOrder = {
-			'Awaiting Start': 1,
-			'In Progress': 2,
-			'Completed': 3,
-			'Aborted': 4
-		};
-
-		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
-		if (statusOrder[aStatus] > statusOrder[bStatus]) return 1;
-
-		return sort;
-	};
+	const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
+	const sortByName = (a, b) => b.name.localeCompare(a.name);
+	const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
+	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
+	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
+	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
