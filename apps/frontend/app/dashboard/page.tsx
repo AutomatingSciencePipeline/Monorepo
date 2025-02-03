@@ -914,6 +914,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			role='list'
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
+
 			{sortedExperiments?.map((project: ExperimentData) => {
 				if (!includeCompleted && project.finished) {
 					return null;
