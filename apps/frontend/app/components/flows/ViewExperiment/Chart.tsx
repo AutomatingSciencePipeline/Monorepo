@@ -43,7 +43,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     const aggregateModes = ['sum', 'count', 'average', 'median', 'mode']
 
-    /*useEffect(() => {
+    useEffect(() => {
         fetch(`/api/download/csv/${project.expId}`).then((response) => response.json()).then((record) => {
             setExperimentChartData(record);
             setLoading(false);
@@ -58,10 +58,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             });
         }
         );
-    }, [project.expId]);*/
-
-    useEffect(() => {
-        setExperimentChartData({_id: '3', experimentId: project.expId, resultContent: 'xData,yData,Classification\n1,7,A\n2,16,B\n3,12,C\n4,10,D\n5,9,A\n6,18,B\n7,12,C\n8,11,D\n9,7,A\n10,5,B\n11,16,C\n12,20,D\n13,0,A\n14,12,B\n15,18,C\n16,3,D\n17,7,A\n18,8,B\n19,19,C\n20,4,D'})
     }, [project.expId]);
 
     const downloadImage = () => {
