@@ -914,34 +914,31 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			role='list'
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
-
-			{sortedExperiments
-				.map((project: ExperimentData) => {
-					if (!includeCompleted && project.finished) {
-						return null;
-					}
-					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-					const oneHourMilliseconds = 1000 * 60 * 60;
-					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-					if (!includeArchived && projectIsArchived) {
-						return null;
-					}
-					return (
-						<li
-							key={project.expId}
-							className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-						>
-							<ExperimentListing
-								projectData={project}
-								onCopyExperiment={onCopyExperiment}
-								onDownloadResults={downloadExperimentResults}
-								onDownloadProjectZip={downloadExperimentProjectZip}
-								onDeleteExperiment={onDeleteExperiment}
-							/>
-						</li>
-					);
-				})}
+			{sortedExperiments?.map((project: ExperimentData) => {
+				if (!includeCompleted && project.finished) {
+					return null;
+				}
+				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+				const oneHourMilliseconds = 1000 * 60 * 60;
+				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+				if (!includeArchived && projectIsArchived) {
+					return null;
+				}
+				return (
+					<li
+						key={project.expId}
+						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+					>
+						<ExperimentListing
+							projectData={project}
+							onCopyExperiment={onCopyExperiment}
+							onDownloadResults={downloadExperimentResults}
+							onDownloadProjectZip={downloadExperimentProjectZip}
+							onDeleteExperiment={onDeleteExperiment} />
+					</li>
+				);
+			})}
 		</ul>
 	</div>);
 };
