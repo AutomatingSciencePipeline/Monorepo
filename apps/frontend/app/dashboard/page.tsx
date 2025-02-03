@@ -634,58 +634,28 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
 	// State of arrow icon
-	const [sortArrowUp, setSortArrowUp] = useState(true);
+	const [sortArrowUp, setSortArrowUp] = useState(false);
 
-	const [selectedSortText, setSelectedSortText] = useState('Date Created');
+	const [selectedSortText, setSelectedSortText] = useState('Date Uploaded');
 
 	// Sorting functions
 	const sortByName = (a, b) => {
-		return sortByExperimentState(a, b, b.name.localeCompare(a.name));
+		return b.name.localeCompare(a.name);
 	};
 	const sortByNameReverse = (a, b) => {
-		return sortByExperimentState(a, b, a.name.localeCompare(b.name));
+		return a.name.localeCompare(b.name);
 	};
 	const sortByDateCreated = (a, b) => {
-		return sortByExperimentState(a, b, b.startedAtEpochMillis - a.startedAtEpochMillis);
+		return b.startedAtEpochMillis - a.startedAtEpochMillis;
 	};
 	const sortByDateCreatedReverse = (a, b) => {
-		return sortByExperimentState(a, b, a.startedAtEpochMillis - b.startedAtEpochMillis);
+		return a.startedAtEpochMillis - b.startedAtEpochMillis;
 	};
 	const sortByDateUploaded = (a, b) => {
-		return sortByExperimentState(a, b, b.created - a.created);
+		return a.created - b.created;
 	};
 	const sortByDateUploadedReverse = (a, b) => {
-		return sortByExperimentState(a, b, a.created - b.created);
-	};
-
-	const getExperimentState = (exp) => {
-		if (exp.finished) {
-			return exp.fails <= 1 && (exp?.passes ?? 0) === 0 ? 'Aborted' : 'Completed';
-		}
-		if (!exp.finished && exp.startedAtEpochMillis) {
-			return 'In Progress';
-		}
-		return 'Awaiting Start';
-	};
-
-	// TODO: Rework this to by default sort by "Uploaded At", rather than "Started At"
-	const sortByExperimentState = (a, b, sort) => {
-		const aStatus = getExperimentState(a);
-		const bStatus = getExperimentState(b);
-
-		// Define priority order for sorting
-		const statusOrder = {
-			'Awaiting Start': 1,
-			'In Progress': 1,
-			'Aborted': 1,
-			'Completed': 2
-		}
-
-		if (statusOrder[aStatus] < statusOrder[bStatus]) return -1;
-		if (statusOrder[aStatus] > statusOrder[bStatus]) return 1;
-		if (statusOrder[aStatus] == 1) return b.created - a.created;
-
-		return sort;
+		return b.created - a.created;
 	};
 
 	// Sort the experiments based on the selected sorting option
