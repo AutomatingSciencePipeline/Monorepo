@@ -98,6 +98,7 @@ const Navbar = (props) => {
 								function (newValue: string): void {
 									console.log(`SearchBar.onValueChanged: ${newValue}`);
 								}} />
+							{/* Links section */}
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
 									<div className='flex'>
