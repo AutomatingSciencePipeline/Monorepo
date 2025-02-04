@@ -6,6 +6,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'GLADOS',
   description: 'GLADOS: A platform for running experiments',
+  icons: [
+    { rel: "icon", url: "/glados-logo.ico" }
+  ],
 };
 
 export default function RootLayout({
