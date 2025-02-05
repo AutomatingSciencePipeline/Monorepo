@@ -70,7 +70,7 @@ const activityItems = [
 	},
 ];
 
-const Navbar = (props) => {
+const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
 
 	useEffect(() => {
@@ -94,11 +94,13 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
-							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
-								function (newValue: string): void {
-									console.log(`SearchBar.onValueChanged: ${newValue}`);
-								}} />
-							{/* Links section */}
+							<SearchBar
+								labelText={'Search experiments'}
+								placeholderText={'Search projects'}
+								onValueChanged={(newValue) => {
+									setSearchTerm(newValue);
+								}}
+							/>
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
 									<div className='flex'>
@@ -235,6 +237,7 @@ export default function DashboardPage() {
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [searchTerm, setSearchTerm] = useState('');
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -350,7 +353,7 @@ export default function DashboardPage() {
 
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar />
+				<Navbar setSearchTerm={setSearchTerm} />
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto xl:px-8 lg:flex'>
@@ -392,7 +395,7 @@ export default function DashboardPage() {
 													onClick={() => {
 														setFormState(1);
 													}}
-												// onClick
+													// onClick
 												>
 													{label}
 												</button>
@@ -543,7 +546,9 @@ export default function DashboardPage() {
 									toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
 									console.log(`Failed delete, reason: ${reason}`);
 								});
-							}} />
+							}}
+							searchTerm={searchTerm}
+						/>
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -617,34 +622,47 @@ export interface ExperimentListProps {
 	experiments: ExperimentData[];
 	onCopyExperiment: (experiment: string) => void;
 	onDeleteExperiment: (experiment: string) => void;
+	searchTerm: string;
 }
 
 const SortingOptions = {
 	NAME: 'name',
 	NAME_REVERSE: 'nameReverse',
-	DATE_MODIFIED: 'dateModified',
-	DATE_MODIFIED_REVERSE: 'dateModifiedReverse',
 	DATE_CREATED: 'dateCreated',
 	DATE_CREATED_REVERSE: 'dateCreatedReverse',
+	DATE_UPLOADED: 'dateUploaded',
+	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm }: ExperimentListProps) => {
 	// Initial sorting option
-	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
+	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
 	// State of arrow icon
-	const [sortArrowUp, setSortArrowUp] = useState(true);
+	const [sortArrowUp, setSortArrowUp] = useState(false);
 
-	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
+	const [selectedSortText, setSelectedSortText] = useState('Date Uploaded');
 
 	// Sorting functions
-	const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
-	const sortByName = (a, b) => b.name.localeCompare(a.name);
-	const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
-	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
-	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+	const sortByName = (a, b) => {
+		return b.name.localeCompare(a.name);
+	};
+	const sortByNameReverse = (a, b) => {
+		return a.name.localeCompare(b.name);
+	};
+	const sortByDateCreated = (a, b) => {
+		return b.startedAtEpochMillis - a.startedAtEpochMillis;
+	};
+	const sortByDateCreatedReverse = (a, b) => {
+		return a.startedAtEpochMillis - b.startedAtEpochMillis;
+	};
+	const sortByDateUploaded = (a, b) => {
+		return a.created - b.created;
+	};
+	const sortByDateUploadedReverse = (a, b) => {
+		return b.created - a.created;
+	};
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
@@ -657,20 +675,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 				setSortedExperiments([...experiments].sort(sortByNameReverse));
 				break;
 
-			case SortingOptions.DATE_MODIFIED:
-				setSortedExperiments([...experiments].sort(sortByDateModified));
-				break;
-
-			case SortingOptions.DATE_MODIFIED_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
-				break;
-
 			case SortingOptions.DATE_CREATED:
 				setSortedExperiments([...experiments].sort(sortByDateCreated));
 				break;
 
 			case SortingOptions.DATE_CREATED_REVERSE:
 				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+				break;
+
+			case SortingOptions.DATE_UPLOADED:
+				setSortedExperiments([...experiments].sort(sortByDateUploaded));
+				break;
+
+			case SortingOptions.DATE_UPLOADED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateUploadedReverse));
 				break;
 
 			default:
@@ -692,20 +710,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			case SortingOptions.NAME_REVERSE:
 				newSortBy = SortingOptions.NAME;
 				break;
-			case SortingOptions.DATE_MODIFIED:
-				newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
-				break;
-			case SortingOptions.DATE_MODIFIED_REVERSE:
-				newSortBy = SortingOptions.DATE_MODIFIED;
-				break;
 			case SortingOptions.DATE_CREATED:
 				newSortBy = SortingOptions.DATE_CREATED_REVERSE;
 				break;
 			case SortingOptions.DATE_CREATED_REVERSE:
 				newSortBy = SortingOptions.DATE_CREATED;
 				break;
+			case SortingOptions.DATE_UPLOADED:
+				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE;
+				break;
+			case SortingOptions.DATE_UPLOADED_REVERSE:
+				newSortBy = SortingOptions.DATE_UPLOADED;
+				break;
 			default:
-				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE; // Default sorting option
 				break;
 		}
 
@@ -726,20 +744,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			case SortingOptions.NAME_REVERSE:
 				newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
 				break;
-			case SortingOptions.DATE_MODIFIED:
-				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
-				break;
-			case SortingOptions.DATE_MODIFIED_REVERSE:
-				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
-				break;
 			case SortingOptions.DATE_CREATED:
 				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
 				break;
 			case SortingOptions.DATE_CREATED_REVERSE:
 				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
 				break;
+			case SortingOptions.DATE_UPLOADED:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_UPLOADED : SortingOptions.DATE_UPLOADED_REVERSE;
+				break;
+			case SortingOptions.DATE_UPLOADED_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_UPLOADED_REVERSE : SortingOptions.DATE_UPLOADED;
+				break;
 			default:
-				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE; // Default sorting option
 				break;
 		}
 
@@ -756,7 +774,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		handleDisplaySortingOptions(newSortBy);
 	};
 
-
 	const handleDisplaySortingOptions = (newSortBy) => {
 		let sortingOption;
 
@@ -766,8 +783,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			sortingOption = 'Name';
 		} else if (newSortBy == SortingOptions.DATE_CREATED || newSortBy == SortingOptions.DATE_CREATED_REVERSE) {
 			sortingOption = 'Date Created';
-		} else if (newSortBy == SortingOptions.DATE_MODIFIED || newSortBy == SortingOptions.DATE_MODIFIED_REVERSE) {
-			sortingOption = 'Date Modified';
+		} else if (newSortBy == SortingOptions.DATE_UPLOADED || newSortBy == SortingOptions.DATE_UPLOADED_REVERSE) {
+			sortingOption = 'Date Uploaded';
 		}
 
 		console.log(`in display SortChange text: ${sortingOption}`);
@@ -832,9 +849,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_MODIFIED)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
 									>
-										Date modified
+										Date created
 									</a>
 								)}
 							</Menu.Item>
@@ -843,9 +860,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)}
 									>
-										Date created
+										Date uploaded
 									</a>
 								)}
 							</Menu.Item>
@@ -887,13 +904,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									</a>
 								)}
 							</Menu.Item>
-							<Menu.Item>
-								{({ active }) => (
-									<a href='#' className={menuHoverActiveCss(active)}>
-										TODO AnotherOption
-									</a>
-								)}
-							</Menu.Item>
 						</div>
 					</Menu.Items>
 				</Menu>
@@ -904,32 +914,38 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
 
-			{sortedExperiments?.map((project: ExperimentData) => {
-				if (!includeCompleted && project.finished) {
-					return null;
-				}
-				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-				const oneHourMilliseconds = 1000 * 60 * 60;
-				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-				if (!includeArchived && projectIsArchived) {
-					return null;
-				}
-				return (
-					<li
-						key={project.expId}
-						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-					>
-						<ExperimentListing
-							projectData={project}
-							onCopyExperiment={onCopyExperiment}
-							onDownloadResults={downloadExperimentResults}
-							onDownloadProjectZip={downloadExperimentProjectZip}
-							onDeleteExperiment={onDeleteExperiment} />
-					</li>
-				);
-			})}
+			{sortedExperiments
+				.filter((project) => {
+					if (searchTerm.trim() === '') {
+						return true;
+					}
+					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
+				}).map((project: ExperimentData) => {
+					if (!includeCompleted && project.finished) {
+						return null;
+					}
+					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+					const oneHourMilliseconds = 1000 * 60 * 60;
+					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+					if (!includeArchived && projectIsArchived) {
+						return null;
+					}
+					return (
+						<li
+							key={project.expId}
+							className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+						>
+							<ExperimentListing
+								projectData={project}
+								onCopyExperiment={onCopyExperiment}
+								onDownloadResults={downloadExperimentResults}
+								onDownloadProjectZip={downloadExperimentProjectZip}
+								onDeleteExperiment={onDeleteExperiment}
+							/>
+						</li>
+					);
+				})}
 		</ul>
 	</div>);
 };
-
