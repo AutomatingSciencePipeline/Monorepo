@@ -7,22 +7,20 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: GLADOS
-      tier: backend
+      app: backend
   template:
     metadata:
       labels:
-        app: GLADOS
-        tier: backend
+        app: backend
     spec:
       containers:
-      - name: glados-backend
-        image: gladospipeline/glados-backend:main
-        imagePullPolicy: Always
+      - name: backend
+        image: backend
         ports:
         - containerPort: 5050
-          # hostPort: 0000
         env:
+        - name: IMAGE_RUNNER
+          value: runner
         - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:

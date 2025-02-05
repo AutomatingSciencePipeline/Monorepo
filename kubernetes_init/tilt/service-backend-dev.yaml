@@ -4,11 +4,10 @@ metadata:
   name: glados-service-backend
   namespace: default
   labels:
-    app: GLADOS
+    app: backend
 spec:
   selector:
-    app: GLADOS
-    tier: backend
+    app: backend
   ports:
     - protocol: TCP
       port: 5050
