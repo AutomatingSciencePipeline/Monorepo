@@ -1,0 +1,18 @@
+name: Enforce Merging from Develop
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_source_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is from development
+        run: |
+          if [[ "${{ github.event.pull_request.base.ref }}" == "main" && "${{ github.event.pull_request.head.ref }}" != "development" ]]; then
+            echo "❌ Merging into main is only allowed from develop!"
+            exit 1
+          fi
+          echo "✅ Allowed merge from develop to main."
