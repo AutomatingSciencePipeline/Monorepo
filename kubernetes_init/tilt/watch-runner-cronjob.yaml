@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: watch-runner-changes
+  label: runner
+spec:
+  schedule: "* * * * *"
+  
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: watch-runner-changes
+              image: runner
+              imagePullPolicy: Always
+          restartPolicy: Never

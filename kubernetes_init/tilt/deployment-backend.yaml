@@ -1,20 +1,31 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: runner
+  name: glados-backend
   namespace: default
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
   template:
     metadata:
       labels:
-        app: GLADOS
+        app: backend
     spec:
       containers:
-      - name: runner
-        image: gladospipeline/glados-runner:main
-        imagePullPolicy: Always
-        command: []
+      - name: backend
+        image: backend
+        ports:
+        - containerPort: 5050
         env:
+        - name: IMAGE_RUNNER
+          value: runner
+        - name: BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
         - name: MONGODB_PORT
           valueFrom:
             secretKeyRef:
@@ -30,11 +41,3 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
-        - name: BACKEND_PORT
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: BACKEND_PORT
-      restartPolicy: Never
-  backoffLimit: 4
-  ttlSecondsAfterFinished: 60
