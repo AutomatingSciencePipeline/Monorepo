@@ -628,29 +628,41 @@ export interface ExperimentListProps {
 const SortingOptions = {
 	NAME: 'name',
 	NAME_REVERSE: 'nameReverse',
-	DATE_MODIFIED: 'dateModified',
-	DATE_MODIFIED_REVERSE: 'dateModifiedReverse',
 	DATE_CREATED: 'dateCreated',
 	DATE_CREATED_REVERSE: 'dateCreatedReverse',
+	DATE_UPLOADED: 'dateUploaded',
+	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm }: ExperimentListProps) => {
 	// Initial sorting option
-	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
+	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 
 	// State of arrow icon
-	const [sortArrowUp, setSortArrowUp] = useState(true);
+	const [sortArrowUp, setSortArrowUp] = useState(false);
 
-	const [selectedSortText, setSelectedSortText] = useState('Date Modified');
+	const [selectedSortText, setSelectedSortText] = useState('Date Uploaded');
 
 	// Sorting functions
-	const sortByNameReverse = (a, b) => a.name.localeCompare(b.name);
-	const sortByName = (a, b) => b.name.localeCompare(a.name);
-	const sortByDateModifiedReverse = (a, b) => a.finishedAtEpochMillis - b.finishedAtEpochMillis;
-	const sortByDateModified = (a, b) => b.finishedAtEpochMillis - a.finishedAtEpochMillis;
-	const sortByDateCreatedReverse = (a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis;
-	const sortByDateCreated = (a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis;
+	const sortByName = (a, b) => {
+		return b.name.localeCompare(a.name);
+	};
+	const sortByNameReverse = (a, b) => {
+		return a.name.localeCompare(b.name);
+	};
+	const sortByDateCreated = (a, b) => {
+		return b.startedAtEpochMillis - a.startedAtEpochMillis;
+	};
+	const sortByDateCreatedReverse = (a, b) => {
+		return a.startedAtEpochMillis - b.startedAtEpochMillis;
+	};
+	const sortByDateUploaded = (a, b) => {
+		return a.created - b.created;
+	};
+	const sortByDateUploadedReverse = (a, b) => {
+		return b.created - a.created;
+	};
 
 	// Sort the experiments based on the selected sorting option
 	useEffect(() => {
@@ -663,20 +675,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 				setSortedExperiments([...experiments].sort(sortByNameReverse));
 				break;
 
-			case SortingOptions.DATE_MODIFIED:
-				setSortedExperiments([...experiments].sort(sortByDateModified));
-				break;
-
-			case SortingOptions.DATE_MODIFIED_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByDateModifiedReverse));
-				break;
-
 			case SortingOptions.DATE_CREATED:
 				setSortedExperiments([...experiments].sort(sortByDateCreated));
 				break;
 
 			case SortingOptions.DATE_CREATED_REVERSE:
 				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
+				break;
+
+			case SortingOptions.DATE_UPLOADED:
+				setSortedExperiments([...experiments].sort(sortByDateUploaded));
+				break;
+
+			case SortingOptions.DATE_UPLOADED_REVERSE:
+				setSortedExperiments([...experiments].sort(sortByDateUploadedReverse));
 				break;
 
 			default:
@@ -698,20 +710,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 			case SortingOptions.NAME_REVERSE:
 				newSortBy = SortingOptions.NAME;
 				break;
-			case SortingOptions.DATE_MODIFIED:
-				newSortBy = SortingOptions.DATE_MODIFIED_REVERSE;
-				break;
-			case SortingOptions.DATE_MODIFIED_REVERSE:
-				newSortBy = SortingOptions.DATE_MODIFIED;
-				break;
 			case SortingOptions.DATE_CREATED:
 				newSortBy = SortingOptions.DATE_CREATED_REVERSE;
 				break;
 			case SortingOptions.DATE_CREATED_REVERSE:
 				newSortBy = SortingOptions.DATE_CREATED;
 				break;
+			case SortingOptions.DATE_UPLOADED:
+				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE;
+				break;
+			case SortingOptions.DATE_UPLOADED_REVERSE:
+				newSortBy = SortingOptions.DATE_UPLOADED;
+				break;
 			default:
-				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE; // Default sorting option
 				break;
 		}
 
@@ -732,20 +744,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 			case SortingOptions.NAME_REVERSE:
 				newSortBy = sortArrowUp ? SortingOptions.NAME : SortingOptions.NAME_REVERSE;
 				break;
-			case SortingOptions.DATE_MODIFIED:
-				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED_REVERSE : SortingOptions.DATE_MODIFIED;
-				break;
-			case SortingOptions.DATE_MODIFIED_REVERSE:
-				newSortBy = sortArrowUp ? SortingOptions.DATE_MODIFIED : SortingOptions.DATE_MODIFIED_REVERSE;
-				break;
 			case SortingOptions.DATE_CREATED:
 				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED_REVERSE : SortingOptions.DATE_CREATED;
 				break;
 			case SortingOptions.DATE_CREATED_REVERSE:
 				newSortBy = sortArrowUp ? SortingOptions.DATE_CREATED : SortingOptions.DATE_CREATED_REVERSE;
 				break;
+			case SortingOptions.DATE_UPLOADED:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_UPLOADED : SortingOptions.DATE_UPLOADED_REVERSE;
+				break;
+			case SortingOptions.DATE_UPLOADED_REVERSE:
+				newSortBy = sortArrowUp ? SortingOptions.DATE_UPLOADED_REVERSE : SortingOptions.DATE_UPLOADED;
+				break;
 			default:
-				newSortBy = SortingOptions.DATE_MODIFIED; // Default sorting option
+				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE; // Default sorting option
 				break;
 		}
 
@@ -771,8 +783,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 			sortingOption = 'Name';
 		} else if (newSortBy == SortingOptions.DATE_CREATED || newSortBy == SortingOptions.DATE_CREATED_REVERSE) {
 			sortingOption = 'Date Created';
-		} else if (newSortBy == SortingOptions.DATE_MODIFIED || newSortBy == SortingOptions.DATE_MODIFIED_REVERSE) {
-			sortingOption = 'Date Modified';
+		} else if (newSortBy == SortingOptions.DATE_UPLOADED || newSortBy == SortingOptions.DATE_UPLOADED_REVERSE) {
+			sortingOption = 'Date Uploaded';
 		}
 
 		console.log(`in display SortChange text: ${sortingOption}`);
@@ -837,9 +849,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_MODIFIED)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
 									>
-										Date modified
+										Date created
 									</a>
 								)}
 							</Menu.Item>
@@ -848,9 +860,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 									<a
 										href="#"
 										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)}
 									>
-										Date created
+										Date uploaded
 									</a>
 								)}
 							</Menu.Item>

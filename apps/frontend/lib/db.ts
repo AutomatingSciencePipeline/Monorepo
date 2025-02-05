@@ -37,7 +37,7 @@ const downloadArbitraryFile = (url: string, name: string) => {
 const formatFilename = (name: string, timestamp: string, extension: string) => {
 	const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
 	const formattedTimestamp = formatTimestamp(timestamp);
-	return `${formattedName}=>${formattedTimestamp}.${extension}`;
+	return `${formattedName}_${formattedTimestamp}.${extension}`;
 };
 
 const formatTimestamp = (timestamp: string) => {
