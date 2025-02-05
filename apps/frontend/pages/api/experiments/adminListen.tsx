@@ -11,41 +11,18 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-    const { uid } = req.query;
-
-    if (!uid) {
-        return;
-    }
-
     // Connect to MongoDB
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
     // Set up a Change Stream for real-time updates
+    // Watch all experiments that are not finished
     const pipeline = [
-        {
-            $match: {
-                $or: [
-                    { "fullDocument.creator": uid },          // Match insert or update with the creator field
-                    { operationType: "delete", "documentKey._id": { $exists: true } },  // Handle deletion events
-                    //Check if uid is in the sharedUsers array
-                    { "fullDocument.sharedUsers": { $in: [uid] } },
-                    //Check if uid is removed
-                    { operationType: "update", "updateDescription.updatedFields.sharedUsers": { $nin: [uid] } }
-
-                ]
-            }
-        }
     ];
     const options = { fullDocument: "updateLookup" };
     const changeStream = experimentsCollection.watch(pipeline, options);
 
-    // Set up real-time streaming of changes to the client using SSE
-    // res.setHeader("Access-Control-Allow-Origin", "*");
-    // res.setHeader("Cache-Control", "no-cache");
-    // res.setHeader("Connection", "keep-alive");
-    // res.setHeader("Content-Type", "text/event-stream");
     res.writeHead(200, {
         Connection: 'keep-alive',
         'Content-Encoding': 'none',
@@ -60,7 +37,7 @@ export default async function handler(req, res) {
     }, HEARTBEAT_INTERVAL);
 
     const initDocs = await experimentsCollection
-        .find({ $or: [{ 'creator': uid }, { 'sharedUsers': { $in: [uid] } }] })
+        .find({ finished: false })
         .toArray();
     const initArray = convertToExpsArray(initDocs);
     res.write(`data: ${JSON.stringify(initArray)}\n\n`);
@@ -68,10 +45,10 @@ export default async function handler(req, res) {
     // Listen to changes in the collection
     changeStream.on("change", async () => {
         const updatedDocuments = await experimentsCollection
-            .find({ $or: [{ 'creator': uid }, { 'sharedUsers': { $in: [uid] } }] })
+            .find({ finished: false })
             .toArray();
 
-        const result = convertToExpsArray(updatedDocuments);
+        const result = await convertToExpsArray(updatedDocuments);
         // Send the updated experiments to the client
         res.write(`data: ${JSON.stringify(result)}\n\n`);
     });
@@ -90,6 +67,7 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         id: doc._id.toString(),
         name: doc.name || "Untitled",
         creator: doc.creator || "Unknown",
+        creatorEmail: doc.creatorEmail || "Unknown",
         description: doc.description || "No description",
         verbose: doc.verbose ?? false,
         workers: doc.workers ?? 0,
@@ -108,7 +86,6 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         estimatedTotalTimeMinutes: doc.estimatedTotalTimeMinutes ?? 0,
         expToRun: doc.expToRun ?? 0,
         file: doc.file || "",
-        status: doc.status || "OK",
         startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
         finishedAtEpochMilliseconds: doc.finishedAtEpochMilliseconds ?? 0,
         passes: doc.passes ?? 0,

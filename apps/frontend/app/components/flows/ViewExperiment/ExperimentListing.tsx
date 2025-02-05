@@ -108,6 +108,27 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setShowGraphModal(false);
 	}
 
+	const totalTime = project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
+		? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000)
+		: null;
+
+	const formattedTotalTime = totalTime !== null
+		? totalTime < 1
+			? `${(totalTime * 60).toFixed(2)} seconds`
+			: `${totalTime.toFixed(2)} minutes`
+		: null;
+
+
+	// Calculate average time per experiment run
+	const averageTimePerRun = project['passes'] && project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
+		? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000) / Number(project['passes'])
+		: null;
+
+	const formattedAverageTimePerRun = averageTimePerRun !== null
+		? averageTimePerRun < 1
+			? `${(averageTimePerRun * 60).toFixed(2)} seconds`
+			: `${averageTimePerRun.toFixed(2)} minutes`
+		: null;
 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
@@ -144,7 +165,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 
 				</div>
-				{project['finished'] == true ?
+				{project['finished'] == true && project.status != 'CANCELLED' ?
+					<button type="button"
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						disabled={busyDownloadingResults}
+						onClick={async () => {
+							setBusyDownloadingResults(true);
+							await onDownloadResults(project.expId);
+							setBusyDownloadingResults(false);
+						}}>
+						{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
+					</button> :
+					null
+				}
+				{project['finished'] == true && project.status != 'CANCELLED' ?
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={() => {
@@ -152,6 +186,19 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						}}>
 						View System Log
 						<ExclamationTriangleIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+					</button> :
+					null
+				}
+				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) && project.status != 'CANCELLED' ?
+					<button type="button"
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						disabled={busyDownloadingZip}
+						onClick={async () => {
+							setBusyDownloadingZip(true);
+							await onDownloadProjectZip(project.expId);
+							setBusyDownloadingZip(false);
+						}}>
+						{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
 					</button> :
 					null
 				}
@@ -263,7 +310,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 						</button>
 				} */}
-				{project.finished ?
+				{project.finished && project.status != 'CANCELLED' ?
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={openGraphModal}
@@ -273,7 +320,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</button> : null
 				}
 				{
-					project.creator == session?.user?.id! ?
+					project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 						<button
 							type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
@@ -298,29 +345,35 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			</div>
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
-					{project.finished ?
-						(project.fails <= 1 && (project?.passes ?? 0) == 0 ?
-							<span className='font-mono text-red-500'>Experiment Aborted</span> :
+					{project.finished && project.status != 'CANCELLED' ? (
+						project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
+							<span className='font-mono text-red-500'>Experiment Aborted</span>
+						) : (
 							<span className='font-mono'>Experiment Completed</span>
-						) : (experimentInProgress ?
-							<span className='font-mono text-blue-500'>Experiment In Progress</span> :
-							<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>)
-					}
+						)
+					) : experimentInProgress && project.status != 'CANCELLED' ? (
+						<span className='font-mono text-blue-500'>Experiment In Progress</span>
+					) : project.status != 'CANCELLED' ? (
+						<span className='font-mono text-gray-500'>Experiment Awaiting Start</span>
+					) : null}
+					{project.status == 'CANCELLED' ? (
+						<span className='font-mono text-red-500'>Experiment Cancelled</span>
+					) : null}
 				</p>
-				{project.finished || experimentInProgress ?
+				{(project.finished || experimentInProgress) && project.status != 'CANCELLED' ?
 					<p className='flex items-center space-x-4'>
 						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
 						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
 					</p> :
 					null
 				}
-				{experimentInProgress ?
+				{experimentInProgress && project.status != 'CANCELLED' ?
 					<p>
 						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
 					</p> :
 					null
 				}
-				{experimentInProgress ?
+				{experimentInProgress && project.status != 'CANCELLED' ?
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
 							<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
@@ -328,7 +381,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) :
 					null
 				}
-				{experimentInProgress ?
+				{experimentInProgress && project.status != 'CANCELLED' ?
 					(project['totalExperimentRuns'] ?
 						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
 						<p>(Calculating total experiment runs...)</p>
@@ -338,15 +391,27 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<p className='flex text-centertext-gray-500 text-sm space-x-2'>
 					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
-				{project['startedAtEpochMillis'] ?
+				{project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
 					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
-				{project['finishedAtEpochMillis'] ?
+				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Finished at {new Date(project['finishedAtEpochMilliseconds']).toLocaleString()}</span>
+					</p> :
+					null
+				}
+				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
+					<p className='flex text-gray-500 text-sm space-x-2'>
+						<span>Total Time: {formattedTotalTime}</span>
+					</p> :
+					null
+				}
+				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
 					<p className='flex text-center text-gray-500 text-sm space-x-2'>
-						<span>Finished at {new Date(project['finishedAtEpochMillis']).toLocaleString()}</span>
+						<span>Average Time per Experiment Run: {formattedAverageTimePerRun}</span>
 					</p> :
 					null
 				}
@@ -423,7 +488,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</div>
 				) : null}
 				{
-					(showGraphModal && project.finished) && (
+					(showGraphModal && project.finished && project.status != 'CANCELLED') && (
 						<Chart onClose={closeGraphModal} project={project} />
 					)
 				}

@@ -12,13 +12,16 @@ class ExperimentType(Enum):
     PYTHON = "python"
     JAVA = "java"
     C = "c"
+    ZIP = "zip"
 
 
 class ExperimentData(BaseModel):
 
     experimentType = ExperimentType.UNKNOWN
+    experimentExecutable = ""
     expId: DocumentId
     creator: UserId
+    creatorRole: str
     trialExtraFile: Optional[str]
     trialResult: str
     file = ""  #Will be set either by initializing or by app.py

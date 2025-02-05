@@ -33,6 +33,11 @@ def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout
                 trialLogFile.close()
             os.chdir('..')
         if data[PROCESS_ERROR_STREAM]:
+            # pybullet build time is a common error that is not an error
+            # the pybullet developers made this output on stderr because they are horrible developers
+            # just ignore it for now, try to find a fix for this later
+            if "pybullet build time" in data[PROCESS_ERROR_STREAM]:
+                return
             errorMessage = f'errors returned from pipe is {data[PROCESS_ERROR_STREAM]}'
             explogger.error(errorMessage)
             raise InternalTrialFailedError(errorMessage)
@@ -82,10 +87,18 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
         raise GladosUserError("Failed to read trial results csv, does the file exist? Typo in the user-specified output filename(s)?") from err
 
 
-def _add_to_output_batch(trialExtraFile, ExpRun: int):
+def _add_to_output_batch(trialExtraFile: str, ExpRun: int):
     try:
-        # Currently only extra CSV files are supported, this will need to be adapted for other file types
-        shutil.copy2(f'{trialExtraFile}', f'ResCsvs/Result{ExpRun}.csv')
+        # check if this is directory
+        if os.path.isdir(trialExtraFile):
+            extraFileName = trialExtraFile.split('/')[-1]
+            if extraFileName == "":
+                extraFileName = trialExtraFile.split('/')[-2]
+            # recursively copy the directory
+            shutil.copytree(trialExtraFile, f'ResCsvs/{extraFileName}{ExpRun}')
+        else:
+            extraFileName = trialExtraFile.split('/')[-1].split('.')[0]
+            shutil.copy2(f'{trialExtraFile}', f'ResCsvs/{extraFileName}{ExpRun}.csv')
     except Exception as err:
         explogger.error(f"Expected to find trial extra file at {trialExtraFile}")
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
@@ -129,11 +142,11 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
             numOutputs = len(csvHeader)
             writer.writerow(["Experiment Run"] + csvHeader + paramNames)
 
-        if experiment.has_extra_files():
+        if experiment.has_extra_files() and experiment.trialExtraFile != None:
             try:
-                _add_to_output_batch(experiment.trialExtraFile, trialNum)
+                _add_to_output_batch(f"trial{trialNum}/" + experiment.trialExtraFile, trialNum)
             except FileHandlingError as err:
-                _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+                _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)                    
                 return
 
         try:
@@ -165,11 +178,11 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
         return
 
-    if experiment.has_extra_files():
+    if experiment.has_extra_files() and experiment.trialExtraFile != None:
         try:
-            _add_to_output_batch(experiment.trialExtraFile, trialNum)
+            _add_to_output_batch(f"trial{trialNum}/" + experiment.trialExtraFile, trialNum)
         except FileHandlingError as err:
-            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
+            _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)                    
             return
 
     try:

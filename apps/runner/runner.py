@@ -2,6 +2,7 @@
 import os
 import shutil
 import logging
+import subprocess
 import sys
 import json
 import time
@@ -67,6 +68,37 @@ def run_batch_and_catch_exceptions(data: IncomingStartRequest):
         # Unsafe to upload experiment logs files here
         raise err
 
+def install_packages(file_path):
+    try:
+        # Read the packages from the file
+        with open(file_path, "r") as file:
+            packages = file.read().splitlines()
+
+        if not packages:
+            explogger.info("No packages to install.")
+            return
+
+        # Update the package list
+        explogger.info("Updating package list...")
+        subprocess.run(["apt-get", "update"], check=True)
+
+        # Install the packages
+        explogger.info("Installing packages...")
+        subprocess.run(["apt-get", "install", "-y"] + packages, check=True)
+        
+        # Update cache
+        explogger.info("Updating cache...")
+        subprocess.run(["ldconfig"], check=True)
+
+        explogger.info("Packages installed successfully!")
+    except subprocess.CalledProcessError as e:
+        explogger.error(f"Error occurred while running a command: {e}")
+    except FileNotFoundError:
+        explogger.error(f"File '{file_path}' not found.")
+    except Exception as e:
+        explogger.error(f"An unexpected error occurred: {e}")
+
+
 def run_batch(data: IncomingStartRequest):
     syslogger.info('Run_Batch starting with data %s', data)
 
@@ -125,10 +157,64 @@ def run_batch(data: IncomingStartRequest):
         close_experiment_run(exp_id)
         return
     
+    # If it is a zip file, extract it
+    if experiment.experimentType == ExperimentType.ZIP:
+        try:
+            # rename the file to a zip file
+            os.rename(filepath, "userProvidedFile.zip")
+            shutil.unpack_archive("userProvidedFile.zip", '.')
+        except Exception as err:
+            explogger.error("Failed to extract zip file")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
+    
+    if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
+        explogger.info("User is admin or privileged, installing packages from packages.txt")
+        
+        if os.path.exists("packages.txt"):
+            try:
+                install_packages("packages.txt")
+            except Exception as err:
+                explogger.error("Failed to install packages")
+                explogger.exception(err)
+                os.chdir('../..')
+                close_experiment_run(exp_id)
+        
+        explogger.info("User is admin or privileged, running commands from commandsToRun.txt")
+            
+        if os.path.exists("commandsToRun.txt"):
+            for line in open("commandsToRun.txt"):
+                try:
+                    os.system(line)
+                except Exception as err:
+                    explogger.error(f"Failed to run command: {line}")
+                    explogger.exception(err)
+                    os.chdir('../..')
+                    close_experiment_run(exp_id)
+                    return        
+            
+    # this needs to happen after all dependencies are installed
+    if experiment.experimentType == ExperimentType.ZIP:
+        # Recalc the file type
+        try:
+            experiment.experimentType = determine_experiment_file_type(experiment.experimentExecutable)
+            # also update experiment.file
+            experiment.file = experiment.experimentExecutable
+        except NotImplementedError as err:
+            explogger.error("This is not a supported experiment file type, aborting")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
+      
     # If it is a python file get the pipreqs
     if experiment.experimentType == ExperimentType.PYTHON:
         try:
-            os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+            # if the file exists, skip running the command
+            if not os.path.exists("userProvidedFileReqs.txt"):
+                os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
         except Exception as err:
             explogger.error("Failed to generate pip requirements")
             explogger.exception(err)
@@ -147,7 +233,6 @@ def run_batch(data: IncomingStartRequest):
             os.chdir('../..')
             close_experiment_run(exp_id)
             return
-      
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{exp_id}/configFiles")
 
@@ -161,6 +246,7 @@ def run_batch(data: IncomingStartRequest):
     experiment.totalExperimentRuns = totalExperimentRuns
 
     update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
+    update_exp_value(exp_id, "status", "RUNNING")
 
     try:
         conduct_experiment(experiment)
@@ -180,26 +266,37 @@ def run_batch(data: IncomingStartRequest):
 def close_experiment_run(expId: DocumentId):
     explogger.info(f'Exiting experiment {expId}')
     update_exp_value(expId, 'finished', True)
+    update_exp_value(expId, 'status', "COMPLETED")
+    endSeconds = time.time()
+    update_exp_value(expId, 'finishedAtEpochMilliseconds', int(endSeconds * 1000))
     close_experiment_logger()
     upload_experiment_log(expId)
     remove_downloaded_directory(expId)
 
 def determine_experiment_file_type(filepath: str):
-    rawfiletype = magic.from_file(filepath)
-    filetype = ExperimentType.UNKNOWN
-    if 'Python script' in rawfiletype or 'python3' in rawfiletype:
-        filetype = ExperimentType.PYTHON
-    elif 'Java archive data (JAR)' in rawfiletype:
-        filetype = ExperimentType.JAVA
-    elif 'ELF 64-bit LSB' in rawfiletype:
-        filetype = ExperimentType.C
+    try:
+        rawfiletype = magic.from_file(filepath)
+        filetype = ExperimentType.UNKNOWN
+        if 'Python script' in rawfiletype or 'python3' in rawfiletype:
+            filetype = ExperimentType.PYTHON
+        elif 'Java archive data (JAR)' in rawfiletype:
+            filetype = ExperimentType.JAVA
+        elif 'ELF 64-bit LSB' in rawfiletype:
+            filetype = ExperimentType.C
+        # check if file is zip
+        elif 'Zip archive data' in rawfiletype:
+            filetype = ExperimentType.ZIP
 
-    explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
+        explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
 
-    if filetype == ExperimentType.UNKNOWN:
-        explogger.error(f'File type "{rawfiletype}" could not be mapped to Python, Java or C, if it should consider updating the matching statements')
-        raise NotImplementedError("Unknown experiment file type")
-    return filetype
+        if filetype == ExperimentType.UNKNOWN:
+            explogger.error(f'File type "{rawfiletype}" could not be mapped to Python, Java or C, if it should consider updating the matching statements')
+            raise NotImplementedError("Unknown experiment file type")
+        return filetype
+    except Exception as err:
+        explogger.error('Error determining file type')
+        explogger.exception(err)
+        raise NotImplementedError("Unknown experiment file type") from err
 
 def download_experiment_files(experiment: ExperimentData):
     if experiment.has_extra_files() or experiment.postProcess != '' or experiment.keepLogs:

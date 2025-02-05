@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -27,9 +27,14 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/'
+const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
+const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
+
+const REPORT_DESCRIPT = 'Report an issue you have encountered to our Google Forms.';
+const HELP_DESCRIPT = 'Open the GLADOS docs to learn how to use the application.';
 
 const navigation = [
+	{ name: 'Report', href: REPORT_GOOGLE_FORM_LINK, current: false },
 	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false }
 ];
 const userNavigation = [
@@ -67,6 +72,16 @@ const activityItems = [
 
 const Navbar = (props) => {
 	const { data: session } = useSession();
+
+	useEffect(() => {
+		if (session?.user?.role === "admin"){
+			//Check to make sure the admin link is not already in the userNavigation
+			if (userNavigation[0].name !== 'Admin'){
+				userNavigation.unshift({ name: 'Admin', href: '/admin' });
+			}
+		}
+	}, [session]);
+
 	return (
 		<Disclosure as='nav' className='flex-shrink-0 bg-blue-600'>
 			{({ open }) => (
@@ -91,9 +106,16 @@ const Navbar = (props) => {
 											<a
 												key={item.name}
 												href={item.href}
-												target={item.name === 'Help' ? '_blank' : '_self'}
+												target={['Help', 'Report'].includes(item.name) ? '_blank' : '_self'}
 												className='px-3 py-2 rounded-md text-sm font-medium text-blue-200 hover:text-white'
 												aria-current={item.current ? 'page' : undefined}
+												title={
+													item.name === 'Help'
+														? HELP_DESCRIPT
+														: item.name === 'Report'
+															? REPORT_DESCRIPT
+															: ''
+												}
 											>
 												{item.name}
 											</a>
@@ -164,7 +186,7 @@ const Navbar = (props) => {
 									key={item.name}
 									as='a'
 									href={item.href}
-									target={item.name === 'Help' ? '_blank' : '_self'}
+									target={['Help', 'Report'].includes(item.name) ? '_blank' : '_self'}
 									className={classNames(
 										item.current ?
 											'text-white bg-blue-800' :
@@ -172,6 +194,13 @@ const Navbar = (props) => {
 										'block px-3 py-2 rounded-md text-base font-medium'
 									)}
 									aria-current={item.current ? 'page' : undefined}
+									title={
+										item.name === 'Help'
+											? HELP_DESCRIPT
+											: item.name === 'Report'
+												? REPORT_DESCRIPT
+												: ''
+									}
 								>
 									{item.name}
 								</Disclosure.Button>
@@ -248,10 +277,8 @@ export default function DashboardPage() {
 	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
 
 	const queryQueueLength = () => {
-		console.log('Querying queue length');
 		setQueueLength(QUEUE_UNKNOWN_LENGTH);
 		fetch('/api/queue').then((res) => res.json()).then((data: QueueResponse) => {
-			console.log('Data back is', data);
 			const value = data.response.queueSize;
 			if (typeof value === 'number') {
 				setQueueLength(value);
@@ -263,23 +290,18 @@ export default function DashboardPage() {
 		});
 	};
 
-	// const QUEUE_RECHECK_INTERVAL_MS = 4000;
+	const QUEUE_RECHECK_INTERVAL_MS = 4000;
 	useEffect(() => {
-		queryQueueLength();
-		// TODO this seems to cause ghost intervals to be left behind, maybe hot reload's fault?
-		// console.log('⏰ Setting up queue length checking timer');
-		// const intervalId = setInterval(() => {
-		// 	fetch('/api/queue').then((res) => res.json()).then((data) => {
-		// 		console.log('Data back is', data);
-		// 		setQueueLength(data.response.queueSize);
-		// 	}).catch((err) => {
-		// 		console.error('Error fetching queue length', err);
-		// 	});
-		// }, QUEUE_RECHECK_INTERVAL_MS);
-		// return () => {
-		// 	console.log('⏰ Clearing queue length checking timer');
-		// 	clearInterval(intervalId);
-		// };
+		const intervalId = setInterval(() => {
+			fetch('/api/queue').then((res) => res.json()).then((data) => {
+				setQueueLength(data.response.queueSize);
+			}).catch((err) => {
+				console.error('Error fetching queue length', err);
+			});
+		}, QUEUE_RECHECK_INTERVAL_MS);
+		return () => {
+			clearInterval(intervalId);
+		};
 	}, []);
 
 
@@ -415,11 +437,6 @@ export default function DashboardPage() {
 															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
 													}
 												</span>
-												<button type="button"
-													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-													onClick={queryQueueLength}>
-													TEMP Manual Query
-												</button>
 											</div>
 											<div className='flex items-center space-x-2'>
 												<>
@@ -431,7 +448,7 @@ export default function DashboardPage() {
 													</button>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
-															<Transition.Child
+															<TransitionChild
 																as={Fragment}
 																enter="ease-out duration-300"
 																enterFrom="opacity-0"
@@ -441,11 +458,11 @@ export default function DashboardPage() {
 																leaveTo="opacity-0"
 															>
 																<div className="fixed inset-0 bg-black bg-opacity-25" />
-															</Transition.Child>
+															</TransitionChild>
 
 															<div className="fixed inset-0 overflow-y-auto">
 																<div className="flex min-h-full items-center justify-center p-4 text-center">
-																	<Transition.Child
+																	<TransitionChild
 																		as={Fragment}
 																		enter="ease-out duration-300"
 																		enterFrom="opacity-0 scale-95"
@@ -454,10 +471,10 @@ export default function DashboardPage() {
 																		leaveFrom="opacity-100 scale-100"
 																		leaveTo="opacity-0 scale-95"
 																	>
-																		<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-																			<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+																		<DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+																			<DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
 																				Select Default Experiment
-																			</Dialog.Title>
+																			</DialogTitle>
 																			<div className="mt-2">
 																				<p className="text-sm text-gray-500">
 																					Please select the type of default experiment you want to run.
@@ -487,8 +504,8 @@ export default function DashboardPage() {
 																					Genetic Algorithm
 																				</button>
 																			</div>
-																		</Dialog.Panel>
-																	</Transition.Child>
+																		</DialogPanel>
+																	</TransitionChild>
 																</div>
 															</div>
 														</Dialog>
