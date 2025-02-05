@@ -10,8 +10,8 @@ This guide is meant for developers contributing to GLADOS that want to test chan
 Helm is needed for this installation. Install with:
 
 ```bash
-    brew install helm #(Intel Mac)
-    winget install Helm.Helm
+    brew install helm # (Intel based Mac)
+    winget install Helm.Helm # (Windows)
 ```
 
 Also ensure that Docker Desktop is installed and open.
@@ -19,16 +19,19 @@ Also ensure that Docker Desktop is installed and open.
 Finally, ensure that kubectl and minikube are installed using:
 
 ```bash
-    brew install kubectl #(Intel Mac)
-    winget install kubectl
+    brew install kubectl # (Intel based Mac)
+    winget install kubectl # (Windows)
 
-    brew install minikube #(Intel Mac)
-    winget install minikube
+    brew install minikube # (Intel based Mac)
+    winget install minikube # (Windows)
 ```
 
 ## Setup Kubernetes Cluster on Minikube
 
-First, start minkube using:
+!!! Warning
+    If you are using [Tilt](#tilt), click the link to jump to that section or you will have to redo some of your work!
+
+First, start Minikube using:
 
 ```bash
     minikube start
@@ -74,7 +77,7 @@ Now, use Helm to install the GLADOS MongoDB registry from DockerHub. This is nec
 ### Ensure that Mongo Replica Set Has Proper Permissions
 
 ```bash
-minkube ssh
+minikube ssh
 
 cd /srv/data
 
@@ -112,6 +115,8 @@ db.updateUser("adminuser", { roles: [ { role: "root", db: "admin" } ] })
 exit
 ```
 
+Return to [Tilt Setup](#running-tilt).
+
 ## Pull Frontend and Backend Images
 
 From the root of the Monorepo, run this command:
@@ -129,7 +134,7 @@ This command is used to expose the frontend pod so that it can be accessed via p
 kubectl expose pod <POD-NAME> --type=NodePort --name=glados-frontend-nodeport --port=3000 --target-port=3000 
 ```
 
-Then you must expose the newly created service on minkube to actually access the website from the url that is provided in the terminal.
+Then you must expose the newly created service on minikube to actually access the website from the url that is provided in the terminal.
 
 ```bash
 minikube service glados-frontend-nodeport --url
@@ -137,115 +142,104 @@ minikube service glados-frontend-nodeport --url
 
 This will have a version of the mainline glados running in your minikube environment.
 
-## Push and Use Docker Images
+## Tilt
 
-In order to use the code in your local environment, you will need to build and push the docker images you have made changes to. 
+As of February of 2025 we have switched to using Tilt for our local development.
 
-### Building and Pushing Docker Images
+### What is Tilt
 
-In a terminal CD to the component you wish to test. For example, if I made changes to the frontend I would
+Tilt for Kubernetes is a tool that streamlines the local development of Kubernetes applications. It automates building container images, deploying them to a cluster, and live-reloading changes in real time. It watches for code updates, rebuilds affected services, and provides a dashboard to monitor logs and resource statuses, making it easier to iterate quickly without manually managing Kubernetes configurations.
 
-```bash
-cd apps/frontend
-```
+### Why use Tilt
 
-Next we need to build the docker image. This is done with the following command:
+The biggest reason for using Tilt is that is has a feature called "live_update". Live update allows us to use the hot reload feature in NextJS to see changes almost instantly. Tilt will update running pods with new files to reflect changes.
 
-```bash
-docker build -t {DOCKER HUB USERNAME}/glados-frontend:main . -f frontend.Dockerfile
-```
+### How to use Tilt
 
-This may make a couple of minutes to build.
+If you have followed the guide up to this point you will have the main line GLADOS running on your system. Unfortunately we are going to have to discard that progress.
 
-You can do the same for the backend and runner.
-
-Next we need to push our docker images to docker hub. Sign into your docker hub account with the following command:
-
-```bash
-docker login
-```
-
-Follow the instructions in the terminal to login.
-
-Now we can push this image!
-
-```bash
-docker push {DOCKER HUB USERNAME}/glados-frontend:main
-```
-
-Our image is now on docker's image library!
-
-### Using our published docker images
-Inside of the kubernetes_init folder, there are a couple of items of interest.
-
-1. backend/deployment-backend.yaml
-2. frontend/deployment-frontend.yaml
-
-If you open these files you will see that on line 20 the image is set. Change this to your image that you published to your docker hub.
-
-Now we need to make sure we are in the project root in our terminal and execute:
-
-```bash
-python3 ./kubernetes_init/init.py --hard
-```
-
-You can then use the command:
-
-```bash
-kubectl get pods
-```
-
-Which will show something like
-
-```bash
-NAME                                        READY   STATUS    RESTARTS       AGE
-glados-backend-687fc6b7ff-dld2p             1/1     Running   0              74s
-glados-frontend-5f575b99b7-9q9ml            1/1     Running   0              74s
-glados-mongodb-0                            1/1     Running   1 (2m9s ago)   20d
-glados-mongodb-1                            1/1     Running   1 (2m9s ago)   20d
-glados-mongodb-arbiter-0                    1/1     Running   2 (20d ago)    20d
-```
-
-Using the image that you replaced run:
-
-```bash
-kubectl describe pod {POD NAME FROM LAST STEP}
-```
-
-This will then show the image information. Make sure this points to your docker hub.
+### If you already have Minikube running on your system
 
 !!! Warning
-    Make sure to change the deployment yaml back before merging!!!!
+    Run the following commands *only* if you have currently have a Minikube cluster running on your machine.
 
-In order to update the runner image, go to the apps/backend folder, and update the image in job-runner.yaml following the steps above.
+Make sure that Docker Desktop is running.
 
-Now you can use locally built images to run GLADOS!
-
-## Prebuilt Script for Docker Image Management
-
-Due to the complexity of getting Minikube to behave, I have created a python script to run the needed commands for you. 
-
-From the root of the Monorepo run the command:
+Run the following command:
 
 ```bash
-python3 .\development_scripts\local\setup_local.py <args>
+minikube delete
 ```
 
-You can provide arguments for which elements of the project you would like to build.
+### Start here if you do not have a Minikube instance
 
-Options are: frontend, backend, runner, all
+We will have to install a couple of prerequisite programs.
 
-In the python3 file you will need to set a couple of values to make sure that it is setup for your environment. Update those values and run the python script with the pieces you would like to build and push.
+#### Windows
 
-Note: You still need to make sure to follow the steps above for changing the image which you are running the cluster from.
-
-After running the python script you will see something like:
+If you have Scoop installed, skip the Scoop install commands.
 
 ```bash
-Frontend is now running at: http://localhost:64068
+# Install Tilt
+iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.ps1'))
+
+# Now we need to install Scoop, skip if Scoop is already installed
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+# Next we are going to install ctlptl
+scoop bucket add tilt-dev https://github.com/tilt-dev/scoop-bucket
+scoop install ctlptl
+
+# Run the following to make sure everything is working
+tilt version
+ctlptl version
+# Restart your terminal if any errors are displayed
+
+# Now we need to start the Minikube cluster
+# This will also create a image registry in Docker Desktop
+ctlptl create cluster minikube --registry=ctlptl-registry
 ```
 
-Opening that link will bring you to a local version of GLADOS.
+#### MacOS
 
-!!!Warning
-    With the local version of GLADOS being HTTP you may have weird networking issues due to the max number of connections to an HTTP/1.1 host. This will be fixed in a later update.
+```bash
+# Install Tilt
+curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash
+
+# Install ctlptl, this is dependent on you having Homebrew installed
+brew install tilt-dev/tap/ctlptl
+
+# Run the following to make sure everything is working
+tilt version
+ctlptl version
+# Restart your terminal if any errors are displayed
+
+# Now we need to start the Minikube cluster
+# This will also create a image registry in Docker Desktop
+ctlptl create cluster minikube --registry=ctlptl-registry
+```
+
+#### Running Tilt
+
+Now that you have the Minikube cluster running, we need to [setup MongoDB](#setup-mongodb-cluster). Come back to here once you have MongoDB running in the Minikube Cluster.
+
+Open a terminal window and navigate to the root of the Monorepo
+
+Run the following:
+
+```bash
+tilt up
+```
+
+Now you can press space bar to open the Tilt GUI in your web browser.
+
+The GLADOS frontend will be accessible at http://localhost:3000.
+
+Any code changes made will automatically update the running pods.
+
+Updating the frontend and backend cause live updates, updating the runner will cause a rebuild to take place.
+
+In the Tilt GUI there are refresh buttons to manually refresh running pods, use this button if you see any weirdness with the backend and frontend not talking to each other properly.
+
+Congrats! You now have the development environment all setup!
