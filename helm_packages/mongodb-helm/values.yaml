@@ -38,5 +38,3 @@ affinity:
               operator: In
               values:
                 - "glados-db"  # Replace with the name of the node you want to use
-
-
