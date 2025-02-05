@@ -1,6 +1,4 @@
 # Setup the needed k8s yamls
-# Maybe setup flannel??
-# Do we need that and metallb?
 k8s_yaml([
     "kubernetes_init/tilt/cluster-role-job-creator.yaml",
     "kubernetes_init/tilt/role-binding-job-creator.yaml",
