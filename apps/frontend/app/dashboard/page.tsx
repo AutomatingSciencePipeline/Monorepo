@@ -70,7 +70,7 @@ const activityItems = [
 	},
 ];
 
-const Navbar = (props) => {
+const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
 
 	useEffect(() => {
@@ -94,11 +94,13 @@ const Navbar = (props) => {
 									<Logo />
 								</div>
 							</div>
-							<SearchBar labelText={'Search experiments'} placeholderText={'Search projects'} onValueChanged={
-								function (newValue: string): void {
-									console.log(`SearchBar.onValueChanged: ${newValue}`);
-								}} />
-							{/* Links section */}
+							<SearchBar
+								labelText={'Search experiments'}
+								placeholderText={'Search projects'}
+								onValueChanged={(newValue) => {
+									setSearchTerm(newValue);
+								}}
+							/>
 							<div className='hidden lg:block lg:w-80'>
 								<div className='flex items-center justify-end'>
 									<div className='flex'>
@@ -235,6 +237,7 @@ export default function DashboardPage() {
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [searchTerm, setSearchTerm] = useState('');
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -350,7 +353,7 @@ export default function DashboardPage() {
 
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar />
+				<Navbar setSearchTerm={setSearchTerm} />
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto xl:px-8 lg:flex'>
@@ -392,7 +395,7 @@ export default function DashboardPage() {
 													onClick={() => {
 														setFormState(1);
 													}}
-												// onClick
+													// onClick
 												>
 													{label}
 												</button>
@@ -543,7 +546,9 @@ export default function DashboardPage() {
 									toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
 									console.log(`Failed delete, reason: ${reason}`);
 								});
-							}} />
+							}}
+							searchTerm={searchTerm}
+						/>
 					</div>
 					{/* Activity feed */}
 					<div className='bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0'>
@@ -617,6 +622,7 @@ export interface ExperimentListProps {
 	experiments: ExperimentData[];
 	onCopyExperiment: (experiment: string) => void;
 	onDeleteExperiment: (experiment: string) => void;
+	searchTerm: string;
 }
 
 const SortingOptions = {
@@ -628,7 +634,7 @@ const SortingOptions = {
 	DATE_CREATED_REVERSE: 'dateCreatedReverse',
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_CREATED);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -755,7 +761,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 		console.log(`in handleSortChange: ${newSortBy}`);
 		handleDisplaySortingOptions(newSortBy);
 	};
-
 
 	const handleDisplaySortingOptions = (newSortBy) => {
 		let sortingOption;
@@ -887,13 +892,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 									</a>
 								)}
 							</Menu.Item>
-							<Menu.Item>
-								{({ active }) => (
-									<a href='#' className={menuHoverActiveCss(active)}>
-										TODO AnotherOption
-									</a>
-								)}
-							</Menu.Item>
 						</div>
 					</Menu.Items>
 				</Menu>
@@ -904,32 +902,38 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment }: E
 			className='relative z-0 divide-y divide-gray-200 border-b border-gray-200'
 		>
 
-			{sortedExperiments?.map((project: ExperimentData) => {
-				if (!includeCompleted && project.finished) {
-					return null;
-				}
-				const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-				const oneHourMilliseconds = 1000 * 60 * 60;
-				const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-				const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-				if (!includeArchived && projectIsArchived) {
-					return null;
-				}
-				return (
-					<li
-						key={project.expId}
-						className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
-					>
-						<ExperimentListing
-							projectData={project}
-							onCopyExperiment={onCopyExperiment}
-							onDownloadResults={downloadExperimentResults}
-							onDownloadProjectZip={downloadExperimentProjectZip}
-							onDeleteExperiment={onDeleteExperiment} />
-					</li>
-				);
-			})}
+			{sortedExperiments
+				.filter((project) => {
+					if (searchTerm.trim() === '') {
+						return true;
+					}
+					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
+				}).map((project: ExperimentData) => {
+					if (!includeCompleted && project.finished) {
+						return null;
+					}
+					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
+					const oneHourMilliseconds = 1000 * 60 * 60;
+					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
+					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
+					if (!includeArchived && projectIsArchived) {
+						return null;
+					}
+					return (
+						<li
+							key={project.expId}
+							className='relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6'
+						>
+							<ExperimentListing
+								projectData={project}
+								onCopyExperiment={onCopyExperiment}
+								onDownloadResults={downloadExperimentResults}
+								onDownloadProjectZip={downloadExperimentProjectZip}
+								onDeleteExperiment={onDeleteExperiment}
+							/>
+						</li>
+					);
+				})}
 		</ul>
 	</div>);
 };
-
