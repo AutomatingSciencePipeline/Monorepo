@@ -234,7 +234,7 @@ tilt up
 
 Now you can press space bar to open the Tilt GUI in your web browser.
 
-The GLADOS frontend will be accessible at http://localhost:3000.
+The GLADOS frontend will be accessible at <http://localhost:3000>.
 
 Any code changes made will automatically update the running pods.
 
