@@ -10,7 +10,7 @@ from kubernetes import client, config
 import pymongo
 from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file, get_experiment, update_exp_value
 
-from spawn_runner import create_job, create_job_object, get_yaml_file_body
+from spawn_runner import create_job, create_job_object
 flaskApp = Flask(__name__)
 
 config.load_incluster_config()
