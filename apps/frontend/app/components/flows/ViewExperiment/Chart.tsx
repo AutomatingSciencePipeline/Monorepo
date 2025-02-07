@@ -194,6 +194,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const headers = returnHeaders;
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+                //if we have a chart instance already, save which datasets are not hidden.
                 let hiddenDatasets={}
                 if (chartInstance) {
 
@@ -262,7 +263,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     }]
                 });
 
-                //Set all of the datasets to be unselected
                 //If it is a pie chart you have to use meta
                 if (chartType == 'pie') {
                     var meta = newChartInstance.getDatasetMeta(0);
@@ -271,8 +271,16 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     });
                 }
                 else {
+                    //check whether we have the dataset saved and use its value, otherwise hide it by default
                     newChartInstance.data.datasets.forEach((dataset) => {
-                        dataset.hidden = true;
+                        if (!(dataset.label === undefined) && dataset.label in hiddenDatasets)
+                        {
+                            dataset.hidden = hiddenDatasets[dataset.label];
+                        }
+                        else
+                        {
+                            dataset.hidden = true;
+                        }
                     });
                 }
                 newChartInstance.update();
