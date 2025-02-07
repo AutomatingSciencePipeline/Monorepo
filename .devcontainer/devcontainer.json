@@ -8,5 +8,5 @@
       "ghcr.io/lentzi90/features/tilt:0": {}
     },
     "forwardPorts": [3000, 5050, 27017, 10350],
-    "postCreateCommand": "cd /apps/frontend && npm install"
+    "postCreateCommand": "cd ./apps/frontend && npm install"
   }
