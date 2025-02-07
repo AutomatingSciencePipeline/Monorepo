@@ -44,7 +44,8 @@ helm_resource(
     name="glados-mongodb",
     chart="oci://registry-1.docker.io/bitnamicharts/mongodb",
     flags=["--values=./helm_packages/mongodb-helm/values.yaml"],
-    labels=["mongodb"]
+    labels=["mongodb"],
+    port_forwards="27017"
 )
 
 # Setup the k8s_resource
