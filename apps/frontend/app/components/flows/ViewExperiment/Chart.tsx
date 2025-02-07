@@ -194,7 +194,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const headers = returnHeaders;
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+                let hiddenDatasets={}
                 if (chartInstance) {
+
+                    chartInstance.data.datasets.forEach((dataSet, i) => {
+                        var meta = chartInstance.getDatasetMeta(i);
+                        hiddenDatasets[meta.label] = meta.hidden;
+                      });
+                    
                     chartInstance.destroy();
                 }
                 const totalLength = headers.length;
