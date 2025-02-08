@@ -19,5 +19,5 @@
         27017,
         10350
     ],
-    "postCreateCommand": "chmod +x ./.devcontainer/post-start.sh && ./.devcontainer/post-start.sh"
+    "postCreateCommand": "bash ./.devcontainer/post-start.sh"
 }

@@ -54,17 +54,17 @@ k8s_resource("glados-backend", port_forwards="5050", labels=["backend"])
 
 # Build the frontend
 docker_build("frontend", 
-    context='./apps/frontend',
+    context='./apps/frontend/',
     live_update=[
-        sync("./apps/frontend", "/usr/src/app")
+        sync("./apps/frontend/", "/usr/src/app")
     ],
     dockerfile='./apps/frontend/frontend-dev.Dockerfile')
 
 # Build the backend
 docker_build("backend", 
-    context='./apps/backend', 
+    context='./apps/backend/', 
     live_update=[
-        sync("./apps/backend", "/app"),
+        sync("./apps/backend/", "/app"),
         run('cd /app && pip install -r requirements.txt',
             trigger='./requirements.txt'),
         
