@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 cd ./apps/frontend || echo 'folder not found!'
 npm i
 
