@@ -39,7 +39,7 @@ syslogger = logging.getLogger(SYSTEM_LOGGER)
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
 
-syslogger.info("GLADOS Runner Started!")
+syslogger.info("GLADOS Runner Started")
 
 def main(experiment_data: str):
     """Function that gets called when the file is ran"""

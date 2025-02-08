@@ -1,17 +1,13 @@
 {
     "name": "GLADOS Dev Container",
-    "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "image": "gladospipeline/glados-dev-container:latest",
     "hostRequirements": {
         "cpus": 4,
         "memory": "16gb",
         "storage": "32gb"
     },
     "features": {
-        "ghcr.io/devcontainers/features/node:1": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
-        "ghcr.io/lentzi90/features/tilt:0": {},
-        "ghcr.io/nucleuscloud/devcontainer-features/ctlptl:0": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
     "forwardPorts": [
         3000,
@@ -19,5 +15,5 @@
         27017,
         10350
     ],
-    "postCreateCommand": "bash ./.devcontainer/post-start.sh"
+    "postStartCommand": "bash ./.devcontainer/post-start.sh"
 }
