@@ -6,8 +6,13 @@
         "memory": "16gb",
         "storage": "32gb"
     },
-    "features": {
-        // "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ]
+        }
     },
     "forwardPorts": [
         3000,
