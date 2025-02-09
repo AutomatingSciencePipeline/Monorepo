@@ -10,7 +10,16 @@
         "vscode": {
             "extensions": [
                 "ms-python.python",
-                "ms-python.vscode-pylance"
+                "ms-python.pylint",
+                "ms-python.vscode-pylance",
+                "herrmannplatz.npm-dependency-links",
+                "dbaeumer.vscode-eslint",
+                "christian-kohler.npm-intellisense",
+                "wix.vscode-import-cost",
+                "jock.svg",
+                "herrmannplatz.npm-dependency-links",
+                "doggy8088.quicktype-refresh",
+                "KevinRose.vsc-python-indent"
             ]
         }
     },
