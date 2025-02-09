@@ -2,12 +2,12 @@
 # This image includes a number of runtime versions for popular languages like Python, Node, PHP, Java, Go, C++, Ruby, and .NET Core/C#.
 FROM mcr.microsoft.com/devcontainers/universal:2
 
-# Install kubectl 
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+# # Install kubectl 
+# RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-# Install Helm
-RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# # Install Helm
+# RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Install Minikube
 RUN curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64 && install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
