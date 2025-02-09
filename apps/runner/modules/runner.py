@@ -73,11 +73,16 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
             lineNum = 0
+            currLine = None
             for line in reader:
+                currLine = line
                 if lineNum == targetLineNumber:
                     return line
                 lineNum += 1
-
+            
+            if targetLineNumber == -1:
+                return currLine        
+                    
             if lineNum == 0:
                 raise GladosUserError(f"{filename} is an empty file cannot gather any information")
             if lineNum == 1:
@@ -150,7 +155,8 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
                 return
 
         try:
-            output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
+            lineToGet = experiment.trialResultLineNumber
+            output = _get_line_n_of_trial_results_csv(lineToGet, f"trial{trialNum}/" + experiment.trialResult)
         except GladosUserError as err:
             _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
             return
@@ -186,7 +192,8 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
             return
 
     try:
-        output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
+        lineToGet = experiment.trialResultLineNumber
+        output = _get_line_n_of_trial_results_csv(lineToGet, f"trial{trialNum}/" + experiment.trialResult)
     except GladosUserError as err:
         _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
         return

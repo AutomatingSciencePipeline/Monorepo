@@ -66,6 +66,7 @@ export interface ExperimentData {
     expId: string; // TODO do we want to ensure this doesn't get stored in fb itself?
     trialExtraFile: FileName;
     trialResult: FileName;
+    trialResultLineNumber: number;
     timeout: number;
     keepLogs: boolean;
     scatter: boolean;
