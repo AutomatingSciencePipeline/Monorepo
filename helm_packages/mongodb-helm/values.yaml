@@ -15,10 +15,8 @@ persistence:
 
 auth:
   enabled: true
+  rootUser: "adminuser"
   rootPassword: "password123"
-  usernames: ["adminuser"]
-  passwords: ["password123"]
-  databases: ["admin"]
 
 service:
   nameOverride: glados-service-mongodb

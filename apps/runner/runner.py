@@ -100,6 +100,7 @@ def install_packages(file_path):
 
 
 def run_batch(data: IncomingStartRequest):
+    fileWasZip = False
     syslogger.info('Run_Batch starting with data %s', data)
 
     # Obtain most basic experiment info
@@ -199,9 +200,11 @@ def run_batch(data: IncomingStartRequest):
     if experiment.experimentType == ExperimentType.ZIP:
         # Recalc the file type
         try:
+            fileWasZip = True
             experiment.experimentType = determine_experiment_file_type(experiment.experimentExecutable)
             # also update experiment.file
             experiment.file = experiment.experimentExecutable
+            explogger.info(f"New experiment file type: {experiment.experimentType}")
         except NotImplementedError as err:
             explogger.error("This is not a supported experiment file type, aborting")
             explogger.exception(err)
@@ -214,7 +217,11 @@ def run_batch(data: IncomingStartRequest):
         try:
             # if the file exists, skip running the command
             if not os.path.exists("userProvidedFileReqs.txt"):
-                os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+                if fileWasZip:
+                    os.system(f"pipreqs --savepath userProvidedFileReqs.txt .")
+                else:
+                    os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+                explogger.info("Generated pip requirements")
         except Exception as err:
             explogger.error("Failed to generate pip requirements")
             explogger.exception(err)
