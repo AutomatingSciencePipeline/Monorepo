@@ -194,17 +194,19 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const headers = returnHeaders;
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+
                 //if we have a chart instance already, save which datasets are not hidden.
-                let hiddenDatasets={}
+                let hiddenDatasets: Record<string, boolean> = {};
                 if (chartInstance) {
 
-                    chartInstance.data.datasets.forEach((dataSet, i) => {
-                        var meta = chartInstance.getDatasetMeta(i);
-                        hiddenDatasets[meta.label] = meta.hidden;
-                      });
+                    chartInstance.data.datasets.forEach((dataset, i) => {
+                        const meta = chartInstance.getDatasetMeta(i);
+                        hiddenDatasets[dataset.label || `dataset_${i}`] = dataset.hidden ?? meta.hidden;
+                    });
                     
                     chartInstance.destroy();
                 }
+
                 const totalLength = headers.length;
                 const newHeaders = [] as any[];
                 for (let i = 0; i < totalLength; i++) {
@@ -216,7 +218,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     label: header,
                     data: yLists[i],
                     borderColor: colors,
-                    backgroundColor: colors
+                    backgroundColor: colors,
+                    //hidden: hiddenDatasets[header] ?? true
                 }));
                 const newChartInstance = new Chart(ctx, {
                     type: chartType,
@@ -273,7 +276,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 else {
                     //check whether we have the dataset saved and use its value, otherwise hide it by default
                     newChartInstance.data.datasets.forEach((dataset) => {
-                        if (!(dataset.label === undefined) && dataset.label in hiddenDatasets)
+                        if (!(dataset.label == undefined) && dataset.label in hiddenDatasets)
                         {
                             dataset.hidden = hiddenDatasets[dataset.label];
                         }
@@ -300,13 +303,15 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     };
 
     useEffect(() => {
-        if (headerSelectRef.current && headerSpanRef.current) {
-            const spanElement = headerSpanRef.current;
-            spanElement.style.display = 'inline';
-            headerSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
-            spanElement.style.display = 'none';
-        }
-      }, [xAxis]);
+        requestAnimationFrame(() => {
+            if (headerSelectRef.current && headerSpanRef.current) {
+                const spanElement = headerSpanRef.current;
+                spanElement.style.display = 'inline';
+                headerSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
+                spanElement.style.display = 'none';
+            }
+        });
+      }, [xAxis, headers]);
 
     useEffect(() => {
         if (aggregateSelectRef.current && aggregateSpanRef.current) {
@@ -315,7 +320,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             aggregateSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
             spanElement.style.display = 'none';
         }
-      }, [aggregateMode]);
+      }, [aggregateMode, loading]);
 
 
     return (
