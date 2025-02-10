@@ -11,7 +11,8 @@ def main():
         return
 
     # Check if the current directory is the project root
-    if not os.path.exists("Monorepo"):
+    if not os.getcwd().endswith("Monorepo"):
+        print("You ran this from: ", os.getcwd())
         print("Please run this script from the project root.")
         return
 
@@ -20,7 +21,7 @@ def main():
     print("Current directory in WSL:", wsl_current_dir)
     
     # Rsync the project to WSL
-    os.system(f"wsl rsync -avz --exclude='.venv' --exclude='node_modules' --exclude='dist' --exclude='build' --exclude='coverage' --exclude='*.log' {wsl_current_dir} ~") 
+    os.system(f"wsl rsync -auz --exclude='.venv' --exclude='node_modules' --exclude='dist' --exclude='build' --exclude='coverage' --exclude='*.log' {wsl_current_dir} ~") 
     print("Copied project to WSL.")
     
     # Change directory to the project root in WSL

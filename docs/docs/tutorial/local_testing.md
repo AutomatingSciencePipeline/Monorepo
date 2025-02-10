@@ -2,7 +2,52 @@
 
 This guide is meant for developers contributing to GLADOS that want to test changes on their local machines. This guide will utilize minikube, docker, and the GLADOS images.
 
-## Install Dependencies
+There are two potential options to run GLADOS locally:
+
+* VSCode Dev Containers
+* Minikube and Tilt locally
+
+Both of these rely on having install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (scroll down to find the download button).
+
+## VSCode Dev Containers
+
+This method uses all of the same technologies and programs as the "Minikube and Tilt locally" method, but it is run inside of a single Docker container. This is a Docker in Docker solution in order to not have to setup all of the dependencies by hand.
+
+### Windows Setup
+
+On Windows you will most likely be using the WSL2 backend for Docker Desktop, follow [this guide](https://docs.docker.com/desktop/features/wsl/) to ensure the WSL2 backend is used.
+
+!!! Note
+    Make sure to use Ubuntu as the distribution of choice.
+
+WSL2 has one small quirk... inotify, which is used to live update the files inside of Tilt (you can read more about this in the Tilt section below), is not supported on mounted files in WSL2. This means that files that are shared between Windows and WSL cannot be watched properly.
+
+The way around this issue is to copy all of the files into WSL2 before we start the dev container.
+
+In the .devcontainer folder in the root of the Monorepo, you will find a script named `start_in_wsl.py`.
+
+Run this script from the *root* of the Monorepo (this is important!!!!):
+
+```bash
+python ./.devcontainer/start_in_wsl.py
+```
+
+This command will copy the current state of the Monorepo into WSL2, rerun this every time you wish to start a developing session in WSL2.
+
+!!! Note
+    Files that are *newer* will not be overwritten!
+
+Once you are inside the VSCode window, you will be prompted in the bottom right to open this repo in a container. If you miss this, you can also press F1 and then search for "Rebuild and Reopen in Container".
+
+After everything is setup, you can type `tilt up` from the root of the Monorepo. You can then open `localhost:10350` in your web browser to manage Tilt.
+
+All done! You now are running a development environment docker container!
+
+## Tilt
+
+This method will create a two Docker containers running on your system. One to manage Minikube and another to act as an image repository. These are both setup and configured using ctlptl (cattle patrol).
+
+### Install Dependencies
 
 !!! Warning
     As of November 2024, GLADOS cannot run locally on M-Series Mac computers
@@ -29,9 +74,7 @@ Finally, ensure that kubectl and minikube are installed using:
     winget install minikube # (Windows)
 ```
 
-## Tilt
-
-As of February of 2025 we have switched to using Tilt for our local development.
+##
 
 ### What is Tilt
 
