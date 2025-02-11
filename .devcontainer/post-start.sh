@@ -1,7 +1,16 @@
-#!/bin/bash
+#!/bin/zsh
+cd /workspaces/Monorepo/apps/frontend || echo 'folder not found!'
+npm i
+ 
+minikube config set cpus 3
+minikube config set memory 12000
+minikube delete
 
-# Silence warnings about the git repos not being owned by this user (since it's bind mounted from host)
-# This runs inside the container, so it's okay to do global git config
-git config --global --add safe.directory "/workspaces/Monorepo"
-git config --global --add safe.directory "/workspaces/Monorepo/Monorepo.wiki"
-echo Added workspace folder to git safe directories
+# wait for docker daemon to start
+while ! docker info &> /dev/null; do
+    sleep 1
+done
+timeout 120s ctlptl create cluster minikube --registry=ctlptl-registry 
+minikube delete
+# try the ctlptl command again
+ctlptl create cluster minikube --registry=ctlptl-registry
