@@ -1,9 +1,10 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
-import { GripVertical, Plus } from 'tabler-icons-react';
+import { GripVertical, Plus, Tool } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
+import { Tooltip } from '@mantine/core';
 
 const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
 
@@ -92,6 +93,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							<GripVertical className='mr-2' />
 						</Center>
 						<span className='text-gray-500 mr-2'>{type}</span>
+						<Tooltip label='Name of the parameter' position='top' withArrow>
 						<input
 							type='text'
 							placeholder='name'
@@ -99,6 +101,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
 							required
 						/>
+						</Tooltip>
 						{useDefault && (
 							<input
 								type='text'
@@ -147,23 +150,32 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 };
 
 const NumberParam = ({ form, type, index, ...rest }) => {
-	return (
-		<Fragment>
-			{['min', 'max', 'step'].map((label, i) => {
+    return (
+        <Fragment>
+            {['min', 'max', 'step'].map((label, i) => {
+                const tooltipText = {
+                    min: 'Minimum value for the parameter',
+                    max: 'Maximum value for the parameter',
+                    step: 'Step value for the parameter',
+                }[label];
 
-				return (
-					<input
-						key={`number_${type}_${label}`}
-						type='number'
-						placeholder={`${label}`}
-						className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
-						required
-						{...form.getInputProps(`hyperparameters.${index}.${label}`)}
-					/>
-				);
-			})}
-		</Fragment>
-	);
+                return (
+                    <Fragment key={`number_${type}_${label}`}>
+						<Tooltip label={tooltipText} position='top' withArrow>
+                        <input
+                            type='number'
+                            placeholder={`${label}`}
+                            className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
+                            required
+                            {...form.getInputProps(`hyperparameters.${index}.${label}`)}
+                            data-tip={tooltipText}
+                        />
+						</Tooltip>
+                    </Fragment>
+                );
+            })}
+        </Fragment>
+    );
 };
 
 const BoolParam = ({ form, type, index, ...rest }) => {
@@ -180,6 +192,7 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 const StringParam = ({ form, type, index, ...rest }) => {
 	return (
 		<>
+		<Tooltip label='String value for the parameter' position='top' withArrow>
 			<input
 				type='text'
 				placeholder={`${type} value`}
@@ -187,6 +200,7 @@ const StringParam = ({ form, type, index, ...rest }) => {
 				{...form.getInputProps(`hyperparameters.${index}.default`)}
 				required
 			/>
+		</Tooltip>
 		</>
 	);
 };
@@ -255,6 +269,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				{values.map((value, idx) => {
 					return (
 						<div key={idx} className='flex items-center mb-2'>
+							<Tooltip label='String value for the parameter' position='top' withArrow>
 							<input
 								type='text'
 								placeholder={`Value ${idx + 1}`}
@@ -263,6 +278,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 								onChange={(e) => handleChange(e, idx)}
 								required
 							/>
+							</Tooltip>
 							<ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
 								<Trash />
 							</ActionIcon>
