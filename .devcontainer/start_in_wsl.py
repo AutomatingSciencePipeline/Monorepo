@@ -1,4 +1,5 @@
 import os
+import sys
 
 
 def main():
@@ -20,8 +21,15 @@ def main():
     wsl_current_dir = "/mnt/c/" + os.getcwd().replace("\\", "/").replace("C:/", "").lower().replace("monorepo", "Monorepo")
     print("Current directory in WSL:", wsl_current_dir)
     
+    if '-y' not in sys.argv[1:]:
+        print("This action is destructive to any data on the WSL instance of vscode... are you sure?", end="")
+        response = input(" (Y/n): ")
+        if response.lower() != "y" and response.strip() != "":
+            print("Exiting...")
+            return
+    
     # Rsync the project to WSL
-    os.system(f"wsl rsync -auz --exclude='.venv' --exclude='node_modules' --exclude='dist' --exclude='build' --exclude='coverage' --exclude='*.log' {wsl_current_dir} ~") 
+    os.system(f"wsl rsync -avz --delete --exclude='.venv' --exclude='node_modules' --exclude='dist' --exclude='build' --exclude='coverage' --exclude='*.log' {wsl_current_dir} ~") 
     print("Copied project to WSL.")
     
     # Change directory to the project root in WSL

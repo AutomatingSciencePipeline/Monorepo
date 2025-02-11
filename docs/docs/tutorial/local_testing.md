@@ -32,10 +32,13 @@ Run this script from the *root* of the Monorepo (this is important!!!!):
 python ./.devcontainer/start_in_wsl.py
 ```
 
-This command will copy the current state of the Monorepo into WSL2, rerun this every time you wish to start a developing session in WSL2.
+!!! Warning
+    All changes in the WSL2 instance will be overwritten!!!!!
 
 !!! Note
-    Files that are *newer* will not be overwritten!
+    Run with the -y flag to skip the confirmation about overwriting files.
+
+This command will copy the current state of the Monorepo into WSL2, rerun this every time you wish to start a developing session in WSL2.
 
 Once you are inside the VSCode window, you will be prompted in the bottom right to open this repo in a container. If you miss this, you can also press F1 and then search for "Rebuild and Reopen in Container".
 
