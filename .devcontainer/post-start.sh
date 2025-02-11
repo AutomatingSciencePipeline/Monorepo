@@ -10,7 +10,7 @@ minikube delete
 while ! docker info &> /dev/null; do
     sleep 1
 done
-# try the ctlptl command again
+# create the cluster
 ctlptl create cluster minikube --registry=ctlptl-registry
 
 # Install some pip packages
