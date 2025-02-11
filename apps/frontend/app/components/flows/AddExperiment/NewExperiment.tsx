@@ -286,6 +286,61 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 		}
 	}, [formState]); // TODO adding 'form' causes an update loop
 
+	const [validationErrors, setValidationErrors] = useState({
+		name: false,
+		trialResult: false,
+	});
+
+	const validateParams = () => {
+		const errors = form.values.hyperparameters.map((param) => {
+			if(param.name === '' || param.type === ''){
+				return false;
+			}
+			if(param.type === 'integer' || param.type === 'float'){
+				return param.min !== '' && param.max !== '' && param.step !== '';
+			}
+			if(param.type === 'string'){
+				return param.default !== '';
+			}
+			if (param.type === 'stringlist') {
+				return param.values.length > 0;
+			}
+			
+			return true;
+		});
+		return errors;
+	}
+
+	const validateFields = () => {
+        const errors = {
+            name: !form.values.name,
+            trialResult: !form.values.trialResult,
+        };
+        setValidationErrors(errors);
+        return !errors.name && !errors.trialResult;
+    };
+
+	const handleNext = () => {
+        if (status === FormStates.Info) {
+            const isValid = validateFields();
+            if (!isValid) {
+                return;
+            }
+        }
+		if (status === FormStates.Params) {
+			const isValid = validateParams();
+			if (!isValid.includes(false)) {
+				setStatus((prevStatus) => prevStatus + 1);
+			}
+			else {
+				toast.error("Please fill out all fields for the hyperparameters!", {duration: 1500});
+			}
+			return;
+		}
+        // Proceed to the next step
+        setStatus((prevStatus) => prevStatus + 1);
+    };
+
 	return (
 		<div>
 			<Toaster />
@@ -334,7 +389,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 
 										{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 										{status === FormStates.Info ? (
-											<InformationStep form={form}></InformationStep>
+											<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
 										) : status === FormStates.DumbTextArea ? (
 											<DumbTextArea form={form}></DumbTextArea>
 										) : status === FormStates.Params ? (
@@ -422,7 +477,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 														} :
 														{
 															type: 'button',
-															onClick: () => setStatus(status + 1),
+															onClick: handleNext,
 														})}
 												>
 													{status === FormStates.Dispatch ? 'Dispatch' : 'Next'}

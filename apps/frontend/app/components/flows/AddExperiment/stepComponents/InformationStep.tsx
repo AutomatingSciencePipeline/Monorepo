@@ -2,8 +2,18 @@
 
 import { Fragment } from 'react';
 import { InputSection } from '../../../InputSection';
+import { useEffect } from 'react';
 
-export const InformationStep = ({ form, ...props }) => {
+export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
+	
+	useEffect(() => {
+        const errors = {
+            name: !form.values.name,
+            trialResult: !form.values.trialResult,
+        };
+        setValidationErrors(errors);
+    }, [form.values, setValidationErrors]);
+
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>
@@ -12,8 +22,8 @@ export const InformationStep = ({ form, ...props }) => {
 						<input
 							type='text'
 							{...form.getInputProps('name')}
-							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
+							className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${validationErrors.name ? 'border-red-500' : ''}`}
+                        />
 					</div>
 				</InputSection>
 
@@ -23,7 +33,7 @@ export const InformationStep = ({ form, ...props }) => {
 							{...form.getInputProps('description')}
 							rows={3}
 							className='block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
+                        />
 					</div>
 				</InputSection>
 
@@ -33,8 +43,8 @@ export const InformationStep = ({ form, ...props }) => {
 							type='text'
 							placeholder='Name and extension of the experiment results file'
 							{...form.getInputProps('trialResult')}
-							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-						/>
+							className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${validationErrors.trialResult ? 'border-red-500' : ''}`}
+                        />
 					</div>
 				</InputSection>
 				<InputSection header={'Trial Result'}>
