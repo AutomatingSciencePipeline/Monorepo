@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, XMarkIcon,ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
@@ -142,8 +142,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									onBlur={handleCancel}
 									onKeyUp={handleKeyUp}
 								/>
-								{/* <button className="save-button" onClick={handleSave}>Save</button>
-								<button className="cancel-button" onClick={handleCancel}>Cancel</button> */}
+								<CheckIcon className="w-5 h-5 text-green-500 cursor-pointer" onClick={() => handleSave(projectName)} />
+								<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel} />
 							</>
 						) : (
 							<>
