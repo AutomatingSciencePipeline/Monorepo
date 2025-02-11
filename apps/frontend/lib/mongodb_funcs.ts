@@ -238,11 +238,10 @@ export async function redeemShareLink(link: string, userId: string) {
     }
 
     if (shareLink.expiration < new Date()) {
+        // Delete the share link
+        await collection.deleteOne({ _id: shareLink._id });
         return Promise.reject(`Share link with link: ${link} has expired`);
     }
-
-    // Delete the share link
-    await collection.deleteOne({ _id: shareLink._id });
 
     // Give the user access to the experiment
     const collectionExperiments = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
