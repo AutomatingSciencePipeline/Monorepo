@@ -24,6 +24,7 @@ class ExperimentData(BaseModel):
     creatorRole: str
     trialExtraFile: Optional[str]
     trialResult: str
+    trialResultLineNumber: int
     file = ""  #Will be set either by initializing or by app.py
     timeout: int
     keepLogs: bool

@@ -37,6 +37,16 @@ export const InformationStep = ({ form, ...props }) => {
 						/>
 					</div>
 				</InputSection>
+				<InputSection header={'Trial Result'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='number'
+							placeholder='Line number of the result that will be used for the trial (Leave blank for first line or -1 for last line)'
+							{...form.getInputProps('trialResultLineNumber')}
+							className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+						/>
+					</div>
+				</InputSection>
 				<InputSection header={"Trial's Extra File"}>
 					<div className='sm:col-span-4'>
 						<input
