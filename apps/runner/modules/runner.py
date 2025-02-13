@@ -220,7 +220,7 @@ def conduct_experiment(experiment: ExperimentData):
     _run_trial_zero(experiment, 0)
     results = []
     
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=50) as executor:
         # run all of the experiments
         futures = [executor.submit(_run_trial_wrapper, experiment, trialNum) for trialNum in trialNums]
         # Wait for all tasks to complete
