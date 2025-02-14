@@ -293,23 +293,42 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 
 	const validateParams = () => {
 		const errors = form.values.hyperparameters.map((param) => {
-			if(param.name === '' || param.type === ''){
+			if (param.name === '' || param.type === '') {
+				toast.error("Please fill out all fields for the hyperparameters!", {duration: 1500});
 				return false;
 			}
-			if(param.type === 'integer' || param.type === 'float'){
-				return param.min !== '' && param.max !== '' && param.step !== '';
+			if (param.type === 'integer' || param.type === 'float') {
+				const min = parseFloat(param.min);
+				const max = parseFloat(param.max);
+				const step = parseFloat(param.step);
+				if (isNaN(min) || isNaN(max) || isNaN(step)) {
+					toast.error(`Invalid number format for parameter ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				if (min >= max) {
+					toast.error(`Minimum value should be less than maximum value for the following parameter: ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				if (step <= 0) {
+					toast.error(`Step size should be greater than 0 for parameter ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				// if ((max - min) % step !== 0) {
+				// 	toast.error(`Step size does not fit evenly into the range for parameter ${param.name}`, { duration: 1500 });
+				// 	return false;
+				// }
+				return true;
 			}
-			if(param.type === 'string'){
+			if (param.type === 'string') {
 				return param.default !== '';
 			}
 			if (param.type === 'stringlist') {
 				return param.values.length > 0;
 			}
-			
 			return true;
 		});
 		return errors;
-	}
+	};
 
 	const validateFields = () => {
         const errors = {
@@ -324,6 +343,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
         if (status === FormStates.Info) {
             const isValid = validateFields();
             if (!isValid) {
+				toast.error("Please fill out name and trial result fields!", {duration: 1500});
                 return;
             }
         }
@@ -331,9 +351,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			const isValid = validateParams();
 			if (!isValid.includes(false)) {
 				setStatus((prevStatus) => prevStatus + 1);
-			}
-			else {
-				toast.error("Please fill out all fields for the hyperparameters!", {duration: 1500});
 			}
 			return;
 		}
