@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 cd /workspaces/Monorepo/apps/frontend || echo 'folder not found!'
 npm i
  
@@ -10,7 +10,20 @@ minikube delete
 while ! docker info &> /dev/null; do
     sleep 1
 done
-timeout 120s ctlptl create cluster minikube --registry=ctlptl-registry 
-minikube delete
-# try the ctlptl command again
+# create the cluster
 ctlptl create cluster minikube --registry=ctlptl-registry
+
+# Install some pip packages
+pip install flask-cors
+pip install kubernetes
+pip install pymongo
+pip install bson
+pip install pyyaml
+pip install gunicorn
+pip install numpy
+pip install configparser
+pip install python-magic
+pip install python-dotenv
+pip install matplotlib
+pip install pydantic
+pip install pipreqs
