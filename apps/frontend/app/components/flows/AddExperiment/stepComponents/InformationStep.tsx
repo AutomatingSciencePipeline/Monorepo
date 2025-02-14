@@ -20,6 +20,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                     <div className='sm:col-span-4'>
                         <input
                             type='text'
+							placeholder='Name of the experiment'
                             {...form.getInputProps('name')}
                             className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${validationErrors.name ? 'border-red-500' : ''}`}
                         />
