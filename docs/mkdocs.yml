@@ -25,6 +25,7 @@ nav:
   - Infrastructure:
     - Kubernetes: infrastructure/kubernetes.md
     - VMs: infrastructure/vms.md
+    - Cluster Upgrade: infrastructure/cluster_update.md
   - Developer Help:
     - Helpful Commands: developerhelp/helpful_commands.md
   - Cheatsheet: cheatsheet.md
