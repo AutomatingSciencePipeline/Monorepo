@@ -99,7 +99,6 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							placeholder='name'
 							className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
-							required
 						/>
 						</Tooltip>
 						{useDefault && (
@@ -108,7 +107,6 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 								placeholder='default'
 								className='ml-2 block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 								{...form.getInputProps(`hyperparameters.${index}.default`)}
-								required
 							/>
 						)}
 
@@ -166,7 +164,6 @@ const NumberParam = ({ form, type, index, ...rest }) => {
                             type='number'
                             placeholder={`${label}`}
                             className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
-                            required
                             {...form.getInputProps(`hyperparameters.${index}.${label}`)}
                             data-tip={tooltipText}
                         />
@@ -198,7 +195,6 @@ const StringParam = ({ form, type, index, ...rest }) => {
 				placeholder={`${type} value`}
 				className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 				{...form.getInputProps(`hyperparameters.${index}.default`)}
-				required
 			/>
 		</Tooltip>
 		</>
@@ -276,7 +272,6 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 								value={value}
 								onChange={(e) => handleChange(e, idx)}
-								required
 							/>
 							</Tooltip>
 							<ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
