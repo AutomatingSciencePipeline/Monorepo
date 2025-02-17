@@ -294,6 +294,74 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 		}
 	}, [formState]); // TODO adding 'form' causes an update loop
 
+	const [validationErrors, setValidationErrors] = useState({
+		name: false,
+		trialResult: false,
+	});
+
+	const validateParams = () => {
+		const errors = form.values.hyperparameters.map((param) => {
+			if (param.name === '' || param.type === '') {
+				toast.error("Please fill out all fields for the hyperparameters!", {duration: 1500});
+				return false;
+			}
+			if (param.type === 'integer' || param.type === 'float') {
+				const min = parseFloat(param.min);
+				const max = parseFloat(param.max);
+				const step = parseFloat(param.step);
+				if (isNaN(min) || isNaN(max) || isNaN(step)) {
+					toast.error(`Invalid number format for parameter ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				if (min >= max) {
+					toast.error(`Minimum value should be less than maximum value for the following parameter: ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				if (step <= 0) {
+					toast.error(`Step size should be greater than 0 for parameter ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				return true;
+			}
+			if (param.type === 'string') {
+				return param.default !== '';
+			}
+			if (param.type === 'stringlist') {
+				return param.values.length > 0;
+			}
+			return true;
+		});
+		return errors;
+	};
+
+	const validateFields = () => {
+        const errors = {
+            name: !form.values.name,
+            trialResult: !form.values.trialResult,
+        };
+        setValidationErrors(errors);
+        return !errors.name && !errors.trialResult;
+    };
+
+	const handleNext = () => {
+        if (status === FormStates.Info) {
+            const isValid = validateFields();
+            if (!isValid) {
+				toast.error("Please fill out name and trial result fields!", {duration: 1500});
+                return;
+            }
+        }
+		if (status === FormStates.Params) {
+			const isValid = validateParams();
+			if (!isValid.includes(false)) {
+				setStatus((prevStatus) => prevStatus + 1);
+			}
+			return;
+		}
+        // Proceed to the next step
+        setStatus((prevStatus) => prevStatus + 1);
+    };
+
 	return (
 		<div>
 			<Toaster />
@@ -342,7 +410,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 
 										{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 										{status === FormStates.Info ? (
-											<InformationStep form={form}></InformationStep>
+											<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
 										) : status === FormStates.DumbTextArea ? (
 											<DumbTextArea form={form}></DumbTextArea>
 										) : status === FormStates.Params ? (
@@ -430,7 +498,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 															type: 'button',
 															onClick: () => {
 																if (!loading) {
-																	setStatus(status + 1);
+																	handleNext();
 																}
 																else {
 																	toast.error("Still setting up... wait a couple seconds and try again.", { duration: 2500 });
