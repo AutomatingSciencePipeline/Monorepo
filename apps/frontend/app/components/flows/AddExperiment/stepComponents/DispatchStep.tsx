@@ -52,7 +52,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 		}
 		else {
 			const json = await uploadFileResponse.json();
-			console.log(`Failed to upload file: ${json['message']}`);
+			console.warn(`Failed to upload file: ${json['message']}`);
 		}
 	};
 
@@ -64,7 +64,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 				<Dropzone
 					onDrop={onDropFile}
 					onReject={(rejections) => {
-						console.log('File rejection details', rejections);
+						console.warn('File rejection details', rejections);
 						const uploadedType = rejections[0]?.file?.type;
 						alert(`Rejected:\n${rejections[0]?.errors[0]?.message}\nYour file was of type: ${uploadedType ? uploadedType : 'Unknown'}\nCheck the console for more details.`);
 					}}

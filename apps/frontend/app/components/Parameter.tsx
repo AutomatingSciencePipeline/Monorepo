@@ -195,19 +195,14 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const [opened, setOpened] = useState(false);
 	const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
 
-	useEffect(() => {
-		console.log('Updated values:', values);
-	}, [values]);
-
 	const handleAddValue = () => {
 		setValues([...values, '']);
 		form.insertListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
-		console.log('replacing list item:', idx, e.target.value);
 		form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
-		console.log('after replace:', form.values.hyperparameters[index].values);
+
 		const newValues = [...values];
 		newValues[idx] = e.target.value;
 		setValues(newValues);
@@ -220,12 +215,10 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		const originalValues = form.values.hyperparameters[index]?.values || [];
 		for (let i = originalValues.length - 1; i >= 0; i--) {
 			if (!newValues.includes(originalValues[i])) {
-				console.log('deleting:', originalValues[i]);
 				form.removeListItem(`hyperparameters[${index}].values`, i);
 			}
 		}
 
-		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
 	const handleClose = () => {
