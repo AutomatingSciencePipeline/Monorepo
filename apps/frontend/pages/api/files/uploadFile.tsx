@@ -42,7 +42,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
             if(identicalFileArray.length > 0){
                 const fileId = identicalFileArray[0]._id;
                 const fileName = identicalFileArray[0].filename;
-                res.status(200).json({message: "Reusing file in database!", fileId: fileId, fileName: fileName} as any);
+                res.status(200).json({message: "Reusing file in database!", fileId: fileId, fileName: fileName, reuse: true} as any);
                 return;
             }
 
