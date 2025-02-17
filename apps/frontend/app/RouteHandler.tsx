@@ -15,8 +15,6 @@ const RouteHandler = ({ children }: RouteHandlerProps) => {
   const router = useRouter();
   const pathname = usePathname() || '';
 
-  console.log(pathname);
-
   return (
     <AuthProvider>
       {noAuthRequired.includes(pathname) ? (

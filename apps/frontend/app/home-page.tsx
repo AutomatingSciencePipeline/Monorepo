@@ -17,8 +17,6 @@ const HomePage = () => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
 
-  console.log('userId', session?.user?.id);
-  console.log(loading, session?.user?.id);
 
   return (
     <div className={'w-full h-full'}>
@@ -115,7 +113,6 @@ const HomePage = () => {
                     /> :
                     <SignUpModal afterSignUp={() => {
                       setLoading(true);
-                      console.log("pushing to dash");
                       router.push('/dashboard');
                     }} />
                   }

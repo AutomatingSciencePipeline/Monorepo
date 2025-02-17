@@ -51,7 +51,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 	const handleSave = (newProjectName) => {
 		updateExperimentNameById(project.expId, newProjectName).catch((reason) => {
-			console.log(`Failed to update experiment name, reason: ${reason}`);
+			console.warn(`Failed to update experiment name, reason: ${reason}`);
 		});
 		// Exit the editing mode
 		setIsEditing(false);
@@ -65,7 +65,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	useEffect(() => {
-		console.log(project.creator);
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
