@@ -74,6 +74,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const dataDict = {} as any;
         const splitRows = [] as any;
 
+        setXAxis(headers[0]);
+
         for (let i = 1; i < rows.length; i++) {
             // Split the row by commas when not inside quotes
             const row = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
@@ -311,7 +313,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 spanElement.style.display = 'none';
             }
         });
-      }, [xAxis, headers]);
+      }, [xAxis, headers, loading]);
 
     useEffect(() => {
         if (aggregateSelectRef.current && aggregateSpanRef.current) {
