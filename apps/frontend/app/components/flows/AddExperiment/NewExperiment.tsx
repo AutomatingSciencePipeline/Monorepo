@@ -313,10 +313,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 					toast.error(`Step size should be greater than 0 for parameter ${param.name}`, { duration: 1500 });
 					return false;
 				}
-				// if ((max - min) % step !== 0) {
-				// 	toast.error(`Step size does not fit evenly into the range for parameter ${param.name}`, { duration: 1500 });
-				// 	return false;
-				// }
 				return true;
 			}
 			if (param.type === 'string') {
