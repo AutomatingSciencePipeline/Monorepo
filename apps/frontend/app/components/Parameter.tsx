@@ -1,9 +1,10 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
-import { GripVertical, Plus } from 'tabler-icons-react';
+import { GripVertical, Plus, Tool } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
+import { Tooltip } from '@mantine/core';
 
 const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...rest }) => {
 
@@ -92,20 +93,20 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 							<GripVertical className='mr-2' />
 						</Center>
 						<span className='text-gray-500 mr-2'>{type}</span>
+						<Tooltip label='Name of the parameter' position='top' withArrow>
 						<input
 							type='text'
 							placeholder='name'
 							className='block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 							{...form.getInputProps(`hyperparameters.${index}.name`)}
-							required
 						/>
+						</Tooltip>
 						{useDefault && (
 							<input
 								type='text'
 								placeholder='default'
 								className='ml-2 block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 								{...form.getInputProps(`hyperparameters.${index}.default`)}
-								required
 							/>
 						)}
 
@@ -147,23 +148,31 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, ...
 };
 
 const NumberParam = ({ form, type, index, ...rest }) => {
-	return (
-		<Fragment>
-			{['min', 'max', 'step'].map((label, i) => {
+    return (
+        <Fragment>
+            {['min', 'max', 'step'].map((label, i) => {
+                const tooltipText = {
+                    min: 'Minimum value for the parameter',
+                    max: 'Maximum value for the parameter',
+                    step: 'Step value for the parameter',
+                }[label];
 
-				return (
-					<input
-						key={`number_${type}_${label}`}
-						type='number'
-						placeholder={`${label}`}
-						className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
-						required
-						{...form.getInputProps(`hyperparameters.${index}.${label}`)}
-					/>
-				);
-			})}
-		</Fragment>
-	);
+                return (
+                    <Fragment key={`number_${type}_${label}`}>
+						<Tooltip label={tooltipText} position='top' withArrow>
+                        <input
+                            type='number'
+                            placeholder={`${label}`}
+                            className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
+                            {...form.getInputProps(`hyperparameters.${index}.${label}`)}
+                            data-tip={tooltipText}
+                        />
+						</Tooltip>
+                    </Fragment>
+                );
+            })}
+        </Fragment>
+    );
 };
 
 const BoolParam = ({ form, type, index, ...rest }) => {
@@ -180,13 +189,14 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 const StringParam = ({ form, type, index, ...rest }) => {
 	return (
 		<>
+		<Tooltip label='String value for the parameter' position='top' withArrow>
 			<input
 				type='text'
 				placeholder={`${type} value`}
 				className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 				{...form.getInputProps(`hyperparameters.${index}.default`)}
-				required
 			/>
+		</Tooltip>
 		</>
 	);
 };
@@ -195,19 +205,14 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	const [opened, setOpened] = useState(false);
 	const [values, setValues] = useState(form.values.hyperparameters[index].values || ['']);
 
-	useEffect(() => {
-		console.log('Updated values:', values);
-	}, [values]);
-
 	const handleAddValue = () => {
 		setValues([...values, '']);
 		form.insertListItem(`hyperparameters[${index}].values`, '');
 	};
 
 	const handleChange = (e, idx) => {
-		console.log('replacing list item:', idx, e.target.value);
 		form.replaceListItem(`hyperparameters[${index}].values`, idx, e.target.value);
-		console.log('after replace:', form.values.hyperparameters[index].values);
+
 		const newValues = [...values];
 		newValues[idx] = e.target.value;
 		setValues(newValues);
@@ -220,12 +225,10 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 		const originalValues = form.values.hyperparameters[index]?.values || [];
 		for (let i = originalValues.length - 1; i >= 0; i--) {
 			if (!newValues.includes(originalValues[i])) {
-				console.log('deleting:', originalValues[i]);
 				form.removeListItem(`hyperparameters[${index}].values`, i);
 			}
 		}
 
-		console.log('after delete:', form.values.hyperparameters[index].values);
 	};
 
 	const handleClose = () => {
@@ -255,14 +258,15 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 				{values.map((value, idx) => {
 					return (
 						<div key={idx} className='flex items-center mb-2'>
+							<Tooltip label='String value for the parameter' position='top' withArrow>
 							<input
 								type='text'
 								placeholder={`Value ${idx + 1}`}
 								className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
 								value={value}
 								onChange={(e) => handleChange(e, idx)}
-								required
 							/>
+							</Tooltip>
 							<ActionIcon onClick={() => handleDelete(idx)} color='red' className='ml-2'>
 								<Trash />
 							</ActionIcon>

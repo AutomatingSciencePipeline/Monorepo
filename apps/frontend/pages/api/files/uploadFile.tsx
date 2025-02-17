@@ -42,7 +42,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
             if(identicalFileArray.length > 0){
                 const fileId = identicalFileArray[0]._id;
                 const fileName = identicalFileArray[0].filename;
-                res.status(200).json({message: "Reusing file in database!", fileId: fileId, fileName: fileName} as any);
+                res.status(200).json({message: "Reusing file in database!", fileId: fileId, fileName: fileName, reuse: true} as any);
                 return;
             }
 
@@ -64,7 +64,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
         catch (error) {
             const message = "Failed to upload experiment file!";
             console.error("Error writing experiment file.");
-            console.log(error);
+            console.error(error);
             res.status(500).json({ response: message } as any);
         }
     }
