@@ -100,38 +100,29 @@ def generate_permutations(parameters):
 
 
 def generate_config_files(experiment: ExperimentData):
-    constants = {}
-    parameters = {}
+    constants, parameters = {}, {}
     gather_parameters(experiment.hyperparameters, constants, parameters)
-    explogger.info("param list: " + str(parameters))
-    explogger.info("const list: " + str(constants))
 
-    configDict = {}
-    configIdNumber = 0
+    explogger.info(f"param list: {parameters}")
+    explogger.info(f"const list: {constants}")
 
-    param_list = []
-    for key, param in parameters.items():
-        param_dict = param.dict()
-        param_dict['name'] = key
-        param_list.append(param_dict)
+    # Convert parameters into a list of dictionaries
+    param_list = [{**param.dict(), 'name': key} for key, param in parameters.items()]
 
-    explogger.info("param list: " + str(param_list))
+    explogger.info(f"param list: {param_list}")
     explogger.info("Generating configs")
+
+    # Generate all permutations
     permutations = generate_permutations(param_list)
 
-    for permutation in permutations:
-        configItems = {}
-        for name, value in permutation.items():
-            configItems[name] = value
-        configItems.update(constants)
-        configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
-        explogger.info(f'Generated config {configIdNumber}')
-        configIdNumber += 1
+    # Build config dictionary using dictionary comprehension
+    experiment.configs = {
+        f'config{configId}': ConfigData(data={**permutation, **constants})
+        for configId, permutation in enumerate(permutations)
+    }
 
-    explogger.info("Finished generating configs")
-    experiment.configs = configDict
-    return configIdNumber
-
+    explogger.info(f"Generated {len(permutations)} configs")
+    return len(permutations)
 
 def create_config_from_data(experiment: ExperimentData, configNum: int):
     """

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: glados-frontend-service
+  namespace: default
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80     # The port exposed by the Service
+      targetPort: 3000 # The port your Next.js app listens on
+  type: ClusterIP

@@ -15,10 +15,8 @@ persistence:
 
 auth:
   enabled: true
+  rootUser: "adminuser"
   rootPassword: "password123"
-  usernames: ["adminuser"]
-  passwords: ["password123"]
-  databases: ["admin"]
 
 service:
   nameOverride: glados-service-mongodb
@@ -38,5 +36,3 @@ affinity:
               operator: In
               values:
                 - "glados-db"  # Replace with the name of the node you want to use
-
-

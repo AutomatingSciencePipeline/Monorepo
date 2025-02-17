@@ -33,6 +33,11 @@ def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout
                 trialLogFile.close()
             os.chdir('..')
         if data[PROCESS_ERROR_STREAM]:
+            # pybullet build time is a common error that is not an error
+            # the pybullet developers made this output on stderr because they are horrible developers
+            # just ignore it for now, try to find a fix for this later
+            if "pybullet build time" in data[PROCESS_ERROR_STREAM]:
+                return
             errorMessage = f'errors returned from pipe is {data[PROCESS_ERROR_STREAM]}'
             explogger.error(errorMessage)
             raise InternalTrialFailedError(errorMessage)
@@ -68,11 +73,16 @@ def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
         with open(filename, mode='r', encoding="utf8") as file:
             reader = csv.reader(file)
             lineNum = 0
+            currLine = None
             for line in reader:
+                currLine = line
                 if lineNum == targetLineNumber:
                     return line
                 lineNum += 1
-
+            
+            if targetLineNumber == -1:
+                return currLine        
+                    
             if lineNum == 0:
                 raise GladosUserError(f"{filename} is an empty file cannot gather any information")
             if lineNum == 1:
@@ -145,7 +155,8 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
                 return
 
         try:
-            output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
+            lineToGet = experiment.trialResultLineNumber
+            output = _get_line_n_of_trial_results_csv(lineToGet, f"trial{trialNum}/" + experiment.trialResult)
         except GladosUserError as err:
             _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
             return
@@ -181,7 +192,8 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
             return
 
     try:
-        output = _get_line_n_of_trial_results_csv(1, f"trial{trialNum}/" + experiment.trialResult)
+        lineToGet = experiment.trialResultLineNumber
+        output = _get_line_n_of_trial_results_csv(lineToGet, f"trial{trialNum}/" + experiment.trialResult)
     except GladosUserError as err:
         _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
         return
@@ -208,7 +220,7 @@ def conduct_experiment(experiment: ExperimentData):
     _run_trial_zero(experiment, 0)
     results = []
     
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=50) as executor:
         # run all of the experiments
         futures = [executor.submit(_run_trial_wrapper, experiment, trialNum) for trialNum in trialNums]
         # Wait for all tasks to complete

@@ -100,6 +100,7 @@ def install_packages(file_path):
 
 
 def run_batch(data: IncomingStartRequest):
+    fileWasZip = False
     syslogger.info('Run_Batch starting with data %s', data)
 
     # Obtain most basic experiment info
@@ -170,29 +171,6 @@ def run_batch(data: IncomingStartRequest):
             close_experiment_run(exp_id)
             return
     
-    # If it is a python file get the pipreqs
-    if experiment.experimentType == ExperimentType.PYTHON:
-        try:
-            os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
-        except Exception as err:
-            explogger.error("Failed to generate pip requirements")
-            explogger.exception(err)
-            os.chdir('../..')
-            close_experiment_run(exp_id)
-            return
-
-    # check if the new requirements exists
-    if os.path.exists("userProvidedFileReqs.txt"):
-        # do pip install -r userProvidedFileReqs.txt
-        try:
-            os.system(f"pip install -r userProvidedFileReqs.txt")
-        except Exception as err:
-            explogger.error("Failed to install pip requirements")
-            explogger.exception(err)
-            os.chdir('../..')
-            close_experiment_run(exp_id)
-            return
-    
     if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
         explogger.info("User is admin or privileged, installing packages from packages.txt")
         
@@ -222,9 +200,11 @@ def run_batch(data: IncomingStartRequest):
     if experiment.experimentType == ExperimentType.ZIP:
         # Recalc the file type
         try:
+            fileWasZip = True
             experiment.experimentType = determine_experiment_file_type(experiment.experimentExecutable)
             # also update experiment.file
             experiment.file = experiment.experimentExecutable
+            explogger.info(f"New experiment file type: {experiment.experimentType}")
         except NotImplementedError as err:
             explogger.error("This is not a supported experiment file type, aborting")
             explogger.exception(err)
@@ -232,6 +212,34 @@ def run_batch(data: IncomingStartRequest):
             close_experiment_run(exp_id)
             return
       
+    # If it is a python file get the pipreqs
+    if experiment.experimentType == ExperimentType.PYTHON:
+        try:
+            # if the file exists, skip running the command
+            if not os.path.exists("userProvidedFileReqs.txt"):
+                if fileWasZip:
+                    os.system(f"pipreqs --savepath userProvidedFileReqs.txt .")
+                else:
+                    os.system(f"pipreqs --savepath userProvidedFileReqs.txt ExperimentFiles/{exp_id}")
+                explogger.info("Generated pip requirements")
+        except Exception as err:
+            explogger.error("Failed to generate pip requirements")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
+
+    # check if the new requirements exists
+    if os.path.exists("userProvidedFileReqs.txt"):
+        # do pip install -r userProvidedFileReqs.txt
+        try:
+            os.system(f"pip install -r userProvidedFileReqs.txt")
+        except Exception as err:
+            explogger.error("Failed to install pip requirements")
+            explogger.exception(err)
+            os.chdir('../..')
+            close_experiment_run(exp_id)
+            return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{exp_id}/configFiles")
 

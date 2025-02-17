@@ -71,7 +71,7 @@ export default function Page() {
                     setRunningExperiments(JSON.parse(event.data) as any[]);
                 }
                 catch {
-                    console.log(`${event.data} was not valid JSON!`);
+                    console.warn(`${event.data} was not valid JSON!`);
                 }
             }
         }
