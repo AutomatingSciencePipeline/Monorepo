@@ -27,7 +27,7 @@ const startExperimentHandler: NextApiHandler = async (req, res) => {
 		}
 	} catch (error) {
 		const message = 'Could not reach the server to request start of the experiment';
-		console.log('Error contacting server: ', error);
+		console.warn('Error contacting server: ', error);
 		res.status(500).json({ response: message });
 		throw new Error(message);
 	}

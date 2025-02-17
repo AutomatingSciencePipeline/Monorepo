@@ -153,7 +153,6 @@ export async function copyFile(fileID: string, userId: string) {
 
     //First check if the user already has a file with the same hash
     const userFile = await bucket.find({ "metadata.hash": file[0].metadata!.hash, "metadata.userId": userId }).toArray();
-    console.log(userFile);
     if (userFile.length > 0) {
         return userFile[0]._id.toString();
     }

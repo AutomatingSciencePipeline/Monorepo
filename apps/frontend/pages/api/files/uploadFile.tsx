@@ -64,7 +64,7 @@ const mongoFileUploader: NextApiHandler<string> = async (req, res) => {
         catch (error) {
             const message = "Failed to upload experiment file!";
             console.error("Error writing experiment file.");
-            console.log(error);
+            console.error(error);
             res.status(500).json({ response: message } as any);
         }
     }
