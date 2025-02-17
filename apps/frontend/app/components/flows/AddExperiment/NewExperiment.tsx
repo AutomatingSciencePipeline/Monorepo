@@ -258,8 +258,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			if (uploadFileResponse.ok) {
 				const json = await uploadFileResponse.json();
 				const fileId = json['fileId'];
-				setFileId(fileId);
 
+				if (json['reuse']) {
+					updateLastUsedDateFile(fileId);
+				}
+
+				setFileId(fileId);
 				form.setFieldValue('file', fileId);
 			} else {
 				const errorJson = await uploadFileResponse.json();
