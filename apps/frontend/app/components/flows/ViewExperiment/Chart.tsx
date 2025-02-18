@@ -211,14 +211,17 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
                 const totalLength = headers.length;
                 const newHeaders = [] as any[];
+                const newYLists = [] as any[];
                 for (let i = 0; i < totalLength; i++) {
                     if (i != xIndex) {
                         newHeaders.push(headers[i]);
+                        newYLists.push(yLists[i]);
                     }
                 }
+
                 const datasetsObj = newHeaders.map((header, i) => ({
                     label: header,
-                    data: yLists[i],
+                    data: newYLists[i],
                     borderColor: colors,
                     backgroundColor: colors,
                     //hidden: hiddenDatasets[header] ?? true
