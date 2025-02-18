@@ -198,13 +198,15 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
 
                 //if we have a chart instance already, save which datasets are not hidden.
-                let hiddenDatasets: Record<string, boolean> = {};
+                let visibleMetas;
                 if (chartInstance) {
 
-                    chartInstance.data.datasets.forEach((dataset, i) => {
-                        const meta = chartInstance.getDatasetMeta(i);
-                        hiddenDatasets[dataset.label || `dataset_${i}`] = dataset.hidden ?? meta.hidden;
-                    });
+                    // chartInstance.data.datasets.forEach((dataset, i) => {
+                    //     const meta = chartInstance.getDatasetMeta(i);
+                    //     hiddenDatasets[dataset.label || `dataset_${i}`] = meta.hidden;
+                    // });
+
+                    visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
                     
                     chartInstance.destroy();
                 }
@@ -224,7 +226,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     data: newYLists[i],
                     borderColor: colors,
                     backgroundColor: colors,
-                    //hidden: hiddenDatasets[header] ?? true
+                    hidden: true
                 }));
                 const newChartInstance = new Chart(ctx, {
                     type: chartType,
@@ -278,18 +280,21 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         (ds as any).hidden = true;
                     });
                 }
-                else {
+                else if (visibleMetas != undefined) {
                     //check whether we have the dataset saved and use its value, otherwise hide it by default
-                    newChartInstance.data.datasets.forEach((dataset) => {
-                        if (!(dataset.label == undefined) && dataset.label in hiddenDatasets)
+
+                    for (let i = 0; i < visibleMetas.length; i++)
+                    {
+                        let datasetLabel = visibleMetas[i].label
+                        newChartInstance.data.datasets.forEach((dataset) => {
+                        if (!(dataset.label == undefined) && dataset.label == datasetLabel)
                         {
-                            dataset.hidden = hiddenDatasets[dataset.label];
-                        }
-                        else
-                        {
-                            dataset.hidden = true;
+                            dataset.hidden = false;
                         }
                     });
+                    }
+
+                    
                 }
                 newChartInstance.update();
 
