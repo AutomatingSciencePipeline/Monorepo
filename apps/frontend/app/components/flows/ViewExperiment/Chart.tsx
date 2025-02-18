@@ -197,17 +197,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
 
-                //if we have a chart instance already, save which datasets are not hidden.
+                //if we have a chart instance already, save which datasets are visible.
                 let visibleMetas;
                 if (chartInstance) {
-
-                    // chartInstance.data.datasets.forEach((dataset, i) => {
-                    //     const meta = chartInstance.getDatasetMeta(i);
-                    //     hiddenDatasets[dataset.label || `dataset_${i}`] = meta.hidden;
-                    // });
-
                     visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
-                    
                     chartInstance.destroy();
                 }
 
@@ -281,7 +274,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     });
                 }
                 else if (visibleMetas != undefined) {
-                    //check whether we have the dataset saved and use its value, otherwise hide it by default
+                    //check whether we have the dataset saved as visible and show it if so
 
                     for (let i = 0; i < visibleMetas.length; i++)
                     {
