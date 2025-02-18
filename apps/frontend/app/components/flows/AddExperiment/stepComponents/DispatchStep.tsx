@@ -52,7 +52,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 			if (json['reuse']) {
 				toast.success(`File already uploaded as ${json['fileName']}, reusing it!`, { duration: 5000 });
 			}
-			else{
+			else {
 				toast.success(`Sucessfully uploaded file!`);
 			}
 			setLoading(false);
@@ -127,9 +127,8 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 							<tr key={file._id.toString()} className="text-center">
 								<td className="border border-gray-300 px-4 py-2">
 									<button
-										className={`rounded-md text-center w-1/2 border border-transparent py-2 px-4 m-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2 ${
-											selectedFileId === file._id.toString() ? 'bg-green-600' : 'bg-blue-500 hover:bg-blue-700'
-										}`}
+										className={`rounded-md text-center w-1/2 border border-transparent py-2 px-4 m-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2 min-w-[100px]
+    												${selectedFileId === file._id.toString() ? 'bg-green-600' : 'bg-blue-500 hover:bg-blue-700'}`}
 										id={file._id.toString()}
 										onClick={() => {
 											updateId(file._id.toString());
@@ -138,6 +137,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 									>
 										{selectedFileId === file._id.toString() ? 'Selected' : 'Select'}
 									</button>
+
 								</td>
 								<td className="border border-gray-300 px-4 py-2">{file.filename}</td>
 								<td className="border border-gray-300 px-4 py-2">
