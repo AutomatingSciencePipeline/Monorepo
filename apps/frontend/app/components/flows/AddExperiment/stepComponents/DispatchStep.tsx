@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useEffect, useState } from 'react';
 import { getRecentFiles } from '../../../../../lib/mongodb_funcs';
-import { on } from 'events';
+import toast from 'react-hot-toast';
 
 const SUPPORTED_FILE_TYPES = {
 	'text/plain': ['.py'],
@@ -48,11 +48,18 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 			const fileId = json['fileId'];
 			updateId(fileId);
 			setSelectedFileId(fileId);
+			console.log(json['reuse']);
+			if (json['reuse']) {
+				toast.success(`File already uploaded as ${json['fileName']}, reusing it!`, { duration: 5000 });
+			}
+			else {
+				toast.success(`Sucessfully uploaded file!`);
+			}
 			setLoading(false);
 		}
 		else {
 			const json = await uploadFileResponse.json();
-			console.log(`Failed to upload file: ${json['message']}`);
+			console.warn(`Failed to upload file: ${json['message']}`);
 		}
 	};
 
@@ -64,7 +71,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 				<Dropzone
 					onDrop={onDropFile}
 					onReject={(rejections) => {
-						console.log('File rejection details', rejections);
+						console.warn('File rejection details', rejections);
 						const uploadedType = rejections[0]?.file?.type;
 						alert(`Rejected:\n${rejections[0]?.errors[0]?.message}\nYour file was of type: ${uploadedType ? uploadedType : 'Unknown'}\nCheck the console for more details.`);
 					}}
@@ -112,6 +119,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 							<th className="border border-gray-300 px-4 py-2">Select</th>
 							<th className="border border-gray-300 px-4 py-2">Filename</th>
 							<th className="border border-gray-300 px-4 py-2">Last Use Date</th>
+							<th className="border border-gray-300 px-4 py-2">Upload Date</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -119,9 +127,8 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 							<tr key={file._id.toString()} className="text-center">
 								<td className="border border-gray-300 px-4 py-2">
 									<button
-										className={`rounded-md w-1/2 border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2 ${
-											selectedFileId === file._id.toString() ? 'bg-green-600' : 'bg-blue-500 hover:bg-blue-700'
-										}`}
+										className={`rounded-md text-center w-1/2 border border-transparent py-2 px-4 m-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50 focus:ring-offset-2 min-w-[100px]
+    												${selectedFileId === file._id.toString() ? 'bg-green-600' : 'bg-blue-500 hover:bg-blue-700'}`}
 										id={file._id.toString()}
 										onClick={() => {
 											updateId(file._id.toString());
@@ -130,10 +137,14 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 									>
 										{selectedFileId === file._id.toString() ? 'Selected' : 'Select'}
 									</button>
+
 								</td>
 								<td className="border border-gray-300 px-4 py-2">{file.filename}</td>
 								<td className="border border-gray-300 px-4 py-2">
 									{new Date(file.metadata.lastUsedDate).toLocaleString()}
+								</td>
+								<td className="border border-gray-300 px-4 py-2">
+									{new Date(file.uploadDate).toLocaleString()}
 								</td>
 							</tr>
 						))}

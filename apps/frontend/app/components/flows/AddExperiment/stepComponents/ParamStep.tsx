@@ -107,7 +107,6 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									key={`addNew_${type}`}
 									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
 									onClick={() => {
-										console.log("add new item" + type + " to hyperparameters")
 										form.insertListItem('hyperparameters', {
 											name: '',
 											default: -1,

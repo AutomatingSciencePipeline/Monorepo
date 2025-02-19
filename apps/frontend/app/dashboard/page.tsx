@@ -265,7 +265,7 @@ export default function DashboardPage() {
 					setExperiments(JSON.parse(event.data) as ExperimentData[]);
 				}
 				catch {
-					console.log(`${event.data} was not valid JSON!`);
+					console.warn(`${event.data} was not valid JSON!`);
 				}
 
 			}
@@ -326,8 +326,6 @@ export default function DashboardPage() {
 		setIsDefault(true);
 		setIsModalOpen(false);
 		setSelectedExperimentType(defaultExpNum); // Set selected experiment type here
-		console.log("IN SELECT EXPERIMENT");
-		console.log("experimentTypeNum: ", defaultExpNum);
 	};
 
 	useEffect(() => {
@@ -398,12 +396,6 @@ export default function DashboardPage() {
 													// onClick
 												>
 													{label}
-												</button>
-												<button
-													type='button'
-													className='mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full'
-												>
-													Invite Team
 												</button>
 											</div>
 										</div>
@@ -544,7 +536,6 @@ export default function DashboardPage() {
 									toast.success("Deleted experiment!", { duration: 1500 });
 								}).catch((reason) => {
 									toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
-									console.log(`Failed delete, reason: ${reason}`);
 								});
 							}}
 							searchTerm={searchTerm}
@@ -701,8 +692,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		// Determine the new sorting option based on the current state
 		let newSortBy;
 
-		console.log('in toggle order: ', { sortBy });
-
 		switch (sortBy) {
 			case SortingOptions.NAME:
 				newSortBy = SortingOptions.NAME_REVERSE;
@@ -726,8 +715,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 				newSortBy = SortingOptions.DATE_UPLOADED_REVERSE; // Default sorting option
 				break;
 		}
-
-		console.log('in toggle order new sort: ', { newSortBy });
 
 		//setSortBy(newSortBy);
 		handleSortChange(newSortBy);
@@ -769,15 +756,11 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
 		setSortBy(newSortBy);
-		console.log(`in handleSortChange param: ${newSortBy}`);
-		console.log(`in handleSortChange: ${newSortBy}`);
 		handleDisplaySortingOptions(newSortBy);
 	};
 
 	const handleDisplaySortingOptions = (newSortBy) => {
 		let sortingOption;
-
-		console.log(`in display SortChange: ${newSortBy}`);
 
 		if (newSortBy == SortingOptions.NAME || newSortBy == SortingOptions.NAME_REVERSE) {
 			sortingOption = 'Name';
@@ -786,8 +769,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		} else if (newSortBy == SortingOptions.DATE_UPLOADED || newSortBy == SortingOptions.DATE_UPLOADED_REVERSE) {
 			sortingOption = 'Date Uploaded';
 		}
-
-		console.log(`in display SortChange text: ${sortingOption}`);
 
 		setSelectedSortText(sortingOption);
 	};

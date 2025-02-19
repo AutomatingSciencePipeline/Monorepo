@@ -83,20 +83,22 @@ function selectDefaultExpFile(selectedExperiment: number) {
 const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, setIsDefault, selectedExperiment, ...rest }) => {
 	const { data: session } = useSession();
 
-	 // Debounced function to handle selectedExperiment
-	 const debouncedHandleExperimentChange = useDebouncedCallback(async (selectedExperiment) => {
-		console.log("Debounced selectedExperiment value:", selectedExperiment);
-	
+	const [fileId, setFileId] = useState<string>();
+
+	const [loading, setLoading] = useState(false);
+
+	// Debounced function to handle selectedExperiment
+	const debouncedHandleExperimentChange = useDebouncedCallback(async (selectedExperiment) => {
 		// Call logic that requires selectedExperiment to be stable
 		if (isDefault) {
-		  await handleDefaultExperiment(selectedExperiment);
+			await handleDefaultExperiment(selectedExperiment);
 		}
-	  }, 500); // Delay in ms (500ms in this example)
-	
-	  useEffect(() => {
+	}, 500); // Delay in ms (500ms in this example)
+
+	useEffect(() => {
 		// Call the debounced function whenever selectedExperiment changes
 		debouncedHandleExperimentChange(selectedExperiment);
-	  }, [selectedExperiment]);
+	}, [selectedExperiment]);
 
 	const form = useForm({
 		// TODO make this follow the schema as closely as we can
@@ -123,7 +125,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 	});
 
 	useEffect(() => {
-		console.log("copyID", copyID);
 		if (copyID != null && copyID != "DefaultExp") {
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
@@ -133,61 +134,83 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 						//We need to copy the file to the user's files and use the new ID
 						copyFile(expInfo['file'], session?.user?.id!).then((newFileId) => {
 							setFileId(newFileId);
+							form.setValues({
+								hyperparameters: hyperparameters,
+								name: expInfo['name'],
+								description: expInfo['description'],
+								trialExtraFile: expInfo['trialExtraFile'],
+								trialResult: expInfo['trialResult'],
+								trialResultLineNumber: expInfo['trialResultLineNumber'],
+								verbose: expInfo['verbose'],
+								workers: expInfo['workers'],
+								scatter: expInfo['scatter'],
+								dumbTextArea: expInfo['dumbTextArea'],
+								scatterIndVar: expInfo['scatterIndVar'],
+								scatterDepVar: expInfo['scatterDepVar'],
+								timeout: expInfo['timeout'],
+								keepLogs: expInfo['keepLogs'],
+								file: newFileId,
+								status: 'CREATED',
+								experimentExecutable: expInfo['experimentExecutable'],
+							});
+							setCopyId(null);
+							setStatus(FormStates.Info);
+						});
+
+					}
+					else {
+						refreshFileTimestamp(expInfo['file']).then(() => {
+							form.setValues({
+								hyperparameters: hyperparameters,
+								name: expInfo['name'],
+								description: expInfo['description'],
+								trialExtraFile: expInfo['trialExtraFile'],
+								trialResult: expInfo['trialResult'],
+								trialResultLineNumber: expInfo['trialResultLineNumber'],
+								verbose: expInfo['verbose'],
+								workers: expInfo['workers'],
+								scatter: expInfo['scatter'],
+								dumbTextArea: expInfo['dumbTextArea'],
+								scatterIndVar: expInfo['scatterIndVar'],
+								scatterDepVar: expInfo['scatterDepVar'],
+								timeout: expInfo['timeout'],
+								keepLogs: expInfo['keepLogs'],
+								file: expInfo['file'],
+								status: 'CREATED',
+								experimentExecutable: expInfo['experimentExecutable'],
+							});
+							setFileId(expInfo['file']);
+							setCopyId(null);
+							setStatus(FormStates.Info);
 						});
 					}
-					else{
-						refreshFileTimestamp(expInfo['file']);
-					}
 
-					form.setValues({
-						hyperparameters: hyperparameters,
-						name: expInfo['name'],
-						description: expInfo['description'],
-						trialExtraFile: expInfo['trialExtraFile'],
-						trialResult: expInfo['trialResult'],
-						trialResultLineNumber: expInfo['trialResultLineNumber'],
-						verbose: expInfo['verbose'],
-						workers: expInfo['workers'],
-						scatter: expInfo['scatter'],
-						dumbTextArea: expInfo['dumbTextArea'],
-						scatterIndVar: expInfo['scatterIndVar'],
-						scatterDepVar: expInfo['scatterDepVar'],
-						timeout: expInfo['timeout'],
-						keepLogs: expInfo['keepLogs'],
-						file: fileId ? fileId : expInfo['file'],
-						status: 'CREATED',
-						experimentExecutable: expInfo['experimentExecutable'],
-					});
-					
-					if (!fileId){
-						setFileId(expInfo['file']);
-					}
-
-					if (fileId?.length === 0) {
-						setFileId(expInfo['file']);
-					}
-					
-					setCopyId(null);
-					setStatus(FormStates.Info);
 				}
 				else {
-					console.log("Could not get expInfo!!!");
+					console.warn("Could not get expInfo!!!");
 				}
 			})
 		}
 		else if (isDefault) {
-			console.log("in handle default experiment")
 			handleDefaultExperiment(selectedExperiment);
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
 
 	const handleDefaultExperiment = async (selectedExperiment) => {
+		setLoading(true);
 		const currentExp = selectDefaultExpFile(selectedExperiment);
-		console.log("currentExp", currentExp);
 		const expInfo = currentExp;
 		const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
-		console.log("hyperparameters in default", hyperparameters);
-	
+
+		// Handle the raw GitHub link
+		const fileUrl = currentExp.file;
+		if (fileUrl) {
+			debouncedUploadFile(fileUrl);
+		} else {
+			console.warn('No valid link provided in the form.');
+			setLoading(false);
+		}
+
 		form.setValues({
 			hyperparameters: hyperparameters,
 			name: expInfo['name'],
@@ -205,19 +228,11 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			keepLogs: expInfo['keepLogs'],
 			experimentExecutable: '',
 		});
-	
+
 		setCopyId(null);
 		setStatus(FormStates.Info);
-		console.log('Default Experiment Copied!');
-		// Handle the raw GitHub link
-		const fileUrl = currentExp.file;
-		if (fileUrl) {
-			debouncedUploadFile(fileUrl);
-		} else {
-			console.warn('No valid link provided in the form.');
-		}
 	};
-	
+
 	// Debounced API call
 	const debouncedUploadFile = useDebouncedCallback(async (fileUrl) => {
 		try {
@@ -225,28 +240,30 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			if (!response.ok) {
 				throw new Error(`Failed to fetch file: ${response.statusText}`);
 			}
-	
+
 			const blob = await response.blob();
 			const fileName = fileUrl.split('/').pop() || 'uploadedFile.tsx';
-	
+
 			const formData = new FormData();
 			formData.append("file", blob, fileName);
 			formData.append("userId", session?.user?.id!);
-	
+
 			const uploadFileResponse = await fetch('/api/files/uploadFile', {
 				method: 'POST',
 				credentials: 'same-origin',
 				body: formData,
 			});
 
-	
+
 			if (uploadFileResponse.ok) {
 				const json = await uploadFileResponse.json();
-				console.log(json);
 				const fileId = json['fileId'];
-				setFileId(fileId);
-				console.log(`File uploaded successfully with ID: ${fileId}`);
 
+				if (json['reuse']) {
+					updateLastUsedDateFile(fileId);
+				}
+
+				setFileId(fileId);
 				form.setFieldValue('file', fileId);
 			} else {
 				const errorJson = await uploadFileResponse.json();
@@ -255,11 +272,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 		} catch (error) {
 			console.error(`Error processing the file: ${error.message}`);
 		}
+		setLoading(false);
 	}, 500); // 500ms delay
-	
+
 
 	const [confirmedValues, setConfirmedValues] = useState<{ index: number, values: any[] }[]>([]);
-	
+
 
 	const fields = form.values.hyperparameters.map(({ type, ...rest }, index) => {
 		return <Parameter key={index} form={form} type={type} index={index} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues} {...rest} />;
@@ -268,12 +286,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 	const [open, setOpen] = useState(true);
 	const [status, setStatus] = useState(0);
 	const [id, setId] = useState(null);
-
-	const [fileId, setFileId] = useState<string>();
-
-	useEffect(() => {
-		console.log("status", status);
-	}, [status]);
 
 	useLayoutEffect(() => {
 		if (formState === FormStates.Info) {
@@ -285,6 +297,74 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			form.reset();
 		}
 	}, [formState]); // TODO adding 'form' causes an update loop
+
+	const [validationErrors, setValidationErrors] = useState({
+		name: false,
+		trialResult: false,
+	});
+
+	const validateParams = () => {
+		const errors = form.values.hyperparameters.map((param) => {
+			if (param.name === '' || param.type === '') {
+				toast.error("Please fill out all fields for the hyperparameters!", {duration: 1500});
+				return false;
+			}
+			if (param.type === 'integer' || param.type === 'float') {
+				const min = parseFloat(param.min);
+				const max = parseFloat(param.max);
+				const step = parseFloat(param.step);
+				if (isNaN(min) || isNaN(max) || isNaN(step)) {
+					toast.error(`Invalid number format for parameter ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				if (min >= max) {
+					toast.error(`Minimum value should be less than maximum value for the following parameter: ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				if (step <= 0) {
+					toast.error(`Step size should be greater than 0 for parameter ${param.name}`, { duration: 1500 });
+					return false;
+				}
+				return true;
+			}
+			if (param.type === 'string') {
+				return param.default !== '';
+			}
+			if (param.type === 'stringlist') {
+				return param.values.length > 0;
+			}
+			return true;
+		});
+		return errors;
+	};
+
+	const validateFields = () => {
+        const errors = {
+            name: !form.values.name,
+            trialResult: !form.values.trialResult,
+        };
+        setValidationErrors(errors);
+        return !errors.name && !errors.trialResult;
+    };
+
+	const handleNext = () => {
+        if (status === FormStates.Info) {
+            const isValid = validateFields();
+            if (!isValid) {
+				toast.error("Please fill out name and trial result fields!", {duration: 1500});
+                return;
+            }
+        }
+		if (status === FormStates.Params) {
+			const isValid = validateParams();
+			if (!isValid.includes(false)) {
+				setStatus((prevStatus) => prevStatus + 1);
+			}
+			return;
+		}
+        // Proceed to the next step
+        setStatus((prevStatus) => prevStatus + 1);
+    };
 
 	return (
 		<div>
@@ -334,7 +414,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 
 										{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 										{status === FormStates.Info ? (
-											<InformationStep form={form}></InformationStep>
+											<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
 										) : status === FormStates.DumbTextArea ? (
 											<DumbTextArea form={form}></DumbTextArea>
 										) : status === FormStates.Params ? (
@@ -344,7 +424,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 										) : status === FormStates.Confirmation ? (
 											<ConfirmationStep form={form} />
 										) : (
-											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined} isDefault={isDefault}/>
+											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined} isDefault={isDefault} />
 										)}
 
 										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
@@ -399,30 +479,35 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																			credentials: 'same-origin',
 																			body: JSON.stringify({ id: expId }),
 																		});
-																		if(response.ok){
-																			console.log(`experiment ${expId} started!`);
-																			toast.success("Started experiment!", {duration: 1500});
+																		if (response.ok) {
+																			toast.success("Started experiment!", { duration: 1500 });
 																		}
-																		else
-																		{
-																			toast.error("Failed to start experiment!", {duration: 1500});
+																		else {
+																			toast.error("Failed to start experiment!", { duration: 1500 });
 																		}
-																	}).then(() =>{
+																	}).then(() => {
 																		//Use this to set the new last used date of the file
 																		updateLastUsedDateFile(fileId);
 																	}).catch((error) => {
-																		toast.error(`Error while starting experiment: ${error}`, {duration: 1500});
+																		toast.error(`Error while starting experiment: ${error}`, { duration: 1500 });
 																	});
 																	setFileId("");
 																}
 																else {
-																	toast.error("No file selected!", {duration: 1500})
+																	toast.error("No file selected!", { duration: 1500 })
 																}
 															}
 														} :
 														{
 															type: 'button',
-															onClick: () => setStatus(status + 1),
+															onClick: () => {
+																if (!loading) {
+																	handleNext();
+																}
+																else {
+																	toast.error("Still setting up... wait a couple seconds and try again.", { duration: 2500 });
+																}
+															},
 														})}
 												>
 													{status === FormStates.Dispatch ? 'Dispatch' : 'Next'}
