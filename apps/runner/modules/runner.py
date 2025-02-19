@@ -206,6 +206,8 @@ def conduct_experiment(experiment: ExperimentData):
     """
     Call this function when inside the experiment folder!
     """
+    # Change to the dir /sandbox/experimentId
+    os.chdir(f"/sandbox/experiment")
     os.mkdir('configFiles')
     explogger.info(f"Running Experiment {experiment.expId}")
     explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")

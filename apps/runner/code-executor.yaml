@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: user-code-execution
+spec:
+  template:
+    spec:
+      containers:
+        - name: execution-container
+          image: gladospipeline/glados-runner:main
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+          command: ["/bin/sh", "/sandbox/entrypoint.sh"]
+          env:
+            - name: USER_PRIVILEGED
+              value: "false"  # Change to "true" for privileged users
+          volumeMounts:
+            - name: deps-volume
+              mountPath: /sandbox
+      restartPolicy: Never
+      volumes:
+        - name: deps-volume
+          emptyDir: {}

@@ -26,6 +26,8 @@ FROM base AS python_dependencies
 RUN pip install pipenv
 COPY Pipfile .
 COPY Pipfile.lock .
+COPY entrypoint.sh .
+COPY code-executor.yaml .
 
 RUN pipenv install --system --deploy --ignore-pipfile
 

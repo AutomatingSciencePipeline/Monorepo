@@ -12,6 +12,11 @@ import base64
 import requests
 from bson.binary import Binary
 
+# Kubernetes API
+from kubernetes import client, config
+config.load_incluster_config()
+BATCH_API = client.BatchV1Api()
+
 from pipreqs import pipreqs
 
 from modules.data.types import DocumentId, IncomingStartRequest
@@ -67,37 +72,6 @@ def run_batch_and_catch_exceptions(data: IncomingStartRequest):
         close_experiment_logger()
         # Unsafe to upload experiment logs files here
         raise err
-
-def install_packages(file_path):
-    try:
-        # Read the packages from the file
-        with open(file_path, "r") as file:
-            packages = file.read().splitlines()
-
-        if not packages:
-            explogger.info("No packages to install.")
-            return
-
-        # Update the package list
-        explogger.info("Updating package list...")
-        subprocess.run(["apt-get", "update"], check=True)
-
-        # Install the packages
-        explogger.info("Installing packages...")
-        subprocess.run(["apt-get", "install", "-y"] + packages, check=True)
-        
-        # Update cache
-        explogger.info("Updating cache...")
-        subprocess.run(["ldconfig"], check=True)
-
-        explogger.info("Packages installed successfully!")
-    except subprocess.CalledProcessError as e:
-        explogger.error(f"Error occurred while running a command: {e}")
-    except FileNotFoundError:
-        explogger.error(f"File '{file_path}' not found.")
-    except Exception as e:
-        explogger.error(f"An unexpected error occurred: {e}")
-
 
 def run_batch(data: IncomingStartRequest):
     fileWasZip = False
@@ -176,7 +150,8 @@ def run_batch(data: IncomingStartRequest):
         
         if os.path.exists("packages.txt"):
             try:
-                install_packages("packages.txt")
+                os.makedirs("/sandbox/deps/", exist_ok=True)
+                shutil.copyfile("packages.txt", "/sandbox/deps/")    
             except Exception as err:
                 explogger.error("Failed to install packages")
                 explogger.exception(err)
@@ -186,15 +161,8 @@ def run_batch(data: IncomingStartRequest):
         explogger.info("User is admin or privileged, running commands from commandsToRun.txt")
             
         if os.path.exists("commandsToRun.txt"):
-            for line in open("commandsToRun.txt"):
-                try:
-                    os.system(line)
-                except Exception as err:
-                    explogger.error(f"Failed to run command: {line}")
-                    explogger.exception(err)
-                    os.chdir('../..')
-                    close_experiment_run(exp_id)
-                    return        
+            os.makedirs("/sandbox/deps/", exist_ok=True)
+            shutil.copyfile("commandsToRun.txt", "/sandbox/deps/")      
             
     # this needs to happen after all dependencies are installed
     if experiment.experimentType == ExperimentType.ZIP:
@@ -233,7 +201,8 @@ def run_batch(data: IncomingStartRequest):
     if os.path.exists("userProvidedFileReqs.txt"):
         # do pip install -r userProvidedFileReqs.txt
         try:
-            os.system(f"pip install -r userProvidedFileReqs.txt")
+            os.makedirs("/sandbox/deps/", exist_ok=True)
+            shutil.copyfile("userProvidedFileReqs.txt", "/sandbox/deps/")
         except Exception as err:
             explogger.error("Failed to install pip requirements")
             explogger.exception(err)
@@ -255,8 +224,12 @@ def run_batch(data: IncomingStartRequest):
     update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
     update_exp_value(exp_id, "status", "RUNNING")
 
+    # Copy everything in the current folder to /sandbox/experiment
+    os.makedirs("/sandbox/experiment/", exist_ok=True)
+    shutil.copytree(os.curdir, "/sandbox/experiment/", dirs_exist_ok=True)
+    
     try:
-        conduct_experiment(experiment)
+        conduct_exp_wrapper(experiment)
         post_process_experiment(experiment)
         upload_experiment_results(experiment)
     except ExperimentAbort as err:
@@ -343,6 +316,48 @@ def remove_downloaded_directory(experimentId: DocumentId):
     except FileNotFoundError as err:
         explogger.error('Error during plot generation')
         explogger.exception(err)
+
+def conduct_exp_wrapper(experiment: ExperimentData):
+    # Here we are going to want to spawn a code-executor pod
+    # First we need to copy the entrypoint.sh into the sandbox folder
+    shutil.copy(os.getcwd() + "/entrypoint.sh", "/sandbox/")
+    
+    # Now spawn the code-executor job
+    job_name = f"code-executor-{experiment.expId}" 
+    job = client.V1Job(
+        api_version="batch/v1",
+        kind="Job",
+        metadata=client.V1ObjectMeta(name=job_name),
+        spec=client.V1JobSpec(
+            template=client.V1PodTemplateSpec(
+                spec=client.V1PodSpec(
+                    containers=[
+                        client.V1Container(
+                            name="code-executor",
+                            image="glados-code-executor:latest",
+                            command=["/bin/bash", "/sandbox/entrypoint.sh"],
+                            env=[
+                                client.V1EnvVar(name="EXP_ID", value=experiment.expId),
+                                client.V1EnvVar(name="TOTAL_RUNS", value=str(experiment.totalExperimentRuns)),
+                                client.V1EnvVar(name="EXPERIMENT_TYPE", value=experiment.experimentType.value),
+                                client.V1EnvVar(name="EXPERIMENT_EXECUTABLE", value=experiment.experimentExecutable),
+                                client.V1EnvVar(name="EXPERIMENT_FILE", value=experiment.file),
+                                client.V1EnvVar(name="EXPERIMENT_TYPE", value=experiment.experimentType.value),
+                                client.V1EnvVar(name="EXPERIMENT_TYPE", value=experiment.experimentType.value),
+                                client.V1EnvVar(name="EXPERIMENT_TYPE", value=experiment.experimentType.value),
+                                client.V1EnvVar(name="EXPERIMENT_TYPE", value=experiment.experimentType.value),
+                            ],
+                            volume_mounts=[client.V1VolumeMount(mount_path="/sandbox", name="sandbox")],
+                        )
+                    ],
+                    volumes=[client.V1Volume(name="sandbox", empty_dir=client.V1EmptyDirVolumeSource())],
+                    restart_policy="Never",
+                )
+            )
+        )
+    )   
+    
+    pass
 
 def upload_experiment_results(experiment: ExperimentData):
     explogger.info('Uploading Experiment Results...')
