@@ -906,6 +906,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 						return null;
 					}
 					// TODO: Archived experiments were determined by time? Looks like two weeks old or more. Rework to be a 'role' people can toggle onto an experiment.
+					// TODO: This step does not work anyway; seems like it might be defaulting to 0, which is bad.
 					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
 					const oneHourMilliseconds = 1000 * 60 * 60;
 					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
