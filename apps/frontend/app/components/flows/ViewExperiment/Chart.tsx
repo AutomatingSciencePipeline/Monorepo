@@ -19,6 +19,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [chartType, setChartType] = useState<keyof ChartTypeRegistry>('line');
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
+    const [firstLoad, setFirstLoad] = useState(true);
     const [xAxis, setXAxis] = useState('X');
     const [aggregateMode, setAggregateMode] = useState('sum');
     const [headers, setHeaders] = useState<string[]>([]);
@@ -74,7 +75,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const dataDict = {} as any;
         const splitRows = [] as any;
 
-        setXAxis(headers[0]);
+        if (firstLoad)
+        {
+            setXAxis(headers[0]);
+            setFirstLoad(false)
+        }
 
         for (let i = 1; i < rows.length; i++) {
             // Split the row by commas when not inside quotes
