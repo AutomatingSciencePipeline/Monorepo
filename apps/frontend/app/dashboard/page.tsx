@@ -905,14 +905,10 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					if (!includeCompleted && project.finished) {
 						return null;
 					}
-					// TODO: Rework to be a 'role' people can toggle onto an experiment.
-					// const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-					// const oneHourMilliseconds = 1000 * 60 * 60;
-					// const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-					// const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-					// if (!includeArchived && projectIsArchived) {
-					// 	return null;
-					// }
+					// TODO: Make a button that sets an experiment to become archived so that this is usefyl.
+					if (!includeArchived && project.archived) {
+						return null;
+					}
 					return (
 						<li
 							key={project.expId}

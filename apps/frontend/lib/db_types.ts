@@ -86,4 +86,5 @@ export interface ExperimentData {
     fails: number;
     totalExperimentRuns: number;
     experimentExecutable: string;
+    archived: boolean;
 }
