@@ -19,6 +19,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [chartType, setChartType] = useState<keyof ChartTypeRegistry>('line');
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
+    const [firstLoad, setFirstLoad] = useState(true);
     const [xAxis, setXAxis] = useState('X');
     const [aggregateMode, setAggregateMode] = useState('sum');
     const [headers, setHeaders] = useState<string[]>([]);
@@ -73,6 +74,12 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         //Create a dictionary to store the data
         const dataDict = {} as any;
         const splitRows = [] as any;
+
+        if (firstLoad)
+        {
+            setXAxis(headers[0]);
+            setFirstLoad(false)
+        }
 
         for (let i = 1; i < rows.length; i++) {
             // Split the row by commas when not inside quotes
@@ -194,21 +201,30 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const headers = returnHeaders;
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+
+                //if we have a chart instance already, save which datasets are visible.
+                let visibleMetas;
                 if (chartInstance) {
+                    visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
                     chartInstance.destroy();
                 }
+
                 const totalLength = headers.length;
                 const newHeaders = [] as any[];
+                const newYLists = [] as any[];
                 for (let i = 0; i < totalLength; i++) {
                     if (i != xIndex) {
                         newHeaders.push(headers[i]);
+                        newYLists.push(yLists[i]);
                     }
                 }
+
                 const datasetsObj = newHeaders.map((header, i) => ({
                     label: header,
-                    data: yLists[i],
+                    data: newYLists[i],
                     borderColor: colors,
-                    backgroundColor: colors
+                    backgroundColor: colors,
+                    hidden: true
                 }));
                 const newChartInstance = new Chart(ctx, {
                     type: chartType,
@@ -255,7 +271,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     }]
                 });
 
-                //Set all of the datasets to be unselected
                 //If it is a pie chart you have to use meta
                 if (chartType == 'pie') {
                     var meta = newChartInstance.getDatasetMeta(0);
@@ -263,10 +278,21 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         (ds as any).hidden = true;
                     });
                 }
-                else {
-                    newChartInstance.data.datasets.forEach((dataset) => {
-                        dataset.hidden = true;
+                else if (visibleMetas != undefined) {
+                    //check whether we have the dataset saved as visible and show it if so
+
+                    for (let i = 0; i < visibleMetas.length; i++)
+                    {
+                        let datasetLabel = visibleMetas[i].label
+                        newChartInstance.data.datasets.forEach((dataset) => {
+                        if (!(dataset.label == undefined) && dataset.label == datasetLabel)
+                        {
+                            dataset.hidden = false;
+                        }
                     });
+                    }
+
+                    
                 }
                 newChartInstance.update();
 
@@ -285,13 +311,15 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     };
 
     useEffect(() => {
-        if (headerSelectRef.current && headerSpanRef.current) {
-            const spanElement = headerSpanRef.current;
-            spanElement.style.display = 'inline';
-            headerSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
-            spanElement.style.display = 'none';
-        }
-      }, [xAxis]);
+        requestAnimationFrame(() => {
+            if (headerSelectRef.current && headerSpanRef.current) {
+                const spanElement = headerSpanRef.current;
+                spanElement.style.display = 'inline';
+                headerSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
+                spanElement.style.display = 'none';
+            }
+        });
+      }, [xAxis, headers, loading]);
 
     useEffect(() => {
         if (aggregateSelectRef.current && aggregateSpanRef.current) {
@@ -300,7 +328,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             aggregateSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
             spanElement.style.display = 'none';
         }
-      }, [aggregateMode]);
+      }, [aggregateMode, loading]);
 
 
     return (
