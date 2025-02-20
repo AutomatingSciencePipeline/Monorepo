@@ -2,17 +2,13 @@
 
 To run the cluster we have created several virtual machines that are hosted by Rose-Hulman. The docs below will layout how these virtual machines are structured.
 
-!!! note
-
-    Currently Ubuntu 22.04 LTS is the operating system of choice. This will be supported until April of 2027. There were some issues with Ubuntu 24.04 LTS running the cluster on our test machine. We can reevaluate this choice in the future.
-
 | VM Host Name     | Description                                                                                     | Specs                                                                        | What runs here?
 | -----------      | ------------------------------------                                                            | ------------------------------------                                         | --------------------------------
 | glados           | This VM will run the kubernetes control plane. See above for the function of the control plane  | 2 CPU cores, 4GB of RAM, 50GB of storage                                     | control-plane
 | glados-db        | This VM will run and store the MongoDB.                                                         | 4 CPU cores, 8GB of RAM, 1TB of storage?, ability to run AVX instructions    | database
 | glados-w1        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific
 | glados-w2        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific
-| glados-dev       | This will run a cluster used for development. Basically a staging environment.                  | 4 CPU cores, 8GB of RAM, 100GV of storage                                    | Entire cluster
+| glados-dev       | This will run a cluster used for development. Basically a staging environment.                  | 4 CPU cores, 8GB of RAM, 100GB of storage                                    | Entire cluster
 
 !!! note
 
