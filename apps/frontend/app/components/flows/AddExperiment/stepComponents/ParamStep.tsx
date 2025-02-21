@@ -65,7 +65,6 @@ function calcPermutations(parameters: HyperparametersCollection) {
 				}
 			}
 			else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
-				// SIMPLY multiply the total by the number of values in one of the groups
 				let hyper = hyperparameter;
 				let numObjs = 0;
 				for (let key in hyper.values) {

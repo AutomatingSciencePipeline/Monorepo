@@ -352,10 +352,6 @@ const ParamGroup = ({ form, type, index, updateConfirmedParamValues, ...rest }) 
 	const [variableCount, setVariableCount] = useState(0);
 	const [variableNames, setVariableNames] = useState<string[]>([]);
 
-	useEffect(() => {
-		console.log('Updated values:', values);
-	}, [values]);
-
 
 	const handleAddRow = () => {
 		const newValues = { ...values };
