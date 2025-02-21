@@ -66,7 +66,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 	const MAXIMUM_SIZE_BYTES = 500 * 1024 ** 2;
 
 	return (
-		<div className='flex flex-col h-full'>
+		<div className='flex flex-col h-full overflow-scroll'>
 			<div className='flex-2'>
 				<Dropzone
 					onDrop={onDropFile}
