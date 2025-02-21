@@ -73,9 +73,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 					break;
 				}
 
-				if (hyper.default == '-1') {
-					noDefaultCount = noDefaultCount * numObjs;
-				}
+				noDefaultCount = noDefaultCount * numObjs;
 				
 			}
 		});

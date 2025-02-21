@@ -86,15 +86,18 @@ def generate_permutations(parameters, paramgroup=None):
         if num_defaults_changed <= 1:
             filtered_permutations.append(perm_dict)
 
-    # Handle paramgroup if provided
+  # Handle paramgroup if provided
     if paramgroup:
-        paramgroup_keys = list(paramgroup.keys())
-        paramgroup_values = list(zip(*paramgroup.values()))
-        paramgroup_permutations = [dict(zip(paramgroup_keys, values)) for values in paramgroup_values]
+        paramgroup_permutations = []
+        for param in paramgroup.values():
+            param_names = list(param.values.keys())
+            param_values = list(itertools.product(*param.values.values()))
+            for values in param_values:
+                paramgroup_permutations.append(dict(zip(param_names, values)))
 
         combined_permutations = []
-        for pg_perm in paramgroup_permutations:
-            for perm in filtered_permutations:
+        for perm in filtered_permutations:
+            for pg_perm in paramgroup_permutations:
                 combined_perm = {**perm, **pg_perm}
                 combined_permutations.append(combined_perm)
         filtered_permutations = combined_permutations

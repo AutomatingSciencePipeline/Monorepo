@@ -99,25 +99,33 @@ def generate_permutations(parameters, paramgroup=None):
 
     # Handle paramgroup if provided
     if paramgroup:
-   
         paramgroup_permutations = []
         for param in paramgroup.values():
-            param_name = list(param.values.keys())[0]
-            param_values = param.values[param_name]
-            for value in param_values:
-                paramgroup_permutations.append({param_name: value})
+            param_names = list(param.values.keys())
+            explogger.info("param names: %s", str(param_names))
+            param_values = list(param.values.values())
+            explogger.info("param values: %s", str(param_values))
+            
+            len_param_keys = len(param_names)
+            len_param_values = len(param_values[0])
+
+            # Generate specific combinations of paramgroup values
+            for i in range(len(param_values[0])):
+                values = [param_values[j][i] for j in range(len(param_values))]
+                paramgroup_permutations.append(dict(zip(param_names, values)))
 
         combined_permutations = []
-        for pg_perm in paramgroup_permutations:
-            for perm in filtered_permutations:
+        for perm in filtered_permutations:
+            for pg_perm in paramgroup_permutations:
                 combined_perm = {**perm, **pg_perm}
                 combined_permutations.append(combined_perm)
         filtered_permutations = combined_permutations
 
-    explogger.info("len filtered: %d", len(filtered_permutations))
-    explogger.info("first permutation: %s", str(filtered_permutations[0]))
+    explogger.info("len filtered: %s", str(len(filtered_permutations)))
+    explogger.info("filtered first permutations: %s", str(filtered_permutations[0]))
 
     return filtered_permutations
+
 
 def generate_config_files(experiment: ExperimentData):
     constants, parameters, paramgroups = {}, {}, {}
