@@ -37,7 +37,7 @@ def expand_values(param):
         return []
 
 
-def generate_permutations(parameters):
+def generate_permutations(parameters, paramgroup=None):
     """Generates permutations dynamically based on parameter definitions, 
        using itertools.product and filtering based on default values."""
 
@@ -82,12 +82,22 @@ def generate_permutations(parameters):
             if param["default"] != -1:
                 if perm_dict[param["name"]] != param["default"]:
                     num_defaults_changed += 1
-        # else:
-        #     # If all constraints are satisfied, add the permutation
-        #     filtered_permutations.append(perm_dict)
 
         if num_defaults_changed <= 1:
             filtered_permutations.append(perm_dict)
+
+    # Handle paramgroup if provided
+    if paramgroup:
+        paramgroup_keys = list(paramgroup.keys())
+        paramgroup_values = list(zip(*paramgroup.values()))
+        paramgroup_permutations = [dict(zip(paramgroup_keys, values)) for values in paramgroup_values]
+
+        combined_permutations = []
+        for pg_perm in paramgroup_permutations:
+            for perm in filtered_permutations:
+                combined_perm = {**perm, **pg_perm}
+                combined_permutations.append(combined_perm)
+        filtered_permutations = combined_permutations
 
     print("len filtered: ", len(filtered_permutations))
 
@@ -97,29 +107,6 @@ def generate_permutations(parameters):
 # Example input
 parameters = [
     {"name": "x", "type": "integer", "default": -1, "min": 1, "max": 10, "step": 1},
-    # {"name": "b", "type": "integer", "default": -1, "min": 11, "max": 20, "step": 1},
-    # {"name": "c", "type": "integer", "default": 21, "min": 21, "max": 30, "step": 1},
-    # {"name": "a", "type": "float", "default": -1, "min": 0.1, "max": 1.0, "step": 0.1},
-    # {"name": "b", "type": "float", "default": -1, "min": 1.1, "max": 2.0, "step": 0.1},
-    # {"name": "c", "type": "float", "default": 2.1, "min": 2.1, "max": 3.0, "step": 0.1},
-    # {
-    #   "name": "test",
-    #   "default": False,
-    #   "type": "bool"
-    # },
-    #  {
-    #   "name": "test",
-    #   "default": "testing",
-    #   "type": "string"
-    # },
-    #  {
-    #         "name": "seed",
-    #         "type": "integer",
-    #         "default": 1,
-    #         "min": 1,
-    #         "max": 10,
-    #         "step": 1
-    #     },
     {
         "name": "steps",
         "type": "stringlist",
@@ -134,10 +121,15 @@ parameters = [
     }
 ]
 
-# Generate permutations
-permutations = generate_permutations(parameters)
+paramgroup = {
+    "test1": ["10", "20", "10", "30"],
+    "test2": ["20", "10", "30", "10"]
+}
 
-# # Print results
+# Generate permutations
+permutations = generate_permutations(parameters, paramgroup)
+
+# Print results
 for p in permutations:
     print(p)
 
