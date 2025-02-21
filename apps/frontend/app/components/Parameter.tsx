@@ -140,14 +140,14 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 
 						<Component form={form} type={type} index={index} updateConfirmedValues={updateConfirmedValues} updateConfirmedParamValues={updateConfirmedParamValues} {...rest} />
 
-						<div className='flex flex-col items-center ml-2'>
+						{type !== 'paramgroup' && <div className='flex flex-col items-center ml-2'>
 							<Switch
 								checked={useDefault}
 								onChange={handleSwitchChange}
 								className={'ml-2'}
 							/>
 							<span className='text-sm text-gray-500'>Default?</span>
-						</div>
+						</div>}
 
 						<ActionIcon
 							color='red'
@@ -355,6 +355,7 @@ const ParamGroup = ({ form, type, index, updateConfirmedParamValues, ...rest }) 
         console.log('Updated values:', values);
     }, [values]);
 
+
     const handleAddRow = () => {
         const newValues = { ...values };
         variableNames.forEach(name => {
@@ -383,7 +384,7 @@ const ParamGroup = ({ form, type, index, updateConfirmedParamValues, ...rest }) 
     };
 
     const handleConfirm = () => {
-       form.values.hyperparameters[index].values = values;
+        form.values.hyperparameters[index].values = values;
         updateConfirmedParamValues(index, values);
         setOpened(false);
     };
@@ -400,9 +401,20 @@ const ParamGroup = ({ form, type, index, updateConfirmedParamValues, ...rest }) 
         setVariableNames(newVariableNames);
     };
 
+	const handleEdit = () => {
+        if (Object.keys(values).length > 0) {
+            const names = Object.keys(values);
+            setVariableNames(names);
+            setVariableCount(names.length);
+            setOpened(true);
+        } else {
+            setVariableModalOpened(true);
+        }
+    };
+
     return (
         <>
-            <Button onClick={() => setVariableModalOpened(true)} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+            <Button onClick={() => handleEdit()} className='ml-2 rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
                 Edit Param Group
             </Button>
             <Modal opened={variableModalOpened} onClose={() => setVariableModalOpened(false)} title="Number of Variables">
