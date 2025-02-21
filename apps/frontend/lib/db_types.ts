@@ -3,7 +3,7 @@ export type FileName = string;
 export type EpochMilliseconds = number;
 
 export interface HyperparametersCollection {
-    hyperparameters: [IntegerHyperparameter | FloatHyperparameter | StringHyperparameter | BooleanHyperparameter | StringListHyperparameter];
+    hyperparameters: [IntegerHyperparameter | FloatHyperparameter | StringHyperparameter | BooleanHyperparameter | StringListHyperparameter | ParamGroupHyperparameter];
 }
 
 export enum HyperparameterTypes {
@@ -11,7 +11,8 @@ export enum HyperparameterTypes {
     FLOAT = 'float',
     STRING = 'string',
     BOOLEAN = 'boolean',
-    STRING_LIST = 'stringlist'
+    STRING_LIST = 'stringlist',
+    PARAM_GROUP = 'paramgroup'
 }
 
 // TODO this duplicates information in validators.ts (the Joi schemas), see https://github.com/AutomatingSciencePipeline/Monorepo/issues/114
@@ -19,6 +20,12 @@ export enum HyperparameterTypes {
 export interface GenericHyperparameter {
     name: string;
     type: HyperparameterTypes;
+}
+
+export interface ParamGroupHyperparameter extends GenericHyperparameter {
+    type: HyperparameterTypes.PARAM_GROUP;
+    default: string;
+    values: { [key: string]: string[] };
 }
 
 // TODO JS does not distinguish between integers and floats, so they end up being the same interface, do we want them to differ?

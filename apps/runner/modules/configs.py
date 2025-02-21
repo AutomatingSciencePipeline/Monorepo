@@ -4,7 +4,7 @@ import os
 from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 
-from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter, StringListParameter
+from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter, StringListParameter, ParamGroupParameter
 from modules.exceptions import GladosInternalError
 from modules.logging.gladosLogging import get_experiment_logger
 
@@ -42,9 +42,12 @@ def expand_values(param):
         return [param["default"]] 
     elif param["type"] == ParamType.BOOL:
         return [True, False]
+    elif param["type"] == ParamType.PARAMGROUP:
+      return param.get("values", [])
     else:
         return []
-def generate_permutations(parameters):
+
+def generate_permutations(parameters, paramgroup=None):
     """Generates permutations dynamically based on parameter definitions, 
        using itertools.product and filtering based on default values."""
     
@@ -53,17 +56,17 @@ def generate_permutations(parameters):
     base_vals = {}
     default_vals = {}
     
-    
     for param in parameters:
-      if param["type"] == ParamType.INTEGER or param["type"] == ParamType.FLOAT:
-        base_vals[param["name"]] = param["min"]
-      elif param["type"] == ParamType.STRING_LIST:
-        base_vals[param['name']] = param['values'][0]
-      elif param["type"] == ParamType.BOOL:
-        base_vals[param["name"]] = param["default"]
+        if param["type"] == ParamType.INTEGER or param["type"] == ParamType.FLOAT:
+            base_vals[param["name"]] = param["min"]
+        elif param["type"] == ParamType.STRING_LIST:
+            base_vals[param['name']] = param['values'][0]
+        elif param["type"] == ParamType.BOOL:
+            base_vals[param["name"]] = param["default"]
 
     explogger.info("base vals: %s", str(base_vals))
     explogger.info("default vals: %s", str(default_vals))
+    explogger.info("paramgroup vals: %s", str(paramgroup))
           
     for param in parameters:
         if param["default"] != -1 and param["default"] != "-1" and param["default"] != '':
@@ -94,17 +97,43 @@ def generate_permutations(parameters):
         if num_defaults_changed <= 1:
             filtered_permutations.append(perm_dict)
 
-    
+    # Handle paramgroup if provided
+    if paramgroup:
+        paramgroup_permutations = []
+        for param in paramgroup.values():
+            param_names = list(param.values.keys())
+            explogger.info("param names: %s", str(param_names))
+            param_values = list(param.values.values())
+            explogger.info("param values: %s", str(param_values))
             
+            len_param_keys = len(param_names)
+            len_param_values = len(param_values[0])
+
+            # Generate specific combinations of paramgroup values
+            for i in range(len(param_values[0])):
+                values = [param_values[j][i] for j in range(len(param_values))]
+                paramgroup_permutations.append(dict(zip(param_names, values)))
+
+        combined_permutations = []
+        for perm in filtered_permutations:
+            for pg_perm in paramgroup_permutations:
+                combined_perm = {**perm, **pg_perm}
+                combined_permutations.append(combined_perm)
+        filtered_permutations = combined_permutations
+
+    explogger.info("len filtered: %s", str(len(filtered_permutations)))
+    explogger.info("filtered first permutations: %s", str(filtered_permutations[0]))
+
     return filtered_permutations
 
 
 def generate_config_files(experiment: ExperimentData):
-    constants, parameters = {}, {}
-    gather_parameters(experiment.hyperparameters, constants, parameters)
+    constants, parameters, paramgroups = {}, {}, {}
+    gather_parameters(experiment.hyperparameters, constants, parameters, paramgroups)
 
     explogger.info(f"param list: {parameters}")
     explogger.info(f"const list: {constants}")
+    explogger.info(f"paramgroup list: {paramgroups}")
 
     # Convert parameters into a list of dictionaries
     param_list = [{**param.dict(), 'name': key} for key, param in parameters.items()]
@@ -113,7 +142,7 @@ def generate_config_files(experiment: ExperimentData):
     explogger.info("Generating configs")
 
     # Generate all permutations
-    permutations = generate_permutations(param_list)
+    permutations = generate_permutations(param_list, paramgroups)
 
     # Build config dictionary using dictionary comprehension
     experiment.configs = {
@@ -141,7 +170,7 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
     # DONE: Change to custom function to create ini file
     configFileLines = ["[DEFAULT]"]
     for line in experiment.dumbTextArea.split('\n'):
-        configFileLines.append(line.replace('\n', ''))
+        configFileLines.append(line.replace('\n', '')) 
     
     for key, value in configData.items():
         if "{" + key + "}" in experiment.dumbTextArea:
@@ -173,7 +202,7 @@ def get_default(parameter: Parameter):
         raise GladosInternalError(f'Parameter {parameter} has an unsupported type')
 
 
-def gather_parameters(hyperparams, constants, parameters):
+def gather_parameters(hyperparams, constants, parameters, paramgroups):
     for parameterKey, hyperparameter in hyperparams.items():
         try:
             parameterType = hyperparameter.type
@@ -201,6 +230,10 @@ def gather_parameters(hyperparams, constants, parameters):
             elif parameterType == ParamType.BOOL:
                 explogger.info(f'param {parameterKey} varies, adding to batch')
                 parameters[parameterKey] = hyperparameter
+            elif parameterType == ParamType.PARAMGROUP:
+                paramGroupParam = ParamGroupParameter(**hyperparameter.dict())
+                explogger.info(f'param {parameterKey} is a paramgroup, adding to paramgroups')
+                paramgroups[parameterKey] = paramGroupParam
             else:
                 msg = f'ERROR DURING CONFIG GEN: param {parameterKey} {hyperparameter} Does not have a supported type'
                 raise GladosInternalError(msg)
@@ -209,6 +242,7 @@ def gather_parameters(hyperparams, constants, parameters):
 
 
 def get_config_paramNames(configfile: FilePath):
+
     config = configparser.ConfigParser()
     config.read(configfile)
     res = []

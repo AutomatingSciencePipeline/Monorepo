@@ -64,6 +64,17 @@ function calcPermutations(parameters: HyperparametersCollection) {
 					countDefaults++;
 				}
 			}
+			else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
+				let hyper = hyperparameter;
+				let numObjs = 0;
+				for (let key in hyper.values) {
+					numObjs = hyper.values[key].length;
+					break;
+				}
+
+				noDefaultCount = noDefaultCount * numObjs;
+				
+			}
 		});
 
 		if (totalObjs < 3 && allInts && countDefaults > 0) {
@@ -78,7 +89,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 }
 
-export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist'] as const;
+export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist', 'paramgroup'] as const;
 
 export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props }) => {
 
@@ -110,6 +121,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 										form.insertListItem('hyperparameters', {
 											name: '',
 											default: -1,
+											...((type === 'paramgroup') && { params: {} }),
 											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {
 												min: '',
