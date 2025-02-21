@@ -99,10 +99,7 @@ def generate_permutations(parameters, paramgroup=None):
 
     # Handle paramgroup if provided
     if paramgroup:
-        explogger.info("in paramgroup, this is list: %s", str(paramgroup))
-        paramgroup_values = [expand_values(param.dict()) for param in paramgroup.values()]
-        explogger.info("paramgroup values: %s", str(paramgroup_values))
-        
+   
         paramgroup_permutations = []
         for param in paramgroup.values():
             param_name = list(param.values.keys())[0]
