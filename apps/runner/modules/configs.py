@@ -43,7 +43,7 @@ def expand_values(param):
     elif param["type"] == ParamType.BOOL:
         return [True, False]
     elif param["type"] == ParamType.PARAMGROUP:
-      return [value for sublist in param["values"].values() for value in sublist]
+      return param.get("values", [])
     else:
         return []
 
@@ -100,9 +100,15 @@ def generate_permutations(parameters, paramgroup=None):
     # Handle paramgroup if provided
     if paramgroup:
         explogger.info("in paramgroup, this is list: %s", str(paramgroup))
-        paramgroup_keys = list(paramgroup.keys())
         paramgroup_values = [expand_values(param.dict()) for param in paramgroup.values()]
-        paramgroup_permutations = [dict(zip(paramgroup_keys, values)) for values in itertools.product(*paramgroup_values)]
+        explogger.info("paramgroup values: %s", str(paramgroup_values))
+        
+        paramgroup_permutations = []
+        for param in paramgroup.values():
+            param_name = list(param.values.keys())[0]
+            param_values = param.values[param_name]
+            for value in param_values:
+                paramgroup_permutations.append({param_name: value})
 
         combined_permutations = []
         for pg_perm in paramgroup_permutations:
