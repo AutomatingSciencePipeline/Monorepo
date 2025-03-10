@@ -71,7 +71,8 @@
         "apps"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "dotnet.defaultSolution": "GladosBackend.sln"
     // ======================= Frontend =============================
 
     // Below this point is uncategorized (please categorize)
