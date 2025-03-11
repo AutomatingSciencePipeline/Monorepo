@@ -12,4 +12,10 @@ setup/temp/
 # MongoDB data volume
 data/*
 
+# C#
+*.suo
+*.user
+bin/
+obj/
+
 # All below this point is uncategorized (categorize them!)
