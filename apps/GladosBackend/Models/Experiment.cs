@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
 
 public class Experiment
 {
@@ -21,18 +22,9 @@ public class Experiment
 
     [BsonElement("trialResult")]
     public string? TrialResult { get; set; }
-
-    [BsonElement("verbose")]
-    public bool Verbose { get; set; }
-
-    [BsonElement("workers")]
-    public int Workers { get; set; }
-
-    [BsonElement("scatter")]
-    public bool Scatter { get; set; }
-
-    [BsonElement("dumbTextArea")]
-    public string? DumbTextArea { get; set; }
+    
+    [BsonElement("trialResultLineNumber")]
+    public int TrialResultLineNumber { get; set; }
 
     [BsonElement("scatterIndVar")]
     public string? ScatterIndVar { get; set; }
@@ -40,18 +32,45 @@ public class Experiment
     [BsonElement("scatterDepVar")]
     public string? ScatterDepVar { get; set; }
 
+    [BsonElement("dumbTextArea")]
+    public string? DumbTextArea { get; set; }
+
     [BsonElement("timeout")]
     public int Timeout { get; set; }
+
+    [BsonElement("verbose")]
+    public bool Verbose { get; set; }
+
+    [BsonElement("scatter")]
+    public bool Scatter { get; set; }
 
     [BsonElement("keepLogs")]
     public bool KeepLogs { get; set; }
 
+    [BsonElement("workers")]
+    public int Workers { get; set; }
+
+    [BsonElement("file")]
+    public string? File { get; set; }
+
+    [BsonElement("status")]
+    public string? Status { get; set; }
+
+    [BsonElement("experimentExecutable")]
+    public string? ExperimentExecutable { get; set; }
+
     [BsonElement("creator")]
     public string? Creator { get; set; }
 
+    [BsonElement("creatorEmail")]
+    public string? CreatorEmail { get; set; }
+
+    [BsonElement("creatorRole")]
+    public string? CreatorRole { get; set; }
+
     [BsonElement("created")]
     [BsonRepresentation(BsonType.Int64)]
-    public long Created { get; set; } // Epoch timestamp (milliseconds)
+    public long Created { get; set; }
 
     [BsonElement("finished")]
     public bool Finished { get; set; }
@@ -68,4 +87,8 @@ public class Experiment
 
     [BsonElement("passes")]
     public int Passes { get; set; }
+
+    [BsonElement("finishedAtEpochMilliseconds")]
+    [BsonRepresentation(BsonType.Int64)]
+    public long FinishedAtEpochMilliseconds { get; set; }
 }

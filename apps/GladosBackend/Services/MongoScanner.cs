@@ -109,13 +109,15 @@ namespace GladosBackend.Services
 
             // Get the experiment file as a byte array
             var collection = _database.GetCollection<BsonDocument>("files");
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", experiment.fil);
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", experiment.File);
+            var file = collection.Find(filter).FirstOrDefault();
+            var fileBytes = file["data"].AsByteArray;
 
             // Create the job
             // _ = new PodManager(client.CreateNamespacedPod(pod, "default"));
             Task.Run(() =>
             {
-                _ = new PodManager(client.CreateNamespacedPod(pod, "default"), experiment);
+                _ = new PodManager(client.CreateNamespacedPod(pod, "default"), experiment, fileBytes);
             });
         
         }
