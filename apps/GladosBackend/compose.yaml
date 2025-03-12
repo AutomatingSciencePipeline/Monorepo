@@ -1,6 +1,0 @@
-﻿services:
-  gladosbackend:
-    image: gladosbackend
-    build:
-      context: .
-      dockerfile: Dockerfile

@@ -17,5 +17,6 @@ data/*
 *.user
 bin/
 obj/
+.idea/
 
 # All below this point is uncategorized (categorize them!)

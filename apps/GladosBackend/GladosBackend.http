@@ -1,6 +1,0 @@
-@GladosBackend_HostAddress = http://localhost:5151
-
-GET {{GladosBackend_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
