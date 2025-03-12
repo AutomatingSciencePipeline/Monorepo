@@ -145,6 +145,6 @@ export const geneticalgo = {
     "trialResult": "geneticRes.csv",
     "dumbTextArea": "",
     "description": "",
-    "name": "Genetric Algorithm Default Experiment",
+    "name": "Genetic Algorithm Default Experiment",
     "scatter": false
 }

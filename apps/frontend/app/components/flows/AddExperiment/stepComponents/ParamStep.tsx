@@ -64,6 +64,17 @@ function calcPermutations(parameters: HyperparametersCollection) {
 					countDefaults++;
 				}
 			}
+			else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
+				let hyper = hyperparameter;
+				let numObjs = 0;
+				for (let key in hyper.values) {
+					numObjs = hyper.values[key].length;
+					break;
+				}
+
+				noDefaultCount = noDefaultCount * numObjs;
+				
+			}
 		});
 
 		if (totalObjs < 3 && allInts && countDefaults > 0) {
@@ -78,7 +89,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 }
 
-export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist'] as const;
+export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist', 'paramgroup'] as const;
 
 export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props }) => {
 
@@ -107,10 +118,10 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									key={`addNew_${type}`}
 									className='-ml-px relative items-center flex-1 px-6 py-2 last:rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:border-blue-500'
 									onClick={() => {
-										console.log("add new item" + type + " to hyperparameters")
 										form.insertListItem('hyperparameters', {
 											name: '',
 											default: -1,
+											...((type === 'paramgroup') && { params: {} }),
 											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {
 												min: '',

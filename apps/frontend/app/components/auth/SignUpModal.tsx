@@ -26,12 +26,6 @@ export const SignUpModal = ({ afterSignUp }) => {
 		return Object.keys(form.errors).length !== 0;
 	}, [form.errors]);
 
-	useEffect(() => {
-		if (formHasError) {
-			console.log('Form errors', form.errors);
-		}
-	}, [formHasError, form.errors]);
-
 	return (
 		<div className='mt-16 sm:mt-24 lg:mt-0 lg:col-span-6'>
 			<div className='bg-white sm:max-w-md sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden'>

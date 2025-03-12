@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, XMarkIcon,ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
@@ -53,7 +53,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 	const handleSave = (newProjectName) => {
 		updateExperimentNameById(project.expId, newProjectName).catch((reason) => {
-			console.log(`Failed to update experiment name, reason: ${reason}`);
+			console.warn(`Failed to update experiment name, reason: ${reason}`);
 		});
 		// Exit the editing mode
 		setIsEditing(false);
@@ -67,7 +67,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	useEffect(() => {
-		console.log(project.creator);
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
@@ -141,11 +140,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									type="text"
 									value={projectName}
 									onChange={(e) => setProjectName(e.target.value)}
-									onBlur={handleCancel}
 									onKeyUp={handleKeyUp}
 								/>
-								{/* <button className="save-button" onClick={handleSave}>Save</button>
-								<button className="cancel-button" onClick={handleCancel}>Cancel</button> */}
+								<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer" onClick={() => handleSave(projectName)} />
+								<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel} />
 							</>
 						) : (
 							<>

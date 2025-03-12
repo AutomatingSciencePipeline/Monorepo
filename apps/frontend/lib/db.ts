@@ -15,6 +15,11 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	values.estimatedTotalTimeMinutes = 0;
 	values.totalExperimentRuns = 0;
 	values.file = fileId;
+	// Make sure that the trialResultLineNumber is a number, not a string
+	if (!values.trialResultLineNumber) {
+		values.trialResultLineNumber = 1;
+	}
+	values.trialResultLineNumber = Number(values.trialResultLineNumber);
 	const response = await fetch(`/api/experiments/storeExp`,
 		{
 			method: "POST",
@@ -37,7 +42,7 @@ const downloadArbitraryFile = (url: string, name: string) => {
 const formatFilename = (name: string, timestamp: string, extension: string) => {
 	const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
 	const formattedTimestamp = formatTimestamp(timestamp);
-	return `${formattedName}=>${formattedTimestamp}.${extension}`;
+	return `${formattedName}_${formattedTimestamp}.${extension}`;
 };
 
 const formatTimestamp = (timestamp: string) => {
@@ -53,8 +58,6 @@ const formatTimestamp = (timestamp: string) => {
 };
 
 export const downloadExperimentResults = async (expId: string) => {
-	console.log(`Downloading results for ${expId}...`);
-
 	const expDoc = await getDocumentFromId(expId);
 	const expName = expDoc['name'];
 	const expCreated = expDoc['created'];
@@ -65,7 +68,6 @@ export const downloadExperimentResults = async (expId: string) => {
 		}
 		return Promise.reject(response);
 	}).then((record: ResultsCsv) => {
-		console.log(record);
 		const csvContents = record.resultContent;
 		const url = `data:text/plain;charset=utf-8,${encodeURIComponent(csvContents)}`;
 		const filename = formatFilename(expName, expCreated, 'csv');
@@ -83,8 +85,6 @@ export const downloadExperimentResults = async (expId: string) => {
 };
 
 export const downloadExperimentProjectZip = async (expId: string) => {
-	console.log(`Downloading project zip for ${expId}...`);
-
 	const expDoc = await getDocumentFromId(expId);
 	const expName = expDoc['name'];
 	const expCreated = expDoc['created'];
@@ -95,7 +95,6 @@ export const downloadExperimentProjectZip = async (expId: string) => {
 		}
 		return Promise.reject(response);
 	}).then((record: ProjectZip) => {
-		console.log(record);
 		const zipContents = record.fileContent;
 		const url = `data:text/plain;base64,${encodeURIComponent(zipContents)}`;
 		const filename = formatFilename(expName, expCreated, 'zip');
@@ -113,14 +112,12 @@ export const downloadExperimentProjectZip = async (expId: string) => {
 };
 
 export const getExperimentDataForGraph = async (expId: string) => {
-	console.log(`Getting results for ${expId} to use in graph modal...`);
 	await fetch(`/api/download/csv/${expId}`).then((response) => {
 		if (response?.ok) {
 			return response.json();
 		}
 		return Promise.reject(response);
 	}).then((record: ResultsCsv) => {
-		console.log(record);
 		return record;
 	}).catch((response: Response) => {
 		console.warn('Error getting experiment results', response.status);

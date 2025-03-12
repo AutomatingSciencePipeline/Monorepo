@@ -16,7 +16,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 # install networking + metallb
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
 
 cd ..
 python3 ./kubernetes_init/init.py
@@ -29,4 +29,3 @@ do
    echo 'Waiting for a pod to start....'
 done
 kubectl apply -f ../kube_config/l2advertisement.yaml
-kubectl expose deployment deployment-test-frontend --type LoadBalancer --port 80 --target-port 3000

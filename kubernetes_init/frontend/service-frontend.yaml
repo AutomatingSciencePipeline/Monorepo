@@ -8,6 +8,6 @@ spec:
     tier: frontend
   ports:
     - protocol: TCP
-      port: 3000       # The port exposed by the Service
+      port: 3000     # The port exposed by the Service
       targetPort: 3000 # The port your Next.js app listens on
   type: ClusterIP

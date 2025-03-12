@@ -15,7 +15,6 @@ const handler: NextApiHandler<QueueResponse> = async (req, res) => {
 		const queueResponse = await fetch(`http://glados-service-backend:${BACKEND_PORT}/queue`);
 		if (queueResponse?.ok) {
 			const contents = await queueResponse.json();
-			console.log('Queue Size', contents);
 			res.status(queueResponse.status).json({ response: contents });
 		} else {
 			throw new Error(`Fetch failed: ${queueResponse.status}`);
