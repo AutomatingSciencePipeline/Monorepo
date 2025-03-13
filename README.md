@@ -10,14 +10,14 @@ The Automating Science Pipeline seeks to make it easier to run data-collecting c
 
 Our live documentation website is hosted [here](https://automatingsciencepipeline.github.io/Monorepo). As of May 2024, old documentation is being migrated to the website.
 
-## User Guide
+## Local Installation
 
-This user guide is meant to assist first time users in setting up a local simulation of the system. You can find it on the [wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/User-Guide).
+This guide is meant to assist first time users in setting up a local simulation of the system. You can find it on the [doc site](https://automatingsciencepipeline.github.io/Monorepo/tutorial/local_testing/).
 
 ## Running an Experiment
 
-Directions for running an experiment (on a local simulated system or the live system) can be found [on the wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/Running-An-Experiment).
+Directions for running an experiment (on a local simulated system or the live system) can be found [on the doc site](https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/).
 
-## Contributing
+<!-- ## Contributing
 
-More info on the [relevant wiki page](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/Contributing).
+More info on the [relevant wiki page](https://github.com/AutomatingSciencePipeline/Monorepo/wiki/Contributing). -->

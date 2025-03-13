@@ -1,5 +1,4 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { CheckIcon, XMarkIcon,ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
@@ -7,6 +6,8 @@ import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
+import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
+import { Minus } from 'tabler-icons-react';
 
 export interface ExperimentListingProps {
 	projectData: ExperimentData;
@@ -158,22 +159,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							</>
 						)}
 					</span>
-
-
 				</div>
-				{project['finished'] == true && project.status != 'CANCELLED' ?
-					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						disabled={busyDownloadingResults}
-						onClick={async () => {
-							setBusyDownloadingResults(true);
-							await onDownloadResults(project.expId);
-							setBusyDownloadingResults(false);
-						}}>
-						{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
-					</button> :
-					null
-				}
+				
 				{project['finished'] == true && project.status != 'CANCELLED' ?
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
@@ -181,19 +168,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							window.open(`/api/download/logs/${project.expId}`, '_blank');
 						}}>
 						View System Log
-					</button> :
-					null
-				}
-				{project['finished'] == true && (project['trialExtraFile'] || project['scatter'] || project['keepLogs']) && project.status != 'CANCELLED' ?
-					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						disabled={busyDownloadingZip}
-						onClick={async () => {
-							setBusyDownloadingZip(true);
-							await onDownloadProjectZip(project.expId);
-							setBusyDownloadingZip(false);
-						}}>
-						{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
+						<ExclamationTriangleIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 					</button> :
 					null
 				}
@@ -244,6 +219,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 											className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
 										>
 											Cancel
+											<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 										</button>
 									</div>
 								</div>
@@ -257,74 +233,47 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						onCopyExperiment(project.expId);
 					}}>
 					Copy Experiment
+					<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 				</button>
-				{/* <button type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={() => {
-						onDeleteExperiment(project.expId);
-					}}>
-					Delete Experiment
-				</button> */}
-				{
-					project.creator == session?.user?.id! ?
-						(
-							project.finished ?
-								<button type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-									onClick={() => {
-										openDeleteModal();
-									}}>
-									Delete Experiment
-								</button>
-								:
-								<button type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-									onClick={() => {
-										toast.promise(cancelExperimentById(project.expId), {
-											success: 'Cancelled experiment', error: 'Failed to cancel experiment', loading: 'Cancelling experiment...'
-										});
-									}}
-								>
-									Cancel Experiment
-								</button>
-						)
-						:
-						<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={() => {
-								toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
-									success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
-									loading: "Unfollowing experiment..."
-								});
-							}}>
-							Unfollow Experiment
-						</button>
-				}
 				{project.finished && project.status != 'CANCELLED' ?
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={openGraphModal}
 					>
 						See Graph
+						<ChartBarIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 					</button> : null
 				}
 				{
 					project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 						<button
 							type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={
-								async () => {
-									//Get the link
-									const link = await addShareLink(project.expId);
-									//Copy the link to the clipboard
-									navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
-									toast.success('Link copied to clipboard!', { duration: 1500 });
-								}
-							}
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+							onClick={async () => {
+								// Get the link
+								const link = await addShareLink(project.expId);
+								// Copy the link to the clipboard
+								navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+								toast.success('Link copied to clipboard!', { duration: 1500 });
+							}}
 						>
 							Share Experiment
+							<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 						</button> : null
+				}
+				{
+					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
+					<button type="button"
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						onClick={() => {
+							toast.promise(cancelExperimentById(project.expId), {
+								success: 'Cancelled experiment', error: 'Failed to cancel experiment', loading: 'Cancelling experiment...'
+							});
+						}}
+					>
+						Cancel Experiment
+						<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+					</button>
 				}
 			</div>
 			<div className='sm:hidden'>
@@ -378,11 +327,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) :
 					null
 				}
-				<p className='flex text-gray-500 text-sm space-x-2'>
+				<p className='flex text-centertext-gray-500 text-sm space-x-2'>
 					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
 				{project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
+					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
@@ -400,10 +349,73 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					null
 				}
 				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
-					<p className='flex text-gray-500 text-sm space-x-2'>
+					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Average Time per Experiment Run: {formattedAverageTimePerRun}</span>
 					</p> :
 					null
+				}
+				{project['finished'] == true && project.status != 'CANCELLED' ? (
+					<div className="flex flex-col space-y-4">
+						<div className="flex space-x-4">
+							<button
+								type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+								disabled={busyDownloadingResults}
+								onClick={async () => {
+									setBusyDownloadingResults(true);
+									await onDownloadResults(project.expId);
+									setBusyDownloadingResults(false);
+								}}
+							>
+								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
+								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button>
+							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
+								<button
+									type="button"
+									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+									disabled={busyDownloadingZip}
+									onClick={async () => {
+										setBusyDownloadingZip(true);
+										await onDownloadProjectZip(project.expId);
+										setBusyDownloadingZip(false);
+									}}
+								>
+									{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
+									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+								</button>
+							) : null}
+						</div>
+					</div>
+				) : null}
+
+				{
+					project.creator == session?.user?.id! ?
+						(
+							project.finished ?
+								<button type="button"
+									className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+									onClick={() => {
+										openDeleteModal();
+									}}>
+									Delete Experiment
+									<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+								</button>
+								:
+								null
+						)
+						:
+						<button type="button"
+							className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={() => {
+								toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
+									success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
+									loading: "Unfollowing experiment..."
+								});
+							}}>
+							Unfollow Experiment
+							<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+						</button>
 				}
 				{
 					(showGraphModal && project.finished && project.status != 'CANCELLED') && (
