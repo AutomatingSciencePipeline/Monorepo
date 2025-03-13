@@ -1,5 +1,4 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { CheckIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
@@ -7,7 +6,7 @@ import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-import { ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
 
 export interface ExperimentListingProps {
