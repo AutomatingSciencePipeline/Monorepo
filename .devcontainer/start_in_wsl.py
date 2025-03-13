@@ -29,7 +29,7 @@ def main():
             return
     
     # Rsync the project to WSL
-    os.system(f"wsl rsync -avz --delete --exclude='.venv' --exclude='node_modules' --exclude='dist' --exclude='build' --exclude='coverage' --exclude='*.log' {wsl_current_dir} ~") 
+    os.system(f"wsl rsync -avz --delete --exclude='.venv' --exclude='node_modules' --exclude='dist' --exclude='build' --exclude='coverage' --exclude='*.log' \"{wsl_current_dir}\" ~") 
     print("Copied project to WSL.")
     
     # Change directory to the project root in WSL
