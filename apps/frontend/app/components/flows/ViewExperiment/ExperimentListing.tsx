@@ -129,7 +129,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		: null;
 
 	return (
-		<div className='flex items-center justify-between space-x-4'>
+		<div className='flex justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>
 				<div className='flex items-center space-x-3'>
 					<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
