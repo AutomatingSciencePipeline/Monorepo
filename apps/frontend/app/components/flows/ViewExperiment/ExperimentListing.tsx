@@ -6,7 +6,7 @@ import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
 
 export interface ExperimentListingProps {
@@ -260,6 +260,17 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							Share Experiment
 							<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 						</button> : null
+				}
+				{project.finished && project.status != 'CANCELLED' ?
+					<button type="button"
+						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full'
+						onClick={() => {
+							// Change this!
+							onCopyExperiment(project.expId);
+						}}>
+						Archive Experiment
+						<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+					</button> : null
 				}
 				{
 					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
