@@ -44,6 +44,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
 
+	const [isArchived, setArchived] = useState(project.archived);
+
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
@@ -244,6 +246,40 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						<ChartBarIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 					</button> : null
 				}
+				{project['finished'] && project.status != 'CANCELLED' ? (
+					<div className="flex flex-col space-y-4">
+						<div className="flex space-x-4">
+							<button
+								type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								disabled={busyDownloadingResults}
+								onClick={async () => {
+									setBusyDownloadingResults(true);
+									await onDownloadResults(project.expId);
+									setBusyDownloadingResults(false);
+								}}
+							>
+								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
+								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button>
+							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
+								<button
+									type="button"
+									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+									disabled={busyDownloadingZip}
+									onClick={async () => {
+										setBusyDownloadingZip(true);
+										await onDownloadProjectZip(project.expId);
+										setBusyDownloadingZip(false);
+									}}
+								>
+									{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
+									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+								</button>
+							) : null}
+						</div>
+					</div>
+				) : null}
 				{
 					project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 						<button
@@ -260,17 +296,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							Share Experiment
 							<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 						</button> : null
-				}
-				{project.finished && project.status != 'CANCELLED' ?
-					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full'
-						onClick={() => {
-							// Change this!
-							onCopyExperiment(project.expId);
-						}}>
-						Archive Experiment
-						<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-					</button> : null
 				}
 				{
 					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
@@ -296,11 +321,15 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
 					{project.finished && project.status != 'CANCELLED' ? (
-						project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
+						project.archived ? (
+							<span className='font-mono text-yellow-500'>Experiment Archived</span>
+						) : project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
 							<span className='font-mono text-red-500'>Experiment Aborted</span>
 						) : (
 							<span className='font-mono'>Experiment Completed</span>
 						)
+					) : project.archived ? (
+						<span className='font-mono text-blue-500'>Experiment Archived</span>
 					) : experimentInProgress && project.status != 'CANCELLED' ? (
 						<span className='font-mono text-blue-500'>Experiment In Progress</span>
 					) : project.status != 'CANCELLED' ? (
@@ -365,41 +394,17 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</p> :
 					null
 				}
-				{project['finished'] == true && project.status != 'CANCELLED' ? (
-					<div className="flex flex-col space-y-4">
-						<div className="flex space-x-4">
-							<button
-								type="button"
-								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-								disabled={busyDownloadingResults}
-								onClick={async () => {
-									setBusyDownloadingResults(true);
-									await onDownloadResults(project.expId);
-									setBusyDownloadingResults(false);
-								}}
-							>
-								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
-								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-							</button>
-							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
-								<button
-									type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-									disabled={busyDownloadingZip}
-									onClick={async () => {
-										setBusyDownloadingZip(true);
-										await onDownloadProjectZip(project.expId);
-										setBusyDownloadingZip(false);
-									}}
-								>
-									{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
-									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-								</button>
-							) : null}
-						</div>
-					</div>
+				{project['finished'] && project.status != 'CANCELLED' ? (
+					<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full'
+							onClick={() => {
+								setArchived(!isArchived);
+								project.archived = !isArchived;
+							}}>
+						{isArchived ? 'Unarchive Experiment' : 'Archive Experiment'}
+						<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+					</button>
 				) : null}
-
 				{
 					project.creator == session?.user?.id! ?
 						(
