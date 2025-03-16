@@ -321,15 +321,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
 					{project.finished && project.status != 'CANCELLED' ? (
-						project.archived ? (
+						isArchived ? (
 							<span className='font-mono text-yellow-500'>Experiment Archived</span>
 						) : project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
 							<span className='font-mono text-red-500'>Experiment Aborted</span>
 						) : (
 							<span className='font-mono'>Experiment Completed</span>
 						)
-					) : project.archived ? (
-						<span className='font-mono text-blue-500'>Experiment Archived</span>
 					) : experimentInProgress && project.status != 'CANCELLED' ? (
 						<span className='font-mono text-blue-500'>Experiment In Progress</span>
 					) : project.status != 'CANCELLED' ? (
