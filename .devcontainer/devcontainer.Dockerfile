@@ -13,7 +13,7 @@ FROM mcr.microsoft.com/devcontainers/universal:2
 RUN curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64 && install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
 
 # Install ctlptl
-RUN CTLPTL_VERSION="0.8.38" && \
+RUN CTLPTL_VERSION="0.8.39" && \
     curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v$CTLPTL_VERSION/ctlptl.$CTLPTL_VERSION.linux.x86_64.tar.gz | tar -xzv -C /usr/local/bin ctlptl
 
 # Install Tilt
