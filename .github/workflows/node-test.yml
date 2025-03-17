@@ -2,8 +2,12 @@ name: Node.js Lint and Test
 
 on:
   push:
+    paths:
+      - 'apps/frontend/**'
     branches: [ main ] 
   pull_request:
+    paths:
+      - 'apps/frontend/**'
     branches: [ main ] 
 
 jobs:
