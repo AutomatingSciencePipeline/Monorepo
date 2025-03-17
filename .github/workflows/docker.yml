@@ -4,14 +4,20 @@ name: Docker Container Build
 
 on:
     pull_request:
-        branches: [ main ]
+      paths:
+      - 'apps/backend/**'
+      - 'apps/frontend/**'
+      - 'apps/runner/**'  
+      branches: [ main ]
 
 permissions:
     contents: read
+
 jobs:
     backend-prod:
         name: Backend Production Container
         runs-on: ubuntu-latest
+        if: contains(github.event.pull_request.changed_files, 'apps/backend/')
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -20,13 +26,13 @@ jobs:
             - name: Build
               uses: docker/build-push-action@v4
               with:
-                # Should match the "build" subsection's settings in docker-compose.yml
                 context: ./apps/backend
                 file: ./apps/backend/backend.Dockerfile
-                # target: production # this has been commented out due to simpler Dockerfile
+
     frontend-prod:
         name: Frontend Production Container
         runs-on: ubuntu-latest
+        if: contains(github.event.pull_request.changed_files, 'apps/frontend/')
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -35,17 +41,17 @@ jobs:
             - name: Build
               uses: docker/build-push-action@v4
               with:
-                # Should match the "build" subsection's settings in docker-compose.yml
                 context: ./apps/frontend
                 file: ./apps/frontend/frontend.Dockerfile
-                # target: runner # this has been commented out due to simpler Dockerfile
                 build-args: |
                   MONGODB_PORT=${{ secrets.MONGODB_PORT }}
                   MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
                   MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+
     runner-prod:
         name: Runner Production Container
         runs-on: ubuntu-latest
+        if: contains(github.event.pull_request.changed_files, 'apps/runner/')
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -54,7 +60,5 @@ jobs:
             - name: Build
               uses: docker/build-push-action@v4
               with:
-                # Should match the "build" subsection's settings in docker-compose.yml
                 context: ./apps/runner
                 file: ./apps/runner/runner.Dockerfile
-                # target: runner # this has been commented out due to simpler Dockerfile
