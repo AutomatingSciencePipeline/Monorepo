@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Chart, registerables, ChartTypeRegistry } from 'chart.js';
 import { BoxPlotController, BoxAndWiskers, ViolinController, Violin } from '@sgratzl/chartjs-chart-boxplot';
 import 'tailwindcss/tailwind.css';
@@ -19,6 +19,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [chartType, setChartType] = useState<keyof ChartTypeRegistry>('line');
     const [experimentChartData, setExperimentChartData] = useState({ _id: '', experimentId: '', resultContent: '' });
     const [loading, setLoading] = useState(true);
+    const [firstLoad, setFirstLoad] = useState(true);
     const [xAxis, setXAxis] = useState('X');
     const [aggregateMode, setAggregateMode] = useState('sum');
     const [headers, setHeaders] = useState<string[]>([]);
@@ -26,6 +27,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [aggregateData, setAggregateData] = useState(false);
     const [canAggregate, setCanAggregate] = useState(true);
+    const aggregateSpanRef = useRef<HTMLSpanElement>(null);
+    const aggregateSelectRef = useRef<HTMLSelectElement>(null);
+    const headerSpanRef = useRef<HTMLSpanElement>(null);
+    const headerSelectRef = useRef<HTMLSelectElement>(null);
 
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen);
@@ -69,6 +74,12 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         //Create a dictionary to store the data
         const dataDict = {} as any;
         const splitRows = [] as any;
+
+        if (firstLoad)
+        {
+            setXAxis(headers[0]);
+            setFirstLoad(false)
+        }
 
         for (let i = 1; i < rows.length; i++) {
             // Split the row by commas when not inside quotes
@@ -190,21 +201,30 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const headers = returnHeaders;
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+
+                //if we have a chart instance already, save which datasets are visible.
+                let visibleMetas;
                 if (chartInstance) {
+                    visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
                     chartInstance.destroy();
                 }
+
                 const totalLength = headers.length;
                 const newHeaders = [] as any[];
+                const newYLists = [] as any[];
                 for (let i = 0; i < totalLength; i++) {
                     if (i != xIndex) {
                         newHeaders.push(headers[i]);
+                        newYLists.push(yLists[i]);
                     }
                 }
+
                 const datasetsObj = newHeaders.map((header, i) => ({
                     label: header,
-                    data: yLists[i],
+                    data: newYLists[i],
                     borderColor: colors,
-                    backgroundColor: colors
+                    backgroundColor: colors,
+                    hidden: true
                 }));
                 const newChartInstance = new Chart(ctx, {
                     type: chartType,
@@ -251,7 +271,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     }]
                 });
 
-                //Set all of the datasets to be unselected
                 //If it is a pie chart you have to use meta
                 if (chartType == 'pie') {
                     var meta = newChartInstance.getDatasetMeta(0);
@@ -259,10 +278,21 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         (ds as any).hidden = true;
                     });
                 }
-                else {
-                    newChartInstance.data.datasets.forEach((dataset) => {
-                        dataset.hidden = true;
+                else if (visibleMetas != undefined) {
+                    //check whether we have the dataset saved as visible and show it if so
+
+                    for (let i = 0; i < visibleMetas.length; i++)
+                    {
+                        let datasetLabel = visibleMetas[i].label
+                        newChartInstance.data.datasets.forEach((dataset) => {
+                        if (!(dataset.label == undefined) && dataset.label == datasetLabel)
+                        {
+                            dataset.hidden = false;
+                        }
                     });
+                    }
+
+                    
                 }
                 newChartInstance.update();
 
@@ -279,6 +309,26 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
     };
+
+    useEffect(() => {
+        requestAnimationFrame(() => {
+            if (headerSelectRef.current && headerSpanRef.current) {
+                const spanElement = headerSpanRef.current;
+                spanElement.style.display = 'inline';
+                headerSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
+                spanElement.style.display = 'none';
+            }
+        });
+      }, [xAxis, headers, loading]);
+
+    useEffect(() => {
+        if (aggregateSelectRef.current && aggregateSpanRef.current) {
+            const spanElement = aggregateSpanRef.current;
+            spanElement.style.display = 'inline';
+            aggregateSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
+            spanElement.style.display = 'none';
+        }
+      }, [aggregateMode, loading]);
 
 
     return (
@@ -312,9 +362,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 )}
             </div>
             <div className='p-4'>
+                <span ref={headerSpanRef} className="hidden">{xAxis}</span>
                 <p className="font-bold">X-Axis Column:</p>
                 <select
-                    className="p-2 border rounded-md font-bold w-auto"
+                    ref={headerSelectRef}
+                    className="p-2 border rounded-md font-bold"
                     onChange={(e) => setXAxis(e.target.value)}
                     name="xaxis"
                     defaultValue={headers[0]}
@@ -330,12 +382,17 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
                 <input className='p-2' id='aggregate-data-box' type="checkbox" checked={aggregateData} onChange={() => setAggregateData(!aggregateData)}></input>
+                <span ref={aggregateSpanRef} className="hidden">{aggregateMode}</span>
                 {
                     aggregateData ?
-                        (<div className='p-4'>
+                        (
+                        <div className='p-4'>
+                            <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
+                            <br/>
                             <select
+                                ref={aggregateSelectRef}
                                 id='aggregate-select'
-                                className="p-2 border rounded-md font-bold w-auto"
+                                className="p-2 border rounded-md font-bold"
                                 disabled={!aggregateData}
                                 name="aggregate"
                                 defaultValue='sum'
@@ -347,7 +404,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                     </option>
                                 ))}
                             </select>
-                            <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
                         </div>)
                         : null
                 }

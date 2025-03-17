@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: glados-service-backend
+  namespace: default
+  labels:
+    app: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 5050
+      targetPort: 5050

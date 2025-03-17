@@ -11,6 +11,7 @@ class ParamType(Enum):
     FLOAT = "float"
     STRING = "string"
     STRING_LIST = "stringlist"
+    PARAMGROUP = "paramgroup"
 
 
 class Parameter(BaseModel):
@@ -27,9 +28,14 @@ class StringParameter(Parameter):
     default: str
 
 class StringListParameter(Parameter):
-    type = ParamType.STRING
+    type = ParamType.STRING_LIST
     default: str
     values: List[str]
+    
+class ParamGroupParameter(Parameter):
+    type = ParamType.PARAMGROUP
+    default: str
+    values: dict
 
 
 def _check_bounds(values):
@@ -101,6 +107,9 @@ def parseRawHyperparameterData(hyperparameters):
         elif entryType == 'stringlist':
             entry['type'] = ParamType.STRING_LIST
             result[entryName] = StringListParameter(**entry)
+        elif entryType == 'paramgroup':
+            entry['type'] = ParamType.PARAMGROUP
+            result[entryName] = ParamGroupParameter(**entry)
         else:
             raise GladosInternalError(f"{entryType} (used by '{entryName}') is not a supported hyperparameter type")
     return result
