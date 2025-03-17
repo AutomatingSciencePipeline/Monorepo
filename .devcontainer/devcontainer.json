@@ -1,6 +1,6 @@
 {
     "name": "GLADOS Dev Container",
-    "image": "gladospipeline/glados-dev-container:latest",
+    "image": "gladospipeline/glados-dev-container:main",
     "hostRequirements": {
         "cpus": 4,
         "memory": "16gb",
