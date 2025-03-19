@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
-import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById, updateExperimentArchiveStatusById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
@@ -44,7 +44,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
 
-	const [isArchived, setArchived] = useState(project.archived);
+	const [isArchived, setArchived] = useState(project['archived']);
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -64,6 +64,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		// Cancel the editing and revert to the original project name
 		setProjectName(originalProjectName); // Revert to the original name
 		setEditingCanceled(true);
+		setIsEditing(false);
+	};
+
+	const handleArchiveStatus = () => {
+		updateExperimentArchiveStatusById(project.expId, !project.archived).catch((reason) => {
+			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
+		});
+		// Exit the editing mode
 		setIsEditing(false);
 	};
 
@@ -163,7 +171,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</span>
 				</div>
 				
-				{project['finished'] == true && project.status != 'CANCELLED' ?
+				{project['finished'] && project.status != 'CANCELLED' ?
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={() => {
@@ -321,7 +329,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
 					{project.finished && project.status != 'CANCELLED' ? (
-						isArchived ? (
+						project.archived ? (
 							<span className='font-mono text-yellow-500'>Experiment Archived</span>
 						) : project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
 							<span className='font-mono text-red-500'>Experiment Aborted</span>
@@ -396,8 +404,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					<button type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full'
 							onClick={() => {
+								// TODO: Works the first time, but then never stays archived again. Also resets all archived statuses
+								// 		 when one experiment turns back to completed. Seems like by clicking the Archive button, it sets
+								//		 sets all experiments to completed from archived.
 								setArchived(!isArchived);
-								project.archived = !isArchived;
+								project['archived'] = !isArchived;
+								handleArchiveStatus();
 							}}>
 						{isArchived ? 'Unarchive Experiment' : 'Archive Experiment'}
 						<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
