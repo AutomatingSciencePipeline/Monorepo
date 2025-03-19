@@ -34,10 +34,13 @@ public class BackendController : ControllerBase
         _database = client.GetDatabase("gladosdb");
     }
 
-    // Write a post that takes in a single string parameter called "expId"
+    // Write a post that takes in a json string
     [HttpPost("incrementExperiment")]
-    public IActionResult IncrementExperiment([FromBody] string expId)
-    {
+    public IActionResult IncrementExperiment([FromBody] string json)
+    {   
+        // Get expId from json
+        var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+        var expId = dict["expId"].ToString();
         // Increment the "passes" field of the experiment with the given expId
         try
         {

@@ -9,6 +9,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -303,7 +304,7 @@ namespace GladosBackend.Services
             // All of these will be asynchronous tasks, we will wait for them to return
             var tasks = new List<Task>
             {
-                Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, $"/experiment/{experiment.TrialResult}", "experimentResults.csv")),
+                Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, $"/experiment/experimentResults.csv", "experimentResults.csv")),
                 Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, "/experiment/experimentLog.txt", "experimentLog.txt")),
                 Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, "/experiment/experiment.zip", "experiment.zip"))
             };
@@ -313,6 +314,15 @@ namespace GladosBackend.Services
             }
             // Wait for all of the tasks to complete
             Task.WaitAll(tasks.ToArray());
+
+            // If experimentExtraFile is not null, we need to add it to the zip file
+            if (experiment.TrialExtraFile != null)
+            {
+                using (var zip = ZipFile.Open("experiment.zip", ZipArchiveMode.Update))
+                {
+                    zip.CreateEntryFromFile("experimentExtraFile", experiment.TrialExtraFile);
+                }
+            }
 
             // Now we need to upload the files to the database
             var resultsBytes = File.ReadAllBytes("experimentResults.csv");
@@ -334,7 +344,7 @@ namespace GladosBackend.Services
             });
 
             // Upload the files, make sure to store the expdId in the metadata
-            var resultsId = resultsBucket.UploadFromBytes("experimentResults.csv", resultsBytes, new GridFSUploadOptions
+            var resultsId = resultsBucket.UploadFromBytes($"{experiment.Id}Results.csv", resultsBytes, new GridFSUploadOptions
             {
                 Metadata = new BsonDocument
                 {
@@ -342,7 +352,7 @@ namespace GladosBackend.Services
                 }
             });
 
-            var logId = logBucket.UploadFromBytes("experimentLog.txt", logBytes, new GridFSUploadOptions
+            var logId = logBucket.UploadFromBytes($"{experiment.Id}Log.txt", logBytes, new GridFSUploadOptions
             {
                 Metadata = new BsonDocument
                 {
@@ -350,7 +360,7 @@ namespace GladosBackend.Services
                 }
             });
 
-            var zipId = zipBucket.UploadFromBytes("experiment.zip", zipBytes, new GridFSUploadOptions
+            var zipId = zipBucket.UploadFromBytes($"{experiment.Id}experiment.zip", zipBytes, new GridFSUploadOptions
             {
                 Metadata = new BsonDocument
                 {
@@ -369,7 +379,6 @@ namespace GladosBackend.Services
             update = Builders<BsonDocument>.Update
                 .Set("status", "COMPLETED");
             collection.UpdateOne(filter, update);
-
         }
 
         private static void CopyFileToPod(Kubernetes client, string podName, byte[] bytes, string destinationPath)
