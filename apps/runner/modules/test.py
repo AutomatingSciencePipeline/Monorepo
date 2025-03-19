@@ -97,30 +97,46 @@ def main():
         #     "values": ["a", "b"]
         # }
          {
-            "name": "a",
+            "name": "x",
+            "type": "integer",
+            "default": -1,
+            "min": 1,
+            "max": 100,
+            "step": 1
+        },
+          {
+            "name": "y",
             "type": "integer",
             "default": -1,
             "min": 1,
             "max": 10,
             "step": 1
         },
+        #   {
+        #     "name": "test",
+        #     "type": "bool",
+        #     "default": False
+        # },
           {
-            "name": "b",
-            "type": "integer",
+            "name": "test2",
+            "type": "float",
             "default": -1,
-            "min": 11,
-            "max": 20,
-            "step": 1
+            "min": 1,
+            "max": 1,
+            "step": 0.1
         },
-          {
-            "name": "c",
-            "type": "integer",
-            "default": 21,
-            "min": 21,
-            "max": 30,
-            "step": 1
-        },
-          
+        #   {
+        #     "name": "test3",
+        #     "type": "stringlist",
+        #     "default": -1,
+        #     "values": ["a", "b"]
+        # },
+        #   {
+        #     "name": "test4",
+        #     "type": "paramgroup",
+        #     "default": -1,
+        #     "values": {"why": ["1", "2"]}
+        #   }
     ]
     
     # Generate permutations
@@ -129,8 +145,8 @@ def main():
     # # Output the results
     print("Generated Permutations:")
     print(len(results))
-    for result in results:
-        print(result)
+    # for result in results:
+    #     print(result)
 
 if __name__ == "__main__":
     main()
