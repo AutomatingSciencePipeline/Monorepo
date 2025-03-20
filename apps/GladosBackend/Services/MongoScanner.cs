@@ -4,14 +4,11 @@ using GladosBackend.Models;
 using k8s;
 using k8s.Models;
 using MongoDB.Bson;
-using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 
@@ -90,14 +87,36 @@ namespace GladosBackend.Services
         public void RunExperiment(Experiment experiment)
         {
             // Make sure the experiment data is valid
-            if (experiment == null)
+            if (experiment == null || experiment.Id == null || experiment.File == null)
             {
                 _logger.LogError("Experiment is null");
-                return;
-            }
-            if (experiment.Id == null || experiment.File == null)
-            {
-                _logger.LogError("Experiment file is null");
+                // Change experiment status to COMPLETED
+                var completedFilter = Builders<BsonDocument>.Filter.Eq("_id", experiment.Id);
+                var completedUpdate = Builders<BsonDocument>.Update
+                    .Set("status", "COMPLETED");
+                var completedCollection = _database.GetCollection<BsonDocument>("experiments");
+                completedCollection.UpdateOne(completedFilter, completedUpdate);
+                // Set fails to 1
+                var failsFilter = Builders<BsonDocument>.Filter.Eq("_id", experiment.Id);
+                var failsUpdate = Builders<BsonDocument>.Update
+                    .Set("fails", 1);
+                var failsCollection = _database.GetCollection<BsonDocument>("experiments");
+                failsCollection.UpdateOne(failsFilter, failsUpdate);
+
+                // Write a log file with bytes
+                var errorLogBytes = Encoding.UTF8.GetBytes("Error parsing experiment. Contact an administrator.");
+                var errorLogBucket = new GridFSBucket(_database, new GridFSBucketOptions
+                {
+                    BucketName = "logsBucket"
+                });
+                var errorLogId = errorLogBucket.UploadFromBytes($"{experiment.Id}Log.txt", errorLogBytes, new GridFSUploadOptions
+                {
+                    Metadata = new BsonDocument
+                    {
+                        { "experimentId", experiment.Id }
+                    }
+                });
+
                 return;
             }
 
@@ -136,7 +155,7 @@ namespace GladosBackend.Services
                     Requests = new Dictionary<string, ResourceQuantity>
                     {
                         { "cpu", new ResourceQuantity("2") },
-                        { "memory", new ResourceQuantity("4Gi") }
+                        { "memory", new ResourceQuantity("2Gi") }
                     }
                 };
             }
@@ -158,6 +177,7 @@ namespace GladosBackend.Services
                 };
             }
 
+            // Used for Tilt development
             if (Environment.GetEnvironmentVariable("IMAGE_RUNNER") != null)
             {
                 pod.Spec.Containers[0].Image = Environment.GetEnvironmentVariable("IMAGE_RUNNER");
@@ -190,7 +210,7 @@ namespace GladosBackend.Services
                 {
                     BucketName = "logsBucket"
                 });
-                var errorLogId = errorLogBucket.UploadFromBytes("errorLog.txt", errorLogBytes, new GridFSUploadOptions
+                var errorLogId = errorLogBucket.UploadFromBytes($"{experiment.Id}Log.txt", errorLogBytes, new GridFSUploadOptions
                 {
                     Metadata = new BsonDocument
                     {
@@ -229,11 +249,17 @@ namespace GladosBackend.Services
             }
             catch
             {
-                // Set the experiment status to FAILED
+                // Set the experiment status to COMPLETED
                 // Write some error message to the experiment log
                 filter = Builders<BsonDocument>.Filter.Eq("_id", experiment.Id);
                 update = Builders<BsonDocument>.Update
-                    .Set("status", "FAILED");
+                    .Set("status", "COMPLETED");
+                collection.UpdateOne(filter, update);
+
+                // Set the fails to 1
+                filter = Builders<BsonDocument>.Filter.Eq("_id", experiment.Id);
+                update = Builders<BsonDocument>.Update
+                    .Set("fails", 1);
                 collection.UpdateOne(filter, update);
 
                 // We are going to have to make a log file with bytes here
@@ -242,7 +268,7 @@ namespace GladosBackend.Services
                 {
                     BucketName = "logsBucket"
                 });
-                var errorLogId = errorLogBucket.UploadFromBytes("errorLog.txt", errorLogBytes, new GridFSUploadOptions
+                var errorLogId = errorLogBucket.UploadFromBytes($"{experiment.Id}Log.txt", errorLogBytes, new GridFSUploadOptions
                 {
                     Metadata = new BsonDocument
                     {
@@ -252,6 +278,11 @@ namespace GladosBackend.Services
                 return;
             }
 
+            // set totalExperimentRuns to the number of config files
+            filter = Builders<BsonDocument>.Filter.Eq("_id", experiment.Id);
+            update = Builders<BsonDocument>.Update
+                .Set("totalExperimentRuns", fileNames.Count);
+            collection.UpdateOne(filter, update);
 
             // Start the pod
             client.CreateNamespacedPod(pod, "default");
@@ -294,7 +325,7 @@ namespace GladosBackend.Services
             {
                 BucketName = "filesBucket"
             });
-            // Donwload based on the _id of the file
+            // Download based on the _id of the file
             var fileBytes = filesBucket.DownloadAsBytes(experiment.File);
             // Send that to the pod
             CopyFileToPod(client, pod.Metadata.Name, fileBytes, "/experiment/experimentFile");
@@ -304,7 +335,7 @@ namespace GladosBackend.Services
             // All of these will be asynchronous tasks, we will wait for them to return
             var tasks = new List<Task>
             {
-                Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, $"/experiment/experimentResults.csv", "experimentResults.csv")),
+                Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, "/experiment/experimentResults.csv", "experimentResults.csv")),
                 Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, "/experiment/experimentLog.txt", "experimentLog.txt")),
                 Task.Run(() => CopyFileFromPod(client, pod.Metadata.Name, "/experiment/experiment.zip", "experiment.zip"))
             };

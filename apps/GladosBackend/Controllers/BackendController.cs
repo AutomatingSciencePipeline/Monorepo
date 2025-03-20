@@ -37,10 +37,12 @@ public class BackendController : ControllerBase
     // Write a post that takes in a json string
     [HttpPost("incrementExperiment")]
     public IActionResult IncrementExperiment([FromBody] string json)
-    {   
+    {
         // Get expId from json
         var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
         var expId = dict["expId"].ToString();
+        // Get pass or fail from json
+        var pass = dict["pass"].ToString() == "true";
         // Increment the "passes" field of the experiment with the given expId
         try
         {
@@ -51,9 +53,26 @@ public class BackendController : ControllerBase
             {
                 return NotFound();
             }
-            var count = experiment["passes"].AsInt32 + 1;
-            var update = Builders<BsonDocument>.Update.Set("passes", count);
-            _database.GetCollection<BsonDocument>("experiments").UpdateOne(filter, update);
+
+            if (pass)
+            {
+                var count = experiment["passes"].AsInt32 + 1;
+                var update = Builders<BsonDocument>.Update.Set("passes", count);
+                _database.GetCollection<BsonDocument>("experiments").UpdateOne(filter, update);
+            }
+            else {
+                if (!experiment.Contains("fails"))
+                {
+                    var update = Builders<BsonDocument>.Update.Set("fails", 1);
+                    _database.GetCollection<BsonDocument>("experiments").UpdateOne(filter, update);
+                }
+                else {
+                    var count = experiment["fails"].AsInt32 + 1;
+                    var update = Builders<BsonDocument>.Update.Set("fails", count);
+                    _database.GetCollection<BsonDocument>("experiments").UpdateOne(filter, update);
+                }
+            }
+
             return Ok();
         }
         catch (Exception e)

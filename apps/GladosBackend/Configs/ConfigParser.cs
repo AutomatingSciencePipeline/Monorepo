@@ -43,7 +43,7 @@ public class ConfigParser
     // Generates all possible permutations of the given parameters
     public static List<Dictionary<string, object>> GeneratePermutations(List<Parameter> parameters)
     {
-        // Seperate out the paramgroup parameters
+        // Separate out the paramgroup parameters
         var paramGroups = parameters.Where(p => p is ParamGroupParameter).ToList();
         parameters = parameters.Where(p => !(p is ParamGroupParameter)).ToList();
 
@@ -82,17 +82,8 @@ public class ConfigParser
                 {
                     defaultValues[parameter.Name] = boolParameter.Value;
                 }
-                else if (parameter is StringListParameter stringListParameter)
-                {
-                    defaultValues[parameter.Name] = stringListParameter.DefaultValue;
-                }
-                else if (parameter is IntegerParameter integerParameter)
-                {
-                    defaultValues[parameter.Name] = integerParameter.DefaultValue;
-                }
-                else if (parameter is FloatParameter floatParameter)
-                {
-                    defaultValues[parameter.Name] = floatParameter.DefaultValue;
+                else {
+                    defaultValues[parameter.Name] = parameter.GetDefault();
                 }
             }
             else
@@ -203,7 +194,7 @@ public class ConfigParser
     public static string FormatPermutation(Dictionary<string, object> permutation, string userDefinedConstants)
     {
         var formattedPermutation = new StringBuilder();
-        formattedPermutation.AppendLine("[\"DEFAULT\"]");
+        formattedPermutation.AppendLine("[DEFAULT]");
         foreach (var kvp in permutation)
         {
             formattedPermutation.AppendLine($"{kvp.Key}: {kvp.Value}");

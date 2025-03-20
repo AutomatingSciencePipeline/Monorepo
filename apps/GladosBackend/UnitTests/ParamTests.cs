@@ -14,7 +14,7 @@ public class ParamTests{
         Assert.Equal("test", param.Name);
         Assert.True(param.Value);
 
-        var parsedParam = new ConfigParser().ParseParameter(json);
+        var parsedParam = ConfigParser.ParseParameter(json);
         Assert.Equal("test", parsedParam.Name);
         // Make sure the type is correct
         Assert.IsType<BoolParameter>(parsedParam);
@@ -29,7 +29,7 @@ public class ParamTests{
         Assert.Equal("test", param.Name);
         Assert.Equal(new List<string>{"test1", "test2"}, param.Value);
 
-        var parsedParam = new ConfigParser().ParseParameter(json);
+        var parsedParam = ConfigParser.ParseParameter(json);
         Assert.Equal("test", parsedParam.Name);
         // Make sure the type is correct
         Assert.IsType<StringListParameter>(parsedParam);
@@ -44,7 +44,7 @@ public class ParamTests{
         Assert.Equal("test", param.Name);
         Assert.Equal(new Dictionary<string, List<string>>{{"test1", new List<string>{"test2", "test3"}}}, param.Value);
     
-        var parsedParam = new ConfigParser().ParseParameter(json);
+        var parsedParam = ConfigParser.ParseParameter(json);
         Assert.Equal("test", parsedParam.Name);
         // Make sure the type is correct
         Assert.IsType<ParamGroupParameter>(parsedParam);
@@ -62,7 +62,7 @@ public class ParamTests{
         Assert.Equal(1, param.Step);
         Assert.False(param.UseDefault);
 
-        var parsedParam = new ConfigParser().ParseParameter(json);
+        var parsedParam = ConfigParser.ParseParameter(json);
         Assert.Equal("test", parsedParam.Name);
         // Make sure the type is correct
         Assert.IsType<IntegerParameter>(parsedParam);
@@ -83,7 +83,7 @@ public class ParamTests{
         Assert.Equal(1.5m, param.Step);
         Assert.False(param.UseDefault);
 
-        var parsedParam = new ConfigParser().ParseParameter(json);
+        var parsedParam = ConfigParser.ParseParameter(json);
         Assert.Equal("test", parsedParam.Name);
         // Make sure the type is correct
         Assert.IsType<FloatParameter>(parsedParam);
@@ -103,7 +103,7 @@ public class ParamTests{
         };
 
         // This should generate 100 permutations
-        var perms = new ConfigParser().GeneratePermutations(parameters);
+        var perms = ConfigParser.GeneratePermutations(parameters);
         Assert.Equal(100, perms.Count);
     }
 
@@ -116,7 +116,7 @@ public class ParamTests{
         };
 
         // This should generate 100 permutations
-        var perms = new ConfigParser().GeneratePermutations(parameters);
+        var perms = ConfigParser.GeneratePermutations(parameters);
         Assert.Equal(100, perms.Count);
     }
 
@@ -129,7 +129,7 @@ public class ParamTests{
         };
 
         // This should generate 20 permutations
-        var perms = new ConfigParser().GeneratePermutations(parameters);
+        var perms = ConfigParser.GeneratePermutations(parameters);
         Assert.Equal(20, perms.Count);
     }
 
@@ -142,7 +142,7 @@ public class ParamTests{
         };
 
         // This should generate 20 permutations
-        var perms = new ConfigParser().GeneratePermutations(parameters);
+        var perms = ConfigParser.GeneratePermutations(parameters);
         Assert.Equal(10, perms.Count);
     }
 
@@ -155,7 +155,7 @@ public class ParamTests{
         };
 
         // This should generate 20 permutations
-        var perms = new ConfigParser().GeneratePermutations(parameters);
+        var perms = ConfigParser.GeneratePermutations(parameters);
         Assert.Equal(20, perms.Count);
     }
 
@@ -169,7 +169,24 @@ public class ParamTests{
         };
 
         // This should generate 28 permutation
-        var perms = new ConfigParser().GeneratePermutations(parameters);
+        var perms = ConfigParser.GeneratePermutations(parameters);
         Assert.Equal(28, perms.Count);
+    }
+
+    [Fact]
+    public void TestFormatPermutation1(){
+        // Create a list of two integer parameters
+        var parameters = new List<Parameter>{
+            new IntegerParameter("{\"name\": \"test1\", \"type\": \"integer\", \"min\": \"1\", \"max\": \"1\", \"step\": \"1\", \"default\": -1}"),
+            new IntegerParameter("{\"name\": \"test2\", \"type\": \"integer\", \"min\": \"1\", \"max\": \"1\", \"step\": \"1\", \"default\": -1}"),
+            new IntegerParameter("{\"name\": \"test3\", \"type\": \"integer\", \"min\": \"1\", \"max\": \"1\", \"step\": \"1\", \"default\": -1}")
+        };
+
+        // Generate the permutations
+        var perms = ConfigParser.GeneratePermutations(parameters);
+
+        // Format the first permutation
+        var formatted = ConfigParser.FormatPermutation(perms[0], string.Empty);
+        Assert.Equal("[DEFAULT]\ntest1: 1\ntest2: 1\ntest3: 1", formatted);
     }
 }

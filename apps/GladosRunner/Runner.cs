@@ -1,12 +1,8 @@
-using System;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
 using Serilog;
-using System.Threading;
-using System.IO;
 
 class Runner
 {
@@ -210,7 +206,21 @@ class Runner
             // Create the zip file
             Log.Information("Creating zip file...");
 
+            // Create a single zip containing the results and logs
+            Directory.CreateDirectory("/experiment/zip");
+            // Copy the results and logs directories to the zip directory
+            CopyDirectory("/experiment/results", "/experiment/zip/results", true);
+            CopyDirectory("/experiment/logs", "/experiment/zip/logs", true);
+            // Zip the zip directory
+            ZipFile.CreateFromDirectory("/experiment/zip", "/experiment/experiment.zip");
+            
+            // Delete the zip directory
+            Directory.Delete("/experiment/zip", true);
 
+            // Create a result file with the experiment results
+            var tempFile = Path.GetTempFileName();
+            // Get the header for the csv file
+            var header = File.ReadLines("/experiment/results/1.csv").First();
 
         }
         catch (Exception ex)
@@ -252,7 +262,7 @@ class Runner
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    CreateNoWindow = true
+                    CreateNoWindow = true,
                 };
 
                 Process pythonProcess = new() { StartInfo = pythonProcessInfo };
@@ -260,7 +270,12 @@ class Runner
 
                 stdOut = pythonProcess.StandardOutput.ReadToEnd();
                 stdErr = pythonProcess.StandardError.ReadToEnd();
-                pythonProcess.WaitForExit();
+                if (!pythonProcess.WaitForExit(experiment.Timeout * 1000))
+                {
+                    Log.Error("Python experiment timed out.");
+                    pythonProcess.Kill();
+                    break;
+                } 
 
                 completed = true;
                 break;
@@ -282,7 +297,12 @@ class Runner
 
                 stdOut = javaProcess.StandardOutput.ReadToEnd();
                 stdErr = javaProcess.StandardError.ReadToEnd();
-                javaProcess.WaitForExit();
+                if (!javaProcess.WaitForExit(experiment.Timeout * 1000))
+                {
+                    Log.Error("Java experiment timed out.");
+                    javaProcess.Kill();
+                    break;
+                }
 
                 completed = true;
                 break;
@@ -304,7 +324,12 @@ class Runner
 
                 stdOut = cProcess.StandardOutput.ReadToEnd();
                 stdErr = cProcess.StandardError.ReadToEnd();
-                cProcess.WaitForExit();
+                if (!cProcess.WaitForExit(experiment.Timeout * 1000))
+                {
+                    Log.Error("C experiment timed out.");
+                    cProcess.Kill();
+                    break;
+                }
 
                 completed = true;
                 break;
@@ -318,7 +343,7 @@ class Runner
             Log.Information("Trial {trialNum} completed.", trialNum);
             // Call to the backend api point to signal the trial is complete
             HttpClient client = new();
-            var response = client.PostAsync("http://glados-backend:8080/backend/incrementExperiment", new StringContent(JsonSerializer.Serialize(new { expId = experiment.Id }))).Result;
+            var response = client.PostAsync("http://glados-backend:8080/backend/incrementExperiment", new StringContent(JsonSerializer.Serialize(new { expId = experiment.Id, pass = true }))).Result;
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 Log.Error("Failed to increment experiment.");
@@ -327,10 +352,106 @@ class Runner
             // Write std out and std err to a single log file
             File.WriteAllText($"/experiment/logs/{trialNum}.log", stdOut + '\n' + stdErr);
 
+            bool firstLine = true;
+            var tempFile = Path.GetTempFileName();
+            // Open the experiment results csv
+            using var reader = new StreamReader(experiment.TrialResult);
+            while(!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+                // Get the params used for this trial
+                if (firstLine){
+                    File.AppendAllText(tempFile, GetParamsHeader(configFile) + ',' + line + '\n');
+                    firstLine = false;
+                }
+                else {
+                    File.AppendAllText(tempFile, GetParamsVals(configFile) + ',' + line + '\n');
+                }
+            }
+
             // Write the results csv to the results directory
-            File.Copy(experiment.TrialResult, $"/experiment/results/{trialNum}.csv");
+            File.Copy(tempFile, $"/experiment/results/{trialNum}.csv");
+
+            // Delete the temp file
+            File.Delete(tempFile);
+        }
+        else
+        {
+            Log.Error("Trial {trialNum} failed.", trialNum);
+            HttpClient client = new();
+            var response = client.PostAsync("http://glados-backend:8080/backend/incrementExperiment", new StringContent(JsonSerializer.Serialize(new { expId = experiment.Id, pass = false }))).Result;
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Error("Failed to increment experiment.");
+            }
         }
 
+    }
+
+    private static string GetParamsHeader(string configPath){
+        // Open the config file
+        var parameters = new List<string>();
+        using var reader = new StreamReader(configPath);
+        while(!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            if (line == null) continue;
+            // Get the params used for this trial
+            if (!line.StartsWith('[')){
+                parameters.Add(line.Split(':')[0].Trim());
+            }
+        }
+        return string.Join(',', parameters);
+    }
+
+    private static string GetParamsVals(string configPath){
+        // Open the config file
+        var parameters = new List<string>();
+        using var reader = new StreamReader(configPath);
+        while(!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            if (line == null) continue;
+            // Get the params used for this trial
+            if (!line.StartsWith('[')){
+                parameters.Add(line.Split(':')[1].Trim());
+            }
+        }
+        return string.Join(',', parameters);
+    }
+    
+    // Thanks microsoft for this code snippet
+    private static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+    {
+        // Get information about the source directory
+        var dir = new DirectoryInfo(sourceDir);
+
+        // Check if the source directory exists
+        if (!dir.Exists)
+            throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+        // Cache directories before we start copying
+        DirectoryInfo[] dirs = dir.GetDirectories();
+
+        // Create the destination directory
+        Directory.CreateDirectory(destinationDir);
+
+        // Get the files in the source directory and copy to the destination directory
+        foreach (FileInfo file in dir.GetFiles())
+        {
+            string targetFilePath = Path.Combine(destinationDir, file.Name);
+            file.CopyTo(targetFilePath);
+        }
+
+        // If recursive and copying subdirectories, recursively call this method
+        if (recursive)
+        {
+            foreach (DirectoryInfo subDir in dirs)
+            {
+                string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                CopyDirectory(subDir.FullName, newDestinationDir, true);
+            }
+        }
     }
 
     private static FileType GetFileType(string path)
