@@ -44,7 +44,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
 
-	const [isArchived, setArchived] = useState(project['archived']);
+	const [isArchived, setArchived] = useState(project.archived ?? false);
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -402,7 +402,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				}
 				{project['finished'] && project.status != 'CANCELLED' ? (
 					<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full'
+							className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
+								isArchived ? 'bg-gray-500 hover:bg-gray-600' : 'bg-yellow-600 hover:bg-yellow-700'
+							} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
 							onClick={() => {
 								// TODO: Works the first time, but then never stays archived again. Also resets all archived statuses
 								// 		 when one experiment turns back to completed. Seems like by clicking the Archive button, it sets
@@ -410,9 +412,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								setArchived(!isArchived);
 								project['archived'] = !isArchived;
 								handleArchiveStatus();
-							}}>
-						{isArchived ? 'Unarchive Experiment' : 'Archive Experiment'}
-						<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							}}
+					>
+							{isArchived ? 'Unarchive Experiment' : 'Archive Experiment'}
+							<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 					</button>
 				) : null}
 				{
