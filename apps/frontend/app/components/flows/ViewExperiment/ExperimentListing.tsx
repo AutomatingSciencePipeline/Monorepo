@@ -67,12 +67,27 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setIsEditing(false);
 	};
 
-	const handleArchiveStatus = () => {
-		updateExperimentArchiveStatusById(project.expId, !project.archived).catch((reason) => {
+	const handleArchiveStatus = (newArchiveStatus) => {
+		// This swap works
+		setArchived(newArchiveStatus);
+
+		// TODO: Got the catch error.
+		//		 reason: Error: Could not update document with id:
+		//		 67dd...
+		//		 Before this, got a POST error, 500 (Internal Server Error) at mongodb funcs.ts:100
+		//		 That happens to be the updateExperimentArchiveStatusById function.
+		//		Essentially, the MongoDB never updates the archived value.
+		//		Why does renaming the exps work and this not?
+		updateExperimentArchiveStatusById(project.expId, newArchiveStatus).catch((reason) => {
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
-		// Exit the editing mode
-		setIsEditing(false);
+
+		// TODO: Should not need this.
+		// console.log("Testing project['archived'] = !isArchived;");
+		// // undefined -> true
+		// console.log("Before: " + project['archived']);
+		// project.archived = newArchiveStatus;
+		// console.log("After: " + project['archived']);
 	};
 
 	useEffect(() => {
@@ -406,12 +421,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								isArchived ? 'bg-gray-500 hover:bg-gray-600' : 'bg-yellow-600 hover:bg-yellow-700'
 							} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
 							onClick={() => {
-								// TODO: Works the first time, but then never stays archived again. Also resets all archived statuses
-								// 		 when one experiment turns back to completed. Seems like by clicking the Archive button, it sets
-								//		 sets all experiments to completed from archived.
-								setArchived(!isArchived);
-								project['archived'] = !isArchived;
-								handleArchiveStatus();
+								const newArchiveStatus = !isArchived;
+								handleArchiveStatus(newArchiveStatus);
 							}}
 					>
 							{isArchived ? 'Unarchive Experiment' : 'Archive Experiment'}
