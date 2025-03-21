@@ -97,12 +97,12 @@ export async function updateExperimentNameById(expId: string, newExpName: string
     return Promise.resolve();
 }
 
-export async function updateExperimentArchiveStatusById(expId: string, newArchiveStatus: boolean) {
+export async function updateExperimentArchiveStatusById(expId: string) {
     'use server';
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
-    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'archived': newArchiveStatus } });
+    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $bit: { 'archived': { xor: 1 } } });
 
     if (experiment.modifiedCount == 0) {
         return Promise.reject(`Could not update document with id: ${expId}`);

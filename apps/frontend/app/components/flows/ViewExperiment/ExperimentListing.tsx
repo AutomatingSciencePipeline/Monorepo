@@ -78,7 +78,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		//		 That happens to be the updateExperimentArchiveStatusById function.
 		//		Essentially, the MongoDB never updates the archived value.
 		//		Why does renaming the exps work and this not?
-		updateExperimentArchiveStatusById(project.expId, newArchiveStatus).catch((reason) => {
+		updateExperimentArchiveStatusById(project.expId).catch((reason) => {
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
 
