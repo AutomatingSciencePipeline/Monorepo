@@ -3,7 +3,6 @@ import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
 import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical, Plus, Tool } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
-import { string } from 'joi';
 import { Tooltip } from '@mantine/core';
 import { toast } from 'react-hot-toast';
 
@@ -12,7 +11,6 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 	const [useDefault, setUseDefault] = useState(form.values.hyperparameters[index].useDefault || false);
 
 	const remains = {
-		string: StringParam,
 		integer: NumberParam,
 		float: NumberParam,
 		bool: BoolParam,
@@ -237,23 +235,8 @@ const BoolParam = ({ form, type, index, ...rest }) => {
 			label={'value'}
 			onLabel={'True'}
 			offLabel={'False'}
-			{...form.getInputProps(`hyperparameters.${index}.default`)}
+			{...form.getInputProps(`hyperparameters.${index}.value`)}
 		/>
-	);
-};
-
-const StringParam = ({ form, type, index, ...rest }) => {
-	return (
-		<>
-			<Tooltip label='String value for the parameter' position='top' withArrow>
-				<input
-					type='text'
-					placeholder={`${type} value`}
-					className='block w-full rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-					{...form.getInputProps(`hyperparameters.${index}.default`)}
-				/>
-			</Tooltip>
-		</>
 	);
 };
 

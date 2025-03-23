@@ -3,13 +3,12 @@ export type FileName = string;
 export type EpochMilliseconds = number;
 
 export interface HyperparametersCollection {
-    hyperparameters: [IntegerHyperparameter | FloatHyperparameter | StringHyperparameter | BooleanHyperparameter | StringListHyperparameter | ParamGroupHyperparameter];
+    hyperparameters: [IntegerHyperparameter | FloatHyperparameter | BooleanHyperparameter | StringListHyperparameter | ParamGroupHyperparameter];
 }
 
 export enum HyperparameterTypes {
     INTEGER = 'integer',
     FLOAT = 'float',
-    STRING = 'string',
     BOOLEAN = 'boolean',
     STRING_LIST = 'stringlist',
     PARAM_GROUP = 'paramgroup'
@@ -47,12 +46,8 @@ export interface FloatHyperparameter extends GenericHyperparameter {
 
 export interface BooleanHyperparameter extends GenericHyperparameter {
     default: boolean;
+    value: boolean;
     type: HyperparameterTypes.BOOLEAN;
-}
-
-export interface StringHyperparameter extends GenericHyperparameter {
-    default: string;
-    type: HyperparameterTypes.STRING;
 }
 
 export interface StringListHyperparameter extends GenericHyperparameter {
