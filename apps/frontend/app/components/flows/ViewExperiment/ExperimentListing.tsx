@@ -171,7 +171,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							)}
 						</span>
 						) : (
-						<ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true"/>
+							<ChevronDownIcon className="h-5 w-5 text-gray-400 mt-5" aria-hidden="true"/>
 					)}
 				</div>
 
