@@ -141,41 +141,73 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<div onClick={() => setClose(!isClosed)}
 					 className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 					{isClosed ? (
-						<ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true"/>
-					) : (
+						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
+							<ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true"/>
+							{isEditing ? (
+								<>
+									<input
+										type="text"
+										value={projectName}
+										onChange={(e) => setProjectName(e.target.value)}
+										onKeyUp={handleKeyUp}
+									/>
+									<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
+											   onClick={() => handleSave(projectName)}/>
+									<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
+								</>
+							) : (
+								<>
+									<span
+										className="editable-text"
+									>
+										{project.name}
+									</span>
+									{project.creator == session?.user?.id! ? <MdEdit
+										className="icon edit-icon"
+										onClick={handleEdit}
+									/> : <></>}
+
+								</>
+							)}
+						</span>
+						) : (
 						<ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true"/>
 					)}
 				</div>
-				<div className='flex items-center space-x-3'>
-					<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
-						{isEditing ? (
-							<>
-								<input
-									type="text"
-									value={projectName}
-									onChange={(e) => setProjectName(e.target.value)}
-									onKeyUp={handleKeyUp}
-								/>
-								<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
-										   onClick={() => handleSave(projectName)}/>
-								<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
-							</>
-						) : (
-							<>
-								<span
-									className="editable-text"
-								>
-									{project.name}
-								</span>
-								{project.creator == session?.user?.id! ? <MdEdit
-									className="icon edit-icon"
-									onClick={handleEdit}
-								/> : <></>}
 
-							</>
-						)}
-					</span>
-				</div>
+				{!isClosed ?
+					<div className='flex items-center space-x-3'>
+						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
+							{isEditing ? (
+								<>
+									<input
+										type="text"
+										value={projectName}
+										onChange={(e) => setProjectName(e.target.value)}
+										onKeyUp={handleKeyUp}
+									/>
+									<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
+											   onClick={() => handleSave(projectName)}/>
+									<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
+								</>
+							) : (
+								<>
+									<span
+										className="editable-text"
+									>
+										{project.name}
+									</span>
+									{project.creator == session?.user?.id! ? <MdEdit
+										className="icon edit-icon"
+										onClick={handleEdit}
+									/> : <></>}
+
+								</>
+							)}
+						</span>
+					</div> :
+					null
+				}
 
 				{!isClosed && project['finished'] && project.status != 'CANCELLED' ?
 					<button type="button"
