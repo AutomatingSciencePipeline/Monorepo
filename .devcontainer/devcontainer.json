@@ -29,5 +29,7 @@
         10350,
         30000
     ],
+    // Pull the docker image to make sure we have the most up to date version
+    "initializeCommand": "docker pull gladospipeline/glados-dev-container:main",
     "postStartCommand": "bash ./.devcontainer/post-start.sh"
 }
