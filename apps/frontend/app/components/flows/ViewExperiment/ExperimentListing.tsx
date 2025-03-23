@@ -68,6 +68,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	const handleArchiveStatus = (newArchiveStatus) => {
+		setIsEditing(true);
 		// This swap works
 		setArchived(newArchiveStatus);
 
@@ -79,7 +80,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		//		Essentially, the MongoDB never updates the archived value.
 		//		Why does renaming the exps work and this not?
 		// TODO: Update: No errors as of now, but the UI is not updating.
-		//		'project.archived' is never defined. Strange, that is what the update function should do.
+		//		'project.archived' is never defined. Strange, as it should default to being false.
 
 		// Should not need this.
 		//project.archived = newArchiveStatus;
@@ -92,6 +93,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 		console.log("Status of project.archived: " + project.archived);
 
+		setIsEditing(false);
 	};
 
 
