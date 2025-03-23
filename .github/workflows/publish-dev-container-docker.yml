@@ -20,7 +20,7 @@ env:
   IMAGE_NAME: glados-dev-container
 
 jobs:
-  runner_push_to_registry:
+  dev_container_push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     permissions:
@@ -50,8 +50,8 @@ jobs:
         id: push
         uses: docker/build-push-action@v3
         with:
-          context: ./apps/runner
-          file: ./apps/runner/runner.Dockerfile
+          context: ./.devcontainer
+          file: ./.devcontainer/devcontainer.Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
