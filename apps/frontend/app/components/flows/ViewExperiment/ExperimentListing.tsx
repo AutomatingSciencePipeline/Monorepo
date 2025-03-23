@@ -44,7 +44,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
 
-	const [isArchived, setArchived] = useState(project.archived ?? false);
+	const [isArchived, setArchived] = useState(projectData.archived);
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -71,24 +71,29 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		// This swap works
 		setArchived(newArchiveStatus);
 
-		// TODO: Got the catch error.
+		// Old News: Got the catch error.
 		//		 reason: Error: Could not update document with id:
 		//		 67dd...
 		//		 Before this, got a POST error, 500 (Internal Server Error) at mongodb funcs.ts:100
 		//		 That happens to be the updateExperimentArchiveStatusById function.
 		//		Essentially, the MongoDB never updates the archived value.
 		//		Why does renaming the exps work and this not?
+		// TODO: Update: No errors as of now, but the UI is not updating.
+		//		'project.archived' is never defined. Strange, that is what the update function should do.
+
+		// Should not need this.
+		//project.archived = newArchiveStatus;
+
+		console.log("This will be archived: " + newArchiveStatus);
+
 		updateExperimentArchiveStatusById(project.expId, newArchiveStatus).catch((reason) => {
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
 
-		// TODO: Should not need this.
-		// console.log("Testing project['archived'] = !isArchived;");
-		// // undefined -> true
-		// console.log("Before: " + project['archived']);
-		// project.archived = newArchiveStatus;
-		// console.log("After: " + project['archived']);
+		console.log("Status of project.archived: " + project.archived);
+
 	};
+
 
 	useEffect(() => {
 		if (editingCanceled) {

@@ -102,7 +102,11 @@ export async function updateExperimentArchiveStatusById(expId: string, newArchiv
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
-    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'name': newArchiveStatus } });
+    const strArc = String(newArchiveStatus);
+
+    // TODO: The field 'archived' is the problem! When I use 'name' and strArc, I see true and false appear when I would expect.
+    //       Update: No error anymore. BUT the UI does not update to 'Experiment Archived' yet. Not sure if this set is actually working.
+    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'archived': newArchiveStatus } });
 
     if (experiment.modifiedCount == 0) {
         return Promise.reject(`Could not update document with id: ${expId}`);
