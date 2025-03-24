@@ -138,11 +138,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	return (
 		<div className='flex items-center justify-between space-x-4'>
 			<div className='min-w-0 space-y-3'>
-				<div onClick={() => setClose(!isClosed)}
-					 className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
+				<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 					{isClosed ? (
 						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
-							<ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true"/>
+							<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400" aria-hidden="true"/>
 							{isEditing ? (
 								<>
 									<input
@@ -171,7 +170,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							)}
 						</span>
 						) : (
-							<ChevronDownIcon className="h-5 w-5 text-gray-400 -translate-y-2" aria-hidden="true"/>
+							<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 -translate-y-2" aria-hidden="true"/>
 					)}
 				</div>
 
