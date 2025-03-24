@@ -171,7 +171,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							)}
 						</span>
 						) : (
-							<ChevronDownIcon className="h-5 w-5 text-gray-400 mt-5" aria-hidden="true"/>
+							<ChevronDownIcon className="h-5 w-5 text-gray-400 -translate-y-2" aria-hidden="true"/>
 					)}
 				</div>
 
@@ -296,40 +296,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						<ChartBarIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
 					</button> : null
 				}
-				{!isClosed && project['finished'] && project.status != 'CANCELLED' ? (
-					<div className="flex flex-col space-y-4">
-						<div className="flex space-x-4">
-							<button
-								type="button"
-								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-								disabled={busyDownloadingResults}
-								onClick={async () => {
-									setBusyDownloadingResults(true);
-									await onDownloadResults(project.expId);
-									setBusyDownloadingResults(false);
-								}}
-							>
-								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
-								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
-							</button>
-							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
-								<button
-									type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-									disabled={busyDownloadingZip}
-									onClick={async () => {
-										setBusyDownloadingZip(true);
-										await onDownloadProjectZip(project.expId);
-										setBusyDownloadingZip(false);
-									}}
-								>
-									{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
-									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
-								</button>
-							) : null}
-						</div>
-					</div>
-				) : null}
 				{
 					!isClosed && project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 						<button
@@ -445,6 +411,40 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</p> :
 					null
 				}
+				{!isClosed && project['finished'] && project.status != 'CANCELLED' ? (
+					<div className="flex flex-col space-y-4">
+						<div className="flex space-x-4">
+							<button
+								type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+								disabled={busyDownloadingResults}
+								onClick={async () => {
+									setBusyDownloadingResults(true);
+									await onDownloadResults(project.expId);
+									setBusyDownloadingResults(false);
+								}}
+							>
+								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
+								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button>
+							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
+								<button
+									type="button"
+									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+									disabled={busyDownloadingZip}
+									onClick={async () => {
+										setBusyDownloadingZip(true);
+										await onDownloadProjectZip(project.expId);
+										setBusyDownloadingZip(false);
+									}}
+								>
+									{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
+									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+								</button>
+							) : null}
+						</div>
+					</div>
+				) : null}
 				{
 					!isClosed ?
 						(
