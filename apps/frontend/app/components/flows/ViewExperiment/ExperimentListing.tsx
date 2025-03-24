@@ -141,7 +141,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 					{isClosed ? (
 						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
-							<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400" aria-hidden="true"/>
+							{project.status == 'COMPLETED' ?
+								(<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400" aria-hidden="true"/>)
+								: null}
 							{isEditing ? (
 								<>
 									<input
@@ -169,13 +171,17 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								</>
 							)}
 						</span>
-						) : (
-							<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 -translate-y-2" aria-hidden="true"/>
-					)}
+						) :
+						(<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
+							{project.status == 'COMPLETED' ?
+								(<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 -translate-y-2"  aria-hidden="true"/>)
+								: null}
+						</span>)
+					}
 				</div>
 
-				{!isClosed ?
-					<div className='flex items-center space-x-3'>
+					{!isClosed ?
+						<div className='flex items-center space-x-3'>
 						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
 							{isEditing ? (
 								<>
@@ -276,15 +282,25 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</div>
 					</div>
 				)}
-				{!isClosed ?
-					<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={() => {
-								onCopyExperiment(project.expId);
-							}}>
-						Copy Experiment
-						<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
-					</button> : null
+				{
+					project.status != 'COMPLETED' ?
+						<button type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								onClick={() => {
+									onCopyExperiment(project.expId);
+								}}>
+							Copy Experiment
+							<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+						</button> :
+						(!isClosed ?
+							<button type="button"
+									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+									onClick={() => {
+										onCopyExperiment(project.expId);
+									}}>
+								Copy Experiment
+								<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+							</button> : null)
 				}
 				{!isClosed && project.finished && project.status != 'CANCELLED' ?
 					<button type="button"
@@ -296,21 +312,37 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</button> : null
 				}
 				{
-					!isClosed && project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
-						<button
-							type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
-							onClick={async () => {
-								// Get the link
-								const link = await addShareLink(project.expId);
-								// Copy the link to the clipboard
-								navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
-								toast.success('Link copied to clipboard!', {duration: 1500});
-							}}
-						>
-							Share Experiment
-							<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
-						</button> : null
+					project.status != 'COMPLETED' ?
+						(project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
+							<button
+								type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+								onClick={async () => {
+									// Get the link
+									const link = await addShareLink(project.expId);
+									// Copy the link to the clipboard
+									navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+									toast.success('Link copied to clipboard!', {duration: 1500});
+								}}
+							>
+								Share Experiment
+								<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+							</button> : null) :
+						(!isClosed && project.creator == session?.user?.id! ?
+							<button
+								type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+								onClick={async () => {
+									// Get the link
+									const link = await addShareLink(project.expId);
+									// Copy the link to the clipboard
+									navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+									toast.success('Link copied to clipboard!', {duration: 1500});
+								}}
+							>
+								Share Experiment
+								<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+							</button> : null)
 				}
 				{
 					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
@@ -359,38 +391,65 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</p> :
 					null
 				}
-				{!isClosed && experimentInProgress && project.status != 'CANCELLED' ?
-					<p>
-						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
-					</p> :
-					null
+				{project.status != 'COMPLETED' ?
+					(experimentInProgress && project.status != 'CANCELLED' ?
+						<p>
+							{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
+						</p> : null) :
+					(!isClosed && experimentInProgress ?
+						<p>
+							{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
+						</p> : null)
 				}
-				{!isClosed && experimentInProgress && project.status != 'CANCELLED' ?
-					expectedFinishTime && (
-						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
-						</p>
+				{project.status != 'COMPLETED' ?
+					(experimentInProgress && project.status != 'CANCELLED' ?
+						expectedFinishTime && (
+							<p className='flex text-gray-500 text-sm space-x-2'>
+								<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
+							</p>
+						) : null
 					) :
-					null
+					(!isClosed && experimentInProgress ?
+							expectedFinishTime && (
+								<p className='flex text-gray-500 text-sm space-x-2'>
+									<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
+								</p>
+							) : null
+					)
 				}
-				{!isClosed && experimentInProgress && project.status != 'CANCELLED' ?
-					(project['totalExperimentRuns'] ?
-							<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
-							<p>(Calculating total experiment runs...)</p>
-					) :
-					null
+				{project.status != 'COMPLETED' ?
+					(experimentInProgress && project.status != 'CANCELLED' ?
+						(project['totalExperimentRuns'] ?
+								<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
+								<p>(Calculating total experiment runs...)</p>
+						) : null) :
+					(!isClosed && experimentInProgress ?
+						(project['totalExperimentRuns'] ?
+								<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
+								<p>(Calculating total experiment runs...)</p>
+						) : null)
 				}
-				{!isClosed ?
+				{project.status != 'COMPLETED' ?
 					(<p className='flex text-centertext-gray-500 text-sm space-x-2'>
 						<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 					</p>) :
-					null
+					(!isClosed ?
+							(<p className='flex text-centertext-gray-500 text-sm space-x-2'>
+								<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
+							</p>) : null
+					)
 				}
-				{!isClosed && project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
-					<p className='flex text-center text-gray-500 text-sm space-x-2'>
-						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
-					</p> :
-					null
+				{project.status != 'COMPLETED' ?
+					(project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
+						<p className='flex text-center text-gray-500 text-sm space-x-2'>
+							<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
+						</p> : null
+					) :
+					(!isClosed && project['startedAtEpochMillis'] ?
+							<p className='flex text-center text-gray-500 text-sm space-x-2'>
+								<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
+							</p> : null
+					)
 				}
 				{!isClosed && project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
