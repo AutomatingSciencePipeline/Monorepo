@@ -3,12 +3,7 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
-import {
-	addShareLink,
-	unfollowExperiment,
-	updateExperimentNameById,
-	cancelExperimentById
-} from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
