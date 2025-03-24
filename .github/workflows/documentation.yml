@@ -1,6 +1,8 @@
 name: documentation 
 on:
   push:
+    paths:
+      - 'docs/**'
     branches:
       - main
 permissions:

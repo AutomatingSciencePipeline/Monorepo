@@ -2,8 +2,12 @@ name: Python Lint and Test - Runner
 
 on:
   push:
+    paths:
+      - 'apps/runner/**'
     branches: [ main ]
   pull_request:
+    paths:
+      - 'apps/runner/**'
     branches: [ main ]
 
 permissions:

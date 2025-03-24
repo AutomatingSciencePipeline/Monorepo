@@ -2,8 +2,12 @@ name: Python Lint and Test - Backend
 
 on:
   push:
+    paths:
+      - 'apps/backend/**'
     branches: [ main ]
   pull_request:
+    paths:
+      - 'apps/backend/**'
     branches: [ main ]
 
 permissions:
