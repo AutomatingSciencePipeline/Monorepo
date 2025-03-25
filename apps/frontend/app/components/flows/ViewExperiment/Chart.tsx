@@ -202,6 +202,22 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const colors = generateColors(headers.length);
                 const ctx = document.getElementById('myChart') as HTMLCanvasElement;
 
+                let xListWithIndices = [] as any[];
+                for (let i = 0; i < xList.length; i++) {
+                    xListWithIndices.push([xList[i], i]);
+                }
+
+                //sort
+                if (xList.every((value) => {
+                    return typeof value === 'number';
+                })) {
+                    xListWithIndices.sort((a, b) => {
+                        return a[0] - b[0];
+                    });
+                }
+
+                let sortedXList = xListWithIndices.map((pair) => pair[0]);
+
                 //if we have a chart instance already, save which datasets are visible.
                 let visibleMetas;
                 if (chartInstance) {
@@ -215,7 +231,13 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 for (let i = 0; i < totalLength; i++) {
                     if (i != xIndex) {
                         newHeaders.push(headers[i]);
-                        newYLists.push(yLists[i]);
+
+                        let newYi = [] as any[];
+                        for (let j = 0; j < xListWithIndices.length; j++)
+                        {
+                            newYi.push(yLists[i][xListWithIndices[j][1]]);
+                        }
+                        newYLists.push(newYi);
                     }
                 }
 
@@ -229,7 +251,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 const newChartInstance = new Chart(ctx, {
                     type: chartType,
                     data: {
-                        labels: xList,
+                        labels: sortedXList,
                         datasets: datasetsObj
                     },
                     options: {
