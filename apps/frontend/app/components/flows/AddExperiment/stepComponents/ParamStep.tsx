@@ -89,7 +89,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 }
 
-export const ParameterOptions = ['integer', 'float', 'bool', 'string', 'stringlist', 'paramgroup'] as const;
+export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
 
 export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props }) => {
 
