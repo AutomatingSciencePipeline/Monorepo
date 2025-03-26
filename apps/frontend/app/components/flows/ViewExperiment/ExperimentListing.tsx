@@ -15,10 +15,13 @@ export interface ExperimentListingProps {
 	onDownloadResults: (experimentId: string) => Promise<void>;
 	onDownloadProjectZip: (experimentId: string) => Promise<void>;
 	onDeleteExperiment: (experimentId: string) => void;
+	multiSelectMode: boolean; // New prop for multi-select mode
+	selectedExperiments: string[]; // New prop for selected experiments
+	setSelectedExperiments: React.Dispatch<React.SetStateAction<string[]>>; // Setter for selected experiments
 }
 
 
-export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
+export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment, multiSelectMode, selectedExperiments, setSelectedExperiments }: ExperimentListingProps) => {
 	const { data: session } = useSession();
 
 	const [project, setProject] = useState<ExperimentData>(projectData);
@@ -43,6 +46,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
+
+	const handleCheckboxChange = (experimentId: string, isChecked: boolean) => {
+		setSelectedExperiments((prev) =>
+			isChecked ? [...prev, experimentId] : prev.filter((id) => id !== experimentId)
+		);
+	};
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -129,10 +138,21 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		: null;
 
 	return (
-		<div className='flex justify-between space-x-4'>
-			<div className='min-w-0 space-y-3'>
+		<div className='flex justify-between space-x-2'>
+			{/* Checkbox for multi-select - reduced spacing */}
+			<div className='flex items-center' style={{ width: '30px', marginRight: '0' }}>
+				{multiSelectMode && (
+					<input
+						type="checkbox"
+						checked={selectedExperiments.includes(projectData.expId)}
+						onChange={(e) => handleCheckboxChange(projectData.expId, e.target.checked)}
+						className="form-checkbox h-5 w-5 text-blue-600"
+					/>
+				)}
+			</div>
+			<div className='flex-1 min-w-0 space-y-3 ml-0'>
 				<div className='flex items-center space-x-3'>
-					<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
+					<span className='text-sm font-medium flex items-center'>
 						{isEditing ? (
 							<>
 								<input
@@ -146,113 +166,55 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							</>
 						) : (
 							<>
-								<span
-									className="editable-text"
-								>
+								<span className="editable-text">
 									{project.name}
 								</span>
-								{project.creator == session?.user?.id! ? <MdEdit
-									className="icon edit-icon"
-									onClick={handleEdit}
-								/> : <></>}
-
+								{project.creator == session?.user?.id! ? (
+									<MdEdit className="icon edit-icon" onClick={handleEdit} />
+								) : null}
 							</>
 						)}
 					</span>
 				</div>
-				
-				{project['finished'] == true && project.status != 'CANCELLED' ?
+
+				<div className="space-y-2 mb-4"> {/* Added mb-4 for spacing */}
+					{project['finished'] == true && project.status != 'CANCELLED' ?
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={() => {
+								window.open(`/api/download/logs/${project.expId}`, '_blank');
+							}}>
+							View System Log
+							<ExclamationTriangleIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+						</button> :
+						null
+					}
+
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={() => {
-							window.open(`/api/download/logs/${project.expId}`, '_blank');
+							onCopyExperiment(project.expId);
 						}}>
-						View System Log
-						<ExclamationTriangleIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-					</button> :
-					null
-				}
+						Copy Experiment
+						<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+					</button>
 
-				{isDeleteModalOpen && (
-					<div className="fixed z-10 inset-0 overflow-y-auto">
-						<div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-							<div className="fixed inset-0 transition-opacity" aria-hidden="true">
-								<div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-							</div>
+					{project.finished && project.status != 'CANCELLED' ?
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={openGraphModal}
+						>
+							See Graph
+							<ChartBarIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+						</button> : null
+					}
 
-							<span
-								className="hidden sm:inline-block sm:align-middle sm:h-screen"
-								aria-hidden="true">
-								&#8203;
-							</span>
-
-							<div
-								className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-								role="dialog"
-								style={{ padding: '1rem' }}
-								aria-modal="true"
-								aria-labelledby="modal-headline"
-							>
-								<div className="bg-white">
-									<div className="relative bg-white">
-										<div className="text-center mt-2">
-											<p className="text-xl font-extrabold text-gray-900">Delete Experiment</p>
-										</div>
-									</div>
-
-									<div className="px-4 py-2">
-										<p className="text-gray-500">Are you sure you want to delete this experiment?</p>
-									</div>
-
-									<div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-										<button
-											onClick={() => {
-												onDeleteExperiment(project.expId);
-												closeDeleteModal(); // Close the modal after deletion
-											}}
-											className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-										>
-											Delete
-										</button>
-										<button
-											onClick={closeDeleteModal}
-											className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
-										>
-											Cancel
-											<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-										</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-				<button type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-					onClick={() => {
-						onCopyExperiment(project.expId);
-					}}>
-					Copy Experiment
-					<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-				</button>
-				{project.finished && project.status != 'CANCELLED' ?
-					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={openGraphModal}
-					>
-						See Graph
-						<ChartBarIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-					</button> : null
-				}
-				{
-					project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
+					{project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 						<button
 							type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
 							onClick={async () => {
-								// Get the link
 								const link = await addShareLink(project.expId);
-								// Copy the link to the clipboard
 								navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
 								toast.success('Link copied to clipboard!', { duration: 1500 });
 							}}
@@ -260,29 +222,32 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							Share Experiment
 							<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 						</button> : null
-				}
-				{
-					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
-					<button type="button"
-						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-						onClick={() => {
-							toast.promise(cancelExperimentById(project.expId), {
-								success: 'Cancelled experiment', error: 'Failed to cancel experiment', loading: 'Cancelling experiment...'
-							});
-						}}
-					>
-						Cancel Experiment
-						<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-					</button>
-				}
+					}
+
+					{project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
+						<button type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							onClick={() => {
+								toast.promise(cancelExperimentById(project.expId), {
+									success: 'Cancelled experiment', error: 'Failed to cancel experiment', loading: 'Cancelling experiment...'
+								});
+							}}
+						>
+							Cancel Experiment
+							<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+						</button>
+					}
+				</div>
 			</div>
+
 			<div className='sm:hidden'>
 				<ChevronRightIcon
 					className='h-5 w-5 text-gray-400'
 					aria-hidden='true'
 				/>
 			</div>
-			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
+
+			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3 ml-4'>
 				<p className='flex items-center space-x-4'>
 					{project.finished && project.status != 'CANCELLED' ? (
 						project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
@@ -299,6 +264,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						<span className='font-mono text-red-500'>Experiment Cancelled</span>
 					) : null}
 				</p>
+
 				{(project.finished || experimentInProgress) && project.status != 'CANCELLED' ?
 					<p className='flex items-center space-x-4'>
 						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
@@ -306,12 +272,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</p> :
 					null
 				}
+
 				{experimentInProgress && project.status != 'CANCELLED' ?
 					<p>
 						{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
 					</p> :
 					null
 				}
+
 				{experimentInProgress && project.status != 'CANCELLED' ?
 					expectedFinishTime && (
 						<p className='flex text-gray-500 text-sm space-x-2'>
@@ -320,6 +288,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) :
 					null
 				}
+
 				{experimentInProgress && project.status != 'CANCELLED' ?
 					(project['totalExperimentRuns'] ?
 						<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
@@ -327,33 +296,39 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) :
 					null
 				}
+
 				<p className='flex text-centertext-gray-500 text-sm space-x-2'>
 					<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
 				</p>
+
 				{project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
 					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
 					</p> :
 					null
 				}
+
 				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
 						<span>Finished at {new Date(project['finishedAtEpochMilliseconds']).toLocaleString()}</span>
 					</p> :
 					null
 				}
+
 				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
 					<p className='flex text-gray-500 text-sm space-x-2'>
 						<span>Total Time: {formattedTotalTime}</span>
 					</p> :
 					null
 				}
+
 				{project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
 					<p className='flex text-center text-gray-500 text-sm space-x-2'>
 						<span>Average Time per Experiment Run: {formattedAverageTimePerRun}</span>
 					</p> :
 					null
 				}
+
 				{project['finished'] == true && project.status != 'CANCELLED' ? (
 					<div className="flex flex-col space-y-4">
 						<div className="flex space-x-4">
@@ -370,6 +345,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
 								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 							</button>
+
 							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
 								<button
 									type="button"
@@ -389,40 +365,93 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					</div>
 				) : null}
 
-				{
-					project.creator == session?.user?.id! ?
-						(
-							project.finished ?
-								<button type="button"
-									className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-									onClick={() => {
-										openDeleteModal();
-									}}>
-									Delete Experiment
-									<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-								</button>
-								:
-								null
-						)
-						:
-						<button type="button"
-							className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={() => {
-								toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
-									success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
-									loading: "Unfollowing experiment..."
-								});
-							}}>
-							Unfollow Experiment
-							<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-						</button>
-				}
-				{
-					(showGraphModal && project.finished && project.status != 'CANCELLED') && (
-						<Chart onClose={closeGraphModal} project={project} />
+				{project.creator == session?.user?.id! ?
+					(
+						project.finished ?
+							<button type="button"
+								className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								onClick={() => {
+									openDeleteModal();
+								}}>
+								Delete Experiment
+								<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button>
+							:
+							null
 					)
+					:
+					<button type="button"
+						className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+						onClick={() => {
+							toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
+								success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
+								loading: "Unfollowing experiment..."
+							});
+						}}>
+						Unfollow Experiment
+						<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+					</button>
 				}
+
+				{(showGraphModal && project.finished && project.status != 'CANCELLED') && (
+					<Chart onClose={closeGraphModal} project={project} />
+				)}
 			</div>
+
+			{isDeleteModalOpen && (
+				<div className="fixed z-10 inset-0 overflow-y-auto">
+					<div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+						<div className="fixed inset-0 transition-opacity" aria-hidden="true">
+							<div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+						</div>
+
+						<span
+							className="hidden sm:inline-block sm:align-middle sm:h-screen"
+							aria-hidden="true">
+							&#8203;
+						</span>
+
+						<div
+							className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+							role="dialog"
+							style={{ padding: '1rem' }}
+							aria-modal="true"
+							aria-labelledby="modal-headline"
+						>
+							<div className="bg-white">
+								<div className="relative bg-white">
+									<div className="text-center mt-2">
+										<p className="text-xl font-extrabold text-gray-900">Delete Experiment</p>
+									</div>
+								</div>
+
+								<div className="px-4 py-2">
+									<p className="text-gray-500">Are you sure you want to delete this experiment?</p>
+								</div>
+
+								<div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+									<button
+										onClick={() => {
+											onDeleteExperiment(project.expId);
+											closeDeleteModal(); // Close the modal after deletion
+										}}
+										className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+									>
+										Delete
+									</button>
+									<button
+										onClick={closeDeleteModal}
+										className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+									>
+										Cancel
+										<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
