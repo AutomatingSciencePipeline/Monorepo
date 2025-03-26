@@ -15,10 +15,13 @@ export interface ExperimentListingProps {
 	onDownloadResults: (experimentId: string) => Promise<void>;
 	onDownloadProjectZip: (experimentId: string) => Promise<void>;
 	onDeleteExperiment: (experimentId: string) => void;
+	multiSelectMode: boolean; // New prop for multi-select mode
+	selectedExperiments: string[]; // New prop for selected experiments
+	setSelectedExperiments: React.Dispatch<React.SetStateAction<string[]>>; // Setter for selected experiments
 }
 
 
-export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment }: ExperimentListingProps) => {
+export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment, multiSelectMode, selectedExperiments, setSelectedExperiments }: ExperimentListingProps) => {
 	const { data: session } = useSession();
 
 	const [project, setProject] = useState<ExperimentData>(projectData);
@@ -45,6 +48,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [showGraphModal, setShowGraphModal] = useState(false);
 
 	const [isClosed, setClose] = useState(true);
+
+	const handleCheckboxChange = (experimentId: string, isChecked: boolean) => {
+		setSelectedExperiments((prev) =>
+			isChecked ? [...prev, experimentId] : prev.filter((id) => id !== experimentId)
+		);
+	};
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -131,7 +140,16 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		: null;
 
 	return (
-		<div className='flex items-center justify-between space-x-4'>
+		<div className='flex items-left justify-between space-x-4'>
+			{/* Checkbox for multi-select - reduced spacing */}
+			{multiSelectMode && (<div className='flex items-center' style={{ width: '30px', marginRight: '0' }}>
+					<input
+						type="checkbox"
+						checked={selectedExperiments.includes(projectData.expId)}
+						onChange={(e) => handleCheckboxChange(projectData.expId, e.target.checked)}
+						className="form-checkbox h-5 w-5 text-blue-600"
+					/>
+			</div>)}
 			<div className='min-w-0 space-y-3'>
 				<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 					{isClosed ? (

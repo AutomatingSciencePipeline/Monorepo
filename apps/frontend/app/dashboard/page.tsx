@@ -784,11 +784,51 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 
 	const [includeCompleted, setIncludeCompleted] = useState(true);
 	const [includeArchived, setIncludeArchived] = useState(true);
+	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
+	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
+
+	const toggleMultiSelectMode = () => {
+		setMultiSelectMode(!multiSelectMode);
+		setSelectedExperiments([]); // Clear selections when toggling mode
+	};
+
+	const handleDeleteSelected = () => {
+		selectedExperiments.forEach((experimentId) => {
+			deleteDocumentById(experimentId)
+				.then(() => {
+					toast.success("Deleted experiment!", { duration: 1500 });
+				})
+				.catch((reason) => {
+					toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
+				});
+		});
+		setSelectedExperiments([]); // Clear selections after deletion
+		setMultiSelectMode(false); // Exit multi-select mode
+	};
 
 	return (<div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
+				{/* "Select Multiple" button */}
+				<button
+					type="button"
+					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+					onClick={toggleMultiSelectMode}
+				>
+					{multiSelectMode ? 'Cancel Multi-Select' : 'Select Multiple'}
+				</button>
+
+				{/* "Delete Selected" button (only visible in multi-select mode) */}
+				{multiSelectMode && selectedExperiments.length > 0 && (
+					<button
+						type="button"
+						className='ml-2 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+						onClick={handleDeleteSelected}
+					>
+						Delete Selected
+					</button>
+				)}
 				<div
 					className="cursor-pointer"
 					style={{ padding: '0.5rem' }}
@@ -923,6 +963,10 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 								onDownloadResults={downloadExperimentResults}
 								onDownloadProjectZip={downloadExperimentProjectZip}
 								onDeleteExperiment={onDeleteExperiment}
+								multiSelectMode={multiSelectMode}
+								selectedExperiments={selectedExperiments}
+								setSelectedExperiments={setSelectedExperiments}
+		
 							/>
 						</li>
 					);
