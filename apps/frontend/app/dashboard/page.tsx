@@ -905,11 +905,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					if (!includeCompleted && project.finished) {
 						return null;
 					}
-					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-					const oneHourMilliseconds = 1000 * 60 * 60;
-					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-					if (!includeArchived && projectIsArchived) {
+					if (!includeArchived && (project.status == 'ARCHIVED')) {
 						return null;
 					}
 					return (
