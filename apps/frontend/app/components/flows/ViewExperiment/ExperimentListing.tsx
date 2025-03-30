@@ -68,17 +68,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	const handleArchiveStatus = (newArchiveStatus) => {
-		setIsEditing(true);
 		// This swap works
 		setArchived(newArchiveStatus);
 
-		// Old News: Got the catch error.
-		//		 reason: Error: Could not update document with id:
-		//		 67dd...
-		//		 Before this, got a POST error, 500 (Internal Server Error) at mongodb funcs.ts:100
-		//		 That happens to be the updateExperimentArchiveStatusById function.
-		//		Essentially, the MongoDB never updates the archived value.
-		//		Why does renaming the exps work and this not?
 		// TODO: Update: No errors as of now, but the UI is not updating.
 		//		'project.archived' is never defined. Strange, as it should default to being false.
 
@@ -91,9 +83,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
 
-		console.log("Status of project.archived: " + project.archived);
-
-		setIsEditing(false);
+		//console.log("Status of project.archived: " + project.archived);
+		console.log("Status of project.status: " + project.status);
 	};
 
 
@@ -351,7 +342,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
 					{project.finished && project.status != 'CANCELLED' ? (
-						project.archived ? (
+						project.status == 'ARCHIVED' ? (
 							<span className='font-mono text-yellow-500'>Experiment Archived</span>
 						) : project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
 							<span className='font-mono text-red-500'>Experiment Aborted</span>

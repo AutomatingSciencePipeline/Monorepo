@@ -905,7 +905,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					if (!includeCompleted && project.finished) {
 						return null;
 					}
-					if (!includeArchived && project.archived) {
+					if (!includeArchived && (project.status == 'ARCHIVED')) {
 						return null;
 					}
 					return (
