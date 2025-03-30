@@ -44,8 +44,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
 
-	const [isArchived, setArchived] = useState(projectData.archived);
-
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
@@ -68,22 +66,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	const handleArchiveStatus = (newArchiveStatus) => {
-		// This swap works
-		setArchived(newArchiveStatus);
-
-		// TODO: Update: No errors as of now, but the UI is not updating.
-		//		'project.archived' is never defined. Strange, as it should default to being false.
-
-		// Should not need this.
-		//project.archived = newArchiveStatus;
-
 		console.log("This will be archived: " + newArchiveStatus);
 
 		updateExperimentArchiveStatusById(project.expId, newArchiveStatus).catch((reason) => {
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
 
-		//console.log("Status of project.archived: " + project.archived);
 		console.log("Status of project.status: " + project.status);
 	};
 
@@ -419,7 +407,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
 							} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
 							onClick={() => {
-								const newArchiveStatus = !isArchived;
+								let newArchiveStatus = project.status !== 'ARCHIVED';
 								handleArchiveStatus(newArchiveStatus);
 							}}
 					>

@@ -15,7 +15,6 @@ export const submitExperiment = async (values: Partial<ExperimentData>, userId: 
 	values.estimatedTotalTimeMinutes = 0;
 	values.totalExperimentRuns = 0;
 	values.file = fileId;
-	values.archived = false;
 	// Make sure that the trialResultLineNumber is a number, not a string
 	if (!values.trialResultLineNumber) {
 		values.trialResultLineNumber = 1;
