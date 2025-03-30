@@ -319,7 +319,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</button> : null
 				}
 				{
-					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' &&
+					project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' && project.status != 'ARCHIVED' &&
 					<button type="button"
 						className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 						onClick={() => {
@@ -416,14 +416,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				{project['finished'] && project.status != 'CANCELLED' ? (
 					<button type="button"
 							className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
-								isArchived ? 'bg-gray-500 hover:bg-gray-600' : 'bg-yellow-600 hover:bg-yellow-700'
+								project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
 							} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
 							onClick={() => {
 								const newArchiveStatus = !isArchived;
 								handleArchiveStatus(newArchiveStatus);
 							}}
 					>
-							{isArchived ? 'Unarchive Experiment' : 'Archive Experiment'}
+							{project.status != 'ARCHIVED' ? 'Archive Experiment' : 'Unarchive Experiment'}
 							<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 					</button>
 				) : null}
