@@ -65,14 +65,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setIsEditing(false);
 	};
 
-	const handleArchiveStatus = (newArchiveStatus) => {
-		console.log("This will be archived: " + newArchiveStatus);
-
-		updateExperimentArchiveStatusById(project.expId, newArchiveStatus).catch((reason) => {
+	const handleArchiveStatus = (newStatus) => {
+		updateExperimentArchiveStatusById(project.expId, newStatus).catch((reason) => {
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
-
-		console.log("Status of project.status: " + project.status);
 	};
 
 
@@ -407,8 +403,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
 							} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
 							onClick={() => {
-								let newArchiveStatus = project.status !== 'ARCHIVED';
-								handleArchiveStatus(newArchiveStatus);
+								const newArchiveStatus = project.status !== 'ARCHIVED';
+								const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
+								handleArchiveStatus(newStatus);
 							}}
 					>
 							{project.status != 'ARCHIVED' ? 'Archive Experiment' : 'Unarchive Experiment'}
