@@ -148,7 +148,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 					{isClosed ? (
 						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
-							{project.status == 'COMPLETED' ?
+							{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
 								(<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400" aria-hidden="true"/>)
 								: null}
 							{isEditing ? (
@@ -180,8 +180,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</span>
 						) :
 						(<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
-							{project.status == 'COMPLETED' ?
-								(<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 -translate-y-2"  aria-hidden="true"/>)
+							{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
+								(<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 translate-y-4"  aria-hidden="true"/>)
 								: null}
 						</span>)
 					}
