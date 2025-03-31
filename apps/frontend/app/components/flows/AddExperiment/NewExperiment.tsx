@@ -411,8 +411,8 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 												/>
 											</div>
 										</div>
-										
-										<div className='overflow-y-auto flex-grow px-4 py-6 sm:px-6'>
+
+										<div className='overflow-y-auto px-4 py-6 sm:px-6'>
 										{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 										{status === FormStates.Info ? (
 											<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
