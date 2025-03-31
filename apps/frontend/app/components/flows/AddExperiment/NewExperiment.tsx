@@ -396,24 +396,23 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 										onSubmit={form.onSubmit((values) => {
 										})}
 									>
-										<div className='flex flex-col'>
-											<div className='bg-gray-50 px-4 py-6 sm:px-6'>
-												<div className='flex items-center align-center justify-between space-x-3'>
-													<Steps
-														steps={['Information', 'Parameters', 'User Defined Constants', 'Post Process', 'Confirmation', 'Dispatch'].map(
-															(step, idx) => {
-																return {
-																	id: idx + 1,
-																	name: step,
-																	status: status < idx ? 'upcoming' : 'complete',
-																};
-															}
-														)}
-													/>
-												</div>
+										<div className='sticky top-0 bg-gray-50 px-4 py-6 sm:px-6'>
+											<div className='flex items-center align-center justify-between space-x-3'>
+												<Steps
+													steps={['Information', 'Parameters', 'User Defined Constants', 'Post Process', 'Confirmation', 'Dispatch'].map(
+														(step, idx) => {
+															return {
+																id: idx + 1,
+																name: step,
+																status: status < idx ? 'upcoming' : 'complete',
+															};
+														}
+													)}
+												/>
 											</div>
 										</div>
-
+										
+										<div className='overflow-y-auto flex-grow px-4 py-6 sm:px-6'>
 										{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 										{status === FormStates.Info ? (
 											<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
@@ -428,6 +427,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 										) : (
 											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined} isDefault={isDefault} />
 										)}
+										</div>
 
 										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
 											<div className='flex justify-end space-x-3'>
