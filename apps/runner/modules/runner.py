@@ -210,17 +210,16 @@ def conduct_experiment(experiment: ExperimentData):
     explogger.info(f"Running Experiment {experiment.expId}")
     explogger.info(f"Now Running {experiment.totalExperimentRuns} trials")
     
-    trialNums = []
-    
-    for i in range(experiment.totalExperimentRuns):
-        if i != 0:
-            trialNums.append(i)
+    trialNums = range(0, experiment.totalExperimentRuns)
+        
             
     # run trial run 0
-    _run_trial_zero(experiment, 0)
+    # _run_trial_zero(experiment, 0)
     results = []
     
-    with ProcessPoolExecutor(max_workers=50) as executor:
+    # mark the experiment as started
+    update_exp_value(experiment.expId, "startedAtEpochMillis", int(time.time() * 1000))
+    with ProcessPoolExecutor() as executor:
         # run all of the experiments
         futures = [executor.submit(_run_trial_wrapper, experiment, trialNum) for trialNum in trialNums]
         # Wait for all tasks to complete
@@ -233,8 +232,16 @@ def conduct_experiment(experiment: ExperimentData):
             except Exception as e:
                 explogger.error(f"Task failed with exception: {e}")
         
-    with open('results.csv', 'a', encoding="utf8") as expResults:
+    header = False
+    with open('results.csv', 'w', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
+        if not header:
+            paramNames = get_config_paramNames('configFiles/0.ini')
+            # paramNames = get_configs_ordered(f'configFiles/0.ini', paramNames)
+            csvHeader = _get_line_n_of_trial_results_csv(0, f"trial0/" + experiment.trialResult)
+            writer.writerow(["Experiment Run"] + csvHeader + paramNames)
+            header = True
+        # write the results to the csv file
         # sort results by the first item in the array
         results.sort(key=lambda x: x[0])
         writer.writerows(results)
