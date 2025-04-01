@@ -397,7 +397,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 										})}
 									>
 										<div className='flex flex-col'>
-											<div className='bg-gray-50 px-4 py-6 sm:px-6'>
+											<div className='sticky top-0 bg-gray-50 px-4 py-6 sm:px-6'>
 												<div className='flex items-center align-center justify-between space-x-3'>
 													<Steps
 														steps={['Information', 'Parameters', 'User Defined Constants', 'Post Process', 'Confirmation', 'Dispatch'].map(
@@ -414,20 +414,22 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 											</div>
 										</div>
 
-										{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
-										{status === FormStates.Info ? (
-											<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
-										) : status === FormStates.DumbTextArea ? (
-											<DumbTextArea form={form}></DumbTextArea>
-										) : status === FormStates.Params ? (
-											<ParamStep form={form} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues}>{fields}</ParamStep>
-										) : status === FormStates.ProcessStep ? (
-											<PostProcessStep form={form}>{fields}</PostProcessStep>
-										) : status === FormStates.Confirmation ? (
-											<ConfirmationStep form={form} />
-										) : (
-											<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined} isDefault={isDefault} />
-										)}
+										<div className='overflow-y-auto px-4 py-6 sm:px-6'>
+											{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
+											{status === FormStates.Info ? (
+												<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
+											) : status === FormStates.DumbTextArea ? (
+												<DumbTextArea form={form}></DumbTextArea>
+											) : status === FormStates.Params ? (
+												<ParamStep form={form} confirmedValues={confirmedValues} setConfirmedValues={setConfirmedValues}>{fields}</ParamStep>
+											) : status === FormStates.ProcessStep ? (
+												<PostProcessStep form={form}>{fields}</PostProcessStep>
+											) : status === FormStates.Confirmation ? (
+												<ConfirmationStep form={form} />
+											) : (
+												<DispatchStep form={form} id={id} fileId={fileId} updateId={setFileId} fileLink={undefined} isDefault={isDefault} />
+											)}
+										</div>
 
 										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
 											<div className='flex justify-end space-x-3'>
