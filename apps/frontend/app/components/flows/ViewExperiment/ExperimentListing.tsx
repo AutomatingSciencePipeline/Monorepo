@@ -147,48 +147,50 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			<div className='min-w-0 space-y-3'>
 				<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 					{isClosed ? (
-						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
+							<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
 							{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
-								(<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400" aria-hidden="true"/>)
+								(<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400"
+												   aria-hidden="true"/>)
 								: null}
-							{isEditing ? (
-								<>
-									<input
-										type="text"
-										value={projectName}
-										onChange={(e) => setProjectName(e.target.value)}
-										onKeyUp={handleKeyUp}
-									/>
-									<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
-											   onClick={() => handleSave(projectName)}/>
-									<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
-								</>
-							) : (
-								<>
+								{isEditing ? (
+									<>
+										<input
+											type="text"
+											value={projectName}
+											onChange={(e) => setProjectName(e.target.value)}
+											onKeyUp={handleKeyUp}
+										/>
+										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
+												   onClick={() => handleSave(projectName)}/>
+										<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
+									</>
+								) : (
+									<>
 									<span
 										className="editable-text"
 									>
 										{project.name}
 									</span>
-									{project.creator == session?.user?.id! ? <MdEdit
-										className="icon edit-icon"
-										onClick={handleEdit}
-									/> : <></>}
+										{project.creator == session?.user?.id! ? <MdEdit
+											className="icon edit-icon"
+											onClick={handleEdit}
+										/> : <></>}
 
-								</>
-							)}
+									</>
+								)}
 						</span>
 						) :
 						(<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
 							{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
-								(<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 translate-y-4"  aria-hidden="true"/>)
+								(<ChevronDownIcon onClick={() => setClose(!isClosed)}
+												  className="h-5 w-5 text-gray-400 translate-y-4" aria-hidden="true"/>)
 								: null}
 						</span>)
 					}
 				</div>
 
-					{!isClosed ?
-						<div className='flex items-center space-x-3'>
+				{!isClosed ?
+					<div className='flex items-center space-x-3'>
 						<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
 							{isEditing ? (
 								<>
@@ -333,7 +335,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								}}
 							>
 								{busyDownloadingResults ? 'Preparing Results...' : 'Download Results'}
-								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+								<DocumentCheckIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
 							</button>
 							{project['trialExtraFile'] || project['scatter'] || project['keepLogs'] ? (
 								<button
@@ -347,12 +349,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									}}
 								>
 									{busyDownloadingZip ? 'Preparing Project Zip...' : 'Download Project Zip'}
-									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+									<FolderArrowDownIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
 								</button>
 							) : null}
 						</div>
 					</div>
-					) : null
+				) : null
 				}
 
 				{
@@ -411,11 +413,44 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					aria-hidden='true'
 				/>
 			</div>
+			{isClosed ? (
+				<div className="flex flex-col space-y-4">
+					<div className="flex space-x-4">
+						<button
+							type="button"
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+							onClick={async () => {
+								// Get the link
+								const link = await addShareLink(project.expId);
+								// Copy the link to the clipboard
+								navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+								toast.success('Link copied to clipboard!', {duration: 1500});
+							}}
+						>
+							{'Share Experiment'}
+							<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+						</button>
+						<button type="button"
+								className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
+									project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
+								} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
+								onClick={() => {
+									const newArchiveStatus = project.status !== 'ARCHIVED';
+									const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
+									handleArchiveStatus(newStatus);
+								}}
+						>
+							{project.status != 'ARCHIVED' ? 'Archive Experiment' : 'Unarchive Experiment'}
+							<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+						</button>
+					</div>
+				</div>) : null
+			}
 			<div className='hidden sm:flex flex-col flex-shrink-0 items-end space-y-3'>
 				<p className='flex items-center space-x-4'>
 					{project.finished && project.status != 'CANCELLED' ? (
 						project.status == 'ARCHIVED' ? (
-								<span className='font-mono text-yellow-500'>Experiment Archived</span>
+							<span className='font-mono text-yellow-500'>Experiment Archived</span>
 						) : project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
 							<span className='font-mono text-red-500'>Experiment Aborted</span>
 						) : (
@@ -432,7 +467,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				</p>
 				{(project.finished || experimentInProgress) && project.status != 'CANCELLED' ?
 					<p className='flex items-center space-x-4'>
-						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
+						<span
+							className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
 						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
 					</p> :
 					null
@@ -449,11 +485,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				}
 				{project.status != 'COMPLETED' ?
 					(experimentInProgress && project.status != 'CANCELLED' ?
-						expectedFinishTime && (
-							<p className='flex text-gray-500 text-sm space-x-2'>
-								<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
-							</p>
-						) : null
+							expectedFinishTime && (
+								<p className='flex text-gray-500 text-sm space-x-2'>
+									<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
+								</p>
+							) : null
 					) :
 					(!isClosed && experimentInProgress ?
 							expectedFinishTime && (
@@ -487,9 +523,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				}
 				{project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
 					(project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
-						<p className='flex text-center text-gray-500 text-sm space-x-2'>
-							<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
-						</p> : null
+							<p className='flex text-center text-gray-500 text-sm space-x-2'>
+								<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
+							</p> : null
 					) :
 					(!isClosed && project['startedAtEpochMillis'] ?
 							<p className='flex text-center text-gray-500 text-sm space-x-2'>
@@ -552,18 +588,19 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 										className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 										onClick={() => {
 											toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
-												success: 'Unfollowed experiment', error: 'Failed to unfollow experiment',
+												success: 'Unfollowed experiment',
+												error: 'Failed to unfollow experiment',
 												loading: "Unfollowing experiment..."
 											});
 										}}>
 									Unfollow Experiment
-									<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+									<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
 								</button>
 						) : null
 				}
 				{
 					(showGraphModal && project.finished && project.status != 'CANCELLED') && (
-						<Chart onClose={closeGraphModal} project={project} />
+						<Chart onClose={closeGraphModal} project={project}/>
 					)
 				}
 			</div>
