@@ -407,7 +407,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					aria-hidden='true'
 				/>
 			</div>
-			{isClosed ? (
+			{isClosed && project.finished ? (
 				<div className="flex flex-col space-y-4">
 					<div className="flex space-x-4">
 						<button
