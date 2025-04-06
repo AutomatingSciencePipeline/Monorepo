@@ -906,7 +906,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 	};
 
 	const [includeCompleted, setIncludeCompleted] = useState(true);
-	const [includeArchived, setIncludeArchived] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(false);
 
 
 	// Handle individual checkbox changes
@@ -1033,14 +1033,10 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					}
 					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
 				}).map((project: ExperimentData) => {
-					if (!includeCompleted && project.finished) {
+					if (!includeCompleted && project.finished && (project.status == 'COMPLETED')) {
 						return null;
 					}
-					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-					const oneHourMilliseconds = 1000 * 60 * 60;
-					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-					if (!includeArchived && projectIsArchived) {
+					if (!includeArchived && (project.status == 'ARCHIVED')) {
 						return null;
 					}
 					return (
