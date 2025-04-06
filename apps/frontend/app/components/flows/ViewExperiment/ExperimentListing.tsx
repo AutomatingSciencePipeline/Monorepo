@@ -146,31 +146,30 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								(<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400"
 												   aria-hidden="true"/>)
 								: null}
-								{isEditing ? (
-									<>
-										<input
-											type="text"
-											value={projectName}
-											onChange={(e) => setProjectName(e.target.value)}
-											onKeyUp={handleKeyUp}
-										/>
-										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer" onClick={() => handleSave(projectName)}/>
-										<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
-									</>
-								) : (
-									<>
+							{isEditing ? (
+								<>
+									<input
+										type="text"
+										value={projectName}
+										onChange={(e) => setProjectName(e.target.value)}
+										onKeyUp={handleKeyUp}
+									/>
+									<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer" onClick={() => handleSave(projectName)}/>
+									<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
+								</>
+							) : (
+								<>
 									<span
 										className="editable-text"
 									>
 										{project.name}
 									</span>
-										{project.creator == session?.user?.id! ? <MdEdit
-											className="icon edit-icon"
-											onClick={handleEdit}
-										/> : <></>}
-
-									</>
-								)}
+									{project.creator == session?.user?.id! ? <MdEdit
+										className="icon edit-icon"
+										onClick={handleEdit}
+									/> : <></>}
+								</>
+							)}
 						</span>
 						) :
 						(<span className='text-sm font-medium' style={{display: 'flex', alignItems: 'center'}}>
@@ -426,8 +425,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				</p>
 				{(project.finished || experimentInProgress) && project.status != 'CANCELLED' ?
 					<p className='flex items-center space-x-4'>
-						<span
-							className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
+						<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
 						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
 					</p> :
 					null
@@ -444,11 +442,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				}
 				{project.status != 'COMPLETED' ?
 					(experimentInProgress && project.status != 'CANCELLED' ?
-							expectedFinishTime && (
-								<p className='flex text-gray-500 text-sm space-x-2'>
-									<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
-								</p>
-							) : null
+						expectedFinishTime && (
+							<p className='flex text-gray-500 text-sm space-x-2'>
+								<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
+							</p>
+						) : null
 					) :
 					(!isClosed && experimentInProgress ?
 							expectedFinishTime && (
@@ -482,14 +480,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				}
 				{project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
 					(project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
-							<p className='flex text-center text-gray-500 text-sm space-x-2'>
-								<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
-							</p> : null
+						<p className='flex text-center text-gray-500 text-sm space-x-2'>
+							<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
+						</p> : null
 					) :
 					(!isClosed && project['startedAtEpochMillis'] ?
-							<p className='flex text-center text-gray-500 text-sm space-x-2'>
-								<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
-							</p> : null
+						<p className='flex text-center text-gray-500 text-sm space-x-2'>
+							<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
+						</p> : null
 					)
 				}
 				{!isClosed && project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
@@ -537,7 +535,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 													openDeleteModal();
 												}}>
 											Delete Experiment
-											<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+											<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 										</button>
 										:
 										null
@@ -553,7 +551,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 											});
 										}}>
 									Unfollow Experiment
-									<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+									<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 								</button>
 						) : null
 				}
