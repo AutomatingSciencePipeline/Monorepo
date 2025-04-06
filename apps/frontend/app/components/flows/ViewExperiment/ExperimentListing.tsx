@@ -498,7 +498,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					<p className='flex items-center space-x-4'>
 						<span
 							className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
-						<span className='w-[160px] font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
+						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
 					</p> :
 					null
 				}
