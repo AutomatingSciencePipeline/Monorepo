@@ -405,6 +405,41 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					aria-hidden='true'
 				/>
 			</div>
+			{isClosed && project.finished && project.status != 'CANCELLED' ? (
+				<div className="flex justify-end space-x-4 w-full">
+					<div className="flex flex-col space-y-4">
+						<div className="flex space-x-4">
+							<button
+								type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+								onClick={async () => {
+									// Get the link
+									const link = await addShareLink(project.expId);
+									// Copy the link to the clipboard
+									navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+									toast.success('Link copied to clipboard!', {duration: 1500});
+								}}
+							>
+								{'Share Experiment'}
+								<ShareIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+							</button>
+							<button type="button"
+									className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
+										project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
+									} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full max-w-[173.67px]`}
+									onClick={() => {
+										const newArchiveStatus = project.status !== 'ARCHIVED';
+										const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
+										handleArchiveStatus(newStatus);
+									}}
+							>
+								{project.status != 'ARCHIVED' ? 'Archive Experiment' : 'Unarchive Experiment'}
+								<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true'/>
+							</button>
+						</div>
+					</div>
+				</div>) : null
+			}
 			{/*<div className="flex justify-end space-x-4 w-full">*/}
 			{/*	{isClosed && project.finished && project.status != 'CANCELLED' ? (*/}
 			{/*		<div className="flex flex-col space-y-4">*/}
@@ -463,7 +498,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					<p className='flex items-center space-x-4'>
 						<span
 							className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
-						<span className='font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
+						<span className='w-[160px] font-mono'>SUCCESSES: {project['passes'] ?? 0}</span>
 					</p> :
 					null
 				}
