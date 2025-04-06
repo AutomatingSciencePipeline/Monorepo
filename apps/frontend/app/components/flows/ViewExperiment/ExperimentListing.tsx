@@ -154,8 +154,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 											onChange={(e) => setProjectName(e.target.value)}
 											onKeyUp={handleKeyUp}
 										/>
-										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
-												   onClick={() => handleSave(projectName)}/>
+										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer" onClick={() => handleSave(projectName)}/>
 										<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
 									</>
 								) : (
@@ -194,8 +193,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 										onChange={(e) => setProjectName(e.target.value)}
 										onKeyUp={handleKeyUp}
 									/>
-									<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
-											   onClick={() => handleSave(projectName)}/>
+									<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer" onClick={() => handleSave(projectName)}/>
 									<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancel}/>
 								</>
 							) : (
@@ -428,7 +426,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							<button type="button"
 									className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
 										project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
-									} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full max-w-[100px]`}
+									} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full max-w-[173.67px]`}
 									onClick={() => {
 										const newArchiveStatus = project.status !== 'ARCHIVED';
 										const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
