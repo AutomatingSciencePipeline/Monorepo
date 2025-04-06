@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Transition, TransitionChild } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Switch, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -74,9 +74,9 @@ const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
 
 	useEffect(() => {
-		if (session?.user?.role === "admin"){
+		if (session?.user?.role === "admin") {
 			//Check to make sure the admin link is not already in the userNavigation
-			if (userNavigation[0].name !== 'Admin'){
+			if (userNavigation[0].name !== 'Admin') {
 				userNavigation.unshift({ name: 'Admin', href: '/admin' });
 			}
 		}
@@ -238,6 +238,10 @@ export default function DashboardPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState('');
+	const [isClosed, setClose] = useState(false);
+	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
+	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
+
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -315,6 +319,16 @@ export default function DashboardPage() {
 	const [selectedExperimentType, setSelectedExperimentType] = useState<ExperimentTypes | null>(null);
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isEditMode, setIsEditMode] = useState(false);
+
+
+	const handleExpandAll = () => {
+		setClose(false);
+	}
+
+	const handleCollapseAll = () => {
+		setClose(true);
+	}
 
 	const handleDefaultExperiment = () => {
 		setIsModalOpen(true);
@@ -326,6 +340,39 @@ export default function DashboardPage() {
 		setIsDefault(true);
 		setIsModalOpen(false);
 		setSelectedExperimentType(defaultExpNum); // Set selected experiment type here
+	};
+
+	const toggleMultiSelectMode = () => {
+		setMultiSelectMode(!multiSelectMode);
+		setSelectedExperiments([]); // Clear selections when toggling mode
+	};
+
+	const handleDeleteSelected = () => {
+		selectedExperiments.forEach((experimentId) => {
+			deleteDocumentById(experimentId)
+				.then(() => {
+					toast.success("Deleted experiment!", { duration: 1500 });
+				})
+				.catch((reason) => {
+					toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
+				});
+		});
+		setSelectedExperiments([]); // Clear selections after deletion
+		setMultiSelectMode(false); // Exit multi-select mode
+	};
+
+	const [isChecked, setIsChecked] = useState(false);
+
+	const handleSelectAll = (checked: boolean) => {
+		setIsChecked(checked);
+		if (checked) {
+			// Select all experiment IDs
+			const allExperimentIds = experiments.map((experiment) => experiment.expId);
+			setSelectedExperiments(allExperimentIds);
+		} else {
+			// Clear all selections
+			setSelectedExperiments([]);
+		}
 	};
 
 	useEffect(() => {
@@ -387,16 +434,24 @@ export default function DashboardPage() {
 											</div>
 											{/* Action buttons */}
 											<div className='flex flex-col sm:flex-row xl:flex-col'>
-												<button
-													type='button'
-													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-													onClick={() => {
-														setFormState(1);
-													}}
-													// onClick
-												>
-													{label}
-												</button>
+												<div className="flex flex-col space-y-2">
+													<button
+														type="button"
+														className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full"
+														onClick={() => {
+															setFormState(1);
+														}}
+													>
+														{label}
+													</button>
+													<button
+														type="button"
+														className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+														onClick={handleDefaultExperiment}
+													>
+														Run a Default Experiment
+													</button>
+												</div>
 											</div>
 										</div>
 										{/* Meta info */}
@@ -433,14 +488,74 @@ export default function DashboardPage() {
 													}
 												</span>
 											</div>
-											<div className='flex items-center space-x-2'>
+											<div className='flex justify-start space-x-2'>
 												<>
-													<button
-														type="button"
-														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-														onClick={handleDefaultExperiment}>
-														Run a Default Experiment
-													</button>
+													{/* Edit Mode Toggle */}
+													<div className="flex flex-col space-y-2 items-start">
+														<div className="flex items-center justify-start space-x-2">
+															<Switch
+																checked={isEditMode}
+																onChange={setIsEditMode}
+																className={`${isEditMode ? 'bg-blue-600' : 'bg-gray-200'}
+        relative inline-flex h-6 w-11 items-center rounded-full`}
+															>
+																<span
+																	className={`${isEditMode ? 'translate-x-6' : 'translate-x-1'}
+          inline-block h-4 w-4 transform rounded-full bg-white transition`}
+																/>
+															</Switch>
+															<span className="text-sm font-medium text-gray-700">Edit Mode</span>
+														</div>
+
+														{/* Conditionally Render Expand/Collapse Buttons */}
+														{isEditMode && (
+															<div className="flex flex-col space-y-2 mt-2">
+																{/* "Select Multiple" button */}
+																<button
+																	type="button"
+																	className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+																	onClick={toggleMultiSelectMode}
+																>
+																	{multiSelectMode ? 'Cancel Multi-Select' : 'Select Multiple'}
+																</button>
+
+																{multiSelectMode && (
+																	<button
+																		type="button"
+																		className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																		onClick={() => handleSelectAll(true)} // Select all experiments
+																	>
+																		Select All
+																	</button>
+																)}
+
+																{/* "Delete Selected" button (only visible in multi-select mode) */}
+																{multiSelectMode && selectedExperiments.length > 0 && (
+																	<button
+																		type="button"
+																		className='ml-2 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+																		onClick={handleDeleteSelected}
+																	>
+																		Delete Selected
+																	</button>
+																)}
+																<button
+																	type="button"
+																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																	onClick={handleExpandAll}
+																>
+																	Expand All Experiments
+																</button>
+																<button
+																	type="button"
+																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																	onClick={handleCollapseAll}
+																>
+																	Collapse All Experiments
+																</button>
+															</div>
+														)}
+													</div>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
 															<TransitionChild
@@ -539,6 +654,11 @@ export default function DashboardPage() {
 								});
 							}}
 							searchTerm={searchTerm}
+							isClosed={isClosed}
+							setClose={setClose}
+							multiSelectMode={multiSelectMode}
+							selectedExperiments={selectedExperiments}
+							setSelectedExperiments={setSelectedExperiments}
 						/>
 					</div>
 					{/* Activity feed */}
@@ -614,6 +734,11 @@ export interface ExperimentListProps {
 	onCopyExperiment: (experiment: string) => void;
 	onDeleteExperiment: (experiment: string) => void;
 	searchTerm: string;
+	isClosed: boolean;
+	setClose: (value: boolean) => void;
+	multiSelectMode: boolean;
+	selectedExperiments: string[];
+	setSelectedExperiments: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const SortingOptions = {
@@ -625,7 +750,7 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, isClosed, setClose, multiSelectMode, selectedExperiments, setSelectedExperiments, }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -751,8 +876,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		handleSortChange(newSortBy);
 	};
 
-	// Handle displaying sorting option
-
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
 		setSortBy(newSortBy);
@@ -784,51 +907,19 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 
 	const [includeCompleted, setIncludeCompleted] = useState(true);
 	const [includeArchived, setIncludeArchived] = useState(true);
-	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
-	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
 
-	const toggleMultiSelectMode = () => {
-		setMultiSelectMode(!multiSelectMode);
-		setSelectedExperiments([]); // Clear selections when toggling mode
-	};
 
-	const handleDeleteSelected = () => {
-		selectedExperiments.forEach((experimentId) => {
-			deleteDocumentById(experimentId)
-				.then(() => {
-					toast.success("Deleted experiment!", { duration: 1500 });
-				})
-				.catch((reason) => {
-					toast.error(`Failed delete, reason: ${reason}`, { duration: 1500 });
-				});
-		});
-		setSelectedExperiments([]); // Clear selections after deletion
-		setMultiSelectMode(false); // Exit multi-select mode
+	// Handle individual checkbox changes
+	const handleCheckboxChange = (experimentId: string, checked: boolean) => {
+		setSelectedExperiments((prev) =>
+			checked ? [...prev, experimentId] : prev.filter((id) => id !== experimentId)
+		);
 	};
 
 	return (<div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
-				{/* "Select Multiple" button */}
-				<button
-					type="button"
-					className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
-					onClick={toggleMultiSelectMode}
-				>
-					{multiSelectMode ? 'Cancel Multi-Select' : 'Select Multiple'}
-				</button>
-
-				{/* "Delete Selected" button (only visible in multi-select mode) */}
-				{multiSelectMode && selectedExperiments.length > 0 && (
-					<button
-						type="button"
-						className='ml-2 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-						onClick={handleDeleteSelected}
-					>
-						Delete Selected
-					</button>
-				)}
 				<div
 					className="cursor-pointer"
 					style={{ padding: '0.5rem' }}
@@ -966,7 +1057,11 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 								multiSelectMode={multiSelectMode}
 								selectedExperiments={selectedExperiments}
 								setSelectedExperiments={setSelectedExperiments}
-		
+								isClosed={isClosed}
+								setClose={setClose}
+								isChecked={selectedExperiments.includes(project.expId)}
+								handleCheckboxChange={handleCheckboxChange}
+
 							/>
 						</li>
 					);
