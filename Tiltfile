@@ -43,7 +43,7 @@ local_resource("fix-minikube-folder-perms-mongo-2-perms",
 helm_resource(
     name="glados-mongodb",
     chart="oci://registry-1.docker.io/bitnamicharts/mongodb",
-    flags=["--values=./helm_packages/mongodb-helm/values.yaml"],
+    flags=["--values=./helm_packages/mongodb-helm/tilt/values.yaml"],
     labels=["mongodb"],
     port_forwards=["30000"]
 )
