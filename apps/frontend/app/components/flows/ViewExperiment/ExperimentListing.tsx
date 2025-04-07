@@ -428,6 +428,23 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						{project.finished && project.status !== 'CANCELLED' && isClosed && !multiSelectMode && (
 
 							<div className="flex items-center space-x-4">
+								{/* Share Button */}
+								{project.creator === session?.user?.id! && (
+									<button
+										type="button"
+										className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+										onClick={async () => {
+											// Get the share link
+											const link = await addShareLink(project.expId);
+											// Copy the link to the clipboard
+											navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
+											toast.success('Link copied to clipboard!', { duration: 1500 });
+										}}
+									>
+										Share
+										<ShareIcon className="h-5 w-5 ml-2" aria-hidden="true" />
+									</button>
+								)}
 								{/* Archive Button */}
 								<button
 									type="button"
@@ -442,18 +459,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									{project.status !== 'ARCHIVED' ? 'Archive' : 'Unarchive'}
 									<ArchiveBoxIcon className="h-5 w-5 ml-2" aria-hidden="true" />
 								</button>
-
-								{/* Delete Button */}
-								{project.creator === session?.user?.id! && (
-									<button
-										type="button"
-										className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-										onClick={openDeleteModal}
-									>
-										Delete
-										<XMarkIcon className="h-5 w-5 ml-2" aria-hidden="true" />
-									</button>
-								)}
 							</div>
 						)}
 
