@@ -143,6 +143,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								<>
 									<input
 										type="text"
+										style={{width: `60ch`}}
 										value={projectName}
 										onChange={(e) => setProjectName(e.target.value)}
 										onKeyUp={handleKeyUp}
@@ -182,6 +183,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								<>
 									<input
 										type="text"
+										style={{width: `60ch`}}
 										value={projectName}
 										onChange={(e) => setProjectName(e.target.value)}
 										onKeyUp={handleKeyUp}
