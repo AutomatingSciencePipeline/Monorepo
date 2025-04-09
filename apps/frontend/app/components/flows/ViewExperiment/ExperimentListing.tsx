@@ -144,8 +144,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<input
 										type="text"
 										style={{
-											width: `${Math.min(Math.max(projectName.length, 40), 80)}ch`,
-											transition: 'width 0.2s ease'
+											width: `${Math.min(Math.max(projectName.length, 40), 60)}ch`,
+											transition: 'width 0.1s ease'
 										}}
 										value={projectName}
 										onChange={(e) => setProjectName(e.target.value)}
@@ -186,8 +186,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<input
 										type="text"
 										style={{
-											width: `${Math.min(Math.max(projectName.length, 40), 80)}ch`,
-											transition: 'width 0.2s ease'
+											width: `${Math.min(Math.max(projectName.length, 40), 60)}ch`,
+											transition: 'width 0.1s ease'
 										}}
 										value={projectName}
 										onChange={(e) => setProjectName(e.target.value)}
