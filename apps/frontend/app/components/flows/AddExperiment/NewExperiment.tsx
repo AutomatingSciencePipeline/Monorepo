@@ -16,7 +16,7 @@ import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../../lib/db'
 import { copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
-import { addNumsExpData, multistringPy, geneticalgo } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
+import { addNumsExpData, multistringPy, geneticalgo, paramGroupDefault } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
 import { useDebouncedCallback } from "use-debounce";
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
@@ -73,6 +73,8 @@ function selectDefaultExpFile(selectedExperiment: number) {
 			return multistringPy;
 		case 3:
 			return geneticalgo;
+		case 4:
+			return paramGroupDefault;
 		default:
 			return addNumsExpData;
 	}
