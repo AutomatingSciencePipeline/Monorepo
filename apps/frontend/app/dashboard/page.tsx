@@ -75,9 +75,9 @@ const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
 
 	useEffect(() => {
-		if (session?.user?.role === "admin"){
+		if (session?.user?.role === "admin") {
 			//Check to make sure the admin link is not already in the userNavigation
-			if (userNavigation[0].name !== 'Admin'){
+			if (userNavigation[0].name !== 'Admin') {
 				userNavigation.unshift({ name: 'Admin', href: '/admin' });
 			}
 		}
@@ -294,17 +294,15 @@ export default function DashboardPage() {
 		});
 	};
 
-	const QUEUE_RECHECK_INTERVAL_MS = 4000;
+	const QUEUE_RECHECK_INTERVAL_MS = 4000; // 4 seconds
+
 	useEffect(() => {
 		const intervalId = setInterval(() => {
-			fetch('/api/queue').then((res) => res.json()).then((data) => {
-				setQueueLength(data.response.queueSize);
-			}).catch((err) => {
-				console.error('Error fetching queue length', err);
-			});
+			queryQueueLength(); // Call the function to fetch queue length
 		}, QUEUE_RECHECK_INTERVAL_MS);
+
 		return () => {
-			clearInterval(intervalId);
+			clearInterval(intervalId); // Clear interval on component unmount
 		};
 	}, []);
 
@@ -378,70 +376,56 @@ export default function DashboardPage() {
 													) : (
 														<></>
 													)}
-
 												</div>
-												<div className='space-y-1'>
+												<div className='flex flex-col items-start justify-start space-y-1 mt-2'>
 													<div className='text-sm font-medium text-gray-900'>
 														{session?.user?.email || ""}
+													</div>
+													<div className='flex items-start space-x-2'>
+														<CheckBadgeIcon
+															className='h-5 w-5 text-gray-400'
+															aria-hidden='true'
+														/>
+														<span className='text-sm text-gray-500 font-medium'>
+															{session?.user?.role || "User"}
+														</span>
 													</div>
 												</div>
 											</div>
 											{/* Action buttons */}
-											<div className='flex flex-col sm:flex-row xl:flex-col'>
+											<div className='flex flex-col sm:flex-row xl:flex-col space-y-2'>
 												<button
 													type='button'
 													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
 													onClick={() => {
 														setFormState(1);
 													}}
-													// onClick
 												>
 													{label}
+												</button>
+												<button
+													type='button'
+													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+													onClick={handleDefaultExperiment}
+												>
+													Run a Default Experiment
 												</button>
 											</div>
 										</div>
 										{/* Meta info */}
 										<div className='flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6'>
 											<div className='flex items-center space-x-2'>
-												<CheckBadgeIcon
-													className='h-5 w-5 text-gray-400'
-													aria-hidden='true'
-												/>
-												<span className='text-sm text-gray-500 font-medium'>
-													Verified GLADOSer
-												</span>
-											</div>
-											<div className='flex items-center space-x-2'>
-												<RectangleStackIcon
-													className='h-5 w-5 text-gray-400'
-													aria-hidden='true'
-												/>
-												<span className='text-sm text-gray-500 font-medium'>
-													{experiments?.length} project{experiments?.length == 1 ? '' : 's'}
-												</span>
-											</div>
-											<div className='flex items-center space-x-2'>
-												<QueueListIcon
-													className='h-5 w-5 text-blue-400'
-													aria-hidden='true'
-												/>
-												<span className={`text-sm text-${queueLength == QUEUE_ERROR_LENGTH ? 'red' : 'blue'}-500 font-medium`}>
-													{queueLength == QUEUE_ERROR_LENGTH ?
-														'Error - Glados Backend Offline' :
-														(queueLength == QUEUE_UNKNOWN_LENGTH) ?
-															'Loading...' :
-															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
-													}
+												<QueueListIcon className='h-5 w-5 text-blue-400' aria-hidden='true' />
+												<span className={`text-sm text-${queueLength === QUEUE_ERROR_LENGTH ? 'red' : 'blue'}-500 font-medium`}>
+													{queueLength === QUEUE_ERROR_LENGTH
+														? 'Error - Backend Offline'
+														: queueLength === QUEUE_UNKNOWN_LENGTH
+															? 'Loading...'
+															: `${queueLength} experiment${queueLength === 1 ? '' : 's'} in queue`}
 												</span>
 											</div>
 											<div className='flex items-center space-x-2'>
 												<>
-													<button
-														type="button"
-														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-														onClick={handleDefaultExperiment}>
-														Run a Default Experiment
-													</button>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
 															<TransitionChild
@@ -796,7 +780,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 	return (<div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
-				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
+				<h1 className='flex-1 text-lg font-medium'>
+					Projects <span className='text-gray-600'>({experiments?.length || 0})</span>
+				</h1>
 				<div
 					className="cursor-pointer"
 					style={{ padding: '0.5rem' }}
