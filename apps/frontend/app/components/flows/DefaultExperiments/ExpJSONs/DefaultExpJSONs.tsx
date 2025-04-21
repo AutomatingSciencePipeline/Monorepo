@@ -148,3 +148,49 @@ export const geneticalgo = {
     "name": "Genetic Algorithm Default Experiment",
     "scatter": false
 }
+
+export const paramGroupDefault =  {
+  "hyperparameters": [
+    {
+      "name": "nums",
+      "default": -1,
+      "params": {},
+      "type": "paramgroup",
+      "useDefault": false,
+      "values": {
+        "x": [
+          "10",
+          "20",
+          "1",
+          "2",
+          "5",
+          "15"
+        ],
+        "y": [
+          "20",
+          "10",
+          "2",
+          "1",
+          "15",
+          "5"
+        ]
+      }
+    }
+  ],
+  "name": "Add Nums Pram Group Default Experiment Python",
+  "description": "",
+  "trialExtraFile": "AddNumResult.csv",
+  "trialResult": "AddNumResult.csv",
+  "trialResultLineNumber": 0,
+  "scatterIndVar": "",
+  "scatterDepVar": "",
+  "dumbTextArea": "",
+  "timeout": 18000,
+  "verbose": false,
+  "scatter": false,
+  "keepLogs": true,
+  "workers": 1,
+ "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/addNums.py",
+  "status": "CREATED",
+  "experimentExecutable": ""
+}

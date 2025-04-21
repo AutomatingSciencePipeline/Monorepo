@@ -46,6 +46,7 @@ enum ExperimentTypes {
 	AddNums = 1,
 	MultiString = 2,
 	GeneticAlgorithm = 3,
+	AddNumsParamGroup = 4,
 }
 
 const projects = [
@@ -483,6 +484,13 @@ export default function DashboardPage() {
 																					onClick={() => selectExperiment(ExperimentTypes.AddNums)}
 																				>
 																					Add Nums (Python)
+																				</button>
+																				<button
+																					type="button"
+																					className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+																					onClick={() => selectExperiment(ExperimentTypes.AddNumsParamGroup)}
+																				>
+																					Param Groups Add Nums (Python)
 																				</button>
 																				<button
 																					type="button"
