@@ -334,7 +334,7 @@ export default function DashboardPage() {
 	
 		setExperimentStates(initialStates);
 	}, [experiments]);
-	
+
 	// Function to toggle the `isClosed` state for a specific experiment
 	const toggleExperimentState = (expId: string) => {
 		setExperimentStates((prevState) => ({
@@ -350,7 +350,6 @@ export default function DashboardPage() {
 			Object.keys(prevState).forEach((expId) => {
 				updatedStates[expId] = false; // Set all experiments to expanded (isClosed = false)
 			});
-			console.log('Updated States in expand:', updatedStates);
 			return updatedStates;
 		});
 	};
@@ -361,7 +360,6 @@ export default function DashboardPage() {
 			Object.keys(prevState).forEach((expId) => {
 				updatedStates[expId] = true; // Set all experiments to collapsed (isClosed = true)
 			});
-			console.log('Updated States in collapse:', updatedStates);
 			return updatedStates;
 		});
 	};
