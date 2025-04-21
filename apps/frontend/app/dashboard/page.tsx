@@ -324,6 +324,17 @@ export default function DashboardPage() {
 
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
 
+
+	useEffect(() => {
+		// Initialize experimentStates with all experiments set to false (expanded)
+		const initialStates = experiments.reduce((acc, experiment) => {
+			acc[experiment.expId] = false; // Default to expanded
+			return acc;
+		}, {} as { [key: string]: boolean });
+	
+		setExperimentStates(initialStates);
+	}, [experiments]);
+	
 	// Function to toggle the `isClosed` state for a specific experiment
 	const toggleExperimentState = (expId: string) => {
 		setExperimentStates((prevState) => ({
@@ -335,20 +346,22 @@ export default function DashboardPage() {
 
 	const handleExpandAll = () => {
 		setExperimentStates((prevState) => {
-			const updatedStates = {};
+			const updatedStates: { [key: string]: boolean } = {};
 			Object.keys(prevState).forEach((expId) => {
 				updatedStates[expId] = false; // Set all experiments to expanded (isClosed = false)
 			});
+			console.log('Updated States in expand:', updatedStates);
 			return updatedStates;
 		});
 	};
 
 	const handleCollapseAll = () => {
 		setExperimentStates((prevState) => {
-			const updatedStates = {};
+			const updatedStates: { [key: string]: boolean } = {};
 			Object.keys(prevState).forEach((expId) => {
 				updatedStates[expId] = true; // Set all experiments to collapsed (isClosed = true)
 			});
+			console.log('Updated States in collapse:', updatedStates);
 			return updatedStates;
 		});
 	};
