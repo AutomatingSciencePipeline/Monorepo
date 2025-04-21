@@ -177,7 +177,7 @@ export const paramGroupDefault =  {
       }
     }
   ],
-  "name": "Add Nums Pram Group Default Experiment Python",
+  "name": "Add Nums Param Group Default Experiment Python",
   "description": "",
   "trialExtraFile": "AddNumResult.csv",
   "trialResult": "AddNumResult.csv",
