@@ -212,7 +212,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								</>
 							)}
 						</span>
-						</div> :
+					</div> :
 					null
 				}
 
