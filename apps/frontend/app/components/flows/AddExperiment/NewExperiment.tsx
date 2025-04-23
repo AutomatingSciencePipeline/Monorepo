@@ -16,7 +16,7 @@ import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../../lib/db'
 import { copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
-import { addNumsExpData, multistringPy, geneticalgo } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
+import { addNumsExpData, multistringPy, geneticalgo, paramGroupDefault } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
 import { useDebouncedCallback } from "use-debounce";
 
 const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
@@ -73,6 +73,8 @@ function selectDefaultExpFile(selectedExperiment: number) {
 			return multistringPy;
 		case 3:
 			return geneticalgo;
+		case 4:
+			return paramGroupDefault;
 		default:
 			return addNumsExpData;
 	}
@@ -414,7 +416,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 											</div>
 										</div>
 
-										<div className='overflow-y-auto px-4 py-6 sm:px-6'>
+										<div className='flex-1 overflow-y-auto px-4 py-6 sm:px-6'>
 											{/* <div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'> */}
 											{status === FormStates.Info ? (
 												<InformationStep form={form} validationErrors={validationErrors} setValidationErrors={setValidationErrors}></InformationStep>
@@ -431,7 +433,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 											)}
 										</div>
 
-										<div className='flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
+										<div className='sticky bottom-0 flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
 											<div className='flex justify-end space-x-3'>
 												<div className='flex space-x-3 flex-1'>
 													<input

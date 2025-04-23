@@ -3,7 +3,7 @@
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Transition, TransitionChild } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Switch, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
@@ -23,9 +23,11 @@ import { ExperimentData } from '../../lib/db_types';
 import { Toggle } from '../components/Toggle';
 import { QueueResponse } from '../../pages/api/queue';
 import { deleteDocumentById } from '../../lib/mongodb_funcs';
+import { updateExperimentArchiveStatusById } from '../../lib/mongodb_funcs';
 import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
@@ -46,6 +48,7 @@ enum ExperimentTypes {
 	AddNums = 1,
 	MultiString = 2,
 	GeneticAlgorithm = 3,
+	AddNumsParamGroup = 4,
 }
 
 const projects = [
@@ -74,9 +77,9 @@ const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
 
 	useEffect(() => {
-		if (session?.user?.role === "admin"){
+		if (session?.user?.role === "admin") {
 			//Check to make sure the admin link is not already in the userNavigation
-			if (userNavigation[0].name !== 'Admin'){
+			if (userNavigation[0].name !== 'Admin') {
 				userNavigation.unshift({ name: 'Admin', href: '/admin' });
 			}
 		}
@@ -238,6 +241,10 @@ export default function DashboardPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState('');
+	const [isClosed, setClose] = useState(false);
+	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
+	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
+
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -293,17 +300,15 @@ export default function DashboardPage() {
 		});
 	};
 
-	const QUEUE_RECHECK_INTERVAL_MS = 4000;
+	const QUEUE_RECHECK_INTERVAL_MS = 4000; // 4 seconds
+
 	useEffect(() => {
 		const intervalId = setInterval(() => {
-			fetch('/api/queue').then((res) => res.json()).then((data) => {
-				setQueueLength(data.response.queueSize);
-			}).catch((err) => {
-				console.error('Error fetching queue length', err);
-			});
+			queryQueueLength(); // Call the function to fetch queue length
 		}, QUEUE_RECHECK_INTERVAL_MS);
+
 		return () => {
-			clearInterval(intervalId);
+			clearInterval(intervalId); // Clear interval on component unmount
 		};
 	}, []);
 
@@ -315,6 +320,49 @@ export default function DashboardPage() {
 	const [selectedExperimentType, setSelectedExperimentType] = useState<ExperimentTypes | null>(null);
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isEditMode, setIsEditMode] = useState(false);
+
+	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
+
+
+	useEffect(() => {
+		// Initialize experimentStates with all experiments set to false (expanded)
+		const initialStates = experiments.reduce((acc, experiment) => {
+			acc[experiment.expId] = false; // Default to expanded
+			return acc;
+		}, {} as { [key: string]: boolean });
+	
+		setExperimentStates(initialStates);
+	}, [experiments]);
+
+	// Function to toggle the `isClosed` state for a specific experiment
+	const toggleExperimentState = (expId: string) => {
+		setExperimentStates((prevState) => ({
+			...prevState,
+			[expId]: !prevState[expId], // Toggle the state for the specific experiment
+		}));
+	};
+
+
+	const handleExpandAll = () => {
+		setExperimentStates((prevState) => {
+			const updatedStates: { [key: string]: boolean } = {};
+			Object.keys(prevState).forEach((expId) => {
+				updatedStates[expId] = false; // Set all experiments to expanded (isClosed = false)
+			});
+			return updatedStates;
+		});
+	};
+
+	const handleCollapseAll = () => {
+		setExperimentStates((prevState) => {
+			const updatedStates: { [key: string]: boolean } = {};
+			Object.keys(prevState).forEach((expId) => {
+				updatedStates[expId] = true; // Set all experiments to collapsed (isClosed = true)
+			});
+			return updatedStates;
+		});
+	};
 
 	const handleDefaultExperiment = () => {
 		setIsModalOpen(true);
@@ -328,6 +376,89 @@ export default function DashboardPage() {
 		setSelectedExperimentType(defaultExpNum); // Set selected experiment type here
 	};
 
+	const [isDeleteSelectedModalOpen, setDeleteSelectedModalOpen] = useState(false);
+
+	const openDeleteSelectedModal = () => setDeleteSelectedModalOpen(true);
+	const closeDeleteSelectedModal = () => setDeleteSelectedModalOpen(false);
+
+	const handleConfirmDelete = () => {
+		handleDeleteSelected();
+		closeDeleteSelectedModal();
+		setIsEditMode(false);
+	};
+
+	const handleDeleteSelected = () => {
+		let deletedCount = 0;
+
+		const deletePromises = selectedExperiments.map((experimentId) =>
+			deleteDocumentById(experimentId)
+				.then(() => {
+					deletedCount++;
+				})
+				.catch((reason) => {
+					toast.error(`Failed to delete experiment ${experimentId}, reason: ${reason}`, { duration: 1500 });
+				})
+		);
+
+		Promise.all(deletePromises).then(() => {
+
+			toast.success(`${deletedCount} experiment${deletedCount !== 1 ? 's' : ''} deleted!`, { duration: 1500 });
+			setSelectedExperiments([]);
+			setMultiSelectMode(false);
+		});
+	};
+
+	const handleArchiveSelected = () => {
+		let archivedCount = 0; // Counter to track successful archives
+		let alreadyArchivedCount = 0; // Counter for already archived experiments
+
+		const archivePromises = selectedExperiments.map((experimentId) => {
+			const experiment = experiments.find((exp) => exp.expId === experimentId);
+
+			if (experiment?.status === 'ARCHIVED') {
+				alreadyArchivedCount++; // Increment the counter for already archived experiments
+				return Promise.resolve(); // Skip archiving this experiment
+			}
+
+			return updateExperimentArchiveStatusById(experimentId, 'ARCHIVED')
+				.then(() => {
+					archivedCount++; // Increment the counter on success
+				})
+				.catch((reason) => {
+					toast.error(`Failed to archive experiment ${experimentId}, reason: ${reason}`, { duration: 1500 });
+				});
+		});
+
+		Promise.all(archivePromises).then(() => {
+			// Show a single toast message with the total count
+			if (archivedCount > 0) {
+				toast.success(`${archivedCount} experiment${archivedCount !== 1 ? 's' : ''} archived!`, { duration: 1500 });
+			}
+
+			// Show a toast for already archived experiments
+			if (alreadyArchivedCount > 0) {
+				toast.error(`${alreadyArchivedCount} experiment${alreadyArchivedCount !== 1 ? 's' : ''} already archived.`, { duration: 1500 });
+			}
+
+			setSelectedExperiments([]); // Clear selections after archiving
+		});
+	};
+
+
+	const [isChecked, setIsChecked] = useState(false);
+
+	const handleSelectAll = (checked: boolean) => {
+		setIsChecked(checked);
+		if (checked) {
+
+			const allExperimentIds = experiments.map((experiment) => experiment.expId);
+			setSelectedExperiments(allExperimentIds);
+		} else {
+
+			setSelectedExperiments([]);
+		}
+	};
+
 	useEffect(() => {
 		if (formState === FormStates.Closed) {
 			setLabel('New Experiment');
@@ -335,6 +466,15 @@ export default function DashboardPage() {
 			setLabel('Continue Experiment');
 		}
 	}, [formState]);
+
+	useEffect(() => {
+		if (isEditMode) {
+			setMultiSelectMode(true);
+		} else {
+			setMultiSelectMode(false);
+			setSelectedExperiments([]);
+		}
+	}, [isEditMode]);
 
 	return (
 		<>
@@ -377,70 +517,132 @@ export default function DashboardPage() {
 													) : (
 														<></>
 													)}
-
 												</div>
-												<div className='space-y-1'>
+												<div className='flex flex-col items-start justify-start space-y-1 mt-2'>
 													<div className='text-sm font-medium text-gray-900'>
 														{session?.user?.email || ""}
+													</div>
+													<div className='flex items-start space-x-2'>
+														<CheckBadgeIcon
+															className='h-5 w-5 text-gray-400'
+															aria-hidden='true'
+														/>
+														<span className='text-sm text-gray-500 font-medium'>
+															{session?.user?.role || "User"}
+														</span>
 													</div>
 												</div>
 											</div>
 											{/* Action buttons */}
 											<div className='flex flex-col sm:flex-row xl:flex-col'>
-												<button
-													type='button'
-													className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-													onClick={() => {
-														setFormState(1);
-													}}
-													// onClick
-												>
-													{label}
-												</button>
+												<div className="flex flex-col space-y-2">
+													<button
+														type="button"
+														className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full"
+														onClick={() => {
+															setFormState(1);
+														}}
+													>
+														{label}
+													</button>
+													<button
+														type="button"
+														className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+														onClick={handleDefaultExperiment}
+													>
+														Run a Default Experiment
+													</button>
+												</div>
 											</div>
 										</div>
 										{/* Meta info */}
 										<div className='flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6'>
 											<div className='flex items-center space-x-2'>
-												<CheckBadgeIcon
-													className='h-5 w-5 text-gray-400'
-													aria-hidden='true'
-												/>
-												<span className='text-sm text-gray-500 font-medium'>
-													Verified GLADOSer
+												<QueueListIcon className='h-5 w-5 text-blue-400' aria-hidden='true' />
+												<span className={`text-sm text-${queueLength === QUEUE_ERROR_LENGTH ? 'red' : 'blue'}-500 font-medium`}>
+													{queueLength === QUEUE_ERROR_LENGTH
+														? 'Error - Backend Offline'
+														: queueLength === QUEUE_UNKNOWN_LENGTH
+															? 'Loading...'
+															: `${queueLength} experiment${queueLength === 1 ? '' : 's'} in queue`}
 												</span>
 											</div>
-											<div className='flex items-center space-x-2'>
-												<RectangleStackIcon
-													className='h-5 w-5 text-gray-400'
-													aria-hidden='true'
-												/>
-												<span className='text-sm text-gray-500 font-medium'>
-													{experiments?.length} project{experiments?.length == 1 ? '' : 's'}
-												</span>
-											</div>
-											<div className='flex items-center space-x-2'>
-												<QueueListIcon
-													className='h-5 w-5 text-blue-400'
-													aria-hidden='true'
-												/>
-												<span className={`text-sm text-${queueLength == QUEUE_ERROR_LENGTH ? 'red' : 'blue'}-500 font-medium`}>
-													{queueLength == QUEUE_ERROR_LENGTH ?
-														'Error - Glados Backend Offline' :
-														(queueLength == QUEUE_UNKNOWN_LENGTH) ?
-															'Loading...' :
-															`${queueLength} experiment${queueLength == 1 ? '' : 's'} in queue`
-													}
-												</span>
-											</div>
-											<div className='flex items-center space-x-2'>
+											<div className='flex justify-start space-x-2'>
 												<>
-													<button
-														type="button"
-														className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-														onClick={handleDefaultExperiment}>
-														Run a Default Experiment
-													</button>
+													{/* Edit Mode Toggle */}
+													<div className="flex flex-col space-y-2 items-start">
+														<div className="flex items-center justify-start space-x-2">
+															<Switch
+																checked={isEditMode}
+																onChange={setIsEditMode}
+																className={`${isEditMode ? 'bg-blue-600' : 'bg-gray-200'}
+        relative inline-flex h-6 w-11 items-center rounded-full`}
+															>
+																<span
+																	className={`${isEditMode ? 'translate-x-6' : 'translate-x-1'}
+          inline-block h-4 w-4 transform rounded-full bg-white transition`}
+																/>
+															</Switch>
+															<span className="text-sm font-medium text-gray-700">Edit Mode</span>
+														</div>
+
+														{/* Conditionally Render Expand/Collapse Buttons */}
+														{isEditMode && (
+															<div className="flex flex-col space-y-2 mt-2">
+																<button
+																	type="button"
+																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																	onClick={handleExpandAll}
+																>
+																	Expand All Experiments
+																</button>
+																<button
+																	type="button"
+																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																	onClick={handleCollapseAll}
+																>
+																	Collapse All Experiments
+																</button>
+																{multiSelectMode && (
+																	<button
+																		type="button"
+																		className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																		onClick={() => handleSelectAll(true)} // Select all experiments
+																	>
+																		Select All
+																	</button>
+																)}
+
+																{/* "Delete Selected" button (only visible in multi-select mode) */}
+																{multiSelectMode && selectedExperiments.length > 0 && (
+																	<>
+																		<button
+																			type="button"
+																			className='ml-2 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+																			onClick={openDeleteSelectedModal}
+																		>
+																			Delete Selected
+																		</button>
+																		{isDeleteSelectedModalOpen && (
+																			<DeleteConfirmationModal
+																				isOpen={isDeleteSelectedModalOpen}
+																				onClose={closeDeleteSelectedModal}
+																				onConfirm={handleConfirmDelete}
+																				selectedCount={selectedExperiments.length}
+																			/>)}
+																		<button
+																			type="button"
+																			className='ml-2 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500'
+																			onClick={handleArchiveSelected}
+																		>
+																			Archive Selected
+																		</button>
+																	</>
+																)}
+
+															</div>
+														)}
+													</div>
 													<Transition appear show={isModalOpen} as={Fragment}>
 														<Dialog as="div" className="relative z-10" onClose={() => setIsModalOpen(false)}>
 															<TransitionChild
@@ -483,6 +685,13 @@ export default function DashboardPage() {
 																					onClick={() => selectExperiment(ExperimentTypes.AddNums)}
 																				>
 																					Add Nums (Python)
+																				</button>
+																				<button
+																					type="button"
+																					className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+																					onClick={() => selectExperiment(ExperimentTypes.AddNumsParamGroup)}
+																				>
+																					Param Groups Add Nums (Python)
 																				</button>
 																				<button
 																					type="button"
@@ -539,6 +748,12 @@ export default function DashboardPage() {
 								});
 							}}
 							searchTerm={searchTerm}
+							experimentStates={experimentStates}
+							setExperimentStates={setExperimentStates}
+							toggleExperimentState={toggleExperimentState}
+							multiSelectMode={multiSelectMode}
+							selectedExperiments={selectedExperiments}
+							setSelectedExperiments={setSelectedExperiments}
 						/>
 					</div>
 					{/* Activity feed */}
@@ -614,6 +829,13 @@ export interface ExperimentListProps {
 	onCopyExperiment: (experiment: string) => void;
 	onDeleteExperiment: (experiment: string) => void;
 	searchTerm: string;
+	multiSelectMode: boolean;
+	selectedExperiments: string[];
+	setSelectedExperiments: React.Dispatch<React.SetStateAction<string[]>>;
+	experimentStates: { [key: string]: boolean };
+	setExperimentStates: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
+	// Function to toggle the `isClosed` state for a specific experiment
+	toggleExperimentState: (expId: string) => void;
 }
 
 const SortingOptions = {
@@ -625,7 +847,7 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -751,8 +973,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		handleSortChange(newSortBy);
 	};
 
-	// Handle displaying sorting option
-
 	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
 		setSortBy(newSortBy);
@@ -782,13 +1002,25 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		);
 	};
 
+
+
 	const [includeCompleted, setIncludeCompleted] = useState(true);
-	const [includeArchived, setIncludeArchived] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(false);
+
+
+	// Handle individual checkbox changes
+	const handleCheckboxChange = (experimentId: string, checked: boolean) => {
+		setSelectedExperiments((prev) =>
+			checked ? [...prev, experimentId] : prev.filter((id) => id !== experimentId)
+		);
+	};
 
 	return (<div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
-				<h1 className='flex-1 text-lg font-medium'>Projects</h1>
+				<h1 className='flex-1 text-lg font-medium'>
+					Projects <span className='text-gray-600'>({experiments?.length || 0})</span>
+				</h1>
 				<div
 					className="cursor-pointer"
 					style={{ padding: '0.5rem' }}
@@ -902,14 +1134,10 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					}
 					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
 				}).map((project: ExperimentData) => {
-					if (!includeCompleted && project.finished) {
+					if (!includeCompleted && project.finished && (project.status == 'COMPLETED')) {
 						return null;
 					}
-					const projectFinishedDate = new Date(project['finishedAtEpochMillis'] || 0);
-					const oneHourMilliseconds = 1000 * 60 * 60;
-					const twoWeeksMilliseconds = oneHourMilliseconds * 24 * 14;
-					const projectIsArchived = projectFinishedDate.getTime() + twoWeeksMilliseconds < Date.now();
-					if (!includeArchived && projectIsArchived) {
+					if (!includeArchived && (project.status == 'ARCHIVED')) {
 						return null;
 					}
 					return (
@@ -923,6 +1151,14 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 								onDownloadResults={downloadExperimentResults}
 								onDownloadProjectZip={downloadExperimentProjectZip}
 								onDeleteExperiment={onDeleteExperiment}
+								multiSelectMode={multiSelectMode}
+								selectedExperiments={selectedExperiments}
+								setSelectedExperiments={setSelectedExperiments}
+								isClosed={experimentStates[project.expId] || false}
+								setClose={() => toggleExperimentState(project.expId)}
+								isChecked={selectedExperiments.includes(project.expId)}
+								handleCheckboxChange={handleCheckboxChange}
+
 							/>
 						</li>
 					);
