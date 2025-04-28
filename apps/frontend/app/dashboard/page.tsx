@@ -321,6 +321,9 @@ export default function DashboardPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 
+	const [includeCompleted, setIncludeCompleted] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(false);
+
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
 
 
@@ -451,11 +454,26 @@ export default function DashboardPage() {
 	const handleSelectAll = (checked: boolean) => {
 		setIsChecked(checked);
 		if (checked) {
-
-			const allExperimentIds = experiments.map((experiment) => experiment.expId);
-			setSelectedExperiments(allExperimentIds);
+			// Filter experiments based on visibility (e.g., search term or filters)
+			const visibleExperimentIds = experiments
+				.filter((experiment) => {
+					// Apply search term filter
+					if (searchTerm.trim() !== '' && !experiment.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+						return false;
+					}
+					// Apply other filters (e.g., completed or archived)
+					if (!includeCompleted && experiment.finished && experiment.status === 'COMPLETED') {
+						return false;
+					}
+					if (!includeArchived && experiment.status === 'ARCHIVED') {
+						return false;
+					}
+					return true;
+				})
+				.map((experiment) => experiment.expId);
+	
+			setSelectedExperiments(visibleExperimentIds);
 		} else {
-
 			setSelectedExperiments([]);
 		}
 	};
@@ -610,7 +628,7 @@ export default function DashboardPage() {
 																{multiSelectMode && (
 																	<button
 																		type="button"
-																		className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																		className="inline-flex items-center justify-center px-4 py-2 w-full max-w-[150px] min-w-[150px] h-[40px] border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 																		onClick={() => handleSelectAll(true)} // Select all experiments
 																	>
 																		Select All
@@ -758,6 +776,10 @@ export default function DashboardPage() {
 							multiSelectMode={multiSelectMode}
 							selectedExperiments={selectedExperiments}
 							setSelectedExperiments={setSelectedExperiments}
+							includeCompleted={includeCompleted}
+							includeArchived={includeArchived}
+							setIncludeCompleted={setIncludeCompleted}
+							setIncludeArchived={setIncludeArchived}
 						/>
 					</div>
 					{/* Activity feed */}
@@ -840,6 +862,10 @@ export interface ExperimentListProps {
 	setExperimentStates: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
 	// Function to toggle the `isClosed` state for a specific experiment
 	toggleExperimentState: (expId: string) => void;
+	includeCompleted?: boolean;
+	includeArchived?: boolean;
+	setIncludeCompleted: React.Dispatch<React.SetStateAction<boolean>>;
+	setIncludeArchived: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SortingOptions = {
@@ -851,7 +877,7 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted}: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -1006,10 +1032,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		);
 	};
 
-
-
-	const [includeCompleted, setIncludeCompleted] = useState(true);
-	const [includeArchived, setIncludeArchived] = useState(false);
 
 
 	// Handle individual checkbox changes
