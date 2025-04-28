@@ -1,6 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Switch, ActionIcon, Center, Button, Modal } from '@mantine/core';
-import { Draggable } from 'react-beautiful-dnd';
 import { GripVertical, Plus, Tool } from 'tabler-icons-react';
 import { TrashIcon as Trash } from '@heroicons/react/24/solid';
 import { string } from 'joi';
