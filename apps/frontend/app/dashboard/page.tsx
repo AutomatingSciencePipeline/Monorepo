@@ -245,7 +245,6 @@ export default function DashboardPage() {
 	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
 	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
 
-
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
 		const toastType = searchParams!.get('toastType');
@@ -326,20 +325,22 @@ export default function DashboardPage() {
 
 
 	useEffect(() => {
-		// Initialize experimentStates with all experiments set to false (expanded)
-		const initialStates = experiments.reduce((acc, experiment) => {
-			acc[experiment.expId] = false; // Default to expanded
-			return acc;
-		}, {} as { [key: string]: boolean });
-	
-		setExperimentStates(initialStates);
+		setExperimentStates((prevState) => {
+			const updatedStates = { ...prevState }; // Preserve existing states
+			experiments.forEach((experiment) => {
+				if (!(experiment.expId in updatedStates)) {
+					updatedStates[experiment.expId] = false; // Default to expanded for new experiments
+				}
+			});
+			return updatedStates;
+		});
 	}, [experiments]);
 
-	// Function to toggle the `isClosed` state for a specific experiment
+	// Toggle experiment state
 	const toggleExperimentState = (expId: string) => {
 		setExperimentStates((prevState) => ({
 			...prevState,
-			[expId]: !prevState[expId], // Toggle the state for the specific experiment
+			[expId]: !prevState[expId],
 		}));
 	};
 
@@ -569,8 +570,25 @@ export default function DashboardPage() {
 											</div>
 											<div className='flex justify-start space-x-2'>
 												<>
+
 													{/* Edit Mode Toggle */}
 													<div className="flex flex-col space-y-2 items-start">
+														<div className="flex flex-col space-y-2 mt-2">
+															<button
+																type="button"
+																className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																onClick={handleExpandAll}
+															>
+																Expand All Experiments
+															</button>
+															<button
+																type="button"
+																className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																onClick={handleCollapseAll}
+															>
+																Collapse All Experiments
+															</button>
+														</div>
 														<div className="flex items-center justify-start space-x-2">
 															<Switch
 																checked={isEditMode}
@@ -589,20 +607,6 @@ export default function DashboardPage() {
 														{/* Conditionally Render Expand/Collapse Buttons */}
 														{isEditMode && (
 															<div className="flex flex-col space-y-2 mt-2">
-																<button
-																	type="button"
-																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-																	onClick={handleExpandAll}
-																>
-																	Expand All Experiments
-																</button>
-																<button
-																	type="button"
-																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-																	onClick={handleCollapseAll}
-																>
-																	Collapse All Experiments
-																</button>
 																{multiSelectMode && (
 																	<button
 																		type="button"
@@ -1019,7 +1023,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>
-					Projects <span className='text-gray-600'>({experiments?.length || 0})</span>
+					Projects <span className='text-gray-600'>({experiments.filter((project) => project.status !== 'ARCHIVED').length} of {experiments.length})</span>
 				</h1>
 				<div
 					className="cursor-pointer"
@@ -1154,8 +1158,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 								multiSelectMode={multiSelectMode}
 								selectedExperiments={selectedExperiments}
 								setSelectedExperiments={setSelectedExperiments}
-								isClosed={experimentStates[project.expId] || false}
-								setClose={() => toggleExperimentState(project.expId)}
+								experimentStates={experimentStates}
+								setExperimentStates={setExperimentStates}
 								isChecked={selectedExperiments.includes(project.expId)}
 								handleCheckboxChange={handleCheckboxChange}
 
