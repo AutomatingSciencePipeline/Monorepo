@@ -2,7 +2,6 @@ import clientPromise, { DB_NAME } from '../../../../lib/mongodb';
 import { GridFSBucket } from 'mongodb';
 import formidable, { Fields, Files } from 'formidable';
 import { Readable } from 'stream';
-import { ReadableStream as WebReadableStream } from 'web-streams-polyfill/ponyfill'; // for web Response body
 import { IncomingMessage } from 'http';
 import fs from "fs";
 import { NextResponse } from 'next/server';
@@ -35,7 +34,7 @@ export async function POST(req: Request) {
     if (identicalFileArray.length > 0) {
       const fileId = identicalFileArray[0]._id;
       const fileName = identicalFileArray[0].filename;
-      return Response.json({
+      return NextResponse.json({
         message: 'Reusing file in database!',
         fileId,
         fileName,
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
         .on('error', (err) => reject(err));
     });
 
-    return Response.json({
+    return NextResponse.json({
       message: 'File and ID uploaded successfully.',
       fileId: uploadStream.id,
       fileName: uploadStream.filename,
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Error writing experiment file.', error);
-    return Response.json({ response: 'Failed to upload experiment file!' }, { status: 500 });
+    return NextResponse.json({ response: 'Failed to upload experiment file!' }, { status: 500 });
   }
 }
 
