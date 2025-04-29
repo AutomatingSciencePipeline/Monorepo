@@ -364,7 +364,9 @@ def upload_experiment_results(experiment: ExperimentData):
         
         # Copy the configFiles to the ResCsvs folder
         try:
-            shutil.copytree('configFiles', 'ResCsvs/configFiles')
+            # Check if configFiles dir exists
+            if os.path.exists('configFiles'):
+                shutil.copytree('configFiles', 'ResCsvs/configFiles')
         except Exception as err:
             raise GladosInternalError("Error copying config files to ResCsvs") from err
 
