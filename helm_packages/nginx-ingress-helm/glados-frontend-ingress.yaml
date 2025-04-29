@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - glados-dev.csse.rose-hulman.edu
+        - glados.csse.rose-hulman.edu
       secretName: glados-tls
   rules:
-    - host: glados-dev.csse.rose-hulman.edu
+    - host: glados.csse.rose-hulman.edu
       http:
         paths:
           - path: /
