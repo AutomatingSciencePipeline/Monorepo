@@ -60,7 +60,7 @@ export async function getDocumentFromId(expId: string) {
     };
 
     //just return the document
-    return expDocWithStringId
+    return expDocWithStringId;
 }
 
 export async function deleteDocumentById(expId: string) {

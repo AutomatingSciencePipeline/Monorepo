@@ -14,7 +14,8 @@ export async function getK8sLogs(expId: string) {
     if (!exp) {
         throw new Error('Experiment not found');
     }
-    if (exp.creator !== session?.user?.id) {
+    const creatorId = (exp as { _id: string; creator?: string }).creator;
+    if (creatorId !== session?.user?.id) {
         throw new Error('User does not have permission to access this experiment');
     }
     const kc = new k8s.KubeConfig();
