@@ -5,6 +5,7 @@ import { Readable } from 'stream';
 import { ReadableStream as WebReadableStream } from 'web-streams-polyfill/ponyfill'; // for web Response body
 import { IncomingMessage } from 'http';
 import fs from "fs";
+import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
   const userId = Array.isArray(fields.userId) ? fields.userId[0] : fields.userId;
 
   if (!files.file || !userId) {
-    return Response.json({ response: 'Not enough arguments!' }, { status: 400 });
+    return NextResponse.json({ response: 'Not enough arguments!' }, { status: 400 });
   }
 
   try {
