@@ -201,6 +201,39 @@ export async function getRecentFiles(userId: string) {
     return serializedFiles;
 }
 
+export async function downloadFile(fileId: string) {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
+    const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+    const session = await auth();
+    if (!session) {
+        return Promise.reject(`User not authenticated`);
+    }
+    if (file.length === 0) {
+        return Promise.reject(`Could not find file with id: ${fileId}`);
+    }
+    
+    const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
+    const chunks: Buffer[] = [];
+    downloadStream.on('data', (chunk) => {
+        chunks.push(chunk);
+    });
+    downloadStream.on('end', () => {
+        const buffer = Buffer.concat(chunks as unknown as Uint8Array[]);
+        // Convert the buffer to a base64 string
+        const base64String = buffer.toString('base64');
+        // Create a data URL
+        const dataUrl = `data:${file[0].contentType};base64,${base64String}`;
+        return Promise.resolve(dataUrl);
+    });
+    downloadStream.on('error', (err) => {
+        return Promise.reject(`Error downloading file: ${err}`);
+    });
+    return downloadStream;
+}
+
 export async function copyFile(fileID: string, userId: string) {
     'use server';
     const client = await clientPromise;
