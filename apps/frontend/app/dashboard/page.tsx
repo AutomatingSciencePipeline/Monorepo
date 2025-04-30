@@ -1209,7 +1209,16 @@ async function downloadProjectZip(expId: string) {
 	}
 
 	const { contents, name } = result;
-	const blob = new Blob([contents], { type: 'application/zip' });
+
+	// Decode base64 to binary
+	const byteCharacters = atob(contents);
+	const byteNumbers = new Array(byteCharacters.length);
+	for (let i = 0; i < byteCharacters.length; i++) {
+		byteNumbers[i] = byteCharacters.charCodeAt(i);
+	}
+	const byteArray = new Uint8Array(byteNumbers);
+
+	const blob = new Blob([byteArray], { type: 'application/zip' });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url;

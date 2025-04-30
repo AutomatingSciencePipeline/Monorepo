@@ -4,6 +4,7 @@ import { BoxPlotController, BoxAndWiskers, ViolinController, Violin } from '@sgr
 import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../../lib/db_types';
 import GraphModal from './ChartModal';
+import { fetchResultsFile } from '../../../../lib/mongodb_funcs';
 
 Chart.register(...registerables);
 Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
@@ -45,20 +46,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const aggregateModes = ['sum', 'count', 'average', 'median', 'mode']
 
     useEffect(() => {
-        fetch(`/api/download/csv/${project.expId}`).then((response) => response.json()).then((record) => {
+        fetchResultsFile(project.expId).then((response) => {
+            // Convert the response to the desired format
+            const record = { _id: project.expId, experimentId: project.expId, resultContent: response?.contents ?? '' };
             setExperimentChartData(record);
             setLoading(false);
         }).catch((response) => {
-            console.warn('Error getting experiment results', response.status);
-            response.json().then((json: any) => {
-                console.warn(json?.response ?? json);
-                const message = json?.response;
-                if (message) {
-                    alert(`Error getting experiment results: ${message}`);
-                }
-            });
-        }
-        );
+            console.warn('Error getting experiment results', response);
+        });
     }, [project.expId]);
 
     const downloadImage = () => {
@@ -75,8 +70,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         const dataDict = {} as any;
         const splitRows = [] as any;
 
-        if (firstLoad)
-        {
+        if (firstLoad) {
             setXAxis(headers[0]);
             setFirstLoad(false)
         }
@@ -233,8 +227,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         newHeaders.push(headers[i]);
 
                         let newYi = [] as any[];
-                        for (let j = 0; j < xListWithIndices.length; j++)
-                        {
+                        for (let j = 0; j < xListWithIndices.length; j++) {
                             newYi.push(yLists[i][xListWithIndices[j][1]]);
                         }
                         newYLists.push(newYi);
@@ -303,18 +296,16 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 else if (visibleMetas != undefined) {
                     //check whether we have the dataset saved as visible and show it if so
 
-                    for (let i = 0; i < visibleMetas.length; i++)
-                    {
+                    for (let i = 0; i < visibleMetas.length; i++) {
                         let datasetLabel = visibleMetas[i].label
                         newChartInstance.data.datasets.forEach((dataset) => {
-                        if (!(dataset.label == undefined) && dataset.label == datasetLabel)
-                        {
-                            dataset.hidden = false;
-                        }
-                    });
+                            if (!(dataset.label == undefined) && dataset.label == datasetLabel) {
+                                dataset.hidden = false;
+                            }
+                        });
                     }
 
-                    
+
                 }
                 newChartInstance.update();
 
@@ -341,7 +332,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 spanElement.style.display = 'none';
             }
         });
-      }, [xAxis, headers, loading]);
+    }, [xAxis, headers, loading]);
 
     useEffect(() => {
         if (aggregateSelectRef.current && aggregateSpanRef.current) {
@@ -350,7 +341,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             aggregateSelectRef.current.style.width = `${spanElement.offsetWidth + 45}px`;
             spanElement.style.display = 'none';
         }
-      }, [aggregateMode, loading]);
+    }, [aggregateMode, loading]);
 
 
     return (
@@ -408,25 +399,25 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 {
                     aggregateData ?
                         (
-                        <div className='p-4'>
-                            <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
-                            <br/>
-                            <select
-                                ref={aggregateSelectRef}
-                                id='aggregate-select'
-                                className="p-2 border rounded-md font-bold"
-                                disabled={!aggregateData}
-                                name="aggregate"
-                                defaultValue='sum'
-                                onChange={(e) => setAggregateMode(e.target.value)}
-                            >
-                                {aggregateModes.map((mode) => (
-                                    <option key={mode} value={mode}>
-                                        {mode}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>)
+                            <div className='p-4'>
+                                <label className='p-2' htmlFor='aggregate-select'>Aggregate Mode:</label>
+                                <br />
+                                <select
+                                    ref={aggregateSelectRef}
+                                    id='aggregate-select'
+                                    className="p-2 border rounded-md font-bold"
+                                    disabled={!aggregateData}
+                                    name="aggregate"
+                                    defaultValue='sum'
+                                    onChange={(e) => setAggregateMode(e.target.value)}
+                                >
+                                    {aggregateModes.map((mode) => (
+                                        <option key={mode} value={mode}>
+                                            {mode}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>)
                         : null
                 }
             </div>}
