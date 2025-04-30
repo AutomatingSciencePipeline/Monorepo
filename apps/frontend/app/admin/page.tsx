@@ -311,7 +311,7 @@ export default function Page() {
                 </Tab>
                 <Tab
                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 mx-2 rounded-lg shadow-md data-[selected]:bg-blue-900">
-                    Application Managment
+                    Application Management
                 </Tab>
             </TabList>
             <TabPanels className={"p-4 w-auto h-auto mx-auto"}>
