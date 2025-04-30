@@ -18,14 +18,14 @@ export interface ExperimentListingProps {
 	multiSelectMode: boolean; // New prop for multi-select mode
 	selectedExperiments: string[]; // New prop for selected experiments
 	setSelectedExperiments: React.Dispatch<React.SetStateAction<string[]>>; // Setter for selected experiments
-	isClosed: boolean;
-	setClose: Function;
+	experimentStates: any; // New prop for experiment states
+	setExperimentStates: React.Dispatch<React.SetStateAction<any>>; // Setter for experiment states
 	isChecked: boolean;
 	handleCheckboxChange: (experimentId: string, isChecked: boolean) => void;
 }
 
 
-export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment, multiSelectMode, selectedExperiments, setSelectedExperiments, isClosed, setClose, isChecked, handleCheckboxChange }: ExperimentListingProps) => {
+export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, onDownloadResults, onDownloadProjectZip, onDeleteExperiment, multiSelectMode, experimentStates, setExperimentStates, selectedExperiments, setSelectedExperiments, isChecked, handleCheckboxChange }: ExperimentListingProps) => {
 	const { data: session } = useSession();
 
 	const [project, setProject] = useState<ExperimentData>(projectData);
@@ -50,6 +50,15 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
+
+	const isClosed = experimentStates[projectData.expId] || false;
+
+    const toggleState = () => {
+        setExperimentStates((prevState) => ({
+            ...prevState,
+            [projectData.expId]: !prevState[projectData.expId],
+        }));
+    };
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -161,7 +170,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						{isClosed ? (
 							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
 								{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
-									(<ChevronRightIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400" aria-hidden="true" />)
+									(<ChevronRightIcon
+										onClick={toggleState} // Toggle to open
+										className="h-5 w-5 text-gray-400"
+										aria-hidden="true"
+									/>)
 									: null}
 								{isEditing ? (
 									<>
@@ -193,7 +206,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						) :
 							(<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
 								{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
-									(<ChevronDownIcon onClick={() => setClose(!isClosed)} className="h-5 w-5 text-gray-400 -translate-y-2" aria-hidden="true" />)
+									(<ChevronDownIcon
+										onClick={toggleState} // Toggle to close
+										className="h-5 w-5 text-gray-400"
+										aria-hidden="true"
+									/>)
 									: null}
 							</span>)
 						}
@@ -462,11 +479,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									type="button"
 									className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${project.status !== 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
 										} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500`}
-									onClick={() => {
-										const newArchiveStatus = project.status !== 'ARCHIVED';
-										const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
-										handleArchiveStatus(newStatus);
-									}}
+									style={{ marginRight: '1rem' }}
 								>
 									{project.status !== 'ARCHIVED' ? 'Archive' : 'Unarchive'}
 									<ArchiveBoxIcon className="h-5 w-5 ml-2" aria-hidden="true" />
