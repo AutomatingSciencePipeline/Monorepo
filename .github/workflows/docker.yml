@@ -62,6 +62,7 @@ jobs:
             MONGODB_PORT=${{ secrets.MONGODB_PORT }}
             MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
             MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+            BACKEND_PORT=${{ secrets.BACKEND_PORT }}
 
   runner-prod:
     name: Runner Production Container

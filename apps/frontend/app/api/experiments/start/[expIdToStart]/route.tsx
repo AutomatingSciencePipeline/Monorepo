@@ -7,7 +7,7 @@ const BACKEND_PORT = getEnvVar('BACKEND_PORT');
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { expIdToStart: string } }
+  { params }: { params: Promise<{ expIdToStart: string }> }
 ) {
   const { expIdToStart } = await params;
 
