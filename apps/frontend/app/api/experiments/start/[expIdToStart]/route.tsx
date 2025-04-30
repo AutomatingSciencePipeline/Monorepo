@@ -3,7 +3,7 @@
 import { getEnvVar } from '../../../../../utils/env';
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_PORT = 5050;
+const BACKEND_PORT = getEnvVar('BACKEND_PORT');
 
 export async function POST(
   req: NextRequest,
