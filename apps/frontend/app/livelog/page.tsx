@@ -10,21 +10,10 @@ import LogViewer from "../components/logViewer/logViewer";
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', current: true }
 ];
-const userNavigation = [
-    { name: 'Your Profile', href: '#' },
-    { name: 'Sign out', href: '#' },
-];
 
-interface LiveLogPageProps {
-    searchParams: {
-        id?: string;
-    };
-}
-
-export default async function LiveLogPage({ searchParams }: LiveLogPageProps) {
+export default async function LiveLogPage({ searchParams }){
     const session = await auth();
-    const params = await searchParams;
-    const id = params.id;
+    const id = typeof searchParams.id === 'string' ? searchParams.id : undefined;
     if (!id) {
         redirect('/dashboard?toastMessage=' + encodeURIComponent("No experiment ID provided!") + "&toastType=error");
     }
