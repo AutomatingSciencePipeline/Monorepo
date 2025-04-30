@@ -173,6 +173,14 @@ export const paramGroupDefault =  {
           "1",
           "15",
           "5"
+        ],
+        "labels for graphing (not real parameter)": [
+          "10-20",
+          "20-10",
+          "1-2",
+          "2-1",
+          "5-15",
+          "15-5"
         ]
       }
     }
