@@ -1,9 +1,7 @@
 // app/api/start/[expIdToStart]/route.ts
-
-import { getEnvVar } from '../../../../../utils/env';
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_PORT = getEnvVar('BACKEND_PORT');
+const BACKEND_PORT = process.env.BACKEND_PORT || 5050;
 
 export async function POST(
   req: NextRequest,
