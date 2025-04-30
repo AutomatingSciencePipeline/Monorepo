@@ -11,9 +11,8 @@ import { ParamStep } from './stepComponents/ParamStep';
 import { PostProcessStep } from './stepComponents/PostProcessStep';
 import { ConfirmationStep } from './stepComponents/ConfirmationStep';
 import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
-import { DB_COLLECTION_EXPERIMENTS, submitExperiment } from '../../../../lib/db';
 
-import { copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
+import { submitExperiment, copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { addNumsExpData, multistringPy, geneticalgo, paramGroupDefault } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
@@ -479,14 +478,15 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
 																	setIsDefault(false);
-																	submitExperiment(form.values as any, session?.user?.id as string, session?.user?.email as string, session?.user?.role as string, fileId).then(async (json) => {
-																		const expId = json['id'];
+																	submitExperiment(form.values as any, session?.user?.id as string, session?.user?.email as string, session?.user?.role as string, fileId).then(async (insertedId) => {
+																		const expId = insertedId;
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
 																			method: 'POST',
 																			headers: new Headers({ 'Content-Type': 'application/json' }),
 																			credentials: 'same-origin',
 																			body: JSON.stringify({ id: expId }),
 																		});
+																		console.log(response);
 																		if (response.ok) {
 																			toast.success("Started experiment!", { duration: 1500 });
 																		}

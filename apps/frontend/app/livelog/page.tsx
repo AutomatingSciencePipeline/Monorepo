@@ -24,11 +24,11 @@ export default async function LiveLogPage({ searchParams }){
     }
 
     // Get the experiment
-    const experiment = await getDocumentFromId(id);
+    const experiment = await getDocumentFromId(id) as { _id: string; creator: string; name: string };
     if (!experiment) {
         redirect('/dashboard?toastMessage=' + encodeURIComponent("Experiment not found!") + "&toastType=error");
     }
-    if (experiment.creator !== session?.user?.id) {
+    if (experiment?.creator !== session?.user?.id) {
         redirect('/dashboard?toastMessage=' + encodeURIComponent("You do not have permission to access this experiment!") + "&toastType=error");
     }
 

@@ -20,7 +20,7 @@ export default function LogViewer({ expId }: { expId: string }) {
     useEffect(() => {
         const fetchLogs = async () => {
             // First get the experiment from the database
-            const exp = await getDocumentFromId(expId);
+            const exp: { _id: string; status?: string } = await getDocumentFromId(expId);
             if (!exp) {
                 console.error('Experiment not found');
                 return;
