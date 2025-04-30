@@ -1,64 +1,77 @@
 name: Docker Container Build
 
-# Adapted from https://docs.docker.com/build/ci/github-actions/
-
 on:
-    pull_request:
-      paths:
+  pull_request:
+    paths:
       - 'apps/backend/**'
       - 'apps/frontend/**'
-      - 'apps/runner/**'  
-      branches: [ main ]
+      - 'apps/runner/**'
+    branches: [ main ]
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    backend-prod:
-        name: Backend Production Container
-        runs-on: ubuntu-latest
-        if: contains(github.event.pull_request.changed_files, 'apps/backend/')
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
-            - name: Build
-              uses: docker/build-push-action@v4
-              with:
-                context: ./apps/backend
-                file: ./apps/backend/backend.Dockerfile
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      runner: ${{ steps.filter.outputs.runner }}
+    steps:
+      - uses: actions/checkout@v3
 
-    frontend-prod:
-        name: Frontend Production Container
-        runs-on: ubuntu-latest
-        if: contains(github.event.pull_request.changed_files, 'apps/frontend/')
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
-            - name: Build
-              uses: docker/build-push-action@v4
-              with:
-                context: ./apps/frontend
-                file: ./apps/frontend/frontend.Dockerfile
-                build-args: |
-                  MONGODB_PORT=${{ secrets.MONGODB_PORT }}
-                  MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
-                  MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+            frontend:
+              - 'apps/frontend/**'
+            runner:
+              - 'apps/runner/**'
 
-    runner-prod:
-        name: Runner Production Container
-        runs-on: ubuntu-latest
-        if: contains(github.event.pull_request.changed_files, 'apps/runner/')
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
-            - name: Build
-              uses: docker/build-push-action@v4
-              with:
-                context: ./apps/runner
-                file: ./apps/runner/runner.Dockerfile
+  backend-prod:
+    name: Backend Production Container
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./apps/backend
+          file: ./apps/backend/backend.Dockerfile
+
+  frontend-prod:
+    name: Frontend Production Container
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./apps/frontend
+          file: ./apps/frontend/frontend.Dockerfile
+          build-args: |
+            MONGODB_PORT=${{ secrets.MONGODB_PORT }}
+            MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
+            MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+
+  runner-prod:
+    name: Runner Production Container
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.runner == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./apps/runner
+          file: ./apps/runner/runner.Dockerfile
