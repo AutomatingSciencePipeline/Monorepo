@@ -385,7 +385,7 @@ export default function Page() {
                             <tbody>
                                 {runningExperiments.map((experiment) => (
                                     <tr
-                                        key={experiment._id} // Add the key prop here
+                                        key={experiment.id} // Add the key prop here
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                                     >
                                         <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">

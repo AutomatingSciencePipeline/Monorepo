@@ -6,7 +6,7 @@ import { Group, Text } from '@mantine/core';
 import { useSession } from "next-auth/react";
 import { Upload, FileCode } from 'tabler-icons-react';
 import { useEffect, useState } from 'react';
-import { getRecentFiles } from '../../../../../lib/mongodb_funcs';
+import { downloadFile, getRecentFiles } from '../../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 
 const SUPPORTED_FILE_TYPES = {
@@ -139,7 +139,14 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 									</button>
 
 								</td>
-								<td className="border border-gray-300 px-4 py-2">{file.filename}</td>
+								<td className="border border-gray-300 px-4 py-2">
+									<a
+										className="text-blue-600 hover:underline cursor-pointer"
+										onClick={() => downloadRecentFile(file._id.toString(), file.filename)}
+									>
+										{file.filename}
+									</a>
+								</td>
 								<td className="border border-gray-300 px-4 py-2">
 									{new Date(file.metadata.lastUsedDate).toLocaleString()}
 								</td>
@@ -155,3 +162,25 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 
 	);
 };
+
+async function downloadRecentFile(fileId: string, filename: string) {
+	const file = await downloadFile(fileId);
+	if (file) {
+		const chunks: Uint8Array[] = [];
+		for await (const chunk of file) {
+			chunks.push(chunk);
+		}
+		const blob = new Blob(chunks, { type: 'application/octet-stream' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename; // You can set the filename here
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	} else {
+		console.error('File not found or download failed.');
+	}
+
+}

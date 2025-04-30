@@ -19,7 +19,8 @@
                 "jock.svg",
                 "herrmannplatz.npm-dependency-links",
                 "doggy8088.quicktype-refresh",
-                "KevinRose.vsc-python-indent"
+                "KevinRose.vsc-python-indent",
+                "bradlc.vscode-tailwindcss"
             ]
         }
     },

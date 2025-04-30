@@ -6,7 +6,7 @@ import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
 
 export interface ExperimentListingProps {
@@ -318,6 +318,18 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							</div>
 						</div>
 					)}
+					{
+						project.status === 'RUNNING' ?
+							<button type="button"
+								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								onClick={() => {
+									// Open a new tab at the livelog page
+									window.open(`/livelog?id=${project.expId}`, '_blank');
+								}}>
+								Open Live Log
+								<BookOpenIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button> : null
+					}
 					{
 						project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
 							<button type="button"
