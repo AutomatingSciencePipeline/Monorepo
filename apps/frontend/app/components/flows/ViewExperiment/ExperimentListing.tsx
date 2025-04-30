@@ -167,13 +167,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<>
 										<input
 											type="text"
-											style={{
-												width: `${Math.min(Math.max(projectName.length, 25), 45)}ch`,
-												transition: 'width 0.1s ease'
-											}}
 											value={projectName}
 											onChange={(e) => setProjectName(e.target.value)}
 											onKeyUp={handleKeyUp}
+											className="w-[35ch]"
 										/>
 										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
 											onClick={() => handleSave(projectName)} />
@@ -210,13 +207,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<>
 										<input
 											type="text"
-											style={{
-												width: `${Math.min(Math.max(projectName.length, 25), 45)}ch`,
-												transition: 'width 0.1s ease'
-											}}
 											value={projectName}
 											onChange={(e) => setProjectName(e.target.value)}
 											onKeyUp={handleKeyUp}
+											className="w-[35ch]"
 										/>
 										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
 											onClick={() => handleSave(projectName)} />
