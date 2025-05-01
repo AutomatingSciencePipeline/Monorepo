@@ -33,6 +33,7 @@
     // Pull the docker image to make sure we have the most up to date version
     "initializeCommand": "docker pull gladospipeline/glados-dev-container:main",
     "postStartCommand": "bash ./.devcontainer/post-start.sh",
+    "postCreateCommand": "nohup bash -c 'while true; do sleep 20; ps aux | grep -E 'vscode.*[b]ootstrap-fork.*extensionHost.*' > /dev/null || kill -15 1; done &' > /dev/null",
     "runArgs": [
         "--rm"
     ]

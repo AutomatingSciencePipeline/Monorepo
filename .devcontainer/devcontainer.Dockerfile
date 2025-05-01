@@ -11,5 +11,3 @@ RUN CTLPTL_VERSION="0.8.40" && \
 
 # Install Tilt
 RUN curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash
-
-CMD while sleep 120 && ps aux | egrep 'vscode.*[b]ootstrap-fork.*extensionHost.*' > /dev/null; do :; done
