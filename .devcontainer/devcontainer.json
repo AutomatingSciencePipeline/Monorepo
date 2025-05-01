@@ -20,7 +20,8 @@
                 "herrmannplatz.npm-dependency-links",
                 "doggy8088.quicktype-refresh",
                 "KevinRose.vsc-python-indent",
-                "bradlc.vscode-tailwindcss"
+                "bradlc.vscode-tailwindcss",
+                "tilt-dev.tiltfile"
             ]
         }
     },
