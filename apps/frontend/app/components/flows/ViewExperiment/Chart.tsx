@@ -28,6 +28,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [aggregateData, setAggregateData] = useState(false);
     const [canAggregate, setCanAggregate] = useState(true);
+    const [yAxisMin, setYAxisMin] = useState('');
+    const [yAxisMax, setYAxisMax] = useState('');
     const aggregateSpanRef = useRef<HTMLSpanElement>(null);
     const aggregateSelectRef = useRef<HTMLSelectElement>(null);
     const headerSpanRef = useRef<HTMLSpanElement>(null);
@@ -188,6 +190,12 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         return colors;
     };
 
+    const getAxisRange = (min: boolean) => {
+        const value = min? yAxisMin : yAxisMax;
+        const parsed = parseFloat(value);
+        return isNaN(parsed)? undefined : parsed;
+    }
+
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
             try {
@@ -263,7 +271,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                 title: {
                                     display: true,
                                     text: 'Y Axis'
-                                }
+                                },
+                                suggestedMin: getAxisRange(true),
+                                suggestedMax: getAxisRange(false) 
                             }
                         },
                         animation: {
@@ -317,7 +327,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             }
         }
 
-    }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData, aggregateMode]);
+    }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData, aggregateMode, yAxisMin, yAxisMax]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
@@ -391,6 +401,11 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     ))}
                 </select>
 
+            </div>
+            <div className='p-4'>
+                <p className="font-bold">Y-Axis Scale:</p>
+                <input value={yAxisMin} onChange={event => setYAxisMin(event.target.value)}/>
+                <input value={yAxisMax} onChange={event => setYAxisMax(event.target.value)}/>
             </div>
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
