@@ -384,28 +384,33 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 )}
             </div>
-            <div className='p-4'>
-                <span ref={headerSpanRef} className="hidden">{xAxis}</span>
-                <p className="font-bold">X-Axis Column:</p>
-                <select
-                    ref={headerSelectRef}
-                    className="p-2 border rounded-md font-bold"
-                    onChange={(e) => setXAxis(e.target.value)}
-                    name="xaxis"
-                    defaultValue={headers[0]}
-                >
-                    {headers.map((header) => (
-                        <option key={header} value={header}>
-                            {header}
-                        </option>
-                    ))}
-                </select>
+            <div className='flex container'>
+                <div className='p-4'>
+                    <span ref={headerSpanRef} className="hidden">{xAxis}</span>
+                    <p className="font-bold">X-Axis Column:</p>
+                    <select
+                        ref={headerSelectRef}
+                        className="p-2 border rounded-md font-bold"
+                        onChange={(e) => setXAxis(e.target.value)}
+                        name="xaxis"
+                        defaultValue={headers[0]}
+                    >
+                        {headers.map((header) => (
+                            <option key={header} value={header}>
+                                {header}
+                            </option>
+                        ))}
+                    </select>
 
-            </div>
-            <div className='p-4'>
-                <p className="font-bold">Y-Axis Scale:</p>
-                <input value={yAxisMin} onChange={event => setYAxisMin(event.target.value)}/>
-                <input value={yAxisMax} onChange={event => setYAxisMax(event.target.value)}/>
+                </div>
+                <div className='p-4 w-full'>
+                    <p className="font-bold">Y-Axis Scale:</p>
+                    <div className='flex container'>
+                        <input className='rounded-md inline-flex w-full' placeholder='min' value={yAxisMin} onChange={event => setYAxisMin(event.target.value)}/>
+                        <p className='p-2'>to</p>
+                        <input className='rounded-md inline-flex w-full' placeholder='max' value={yAxisMax} onChange={event => setYAxisMax(event.target.value)}/>
+                    </div>
+                </div>
             </div>
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
