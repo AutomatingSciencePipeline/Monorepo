@@ -243,7 +243,6 @@ export default function DashboardPage() {
 	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
 	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
 
-
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
 		const toastType = searchParams!.get('toastType');
@@ -310,24 +309,29 @@ export default function DashboardPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 
+	const [includeCompleted, setIncludeCompleted] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(false);
+
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
 
 
 	useEffect(() => {
-		// Initialize experimentStates with all experiments set to false (expanded)
-		const initialStates = experiments.reduce((acc, experiment) => {
-			acc[experiment.expId] = false; // Default to expanded
-			return acc;
-		}, {} as { [key: string]: boolean });
-
-		setExperimentStates(initialStates);
+		setExperimentStates((prevState) => {
+			const updatedStates = { ...prevState }; // Preserve existing states
+			experiments.forEach((experiment) => {
+				if (!(experiment.expId in updatedStates)) {
+					updatedStates[experiment.expId] = false; // Default to expanded for new experiments
+				}
+			});
+			return updatedStates;
+		});
 	}, [experiments]);
 
-	// Function to toggle the `isClosed` state for a specific experiment
+	// Toggle experiment state
 	const toggleExperimentState = (expId: string) => {
 		setExperimentStates((prevState) => ({
 			...prevState,
-			[expId]: !prevState[expId], // Toggle the state for the specific experiment
+			[expId]: !prevState[expId],
 		}));
 	};
 
@@ -438,11 +442,26 @@ export default function DashboardPage() {
 	const handleSelectAll = (checked: boolean) => {
 		setIsChecked(checked);
 		if (checked) {
-
-			const allExperimentIds = experiments.map((experiment) => experiment.expId);
-			setSelectedExperiments(allExperimentIds);
+			// Filter experiments based on visibility (e.g., search term or filters)
+			const visibleExperimentIds = experiments
+				.filter((experiment) => {
+					// Apply search term filter
+					if (searchTerm.trim() !== '' && !experiment.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+						return false;
+					}
+					// Apply other filters (e.g., completed or archived)
+					if (!includeCompleted && experiment.finished && experiment.status === 'COMPLETED') {
+						return false;
+					}
+					if (!includeArchived && experiment.status === 'ARCHIVED') {
+						return false;
+					}
+					return true;
+				})
+				.map((experiment) => experiment.expId);
+	
+			setSelectedExperiments(visibleExperimentIds);
 		} else {
-
 			setSelectedExperiments([]);
 		}
 	};
@@ -557,8 +576,25 @@ export default function DashboardPage() {
 											</div>
 											<div className='flex justify-start space-x-2'>
 												<>
+
 													{/* Edit Mode Toggle */}
 													<div className="flex flex-col space-y-2 items-start">
+														<div className="flex flex-col space-y-2 mt-2">
+															<button
+																type="button"
+																className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																onClick={handleExpandAll}
+															>
+																Expand All Experiments
+															</button>
+															<button
+																type="button"
+																className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																onClick={handleCollapseAll}
+															>
+																Collapse All Experiments
+															</button>
+														</div>
 														<div className="flex items-center justify-start space-x-2">
 															<Switch
 																checked={isEditMode}
@@ -577,24 +613,10 @@ export default function DashboardPage() {
 														{/* Conditionally Render Expand/Collapse Buttons */}
 														{isEditMode && (
 															<div className="flex flex-col space-y-2 mt-2">
-																<button
-																	type="button"
-																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-																	onClick={handleExpandAll}
-																>
-																	Expand All Experiments
-																</button>
-																<button
-																	type="button"
-																	className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-																	onClick={handleCollapseAll}
-																>
-																	Collapse All Experiments
-																</button>
 																{multiSelectMode && (
 																	<button
 																		type="button"
-																		className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+																		className="inline-flex items-center justify-center px-4 py-2 w-full max-w-[150px] min-w-[150px] h-[40px] border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 																		onClick={() => handleSelectAll(true)} // Select all experiments
 																	>
 																		Select All
@@ -742,6 +764,10 @@ export default function DashboardPage() {
 							multiSelectMode={multiSelectMode}
 							selectedExperiments={selectedExperiments}
 							setSelectedExperiments={setSelectedExperiments}
+							includeCompleted={includeCompleted}
+							includeArchived={includeArchived}
+							setIncludeCompleted={setIncludeCompleted}
+							setIncludeArchived={setIncludeArchived}
 						/>
 					</div>
 					{/* Activity feed */}
@@ -824,6 +850,10 @@ export interface ExperimentListProps {
 	setExperimentStates: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
 	// Function to toggle the `isClosed` state for a specific experiment
 	toggleExperimentState: (expId: string) => void;
+	includeCompleted?: boolean;
+	includeArchived?: boolean;
+	setIncludeCompleted: React.Dispatch<React.SetStateAction<boolean>>;
+	setIncludeArchived: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SortingOptions = {
@@ -835,7 +865,7 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState }: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted}: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -992,10 +1022,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 
 
 
-	const [includeCompleted, setIncludeCompleted] = useState(true);
-	const [includeArchived, setIncludeArchived] = useState(false);
-
-
 	// Handle individual checkbox changes
 	const handleCheckboxChange = (experimentId: string, checked: boolean) => {
 		setSelectedExperiments((prev) =>
@@ -1007,7 +1033,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>
-					Projects <span className='text-gray-600'>({experiments?.length || 0})</span>
+					Projects <span className='text-gray-600'>({experiments.filter((project) => project.status !== 'ARCHIVED').length} of {experiments.length})</span>
 				</h1>
 				<div
 					className="cursor-pointer"
@@ -1142,8 +1168,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 								multiSelectMode={multiSelectMode}
 								selectedExperiments={selectedExperiments}
 								setSelectedExperiments={setSelectedExperiments}
-								isClosed={experimentStates[project.expId] || false}
-								setClose={() => toggleExperimentState(project.expId)}
+								experimentStates={experimentStates}
+								setExperimentStates={setExperimentStates}
 								isChecked={selectedExperiments.includes(project.expId)}
 								handleCheckboxChange={handleCheckboxChange}
 
@@ -1183,7 +1209,16 @@ async function downloadProjectZip(expId: string) {
 	}
 
 	const { contents, name } = result;
-	const blob = new Blob([contents], { type: 'application/zip' });
+
+	// Decode base64 to binary
+	const byteCharacters = atob(contents);
+	const byteNumbers = new Array(byteCharacters.length);
+	for (let i = 0; i < byteCharacters.length; i++) {
+		byteNumbers[i] = byteCharacters.charCodeAt(i);
+	}
+	const byteArray = new Uint8Array(byteNumbers);
+
+	const blob = new Blob([byteArray], { type: 'application/zip' });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url;
