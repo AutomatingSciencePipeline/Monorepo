@@ -7,12 +7,9 @@ import sys
 import json
 import time
 import typing
-import base64
 
 import requests
 from bson.binary import Binary
-
-from pipreqs import pipreqs
 
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
@@ -24,6 +21,7 @@ from modules.exceptions import CustomFlaskError, DatabaseConnectionError, Glados
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id, update_exp_value
+import modules.mailSend
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -106,6 +104,7 @@ def run_batch(data: IncomingStartRequest):
     # Obtain most basic experiment info
     exp_id = data['experiment']['id']
     syslogger.debug('received %s', exp_id)
+    update_exp_value(exp_id, "status", "RUNNING")
 
     open_experiment_logger(exp_id)
 
@@ -253,18 +252,20 @@ def run_batch(data: IncomingStartRequest):
     experiment.totalExperimentRuns = totalExperimentRuns
 
     update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
-    update_exp_value(exp_id, "status", "RUNNING")
 
     try:
         conduct_experiment(experiment)
         post_process_experiment(experiment)
         upload_experiment_results(experiment)
+        send_email(experiment, "COMPLETED")
     except ExperimentAbort as err:
         explogger.error(f'Experiment {exp_id} critical failure, not doing any result uploading or post processing')
         explogger.exception(err)
+        send_email(experiment, "ABORTED")
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error('Uncaught exception while running an experiment. The GLADOS code needs to be changed to handle this in a cleaner manner')
         explogger.exception(err)
+        send_email(experiment, "FAILED")
     finally:
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
@@ -294,7 +295,7 @@ def determine_experiment_file_type(filepath: str):
         elif 'Zip archive data' in rawfiletype:
             filetype = ExperimentType.ZIP
 
-        explogger.info(f"Raw Filetype: {rawfiletype}\n Filtered Filetype: {filetype.value}")
+        explogger.info(f"Raw Filetype: {rawfiletype}, Filtered Filetype: {filetype.value}")
 
         if filetype == ExperimentType.UNKNOWN:
             explogger.error(f'File type "{rawfiletype}" could not be mapped to Python, Java or C, if it should consider updating the matching statements')
@@ -392,6 +393,14 @@ def post_process_experiment(experiment: ExperimentData):
         except (KeyError, ValueError) as err:
             explogger.error('Error during plot generation')
             explogger.exception(err)
+            
+def send_email(experiment: ExperimentData, status):
+    if experiment.sendEmail:
+        explogger.info(f"Sending email to {experiment.creatorEmail}")
+        experiment.status = status
+        modules.mailSend.send_email(experiment)
+    
+        
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

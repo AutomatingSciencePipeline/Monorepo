@@ -247,6 +247,7 @@ def conduct_experiment(experiment: ExperimentData):
         writer.writerows(results)
         
     explogger.info("Finished running Trials")
+    experiment.status = "COMPLETED"
 
 
 def _handle_trial_error(experiment: ExperimentData, numOutputs: int, paramNames: "list", writer, trialNum: int, err: BaseException):
