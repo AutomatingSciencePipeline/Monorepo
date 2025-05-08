@@ -394,7 +394,7 @@ def post_process_experiment(experiment: ExperimentData):
             explogger.error('Error during plot generation')
             explogger.exception(err)
             
-def send_email(experiment: ExperimentData, status):
+def send_email(experiment: ExperimentData, status: str):
     if experiment.sendEmail:
         explogger.info(f"Sending email to {experiment.creatorEmail}")
         experiment.status = status
