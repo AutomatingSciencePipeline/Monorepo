@@ -38,7 +38,7 @@ def send_message(service, user_id, message):
         print(f"Message Id: {sent_message['id']}")
         return sent_message
     except Exception as e:
-        print(f"An error occurred: {e}")
+        explogger.error(f"An error occurred: {e}")
         return None
 
 # Usage
