@@ -6,9 +6,9 @@ from email.mime.text import MIMEText
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from apps.runner.modules.logging.gladosLogging import EXPERIMENT_LOGGER
+from modules.logging.gladosLogging import get_experiment_logger
 
-explogger = logging.getLogger(EXPERIMENT_LOGGER)
+explogger = get_experiment_logger()
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
