@@ -5,6 +5,7 @@ import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../../lib/db_types';
 import GraphModal from './ChartModal';
 import { fetchResultsFile } from '../../../../lib/mongodb_funcs';
+import { useDebounce } from 'use-debounce';
 
 Chart.register(...registerables);
 Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
@@ -30,6 +31,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [canAggregate, setCanAggregate] = useState(true);
     const [yAxisMin, setYAxisMin] = useState('');
     const [yAxisMax, setYAxisMax] = useState('');
+    const [dataHidden, setDataHidden] = useState(false);
     const aggregateSpanRef = useRef<HTMLSpanElement>(null);
     const aggregateSelectRef = useRef<HTMLSelectElement>(null);
     const headerSpanRef = useRef<HTMLSpanElement>(null);
@@ -196,6 +198,30 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         return isNaN(parsed)? undefined : parsed;
     }
 
+    const updateDataHidden = (headers, yLists) => {
+        setDataHidden(false);
+        if (chartInstance != null && chartInstance.getSortedVisibleDatasetMetas() != undefined)
+        {
+            let visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
+            for (let i = 0; i < visibleMetas.length; i++) {
+                let datasetLabel = visibleMetas[i].label;
+                let labelIndex = headers.indexOf(datasetLabel);
+                for (let j = 0; j < yLists[labelIndex].length; j++)
+                {
+                    let dataValue = yLists[labelIndex][j];
+                    let min = getAxisRange(true);
+                    min = (min === undefined)? dataValue : min;
+                    let max = getAxisRange(false);
+                    max = (max === undefined)? dataValue : max;
+                    if (dataValue < min! || dataValue > max!)
+                    {
+                        setDataHidden(true);
+                    }
+                }
+            }
+        }
+    }
+
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
             try {
@@ -272,15 +298,16 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                     display: true,
                                     text: 'Y Axis'
                                 },
-                                suggestedMin: getAxisRange(true),
-                                suggestedMax: getAxisRange(false) 
+                                min: getAxisRange(true),
+                                max: getAxisRange(false) 
                             }
                         },
                         animation: {
                             onComplete: function () {
                                 setImg(newChartInstance.toBase64Image());
                             }
-                        }
+                        },
+                        onClick: (e) => { updateDataHidden(newHeaders, yLists) }
                     },
                     //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
                     plugins: [{
@@ -304,7 +331,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     });
                 }
                 else if (visibleMetas != undefined) {
-                    //check whether we have the dataset saved as visible and show it if so
+                    //check whether we have the dataset saved as visible and show it if so.
+                    //also, check for hidden data.
 
                     for (let i = 0; i < visibleMetas.length; i++) {
                         let datasetLabel = visibleMetas[i].label
@@ -317,6 +345,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
 
                 }
+
+                updateDataHidden(newHeaders, yLists);
+
                 newChartInstance.update();
 
                 setChartInstance(newChartInstance);
@@ -412,6 +443,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 </div>
             </div>
+            <p className={`text-red-700 font-bold text-xl text-center ${!dataHidden ? 'hidden' : ''}`}>Warning: Some data is not shown with this choice of y-axis scale!</p>
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
                 <input className='p-2' id='aggregate-data-box' type="checkbox" checked={aggregateData} onChange={() => setAggregateData(!aggregateData)}></input>
