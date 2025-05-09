@@ -1,11 +1,14 @@
+import logging
 import os
 import json
 import base64
 from email.mime.text import MIMEText
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
+
+from apps.runner.modules.logging.gladosLogging import EXPERIMENT_LOGGER
+
+explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
