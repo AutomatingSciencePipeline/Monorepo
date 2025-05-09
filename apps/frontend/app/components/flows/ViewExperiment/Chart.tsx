@@ -200,22 +200,30 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     const updateDataHidden = (headers, yLists) => {
         setDataHidden(false);
+        console.log("refreshing data hidden.");
         if (chartInstance != null && chartInstance.getSortedVisibleDatasetMetas() != undefined)
         {
             let visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
+            console.log("\tfound chart instance with valid visible metas: " + visibleMetas);
             for (let i = 0; i < visibleMetas.length; i++) {
                 let datasetLabel = visibleMetas[i].label;
+                console.log("\t\tat visible label: " + datasetLabel);
                 let labelIndex = headers.indexOf(datasetLabel);
-                for (let j = 0; j < yLists[labelIndex].length; j++)
+                if (yLists[labelIndex] != undefined)
                 {
-                    let dataValue = yLists[labelIndex][j];
-                    let min = getAxisRange(true);
-                    min = (min === undefined)? dataValue : min;
-                    let max = getAxisRange(false);
-                    max = (max === undefined)? dataValue : max;
-                    if (dataValue < min! || dataValue > max!)
+                    for (let j = 0; j < yLists[labelIndex].length; j++)
                     {
-                        setDataHidden(true);
+                        let dataValue = yLists[labelIndex][j];
+                        let min = getAxisRange(true);
+                        min = (min === undefined)? dataValue : min;
+                        let max = getAxisRange(false);
+                        max = (max === undefined)? dataValue : max;
+                        if (dataValue < min! || dataValue > max!)
+                        {
+                            console.log("\t\t\tfound offending data point. showing warning.");
+                            setDataHidden(true);
+                            return;
+                        }
                     }
                 }
             }
@@ -307,7 +315,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                 setImg(newChartInstance.toBase64Image());
                             }
                         },
-                        onClick: (e) => { updateDataHidden(newHeaders, yLists) }
+                        plugins: {
+                            legend: {
+                                onClick: function (e, legendItem, legend) {
+                                    Chart.defaults.plugins.legend.onClick.call(this, e, legendItem, legend);
+                                    updateDataHidden(newHeaders, yLists);
+                                }
+                            }
+                        }
                     },
                     //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
                     plugins: [{
@@ -320,7 +335,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                             ctx.fillRect(0, 0, chart.canvas.width, chart.canvas.height);
                             ctx.restore();
                         }
-                    }]
+                    },
+                    {
+                        id: 'after-legend-update-hook',
+                        afterUpdate(chart) {
+                          let visibleMetas = chart.getSortedVisibleDatasetMetas();
+                          updateDataHidden(newHeaders, yLists, visibleMetas);
+                        }
+                      }]
                 });
 
                 //If it is a pie chart you have to use meta
@@ -332,7 +354,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 }
                 else if (visibleMetas != undefined) {
                     //check whether we have the dataset saved as visible and show it if so.
-                    //also, check for hidden data.
 
                     for (let i = 0; i < visibleMetas.length; i++) {
                         let datasetLabel = visibleMetas[i].label
