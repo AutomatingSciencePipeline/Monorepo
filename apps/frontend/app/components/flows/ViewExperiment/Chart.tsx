@@ -200,12 +200,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
     const updateDataHidden = (headers, yLists, visibleMetas) => {
         setDataHidden(false);
-        console.log("refreshing data hidden.");
         if (visibleMetas != undefined)
         {
             for (let i = 0; i < visibleMetas.length; i++) {
                 let datasetLabel = visibleMetas[i].label;
-                console.log("\tat visible label: " + datasetLabel);
                 let labelIndex = headers.indexOf(datasetLabel);
                 if (yLists[labelIndex] != undefined)
                 {
@@ -216,10 +214,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         min = (min === undefined)? dataValue : min;
                         let max = getAxisRange(false);
                         max = (max === undefined)? dataValue : max;
-                        console.log('datavalue: ' + dataValue)
                         if (dataValue < min! || dataValue > max!)
                         {
-                            console.log("\t\tfound offending data point. showing warning.");
                             setDataHidden(true);
                             return;
                         }
@@ -455,7 +451,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 </div>
             </div>
-            <p className={`text-red-700 font-bold text-xl text-center ${!dataHidden ? 'hidden' : ''}`}>Warning: Some data is not shown with this choice of y-axis scale!</p>
+            <p className={`text-red-700 font-bold text-xl text-center ${!dataHidden ? 'hidden' : ''}`}>Warning: Some data points are not shown with this choice of y-axis scale!</p>
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
                 <input className='p-2' id='aggregate-data-box' type="checkbox" checked={aggregateData} onChange={() => setAggregateData(!aggregateData)}></input>
