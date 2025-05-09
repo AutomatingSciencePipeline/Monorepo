@@ -235,6 +235,8 @@ Example below:
 
 ![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-in_progress_exp-05_2025.png)
 
+For longer experiments, you can click the "Open Live Log" button to see live log updates from the configurations files. It updates every 5 seconds. This can help you identify when an error occurred mid experiment run.
+
 You can cancel an experiment at any time. However, small experiments may finish before cancellation takes effect.
 
 > **Note:** The "Expected Total Time" metric does not account for parallel execution, so actual completion may be faster.
@@ -250,6 +252,12 @@ To rerun an experiment with modified parameters, click "Copy Experiment."
 To visualize results, click "See Graph" on the dashboard.
 
 Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.
+
+By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived".
+
+![filter_archive](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-filter_archive-05_2025.png)
+
+If you don't have any further use for an experiment, feel free to delete it by clicking "Delete Experiment".
 
 ## Permutations
 
