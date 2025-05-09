@@ -198,16 +198,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         return isNaN(parsed)? undefined : parsed;
     }
 
-    const updateDataHidden = (headers, yLists) => {
+    const updateDataHidden = (headers, yLists, visibleMetas) => {
         setDataHidden(false);
         console.log("refreshing data hidden.");
-        if (chartInstance != null && chartInstance.getSortedVisibleDatasetMetas() != undefined)
+        if (visibleMetas != undefined)
         {
-            let visibleMetas = chartInstance.getSortedVisibleDatasetMetas();
-            console.log("\tfound chart instance with valid visible metas: " + visibleMetas);
             for (let i = 0; i < visibleMetas.length; i++) {
                 let datasetLabel = visibleMetas[i].label;
-                console.log("\t\tat visible label: " + datasetLabel);
+                console.log("\tat visible label: " + datasetLabel);
                 let labelIndex = headers.indexOf(datasetLabel);
                 if (yLists[labelIndex] != undefined)
                 {
@@ -218,9 +216,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         min = (min === undefined)? dataValue : min;
                         let max = getAxisRange(false);
                         max = (max === undefined)? dataValue : max;
+                        console.log('datavalue: ' + dataValue)
                         if (dataValue < min! || dataValue > max!)
                         {
-                            console.log("\t\t\tfound offending data point. showing warning.");
+                            console.log("\t\tfound offending data point. showing warning.");
                             setDataHidden(true);
                             return;
                         }
@@ -314,14 +313,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                             onComplete: function () {
                                 setImg(newChartInstance.toBase64Image());
                             }
-                        },
-                        plugins: {
-                            legend: {
-                                onClick: function (e, legendItem, legend) {
-                                    Chart.defaults.plugins.legend.onClick.call(this, e, legendItem, legend);
-                                    updateDataHidden(newHeaders, yLists);
-                                }
-                            }
                         }
                     },
                     //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
@@ -340,7 +331,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                         id: 'after-legend-update-hook',
                         afterUpdate(chart) {
                           let visibleMetas = chart.getSortedVisibleDatasetMetas();
-                          updateDataHidden(newHeaders, yLists, visibleMetas);
+                          updateDataHidden(newHeaders, newYLists, visibleMetas);
                         }
                       }]
                 });
@@ -367,7 +358,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
                 }
 
-                updateDataHidden(newHeaders, yLists);
+                updateDataHidden(newHeaders, newYLists, visibleMetas);
 
                 newChartInstance.update();
 
