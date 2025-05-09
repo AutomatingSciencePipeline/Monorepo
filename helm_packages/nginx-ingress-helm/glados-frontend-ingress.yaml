@@ -23,4 +23,3 @@ spec:
                 name: glados-frontend-service
                 port:
                   number: 3000
-
