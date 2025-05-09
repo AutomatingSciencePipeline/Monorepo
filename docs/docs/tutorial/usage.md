@@ -100,21 +100,21 @@ To create a new experiment, click the "New Experiment" button below your email i
 
 Upon first login, your dashboard will be empty.
 
-![dashboard](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/dashboard.png)
+![dashboard](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-dashboard-05_2025.png)
 
 To run a default experiment, click the "Run a Default Experiment" button on the right side of the screen.
 
-![run_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/run_default_exp.png)
+![run_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-run_default-05_2025.png)
 
 You will see a modal where you can select "Add Nums (Python)." This will present an already configured experiment.
 
-![select_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/select_default.png)
+![select_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-select_default-05_2025.png)
 
 The experiment creation interface consists of multiple tabs:
 
 ### Information Tab
 
-![information_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/information_tab.png)
+![information_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-information_tab-05_2025.png)
 
 #### Name *(Required)*
 
@@ -146,7 +146,7 @@ Select this option to store logs from the experiment runner pod.
 
 ### Parameters Tab
 
-![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/parameters_tab.png)
+![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-parameters_tab-05_2025.png)
 
 There are five parameter types:
 
@@ -182,7 +182,7 @@ Similar to Integer but supports decimal values.
 
 ### User Defined Constants Tab
 
-![user_defined_constants_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/user_defined_constants.png)
+![user_defined_constants_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-user_defined_constants_tab-05_2025.png)
 
 This tab allows defining a text block appended to every generated `.ini` config file. You can use parameters from the "Parameters" tab inside curly brackets.
 
@@ -195,19 +195,19 @@ test_var = {test}
 
 ### Post Process Tab
 
-![post_process_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/post_process.png)
+![post_process_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-post_process_tab-05_2025.png)
 
 This tab allows you to include a scatter plot in the downloadable Project Zip. This feature will be replaced by ChartJS functionality on the dashboard in future updates.
 
 ### Confirmation Tab
 
-![confirmation_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/confirmation.png)
+![confirmation_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-confirmation_tab-05_2025.png)
 
 This tab allows you to review all hyperparameters and settings before running the experiment.
 
 ### Dispatch Tab
 
-![dispatch_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/dispatch.png)
+![dispatch_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-dispatch_tab-05_2025.png)
 
 You can start an experiment from this tab by either:
 
@@ -217,6 +217,10 @@ You can start an experiment from this tab by either:
 If you copied an experiment, the file will be preselected.
 
 ## Results
+
+After dispatching the experiment, it will take a little bit before starting.
+
+![awaiting_start_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-awaiting_start_exp-05_2025.png)
 
 Once the experiment starts, you can monitor progress in real time.
 
@@ -229,7 +233,7 @@ The dashboard will display:
 
 Example below:
 
-![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/in_progress_exp.png)
+![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-in_progress_exp-05_2025.png)
 
 You can cancel an experiment at any time. However, small experiments may finish before cancellation takes effect.
 
@@ -237,7 +241,7 @@ You can cancel an experiment at any time. However, small experiments may finish 
 
 Example of completed experiment:
 
-![finished_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/finished_exp.png)
+![finished_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-finished_exp-05_2025.png)
 
 After completion, you can download the `results.csv` file, which contains output data and configurations for each trial. If extra files were generated, logs were kept, or post-processing was applied, a zip file will also be available.
 
