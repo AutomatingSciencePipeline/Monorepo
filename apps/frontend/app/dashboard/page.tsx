@@ -459,7 +459,7 @@ export default function DashboardPage() {
 					return true;
 				})
 				.map((experiment) => experiment.expId);
-	
+
 			setSelectedExperiments(visibleExperimentIds);
 		} else {
 			setSelectedExperiments([]);
@@ -487,23 +487,17 @@ export default function DashboardPage() {
 		<>
 			<Toaster />
 			{/* Background color split screen for large screens */}
-			<div
-				className='fixed top-0 left-0 w-1/2 h-full bg-white'
-				aria-hidden='true'
-			/>
-			<div
-				className='fixed top-0 right-0 w-1/2 h-full bg-gray-50'
-				aria-hidden='true'
-			/>
+			<div className='fixed top-0 left-0 w-1/2 h-full bg-white' aria-hidden='true' />
+			<div className='fixed top-0 right-0 w-1/2 h-full bg-gray-50' aria-hidden='true' />
 
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
 				<Navbar setSearchTerm={setSearchTerm} />
 
 				{/* 3 column wrapper */}
-				<div className='flex-grow w-full mx-auto xl:px-8 lg:flex'>
+				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
 					{/* Left sidebar & main wrapper */}
-					<div className='flex-1 min-w-0 bg-white xl:flex'>
+					<div className='flex-1 min-w-0 bg-white flex flex-col xl:flex-row'>
 						{/* Account profile */}
 						<div className='xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200 bg-white'>
 							<div className='pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0'>
@@ -865,7 +859,7 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted}: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
