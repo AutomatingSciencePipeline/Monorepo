@@ -112,7 +112,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 		<div className='flex flex-col mb-2'>
 			<div className='flex items-center'>
 
-				<span className='text-gray-500 mr-2'>{type}</span>
+			<span className="text-gray-500 mr-2 min-w-[85px] text-right">
+                {type}
+            </span>
 
 				<Tooltip label='Name of the parameter' position='top' withArrow>
 					<input

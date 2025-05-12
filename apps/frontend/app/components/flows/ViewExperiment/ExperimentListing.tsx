@@ -6,7 +6,7 @@ import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
 
 export interface ExperimentListingProps {
@@ -53,12 +53,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 	const isClosed = experimentStates[projectData.expId] || false;
 
-    const toggleState = () => {
-        setExperimentStates((prevState) => ({
-            ...prevState,
-            [projectData.expId]: !prevState[projectData.expId],
-        }));
-    };
+	const toggleState = () => {
+		setExperimentStates((prevState) => ({
+			...prevState,
+			[projectData.expId]: !prevState[projectData.expId],
+		}));
+	};
 
 	const handleEdit = () => {
 		// Enable editing and set the edited project name to the current project name
@@ -128,43 +128,204 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setShowGraphModal(false);
 	}
 
-	const totalTime = project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
-		? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000)
-		: null;
+	// const totalTime = project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
+	// 	? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000)
+	// 	: null;
 
-	const formattedTotalTime = totalTime !== null
-		? totalTime < 1
-			? `${(totalTime * 60).toFixed(2)} seconds`
-			: `${totalTime.toFixed(2)} minutes`
-		: null;
+	// const formattedTotalTime = totalTime !== null
+	// 	? totalTime < 1
+	// 		? `${(totalTime * 60).toFixed(2)} seconds`
+	// 		: `${totalTime.toFixed(2)} minutes`
+	// 	: null;
 
 
-	// Calculate average time per experiment run
-	const averageTimePerRun = project['passes'] && project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
-		? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000) / Number(project['passes'])
-		: null;
+	// // Calculate average time per experiment run
+	// const averageTimePerRun = project['passes'] && project['startedAtEpochMillis'] && project['finishedAtEpochMilliseconds']
+	// 	? ((Number(project['finishedAtEpochMilliseconds']) - Number(project['startedAtEpochMillis'])) / 60000) / Number(project['passes'])
+	// 	: null;
 
-	const formattedAverageTimePerRun = averageTimePerRun !== null
-		? averageTimePerRun < 1
-			? `${(averageTimePerRun * 60).toFixed(2)} seconds`
-			: `${averageTimePerRun.toFixed(2)} minutes`
-		: null;
+	// const formattedAverageTimePerRun = averageTimePerRun !== null
+	// 	? averageTimePerRun < 1
+	// 		? `${(averageTimePerRun * 60).toFixed(2)} seconds`
+	// 		: `${averageTimePerRun.toFixed(2)} minutes`
+	// 	: null;
+
+	const formattedTotalTime = (project) => {
+		const totalTime =
+			project.startedAtEpochMillis && project.finishedAtEpochMilliseconds
+				? (Number(project.finishedAtEpochMilliseconds) - Number(project.startedAtEpochMillis)) / 60000
+				: null;
+
+		return totalTime !== null
+			? totalTime < 1
+				? `${(totalTime * 60).toFixed(2)} seconds`
+				: `${totalTime.toFixed(2)} minutes`
+			: null;
+	};
+
+	const formattedAverageTimePerRun = (project) => {
+		const averageTimePerRun =
+			project.passes && project.startedAtEpochMillis && project.finishedAtEpochMilliseconds
+				? ((Number(project.finishedAtEpochMilliseconds) - Number(project.startedAtEpochMillis)) / 60000) /
+				Number(project.passes)
+				: null;
+
+		return averageTimePerRun !== null
+			? averageTimePerRun < 1
+				? `${(averageTimePerRun * 60).toFixed(2)} seconds`
+				: `${averageTimePerRun.toFixed(2)} minutes`
+			: null;
+	};
+
+	const getStatusText = (project, experimentInProgress, isClosed) => {
+		const failures = project.fails ?? 0;
+		const successes = project.passes ?? 0;
+		const runsLeft = project.totalExperimentRuns
+			? project.totalExperimentRuns - failures - successes
+			: null;
+		const expectedFinishTime = experimentInProgress
+			? new Date(project.startedAtEpochMillis + (project.estimatedTotalTimeMinutes ?? 0) * 60000)
+			: null;
+
+
+		if (isClosed) {
+			return (
+				<>
+					{/* Main Status */}
+					<p className="text-lg font-bold text-black-500">
+						{project.finished && project.status !== 'CANCELLED' ? (
+							project.status === 'ARCHIVED' ? (
+								'Experiment Archived'
+							) : failures <= 1 && successes === 0 ? (
+								'Experiment Aborted'
+							) : (
+								'Experiment Completed'
+							)
+						) : experimentInProgress && project.status !== 'CANCELLED' ? (
+							'Experiment In Progress'
+						) : project.status !== 'CANCELLED' ? (
+							'Experiment Awaiting Start'
+						) : (
+							'Experiment Cancelled'
+						)}
+					</p>
+
+					{/* Failures and Successes */}
+					{(failures > 0 || successes > 0) && (
+						<p className="text-lg font-mono text-gray-500">
+							FAILS: <span className="text-red-500">{failures}</span>, SUCCESSES: <span className="text-green-500">{successes}</span>
+						</p>
+					)}
+				</>
+			);
+		}
+		else {
+			return (
+				<>
+					{/* Main Status */}
+					<p className="text-lg font-bold text-black-500">
+						{project.finished && project.status !== 'CANCELLED' ? (
+							project.status === 'ARCHIVED' ? (
+								'Experiment Archived'
+							) : failures <= 1 && successes === 0 ? (
+								'Experiment Aborted'
+							) : (
+								'Experiment Completed'
+							)
+						) : experimentInProgress && project.status !== 'CANCELLED' ? (
+							'Experiment In Progress'
+						) : project.status !== 'CANCELLED' ? (
+							'Experiment Awaiting Start'
+						) : (
+							'Experiment Cancelled'
+						)}
+					</p>
+
+					{/* Failures and Successes */}
+					{(failures > 0 || successes > 0) && (
+						<p className="text-lg font-mono text-gray-500">
+							FAILS: <span className="text-red-500">{failures}</span>, SUCCESSES: <span className="text-green-500">{successes}</span>
+						</p>
+					)}
+
+					{/* Expected Total Time */}
+					{experimentInProgress && project.status !== 'CANCELLED' && (
+						<p className="text-sm font-mono text-gray-500">
+							{project.estimatedTotalTimeMinutes
+								? `Expected Total Time: ${project.estimatedTotalTimeMinutes} Minutes`
+								: '(Calculating estimated runtime...)'}
+						</p>
+					)}
+
+					{/* Expected Finish Time */}
+					{expectedFinishTime && (
+						<p className="text-sm font-mono text-gray-500">
+							Expected Finish Time: {expectedFinishTime.toLocaleDateString()}
+						</p>
+					)}
+
+					{/* Runs Left */}
+					{runsLeft !== null && (
+						<p className="text-sm font-mono text-gray-500">
+							{`${runsLeft} run${runsLeft === 1 ? '' : 's'} remain${runsLeft === 1 ? 's' : ''} (of ${project.totalExperimentRuns})`}
+						</p>
+					)}
+
+					{/* Uploaded Time */}
+					{project.created && (
+						<p className="text-sm font-mono text-gray-500">
+							Uploaded at {new Date(Number(project.created)).toLocaleString()}
+						</p>
+					)}
+
+					{/* Started Time */}
+					{project.startedAtEpochMillis && (
+						<p className="text-sm font-mono text-gray-500">
+							Started at {new Date(project.startedAtEpochMillis).toLocaleString()}
+						</p>
+					)}
+
+					{/* Finished Time */}
+					{project.finishedAtEpochMilliseconds && project.status !== 'CANCELLED' && (
+						<p className="text-sm font-mono text-gray-500">
+							Finished at {new Date(project.finishedAtEpochMilliseconds).toLocaleString()}
+						</p>
+					)}
+
+					{/* Total Time */}
+					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && (
+						<p className="text-sm font-mono text-gray-500">
+							Total Time: {formattedTotalTime(project)}
+						</p>
+					)}
+
+					{/* Average Time Per Run */}
+					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && successes > 0 && (
+						<p className="text-sm font-mono text-gray-500">
+							Average Time per Experiment Run: {formattedAverageTimePerRun(project)}
+						</p>
+					)}
+				</>
+			);
+		}
+
+	};
 
 
 	return (
-		<div className={`flex items-left ${multiSelectMode ? '' : 'justify-between'} space-x-4`}>
+		<div className={`flex flex-col sm:flex-row items-start sm:items-center ${multiSelectMode ? '' : 'justify-between'} space-y-4 sm:space-y-0 sm:space-x-4`}>
 			{/* Checkbox for multi-select - reduced spacing */}
 			{multiSelectMode && (
-				<div className='flex items-center' style={{ width: '30px', marginRight: '0' }}>
+				<div className="flex items-center w-6 sm:w-8">
 					<input
 						type="checkbox"
 						checked={isChecked}
 						onChange={(e) => handleCheckboxChange(projectData.expId, e.target.checked)}
-						className="form-checkbox h-5 w-5 text-blue-600 rounded-full" // Added rounded-full
+						className="form-checkbox h-5 w-5 text-blue-600 rounded-full"
 					/>
 				</div>
 			)}
-			<div className={`flex items-center justify-between w-full ${multiSelectMode ? 'ml-4' : ''}`}>
+			<div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between w-full ${multiSelectMode ? 'ml-4' : ''}`}>
 				<div className="min-w-0 space-y-3">
 					<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 						{isClosed ? (
@@ -183,6 +344,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 											value={projectName}
 											onChange={(e) => setProjectName(e.target.value)}
 											onKeyUp={handleKeyUp}
+											className="border rounded-md px-2 py-1 text-sm w-full sm:w-auto"
 										/>
 										<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
 											onClick={() => handleSave(projectName)} />
@@ -250,15 +412,22 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
+					<p className="text-sm font-mono text-gray-500 sm:hidden text-left">
+						{getStatusText(project, experimentInProgress, experimentStates[project.expId])}
+					</p>
+
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ?
-						<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={() => {
-								window.open(`/api/download/logs/${project.expId}`, '_blank');
-							}}>
-							View System Log
-							<ExclamationTriangleIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-						</button> :
+						<>
+							<button type="button"
+								className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
+								onClick={() => {
+									window.open(`/api/download/logs/${project.expId}`, '_blank');
+								}}>
+								View System Log
+								<ExclamationTriangleIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button>
+						</>
+						:
 						null
 					}
 
@@ -319,9 +488,21 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</div>
 					)}
 					{
+						project.status === 'RUNNING' ?
+							<button type="button"
+								className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
+								onClick={() => {
+									// Open a new tab at the livelog page
+									window.open(`/livelog?id=${project.expId}`, '_blank');
+								}}>
+								Open Live Log
+								<BookOpenIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button> : null
+					}
+					{
 						project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
 							<button type="button"
-								className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+								className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
 								onClick={() => {
 									onCopyExperiment(project.expId);
 								}}>
@@ -330,7 +511,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							</button> :
 							(!isClosed ?
 								<button type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+									className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
 									onClick={() => {
 										onCopyExperiment(project.expId);
 									}}>
@@ -338,15 +519,18 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<DocumentDuplicateIcon className='h-5 w-5 ml-2' aria-hidden='true' />
 								</button> : null)
 					}
-					{!isClosed && project.finished && project.status != 'CANCELLED' ?
-						<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-							onClick={openGraphModal}
-						>
-							See Graph
-							<ChartBarIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-						</button> : null
-					}
+					{!isClosed && project.finished && project.status != 'CANCELLED' ? (
+						<div className="hidden sm:block">
+							<button
+								type="button"
+								className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full"
+								onClick={openGraphModal}
+							>
+								See Graph
+								<ChartBarIcon className="h-5 w-5 ml-2" aria-hidden="true" />
+							</button>
+						</div>
+					) : null}
 
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ? (
 						<div className="flex flex-col space-y-4">
@@ -389,7 +573,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							(project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 								<button
 									type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+									className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
 									onClick={async () => {
 										// Get the link
 										const link = await addShareLink(project.expId);
@@ -404,7 +588,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							(!isClosed && project.creator == session?.user?.id! ?
 								<button
 									type="button"
-									className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 xl:w-full'
+									className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gren-500 w-full sm:w-auto xl:w-full"
 									onClick={async () => {
 										// Get the link
 										const link = await addShareLink(project.expId);
@@ -434,26 +618,17 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						</button>
 					}
 				</div>
-				<div className='sm:hidden'>
-					<ChevronRightIcon
-						className='h-5 w-5 text-gray-400'
-						aria-hidden='true'
-					/>
-				</div>
-				<div className={`hidden sm:flex flex-col flex-shrink-0 items-end space-y-3 ${multiSelectMode ? 'ml-4' : ''}`}>
-					<div className="flex items-center space-x-4">
-						{project.finished && project.status !== 'CANCELLED' && isClosed && !multiSelectMode && (
 
-							<div className="flex items-center space-x-4">
-								{/* Share Button */}
+				<div className={`flex flex-col flex-shrink-0 items-end space-y-3 ${multiSelectMode ? 'ml-4' : ''}`}>
+					<div className="flex items-center space-x-4 mt-4">
+						{project.finished && project.status !== 'CANCELLED' && isClosed && !multiSelectMode && (
+							<div className="flex items-center space-x-4 sm:mt-4 sm:ml-4">
 								{project.creator === session?.user?.id! && (
 									<button
 										type="button"
 										className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
 										onClick={async () => {
-											// Get the share link
 											const link = await addShareLink(project.expId);
-											// Copy the link to the clipboard
 											navigator.clipboard.writeText(`${window.location.origin}/share?link=${link}`);
 											toast.success('Link copied to clipboard!', { duration: 1500 });
 										}}
@@ -462,7 +637,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 										<ShareIcon className="h-5 w-5 ml-2" aria-hidden="true" />
 									</button>
 								)}
-								{/* Archive Button */}
+
 								<button
 									type="button"
 									className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${project.status !== 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
@@ -477,160 +652,61 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 						<div>
 							{/* Status Text */}
-							<p className="flex justify-end items-center text-right">
-								{project.finished && project.status != 'CANCELLED' ? (
-									project.status == 'ARCHIVED' ? (
-										<span className="font-mono text-yellow-500">Experiment Archived</span>
-									) : project.fails <= 1 && (project?.passes ?? 0) == 0 ? (
-										<span className="font-mono text-red-500">Experiment Aborted</span>
-									) : (
-										<span className="font-mono">Experiment Completed</span>
-									)
-								) : experimentInProgress && project.status != 'CANCELLED' ? (
-									<span className="font-mono text-blue-500">Experiment In Progress</span>
-								) : project.status != 'CANCELLED' ? (
-									<span className="font-mono text-gray-500">Experiment Awaiting Start</span>
-								) : null}
-								{project.status == 'CANCELLED' ? (
-									<span className="font-mono text-red-500">Experiment Cancelled</span>
-								) : null}
+							<p className="hidden sm:block text-sm font-mono text-gray-500 text-right">
+								{getStatusText(project, experimentInProgress, experimentStates[project.expId])}
 							</p>
-
-							{/* Failures and Successes */}
-							{(project.finished || experimentInProgress) && project.status != 'CANCELLED' ? (
-								<p className="flex justify-end items-center text-right space-x-4">
-									<span className={`font-mono ${project['fails'] ? 'text-red-500' : ''}`}>FAILS: {project['fails'] ?? 0}</span>
-									<span className="font-mono">SUCCESSES: {project['passes'] ?? 0}</span>
-								</p>
-							) : null}
 						</div>
 
 					</div>
+					<div className="items-center space-y-2">
+						{!isClosed && project['finished'] && project.status != 'CANCELLED' ? (
+							<button type="button"
+								className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
+									} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 w-full`}
+								onClick={() => {
+									const newArchiveStatus = project.status !== 'ARCHIVED';
+									const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
+									handleArchiveStatus(newStatus);
+								}}
+							>
+								{project.status != 'ARCHIVED' ? 'Archive Experiment' : 'Unarchive Experiment'}
+								<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+							</button>
+						) : null}
+						{
+							!isClosed ?
+								(
+									project.creator == session?.user?.id! ?
+										(
+											project.finished ?
+												<button type="button"
+													className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full'
+													onClick={() => {
+														openDeleteModal();
+													}}>
+													Delete Experiment
+													<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+												</button>
+												:
+												null
+										)
+										:
+										<button type="button"
+											className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full'
+											onClick={() => {
+												toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
+													success: 'Unfollowed experiment',
+													error: 'Failed to unfollow experiment',
+													loading: "Unfollowing experiment..."
+												});
+											}}>
+											Unfollow Experiment
+											<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
+										</button>
+								) : null
+						}
+					</div>
 
-					{project.status != 'COMPLETED' ?
-						(experimentInProgress && project.status != 'CANCELLED' ?
-							<p>
-								{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
-							</p> : null) :
-						(!isClosed && experimentInProgress ?
-							<p>
-								{expectedTimeToRun ? `Expected Total Time: ${expectedTimeToRun} Minutes` : '(Calculating estimated runtime...)'}
-							</p> : null)
-					}
-					{project.status != 'COMPLETED' ?
-						(experimentInProgress && project.status != 'CANCELLED' ?
-							expectedFinishTime && (
-								<p className='flex text-gray-500 text-sm space-x-2'>
-									<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
-								</p>
-							) : null
-						) :
-						(!isClosed && experimentInProgress ?
-							expectedFinishTime && (
-								<p className='flex text-gray-500 text-sm space-x-2'>
-									<span> Expected Finish Time: {expectedFinishTime.toLocaleDateString()}</span>
-								</p>
-							) : null
-						)
-					}
-					{project.status != 'COMPLETED' ?
-						(experimentInProgress && project.status != 'CANCELLED' ?
-							(project['totalExperimentRuns'] ?
-								<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
-								<p>(Calculating total experiment runs...)</p>
-							) : null) :
-						(!isClosed && experimentInProgress ?
-							(project['totalExperimentRuns'] ?
-								<p>{`${runsLeft} run${runsLeft == 1 ? '' : 's'} remain${runsLeft == 1 ? 's' : ''} (of ${project['totalExperimentRuns']})`}</p> :
-								<p>(Calculating total experiment runs...)</p>
-							) : null)
-					}
-					{project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
-						(<p className='flex text-centertext-gray-500 text-sm space-x-2'>
-							<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
-						</p>) :
-						(!isClosed ?
-							(<p className='flex text-centertext-gray-500 text-sm space-x-2'>
-								<span>Uploaded at {new Date(Number(project['created'])).toLocaleString()}</span>
-							</p>) : null
-						)
-					}
-					{project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
-						(project['startedAtEpochMillis'] && project.status != 'CANCELLED' ?
-							<p className='flex text-center text-gray-500 text-sm space-x-2'>
-								<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
-							</p> : null
-						) :
-						(!isClosed && project['startedAtEpochMillis'] ?
-							<p className='flex text-center text-gray-500 text-sm space-x-2'>
-								<span>Started at {new Date(project['startedAtEpochMillis']).toLocaleString()}</span>
-							</p> : null
-						)
-					}
-					{!isClosed && project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
-						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span>Finished at {new Date(project['finishedAtEpochMilliseconds']).toLocaleString()}</span>
-						</p> :
-						null
-					}
-					{!isClosed && project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
-						<p className='flex text-gray-500 text-sm space-x-2'>
-							<span>Total Time: {formattedTotalTime}</span>
-						</p> :
-						null
-					}
-					{!isClosed && project['finishedAtEpochMilliseconds'] && project.status != 'CANCELLED' ?
-						<p className='flex text-center text-gray-500 text-sm space-x-2'>
-							<span>Average Time per Experiment Run: {formattedAverageTimePerRun}</span>
-						</p> :
-						null
-					}
-					{!isClosed && project['finished'] && project.status != 'CANCELLED' ? (
-						<button type="button"
-							className={`inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${project.status != 'ARCHIVED' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-600'
-								} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 xl:w-full`}
-							onClick={() => {
-								const newArchiveStatus = project.status !== 'ARCHIVED';
-								const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
-								handleArchiveStatus(newStatus);
-							}}
-						>
-							{project.status != 'ARCHIVED' ? 'Archive Experiment' : 'Unarchive Experiment'}
-							<ArchiveBoxIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-						</button>
-					) : null}
-					{
-						!isClosed ?
-							(
-								project.creator == session?.user?.id! ?
-									(
-										project.finished ?
-											<button type="button"
-												className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-												onClick={() => {
-													openDeleteModal();
-												}}>
-												Delete Experiment
-												<XMarkIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-											</button>
-											:
-											null
-									)
-									:
-									<button type="button"
-										className='bg-red-500 hover:bg-red-700 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
-										onClick={() => {
-											toast.promise(unfollowExperiment(project.expId, session?.user?.id!), {
-												success: 'Unfollowed experiment',
-												error: 'Failed to unfollow experiment',
-												loading: "Unfollowing experiment..."
-											});
-										}}>
-										Unfollow Experiment
-										<MinusIcon className='h-5 w-5 ml-2' aria-hidden='true' />
-									</button>
-							) : null
-					}
 					{
 						(showGraphModal && project.finished && project.status != 'CANCELLED') && (
 							<Chart onClose={closeGraphModal} project={project} />

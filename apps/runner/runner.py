@@ -361,6 +361,14 @@ def upload_experiment_results(experiment: ExperimentData):
 
     if experiment.has_extra_files() or experiment.postProcess or experiment.keepLogs:
         explogger.info('Uploading Result Csvs')
+        
+        # Copy the configFiles to the ResCsvs folder
+        try:
+            # Check if configFiles dir exists
+            if os.path.exists('configFiles'):
+                shutil.copytree('configFiles', 'ResCsvs/configFiles')
+        except Exception as err:
+            raise GladosInternalError("Error copying config files to ResCsvs") from err
 
         encoded = None
         try:

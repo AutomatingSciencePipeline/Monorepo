@@ -1,7 +1,6 @@
 'use client'
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
-import { downloadExperimentResults, downloadExperimentProjectZip } from '../../lib/db';
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Switch, Transition, TransitionChild } from '@headlessui/react';
 import {
@@ -21,8 +20,7 @@ import { SearchBar } from '../components/SearchBar';
 import { ExperimentListing as ExperimentListing } from '../components/flows/ViewExperiment/ExperimentListing';
 import { ExperimentData } from '../../lib/db_types';
 import { Toggle } from '../components/Toggle';
-import { QueueResponse } from '../../pages/api/queue';
-import { deleteDocumentById } from '../../lib/mongodb_funcs';
+import { deleteDocumentById, fetchProjectZip, fetchResultsFile } from '../../lib/mongodb_funcs';
 import { updateExperimentArchiveStatusById } from '../../lib/mongodb_funcs';
 import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
@@ -286,17 +284,7 @@ export default function DashboardPage() {
 	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
 
 	const queryQueueLength = () => {
-		setQueueLength(QUEUE_UNKNOWN_LENGTH);
-		fetch('/api/queue').then((res) => res.json()).then((data: QueueResponse) => {
-			const value = data.response.queueSize;
-			if (typeof value === 'number') {
-				setQueueLength(value);
-			} else {
-				setQueueLength(QUEUE_ERROR_LENGTH);
-			}
-		}).catch((err) => {
-			console.error('Error fetching queue length', err);
-		});
+		setQueueLength(0);
 	};
 
 	const QUEUE_RECHECK_INTERVAL_MS = 4000; // 4 seconds
@@ -471,7 +459,7 @@ export default function DashboardPage() {
 					return true;
 				})
 				.map((experiment) => experiment.expId);
-	
+
 			setSelectedExperiments(visibleExperimentIds);
 		} else {
 			setSelectedExperiments([]);
@@ -499,23 +487,17 @@ export default function DashboardPage() {
 		<>
 			<Toaster />
 			{/* Background color split screen for large screens */}
-			<div
-				className='fixed top-0 left-0 w-1/2 h-full bg-white'
-				aria-hidden='true'
-			/>
-			<div
-				className='fixed top-0 right-0 w-1/2 h-full bg-gray-50'
-				aria-hidden='true'
-			/>
+			<div className='fixed top-0 left-0 w-1/2 h-full bg-white' aria-hidden='true' />
+			<div className='fixed top-0 right-0 w-1/2 h-full bg-gray-50' aria-hidden='true' />
 
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
 				<Navbar setSearchTerm={setSearchTerm} />
 
 				{/* 3 column wrapper */}
-				<div className='flex-grow w-full mx-auto xl:px-8 lg:flex'>
+				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
 					{/* Left sidebar & main wrapper */}
-					<div className='flex-1 min-w-0 bg-white xl:flex'>
+					<div className='flex-1 min-w-0 bg-white flex flex-col xl:flex-row'>
 						{/* Account profile */}
 						<div className='xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200 bg-white'>
 							<div className='pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0'>
@@ -877,7 +859,7 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
-const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted}: ExperimentListProps) => {
+const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
@@ -1174,8 +1156,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 							<ExperimentListing
 								projectData={project}
 								onCopyExperiment={onCopyExperiment}
-								onDownloadResults={downloadExperimentResults}
-								onDownloadProjectZip={downloadExperimentProjectZip}
+								onDownloadResults={downloadResultsFile}
+								onDownloadProjectZip={downloadProjectZip}
 								onDeleteExperiment={onDeleteExperiment}
 								multiSelectMode={multiSelectMode}
 								selectedExperiments={selectedExperiments}
@@ -1192,3 +1174,42 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		</ul>
 	</div>);
 };
+
+async function downloadResultsFile(expId: string) {
+	const result = await fetchResultsFile(expId);
+	if (result === null) {
+		alert(`Could not find results file for experiment with id: ${expId}`);
+		return;
+	}
+
+	const { contents, name } = result;
+	const blob = new Blob([contents], { type: 'text/csv;charset=utf-8' });
+	const url = URL.createObjectURL(blob);
+
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = name;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}
+
+async function downloadProjectZip(expId: string) {
+	const result = await fetchProjectZip(expId);
+	if (result === null) {
+		alert(`Could not find project zip file for experiment with id: ${expId}`);
+		return;
+	}
+
+	const { contents, name } = result;
+	const blob = new Blob([contents], { type: 'application/zip' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = name;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}
