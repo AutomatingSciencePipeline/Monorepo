@@ -259,11 +259,11 @@ By clicking on "Archive Experiment", you can hide the experiment from view. You 
 
 If you don't have any further use for an experiment, feel free to delete it by clicking "Delete Experiment".
 
-![select-exps](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-select_exps-05_2025.png)
+![select-exps](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_exps-05_2025.png)
 
 In order to select experiments, you need to turn on ‘Edit Mode’, which is off by default. You will find it below the 'Expand All' and 'Collapse All' buttons. Each experiment will have a radio button to the left of it that allows you to select it. This enables you to delete or archive as many selected experiments as you would like.
 
-![collapse](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/usage-collapse-05_2025.png)
+![collapse](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-collapse-05_2025.png)
 
 By default, experiments will be open, and will all reopen on refresh of the page. In order to close all of your experiments, you can use the ‘Select All’ button under ‘Edit Mode’.
 
