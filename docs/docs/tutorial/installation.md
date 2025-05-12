@@ -18,7 +18,7 @@ If you don't want to run your own copy, you can instead access the live website 
 
 ### Git
 
-Git is a code version management tool that integrates with Github, where our codebase is stored. 
+Git is a code version management tool that integrates with Github, where our codebase is stored.
 
 If you don't already have it installed, you can download it on the [git website](https://git-scm.com/downloads).
 

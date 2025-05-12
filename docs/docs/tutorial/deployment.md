@@ -13,16 +13,18 @@ This guide contains the steps to deploy changes to the GLADOS frontend, backend,
 !!! warning
     Ensure that the terminal is directed to the outermost level of the Monorepo before running the following commands.
 
+There are two setup machine scripts. One is for Debian and the other is for Ubuntu. Choose the correct one for your setup.
+
 Before you can run the file, you need to make it executable. To do this, running the following command:
 
 ```bash
-    chmod +x Setup_Machine.sh
+    chmod +x Debian_Setup_Machine.sh
 ```
 
 The first script is to set up the settings machine to run the GLADOS deployment. Run this command, then follow the prompts.
 
 ```bash
-    ./Setup_Machine.sh
+    ./Debian_Setup_Machine.sh
 ```
 
 !!! note
@@ -44,36 +46,54 @@ The next script is to run the script that creates (or re-creates) the clusters a
 
 Utilizing these two scripts should result in a new VM being created an
 
+## Updating Cluster
+
+To avoid having to recreate the cluster every time that new images are pushed to Docker Hub, we have added a function to the deployment Python script that just updates the images.
+
+Run the following command from the root folder of the Monorepo.
+
+```bash
+    ./python3 kubernetes_init/init.py --update
+```
+
 ## Debugging Commands
 
 ### Expose ports for the MongoDB and backend service
 
-These commands will expose Node Ports for the MongoDB and backend services. This will allow connections to be made to this services from outside of the cluster.
+This command will expose a Node Port for the backend services. This will allow connections to be made to this service from outside of the cluster.
 
 ```bash
-    kubectl expose svc glados-service-mongodb --type=NodePort --name=glados-mongodb-nodeport --port=27017 --target-port=27017
-    kubectl expose svc glados-service-backend --type=NodePort --name=glados-backend-nodeport --port=5050  --target-port=5050
+kubectl expose svc glados-service-backend --type=NodePort --name=glados-backend-nodeport --port=5050  --target-port=5050
+```
+
+The MongoDB Node Ports must be enabled in the helm values.yml files for MongoDB.
+
+Once you change these values you can run the following command from the mongodb-helm folder:
+
+```bash
+helm upgrade -f values glados-mongodb
 ```
 
 Then run:
 
 ```bash
-    kubectl get svc
+kubectl get svc
 ```
 
-This will list the services and all of their ports. This looks like:
+This will list the services and all of their ports. This looks similar to:
 
 ```bash
-    NAME                       TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)           AGE
-    deployment-test-frontend   LoadBalancer   10.110.22.190    137.112.156.235   80:31089/TCP      19h
-    glados-backend-nodeport    NodePort       10.101.44.177    <none>            5050:32636/TCP    2s
-    glados-mongodb-nodeport    NodePort       10.109.48.36     <none>            27017:31129/TCP   2s
-    glados-service-backend     ClusterIP      10.107.96.198    <none>            5050/TCP          19h
-    glados-service-mongodb     ClusterIP      10.103.225.198   <none>            27017/TCP         19h
-    kubernetes                 ClusterIP      10.96.0.1        <none>            443/TCP           19h
+NAME                       TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)           AGE
+deployment-test-frontend   LoadBalancer   10.110.22.190    137.112.156.235   80:31089/TCP      19h
+glados-backend-nodeport    NodePort       10.101.44.177    <none>            5050:32636/TCP    2s
+glados-mongodb-external-0  NodePort       10.109.48.36     <none>            27017:30001/TCP   2s
+glados-mongodb-external-1  NodePort       10.109.48.36     <none>            27017:30002/TCP   2s
+glados-service-backend     ClusterIP      10.107.96.198    <none>            5050/TCP          19h
+glados-service-mongodb     ClusterIP      10.103.225.198   <none>            27017/TCP         19h
+kubernetes                 ClusterIP      10.96.0.1        <none>            443/TCP           19h
 ```
 
-Here you can see the glados-backend-nodeport is accessible at port 32636 and the glados-mongodb-nodeport is accessible at port 31129. You can then use Postman or similar programs to test the backend. You can also use Mongo Compass to login into the MongoDB and monitor the database.
+Here you can see the glados-backend-nodeport is accessible at port 32636 and the glados-mongodb-external-0 is accessible at port 30001. You can then use Postman or similar programs to test the backend. You can also use Mongo Compass to login into the MongoDB and monitor the database. If you are using MongoDB Compass make sure that *direct connection* is selected in "advanced connection options".
 
 ### Using Dev Pull Repo
 
@@ -85,5 +105,5 @@ This script is designed to pull the repo and set the frontend and backend to use
 To run the Dev Pull Repo
 
 ```bash
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/development/development_scripts/Dev_pull_repo.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/development/development_scripts/Dev_pull_repo.sh)"
 ```

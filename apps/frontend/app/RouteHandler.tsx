@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import AuthProvider from './components/auth/AuthProvider';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
-const noAuthRequired = ['/', '/signin'];
+const noAuthRequired = ['/', '/signin', '/share'];
 
 interface RouteHandlerProps {
   children: ReactNode;
@@ -14,8 +14,6 @@ interface RouteHandlerProps {
 const RouteHandler = ({ children }: RouteHandlerProps) => {
   const router = useRouter();
   const pathname = usePathname() || '';
-
-  console.log(pathname);
 
   return (
     <AuthProvider>

@@ -9,7 +9,6 @@ const ProtectedRoute = ({ children }) => {
 	const router = useRouter();
 	useEffect(() => {
 		if (session.status != "loading" && !session.data?.user) {
-			console.log('User is not signed in; redirecting them to landing page');
 			router.push('/');
 		}
 	}, [!session.data?.user, router, session.status]);

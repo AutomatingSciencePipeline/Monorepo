@@ -2,32 +2,31 @@
 
 This section covers how to run an experiment on the system.
 
-Definitions:
+## Definitions
 
-* **Trial**: A single run of submitted code with a corresponding config file
+- **Trial**: A single run of submitted code with a corresponding config file.
 
 ## Accessing the System
 
-When on the Rose-Hulman network, you can access the live copy at <http://glados-lb.csse.rose-hulman.edu/> (note: this is **not** https).
+When connected to the Rose-Hulman network, you can access the live system at <https://glados.csse.rose-hulman.edu/>.
 
-If you need a local copy the system, view the [installation guide](installation.md).
+If you need a local copy of the system, refer to the [installation guide](installation.md).
 
-You will need an account to run an experiment.
+You must sign in with either a Google or GitHub account to run an experiment.
 
-## Prepare your Code
+## Preparing Your Code
 
-GLADOS has limited support for experiments. To ensure your experiment may run on GLADOS, check whether it falls under [compatible specs](#compatability).
+GLADOS has limited support for experiments. To ensure your experiment runs properly, check whether it meets the [compatibility requirements](#compatibility).
 
-The main steps a typical experiment will need to take is:
+The main steps to prepare an experiment are:
 
-* Ensure GLADOS supports the experiment. Specific details can be found under [Compatability](#compatability)
-* Have parameters input via a `.ini` file, passed through as a command line argument
-* Have output be written to a csv file
-  * Alternatively, you can have a single return value be captured as the output
+1. Ensure GLADOS supports your experiment. Details are available under [Compatibility](#compatibility).
+2. Use a `.ini` file to input parameters, passed as a command-line argument.
+3. Output results to a CSV file, or return a single value as the output.
 
-We provided simple example experiments [in the repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for how to make your experiment run on GLADOS.
+We provide example experiments in the [repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for formatting your experiment.
 
-For any experiment, you will need to set up your code such that it will accept a .ini config file in the form of:
+Your experiment must be configured to accept a `.ini` config file structured as follows:
 
 ```ini
 [DEFAULT]
@@ -38,130 +37,324 @@ mr = 0.2
 s = 1
 ```
 
-Additionally, set up your code to output to a two-line csv that consists of headers and results like so:
+You can format the generated `.ini` file using the "User Defined Constants" tab while creating an experiment. Use curly brackets `{}` to reference parameter names.
+
+Example:
+
+If you have a parameter named `seed` ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as:
+
+```ini
+[SEED]
+random_seed = {seed}
+```
+
+This allows additional `.ini` sections to be included dynamically.
+
+Your experiment must also output results in a two-line CSV format with headers and corresponding values:
 
 ```csv
 HeaderFor1, HeaderFor2
 Result1, Result2
 ```
 
-Java experiments must be packaged into an executable `.jar` file.
-C experiments must be compiled into a Unix binary executable.
-Specifics are noted under [Compatability](#compatability).
+> **Note:** If your CSV file contains more than two lines, you can specify which line should be used in the "Information" tab.
 
-Once your experiment is set up, continue by [running the experiment](#running-experiments)
+Java experiments must be packaged as an executable `.jar` file.
+C experiments must be compiled into a Unix binary executable (for basic users).
+Specific requirements are outlined under [Compatibility](#compatibility).
 
-### Compatability
+Once your experiment is set up, proceed to [Running the Experiment](#running-experiments).
+
+## Compatibility
 
 GLADOS supports experiments that:
 
-* run on Python 3.8 through a single Python file, with no external packages aside from `configparser`, and no multiprocessing/threading features
-* are packaged in a `.jar` executable
-* are compiled into a binary executable for Unix systems, such that a base Debian system can run it
+- Run on Python 3.8 as a single Python file.
+- Are packaged as an executable `.jar` file.
+- Are compiled into a binary executable for Unix systems, runnable on a base Debian system.
+- Are contained in a zip file that includes one of the above file types.
 
-Other experiment types may be supported, though testing is limited. *Try at your own risk*
+Other experiment types may be supported, but testing is limited. *Use at your own risk.*
 
-GLADOS supports more complex outputs, like multiple files. However, currently, data aggregation is only done on a single file.
-You can get all the generated files, organized by each run, by downloading the Project Zip after completion.
+GLADOS supports complex outputs, including multiple files. However, data aggregation is currently limited to a single file.
 
-In the future, we plan to add more support for dependencies and other types of experiments.
+After completion, you can download all generated files, organized by each trial run, in a Project Zip.
+
+Future updates will improve support for dependencies and additional experiment types.
+
+### Extra Features
+
+> **Note:** These files can only be provided inside of zip files!
+
+Users can provide a file called "userProvidedFileReqs.txt". This file is a Python requirements file. When this file is provided all packages will be automatically installed.
+
+Privileged users have the option to provide two files:
+
+- packages.txt - this contains Debian packages to be installed to the runner.
+
+- commandsToRun.txt - this file contains bash commands that will be run on the runner after packages have been installed.
 
 ## Running Experiments
 
-This example will walk through running the Python Genetic Algorithm Experiment, which can be found [in the repository's examples](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments/python).
+To create a new experiment, click the "New Experiment" button below your email in the top-left corner of the dashboard.
 
-When first logged in, this should be what you see (except you may not have any experiments listed yet)
+Upon first login, your dashboard will be empty.
 
-![landing page](https://user-images.githubusercontent.com/23245825/201237091-42cd26fa-8649-4ecb-9386-bbabc3a85a01.PNG)
+![dashboard](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/dashboard.png)
 
-To start an experiment click the blue 'new experiment' button on the top left corner on the page.
-This will bring up the Experiment Information pane.
+To run a default experiment, click the "Run a Default Experiment" button on the right side of the screen.
 
-![informationStep](https://user-images.githubusercontent.com/23245825/223880912-8f234bb7-0958-4a04-ad18-81bd33d3b9cc.png)
+![run_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/run_default_exp.png)
 
-Field Specifications:
+You will see a modal where you can select "Add Nums (Python)." This will present an already configured experiment.
 
-* **Trial Result (This field is required):** If your project creates a two-line csv file to store the output of the trial, specify the name and extension of the csv file in the Trial Result textbox. (This can be the same as Extra Trial File)
-* **Trial Extra File:** If your project creates an extra file as its result, specify the name and extension of the file in the Extra Trial File textbox so that the system knows how to find it. (This can be the same as Trial Result)
-* **Keep Logs**: If you want to store any system prints from a trial, leave this checked, otherwise uncheck it.
+![select_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/select_default.png)
 
-Here's an example of a filled out information page:
+The experiment creation interface consists of multiple tabs:
 
-![filledInformationPage](https://user-images.githubusercontent.com/23245825/223881669-9d3790fa-115b-498b-9751-346b6047820f.png)
+### Information Tab
 
-Clicking next will bring you to the parameter input page:
+![information_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/information_tab.png)
 
-![parameterPage](https://user-images.githubusercontent.com/23245825/223881744-33f91bb3-0eb1-44dd-bff2-4bb2964be5a1.png)
+#### Name *(Required)*
 
-There are 4 supported parameter types; Integers, Floats, Strings, and Booleans. Strings and booleans are treated as constants and are not iterated upon.
+The name displayed in the UI for this experiment.
 
-* Integers and floats have 4 fields, default, min, max, and step. default is the default value the variable will have when not being iterated. min, max, and step determine how the variable will be iterated.
-* Strings and Booleans are constants
+#### Description *(Optional)*
 
-To add a parameter to the experiment click on the box that contains the name of desired type of parameter. This will add a form item that you can enter more information into like so.
+A description stored with the experiment record.
 
-![emptyParams](https://user-images.githubusercontent.com/23245825/223882117-d28d2a96-c3af-425b-97cb-16005c3b7a42.png)
+#### Trial Result *(Required)*
 
-You can then enter in the required information.
+The CSV file captured as the experiment result.
 
-Here's an example of a filled parameter page:
+#### Trial's Extra File *(Optional)*
 
-![filledParams](https://user-images.githubusercontent.com/23245825/223882365-97057fe0-9e48-49ec-bcd4-8ddc88661b02.png)
+A folder or file included in the downloadable Project Zip after experiment completion.
 
-Once you have entered your parameter information, clicking next will bring you to the user defined constants page.
+#### Trial Timeout (Seconds) *(Required)*
 
-![constsPage](https://user-images.githubusercontent.com/23245825/223882904-ae4646b3-bcd8-417a-9f74-143c67092bea.png)
+The duration before the experiment automatically times out.
 
-On this page you can optionally define the values for the variables that do not need to be iterated upon.
-You must input information into the text area as if it were text inside an .ini or .config file, because it will be appended directly to the end of each trial's input ini file.
+#### Executable File *(Required for zip experiments)*
 
-Here's an example of a possible valid entry in this field:
+If using a zip experiment, specify the main executable filename.
+
+#### Keep Logs *(Required)*
+
+Select this option to store logs from the experiment runner pod.
+
+### Parameters Tab
+
+![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/parameters_tab.png)
+
+There are five parameter types:
+
+#### Integer
+
+- **Name**: The parameter name used in the `.ini` file.
+- **Min**: Minimum value.
+- **Max**: Maximum value.
+- **Step**: Increment value.
+- **Default** (if enabled): The default value used when generating permutations.
+
+#### Float
+
+Similar to Integer but supports decimal values.
+
+#### Boolean
+
+- **Name**: The parameter name.
+- **Value**: `true/false`
+- **Default** (if enabled): Used in permutation generation.
+
+#### String
+
+- **Name**: The parameter name.
+- **Value**: A string value.
+- **Default** (if enabled): Used in permutation generation.
+
+#### String List
+
+- **Name**: The parameter name.
+- **Edit String**: Defines a list of strings to iterate over in permutations.
+- **Default** (if enabled): Used in permutation generation.
+
+### User Defined Constants Tab
+
+![user_defined_constants_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/user_defined_constants.png)
+
+This tab allows defining a text block appended to every generated `.ini` config file. You can use parameters from the "Parameters" tab inside curly brackets.
+
+Example:
 
 ```ini
-[const]
-a = -1
-;test comment
-b = 10.5
-invert = False
-[Strings]
-c = Test String
+[DEFAULT]
+test_var = {test}
 ```
 
-Any input to the textarea will not be validated, so make sure that the data is formatted correctly!
+### Post Process Tab
 
-Clicking next will bring you to the Post Process page:
+![post_process_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/post_process.png)
 
-![postProcess](https://user-images.githubusercontent.com/23245825/223883336-350b4a7a-f85a-4763-9d52-4cfc33425e20.png)
+This tab allows you to include a scatter plot in the downloadable Project Zip. This feature will be replaced by ChartJS functionality on the dashboard in future updates.
 
-There is currently only one post processing option: it generates a Scatter Plot with a line of best fit using the data from the results of the experiment. The dependent and independent variables can be any of the user defined variables or constants. You can also use any of the headers that are defined in the TrialResults csv
+### Confirmation Tab
 
-Clicking next will bring up the confirmation page:
+![confirmation_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/confirmation.png)
 
-![confirmationPage](https://user-images.githubusercontent.com/23245825/223884249-eab24c91-2b8f-43f9-9423-4c9e156e99df.png)
+This tab allows you to review all hyperparameters and settings before running the experiment.
 
-This contains a json file of what will be passed to the backend you can check it again here.
-Clicking next will bring up the Dispatch Page. Drop the .py or .jar file that you want the experiment to run on and click Dispatch to start the experiment.
+### Dispatch Tab
 
-### Results
+![dispatch_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/dispatch.png)
 
-While the system is generating the config files, this is what will appear on the dashboard:
+You can start an experiment from this tab by either:
 
-![awaitingExpStart](https://user-images.githubusercontent.com/23245825/223901376-b047a2bc-9dc2-40d2-9d0e-6a0185f7f6cb.png)
+1. Selecting a file from the five most recent ones used.
+2. Uploading a new file.
 
-Once the experiment starts running trials the item on the dashboard will provide; how many trials are to be run, how many trials have been run so far, the number of successes and failures, and an estimation of how long it will take the experiment to complete.
+If you copied an experiment, the file will be preselected.
 
-![experimentInProgress](https://user-images.githubusercontent.com/23245825/223901790-f6476518-b0bf-4745-814a-c621dc564ac3.png)
+## Results
 
-Once the experiment has completed you will be able to download the result.csv from the "Download Results" button which contains the output and the configuration used to get said result for each trial run.
+Once the experiment starts, you can monitor progress in real time.
 
-If you had an extra file produced by the experiment, chose to keep the logs from the experiment, or chose to do any post processing, you will also be able to download a zip containing those files.
+The dashboard will display:
 
-An example of a completed experiment can be seen here:
+- Total trials.
+- Completed trials.
+- Successes and failures.
+- Estimated time to completion.
 
-![completedExperiment](https://user-images.githubusercontent.com/23245825/223902650-ed63760d-ce95-4f57-a571-a38dda141848.png)
+Example below:
 
-If you wish to run the same experiment again while changing parameters you can click on "Copy Experiment" and it will open up a new experiment window with the values from the previous experiment copied over.
+![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/in_progress_exp.png)
 
-## Known bugs
+You can cancel an experiment at any time. However, small experiments may finish before cancellation takes effect.
 
-* If something catastrophically goes wrong and the experiment cannot continue, the user is not notified. So if an experiment is stuck on "Experiment Awaiting Start" or stuck on a trial run for a long period of time it is likely that the experiment has crashed. This is currently being addressed and should be fixed in the future.
+> **Note:** The "Expected Total Time" metric does not account for parallel execution, so actual completion may be faster.
+
+Example of completed experiment:
+
+![finished_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/finished_exp.png)
+
+After completion, you can download the `results.csv` file, which contains output data and configurations for each trial. If extra files were generated, logs were kept, or post-processing was applied, a zip file will also be available.
+
+To rerun an experiment with modified parameters, click "Copy Experiment."
+
+To visualize results, click "See Graph" on the dashboard.
+
+Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.
+
+## Permutations
+
+This section explains how parameter permutations are generated.
+
+### Example 1: No Defaults
+
+An integer parameter `test` with:
+
+- Min: `1`
+- Max: `10`
+- Step: `1`
+
+will generate 10 configurations:
+
+```ini
+[DEFAULT]
+test=1
+```
+
+```ini
+[DEFAULT]
+test=2
+```
+
+... up to `test=10`.
+
+> **Note:** Every parameter will go under the [DEFAULT] header unless defined in the "User Defined Constants" tab.
+
+### Example 2: Using Defaults
+
+An integer parameter `x` with:
+
+- Min: `1`
+- Max: `10`
+- Step: `1`
+- Default: `1`
+
+An integer parameter `y` with:
+
+- Min: `11`
+- Max: `20`
+- Step: `1`
+- Default: `11`
+
+An stringlist parameter `test` with:
+
+- Values: `["one", "two", "three"]`
+- Default: `two`
+
+will generate 21 configurations (after duplicates are removed):
+
+```ini
+[DEFAULT]
+x=1
+y=11
+test="two"
+```
+
+```ini
+[DEFAULT]
+x=2
+y=11
+test="two"
+```
+
+... up to `x=10, y=11, test="two"`
+
+```ini
+[DEFAULT]
+x=1
+y=11
+test="two"
+```
+
+```ini
+[DEFAULT]
+x=1
+y=12
+test="two"
+```
+
+... up to `x=1, y=20, test="two"`
+
+```ini
+[DEFAULT]
+x=1
+y=11
+test="one"
+```
+
+```ini
+[DEFAULT]
+x=1
+y=11
+test="two"
+```
+
+```ini
+[DEFAULT]
+x=1
+y=11
+test="three"
+```
+
+That will be all generated permutations.
+
+> **Note:** Some of the examples shown were duplicates and would be removed automatically.
+
+## Known Bugs
+
+- If an experiment crashes, users are not notified. If an experiment is stuck on "Experiment Awaiting Start" or a trial takes too long, it has likely failed. A fix is in progress.

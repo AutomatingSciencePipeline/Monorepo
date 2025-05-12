@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: runner
+  namespace: default
 spec:
   template:
     metadata:
@@ -34,6 +35,11 @@ spec:
             secretKeyRef:
               name: secret-env
               key: BACKEND_PORT
+        - name: GMAIL_CREDS
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: GMAIL_CREDS
       restartPolicy: Never
   backoffLimit: 4
   ttlSecondsAfterFinished: 60

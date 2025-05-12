@@ -2,8 +2,12 @@ name: Python Lint and Test - Runner
 
 on:
   push:
+    paths:
+      - 'apps/runner/**'
     branches: [ main ]
   pull_request:
+    paths:
+      - 'apps/runner/**'
     branches: [ main ]
 
 permissions:
@@ -48,7 +52,7 @@ jobs:
       working-directory: ./apps/runner
       run: zip -r codeCoverage.zip coverageReport/
     - name: Upload runner coverage report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report-runner
         path: ./apps/runner/codeCoverage.zip

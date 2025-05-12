@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: glados-service-frontend
+  name: glados-frontend-service
 spec:
   selector:
-    app: GLADOS # Ensure this matches the pod label
+    app: GLADOS
+    tier: frontend
   ports:
     - protocol: TCP
-      port: 3000 # The service port
-      targetPort: 3000 # The container port where Next.js listens
-  type: LoadBalancer # Expose service with a load balancer
+      port: 3000     # The port exposed by the Service
+      targetPort: 3000 # The port your Next.js app listens on
+  type: ClusterIP

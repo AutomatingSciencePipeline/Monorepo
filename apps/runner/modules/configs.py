@@ -4,7 +4,7 @@ import os
 from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 
-from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter, StringListParameter
+from modules.data.parameters import ParamType, BoolParameter, FloatParam, IntegerParam, Parameter, StringParameter, StringListParameter, ParamGroupParameter
 from modules.exceptions import GladosInternalError
 from modules.logging.gladosLogging import get_experiment_logger
 
@@ -12,186 +12,146 @@ FilePath = str
 
 explogger = get_experiment_logger()
 
-def float_range(start: float, stop: float, step=1.0):
-    count = 0
-    while True:
-        temp = float(start + count * step)
-        if temp >= stop:
-            break
-        yield temp
-        count += 1
-
-
-def generate_list(param: Parameter, paramName):
-    if param.type == ParamType.INTEGER:
-        intParam = IntegerParam(**param.dict())
-        return [(paramName, i) for i in range(intParam.min, intParam.max, intParam.step)]
-    elif param.type == ParamType.FLOAT:
-        floatParam = FloatParam(**param.dict())
-        return [(paramName, i) for i in float_range(floatParam.min, floatParam.max, floatParam.step)]
-    elif param.type == ParamType.BOOL:
-        return [(paramName, val) for val in [True, False]]
-    elif param.type == ParamType.STRING_LIST:
-        stringListParam = StringListParameter(**param.dict())
-        return [(paramName, val) for val in stringListParam.values]
-    else: #This will never happen
-        return []
+def float_range(start, stop, step, decimals):
+    """Helper for expanding values with floats, ensuring truncation."""
+    current = start
+    while round(current, decimals) < round(stop, decimals):  # Use rounded values for comparison
+        yield round(current, decimals)  # Ensure consistent decimal places
+        current += step
+        
+def get_decimal_places(number):
+    """Returns the number of decimal places in a float."""
+    if isinstance(number, int):
+        return 0
+    return max(0, len(str(number).split(".")[1]))
 
 def expand_values(param):
-    if param['type'] == ParamType.INTEGER:
-        return list(range(param['min'], param['max'] + 1, param['step']))
-    elif param['type'] == ParamType.STRING_LIST:
-        return param['values']
-    return []
+    """Expands possible values for a parameter with appropriate decimal precision."""
+    if param["type"] == ParamType.INTEGER:
+        return list(range(param["min"], param["max"] + 1, param["step"]))
+    elif param["type"] == ParamType.FLOAT:
+        decimals = max(
+            get_decimal_places(param["min"]),
+            get_decimal_places(param["max"]),
+            get_decimal_places(param["step"]),
+        )
+        return list(float_range(param["min"], param["max"] + param["step"], param["step"], decimals))
+    elif param["type"] == ParamType.STRING_LIST:
+        return param.get("values", [])
+    elif param["type"] == ParamType.STRING:
+        return [param["default"]] 
+    elif param["type"] == ParamType.BOOL:
+        return [True, False]
+    elif param["type"] == ParamType.PARAMGROUP:
+      return param.get("values", [])
+    else:
+        return []
 
-def cartesian_product(params_dict):
-    if not params_dict:
-        return [{}]
-    keys, values = zip(*params_dict.items())
-    return [dict(zip(keys, v)) for v in itertools.product(*values)]
+def generate_permutations(parameters, paramgroup=None):
+    """Generates permutations dynamically based on parameter definitions, 
+       using itertools.product and filtering based on default values."""
+    
+    # Prepare all possible values for parameters, including default and expanded ranges
+    all_values = []
+    base_vals = {}
+    default_vals = {}
+    
+    for param in parameters:
+        if param["type"] == ParamType.INTEGER or param["type"] == ParamType.FLOAT:
+            base_vals[param["name"]] = param["min"]
+        elif param["type"] == ParamType.STRING_LIST:
+            base_vals[param['name']] = param['values'][0]
+        elif param["type"] == ParamType.BOOL:
+            base_vals[param["name"]] = param["default"]
 
-def generate_permutations(parameters):
-    all_permutations = []
-    for current_param_index, current_param in enumerate(parameters):
-        fixed_values = {}
-        current_values = []
-        for i, param in enumerate(parameters):
-            if i == current_param_index:
-                if param['default'] == -1:
-                    current_values = expand_values(param)
-                else:
-                    current_values = [param['default']]
-            else:
-                if param['default'] != -1:
-                    fixed_values[param['name']] = [param['default']]
-                else:
-                    fixed_values[param['name']] = expand_values(param)
-        for value in current_values:
-            expanded_permutations = cartesian_product(fixed_values)
-            for perm in expanded_permutations:
-                perm[current_param['name']] = value
-                all_permutations.append(perm)
+    explogger.info("base vals: %s", str(base_vals))
+    explogger.info("default vals: %s", str(default_vals))
+    explogger.info("paramgroup vals: %s", str(paramgroup))
+          
+    for param in parameters:
+        if param["default"] != -1 and param["default"] != "-1" and param["default"] != '':
+            default_vals[param["name"]] = [param["default"]]
+        else:
+            default_vals[param["name"]] = expand_values(param)
+          
+    explogger.info("base vals: %s", str(base_vals))
+    explogger.info("default vals: %s", str(default_vals))
 
-    print("all permutations: ", all_permutations)
-    return all_permutations 
+    for param in parameters:
+        all_values.append(expand_values(param))
+    
+    # Generate all permutations using itertools.product
+    all_permutations = list(itertools.product(*all_values))
+    
+    # Now filter permutations based on the constraints: Default values should remain fixed.
+    filtered_permutations = []
+    for perm in all_permutations:
+        perm_dict = {parameters[i]["name"]: perm[i] for i in range(len(parameters))}
+        
+        num_defaults_changed = 0
+        for param in parameters:
+            if param["default"] != -1  and param["default"] != "-1" and param["default"] != '':
+                if perm_dict[param["name"]] != param["default"]:
+                    num_defaults_changed += 1
+        
+        if num_defaults_changed <= 1:
+            filtered_permutations.append(perm_dict)
 
-# def generate_config_files(experiment: ExperimentData):
-#     constants = {}
-#     parameters = {}
-#     gather_parameters(experiment.hyperparameters, constants, parameters)
-#     explogger.info("param list: " + str(parameters))
-#     explogger.info("const list: " + str(constants))
+    # Handle paramgroup if provided
+    if paramgroup:
+        paramgroup_permutations = []
+        for param in paramgroup.values():
+            param_names = list(param.values.keys())
+            explogger.info("param names: %s", str(param_names))
+            param_values = list(param.values.values())
+            explogger.info("param values: %s", str(param_values))
+            
+            len_param_keys = len(param_names)
+            len_param_values = len(param_values[0])
 
-#     configDict = {}
-#     configIdNumber = 0
+            # Generate specific combinations of paramgroup values
+            for i in range(len(param_values[0])):
+                values = [param_values[j][i] for j in range(len(param_values))]
+                paramgroup_permutations.append(dict(zip(param_names, values)))
 
-#     # Check if there is a string list parameter
-#     string_list_key = None
-#     string_list_values = []
-#     for key, var in parameters.items():
-#         if isinstance(var, StringListParameter):
-#             string_list_key = key
-#             string_list_values = var.values
-#             break
+        combined_permutations = []
+        for perm in filtered_permutations:
+            for pg_perm in paramgroup_permutations:
+                combined_perm = {**perm, **pg_perm}
+                combined_permutations.append(combined_perm)
+        filtered_permutations = combined_permutations
 
-#     if string_list_key:
-#         # Generate configurations for each value in the string list
-#         for string_value in string_list_values:
-#             for varyingKey, varyingVar in parameters.items():
-#                 if varyingKey == string_list_key:
-#                     continue  # Skip the string list parameter
+    explogger.info("len filtered: %s", str(len(filtered_permutations)))
+    explogger.info("filtered first permutations: %s", str(filtered_permutations[0]))
 
-#                 explogger.info(f'Keeping {varyingVar} constant with {string_value}')
-#                 possibleParamVals = []
+    return filtered_permutations
 
-#                 # Generate list for the varying parameter
-#                 possibleParamVals.append(generate_list(varyingVar, varyingKey))
-
-#                 # Add the string list parameter with the current string value
-#                 possibleParamVals.append([(string_list_key, string_value)])
-
-#                 for otherKey, otherVar in parameters.items():
-#                     if otherKey != varyingKey and otherKey != string_list_key:
-#                         possibleParamVals.append([(otherKey, get_default(otherVar))])
-
-#                 try:
-#                     permutations = list(itertools.product(*possibleParamVals))
-#                 except Exception as err:
-#                     raise GladosInternalError("Error while making permutations") from err
-
-#                 for thisPermutation in permutations:
-#                     configItems = {}
-#                     for item in thisPermutation:
-#                         name = item[0]
-#                         value = item[1]
-#                         configItems[name] = value
-#                     configItems.update(constants)
-#                     configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
-#                     explogger.info(f'Generated config {configIdNumber}')
-#                     configIdNumber += 1
-#     else:
-#         # No string list parameter, generate configurations normally
-#         for varyingKey, varyingVar in parameters.items():
-#             explogger.info(f'Keeping {varyingVar} constant')
-#             possibleParamVals = []
-
-#             possibleParamVals.append(generate_list(varyingVar, varyingKey))
-
-#             for otherKey, otherVar in parameters.items():
-#                 if otherKey != varyingKey:
-#                     possibleParamVals.append([(otherKey, get_default(otherVar))])
-
-#             try:
-#                 permutations = list(itertools.product(*possibleParamVals))
-#             except Exception as err:
-#                 raise GladosInternalError("Error while making permutations") from err
-
-#             for thisPermutation in permutations:
-#                 configItems = {}
-#                 for item in thisPermutation:
-#                     name = item[0]
-#                     value = item[1]
-#                     configItems[name] = value
-#                 configItems.update(constants)
-#                 configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
-#                 explogger.info(f'Generated config {configIdNumber}')
-#                 configIdNumber += 1
-
-#     explogger.info("Finished generating configs")
-#     experiment.configs = configDict
-#     return configIdNumber
 
 def generate_config_files(experiment: ExperimentData):
-    constants = {}
-    parameters = {}
-    gather_parameters(experiment.hyperparameters, constants, parameters)
-    explogger.info("param list: " + str(parameters))
-    explogger.info("const list: " + str(constants))
+    constants, parameters, paramgroups = {}, {}, {}
+    gather_parameters(experiment.hyperparameters, constants, parameters, paramgroups)
 
-    configDict = {}
-    configIdNumber = 0
+    explogger.info(f"param list: {parameters}")
+    explogger.info(f"const list: {constants}")
+    explogger.info(f"paramgroup list: {paramgroups}")
 
-    param_list = []
-    for key, param in parameters.items():
-        param_dict = param.dict()
-        param_dict['name'] = key
-        param_list.append(param_dict)
+    # Convert parameters into a list of dictionaries
+    param_list = [{**param.dict(), 'name': key} for key, param in parameters.items()]
 
-    permutations = generate_permutations(param_list)
+    explogger.info(f"param list: {param_list}")
+    explogger.info("Generating configs")
 
-    for permutation in permutations:
-        configItems = {}
-        for name, value in permutation.items():
-            configItems[name] = value
-        configItems.update(constants)
-        configDict[f'config{configIdNumber}'] = ConfigData(data=configItems)
-        explogger.info(f'Generated config {configIdNumber}')
-        configIdNumber += 1
+    # Generate all permutations
+    permutations = generate_permutations(param_list, paramgroups)
 
-    explogger.info("Finished generating configs")
-    experiment.configs = configDict
-    return configIdNumber
+    # Build config dictionary using dictionary comprehension
+    experiment.configs = {
+        f'config{configId}': ConfigData(data={**permutation, **constants})
+        for configId, permutation in enumerate(permutations)
+    }
 
+    explogger.info(f"Generated {len(permutations)} configs")
+    return len(permutations)
 
 def create_config_from_data(experiment: ExperimentData, configNum: int):
     """
@@ -207,12 +167,20 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
         raise GladosInternalError(msg) from err
 
     os.chdir('configFiles')
-    outputConfig = configparser.ConfigParser()
-    outputConfig.optionxform = str  # type: ignore # Must use this to make the file case sensitive, but type checker is unhappy without this ignore rule
-    outputConfig["DEFAULT"] = configData
+    # DONE: Change to custom function to create ini file
+    configFileLines = ["[DEFAULT]"]
+    for line in experiment.dumbTextArea.split('\n'):
+        configFileLines.append(line.replace('\n', '')) 
+    
+    for key, value in configData.items():
+        if "{" + key + "}" in experiment.dumbTextArea:
+            for i, line in enumerate(configFileLines):
+                configFileLines[i] = line.replace("{" + key + "}", str(value))
+        else:
+            configFileLines.append(f"{key} = {value}")
+    
     with open(f'{configNum}.ini', 'w', encoding="utf8") as configFile:
-        outputConfig.write(configFile)
-        configFile.write(experiment.dumbTextArea)
+        configFile.write('\n'.join(configFileLines))
         configFile.close()
         explogger.info(f"Wrote config{configNum} to a file")
     os.chdir('..')
@@ -234,7 +202,7 @@ def get_default(parameter: Parameter):
         raise GladosInternalError(f'Parameter {parameter} has an unsupported type')
 
 
-def gather_parameters(hyperparams, constants, parameters):
+def gather_parameters(hyperparams, constants, parameters, paramgroups):
     for parameterKey, hyperparameter in hyperparams.items():
         try:
             parameterType = hyperparameter.type
@@ -262,6 +230,10 @@ def gather_parameters(hyperparams, constants, parameters):
             elif parameterType == ParamType.BOOL:
                 explogger.info(f'param {parameterKey} varies, adding to batch')
                 parameters[parameterKey] = hyperparameter
+            elif parameterType == ParamType.PARAMGROUP:
+                paramGroupParam = ParamGroupParameter(**hyperparameter.dict())
+                explogger.info(f'param {parameterKey} is a paramgroup, adding to paramgroups')
+                paramgroups[parameterKey] = paramGroupParam
             else:
                 msg = f'ERROR DURING CONFIG GEN: param {parameterKey} {hyperparameter} Does not have a supported type'
                 raise GladosInternalError(msg)
@@ -270,6 +242,7 @@ def gather_parameters(hyperparams, constants, parameters):
 
 
 def get_config_paramNames(configfile: FilePath):
+
     config = configparser.ConfigParser()
     config.read(configfile)
     res = []

@@ -14,9 +14,12 @@ matplotlib = "*"
 pymongo = "*"
 pydantic = "==1.10.7"
 pytest-cov = "*"
+pipreqs = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
 
 [dev-packages]
-# libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)
 python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
 yapf = "*"
 pylint = "*"

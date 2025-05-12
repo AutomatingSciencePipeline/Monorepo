@@ -10,11 +10,14 @@ edit_uri: '' # edit is hidden
 nav:
   - Home: index.md
   - About GLADOS: about.md
+  - BioAI User Guides:
+    - HW8: bioai/hw8.md
   - Tutorial:
     - Usage: tutorial/usage.md
     - Installation: tutorial/installation.md
-    - Deployment: tutorial/deployment.md
+    - Local GLADOS Installation (Updated Nov 2024): tutorial/local_testing.md
     - Developer Installation: tutorial/developer_installation.md
+    - Deployment: tutorial/deployment.md
     - Developer Deployment: tutorial/developer_deployment.md
     - Troubleshooting: tutorial/troubleshooting.md
   - Documentation:
@@ -22,6 +25,9 @@ nav:
   - Infrastructure:
     - Kubernetes: infrastructure/kubernetes.md
     - VMs: infrastructure/vms.md
+    - Cluster Upgrade: infrastructure/cluster_update.md
+  - Developer Help:
+    - Helpful Commands: developerhelp/helpful_commands.md
   - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
 

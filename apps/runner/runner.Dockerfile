@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.8-slim as base
+FROM python:3.8 as base
 
 # Keeps Python from generating .pyc files in the container
 # This doesn't benefit the performance of the system
@@ -15,7 +15,7 @@ RUN apt-get update && \
         # For file type identification via bytes
         libmagic1 \
         #Ths should also get Java 11? -David
-        default-jdk
+        default-jdk 
 
 # Ability to pass in JVM options
 ARG JAVA_OPTS

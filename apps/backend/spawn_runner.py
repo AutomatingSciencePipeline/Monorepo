@@ -1,5 +1,6 @@
 """Module that provides functionality to create a job for the runner"""
 
+import os
 import time
 import sys
 import yaml
@@ -12,13 +13,19 @@ RUNNER_PATH = "./job-runner.yaml"
 def create_job_object(experiment_data):
     """Function that creates the job object for the runner"""
     # Configure Pod template container
-    job_name = "runner-" + str(time.time())
+    job_name = "runner-" + experiment_data['experiment']['id']
+    
     job_command = ["python3", "runner.py", json.dumps(experiment_data)]
 
     runner_body = get_yaml_file_body(RUNNER_PATH)
 
     runner_body['metadata']['name'] = job_name
     runner_body['spec']['template']['spec']['containers'][0]['command'] = job_command
+    
+    if os.getenv("IMAGE_RUNNER"):
+        # Get the image name
+        image_name = str(os.getenv("IMAGE_RUNNER"))
+        runner_body['spec']['template']['spec']['containers'][0]['image'] = image_name
 
     return runner_body
 

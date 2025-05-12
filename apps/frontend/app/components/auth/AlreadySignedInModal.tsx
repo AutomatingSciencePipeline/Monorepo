@@ -58,7 +58,7 @@ export const AlreadySignedInModal = ({ continueButtonMessage, linkTarget }: Alre
 										.then(() => {
 											Router.reload();
 										})
-										.catch((err) => console.log('Sign out error', err))
+										.catch((err) => console.warn('Sign out error', err))
 								);
 							}}
 						>

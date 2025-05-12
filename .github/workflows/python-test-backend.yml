@@ -2,8 +2,12 @@ name: Python Lint and Test - Backend
 
 on:
   push:
+    paths:
+      - 'apps/backend/**'
     branches: [ main ]
   pull_request:
+    paths:
+      - 'apps/backend/**'
     branches: [ main ]
 
 permissions:
@@ -47,7 +51,7 @@ jobs:
       working-directory: ./apps/backend
       run: zip -r codeCoverage.zip coverageReport/
     - name: Upload backend coverage report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report-backend
         path: ./apps/backend/codeCoverage.zip

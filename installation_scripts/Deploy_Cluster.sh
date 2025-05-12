@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script is meant to be run on the server to update the code and restart the docker containers
+# This script is only to be run when the cluster is setup for the first time!
 
 echo "Restarting cubed"
 sudo kubeadm reset --cri-socket unix:///var/run/containerd/containerd.sock
@@ -16,9 +16,16 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 # install networking + metallb
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
 
-cd ..
+# Run the helm deploy scripts
+cd ../helm_packages/nginx-ingress-helm || exit
+./deploy.sh
+cd ../mongodb-helm || exit
+./deploy.sh --create
+
+# Get back to the root directory
+cd ../..
 python3 ./kubernetes_init/init.py
 cd installation_scripts || exit
 echo 'Waiting for a pod to start....'
@@ -29,4 +36,3 @@ do
    echo 'Waiting for a pod to start....'
 done
 kubectl apply -f ../kube_config/l2advertisement.yaml
-kubectl expose deployment deployment-test-frontend --type LoadBalancer --port 80 --target-port 3000
