@@ -16,17 +16,19 @@ class ExperimentType(Enum):
 
 
 class ExperimentData(BaseModel):
-
+    name = ""
     experimentType = ExperimentType.UNKNOWN
     experimentExecutable = ""
     expId: DocumentId
     creator: UserId
     creatorRole: str
+    creatorEmail: str
     trialExtraFile: Optional[str]
     trialResult: str
     trialResultLineNumber: int
     file = ""  #Will be set either by initializing or by app.py
     timeout: int
+    sendEmail: bool
     keepLogs: bool
     scatter: bool
     scatterIndVar: Optional[str]
@@ -44,6 +46,7 @@ class ExperimentData(BaseModel):
     totalExperimentRuns: int = 0
     passes: int = 0
     fails: int = 0
+    status = "RUNNING"
 
     @validator('trialResult')
     @classmethod

@@ -6,4 +6,4 @@ metadata:
 spec:
   addresses:
   # dev is 137.112.104.86
-  - 137.112.104.87/32
+  - 137.112.104.84/32 # This is the ip address for the hostname glados.csse.rose-hulman.edu
