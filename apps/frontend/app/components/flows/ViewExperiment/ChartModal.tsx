@@ -11,9 +11,9 @@ interface ModalProps {
 
 const GraphModal: React.FC<ModalProps> = ({ onClose, fullScreen, toggleFullscreen, children }) => {
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-scroll">
             <div
-                className={fullScreen ? "bg-white rounded-lg shadow-lg w-screen h-screen" : "bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3"}>
+                className={fullScreen ? "bg-white rounded-lg shadow-lg w-screen h-auto" : "bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3"}>
                 <div className="flex justify-end p-2">
                     <button
                         onClick={toggleFullscreen}
