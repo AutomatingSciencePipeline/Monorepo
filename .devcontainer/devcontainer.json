@@ -1,12 +1,15 @@
 {
-    "name": "GLADOS Dev Container",
-    "image": "gladospipeline/glados-dev-container:main",
-    "hostRequirements": {
-        "cpus": 4,
-        "memory": "16gb",
-        "storage": "32gb"
-    },
-    "customizations": {
+	"name": "GLADOS Dev Container",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node",
+	"features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+        "ghcr.io/nucleuscloud/devcontainer-features/ctlptl:0": {},
+        "ghcr.io/lentzi90/features/tilt:0": {}
+
+	},
+	"customizations": {
         "vscode": {
             "extensions": [
                 "ms-python.python",
@@ -25,17 +28,6 @@
             ]
         }
     },
-    "forwardPorts": [
-        3000,
-        5050,
-        10350,
-        30000
-    ],
-    // Pull the docker image to make sure we have the most up to date version
-    "initializeCommand": "docker pull gladospipeline/glados-dev-container:main",
-    "postStartCommand": "bash ./.devcontainer/post-start.sh",
-    "postCreateCommand": "nohup bash -c 'while true; do sleep 20; ps aux | grep -E 'vscode.*[b]ootstrap-fork.*extensionHost.*' > /dev/null || kill -15 1; done &' > /dev/null",
-    "runArgs": [
-        "--rm"
-    ]
+	"forwardPorts": [3000, 5050, 10350],
+	"postStartCommand": "bash ./.devcontainer/post-start.sh",
 }
