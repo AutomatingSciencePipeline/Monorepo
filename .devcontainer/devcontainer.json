@@ -29,5 +29,5 @@
         }
     },
 	"forwardPorts": [3000, 5050, 10350],
-	"postStartCommand": "bash ./.devcontainer/post-start.sh",
+	// "postStartCommand": "bash ./.devcontainer/post-start.sh",
 }
