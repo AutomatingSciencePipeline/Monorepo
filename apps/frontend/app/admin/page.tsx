@@ -9,6 +9,7 @@ import classNames from "classnames";
 import { useRouter } from "next/navigation";
 import { cancelExperimentById, getUsers, updateUserRole } from "../../lib/mongodb_funcs";
 import toast, { Toaster } from "react-hot-toast";
+import { triggerRedeploy } from "../../lib/k8s_funcs";
 
 declare module "next-auth" {
     interface User {
@@ -59,7 +60,7 @@ export default function Page() {
             return;
         }
 
-        if(session.user?.role !== "admin") {
+        if (session.user?.role !== "admin") {
             return;
         }
 
@@ -308,10 +309,10 @@ export default function Page() {
                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 mx-2 rounded-lg shadow-md data-[selected]:bg-blue-900">
                     Running Experiment Management
                 </Tab>
-                {/* <Tab
+                <Tab
                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 mx-2 rounded-lg shadow-md data-[selected]:bg-blue-900">
-                    Default Experiments Tester
-                </Tab> */}
+                    Application Management
+                </Tab>
             </TabList>
             <TabPanels className={"p-4 w-auto h-auto mx-auto"}>
                 <TabPanel className={"flex"}>
@@ -419,9 +420,51 @@ export default function Page() {
                         </table>
                     </div>
                 </TabPanel>
-                {/* <TabPanel>
-                    Work in progress!!!
-                </TabPanel> */}
+                <TabPanel>
+                    <div className="relative overflow-x-auto">
+                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3">
+                                        Application Name
+                                    </th>
+                                    <th scope="col" className="px-6 py-3">
+                                        Manage
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    key={"glados"}
+                                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                                >
+                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        GLADOS
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <button
+                                            className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                                            onClick={() => {
+                                                toast.promise(triggerRedeploy(), {
+                                                    loading: "Redeploying...",
+                                                    success: <div className="text-center">
+                                                        <b>Redeployed successfully!</b>
+                                                        <br />
+                                                        Please wait a few seconds and then refresh the page.
+                                                    </div>,
+                                                    error: "Failed to trigger redeploy!",
+                                                });
+                                            }}
+                                        >
+                                            Redeploy
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </TabPanel>
             </TabPanels>
         </TabGroup>
     </div>
