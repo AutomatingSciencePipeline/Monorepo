@@ -13,12 +13,13 @@ nav:
   - BioAI User Guides:
     - HW8: bioai/hw8.md
   - Tutorial:
+    - Best Practices: tutorial/best_practices.md
     - Usage: tutorial/usage.md
     - Installation: tutorial/installation.md
     - Local GLADOS Installation (Updated Nov 2024): tutorial/local_testing.md
-    - Developer Installation: tutorial/developer_installation.md
+    - Developer Installation: tutorial/dev_environment.md
     - Deployment: tutorial/deployment.md
-    - Developer Deployment: tutorial/developer_deployment.md
+    # - Developer Deployment: tutorial/developer_deployment.md
     - Troubleshooting: tutorial/troubleshooting.md
   - Documentation:
     - Updating Documentation: documentation/guide.md

@@ -9,7 +9,7 @@ To run the cluster we have created several virtual machines that are hosted by R
 | glados-w1        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific            |
 | glados-w2        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific            |
 | glados-dev       | This will run a cluster used for development. Basically a staging environment.                  | 4 CPU cores, 8GB of RAM, 100GB of storage                                    | Entire cluster          |
-| glados-forge     | Dedicated VM for development environments for "local" development of GLADOS.                            | X CPU cores, XGB of RAM, 500GB of storage                                   | Dev containers, VS Code |
+| glados-forge     | Dedicated VM for development environments for "local" development of GLADOS.                            | XCPU cores, XGB of RAM, 500GB of storage                                   | Dev containers, VS Code |
 
 !!! note
 

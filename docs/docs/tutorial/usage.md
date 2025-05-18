@@ -168,16 +168,16 @@ Similar to Integer but supports decimal values.
 - **Value**: `true/false`
 - **Default** (if enabled): Used in permutation generation.
 
-#### String
-
-- **Name**: The parameter name.
-- **Value**: A string value.
-- **Default** (if enabled): Used in permutation generation.
-
 #### String List
 
 - **Name**: The parameter name.
 - **Edit String**: Defines a list of strings to iterate over in permutations.
+- **Default** (if enabled): Used in permutation generation.
+
+#### Parameter Group
+
+- **Name**: The parameter group name.
+- **Parameters**: The parameter groupings that will be tested together in an experiment run.
 - **Default** (if enabled): Used in permutation generation.
 
 ### User Defined Constants Tab
