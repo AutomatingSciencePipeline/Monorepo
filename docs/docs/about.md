@@ -6,9 +6,7 @@ As of the end of the school year ranging from 2024-2025, the project has achieve
 
 Below is the most recent poster shown at the Rose Show.
 
-![poster](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/about-Rose_Show_Poster-05_2025.png)
-
-![poster2](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/update-documentation-images/docs/images/about-Rose_Show_Poster-05_2025.png)
+![poster](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/about-Rose_Show_Poster-05_2025.png)
 
 ## FAQ
 
@@ -22,4 +20,4 @@ GLADOS uses React and Next.js on the frontend, Python on the backend, and MongoD
 
 * Future goals?
 
-GLADOS aims to become more secure, as currently that has not been a large priority. In addition, getting GLADOS to be at least semi-functional from a mobile device would allow for more flexibility in its usage. These goals are being handed off to next year's senior capstone project team.
+GLADOS aims to become more secure in order to eventually broader its scope to be more open source. In addition, getting GLADOS to be at least semi-functional from a mobile device would allow for more flexibility in its usage. These goals are being handed off to next year's senior capstone project team.
