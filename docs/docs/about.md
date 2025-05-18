@@ -16,4 +16,4 @@ GLADOS uses React and Next.js on the frontend, Python on the backend, and MongoD
 
 * Future goals?
 
-In the future, GLADOS aims to become more secure, as currently that has not been a large priority. In addition, getting GLADOS to be at least semi-functional from a mobile device would allow for more flexibility in its usage. These goals are being handed off to next year's senior capstone project team.
+GLADOS aims to become more secure, as currently that has not been a large priority. In addition, getting GLADOS to be at least semi-functional from a mobile device would allow for more flexibility in its usage. These goals are being handed off to next year's senior capstone project team.
