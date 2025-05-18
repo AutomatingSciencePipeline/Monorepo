@@ -8,7 +8,7 @@ Auth.js is the library that is used for authentication on GLADOS.
 
 OAuth authentication is the Auth.js type used on GLADOS. The Next.js version is used, since Next.js is already being used in the frontend.
 
-Thanks to Auth.js, GLADOS users can log into the website by using their GitHub account.
+Thanks to OAuth, GLADOS users can log into the website by using their GitHub account.
 
 Learn more about Auth.js on their [website](https://authjs.dev/getting-started).
 
