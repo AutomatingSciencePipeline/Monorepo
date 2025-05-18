@@ -4,6 +4,12 @@ GLADOS, the Automated Science Pipeline, started when Dr. Jason Yoder, a CSSE Pro
 
 As of the end of the school year ranging from 2024-2025, the project has achieved basic usability, being used by multiple thesis students. Thanks to Kubernetes, the process is sped up considerably for them, allowing for multiple large experiments to be run in parallel while viewing the logs within them. Once complete, users can also use various types of graphs available on GLADOS to see their results and determine if they need to rerun their experiment again with different parameters, which can be easily done.
 
+Below is the most recent poster shown at the Rose Show.
+
+![poster](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/update-documentation-images/docs/images/about-Rose_Show_Poster-05_2025.png)
+
+![poster2](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/update-documentation-images/docs/images/about-Rose_Show_Poster-05_2025.png)
+
 ## FAQ
 
 * Why 'GLADOS'?
