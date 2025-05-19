@@ -23,7 +23,14 @@ explogger = get_experiment_logger()
 
 def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
     try:
-        data = process.communicate(timeout=trialTimeout)
+           #    log the experiment.timeout
+        explogger.info(f"INFO: Experiment Trial Timeout is {trialTimeout}")
+        # Cap timeout if needed
+        if trialTimeout == -1:
+            data = process.communicate()
+        else:
+            capped_timeout = min(trialTimeout, 2147483)
+            data = process.communicate(timeout=capped_timeout)
         if keepLogs:
             os.chdir('../ResCsvs')
             with open(f"log{trialRun}.txt", 'w', encoding='utf8') as trialLogFile:

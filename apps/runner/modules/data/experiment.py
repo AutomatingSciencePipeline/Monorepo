@@ -66,8 +66,8 @@ class ExperimentData(BaseModel):
     @validator('timeout')
     @classmethod
     def check_timeout(cls, v):
-        if v < 1:
-            raise ValueError(f'value {v} is an invalid timeout, timeout must be greater than or equal to 1')
+        if v < -1 or v == 0:
+            raise ValueError(f'value {v} is an invalid timeout, timeout must be greater than or equal to -1 and not equal to 0')
         return v
 
     @validator('hyperparameters')
