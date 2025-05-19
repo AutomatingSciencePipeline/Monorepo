@@ -361,7 +361,7 @@ After the experiment has completed, you can view the chart by clicking "See Grap
 
 Example below:
 
-![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/chartmodal.png)
+![The chart modal](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/chartmodal.png)
   
 You can toggle fullscreen mode or close the modal by using the buttons in the top right of the modal.
 
