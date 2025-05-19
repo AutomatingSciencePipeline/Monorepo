@@ -2,9 +2,10 @@
 
 GLADOS, the Automated Science Pipeline, started when Dr. Jason Yoder, a CSSE Professor at Rose-Hulman Institute of Technology, found himself building the same interface for many different computational research projects over his years of research. Finding a natural need to make this repeated process easier to set up, the project began in 2021 as a senior capstone project, with continuous iterations done by different senior capstone project teams each academic year. The goal is to provide a useful website for people with hard to run experiments that they need to iterate on, as GLADOS will speed up the time running those experiments take while also providing a nice interface to view the experiment results on.
 
-As of the end of the school year ranging from 2024-2025, the project has achieved basic usability, being used by multiple thesis students. Thanks to Kubernetes, the process is sped up considerably for them, allowing for multiple large experiments to be run in parallel while viewing the logs within them. Once complete, users can also use various types of graphs available on GLADOS to see their results and determine if they need to rerun their experiment again with different parameters, which can be easily done.
+ The 2024-25 team completed the Kubernetes system migration and created the scalable VMs server infrastructure. They migrated the database from Firebase to MongoDB and authentication from Firebase authentication to Auth.js. They also improved the system's usability by adding features like default experiments, charting, cancellation, archiving, deletion, collapsing, and expanding experiments.
 
-Below is the most recent poster shown at the Rose Show.
+
+Below is the most recent poster shown at the Rose Show for the 24-25 year.
 
 ![poster](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/about-Rose_Show_Poster-05_2025.png)
 
