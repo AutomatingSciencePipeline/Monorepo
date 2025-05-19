@@ -1,12 +1,7 @@
 {
-    "name": "GLADOS Dev Container",
-    "image": "gladospipeline/glados-dev-container:main",
-    "hostRequirements": {
-        "cpus": 4,
-        "memory": "16gb",
-        "storage": "32gb"
-    },
-    "customizations": {
+	"name": "GLADOS Dev Container",
+	"image": "gladospipeline/glados-dev-container:main",
+	"customizations": {
         "vscode": {
             "extensions": [
                 "ms-python.python",
@@ -25,17 +20,5 @@
             ]
         }
     },
-    "forwardPorts": [
-        3000,
-        5050,
-        10350,
-        30000
-    ],
-    // Pull the docker image to make sure we have the most up to date version
-    "initializeCommand": "docker pull gladospipeline/glados-dev-container:main",
-    "postStartCommand": "bash ./.devcontainer/post-start.sh",
-    "postCreateCommand": "nohup bash -c 'while true; do sleep 20; ps aux | grep -E 'vscode.*[b]ootstrap-fork.*extensionHost.*' > /dev/null || kill -15 1; done &' > /dev/null",
-    "runArgs": [
-        "--rm"
-    ]
+	"forwardPorts": [3000, 5050, 10350]
 }
