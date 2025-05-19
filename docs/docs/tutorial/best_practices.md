@@ -34,6 +34,22 @@ The development environment for GLADOS is streamlined using the glados-forge VM,
 
 The task board for GLADOS is located in the [GitHub Projects](https://github.com/orgs/AutomatingSciencePipeline/projects/1/views/1). This is where all of the tasks/issues for GLADOS are tracked and managed. The current dev team should create a standard for how to name and track time for the tasks/issues that they are working on. In the past, the naming convention has been to use the following format: '[Task Name] - _/[Number of Hours Predicted]'. This way the person who is assigned to the task can update the time as they are working. 
 
+### Task Board Categories
+
+| Category         | Description                                                                                                 |
+|------------------|------------------------------------------------------------------------------------------------------------|
+| **TroubleShooting** | Issues with bugs that need further fixing before they can be marked as done.                              |
+| **Consult Jason**   | Issues that are roadblocked and require clarification or input from Jason before progress can be made.    |
+| **Onboarding**      | Good starter issues for new teams. Look here first if you’re not sure what to work on.                    |
+| **Backlog**         | Issues that need to be done and haven’t been started yet, but are not currently prioritized.              |
+| **Ready**           | Issues that have not been started yet and are ready for someone to pick up.                               |
+| **Roadblocked**     | Issues that cannot progress because they require changes from another team member.                        |
+| **On Hold**         | Issues that were in progress but are paused due to other priorities.                                      |
+| **In Progress**     | Issues currently being worked on by someone.                                                              |
+| **In Review**       | Issues completed and waiting for review by other team members before merging.                             |
+| **Done**            | Issues that have been completed.                                                                          |
+| **Eventually**      | Issues that need to be completed, but cannot be addressed for the foreseeable future.                     |
+
 GitHub has also implemented a sub-task feature that allows for the creation and management of smaller tasks that can combine into a larger feature. This is a great way to  both split up work on a large feature between people and better track the time that each part of the feature is taking. 
 
 Another important feature of the task board is the ability to assign labels for importance of the task and assign the development branch that is being used to complete the work for that task. Utilizing these task board management features will help the team stay organized and on track with the development of GLADOS.
