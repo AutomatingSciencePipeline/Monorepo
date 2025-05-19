@@ -27,6 +27,7 @@ nav:
     - Kubernetes: infrastructure/kubernetes.md
     - VMs: infrastructure/vms.md
     - Cluster Upgrade: infrastructure/cluster_update.md
+    - Used Technologies: infrastructure/used_technologies.md
   - Developer Help:
     - Developer Setup: developerhelp/setup.md
     - Helpful Commands: developerhelp/helpful_commands.md
