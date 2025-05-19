@@ -27,6 +27,7 @@ nav:
     - VMs: infrastructure/vms.md
     - Cluster Upgrade: infrastructure/cluster_update.md
   - Developer Help:
+    - Developer Setup: developerhelp/setup.md
     - Helpful Commands: developerhelp/helpful_commands.md
   - Cheatsheet: cheatsheet.md
   - (Old) Repository Guide: repository_guide.md
