@@ -101,10 +101,8 @@ Maybe in the future, shifting to [Longhorn](https://longhorn.io/) or something s
 
 ## Helm
 
-!!! note
-
-    The current system does not use Helm to package the Kubernetes setup. However, shifting towards Helm is likely going to happen in the future, for a more standard Kubernetes setup.
-
 [Helm](https://helm.sh/) is a tool that packages entire Kubernetes applications. Just like how images are packages of a containerized application or program, Helm works with Charts, which package applications written to work using Kubernetes. This is a more standard way of installing applications onto a Kubernetes cluster, and many charts are stored on [Artifact Hub](https://artifacthub.io/).
 
 To use helm, the project must be restructured to fit what it expected such that it can be packaged into a chart. [This video](https://www.youtube.com/watch?v=5_J7RWLLVeQ) may be a helpful resource, though there are other explanations online that may work better. The current development team has little experience with Helm, so as a result, this section is lacking in a full explanation.
+
+We are currently using Helm to deploy NGINX-ingress and MongoDB. See the Monorepo/helm_packages.
