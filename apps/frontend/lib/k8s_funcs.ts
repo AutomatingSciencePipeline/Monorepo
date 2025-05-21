@@ -71,8 +71,8 @@ export async function triggerRedeploy() {
     // First cordon glados-w0 node
     const nodeName = 'glados-w0';
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-    const cordonPatch = [{ op: "replace", path: "/spec/unschedulable", value: true }];
-    const uncordonPatch = [{ op: "replace", path: "/spec/unschedulable", value: false }];
+    const cordonPatch = {spec: { unschedulable: true }};
+    const uncordonPatch = {spec: { unschedulable: false }};
     // Check if the node exists
     const nodeList = await k8sApi.listNode();
     const nodeExists = nodeList.items.some((node) => node.metadata?.name === nodeName);
