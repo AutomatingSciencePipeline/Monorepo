@@ -19,7 +19,7 @@ export async function getK8sLogs(expId: string) {
         throw new Error('User does not have permission to access this experiment');
     }
     const kc = new k8s.KubeConfig();
-    kc.loadFromDefault();
+    kc.loadFromCluster();
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
     const jobName = `runner-${expId}`;
