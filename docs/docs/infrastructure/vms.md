@@ -4,7 +4,7 @@ To run the cluster we have created several virtual machines that are hosted by R
 
 | VM Host Name     | Description                                                                                     | Specs                                                                        | What runs here?
 | -----------      | ------------------------------------                                                            | ------------------------------------                                         | --------------------------------
-| glados           | This VM will run the kubernetes control plane. See above for the function of the control plane  | 2 CPU cores, 4GB of RAM, 50GB of storage                                     | control-plane
+| glados-cp           | This VM will run the kubernetes control plane. See above for the function of the control plane  | 2 CPU cores, 4GB of RAM, 50GB of storage                                     | control-plane
 | glados-db        | This VM will run and store the MongoDB.                                                         | 4 CPU cores, 8GB of RAM, 1TB of storage?, ability to run AVX instructions    | database
 | glados-w1        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific
 | glados-w2        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific
