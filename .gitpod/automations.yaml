@@ -1,0 +1,19 @@
+tasks:
+  npmInstall:
+    name: NPM Install
+    description: runs npm install
+    triggeredBy:
+      - postEnvironmentStart
+    command: cd /workspaces/Monorepo/apps/frontend && npm i
+  setupMinikube:
+    name: Setup Minikube
+    description: configures and sets up Minikube
+    triggeredBy:
+      - postEnvironmentStart
+    command: minikube config set cpus 4 && minikube config set memory 6000 && minikube delete && ctlptl create cluster minikube --registry=ctlptl-registry
+  pipInstall:
+    name: Install pip packages
+    description: installs needed pip packages
+    triggeredBy:
+      - postEnvironmentStart
+    command: pip install flask-cors && pip install kubernetes && pip install pymongo && pip install bson && pip install pyyaml && pip install gunicorn && pip install numpy && pip install configparser && pip install python-magic && pip install python-dotenv && pip install matplotlib && pip install pydantic && pip install pipreqs

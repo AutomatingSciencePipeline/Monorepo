@@ -76,6 +76,7 @@ export interface ExperimentData {
     trialResultLineNumber: number;
     timeout: number;
     keepLogs: boolean;
+    sendEmail: boolean;
     scatter: boolean;
     scatterIndVar: string;
     scatterDepVar: string;
