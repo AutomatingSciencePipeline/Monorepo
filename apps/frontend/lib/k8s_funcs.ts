@@ -77,11 +77,15 @@ export async function triggerRedeploy() {
     const nodeList = await k8sApi.listNode();
     const nodeExists = nodeList.items.some((node) => node.metadata?.name === nodeName);
     if (nodeExists) {
-        await k8sApi.patchNode({
-            name: nodeName,
-            body: cordonPatch,
-            pretty: 'true', // Optional pretty-printing
-        }, k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch));
+        try {
+            await k8sApi.patchNode({
+                name: nodeName,
+                body: cordonPatch,
+                pretty: 'true', // Optional pretty-printing
+            }, k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch));
+        } catch (error) {
+            console.error(`Failed to cordon node ${nodeName}:`, error);
+        }
     }
 
 
