@@ -5,6 +5,7 @@ import 'tailwindcss/tailwind.css';
 import { ExperimentData } from '../../../../lib/db_types';
 import GraphModal from './ChartModal';
 import { fetchResultsFile } from '../../../../lib/mongodb_funcs';
+import { useDebounce } from 'use-debounce';
 
 Chart.register(...registerables);
 Chart.register(BoxPlotController, BoxAndWiskers, ViolinController, Violin);
@@ -28,6 +29,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [aggregateData, setAggregateData] = useState(false);
     const [canAggregate, setCanAggregate] = useState(true);
+    const [yAxisMin, setYAxisMin] = useState('');
+    const [yAxisMax, setYAxisMax] = useState('');
+    const [dataHidden, setDataHidden] = useState(false);
     const aggregateSpanRef = useRef<HTMLSpanElement>(null);
     const aggregateSelectRef = useRef<HTMLSelectElement>(null);
     const headerSpanRef = useRef<HTMLSpanElement>(null);
@@ -188,6 +192,39 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
         return colors;
     };
 
+    const getAxisRange = (min: boolean) => {
+        const value = min? yAxisMin : yAxisMax;
+        const parsed = parseFloat(value);
+        return isNaN(parsed)? undefined : parsed;
+    }
+
+    const updateDataHidden = (headers, yLists, visibleMetas) => {
+        setDataHidden(false);
+        if (visibleMetas != undefined)
+        {
+            for (let i = 0; i < visibleMetas.length; i++) {
+                let datasetLabel = visibleMetas[i].label;
+                let labelIndex = headers.indexOf(datasetLabel);
+                if (yLists[labelIndex] != undefined)
+                {
+                    for (let j = 0; j < yLists[labelIndex].length; j++)
+                    {
+                        let dataValue = yLists[labelIndex][j];
+                        let min = getAxisRange(true);
+                        min = (min === undefined)? dataValue : min;
+                        let max = getAxisRange(false);
+                        max = (max === undefined)? dataValue : max;
+                        if (dataValue < min! || dataValue > max!)
+                        {
+                            setDataHidden(true);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     useEffect(() => {
         if (!loading && experimentChartData.resultContent) {
             try {
@@ -263,7 +300,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                 title: {
                                     display: true,
                                     text: 'Y Axis'
-                                }
+                                },
+                                min: getAxisRange(true),
+                                max: getAxisRange(false) 
                             }
                         },
                         animation: {
@@ -283,7 +322,14 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                             ctx.fillRect(0, 0, chart.canvas.width, chart.canvas.height);
                             ctx.restore();
                         }
-                    }]
+                    },
+                    {
+                        id: 'after-legend-update-hook',
+                        afterUpdate(chart) {
+                          let visibleMetas = chart.getSortedVisibleDatasetMetas();
+                          updateDataHidden(newHeaders, newYLists, visibleMetas);
+                        }
+                      }]
                 });
 
                 //If it is a pie chart you have to use meta
@@ -294,7 +340,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     });
                 }
                 else if (visibleMetas != undefined) {
-                    //check whether we have the dataset saved as visible and show it if so
+                    //check whether we have the dataset saved as visible and show it if so.
 
                     for (let i = 0; i < visibleMetas.length; i++) {
                         let datasetLabel = visibleMetas[i].label
@@ -307,6 +353,9 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
 
 
                 }
+
+                updateDataHidden(newHeaders, newYLists, visibleMetas);
+
                 newChartInstance.update();
 
                 setChartInstance(newChartInstance);
@@ -317,7 +366,7 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
             }
         }
 
-    }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData, aggregateMode]);
+    }, [loading, experimentChartData, chartType, xAxis, isFullscreen, aggregateData, aggregateMode, yAxisMin, yAxisMax]);
 
     const regenerateCanvas = () => {
         setCanvasKey(prevKey => prevKey + 1);
@@ -374,24 +423,35 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                     </div>
                 )}
             </div>
-            <div className='p-4'>
-                <span ref={headerSpanRef} className="hidden">{xAxis}</span>
-                <p className="font-bold">X-Axis Column:</p>
-                <select
-                    ref={headerSelectRef}
-                    className="p-2 border rounded-md font-bold"
-                    onChange={(e) => setXAxis(e.target.value)}
-                    name="xaxis"
-                    defaultValue={headers[0]}
-                >
-                    {headers.map((header) => (
-                        <option key={header} value={header}>
-                            {header}
-                        </option>
-                    ))}
-                </select>
+            <div className='flex container'>
+                <div className='p-4'>
+                    <span ref={headerSpanRef} className="hidden">{xAxis}</span>
+                    <p className="font-bold">X-Axis Column:</p>
+                    <select
+                        ref={headerSelectRef}
+                        className="p-2 border rounded-md font-bold"
+                        onChange={(e) => setXAxis(e.target.value)}
+                        name="xaxis"
+                        defaultValue={headers[0]}
+                    >
+                        {headers.map((header) => (
+                            <option key={header} value={header}>
+                                {header}
+                            </option>
+                        ))}
+                    </select>
 
+                </div>
+                <div className='p-4 w-full'>
+                    <p className="font-bold">Y-Axis Scale:</p>
+                    <div className='flex container'>
+                        <input className='rounded-md inline-flex w-full' placeholder='min' value={yAxisMin} onChange={event => setYAxisMin(event.target.value)}/>
+                        <p className='p-2'>to</p>
+                        <input className='rounded-md inline-flex w-full' placeholder='max' value={yAxisMax} onChange={event => setYAxisMax(event.target.value)}/>
+                    </div>
+                </div>
             </div>
+            <p className={`text-red-700 font-bold text-xl text-center ${!dataHidden ? 'hidden' : ''}`}>Warning: Some data points are not shown with this choice of y-axis scale!</p>
             {canAggregate && <div className='p-4'>
                 <label className='p-2' htmlFor='aggregate-data-box'>Aggregate data?</label>
                 <input className='p-2' id='aggregate-data-box' type="checkbox" checked={aggregateData} onChange={() => setAggregateData(!aggregateData)}></input>
