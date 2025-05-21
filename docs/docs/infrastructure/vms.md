@@ -9,6 +9,7 @@ To run the cluster we have created several virtual machines that are hosted by R
 | glados-w1        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific
 | glados-w2        | This will be a general worker node.                                                             | 4 CPU cores, 8GB of RAM, 50GB of storage                                     | non-specific
 | glados-dev       | This will run a cluster used for development. Basically a staging environment.                  | 4 CPU cores, 8GB of RAM, 100GB of storage                                    | Entire cluster
+| glados-forge     | This will run individual VMs for development containers.                                        | 16 CPU cores, 32GB of RAM, 500GB of storage                                   | Dev containers
 
 !!! note
 
@@ -38,8 +39,14 @@ Run the cluster on a single machine for testing purposes.
 
 4 CPU cores, 8 GB RAM, 100GB storage
 
-We might need a little extra storage due to kubernetes caching old images. We will have to make sure we clean this up periodically. 
+We might need a little extra storage due to kubernetes caching old images. We will have to make sure we clean this up periodically.
 
 ## Physical Server
 
 We will continue to use the physical GLADOS server in the cluster. We will use the physical server as a worker node (worker 0). The physical server will now have the hostname glados-w0.
+
+## glados-forge
+
+This VM is used for development purposes for the GLADOS team. It is configured to create and manage development environments for each member of the GitPod organization, allowing each person to maintain their own environment and changes for the work they are completing to enhance the system.
+
+The development environments are dynamically spun up and down as needed to preserve the ram and CPU usage on the VM.

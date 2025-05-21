@@ -1,8 +1,8 @@
 'use server';
 import * as k8s from '@kubernetes/client-node';
-import {auth} from '../auth';
+import { auth } from '../auth';
 import { getDocumentFromId } from './mongodb_funcs';
- 
+
 export async function getK8sLogs(expId: string) {
     // Check if the user is authenticated
     const session = await auth();
@@ -23,7 +23,7 @@ export async function getK8sLogs(expId: string) {
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
     const jobName = `runner-${expId}`;
-    const result = k8sApi.listNamespacedPod({ namespace: 'default' }).then( async (res) => {
+    const result = k8sApi.listNamespacedPod({ namespace: 'default' }).then(async (res) => {
         // This will return a V1PodList object
         const podList = res;
         const podName = podList.items.find((pod) => pod.metadata?.name?.startsWith(jobName))?.metadata?.name;
@@ -68,6 +68,27 @@ export async function triggerRedeploy() {
         },
     };
 
+    // First cordon glados-w0 node
+    const nodeName = 'glados-w0';
+    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+    const cordonPatch = [{ op: "replace", path: "/spec/unschedulable", value: true }];
+    const uncordonPatch = [{ op: "replace", path: "/spec/unschedulable", value: false }];
+    // Check if the node exists
+    const nodeList = await k8sApi.listNode();
+    const nodeExists = nodeList.items.some((node) => node.metadata?.name === nodeName);
+    if (nodeExists) {
+        try {
+            await k8sApi.patchNode({
+                name: nodeName,
+                body: cordonPatch,
+                pretty: 'true', // Optional pretty-printing
+            }, k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch));
+        } catch (error) {
+            console.error(`Failed to cordon node ${nodeName}:`, error);
+        }
+    }
+
+
     // Patch each deployment
     for (const { name, namespace } of deployments) {
         await appsApi.patchNamespacedDeployment({
@@ -75,7 +96,16 @@ export async function triggerRedeploy() {
             namespace,
             body: patchBody,
             pretty: 'true', // Optional pretty-printing
-            }, k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch));
+        }, k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch));
+    }
+
+    if (nodeExists) {
+        // Uncordon the node after patching
+        await k8sApi.patchNode({
+            name: nodeName,
+            body: uncordonPatch,
+            pretty: 'true', // Optional pretty-printing
+        }, k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch));
     }
 }
 
