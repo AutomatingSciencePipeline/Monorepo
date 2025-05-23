@@ -8,10 +8,8 @@ When you're on the Rose-Hulman internal network, you can access the deployed pro
 
 **To run an experiment on a running copy of the system**, [get started here](tutorial/usage.md).
 
-
 ## Development
 
-To set up a new machine for development, follow the [developer installation guide](../docs/developerhelp/setup.md).
+To set up a new machine for development, follow the [developer installation guide](developerhelp/setup.md).
 
-To get familiar with the components of the system, check out the [Best Practices](../docs/tutorial/best_practices.md).
-
+To get familiar with the components of the system, check out the [Best Practices](tutorial/best_practices.md) guide.
