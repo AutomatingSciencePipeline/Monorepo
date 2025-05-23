@@ -32,7 +32,7 @@ Addition,Subtraction
 ```
 
 ## Notes
-- The `AddNums` script is designed to demonstrate congfig files and show an output for GLADOS.
+- The `AddNums` script is designed to demonstrate config files and show an output for GLADOS.
 - Both **Trial's Extra File** and **Trial Result** functionalities can be used simultaneously to gather and analyze the output data.
 - Ensure that the configuration file (`config.ini`) is correctly formatted and contains valid integer values for `x` and `y`.
 - The generated `AddNumResult.csv` file will be overwritten each time the script is executed, so make sure to save or rename the file if needed.
