@@ -16,3 +16,6 @@ rules:
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["patch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list", "get", "patch", "watch"]
