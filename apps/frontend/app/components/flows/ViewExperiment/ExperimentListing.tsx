@@ -177,7 +177,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			: null;
 	};
 
-	const getStatusText = (project, experimentInProgress, isClosed) => {
+	const getStatusText = (project, isClosed) => {
 		const failures = project.fails ?? 0;
 		const successes = project.passes ?? 0;
 		const runsLeft = project.totalExperimentRuns
@@ -249,29 +249,32 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					)}
 
 					{/* Expected Total Time */}
-					{experimentInProgress && project.status !== 'CANCELLED' && (
+					{project.status !== 'CANCELLED' && project.estimatedTotalTimeMinutes ? (
 						<p className="text-sm font-mono text-gray-500">
-							{project.estimatedTotalTimeMinutes
-								? `Expected Total Time: ${project.estimatedTotalTimeMinutes} Minutes`
-								: '(Calculating estimated runtime...)'}
+							Expected Total Time: {project.estimatedTotalTimeMinutes} Minutes
 						</p>
-					)}
+					) : null}
+					{project.status !== 'CANCELLED' && project.status === 'RUNNING' && !project.estimatedTotalTimeMinutes ? (
+						<p className="text-sm font-mono text-gray-500">
+							(Calculating estimated runtime...)
+						</p>
+					): null}
 
 					{/* Expected Finish Time */}
-					{expectedFinishTime && (
+					{expectedFinishTime && project.status === "RUNNING" ? (
 						<p className="text-sm font-mono text-gray-500">
 							Expected Finish Time: {expectedFinishTime.toLocaleDateString()}
 						</p>
-					)}
+					) : null}
 
 					{/* Runs Left */}
-					{runsLeft !== null && (
+					{runsLeft !== null && project.status !== "COMPLETED" && runsLeft > 0 ? (
 						<p className="text-sm font-mono text-gray-500">
 							{`${runsLeft} run${runsLeft === 1 ? '' : 's'} remain${runsLeft === 1 ? 's' : ''} (of ${project.totalExperimentRuns})`}
 						</p>
-					)}
+					) : null}
 
-					{/* Uploaded Time */}
+					{/* Uploaded Time (always show if present) */}
 					{project.created && (
 						<p className="text-sm font-mono text-gray-500">
 							Uploaded at {new Date(Number(project.created)).toLocaleString()}
@@ -279,32 +282,32 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					)}
 
 					{/* Started Time */}
-					{project.startedAtEpochMillis && (
+					{project.startedAtEpochMillis && project.status !== 'CANCELLED' && project.status !== 'CREATED' ? (
 						<p className="text-sm font-mono text-gray-500">
 							Started at {new Date(project.startedAtEpochMillis).toLocaleString()}
 						</p>
-					)}
+					) : null}
 
 					{/* Finished Time */}
-					{project.finishedAtEpochMilliseconds && project.status !== 'CANCELLED' && (
+					{project.finishedAtEpochMilliseconds && project.status !== 'CANCELLED' ? (
 						<p className="text-sm font-mono text-gray-500">
 							Finished at {new Date(project.finishedAtEpochMilliseconds).toLocaleString()}
 						</p>
-					)}
+					) : null}
 
 					{/* Total Time */}
-					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && (
+					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && project.status === 'COMPLETED' ? (
 						<p className="text-sm font-mono text-gray-500">
 							Total Time: {formattedTotalTime(project)}
 						</p>
-					)}
+					) : null}
 
 					{/* Average Time Per Run */}
-					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && successes > 0 && (
+					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && project.status === 'COMPLETED' && successes > 0 ? (
 						<p className="text-sm font-mono text-gray-500">
 							Average Time per Experiment Run: {formattedAverageTimePerRun(project)}
 						</p>
-					)}
+					) : null}
 				</>
 			);
 		}
@@ -413,7 +416,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					}
 
 					<p className="text-sm font-mono text-gray-500 sm:hidden text-left">
-						{getStatusText(project, experimentInProgress, experimentStates[project.expId])}
+						{getStatusText(project, experimentStates[project.expId])}
 					</p>
 
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ?
@@ -573,7 +576,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							(project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 								<button
 									type="button"
-									className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
+									className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 w-full sm:w-auto xl:w-full"
 									onClick={async () => {
 										// Get the link
 										const link = await addShareLink(project.expId);
@@ -604,7 +607,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					{
 						project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' && project.status != 'ARCHIVED' &&
 						<button type="button"
-							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 xl:w-full'
+							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full'
 							onClick={() => {
 								toast.promise(cancelExperimentById(project.expId), {
 									success: 'Cancelled experiment',
@@ -653,7 +656,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						<div>
 							{/* Status Text */}
 							<p className="hidden sm:block text-sm font-mono text-gray-500 text-right">
-								{getStatusText(project, experimentInProgress, experimentStates[project.expId])}
+								{getStatusText(project, experimentStates[project.expId])}
 							</p>
 						</div>
 
