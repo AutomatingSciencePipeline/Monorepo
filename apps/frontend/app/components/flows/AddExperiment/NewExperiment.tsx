@@ -114,7 +114,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			scatterDepVar: '',
 			dumbTextArea: '',
 			timeout: DEFAULT_TRIAL_TIMEOUT_SECONDS,
-			verbose: false,
 			scatter: false,
 			keepLogs: true,
 			sendEmail: false,
@@ -143,7 +142,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
-								verbose: expInfo['verbose'],
 								workers: expInfo['workers'],
 								scatter: expInfo['scatter'],
 								dumbTextArea: expInfo['dumbTextArea'],
@@ -170,7 +168,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
-								verbose: expInfo['verbose'],
 								workers: expInfo['workers'],
 								scatter: expInfo['scatter'],
 								dumbTextArea: expInfo['dumbTextArea'],
@@ -221,7 +218,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			description: expInfo['description'],
 			trialExtraFile: expInfo['trialExtraFile'],
 			trialResult: expInfo['trialResult'],
-			verbose: expInfo['verbose'],
 			workers: expInfo['workers'],
 			scatter: expInfo['scatter'],
 			dumbTextArea: expInfo['dumbTextArea'],
@@ -446,12 +442,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 														required
 														{...form.getInputProps('workers')}
 													/>
-													<Toggle
-														label={'Verbose?'}
-														onChange={() => {
-															form.setFieldValue('verbose', !form.values.verbose);
-														}}
-													/>
+													
 												</div>
 												<button
 													type='button'
