@@ -415,9 +415,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
-					<p className="text-sm font-mono text-gray-500 sm:hidden text-left">
+					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
 						{getStatusText(project, experimentStates[project.expId])}
-					</p>
+					</div>
 
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ?
 						<>
@@ -655,9 +655,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 						<div>
 							{/* Status Text */}
-							<p className="hidden sm:block text-sm font-mono text-gray-500 text-right">
+							<div className="hidden sm:block text-sm font-mono text-gray-500 text-right">
 								{getStatusText(project, experimentStates[project.expId])}
-							</p>
+							</div>
 						</div>
 
 					</div>
