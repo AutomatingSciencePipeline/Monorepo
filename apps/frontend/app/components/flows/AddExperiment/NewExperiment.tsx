@@ -492,6 +492,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
 																	setIsDefault(false);
+																	form.values.timeout *= 3600;
 																	submitExperiment(form.values as any, session?.user?.id as string, session?.user?.email as string, session?.user?.role as string, fileId).then(async (insertedId) => {
 																		const expId = insertedId;
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
