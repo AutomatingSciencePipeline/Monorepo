@@ -10,8 +10,6 @@ export async function submitExperiment(values: Partial<ExperimentData>, userId: 
     values.creatorEmail = userEmail;
     values.creatorRole = role;
     values.created = Date.now();
-
-    // Convert hours to seconds for timeout
     values.finished = false;
     values.estimatedTotalTimeMinutes = 0;
     values.totalExperimentRuns = 0;
