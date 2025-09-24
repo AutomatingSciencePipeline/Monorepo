@@ -20,7 +20,7 @@ export const addNumsExpData = {
             "useDefault": false
           },
     ],
-    "timeout": 18000,
+    "timeout": 5,
     "trialExtraFile": "AddNumResult.csv",
     "workers": 1,
     "scatterDepVar": "",
@@ -70,7 +70,7 @@ export const multistringPy = {
           "useDefault": false
         }
       ],
-    "timeout": 18000,
+    "timeout": 5,
     "trialExtraFile": "stringResult.csv",
     "scatterDepVar": "",
     "scatterIndVar": "",
@@ -135,7 +135,7 @@ export const geneticalgo = {
       "useDefault": true
     }
   ],
-    "timeout": 18000,
+    "timeout": 5,
     "trialExtraFile": "geneticRes.csv",
     "scatterDepVar": "",
     "scatterIndVar": "",
@@ -196,7 +196,7 @@ export const paramGroupDefault =  {
   "scatterIndVar": "",
   "scatterDepVar": "",
   "dumbTextArea": "",
-  "timeout": 18000,
+  "timeout": 5,
   "verbose": false,
   "scatter": false,
   "keepLogs": true,

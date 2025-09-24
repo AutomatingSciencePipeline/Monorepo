@@ -67,11 +67,11 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         />
                     </div>
                 </InputSection>
-                <InputSection header={'Trial Timeout (seconds)'}>
+                <InputSection header={'Trial Timeout (hours)'}>
                     <div className='sm:col-span-4'>
                         <input
                             type='number'
-                            placeholder='Maximum length for an trial to run in seconds'
+                            placeholder='Maximum length for an trial to run in hours'
                             {...form.getInputProps('timeout')}
                             className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                         />
