@@ -18,7 +18,6 @@ if __name__ == "__main__":
         'finished': False,
         'estimatedTotalTimeMinutes': 0,
         'dumbTextArea': 'dummy = dummy\na = 100',
-        'verbose': True,
         'scatterIndVar': 'iparam',
         'scatterDepVar': 'fparam',
         'timeout': 18000,
