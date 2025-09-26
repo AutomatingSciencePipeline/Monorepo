@@ -132,7 +132,7 @@ The CSV file captured as the experiment result.
 
 A folder or file included in the downloadable Project Zip after experiment completion.
 
-#### Trial Timeout (Seconds) *(Required)*
+#### Trial Timeout (hours) *(Required)*
 
 The duration before the experiment automatically times out.
 

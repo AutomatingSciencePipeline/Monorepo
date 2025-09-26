@@ -20,7 +20,7 @@ export const addNumsExpData = {
             "useDefault": false
           },
     ],
-    "timeout": 18000,
+    "timeout": 5,
     "trialExtraFile": "AddNumResult.csv",
     "workers": 1,
     "scatterDepVar": "",
@@ -28,7 +28,6 @@ export const addNumsExpData = {
     "keepLogs": true,
     "sendEmail": false,
     "creator": "DefaultRunner",
-    "verbose": false,
     "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/addNums.py",
     "trialResult": "AddNumResult.csv",
     "dumbTextArea": "",
@@ -70,7 +69,7 @@ export const multistringPy = {
           "useDefault": false
         }
       ],
-    "timeout": 18000,
+    "timeout": 5,
     "trialExtraFile": "stringResult.csv",
     "scatterDepVar": "",
     "scatterIndVar": "",
@@ -78,7 +77,6 @@ export const multistringPy = {
     "keepLogs": true,
     "sendEmail": false,
     "creator": "DefaultRunner",
-    "verbose": false,
     "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/multiString.py",
     "trialResult": "stringResult.csv",
     "dumbTextArea": "",
@@ -135,7 +133,7 @@ export const geneticalgo = {
       "useDefault": true
     }
   ],
-    "timeout": 18000,
+    "timeout": 5,
     "trialExtraFile": "geneticRes.csv",
     "scatterDepVar": "",
     "scatterIndVar": "",
@@ -143,7 +141,6 @@ export const geneticalgo = {
     "keepLogs": true,
     "sendEmail": false,
     "creator": "DefaultRunner",
-    "verbose": false,
     "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/genetic_algorithm.py",
     "trialResult": "geneticRes.csv",
     "dumbTextArea": "",
@@ -196,8 +193,7 @@ export const paramGroupDefault =  {
   "scatterIndVar": "",
   "scatterDepVar": "",
   "dumbTextArea": "",
-  "timeout": 18000,
-  "verbose": false,
+  "timeout": 5,
   "scatter": false,
   "keepLogs": true,
   "sendEmail": false,

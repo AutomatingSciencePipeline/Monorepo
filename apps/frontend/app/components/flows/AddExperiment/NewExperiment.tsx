@@ -18,7 +18,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { addNumsExpData, multistringPy, geneticalgo, paramGroupDefault } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
 import { useDebouncedCallback } from "use-debounce";
 
-const DEFAULT_TRIAL_TIMEOUT_SECONDS = 5 * 60 * 60; // 5 hours in seconds
+const DEFAULT_TRIAL_TIMEOUT_HOURS = 5;
 
 export const FormStates = {
 	Closed: -1,
@@ -113,8 +113,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			scatterIndVar: '',
 			scatterDepVar: '',
 			dumbTextArea: '',
-			timeout: DEFAULT_TRIAL_TIMEOUT_SECONDS,
-			verbose: false,
+			timeout: DEFAULT_TRIAL_TIMEOUT_HOURS,
 			scatter: false,
 			keepLogs: true,
 			sendEmail: false,
@@ -143,13 +142,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
-								verbose: expInfo['verbose'],
 								workers: expInfo['workers'],
 								scatter: expInfo['scatter'],
 								dumbTextArea: expInfo['dumbTextArea'],
 								scatterIndVar: expInfo['scatterIndVar'],
 								scatterDepVar: expInfo['scatterDepVar'],
-								timeout: expInfo['timeout'],
+								timeout: expInfo['timeout'] / 3600,
 								keepLogs: expInfo['keepLogs'],
 								sendEmail: expInfo['sendEmail'],
 								file: newFileId,
@@ -170,13 +168,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
-								verbose: expInfo['verbose'],
 								workers: expInfo['workers'],
 								scatter: expInfo['scatter'],
 								dumbTextArea: expInfo['dumbTextArea'],
 								scatterIndVar: expInfo['scatterIndVar'],
 								scatterDepVar: expInfo['scatterDepVar'],
-								timeout: expInfo['timeout'],
+								timeout: expInfo['timeout'] / 3600,
 								keepLogs: expInfo['keepLogs'],
 								sendEmail: expInfo['sendEmail'],
 								file: expInfo['file'],
@@ -221,7 +218,6 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			description: expInfo['description'],
 			trialExtraFile: expInfo['trialExtraFile'],
 			trialResult: expInfo['trialResult'],
-			verbose: expInfo['verbose'],
 			workers: expInfo['workers'],
 			scatter: expInfo['scatter'],
 			dumbTextArea: expInfo['dumbTextArea'],
@@ -349,16 +345,26 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
         const errors = {
             name: !form.values.name,
             trialResult: !form.values.trialResult,
+			timeout: (!form.values.timeout || form.values.timeout <= 0)
         };
         setValidationErrors(errors);
-        return !errors.name && !errors.trialResult;
+        if (errors.name) {
+			return "Please fill out the name field.";
+		}
+		if (errors.trialResult) {
+			return "Please fill out the trial result field.";
+		}
+		if (errors.timeout) {
+			return "Timeout must be greater than 0."
+		}
+		return "";
     };
 
 	const handleNext = () => {
         if (status === FormStates.Info) {
-            const isValid = validateFields();
-            if (!isValid) {
-				toast.error("Please fill out name and trial result fields!", {duration: 1500});
+            const validationError = validateFields();
+            if (validationError) {
+				toast.error(validationError, {duration: 1500});
                 return;
             }
         }
@@ -446,12 +452,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 														required
 														{...form.getInputProps('workers')}
 													/>
-													<Toggle
-														label={'Verbose?'}
-														onChange={() => {
-															form.setFieldValue('verbose', !form.values.verbose);
-														}}
-													/>
+													
 												</div>
 												<button
 													type='button'
@@ -482,6 +483,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																	localStorage.removeItem('ID');
 																	setStatus(FormStates.Info);
 																	setIsDefault(false);
+																	form.values.timeout *= 3600;
 																	submitExperiment(form.values as any, session?.user?.id as string, session?.user?.email as string, session?.user?.role as string, fileId).then(async (insertedId) => {
 																		const expId = insertedId;
 																		const response = await fetch(`/api/experiments/start/${expId}`, {
