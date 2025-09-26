@@ -1,11 +1,6 @@
 # values.yaml
 architecture: replicaset
 
-image: 
-  registry: docker.io 
-  repository: bitnamilegacy/mongodb 
-  tag: 8.0.13
-
 replicaSet:
   enabled: true
   replicas: 3 # Set the number of replicas
