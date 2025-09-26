@@ -1,0 +1,1842 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for GLADOS - Automated Science Pipeline">
+      
+      
+      
+        <link rel="canonical" href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/">
+      
+      
+        <link rel="prev" href="../best_practices/">
+      
+      
+        <link rel="next" href="../deployment/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
+    
+    
+      
+        <title>Usage - GLADOS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GLADOS" class="md-header__button md-logo" aria-label="GLADOS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GLADOS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="GLADOS" class="md-nav__button md-logo" aria-label="GLADOS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GLADOS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About GLADOS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorial
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorial
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best_practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Usage
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Usage
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preparing-your-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preparing Your Code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compatibility
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extra-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extra Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Experiments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Experiments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#information-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Information Tab
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Information Tab">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Name (Required)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trial-result-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trial Result (Required)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trials-extra-file-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trial's Extra File (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trial-timeout-hours-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trial Timeout (hours) (Required)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#executable-file-required-for-zip-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executable File (Required for zip experiments)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keep-logs-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keep Logs (Required)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters Tab
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters Tab">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#float" class="md-nav__link">
+    <span class="md-ellipsis">
+      Float
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Boolean
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      String List
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameter Group
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-defined-constants-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Defined Constants Tab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-process-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post Process Tab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confirmation-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confirmation Tab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dispatch-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dispatch Tab
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Results
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permutations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permutations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Permutations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-no-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: No Defaults
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-using-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Using Defaults
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chart
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known Bugs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Documentation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Updating Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Infrastructure
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Infrastructure
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kubernetes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/vms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    VMs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/cluster_update/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cluster Upgrade
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/used_technologies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Used Technologies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Help
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developerhelp/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developer Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developerhelp/helpful_commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Helpful Commands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    BioAI User Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            BioAI User Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../bioai/hw8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    HW8
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preparing-your-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preparing Your Code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compatibility
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extra-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extra Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Experiments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Experiments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#information-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Information Tab
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Information Tab">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Name (Required)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trial-result-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trial Result (Required)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trials-extra-file-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trial's Extra File (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trial-timeout-hours-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trial Timeout (hours) (Required)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#executable-file-required-for-zip-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executable File (Required for zip experiments)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keep-logs-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keep Logs (Required)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters Tab
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters Tab">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#float" class="md-nav__link">
+    <span class="md-ellipsis">
+      Float
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Boolean
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      String List
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameter Group
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-defined-constants-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Defined Constants Tab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-process-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post Process Tab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confirmation-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confirmation Tab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dispatch-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dispatch Tab
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Results
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permutations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permutations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Permutations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-no-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: No Defaults
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-using-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Using Defaults
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chart
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known Bugs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="usage">Usage</h1>
+<p>This section covers how to run an experiment on the system.</p>
+<h2 id="definitions">Definitions</h2>
+<ul>
+<li><strong>Trial</strong>: A single run of submitted code with a corresponding config file.</li>
+</ul>
+<h2 id="accessing-the-system">Accessing the System</h2>
+<p>When connected to the Rose-Hulman network, you can access the live system at <a href="https://glados.csse.rose-hulman.edu/">https://glados.csse.rose-hulman.edu/</a>.</p>
+<p>If you need a local copy of the system, refer to the <a href="installation.md">installation guide</a>.</p>
+<p>You must sign in with either a Google or GitHub account to run an experiment.</p>
+<h2 id="preparing-your-code">Preparing Your Code</h2>
+<p>GLADOS has limited support for experiments. To ensure your experiment runs properly, check whether it meets the <a href="#compatibility">compatibility requirements</a>.</p>
+<p>The main steps to prepare an experiment are:</p>
+<ol>
+<li>Ensure GLADOS supports your experiment. Details are available under <a href="#compatibility">Compatibility</a>.</li>
+<li>Use a <code>.ini</code> file to input parameters, passed as a command-line argument.</li>
+<li>Output results to a CSV file, or return a single value as the output.</li>
+</ol>
+<p>We provide example experiments in the <a href="https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments">repository</a>. Consider using them as a guideline for formatting your experiment.</p>
+<p>Your experiment must be configured to accept a <code>.ini</code> config file structured as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">5</span>
+<span class="na">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">50</span>
+<span class="na">gl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1</span>
+<span class="na">mr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">0.2</span>
+<span class="na">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1</span>
+</code></pre></div>
+<p>You can format the generated <code>.ini</code> file using the "User Defined Constants" tab while creating an experiment. Use curly brackets <code>{}</code> to reference parameter names.</p>
+<p>Example:</p>
+<p>If you have a parameter named <code>seed</code> ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[SEED]</span>
+<span class="na">random_seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">{seed}</span>
+</code></pre></div>
+<p>This allows additional <code>.ini</code> sections to be included dynamically.</p>
+<p>Your experiment must also output results in a two-line CSV format with headers and corresponding values:</p>
+<div class="highlight"><pre><span></span><code>HeaderFor1, HeaderFor2
+Result1, Result2
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> If your CSV file contains more than two lines, you can specify which line should be used in the "Information" tab.</p>
+</blockquote>
+<p>Java experiments must be packaged as an executable <code>.jar</code> file.
+C experiments must be compiled into a Unix binary executable (for basic users).
+Specific requirements are outlined under <a href="#compatibility">Compatibility</a>.</p>
+<p>Once your experiment is set up, proceed to <a href="#running-experiments">Running the Experiment</a>.</p>
+<h2 id="compatibility">Compatibility</h2>
+<p>GLADOS supports experiments that:</p>
+<ul>
+<li>Run on Python 3.8 as a single Python file.</li>
+<li>Are packaged as an executable <code>.jar</code> file.</li>
+<li>Are compiled into a binary executable for Unix systems, runnable on a base Debian system.</li>
+<li>Are contained in a zip file that includes one of the above file types.</li>
+</ul>
+<p>Other experiment types may be supported, but testing is limited. <em>Use at your own risk.</em></p>
+<p>GLADOS supports complex outputs, including multiple files. However, data aggregation is currently limited to a single file.</p>
+<p>After completion, you can download all generated files, organized by each trial run, in a Project Zip.</p>
+<p>Future updates will improve support for dependencies and additional experiment types.</p>
+<h3 id="extra-features">Extra Features</h3>
+<blockquote>
+<p><strong>Note:</strong> These files can only be provided inside of zip files!</p>
+</blockquote>
+<p>Users can provide a file called "userProvidedFileReqs.txt". This file is a Python requirements file. When this file is provided all packages will be automatically installed.</p>
+<p>Privileged users have the option to provide two files:</p>
+<ul>
+<li>
+<p>packages.txt - this contains Debian packages to be installed to the runner.</p>
+</li>
+<li>
+<p>commandsToRun.txt - this file contains bash commands that will be run on the runner after packages have been installed.</p>
+</li>
+</ul>
+<h2 id="running-experiments">Running Experiments</h2>
+<p>To create a new experiment, click the "New Experiment" button below your email in the top-left corner of the dashboard.</p>
+<p>Upon first login, your dashboard will be empty.</p>
+<p><img alt="dashboard" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-dashboard-05_2025.png" /></p>
+<p>To run a default experiment, click the "Run a Default Experiment" button on the right side of the screen.</p>
+<p><img alt="run_default" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-run_default-05_2025.png" /></p>
+<p>You will see a modal where you can select "Add Nums (Python)." This will present an already configured experiment.</p>
+<p><img alt="select_default" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_default-05_2025.png" /></p>
+<p>The experiment creation interface consists of multiple tabs:</p>
+<h3 id="information-tab">Information Tab</h3>
+<p><img alt="information_tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-information_tab-05_2025.png" /></p>
+<h4 id="name-required">Name <em>(Required)</em></h4>
+<p>The name displayed in the UI for this experiment.</p>
+<h4 id="description-optional">Description <em>(Optional)</em></h4>
+<p>A description stored with the experiment record.</p>
+<h4 id="trial-result-required">Trial Result <em>(Required)</em></h4>
+<p>The CSV file captured as the experiment result.</p>
+<h4 id="trials-extra-file-optional">Trial's Extra File <em>(Optional)</em></h4>
+<p>A folder or file included in the downloadable Project Zip after experiment completion.</p>
+<h4 id="trial-timeout-hours-required">Trial Timeout (hours) <em>(Required)</em></h4>
+<p>The duration before the experiment automatically times out.</p>
+<h4 id="executable-file-required-for-zip-experiments">Executable File <em>(Required for zip experiments)</em></h4>
+<p>If using a zip experiment, specify the main executable filename.</p>
+<h4 id="keep-logs-required">Keep Logs <em>(Required)</em></h4>
+<p>Select this option to store logs from the experiment runner pod.</p>
+<h3 id="parameters-tab">Parameters Tab</h3>
+<p><img alt="parameters_tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-parameters_tab-05_2025.png" /></p>
+<p>There are five parameter types:</p>
+<h4 id="integer">Integer</h4>
+<ul>
+<li><strong>Name</strong>: The parameter name used in the <code>.ini</code> file.</li>
+<li><strong>Min</strong>: Minimum value.</li>
+<li><strong>Max</strong>: Maximum value.</li>
+<li><strong>Step</strong>: Increment value.</li>
+<li><strong>Default</strong> (if enabled): The default value used when generating permutations.</li>
+</ul>
+<h4 id="float">Float</h4>
+<p>Similar to Integer but supports decimal values.</p>
+<h4 id="boolean">Boolean</h4>
+<ul>
+<li><strong>Name</strong>: The parameter name.</li>
+<li><strong>Value</strong>: <code>true/false</code></li>
+<li><strong>Default</strong> (if enabled): Used in permutation generation.</li>
+</ul>
+<h4 id="string-list">String List</h4>
+<ul>
+<li><strong>Name</strong>: The parameter name.</li>
+<li><strong>Edit String</strong>: Defines a list of strings to iterate over in permutations.</li>
+<li><strong>Default</strong> (if enabled): Used in permutation generation.</li>
+</ul>
+<h4 id="parameter-group">Parameter Group</h4>
+<ul>
+<li><strong>Name</strong>: The parameter group name.</li>
+<li><strong>Parameters</strong>: The parameter groupings that will be tested together in an experiment run.</li>
+<li><strong>Default</strong> (if enabled): Used in permutation generation.</li>
+</ul>
+<h3 id="user-defined-constants-tab">User Defined Constants Tab</h3>
+<p><img alt="user_defined_constants_tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-user_defined_constants_tab-05_2025.png" /></p>
+<p>This tab allows defining a text block appended to every generated <code>.ini</code> config file. You can use parameters from the "Parameters" tab inside curly brackets.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">test_var</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">{test}</span>
+</code></pre></div>
+<h3 id="post-process-tab">Post Process Tab</h3>
+<p><img alt="post_process_tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-post_process_tab-05_2025.png" /></p>
+<p>This tab allows you to include a scatter plot in the downloadable Project Zip. This feature will be replaced by ChartJS functionality on the dashboard in future updates.</p>
+<h3 id="confirmation-tab">Confirmation Tab</h3>
+<p><img alt="confirmation_tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-confirmation_tab-05_2025.png" /></p>
+<p>This tab allows you to review all hyperparameters and settings before running the experiment.</p>
+<h3 id="dispatch-tab">Dispatch Tab</h3>
+<p><img alt="dispatch_tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-dispatch_tab-05_2025.png" /></p>
+<p>You can start an experiment from this tab by either:</p>
+<ol>
+<li>Selecting a file from the five most recent ones used.</li>
+<li>Uploading a new file.</li>
+</ol>
+<p>If you copied an experiment, the file will be preselected.</p>
+<h2 id="results">Results</h2>
+<p>After dispatching the experiment, it will take a little bit before starting.</p>
+<p><img alt="awaiting_start_exp" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-awaiting_start_exp-05_2025.png" /></p>
+<p>Once the experiment starts, you can monitor progress in real time.</p>
+<p>The dashboard will display:</p>
+<ul>
+<li>Total trials.</li>
+<li>Completed trials.</li>
+<li>Successes and failures.</li>
+<li>Estimated time to completion.</li>
+</ul>
+<p>Example below:</p>
+<p><img alt="in_progress_exp" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-in_progress_exp-05_2025.png" /></p>
+<p>For longer experiments, you can click the "Open Live Log" button to see live log updates from the configurations files. It updates every 5 seconds. This can help you identify when an error occurred mid experiment run.</p>
+<p>You can cancel an experiment at any time. However, small experiments may finish before cancellation takes effect.</p>
+<blockquote>
+<p><strong>Note:</strong> The "Expected Total Time" metric does not account for parallel execution, so actual completion may be faster.</p>
+</blockquote>
+<p>Example of completed experiment:</p>
+<p><img alt="finished_exp" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-finished_exp-05_2025.png" /></p>
+<p>After completion, you can download the <code>results.csv</code> file, which contains output data and configurations for each trial. If extra files were generated, logs were kept, or post-processing was applied, a zip file will also be available.</p>
+<p>To rerun an experiment with modified parameters, click "Copy Experiment."</p>
+<p>To visualize results, click "See Graph" on the dashboard.</p>
+<p>Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.</p>
+<p>By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived".</p>
+<p><img alt="filter_archive" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_archive-05_2025.png" /></p>
+<p>If you don't have any further use for an experiment, feel free to delete it by clicking "Delete Experiment".</p>
+<p><img alt="select-exps" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_exps-05_2025.png" /></p>
+<p>In order to select experiments, you need to turn on ‘Edit Mode’, which is off by default. You will find it below the 'Expand All' and 'Collapse All' buttons. Each experiment will have a radio button to the left of it that allows you to select it. This enables you to delete or archive as many selected experiments as you would like.</p>
+<p><img alt="collapse" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-collapse-05_2025.png" /></p>
+<p>By default, experiments will be open, and will all reopen on refresh of the page. In order to close all of your experiments, you can use the ‘Select All’ button under ‘Edit Mode’.</p>
+<h2 id="permutations">Permutations</h2>
+<p>This section explains how parameter permutations are generated.</p>
+<h3 id="example-1-no-defaults">Example 1: No Defaults</h3>
+<p>An integer parameter <code>test</code> with:</p>
+<ul>
+<li>Min: <code>1</code></li>
+<li>Max: <code>10</code></li>
+<li>Step: <code>1</code></li>
+</ul>
+<p>will generate 10 configurations:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">test</span><span class="o">=</span><span class="s">1</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">test</span><span class="o">=</span><span class="s">2</span>
+</code></pre></div>
+<p>... up to <code>test=10</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> Every parameter will go under the [DEFAULT] header unless defined in the "User Defined Constants" tab.</p>
+</blockquote>
+<h3 id="example-2-using-defaults">Example 2: Using Defaults</h3>
+<p>An integer parameter <code>x</code> with:</p>
+<ul>
+<li>Min: <code>1</code></li>
+<li>Max: <code>10</code></li>
+<li>Step: <code>1</code></li>
+<li>Default: <code>1</code></li>
+</ul>
+<p>An integer parameter <code>y</code> with:</p>
+<ul>
+<li>Min: <code>11</code></li>
+<li>Max: <code>20</code></li>
+<li>Step: <code>1</code></li>
+<li>Default: <code>11</code></li>
+</ul>
+<p>An stringlist parameter <code>test</code> with:</p>
+<ul>
+<li>Values: <code>["one", "two", "three"]</code></li>
+<li>Default: <code>two</code></li>
+</ul>
+<p>will generate 21 configurations (after duplicates are removed):</p>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">1</span>
+<span class="na">y</span><span class="o">=</span><span class="s">11</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;two&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">2</span>
+<span class="na">y</span><span class="o">=</span><span class="s">11</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;two&quot;</span>
+</code></pre></div>
+<p>... up to <code>x=10, y=11, test="two"</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">1</span>
+<span class="na">y</span><span class="o">=</span><span class="s">11</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;two&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">1</span>
+<span class="na">y</span><span class="o">=</span><span class="s">12</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;two&quot;</span>
+</code></pre></div>
+<p>... up to <code>x=1, y=20, test="two"</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">1</span>
+<span class="na">y</span><span class="o">=</span><span class="s">11</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;one&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">1</span>
+<span class="na">y</span><span class="o">=</span><span class="s">11</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;two&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">[DEFAULT]</span>
+<span class="na">x</span><span class="o">=</span><span class="s">1</span>
+<span class="na">y</span><span class="o">=</span><span class="s">11</span>
+<span class="na">test</span><span class="o">=</span><span class="s">&quot;three&quot;</span>
+</code></pre></div>
+<p>That will be all generated permutations.</p>
+<blockquote>
+<p><strong>Note:</strong> Some of the examples shown were duplicates and would be removed automatically.</p>
+</blockquote>
+<h2 id="chart">Chart</h2>
+<p>After the experiment has completed, you can view the chart by clicking "See Graph". This will bring up the chart modal.</p>
+<p>Example below:</p>
+<p><img alt="The chart modal" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/chartmodal.png" /></p>
+<p>You can toggle fullscreen mode or close the modal by using the buttons in the top right of the modal.</p>
+<p>You can change the chart type by using the buttons along the top. Currently, bar charts, line charts, pie graphs, box plots, and violin plots are supported.</p>
+<p>The chart accesses the results file generated by the experiment, "results.csv", and separates the columns. You can select which column is used as the x-axis using the dropdown below the chart. You can then toggle the visible y-axis columns by clicking the colored boxes along the top of the chart.</p>
+<p>You can set the y-axis range used by the chart by entering numbers into the "Y-Axis Scale" inputs below the chart. If you don't input a valid number, the chart will use its default range, which displays all data points. If you input a range that hides data points on any visible y-axis column, a warning will appear to remind you of this.</p>
+<p>If the selected x-axis column has multiple entries with the same value, you can choose to aggregate the entries together by toggling the checkbox below the chart and selecting the preferred mode of aggregation. The y-axis values with the same x-axis value will be combined using the chosen method.
+For example, if you enabled aggregation using the "average" mode and your results looked like this:</p>
+<table>
+<thead>
+<tr>
+<th>x</th>
+<th>y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr>
+<td>1</td>
+<td>5</td>
+</tr>
+<tr>
+<td>1</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p>The resulting chart would show two values:</p>
+<table>
+<thead>
+<tr>
+<th>x</th>
+<th>y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>1</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>Currently, sum, count (number of values), average, median, and mode are supported.</p>
+<blockquote>
+<p><strong>Note:</strong> Box plots and violin plots aggregate the x-axis by default, and do not support toggling of this feature.</p>
+</blockquote>
+<p>Finally, you can download the resulting chart as an image by clicking the "Download Image" button at the bottom of the modal. The image should automatically begin downloading as a .png file. If desired, using fullscreen mode can provide a larger chart.</p>
+<h2 id="known-bugs">Known Bugs</h2>
+<ul>
+<li>If an experiment crashes, users are not notified. If an experiment is stuck on "Experiment Awaiting Start" or a trial takes too long, it has likely failed. A fix is in progress.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
