@@ -445,8 +445,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 										<div className='sticky bottom-0 flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6'>
 											<div className='flex justify-end space-x-3'>
 												<div className='flex space-x-3 flex-1'>
+													<label className='block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2'>
+													Number of Workers
+													</label>
 													<input
 														type='number'
+														name='workerNumber'
 														placeholder={'Number of Workers'}
 														className='rounded-md  border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 														required
