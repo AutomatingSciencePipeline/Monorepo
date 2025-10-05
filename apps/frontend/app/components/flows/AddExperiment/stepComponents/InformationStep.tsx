@@ -56,8 +56,8 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                             </div>
                         </div>
                         <div className='w-full flex space-x-2'>
-                            <Tag></Tag> 
-                            <Tag></Tag>
+                            <Tag text="Tag1" />
+                            <Tag text="Tag2" />
                         </div>
                     </div>
                 </InputSection>

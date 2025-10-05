@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
-
+import {Tag} from '../../Tag.tsx'
 export interface ExperimentListingProps {
 	projectData: ExperimentData;
 	onCopyExperiment: (experimentId: string) => void;
@@ -417,6 +417,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
 						{getStatusText(project, experimentStates[project.expId])}
+					</div>
+
+					<div>
+						<Tag text="Tag"/>
 					</div>
 
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ?
