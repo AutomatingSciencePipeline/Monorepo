@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
+import {Tag} from '../../../Tag';
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
     
@@ -34,6 +35,30 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                             rows={3}
                             className='block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                         />
+                    </div>
+                </InputSection>
+
+                <InputSection header={'Experiment Tags'}>
+                    <div className='grid-rows-2 gap-2 col-span-4 space-y-5'>
+                        <div className='grid grid-cols-6 gap-4'>
+                            <div className='col-span-5'>
+                                <input
+                                type='text'
+                                placeholder='Enter tag name and select "Add" to submit'
+                                {...form.getInputProps('tags')} //TODO: change prop
+                                className='block rounded-md w-full border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+                            />
+                            </div>
+                            <div className=''>
+                                <button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                        <div className='w-full flex space-x-2'>
+                            <Tag></Tag> 
+                            <Tag></Tag>
+                        </div>
                     </div>
                 </InputSection>
 
