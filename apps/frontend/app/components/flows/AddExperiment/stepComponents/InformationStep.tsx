@@ -12,8 +12,9 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
     const TAG_MAX_NUMBER = 5;
 
     function addTagValue(){
-        if(!form.values.tags.includes(individualTag) && form.values.tags.length <= TAG_MAX_NUMBER){ 
+        if(!form.values.tags.includes(individualTag) && form.values.tags.length < TAG_MAX_NUMBER){ 
             form.setFieldValue('tags', [...form.values.tags, individualTag])
+            setIndividualTag("");
         }
     }
     
@@ -54,10 +55,17 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         <div className='grid grid-cols-6 gap-4'>
                             <div className='col-span-5'>
                                 <input
-                                type='text'
-                                placeholder='Enter tag name and select "Add" to submit'
-                                onChange={(e) => setIndividualTag(e.target.value)}
-                                className='block rounded-md w-full border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+                                    type='text'
+                                    value={individualTag}
+                                    placeholder='Enter tag name and select "Add" to submit'
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault(); 
+                                            addTagValue();
+                                        }
+                                    }}
+                                    onChange={(e) => setIndividualTag(e.target.value)}
+                                    className='block rounded-md w-full border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                             />
                             </div>
                             <div className=''>
