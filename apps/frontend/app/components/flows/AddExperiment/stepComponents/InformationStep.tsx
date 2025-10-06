@@ -7,11 +7,13 @@ import React, {useState} from 'react';
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
 
-    const [tagNames, setTagNames] = useState([])
+    const [individualTag, setIndividualTag] = useState("")
 
-    useEffect(() => {
-        setTagNames(form.tags.value)
-    }, [form.tags.value])
+    function addTagValue(){
+        if(!form.values.tags.includes(individualTag)){
+            form.setFieldValue('tags', [...form.values.tags, individualTag])
+        }
+    }
     
     useEffect(() => {
         const errors = {
@@ -52,21 +54,20 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                 <input
                                 type='text'
                                 placeholder='Enter tag name and select "Add" to submit'
-                                 {...form.getInputProps('tags')} //TODO: change prop
+                                onChange={(e) => setIndividualTag(e.target.value)}
                                 className='block rounded-md w-full border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                             />
                             </div>
                             <div className=''>
-                                <button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                                <button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                                onClick={addTagValue}>
                                     Add
                                 </button>
                             </div>
                         </div>
                         <div className='w-full flex space-x-2'>
-                            {/* <Tag text="Tag1" />
-                            <Tag text="Tag2" /> */}
-                            {tagNames &&
-                            tagNames.map((title) =>(
+                           {form.values.tags &&
+                           form.values.tags.map((title) =>(
                                 <Tag key={title} text={title} />
                             ))}
                         </div>
