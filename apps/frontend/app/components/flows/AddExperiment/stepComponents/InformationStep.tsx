@@ -3,8 +3,15 @@
 import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
 import {Tag} from '../../../Tag';
+import React, {useState} from 'react';
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
+
+    const [tagNames, setTagNames] = useState([])
+
+    useEffect(() => {
+        setTagNames(form.tags.value)
+    }, [form.tags.value])
     
     useEffect(() => {
         const errors = {
@@ -45,7 +52,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                 <input
                                 type='text'
                                 placeholder='Enter tag name and select "Add" to submit'
-                                {...form.getInputProps('tags')} //TODO: change prop
+                                 {...form.getInputProps('tags')} //TODO: change prop
                                 className='block rounded-md w-full border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                             />
                             </div>
@@ -56,8 +63,12 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                             </div>
                         </div>
                         <div className='w-full flex space-x-2'>
-                            <Tag text="Tag1" />
-                            <Tag text="Tag2" />
+                            {/* <Tag text="Tag1" />
+                            <Tag text="Tag2" /> */}
+                            {tagNames &&
+                            tagNames.map((title) =>(
+                                <Tag key={title} text={title} />
+                            ))}
                         </div>
                     </div>
                 </InputSection>
