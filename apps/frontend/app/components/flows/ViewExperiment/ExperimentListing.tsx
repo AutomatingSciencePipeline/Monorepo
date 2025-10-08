@@ -415,15 +415,15 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
-					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
-						{getStatusText(project, experimentStates[project.expId])}
-					</div>
-
-					<div className="flex items-center justify-center">
+					<div className="flex items-center justify-left space-x-1">
 						{project.tags &&
 							project.tags.map((title) =>(
-							<Tag key={title} text={title} />
-						))}
+								<Tag key={title} text={title} />
+							))}
+					</div>
+
+					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
+						{getStatusText(project, experimentStates[project.expId])}
 					</div>
 
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ?
