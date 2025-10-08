@@ -419,8 +419,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						{getStatusText(project, experimentStates[project.expId])}
 					</div>
 
-					<div>
-						<Tag text="Tag"/>
+					<div className="flex items-center justify-center">
+						{project.tags &&
+							project.tags.map((title) =>(
+							<Tag key={title} text={title} />
+						))}
 					</div>
 
 					{!isClosed && project['finished'] && project.status != 'CANCELLED' ?

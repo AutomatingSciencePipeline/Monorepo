@@ -12,7 +12,9 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
     const TAG_MAX_NUMBER = 5;
 
     function addTagValue(){
-        if(!form.values.tags.includes(individualTag) && form.values.tags.length < TAG_MAX_NUMBER){ 
+        if(!form.values.tags.includes(individualTag) 
+            && form.values.tags.length < TAG_MAX_NUMBER
+            && individualTag){ 
             form.setFieldValue('tags', [...form.values.tags, individualTag])
             setIndividualTag("");
         }
