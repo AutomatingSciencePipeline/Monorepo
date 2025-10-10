@@ -71,6 +71,20 @@ const activityItems = [
 	},
 ];
 
+const filterTags = (searchTerm, tags) => {
+	if(!tags){
+		return false;
+	}
+	let processedTerm = searchTerm.trim().toLowerCase();
+	for(let i=0; i<tags.length; i++){
+		if (tags[i].toLowerCase().includes(processedTerm)){
+			return true;
+		}
+	}
+	return false;
+}
+
+
 const Navbar = ({ setSearchTerm }) => {
 	const { data: session } = useSession();
 
@@ -446,7 +460,8 @@ export default function DashboardPage() {
 			const visibleExperimentIds = experiments
 				.filter((experiment) => {
 					// Apply search term filter
-					if (searchTerm.trim() !== '' && !experiment.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+					if (searchTerm.trim() !== '' && (!experiment.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+					!filterTags(searchTerm, experiment.tags))) {
 						return false;
 					}
 					// Apply other filters (e.g., completed or archived)
@@ -1140,7 +1155,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					if (searchTerm.trim() === '') {
 						return true;
 					}
-					return project.name.toLowerCase().includes(searchTerm.toLowerCase());
+					return project.name.toLowerCase().includes(searchTerm.toLowerCase()) || filterTags(searchTerm, project.tags);
 				}).map((project: ExperimentData) => {
 					if (!includeCompleted && project.finished && (project.status == 'COMPLETED')) {
 						return null;
