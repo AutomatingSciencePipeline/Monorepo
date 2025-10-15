@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
-import {Tag} from '../../../Tag';
+import {DeletableTag} from '../../../DeletableTag';
 import React, {useState} from 'react';
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
@@ -11,13 +11,17 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
 
     const TAG_MAX_NUMBER = 5;
 
-    function addTagValue(){
+    const addTagValue = () => {
         if(!form.values.tags.includes(individualTag) 
             && form.values.tags.length < TAG_MAX_NUMBER
             && individualTag){ 
             form.setFieldValue('tags', [...form.values.tags, individualTag]);
             setIndividualTag("");
         }
+    }
+
+    const deleteTag = (title) => {
+        form.setFieldValue('tags', form.values.tags.filter(tagName => tagName !== title));
     }
     
     useEffect(() => {
@@ -80,8 +84,8 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         <div className='w-full flex space-x-2'>
                            {form.values.tags &&
                            form.values.tags.map((title) =>(
-                                <div key={title} onClick={(e) => form.setFieldValue('tags', form.values.tags.filter(tagName => tagName !== title))}>
-                                    <Tag text={title}/>
+                                <div key={title} onClick={() => deleteTag(title)}>
+                                    <DeletableTag text={title}/>
                                 </div>
                             ))}
                         </div>
