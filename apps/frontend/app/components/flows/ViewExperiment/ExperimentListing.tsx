@@ -415,7 +415,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
-					<div className="flex items-center justify-left space-x-1">
+					<div className="flex items-center flex-wrap gap-1 justify-left">
 						{project.tags &&
 							project.tags.map((title) =>(
 								<ReadOnlyTag key={title} text={title} />

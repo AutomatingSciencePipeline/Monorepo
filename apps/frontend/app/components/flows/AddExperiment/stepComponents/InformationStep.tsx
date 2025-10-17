@@ -63,6 +63,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                 <input
                                     type='text'
                                     value={individualTag}
+                                    maxLength={40}
                                     placeholder='Enter tag name and select "Add" to submit'
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
@@ -81,7 +82,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                 </button>
                             </div>
                         </div>
-                        <div className='w-full flex space-x-2'>
+                        <div className='w-full flex flex-wrap gap-1'>
                            {form.values.tags &&
                            form.values.tags.map((title) =>(
                                 <div key={title} onClick={() => deleteTag(title)}>
