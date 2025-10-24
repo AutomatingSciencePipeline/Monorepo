@@ -14,7 +14,8 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
     const addTagValue = () => {
         if(!form.values.tags.includes(individualTag) 
             && form.values.tags.length < TAG_MAX_NUMBER
-            && individualTag){ 
+            && individualTag
+            && individualTag.trim().length){ 
             form.setFieldValue('tags', [...form.values.tags, individualTag]);
             setIndividualTag("");
         }
@@ -64,7 +65,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                     type='text'
                                     value={individualTag}
                                     maxLength={40}
-                                    placeholder='Enter tag name and select "Add" to submit'
+                                    placeholder='Enter tag name and select "Add" or press "Return" to submit'
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault(); 
