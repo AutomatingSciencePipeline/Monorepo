@@ -131,16 +131,18 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			getDocumentFromId(copyID).then((expInfo) => {
 				if (expInfo) {
 					const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
+					let tags = expInfo['tags'] ? expInfo['tags'] : [];
 					setFileId("");
 					if (expInfo['creator'] !== session?.user?.id) {
 						//We need to copy the file to the user's files and use the new ID
 						copyFile(expInfo['file'], session?.user?.id!).then((newFileId) => {
 							setFileId(newFileId);
+							let tags = expInfo['tags'] ? expInfo['tags'] : [];
 							form.setValues({
 								hyperparameters: hyperparameters,
 								name: expInfo['name'],
 								description: expInfo['description'],
-								tags: [...expInfo['tags'], `Copied Experiment ${expInfo['name']}`],
+								tags: [...tags, `Copied Experiment ${expInfo['name']}`],
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
@@ -163,11 +165,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 					}
 					else {
 						refreshFileTimestamp(expInfo['file']).then(() => {
+							let tags = expInfo['tags'] ? expInfo['tags'] : [];
 							form.setValues({
 								hyperparameters: hyperparameters,
 								name: expInfo['name'],
 								description: expInfo['description'],
-								tags: [...expInfo['tags'], `Copied Experiment ${expInfo['name']}`],
+								tags: [...tags, `Copied Experiment ${expInfo['name']}`],
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
@@ -214,12 +217,12 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			console.warn('No valid link provided in the form.');
 			setLoading(false);
 		}
-
+		let tags = expInfo['tags'] ? expInfo['tags'] : [];
 		form.setValues({
 			hyperparameters: hyperparameters,
 			name: expInfo['name'],
 			description: expInfo['description'],
-			tags: [...expInfo['tags'], 'Default Experiment'],
+			tags: [...tags, 'Default Experiment'],
 			trialExtraFile: expInfo['trialExtraFile'],
 			trialResult: expInfo['trialResult'],
 			workers: expInfo['workers'],
