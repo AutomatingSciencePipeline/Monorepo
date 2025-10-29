@@ -4,13 +4,13 @@ import clientPromise, { DB_NAME } from '../../../../../lib/mongodb';
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    try{
     const login = await req.json();
-    console.log("id: ", login["id"]);
     const client = await clientPromise;
-    const db = client.db("gladosdb")
+    const db = client.db("gladosdb");
 
     const account = await db.collection("accounts").findOne({
+        //TODO: only GitHub should remain out of these 3 listed once merged
+        //so long as we don't want risky email sharing on CLI
         $or: [
         { providerAccountId: login["id"].toString(), provider: "github" },
         { providerAccountId: login["id"].toString(), provider: "google" },
@@ -20,17 +20,27 @@ export async function POST(req: Request) {
 
     let user;
     if (account ){
+        //If account exists, return user
         user = await db.collection("users").findOne({ _id: account.userId });
     }else{
-        user = {
-            "auth": "Wrong"
-        }
+        //If account does not exist, add entry to users and then accounts collections
+        let submission = await db.collection("users").insertOne({  name:  login["name"],
+                                            email: login["email"],
+                                            image: login["avatar_url"], 
+                                            role: "user" });
+        user = {_id: submission["insertedId"],
+                name: login["name"],
+                email:login["email"],
+                image:login["avatar_url"], 
+                role: "user" }
+        await db.collection("accounts").insertOne({ _id: submission["insertedId"],
+                                            type: "oauth",
+                                            provider: "github",
+                                            providerAccountId: login["id"].toString(),
+                                            access_token: login["access_token"],
+                                            token_type: "bearer"});                                         
     }
 
-    return NextResponse.json({user})
-    } catch (err) {
-        console.error("Wrong!");
-    }
-    
+    return NextResponse.json({user}); 
 
 }
