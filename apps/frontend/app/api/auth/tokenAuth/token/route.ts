@@ -14,17 +14,18 @@ export async function POST(req: Request) {
         $or: [
         { providerAccountId: login["id"].toString(), provider: "github" },
         { providerAccountId: login["id"].toString(), provider: "google" },
-        { email: login["email"] }
+        { email: login["email"]}
     ]
     });
 
     let user;
     if (account ){
         //If account exists, return user
-        user = await db.collection("users").findOne({ _id: account.userId });
+        let userId = account["userid"];
+        user = await db.collection("users").findOne({ _id: userId });
     }else{
         //If account does not exist, add entry to users and then accounts collections
-        let submission = await db.collection("users").insertOne({  name:  login["name"],
+        let submission = await db.collection("users").insertOne({  name:  login["login"],
                                             email: login["email"],
                                             image: login["avatar_url"], 
                                             role: "user" });
@@ -33,7 +34,9 @@ export async function POST(req: Request) {
                 email:login["email"],
                 image:login["avatar_url"], 
                 role: "user" }
-        await db.collection("accounts").insertOne({ _id: submission["insertedId"],
+        await db.collection("accounts").insertOne({ 
+                                            _id: login["id"],
+                                            userid: submission["insertedId"],
                                             type: "oauth",
                                             provider: "github",
                                             providerAccountId: login["id"].toString(),
@@ -41,6 +44,6 @@ export async function POST(req: Request) {
                                             token_type: "bearer"});                                         
     }
 
-    return NextResponse.json({user}); 
+    return NextResponse.json(user); 
 
 }
