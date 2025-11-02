@@ -4,19 +4,30 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/
 import { WithId, Document } from 'mongodb';
 import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
+import { authenticateToken } from "../../auth/tokenAuth/token/route"
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-    const user = await req.json();
+    const experiment_req = await req.json();
 
-    if (!user || !user["_id"] ) {
-        return new Response('Missing UID', { status: 400 });
+    if (!experiment_req || !experiment_req ["token"] || !experiment_req ["exp_id"] ){
+        return new Response('Missing parameters', { status: 400 });
     }
 
-    const uid = user["_id"];
-
+    const user = await authenticateToken(experiment_req ["token"]);
+    let uid;
+    if(user){
+        uid = user._id.toString();
+    } else {
+        uid = 0;
+    }
+    const eid = experiment_req ["exp_id"];
+    //const uid = "6906f4c933de306b5934341a";
+    console.log("UUUUUUU");
+    console.log(uid);
+    
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
@@ -31,6 +42,7 @@ export async function POST(req: NextRequest) {
 
     const result = await sendAllRelevantDocs();
 
+    // return NextResponse.json(result);
     return NextResponse.json(result);
 }
 
