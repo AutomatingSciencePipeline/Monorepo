@@ -1,10 +1,13 @@
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import NextAuth from "next-auth";
 import clientPromise, { DB_NAME } from '../../../../../lib/mongodb';
+import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
-export async function authenticateToken(token: string) {
+export async function POST(req: NextRequest) {
+
+    const token = (await req.json())["token"];
 
     const response = await fetch ("https://api.github.com/user", {
         method: "GET",
@@ -30,8 +33,12 @@ export async function authenticateToken(token: string) {
 });
 const emails = await emailResponse.json();
 const primaryEmail = emails.find(e => e.primary)?.email;
-
-const user = await db.collection("users").findOne({ email: primaryEmail });
+let user;
+try{
+    user = await db.collection("users").findOne({ email: primaryEmail });
+} catch (error) {
+    return NextResponse.json({ response: 'Missing User' }, { status: 404 });
+}
 
     // const account = await db.collection("accounts").findOne({
     //     //TODO: only GitHub should remain out of these 3 listed once merged
@@ -79,7 +86,6 @@ const user = await db.collection("users").findOne({ email: primaryEmail });
     //     //                                     token_type: "bearer",
     //     //                                     userId: new ObjectId(submission["insertedId"])});                                         
     // }
-
-    return user; 
+    return NextResponse.json(user); 
 
 }
