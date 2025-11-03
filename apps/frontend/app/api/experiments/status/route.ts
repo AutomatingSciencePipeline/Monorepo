@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
             "success": true,
             "error": undefined,
             "status": result.status,
-            "current_permutation": result.passes + result.fails,
-            "total_permuations": result.totalExperimentRuns
+            "current_permutation": (result.passes ? result.passes : 0) + (result.fails ? result.fails : 0),
+            "total_permutations": result.totalExperimentRuns
         } :
         {
             "success": false,
