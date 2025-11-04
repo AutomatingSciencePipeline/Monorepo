@@ -137,6 +137,13 @@ def update_experiment():
         return Response(status=200)
     except Exception:
         return Response(status=500)
+    
+@flaskApp.get("/cliTest")
+def test_cli():
+    try:
+        return "Test Success"
+    except Exception:
+        return Response(status=500)
 
 if __name__ == '__main__':
     flaskApp.run()
