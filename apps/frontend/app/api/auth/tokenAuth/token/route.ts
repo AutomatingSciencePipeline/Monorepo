@@ -22,11 +22,11 @@ export async function POST(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("gladosdb");
 
-//     const accountsCollection = db.collection("users");
+    const accountsCollection = db.collection("accounts");
 
-//   // Get one document
-//   const account1 = await accountsCollection.findOne();
-//   console.log(account1);
+  // Get one document
+  const account1 = await accountsCollection.findOne();
+  console.log(account1);
 
     const emailResponse = await fetch("https://api.github.com/user/emails", {
   headers: { Authorization: `Bearer ${token}` }

@@ -60,35 +60,5 @@ function convertToExpsArray(arr: WithId<Document>[]) {
     }));
 }
 
-// function convertToExpsArray(arr: WithId<Document>[]) {
-//     return arr.map((doc: WithId<Document>) => ({
-//         id: doc._id.toString(),
-//         name: doc.name || 'Untitled',
-//         creator: doc.creator || 'Unknown',
-//         description: doc.description || 'No description',
-//         workers: doc.workers ?? 0,
-//         expId: doc._id || '',
-//         trialExtraFile: doc.trialExtraFile || '',
-//         trialResult: doc.trialResult || '',
-//         trialResultLineNumber: doc.trialResultLineNumber ?? 0,
-//         timeout: doc.timeout ?? 0,
-//         keepLogs: doc.keepLogs ?? false,
-//         scatter: doc.scatter ?? false,
-//         scatterIndVar: doc.scatterIndVar || '',
-//         scatterDepVar: doc.scatterDepVar || '',
-//         dumbTextArea: doc.dumbTextArea || '',
-//         created: doc.created?.toString() || '0',
-//         hyperparameters: doc.hyperparameters ?? {},
-//         finished: doc.finished ?? false,
-//         estimatedTotalTimeMinutes: doc.estimatedTotalTimeMinutes ?? 0,
-//         expToRun: doc.expToRun ?? 0,
-//         file: doc.file || '',
-//         status: doc.status || 'OK',
-//         startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
-//         finishedAtEpochMilliseconds: doc.finishedAtEpochMilliseconds ?? 0,
-//         passes: doc.passes ?? 0,
-//         fails: doc.fails ?? 0,
-//         totalExperimentRuns: doc.totalExperimentRuns ?? 0,
-//     }));
-// }
+
 
