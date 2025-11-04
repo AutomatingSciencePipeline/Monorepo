@@ -2,8 +2,30 @@
 
 import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
+import {DeletableTag} from '../../../DeletableTag';
+import React, {useState} from 'react';
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
+
+    const [individualTag, setIndividualTag] = useState("")
+
+    const TAG_MAX_NUMBER = 5;
+
+    const addTagValue = () => {
+        if(form.values.tags && (form.values.tags.includes(individualTag)
+            || form.values.tags.length >= TAG_MAX_NUMBER)){
+            return
+        }
+        if(individualTag
+            && individualTag.trim().length){ 
+            form.setFieldValue('tags', [...form.values.tags, individualTag]);
+            setIndividualTag("");
+        }
+    }
+
+    const deleteTag = (title) => {
+        form.setFieldValue('tags', form.values.tags.filter(tagName => tagName !== title));
+    }
     
     useEffect(() => {
         const errors = {
@@ -34,6 +56,43 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                             rows={3}
                             className='block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                         />
+                    </div>
+                </InputSection>
+
+                <InputSection header={'Experiment Tags'}>
+                    <div className='grid-rows-2 gap-2 col-span-4 space-y-5'>
+                        <div className='grid grid-cols-6 gap-4'>
+                            <div className='col-span-5'>
+                                <input
+                                    type='text'
+                                    value={individualTag}
+                                    maxLength={40}
+                                    placeholder='Enter tag name and select "Add" or press "Return" to submit'
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault(); 
+                                            addTagValue();
+                                        }
+                                    }}
+                                    onChange={(e) => setIndividualTag(e.target.value)}
+                                    className='block rounded-md w-full border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+                            />
+                            </div>
+                            <div className=''>
+                                <button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                                onClick={addTagValue}>
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                        <div className='w-full flex flex-wrap gap-1'>
+                           {form.values.tags &&
+                           form.values.tags.map((title) =>(
+                                <div key={title} onClick={() => deleteTag(title)}>
+                                    <DeletableTag text={title}/>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </InputSection>
 
