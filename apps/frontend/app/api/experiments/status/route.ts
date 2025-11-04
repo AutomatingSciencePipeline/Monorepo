@@ -1,7 +1,4 @@
-// app/api/experiments/stream-by-uid/route.ts
-
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/mongodb';
-import { WithId, Document } from 'mongodb';
 import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -58,7 +55,6 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    // return NextResponse.json(result);
     return NextResponse.json(processedResult);
 }
 
