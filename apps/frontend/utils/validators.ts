@@ -43,6 +43,7 @@ export const emailSchema = Joi.string()
 export const experimentSchema = Joi.object().keys({
 	name: Joi.string().required(),
 	description: Joi.string(),
+	tags: Joi.array().items(Joi.string().required()),
 	hyperparameters: Joi.array().items(intschema, floatschema, boolschema, strschema, stringlistschema),
 	workers: Joi.number().integer().required(),
 });
