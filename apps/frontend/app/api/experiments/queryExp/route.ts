@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
     }
 
      const user = await tokenBasedAuth(experiment_req ["token"]);
-        if(user.json()["response"]){
+     const userData = await user.json();
+        if(userData["response"]){
             let processedResult = {
                 "success": false,
                 "error": "Other",
@@ -23,7 +24,15 @@ export async function POST(req: NextRequest) {
             }
             return NextResponse.json(processedResult);
         }
-    const uid = user["id"];
+    const uid = userData["_id"];
+    if (!uid){
+        let processedResult = {
+            "success": false,
+            "error": "auth_error",
+            "matches": undefined
+        }
+        return NextResponse.json(processedResult);
+    }
     const title = experiment_req ["exp_title"];
     
     const client = await clientPromise;
