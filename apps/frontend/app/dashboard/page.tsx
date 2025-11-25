@@ -26,6 +26,7 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import {ReadOnlyTag} from '../components/ReadOnlyTag'
 
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
@@ -878,6 +879,22 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
+	const [tags, setTags] = useState<string[]>([]);
+	const [tagsMultipleFilter, setTagsMultipleFilter] = useState<string[]>([]);
+
+	useEffect(() => {
+		let newTags = [] as string[];
+		for(let k=0; k<experiments.length; k++){
+			if(experiments[k].tags){
+					for(let i=0; i<experiments[k].tags.length; i++){
+						if(!newTags.includes(experiments[k].tags[i])){
+							newTags.push(experiments[k].tags[i]);
+						}
+					}
+				}
+			}
+		setTags(newTags);
+	}, [experiments]);
 
 	// State of arrow icon
 	const [sortArrowUp, setSortArrowUp] = useState(false);
@@ -1029,7 +1046,18 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		);
 	};
 
-
+	const handleMultipleFilterTag = (title: string, newValue: boolean) => {
+		if (newValue){
+			setTagsMultipleFilter([...tagsMultipleFilter, title])
+		} else {
+			let newTagsFilter = [...tagsMultipleFilter];
+			let index = newTagsFilter.indexOf(title);
+  			if (index > -1) {
+    			newTagsFilter.splice(index, 1);
+  			}
+			setTagsMultipleFilter(newTagsFilter);
+		}
+	}
 
 	// Handle individual checkbox changes
 	const handleCheckboxChange = (experimentId: string, checked: boolean) => {
@@ -1140,6 +1168,38 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 									</a>
 								)}
 							</Menu.Item>
+							<Menu.Item>
+								<Menu as='div' className='relative' style={{ marginLeft: '0.5rem' }}>
+									<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+										Experiment Tags
+										<ChevronDownIcon
+										className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
+										aria-hidden='true' />
+									</Menu.Button>
+									<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+										{tags &&
+											tags.map((title) =>(
+												<div key={title}>
+													<Menu.Item>
+													{({ active }) => (
+														<a href='#' className={`${menuHoverActiveCss(active)} flex items-center gap-1`}>
+														<Toggle
+															label={' '}
+															initialValue={
+  																tagsMultipleFilter.indexOf(title) > -1
+    														}
+															onChange={(newValue) => {
+															handleMultipleFilterTag(title, newValue);
+														}} />
+												 		<ReadOnlyTag key={title} text={title} />
+														</a>
+													)}
+												</Menu.Item>
+											</div>
+										))}
+									</Menu.Items>
+								</Menu>
+							</Menu.Item>
 						</div>
 					</Menu.Items>
 				</Menu>
@@ -1162,6 +1222,11 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					}
 					if (!includeArchived && (project.status == 'ARCHIVED')) {
 						return null;
+					}
+					if(tagsMultipleFilter.length){
+						if(!project.tags.some(item => tagsMultipleFilter.includes(item))){
+							return null;
+						}
 					}
 					return (
 						<li
