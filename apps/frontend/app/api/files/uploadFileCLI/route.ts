@@ -1,40 +1,38 @@
-import { tokenBasedAuth } from '../../../../tokenAuth';
-import clientPromise, { DB_NAME } from '../../../../lib/mongodb';
-import { GridFSBucket } from 'mongodb';
-import formidable, { Fields, Files } from 'formidable';
-import { Readable } from 'stream';
-import { IncomingMessage } from 'http';
-import fs from "fs";
-import { NextResponse } from 'next/server';
+import { tokenBasedAuth } from "../../../../tokenAuth";
+import clientPromise, { DB_NAME } from "../../../../lib/mongodb";
+import { GridFSBucket } from "mongodb";
+import { NextResponse } from "next/server";
+import crypto from "crypto";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const { fields, files } = await parseForm(req);
+  const form = await req.formData();
 
-  const userToken = Array.isArray(fields.userToken) ? fields.userToken[0] : fields.userToken;
+  const userToken = form.get("userToken");
+  const file = form.get("file") as File | null;
 
-  if(!userToken){
-    throw new Error('Token not found');
-  }
-
-  const user = await tokenBasedAuth(userToken);
-  const userId = user["id"];
-
-  if (!files.file || !userId) {
+  if (!userToken || !file) {
     return NextResponse.json({ response: 'Not enough arguments!' }, { status: 400 });
   }
+
+  const user = await tokenBasedAuth(String(userToken));
+  const userId = user["id"];
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
 
   try {
     const client = await clientPromise;
     const db = client.db(DB_NAME);
-    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
-
-    const file = Array.isArray(files.file) ? files.file[0] : files.file;
+    const bucket = new GridFSBucket(db, { bucketName: "fileBucket" });
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const uint8 = new Uint8Array(arrayBuffer);
+    const hash = crypto.createHash("sha256").update(uint8).digest("hex");
 
     const identicalFileCursor = bucket.find({
-      'metadata.hash': file.hash,
+      'metadata.hash': hash,
       'metadata.userId': userId,
     });
     const identicalFileArray = await identicalFileCursor.toArray();
@@ -50,51 +48,23 @@ export async function POST(req: Request) {
       });
     }
 
-    const fileStream = fs.createReadStream(file.filepath);
-
-    const uploadStream = bucket.openUploadStream(file.originalFilename || 'uploadedFile', {
-      metadata: { userId: userId, hash: file.hash, lastUsedDate: new Date() },
+    const uploadStream = bucket.openUploadStream(file.name || 'uploadedFile', {
+      metadata: { userId: userId, hash: hash, lastUsedDate: new Date() },
     });
+    uploadStream.end(buffer);
 
-    // Pipe file stream into MongoDB
-    await new Promise<void>((resolve, reject) => {
-      fileStream.pipe(uploadStream)
-        .on('finish', () => resolve())
-        .on('error', (err) => reject(err));
+    await new Promise((resolve, reject) => {
+      uploadStream.on("finish", resolve);
+      uploadStream.on("error", reject);
     });
 
     return NextResponse.json({
-      message: 'File and ID uploaded successfully.',
+      message: "File uploaded successfully",
       fileId: uploadStream.id,
       fileName: uploadStream.filename,
     });
-
   } catch (error) {
     console.error('Error writing experiment file.', error);
     return NextResponse.json({ response: 'Failed to upload experiment file!' }, { status: 500 });
   }
 }
-
-async function parseForm(req: Request): Promise<{ fields: Fields; files: Files }> {
-    const contentType = req.headers.get('content-type') || '';
-    if (!contentType.startsWith('multipart/form-data')) {
-      throw new Error('Invalid Content-Type');
-    }
-  
-    const form = formidable({ keepExtensions: true, hashAlgorithm: 'sha256' });
-  
-    const bodyBuffer = Buffer.from(await req.arrayBuffer());
-    const stream = Readable.from(bodyBuffer) as unknown as IncomingMessage;
-  
-    // Now manually set needed fields so Formidable is happy
-    stream.headers = Object.fromEntries(req.headers.entries());
-    stream.method = req.method || 'POST';
-    stream.url = '';
-  
-    return new Promise((resolve, reject) => {
-      form.parse(stream, (err, fields, files) => {
-        if (err) return reject(err);
-        resolve({ fields, files });
-      });
-    });
-  }
