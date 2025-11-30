@@ -73,6 +73,8 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         name: doc.name || 'Untitled',
         status: doc.status || 'OK',
         started_on: doc.startedAtEpochMillis ?? 0,
+        current_permutation: (doc.passes ? doc.passes : 0) + (doc.fails ? doc.fails : 0),
+        total_permutations: doc.totalExperimentRuns
     }));
 }
 

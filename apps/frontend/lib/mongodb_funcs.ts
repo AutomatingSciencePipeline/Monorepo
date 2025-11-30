@@ -4,6 +4,36 @@ import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS 
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
 
+export async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
+    'use server';
+    values.creator = userId;
+    values.creatorEmail = userEmail;
+    values.creatorRole = role;
+    values.created = Date.now();
+    values.finished = false;
+    values.estimatedTotalTimeMinutes = 0;
+    values.totalExperimentRuns = 0;
+    values.file = fileId;
+    // Make sure that the trialResultLineNumber is a number, not a string
+    if (!values.trialResultLineNumber) {
+        values.trialResultLineNumber = 1;
+    }
+    values.trialResultLineNumber = Number(values.trialResultLineNumber);
+    const expData: Partial<ExperimentData> = values;
+
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    
+    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
+
+    if (result){
+        return Promise.resolve(result.insertedId.toString());
+    }
+    else {
+        return Promise.reject(`Failed to insert experiment data`);
+    }
+}
+
 export async function submitExperiment(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
     values.creator = userId;
