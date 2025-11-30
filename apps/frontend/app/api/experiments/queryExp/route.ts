@@ -72,7 +72,7 @@ function convertToExpsArray(arr: WithId<Document>[]) {
         id: doc._id.toString(),
         name: doc.name || 'Untitled',
         status: doc.status || 'OK',
-        startedAtEpochMillis: doc.startedAtEpochMillis ?? 0,
+        started_on: doc.startedAtEpochMillis ?? 0,
     }));
 }
 

@@ -1,4 +1,3 @@
-import clientPromise from '../../../../../lib/mongodb';
 import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
 import { tokenBasedAuth } from '../../../../../tokenAuth';
@@ -11,7 +10,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({error: 'Other', status: 400 });
     }
 
-    const user = await tokenBasedAuth(experiment_req["token"]);
+    const resp = await tokenBasedAuth(experiment_req["token"]);
+    const user = await resp.json();
+
+    console.log(user);
 
     return NextResponse.json(user); 
 
