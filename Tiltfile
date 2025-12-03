@@ -77,6 +77,12 @@ docker_build("runner",
     dockerfile='./apps/runner/runner.Dockerfile',
     match_in_env_vars=True)
 
+# Build the programmatic runner
+docker_build("programmatic_runner", 
+    context='./apps/programmatic_runner', 
+    dockerfile='./apps/programmatic_runner/runner.Dockerfile',
+    match_in_env_vars=True)
+
 # add a command that will run on tilt down to cleanup the pv's that are made by helm
 if config.tilt_subcommand == 'down':
     local("helm uninstall glados-mongodb")
