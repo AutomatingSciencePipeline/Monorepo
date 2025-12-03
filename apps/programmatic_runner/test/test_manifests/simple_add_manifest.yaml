@@ -1,0 +1,10 @@
+globalvars:
+
+experiment: 
+    name: MyExp
+    className: MyAddExperiment
+    filename: simple_add.py
+
+additional_files:
+    - logic_gates.py
+    - my_map_cps.py
