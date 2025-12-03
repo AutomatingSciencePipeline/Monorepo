@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const resp = await tokenBasedAuth(String(userToken));
     const user = await resp.json();
     // console.log(user);
-    const userId = user["id"];
+    const userId = user["_id"];
     const email = user['email'];
     const role = user['role'];
     const yamlText = await file.text();
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     parsed["file"] = execFile;
-    parsed["experimentExecutable"] = execFile;
+    parsed["experimentExecutable"] = "";
 
     console.log(parsed)
 
