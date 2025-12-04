@@ -17,7 +17,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
             toast.error("Experiment tags cannot be redundant.", {duration: 1500});
             return;
         } else if(form.values.tags && form.values.tags.length >= TAG_MAX_NUMBER){
-            toast.error("Max number of experiment tags is five.", {duration: 1500});
+            toast.error(`Max number of experiment tags is ${TAG_MAX_NUMBER}.`, {duration: 1500});
             return;
         } else if(!individualTag || !individualTag.trim().length) {
             toast.error("Experiment tag cannot be blank.", {duration: 1500});
