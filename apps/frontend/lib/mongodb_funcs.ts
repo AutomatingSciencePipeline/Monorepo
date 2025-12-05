@@ -424,6 +424,41 @@ export async function updateUserRole(userId: string, role: string) {
     return Promise.resolve();
 }
 
+export async function fetchResultsFileCLI(expId: string, userId: string): Promise<{ contents: string; name: string } | null> {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
+
+    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
+    if (results.length === 0) return null;
+
+    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
+    if (!experiment) return null;
+
+    // Make sure the user is the creator or in the sharedUsers array
+    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
+        return null;
+    }
+
+    const expName = experiment.name;
+    const expCreated = experiment.created;
+
+    const downloadStream = resultsBucket.openDownloadStream(results[0]._id);
+    const chunks: Buffer[] = [];
+
+    const contents = await new Promise<string>((resolve, reject) => {
+        downloadStream.on('data', (chunk) => chunks.push(chunk));
+        downloadStream.on('end', () => resolve(Buffer.concat(chunks as unknown as Uint8Array[]).toString('utf-8')));
+        downloadStream.on('error', reject);
+    });
+
+    return {
+        contents,
+        name: formatFilename(expName, expCreated, 'csv'),
+    };
+}
+
 export async function fetchResultsFile(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();

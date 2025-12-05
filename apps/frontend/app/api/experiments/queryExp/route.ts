@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         processedResult = {
             "success": true,
             "error": undefined,
-            "matches": result.sort((a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis)
+            "matches": result.sort((a, b) => b.started_on - a.started_on)
         }
     } catch (error){
         processedResult = {
