@@ -11,7 +11,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       GitHub({
         allowDangerousEmailAccountLinking: true,
         profile(profile) {
-          return { role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
+          return { id: profile.id?.toString(), role: (profile as any).role ?? "user", image: profile.avatar_url, email: profile.email }
         }}),
       Google({
         allowDangerousEmailAccountLinking: true,
@@ -31,5 +31,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       (session.user as any).role = (user as any).role
       return session
     },
+    signIn: async ({ user, account, profile }) => {
+      if (account?.provider === "github" && profile?.id) {
+        try {
+          const client = await clientPromise;
+          const db = client.db("gladosdb");
+
+          const existingAccount = await db.collection("accounts").findOne({
+            userId: user.id,
+            provider: "github",
+          });
+          
+          if (existingAccount) {
+            const isNotProviderID =
+              /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+                existingAccount.providerAccountId ?? ""
+              );
+
+            if (isNotProviderID) {
+              await db.collection("accounts").updateOne(
+                { _id: existingAccount._id },
+                { $set: { providerAccountId: profile.id.toString() } }
+              );
+            }
+          }
+
+        } catch (err) {
+          console.error("Failed Migration:", err);
+        }
+      }
+      return true;
+    }
   },
 })

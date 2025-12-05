@@ -2,6 +2,7 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/
 import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
+import { tokenBasedAuth } from '../../../../tokenAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,11 +10,22 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const experiment_req = await req.json();
 
-    if (!experiment_req || !experiment_req ["uid"] || !experiment_req ["eid"] ){
+    if (!experiment_req || !experiment_req ["token"] || !experiment_req ["eid"] ){
         return new Response('Other', { status: 400 });
     }
 
-    const uid = experiment_req ["uid"];
+    const user = await tokenBasedAuth(experiment_req ["token"]);
+    if(user.json()["response"]){
+        let processedResult = {
+            "success": false,
+            "error": "Other",
+            "status": undefined,
+            "current_permutation": undefined,
+            "total_permutations": undefined
+        }
+        return NextResponse.json(processedResult);
+    }
+    const uid = user["id"];
     const eid = experiment_req ["eid"];
 
     const client = await clientPromise;

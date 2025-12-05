@@ -4,6 +4,36 @@ import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS 
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
 
+export async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
+    'use server';
+    values.creator = userId;
+    values.creatorEmail = userEmail;
+    values.creatorRole = role;
+    values.created = Date.now();
+    values.finished = false;
+    values.estimatedTotalTimeMinutes = 0;
+    values.totalExperimentRuns = 0;
+    values.file = fileId;
+    // Make sure that the trialResultLineNumber is a number, not a string
+    if (!values.trialResultLineNumber) {
+        values.trialResultLineNumber = 1;
+    }
+    values.trialResultLineNumber = Number(values.trialResultLineNumber);
+    const expData: Partial<ExperimentData> = values;
+
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    
+    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
+
+    if (result){
+        return Promise.resolve(result.insertedId.toString());
+    }
+    else {
+        return Promise.reject(`Failed to insert experiment data`);
+    }
+}
+
 export async function submitExperiment(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
     values.creator = userId;
@@ -392,6 +422,53 @@ export async function updateUserRole(userId: string, role: string) {
     await users.updateOne({ '_id': new ObjectId(userId) }, { $set: { 'role': role } });
 
     return Promise.resolve();
+}
+
+export async function fetchResultsFileCLI(expId: string, userId: string): Promise<| { contents: string; name: string }| { success: boolean; status: string }> {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
+
+    let objectId;
+
+    try {
+        objectId = new ObjectId(expId);
+    } catch (err) {
+        return { success: false, status: 'not_found'};
+    }
+
+    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: objectId });
+    if (!experiment) return { success: false, status: 'not_found'};
+
+    // Make sure the user is the creator or in the sharedUsers array
+    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
+        return { success: false, status: 'not_found'};
+    }
+
+    if(experiment.status != 'COMPLETED') return { success: false, status: 'not_done'};
+
+    if(experiment.fails > 0) return { success: false, status: 'exp_failed'};
+
+    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
+    if (results.length === 0)  return { success: false, status: 'not_done'};
+
+    const expName = experiment.name;
+    const expCreated = experiment.created;
+
+    const downloadStream = resultsBucket.openDownloadStream(results[0]._id);
+    const chunks: Buffer[] = [];
+
+    const contents = await new Promise<string>((resolve, reject) => {
+        downloadStream.on('data', (chunk) => chunks.push(chunk));
+        downloadStream.on('end', () => resolve(Buffer.concat(chunks as unknown as Uint8Array[]).toString('utf-8')));
+        downloadStream.on('error', reject);
+    });
+
+    return {
+        contents,
+        name: formatFilename(expName, expCreated, 'csv'),
+    };
 }
 
 export async function fetchResultsFile(expId: string): Promise<{ contents: string; name: string } | null> {
