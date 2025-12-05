@@ -17,18 +17,12 @@ export async function POST(req: NextRequest) {
     const uid = userData["_id"];
     const result = await fetchResultsFileCLI(experiment_req ["expID"], uid);
 
-    console.log(result);
-
-    console.log("Right here");
-
     if("success" in result ) {
-      console.log("In success result");
       const status = result.status;
       return new Response(status);
     }
 
 	const { contents, name } = result;
-    console.log(contents);
 	return new Response(contents, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
