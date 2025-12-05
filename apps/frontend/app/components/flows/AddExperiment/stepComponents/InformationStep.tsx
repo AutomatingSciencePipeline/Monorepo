@@ -4,6 +4,7 @@ import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
 import {DeletableTag} from '../../../DeletableTag';
 import React, {useState} from 'react';
+import toast from 'react-hot-toast';
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
 
@@ -12,12 +13,16 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
     const TAG_MAX_NUMBER = 5;
 
     const addTagValue = () => {
-        if(form.values.tags && (form.values.tags.includes(individualTag)
-            || form.values.tags.length >= TAG_MAX_NUMBER)){
-            return
-        }
-        if(individualTag
-            && individualTag.trim().length){ 
+        if(form.values.tags && (form.values.tags.includes(individualTag.trim()))){
+            toast.error("Experiment tags cannot be redundant.", {duration: 1500});
+            return;
+        } else if(form.values.tags && form.values.tags.length >= TAG_MAX_NUMBER){
+            toast.error(`Max number of experiment tags is ${TAG_MAX_NUMBER}.`, {duration: 1500});
+            return;
+        } else if(!individualTag || !individualTag.trim().length) {
+            toast.error("Experiment tag cannot be blank.", {duration: 1500});
+            return;
+        } else {
             form.setFieldValue('tags', [...form.values.tags, individualTag]);
             setIndividualTag("");
         }
