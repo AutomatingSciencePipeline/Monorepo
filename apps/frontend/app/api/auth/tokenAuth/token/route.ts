@@ -13,8 +13,6 @@ export async function POST(req: NextRequest) {
     const resp = await tokenBasedAuth(experiment_req["token"]);
     const user = await resp.json();
 
-    console.log(user);
-
     return NextResponse.json(user); 
 
 }
