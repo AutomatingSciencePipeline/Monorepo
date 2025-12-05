@@ -11,10 +11,12 @@ import pymongo
 from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file, get_experiment, update_exp_value
 
 from spawn_runner import create_job, create_job_object
+from spawn_programmatic_runner import create_and_upload_job
 flaskApp = Flask(__name__)
 
 config.load_incluster_config()
 BATCH_API = client.BatchV1Api()
+CORE_API = client.CoreV1Api() 
 
 MAX_WORKERS = 1
 executor = ProcessPoolExecutor(MAX_WORKERS)
@@ -65,6 +67,18 @@ def spawn_job(experiment_data):
     """Function for creating a job"""
     job = create_job_object(experiment_data)
     create_job(BATCH_API, job)
+
+@flaskApp.post("/experiment_programmatic")
+def recv_experiment_programmatic():
+    """The query to run an experiment"""
+    data = request.get_json()
+    executor.submit(spawn_job_programmatic, data)
+    return Response(status=200)
+    
+def spawn_job_programmatic(experiment_data):
+    """Function for creating a job for programmatic mode"""
+    job_name = create_and_upload_job(CORE_API, experiment_data)
+    print(f"Job {job_name} created and payload uploaded successfully")
     
 @flaskApp.post("/cancelExperiment")
 def cancel_experiment():
