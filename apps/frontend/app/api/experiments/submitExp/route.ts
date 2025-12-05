@@ -1,11 +1,7 @@
 import { submitExperimentCLI } from '../../../../lib/mongodb_funcs';
 import { tokenBasedAuth } from "../../../../tokenAuth";
-import clientPromise, { DB_NAME } from "../../../../lib/mongodb";
-import { GridFSBucket } from "mongodb";
 import * as yaml from "js-yaml";
 import { NextResponse } from "next/server";
-import { useForm, joiResolver } from '@mantine/form';
-import { experimentSchema } from '../../../../utils/validators';
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,13 +20,10 @@ export async function POST(req: Request) {
   try {
     const resp = await tokenBasedAuth(String(userToken));
     const user = await resp.json();
-    // console.log(user);
     const userId = user["_id"];
     const email = user['email'];
     const role = user['role'];
     const yamlText = await file.text();
-    // console.log("This is exec file id");
-    // console.log(execFile);
 
     let parsed: any;
     try {
@@ -44,15 +37,6 @@ export async function POST(req: Request) {
 
     parsed["file"] = execFile;
     parsed["experimentExecutable"] = "";
-
-    console.log(parsed)
-
-    // if (error) {
-    //     return NextResponse.json(
-    //     { error: "Validation failed", details: error.details },
-    //     { status: 400 }
-    //   );
-    // }
 
     const expId = await submitExperimentCLI(parsed, userId, email, role, execFile);
 

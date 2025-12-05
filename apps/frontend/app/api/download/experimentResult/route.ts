@@ -1,4 +1,3 @@
-import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/mongodb';
 import { NextRequest } from 'next/server';
 import { fetchResultsFileCLI } from '../../../../lib/mongodb_funcs';
 import { tokenBasedAuth } from '../../../../tokenAuth';
@@ -16,33 +15,17 @@ export async function POST(req: NextRequest) {
     const user = await tokenBasedAuth(experiment_req ["token"]);
     const userData = await user.json();
     const uid = userData["_id"];
-
-    // const client = await clientPromise;
-    // const db = client.db(DB_NAME);
-    // const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
-
-    // const sendAllRelevantDocs = async () => {
-    //     const docs = await experimentsCollection
-    //         .find({ $and: [ { creator: uid }, {_id: experiment_req ["expID"]}]})
-    //         .toArray();
-    //     return docs;
-    // };
-    
-    // try{
-    //     const result = await sendAllRelevantDocs();
-    //     if(!result){
-            
-    //     }
-    // } catch (error){
-
-    // }
-    console.log(experiment_req ["expID"]);
     const result = await fetchResultsFileCLI(experiment_req ["expID"], uid);
-    if (result === null) {
-		//Add result warning
-        console.log("Result ended up being Null :)")
-        return;
-	}
+
+    console.log(result);
+
+    console.log("Right here");
+
+    if("success" in result ) {
+      console.log("In success result");
+      const status = result.status;
+      return new Response(status);
+    }
 
 	const { contents, name } = result;
     console.log(contents);

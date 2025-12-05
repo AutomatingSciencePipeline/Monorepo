@@ -424,22 +424,34 @@ export async function updateUserRole(userId: string, role: string) {
     return Promise.resolve();
 }
 
-export async function fetchResultsFileCLI(expId: string, userId: string): Promise<{ contents: string; name: string } | null> {
+export async function fetchResultsFileCLI(expId: string, userId: string): Promise<| { contents: string; name: string }| { success: boolean; status: string }> {
     'use server';
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
 
-    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0) return null;
+    let objectId;
 
-    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
-    if (!experiment) return null;
+    try {
+        objectId = new ObjectId(expId);
+    } catch (err) {
+        return { success: false, status: 'not_found'};
+    }
+
+    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: objectId });
+    if (!experiment) return { success: false, status: 'not_found'};
 
     // Make sure the user is the creator or in the sharedUsers array
     if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
-        return null;
+        return { success: false, status: 'not_found'};
     }
+
+    if(experiment.status != 'COMPLETED') return { success: false, status: 'not_done'};
+
+    if(experiment.fails > 0) return { success: false, status: 'exp_failed'};
+
+    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
+    if (results.length === 0)  return { success: false, status: 'not_done'};
 
     const expName = experiment.name;
     const expCreated = experiment.created;
