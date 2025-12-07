@@ -21,6 +21,8 @@ spec:
         env:
         - name: IMAGE_RUNNER
           value: runner
+        - name: PROGRAMMATIC_RUNNER
+          value: prunner
         - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:
