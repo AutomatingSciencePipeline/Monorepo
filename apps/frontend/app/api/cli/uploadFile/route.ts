@@ -11,6 +11,7 @@ export async function POST(req: Request) {
   const form = await req.formData();
 
   const userToken = form.get("userToken");
+  //This file is the executable file for the experiment that will be run
   const file = form.get("file") as File | null;
 
   if (!userToken || !file) {
