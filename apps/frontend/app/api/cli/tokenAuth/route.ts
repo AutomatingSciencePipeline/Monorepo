@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
-import { tokenBasedAuth } from '../../../../../tokenAuth';
+import { tokenBasedAuth } from '../../../../tokenAuth';
 
 export async function POST(req: NextRequest) {
 
