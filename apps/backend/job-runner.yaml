@@ -15,6 +15,11 @@ spec:
         imagePullPolicy: Always
         command: []
         env:
+        - name: MONGODB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_PORT
         - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:
