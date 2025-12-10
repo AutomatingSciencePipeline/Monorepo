@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const formVals = await req.formData();
 
   const userToken = formVals.get("userToken");
-  const execFile = formVals.get("execFileID") as string;
+  const fileId = formVals.get("execFileID") as string;
   const file = formVals.get("file") as File | null;
 
   if (!userToken || !file) {
@@ -35,10 +35,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid YAML: " + err.message }, { status: 400 });
     }
 
-    parsed["file"] = execFile;
-    parsed["experimentExecutable"] = "";
+    parsed["file"] = fileId;
 
-    const expId = await submitExperimentCLI(parsed, userId, email, role, execFile);
+    const expId = await submitExperimentCLI(parsed, userId, email, role, fileId);
 
     return NextResponse.json({
       success: true,
