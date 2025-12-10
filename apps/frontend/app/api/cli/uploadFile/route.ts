@@ -43,8 +43,8 @@ export async function POST(req: Request) {
       const fileName = identicalFileArray[0].filename;
       return NextResponse.json({
         message: 'Reusing file in database!',
-        fileId,
-        fileName,
+        fileId: fileId,
+        fileName: fileName,
         reuse: true,
       });
     }
