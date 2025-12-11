@@ -71,6 +71,7 @@ function convertToExpsArray(arr: WithId<Document>[]) {
     return arr.map((doc: WithId<Document>) => ({
         id: doc._id.toString(),
         name: doc.name || 'Untitled',
+        tags: doc.tags || [],
         status: doc.status || 'OK',
         started_on: doc.startedAtEpochMillis ?? 0,
         current_permutation: (doc.passes ? doc.passes : 0) + (doc.fails ? doc.fails : 0),
