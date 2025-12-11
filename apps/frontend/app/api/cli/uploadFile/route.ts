@@ -1,71 +1,118 @@
+import clientPromise, { DB_NAME } from '../../../../lib/mongodb';
+import { GridFSBucket } from 'mongodb';
+import formidable, { Files, Fields } from 'formidable';
+import { Readable } from 'stream';
+import fs from 'fs';
+import { NextResponse } from 'next/server';
 import { tokenBasedAuth } from "../../../../tokenAuth";
-import clientPromise, { DB_NAME } from "../../../../lib/mongodb";
-import { GridFSBucket } from "mongodb";
-import { NextResponse } from "next/server";
-import crypto from "crypto";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const form = await req.formData();
-
-  const userToken = form.get("userToken");
-  //This file is the executable file for the experiment that will be run
-  const file = form.get("file") as File | null;
-
-  if (!userToken || !file) {
-    return NextResponse.json({ response: 'Not enough arguments!' }, { status: 400 });
-  }
-
-  const user = await tokenBasedAuth(String(userToken));
-  const userId = user["id"];
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  let fields: Fields;
+  let files: Files;
 
   try {
+    ({ fields, files } = await parseForm(req));
+  } catch (err) {
+    return NextResponse.json(
+      { message: "Failed to parse upload form" },
+      { status: 400 }
+    );
+  }
+
+  const userToken = Array.isArray(fields.userToken) ? fields.userToken[0] : fields.userToken;
+  const file = Array.isArray(files.file) ? files.file[0] : files.file;
+
+  if (!file || !userToken) {
+    return NextResponse.json(
+      { message: "File or userId missing" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const resp = await tokenBasedAuth(String(userToken));
+    const user = await resp.json();
+    const userId = user["_id"];
     const client = await clientPromise;
     const db = client.db(DB_NAME);
-    const bucket = new GridFSBucket(db, { bucketName: "fileBucket" });
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const uint8 = new Uint8Array(arrayBuffer);
-    const hash = crypto.createHash("sha256").update(uint8).digest("hex");
+    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
 
-    const identicalFileCursor = bucket.find({
-      'metadata.hash': hash,
-      'metadata.userId': userId,
-    });
-    const identicalFileArray = await identicalFileCursor.toArray();
+    const existing = await bucket
+      .find({ 'metadata.hash': file.hash, 'metadata.userId': userId })
+      .toArray();
 
-    if (identicalFileArray.length > 0) {
-      const fileId = identicalFileArray[0]._id;
-      const fileName = identicalFileArray[0].filename;
+    if (existing.length > 0) {
+      const match = existing[0];
       return NextResponse.json({
         message: 'Reusing file in database!',
-        fileId: fileId,
-        fileName: fileName,
+        fileId: match._id,
+        fileName: match.filename,
         reuse: true,
       });
     }
 
-    const uploadStream = bucket.openUploadStream(file.name || 'uploadedFile', {
-      metadata: { userId: userId, hash: hash, lastUsedDate: new Date() },
-    });
-    uploadStream.end(buffer);
+    const fileStream = fs.createReadStream(file.filepath);
 
-    await new Promise((resolve, reject) => {
-      uploadStream.on("finish", resolve);
-      uploadStream.on("error", reject);
+    const uploadStream = bucket.openUploadStream(
+      file.originalFilename || "uploadedFile",
+      {
+        metadata: {
+          userId,
+          hash: file.hash,
+          lastUsedDate: new Date(),
+        },
+      }
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      fileStream
+        .pipe(uploadStream)
+        .on("finish", resolve)
+        .on("error", reject);
     });
 
     return NextResponse.json({
-      message: "File uploaded successfully",
+      message: "Upload successful",
       fileId: uploadStream.id,
       fileName: uploadStream.filename,
+      reuse: false,
     });
   } catch (error) {
-    console.error('Error writing experiment file.', error);
-    return NextResponse.json({ response: 'Failed to upload experiment file!' }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to upload file" },
+      { status: 500 }
+    );
   }
+}
+
+async function parseForm(
+  req: Request
+): Promise<{ fields: Fields; files: Files }> {
+  const contentType = req.headers.get("content-type") || "";
+  if (!contentType.startsWith("multipart/form-data")) {
+    throw new Error("Invalid content-type");
+  }
+
+  const form = formidable({
+    keepExtensions: true,
+    hashAlgorithm: "sha256",
+    multiples: false,
+  });
+
+  const bodyBuf = Buffer.from(await req.arrayBuffer());
+  const incoming = Readable.from(bodyBuf) as any;
+
+  incoming.headers = Object.fromEntries(req.headers.entries());
+  incoming.method = "POST";
+  incoming.url = "/";
+
+  return new Promise((resolve, reject) => {
+    form.parse(incoming, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
 }
