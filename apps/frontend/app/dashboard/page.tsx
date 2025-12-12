@@ -29,6 +29,7 @@ import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {ReadOnlyTag} from '../components/ReadOnlyTag'
 import { Blockquote, CloseButton } from '@mantine/core';
 import { LightBulbIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
@@ -331,6 +332,11 @@ export default function DashboardPage() {
 
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
 
+	// TODO: this function is way too long. There are quite a bit of moving parts that maybe should get their own functions
+	const [bannerOpen, setBannerOpen] = useState(true);
+	const infoIcon = (
+		<LightBulbIcon className='h-6 w-6 text-blue-400' aria-hidden='true' />
+	);
 
 	useEffect(() => {
 		setExperimentStates((prevState) => {
@@ -754,7 +760,18 @@ export default function DashboardPage() {
 								</div>
 							</div>
 						</div>
-
+						<div>
+							{bannerOpen ? (
+								<Blockquote color='blue' icon={infoIcon} mt="xl">
+									<div className='flex-col'>
+										<CloseButton onClick={() => setBannerOpen(false)}/>
+										<b>Did you know?</b> The GLADOS CLI is ready to be tested! 
+										<Link color='blue' href="/api/download/gladosCLI"> <u>Click here</u> </Link>
+										to give it a try.
+									</div>
+								</Blockquote>
+							) : null}
+						</div>
 						<ExperimentList
 							experiments={experiments}
 							onCopyExperiment={(experimentId) => {
@@ -883,7 +900,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 	const [tags, setTags] = useState<string[]>([]);
 	const [tagsMultipleFilter, setTagsMultipleFilter] = useState<string[]>([]);
-	const [bannerOpen, setBannerOpen] = useState(true);
 
 	useEffect(() => {
 		let newTags = [] as string[];
@@ -1069,24 +1085,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		);
 	};
 
-	const infoIcon = (
-		<LightBulbIcon className='h-6 w-6 text-blue-400' aria-hidden='true' />
-	);
-
 	return (<div className='bg-white lg:min-w-0 lg:flex-1'>
 		<div className='pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0'>
-			<div>
-				{bannerOpen ? (
-					<Blockquote color='blue' icon={infoIcon} mt="xl">
-						<div className='flex-col'>
-							<CloseButton onClick={() => setBannerOpen(false)}/>
-							<b>Did you know?</b> The GLADOS CLI is ready to be tested! 
-							<a href="test" color='blue'> <u>Click here</u> </a>
-							to give it a try.
-						</div>
-					</Blockquote>
-				) : null}
-			</div>
 			<div className='flex items-center'>
 				<h1 className='flex-1 text-lg font-medium'>
 					Projects <span className='text-gray-600'>({experiments.filter((project) => project.status !== 'ARCHIVED').length} of {experiments.length})</span>
