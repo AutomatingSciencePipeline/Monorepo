@@ -7,19 +7,20 @@ import time
 from typing import Any, Dict, Optional
 import requests
 from datetime import datetime
+import urllib3
 
-API_HOST = "http://localhost:3000"
+API_HOST = "https://glados.csse.rose-hulman.edu/"
 
 CLIENT_ID = os.getenv("GLADOS_CLIENT_ID")
 
 DEVICE_CODE_URL = "https://github.com/login/device/code"
 ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token"
-VIEW_EXPERIMENT_URL = f"{API_HOST}/api/experiments/queryExp"
-AUTH_URL = f"{API_HOST}/api/auth/tokenAuth/token"
-UPLOAD_EXPERIMENT_URL = f"{API_HOST}/api/files/uploadFileCLI"
-SUBMIT_EXPERIMENT_URL = f"{API_HOST}/api/experiments/submitExp"
+VIEW_EXPERIMENT_URL = f"{API_HOST}/api/cli/queryExp"
+AUTH_URL = f"{API_HOST}/api/cli/tokenAuth"
+UPLOAD_EXPERIMENT_URL = f"{API_HOST}/api/cli/uploadFile"
+SUBMIT_EXPERIMENT_URL = f"{API_HOST}/api/cli/submitExp"
 START_EXPERIMENT_URL = f"{API_HOST}/api/experiments/start/"
-DOWNLOAD_EXPERIMENT_RESULTS_URL = f"{API_HOST}/api/download/experimentResult"
+DOWNLOAD_EXPERIMENT_RESULTS_URL = f"{API_HOST}/api/cli/downloadResult"
 
 EX_UNKNOWN = -2
 EX_PARSE_ERROR = -1
@@ -29,6 +30,8 @@ EX_NOTFOUND = 2
 EX_INVALID_EXP_FORMAT = 3
 EX_NOT_DONE = 4
 EX_EXP_FAILED = 5
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class RequestManager(object):
     def __init__(self):
@@ -81,14 +84,17 @@ class RequestManager(object):
             res = requests.post(AUTH_URL, verify=False, json=user_token, timeout=5)
             response = res.json()
             self.token: str = token
+            if(response.get("_id") is None):
+                return {"uid": None, "error": "User not found"}
             return {"uid": response["_id"], "error": None}
         except requests.RequestException as error:
             return {"uid": None, "error": f'{error}'}
         # Implementation for authenticating with the provided token
     
     def upload_and_start_experiment(self, experiment_path: str) -> Dict[str, typing.Any]:
+        filename = os.path.basename(experiment_path)
         files = {
-            "file": open(experiment_path, "rb")
+            "file": (filename, open(experiment_path, "rb"), "application/octet-stream")
         }
         data = {
             "userToken": self.token
@@ -98,8 +104,23 @@ class RequestManager(object):
             time.sleep(5)
         except requests.RequestException as error:
             perror(f'{error}')
+            
+        if(res is None):
+            return {
+            'success': False,
+            'error': 'other',
+            'exp_id': ''
+        }  
 
         submitted_exec_file = res.json()
+        
+        if(submitted_exec_file.get("fileId") is None):
+            return {
+            'success': False,
+            'error': submitted_exec_file.get('message'),
+            'exp_id': ''
+            }   
+            
         files = {
             "file": open("manifest.yml", "rb")
         }
@@ -108,6 +129,8 @@ class RequestManager(object):
             "execFileID": submitted_exec_file['fileId']
         }
         try:
+            uploadMessage = submitted_exec_file["message"]
+            print(uploadMessage)
             res = requests.post(SUBMIT_EXPERIMENT_URL, verify=False, files=files, data=data, timeout=40)
             submitted_exp = res.json()
             time.sleep(5)
@@ -185,10 +208,6 @@ def upload_and_start_experiment(request_manager: RequestManager, experiment_path
     if not os.path.isfile(experiment_path):
         perror(f"error: Experiment file '{experiment_path}' not found.")
         return EX_NOTFOUND
-    # validation_error = validate_experiment_file(experiment_path)
-    # if validation_error is not None:
-    #     perror(f"error: {validation_error}")
-    #     return EX_INVALID_EXP_FORMAT
 
     results = request_manager.upload_and_start_experiment(experiment_path)
     if not results.get('success', False):
@@ -212,6 +231,7 @@ def query_experiments(request_manager: RequestManager, title: str):
         print(f"Experiment {index + 1}: {match['name']}")
         print("***********************************************")
         print(f"ID: {match['id']}")
+        print(f"Tags: {match['tags']}")
         print(f"Status: {match['status']}")
         print(f"Time Started: {time_started}")
         print(f"Trials: {match['current_permutation']}/{match['total_permutations']} Completed\n")
@@ -265,8 +285,7 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
     
     parsed = parser.parse_args(args)
-    
-    # TODO: this section probably needs to be refactored!
+
     if not exactly_one([parsed.upload, parsed.query, parsed.download]) and not parsed.generate_token and not parsed.token:
         perror("error: Exactly one of -z, -q, or -d must be provided.")
         return EX_PARSE_ERROR
@@ -283,7 +302,12 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         result = store_token(parsed.token)
         if result != EX_SUCCESS:
             perror("error: An unexpected error occurred while storing the token.")
-        if not request_manager.authenticate(parsed.token):
+        auth_result = request_manager.authenticate(parsed.token)
+        if type(auth_result) is bool:
+            if auth_result is False:
+                perror("error: Cannot authenticate token - check your internet connection and token.")
+                return EX_INVALID_TOKEN
+        elif auth_result.get("uid") is None:
             perror("error: Cannot authenticate token - check your internet connection and token.")
             return EX_INVALID_TOKEN
     
@@ -301,15 +325,14 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     sys.stdout, sys.stderr = _out, _err
     return result
 
-
 def exactly_one(args : typing.Sequence[str]) -> bool:
     """Returns True if exactly one argument in args is not None."""
     return sum(1 for arg in args if arg) == 1
-    
 
 def main():
-    parse_args(RequestManager()) 
-    
+    parse_args(RequestManager())
 
 if __name__ == "__main__":
     main()
+    
+    
