@@ -27,7 +27,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {ReadOnlyTag} from '../components/ReadOnlyTag'
-import { Blockquote, CloseButton } from '@mantine/core';
+import { Notification } from '@mantine/core';
 import { LightBulbIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -513,10 +513,20 @@ export default function DashboardPage() {
 			{/* Background color split screen for large screens */}
 			<div className='fixed top-0 left-0 w-1/2 h-full bg-white' aria-hidden='true' />
 			<div className='fixed top-0 right-0 w-1/2 h-full bg-gray-50' aria-hidden='true' />
-
+			
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar setSearchTerm={setSearchTerm} />
+				<Navbar setSearchTerm={setSearchTerm} /> 
+				
+				<div className='float-right'>
+					{bannerOpen ? (
+							<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
+								The GLADOS CLI is ready to be tested! 
+								<Link color='blue' href="/api/download/gladosCLI"> <u>Click here</u> </Link>
+								to give it a try.
+							</Notification>
+						) : (<div/>)}
+				</div>
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
@@ -760,18 +770,6 @@ export default function DashboardPage() {
 								</div>
 							</div>
 						</div>
-						<div>
-							{bannerOpen ? (
-								<Blockquote color='blue' icon={infoIcon} mt="xl">
-									<div className='flex-col'>
-										<CloseButton onClick={() => setBannerOpen(false)}/>
-										<b>Did you know?</b> The GLADOS CLI is ready to be tested! 
-										<Link color='blue' href="/api/download/gladosCLI"> <u>Click here</u> </Link>
-										to give it a try.
-									</div>
-								</Blockquote>
-							) : null}
-						</div>
 						<ExperimentList
 							experiments={experiments}
 							onCopyExperiment={(experimentId) => {
@@ -862,6 +860,8 @@ export default function DashboardPage() {
 						/>
 					)}
 				</div>
+
+				
 			</div>
 		</>
 	);
