@@ -27,6 +27,9 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {ReadOnlyTag} from '../components/ReadOnlyTag'
+import { Notification } from '@mantine/core';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
@@ -329,6 +332,11 @@ export default function DashboardPage() {
 
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
 
+	// TODO: this function is way too long. There are quite a bit of moving parts that maybe should get their own functions
+	const [bannerOpen, setBannerOpen] = useState(true);
+	const infoIcon = (
+		<LightBulbIcon className='h-6 w-6 text-blue-400' aria-hidden='true' />
+	);
 
 	useEffect(() => {
 		setExperimentStates((prevState) => {
@@ -505,10 +513,20 @@ export default function DashboardPage() {
 			{/* Background color split screen for large screens */}
 			<div className='fixed top-0 left-0 w-1/2 h-full bg-white' aria-hidden='true' />
 			<div className='fixed top-0 right-0 w-1/2 h-full bg-gray-50' aria-hidden='true' />
-
+			
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar setSearchTerm={setSearchTerm} />
+				<Navbar setSearchTerm={setSearchTerm} /> 
+				
+				<div className='float-right'>
+					{bannerOpen ? (
+							<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
+								The GLADOS CLI is ready to be tested! 
+								<Link color='blue' href="/api/download/gladosCLI"> <u>Click here</u> </Link>
+								to give it a try.
+							</Notification>
+						) : (<div/>)}
+				</div>
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
@@ -752,7 +770,6 @@ export default function DashboardPage() {
 								</div>
 							</div>
 						</div>
-
 						<ExperimentList
 							experiments={experiments}
 							onCopyExperiment={(experimentId) => {
@@ -843,6 +860,8 @@ export default function DashboardPage() {
 						/>
 					)}
 				</div>
+
+				
 			</div>
 		</>
 	);
