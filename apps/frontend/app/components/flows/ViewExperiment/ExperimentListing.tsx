@@ -332,7 +332,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<div className="min-w-0 space-y-3 max-w-md">
 					<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 						{isClosed ? (
-							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center', overflowX: 'auto' }}>
+							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', gap: '10px' }}>
 								{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
 									(<ChevronRightIcon
 										onClick={toggleState} // Toggle to open
@@ -357,13 +357,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<>
 										<span
 											className="editable-text max-w-md"
-											style={{overflowX: 'auto'}}
 										>
 											{project.name}
 										</span>
 										{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
+											style={{flexShrink: 0}}
 										/> : <></>}
 
 									</>
@@ -384,7 +384,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{!isClosed ?
 						<div className='flex items-center space-x-3'>
-							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center',  overflowX: 'auto' }}>
+							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', gap: '10px' }}>
 								{isEditing ? (
 									<>
 										<input
@@ -401,13 +401,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<>
 										<span
 											className="editable-text max-w-md"
-											style={{ overflowX: 'auto'}}
 										>
 											{project.name}
 										</span>
 										{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
+											style={{flexShrink: 0}}
 										/> : <></>}
 
 									</>
