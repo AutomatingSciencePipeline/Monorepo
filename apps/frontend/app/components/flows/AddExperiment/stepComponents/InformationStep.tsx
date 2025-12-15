@@ -151,15 +151,6 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         />
                     </div>
                 </InputSection>
-                <InputSection header={'Send Email Upon Completion'}>
-                    <div className='sm:col-span-4'>
-                        <input
-                            type='checkbox'
-                            checked={form.values.sendEmail}
-                            onChange={() => form.setFieldValue('sendEmail', !form.values.sendEmail)}>
-                        </input>
-                    </div>
-                </InputSection>
             </Fragment>
         </div>
     );
