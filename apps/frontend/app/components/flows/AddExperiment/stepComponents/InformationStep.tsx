@@ -151,15 +151,6 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         />
                     </div>
                 </InputSection>
-                <InputSection header={'Keep Logs'}>
-                    <div className='sm:col-span-4'>
-                        <input
-                            type='checkbox'
-                            checked={form.values.keepLogs}
-                            onChange={() => form.setFieldValue('keepLogs', !form.values.keepLogs)}>
-                        </input>
-                    </div>
-                </InputSection>
                 <InputSection header={'Send Email Upon Completion'}>
                     <div className='sm:col-span-4'>
                         <input

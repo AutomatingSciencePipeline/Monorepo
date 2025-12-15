@@ -137,7 +137,6 @@ This step reviews the experiment setup. If the previous steps were followed corr
   "dumbTextArea": "\nnum_inputs = 4\nnum_classes = 4\nnum_solutions = 10\nhidden_activations = sigmoid\noutput_activation = sigmoid\nnum_parents_mating = 5\nnum_generations = 2\nmutation_probability = {mr}\nparent_selection_type = rank\ncrossover_type = scattered\nmutation_type = random\nkeep_parents = 0\nrandom_seed = {seed}",
   "timeout": 5,
   "scatter": false,
-  "keepLogs": true,
   "workers": 1,
   "file": "679e806160f8c8d0c659037d",
   "status": "CREATED",
