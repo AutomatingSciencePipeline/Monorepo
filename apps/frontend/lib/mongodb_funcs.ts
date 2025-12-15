@@ -545,6 +545,41 @@ export async function fetchProjectZip(expId: string): Promise<{ contents: string
     };
 }
 
+export async function fetchProjectZipCLI(expId: string, userId: string): Promise<{ contents: string; name: string } | null> {
+    'use server';
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const zipsBucket = new GridFSBucket(db, { bucketName: 'zipsBucket' });
+
+    const results = await zipsBucket.find({ 'metadata.experimentId': expId }).toArray();
+    if (results.length === 0) return null;
+
+    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
+    if (!experiment) return null;
+
+    // Make sure the user is the creator or in the sharedUsers array
+    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
+        return null;
+    }
+
+    const expName = experiment.name;
+    const expCreated = experiment.created;
+
+    const downloadStream = zipsBucket.openDownloadStream(results[0]._id);
+    const chunks: Buffer[] = [];
+
+    const contents = await new Promise<string>((resolve, reject) => {
+        downloadStream.on('data', (chunk) => chunks.push(chunk));
+        downloadStream.on('end', () => resolve(Buffer.concat(chunks as unknown as Uint8Array[]).toString('base64')));
+        downloadStream.on('error', reject);
+    });
+
+    return {
+        contents,
+        name: formatFilename(expName, expCreated, 'zip'),
+    };
+}
+
 // Auxiliary functions, keep at the bottom of the file
 const formatFilename = (name: string, timestamp: string, extension: string) => {
     const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
