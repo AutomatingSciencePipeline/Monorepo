@@ -498,7 +498,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																			credentials: 'same-origin',
 																			body: JSON.stringify({ id: expId }),
 																		});
-																		console.log(response);
+																		
 																		if (response.ok) {
 																			toast.success("Started experiment!", { duration: 1500 });
 																		}
