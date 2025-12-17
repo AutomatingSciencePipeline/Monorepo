@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         if (!experiment) {
             return NextResponse.json(
                 {
-                    response: `Experiment '${expID}' not found. Please contact the GLADOS team for further troubleshooting.`,
+                    response: `not_found`,
                 },
                 { status: 404 }
             );
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         ) {
             return NextResponse.json(
                 {
-                    response: `You are not authorized to access this experiment. Please contact the GLADOS team for further troubleshooting.`,
+                    response: `not_found`,
                 },
                 { status: 403 }
             );
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         if (results.length !== 1) {
             return NextResponse.json(
                 {
-                    response: `Experiment Log '${expID}' not found. Please contact the GLADOS team for further troubleshooting.`,
+                    response: `not_found`,
                 },
                 { status: 404 }
             );
@@ -84,6 +84,6 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('Error contacting server: ', error);
-        return NextResponse.json({ response: 'Failed to download the log file' }, { status: 500 });
+        return NextResponse.json({ response: 'not_found' }, { status: 500 });
     }
 }

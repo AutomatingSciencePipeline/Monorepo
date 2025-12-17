@@ -18,8 +18,7 @@ export async function POST(req: NextRequest) {
     const result = await fetchResultsFileCLI(experiment_req ["expID"], uid);
 
     if("success" in result ) {
-      const status = result.status;
-      return new Response(status);
+      return new Response('not_found', { status: 500 });
     }
 
 	const { contents, name } = result;
