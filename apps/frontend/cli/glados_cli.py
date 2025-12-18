@@ -21,6 +21,8 @@ UPLOAD_EXPERIMENT_URL = f"{API_HOST}/api/cli/uploadFile"
 SUBMIT_EXPERIMENT_URL = f"{API_HOST}/api/cli/submitExp"
 START_EXPERIMENT_URL = f"{API_HOST}/api/experiments/start/"
 DOWNLOAD_EXPERIMENT_RESULTS_URL = f"{API_HOST}/api/cli/downloadResult"
+DOWNLOAD_EXPERIMENT_LOG_URL = f"{API_HOST}/api/cli/downloadLogs"
+DOWNLOAD_EXPERIMENT_ZIP = f"{API_HOST}/api/cli/downloadZip"
 
 EX_UNKNOWN = -2
 EX_PARSE_ERROR = -1
@@ -167,8 +169,12 @@ class RequestManager(object):
         try:
             res = requests.post(DOWNLOAD_EXPERIMENT_RESULTS_URL, verify=False, json=experiment_req_json, timeout=20)
             
-            if(res.headers.get("Content-Disposition") is None):
-                return { 'success': False, 'error': res.content.decode('utf-8') }
+            if(res.status_code != 200):
+                try:
+                    error_msg = res.json().get("response", res.text)
+                except ValueError:
+                    error_msg = res.text
+                return {'success': False, 'error': error_msg}
             
             cd = res.headers.get("Content-Disposition", "")
             filename = "results.csv"
@@ -178,11 +184,51 @@ class RequestManager(object):
 
             with open(filename, "wb") as f:
                 f.write(res.content)
-
             return { 'success': True, 'files': [{'name': filename, 'content': res.content}] }
-            
         except requests.RequestException as error:
             perror(f'{error}')
+            
+    def download_all(self, experiment_id: str) -> Dict[str, typing.Any]:
+        experiment_req_json = {
+            "token": self.token,
+            "expID": experiment_id
+        }
+        try:
+            res = self.download_experiment_results(experiment_id)
+            if(res.get('success') is not True):
+                return res
+        except requests.RequestException as error:
+            perror(f'{error}')
+            
+        filename = res['files'][0]['name'].replace(".csv", "")
+            
+        try:
+            res = requests.post(DOWNLOAD_EXPERIMENT_LOG_URL, verify=False, json=experiment_req_json, timeout=20)
+            if(res.status_code != 200):
+                try:
+                    error_msg = res.json().get("response", res.text)
+                except ValueError:
+                    error_msg = res.text
+                return {'success': False, 'error': error_msg}
+            with open(f'{filename}_system_log.txt', "w", encoding="utf-8") as f:
+                f.write(res.text)
+        except requests.RequestException as error:
+            perror(f'{error}')
+           
+        try:
+            res = requests.post(DOWNLOAD_EXPERIMENT_ZIP, verify=False, json=experiment_req_json, timeout=20)
+            if(res.status_code != 200):
+                try:
+                    error_msg = res.json().get("response", res.text)
+                except ValueError:
+                    error_msg = res.text
+                return {'success': False, 'error': error_msg}
+            with open(f"{filename}_results.zip", "wb") as f:
+                f.write(res.content)
+        except requests.RequestException as error:
+            perror(f'{error}')
+            
+        return { 'success': True, 'files': [{'name': "All System Artifacts", 'content': res.content}] }
     
 def perror(*args, **kwargs) -> None:
     """Prints to stderr."""
@@ -251,6 +297,20 @@ def download_experiment(request_manager: RequestManager, experiment_id: str) -> 
     print(f"Experiment results downloaded successfully to './{results['files'][0]['name']}'.")
     return EX_SUCCESS
 
+def download_all(request_manager: RequestManager, experiment_id: str) -> int:
+    results = request_manager.download_all(experiment_id)
+    if not results.get("success", False):
+        msg, status = {
+            'not_found': ("Experiment not found.", EX_NOTFOUND),
+            'not_done': ("Experiment is still running.", EX_NOT_DONE),
+            'exp_failed': ("Experiment did not complete successfully.", EX_EXP_FAILED)
+        }[results.get("error")]
+        perror(msg)
+        return status
+    
+    print(f"All experiment artifacts downloaded successfully to current directory.")
+    return EX_SUCCESS
+
 def validate_experiment_file(filepath: str) -> Optional[str]:
     if not zipfile.is_zipfile(filepath):
         return f"'{filepath}' is in an invalid format."
@@ -283,10 +343,11 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     parser.add_argument('--upload', '-z', type=str, help='Upload a ZIP file. Cannot be used with -q, or -d.')
     parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z or -d.')
     parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
     
     parsed = parser.parse_args(args)
 
-    if not exactly_one([parsed.upload, parsed.query, parsed.download]) and not parsed.generate_token and not parsed.token:
+    if not exactly_one([parsed.upload, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
         perror("error: Exactly one of -z, -q, or -d must be provided.")
         return EX_PARSE_ERROR
     elif not parsed.token and not parsed.generate_token:
@@ -320,6 +381,8 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         result = query_experiments(request_manager, parsed.query)
     if parsed.download:
         result = download_experiment(request_manager, parsed.download)
+    if parsed.download_all:
+        result = download_all(request_manager, parsed.download_all)
     
     # Restore original stdout and stderr
     sys.stdout, sys.stderr = _out, _err
