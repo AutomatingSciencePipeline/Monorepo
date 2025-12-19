@@ -522,7 +522,7 @@ export default function DashboardPage() {
 					{bannerOpen ? (
 							<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
 								The GLADOS CLI is ready to be tested! 
-								<Link color='blue' href="/api/download/gladosCLI"> <u>Click here</u> </Link>
+								<Link color='blue' href="/cli/glados_cli.py" download="glados_cli.py"> <u>Click here</u> </Link>
 								to give it a try.
 							</Notification>
 						) : (<div/>)}
