@@ -229,11 +229,6 @@ class RequestManager(object):
             perror(f'{error}')
             
         return { 'success': True, 'files': [{'name': "All System Artifacts", 'content': res.content}] }
-
-            return { 'success': True, 'files': [{'name': filename, 'content': res.content}] }
-            
-        except requests.RequestException as error:
-            perror(f'{error}')
     
 def perror(*args, **kwargs) -> None:
     """Prints to stderr."""
@@ -353,10 +348,6 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     parsed = parser.parse_args(args)
 
     if not exactly_one([parsed.upload, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
-    
-    parsed = parser.parse_args(args)
-
-    if not exactly_one([parsed.upload, parsed.query, parsed.download]) and not parsed.generate_token and not parsed.token:
         perror("error: Exactly one of -z, -q, or -d must be provided.")
         return EX_PARSE_ERROR
     elif not parsed.token and not parsed.generate_token:
