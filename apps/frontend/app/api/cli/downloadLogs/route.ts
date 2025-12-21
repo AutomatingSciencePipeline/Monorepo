@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
                 {
                     response: `not_found`,
                 },
-                { status: 403 }
+                { status: 404 }
             );
         }
 
