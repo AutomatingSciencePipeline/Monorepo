@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
-import {DeletableTag} from '../../../DeletableTag';
+import {Tag} from '../../../Tag';
 import React, {useState} from 'react';
 import toast from 'react-hot-toast';
 
@@ -94,7 +94,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                            {Array.isArray(form.values.tags) &&
                            form.values.tags.map((title) =>(
                                 <div key={title} onClick={() => deleteTag(title)}>
-                                    <DeletableTag text={title}/>
+                                    <Tag deletable={true} text={title}/>
                                 </div>
                             ))}
                         </div>
