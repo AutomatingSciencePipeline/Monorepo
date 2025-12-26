@@ -140,7 +140,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								hyperparameters: hyperparameters,
 								name: expInfo['name'],
 								description: expInfo['description'],
-								tags: expInfo['tags'],
+								tags: Array.isArray(expInfo['tags']) ? expInfo['tags'] : [],
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
@@ -167,7 +167,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								hyperparameters: hyperparameters,
 								name: expInfo['name'],
 								description: expInfo['description'],
-								tags: expInfo['tags'],
+								tags: Array.isArray(expInfo['tags']) ? expInfo['tags'] : [],
 								trialExtraFile: expInfo['trialExtraFile'],
 								trialResult: expInfo['trialResult'],
 								trialResultLineNumber: expInfo['trialResultLineNumber'],
@@ -498,7 +498,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 																			credentials: 'same-origin',
 																			body: JSON.stringify({ id: expId }),
 																		});
-																		console.log(response);
+																		
 																		if (response.ok) {
 																			toast.success("Started experiment!", { duration: 1500 });
 																		}
