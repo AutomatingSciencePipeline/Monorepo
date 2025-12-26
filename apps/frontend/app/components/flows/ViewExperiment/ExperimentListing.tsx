@@ -329,7 +329,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				</div>
 			)}
 			<div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between w-full ${multiSelectMode ? 'ml-4' : ''}`}>
-				<div className="min-w-0 space-y-3">
+				<div className="min-w-0 space-y-3 max-w-md">
 					<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 						{isClosed ? (
 							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
@@ -356,13 +356,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text"
+											className="editable-text scrollable_x"
+											style={{ 
+												overflowX: 'auto',
+												whiteSpace: 'nowrap',
+												display: 'block',
+												width: '400px'
+											}}
 										>
 											{project.name}
 										</span>
 										{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
+											style={{flexShrink: 0}}
 										/> : <></>}
 
 									</>
@@ -383,7 +390,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{!isClosed ?
 						<div className='flex items-center space-x-3'>
-							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
+							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center'}}>
 								{isEditing ? (
 									<>
 										<input
@@ -399,13 +406,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text"
+											className="editable-text scrollable_x"
+											style={{ 
+												overflowX: 'auto',
+												whiteSpace: 'nowrap',
+												display: 'block',
+												width: '400px'
+											}}
 										>
 											{project.name}
 										</span>
 										{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
+											style={{flexShrink: 0}}
 										/> : <></>}
 
 									</>
