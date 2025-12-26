@@ -332,7 +332,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				<div className="min-w-0 space-y-3 max-w-md">
 					<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 						{isClosed ? (
-							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', gap: '10px' }}>
+							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
 								{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
 									(<ChevronRightIcon
 										onClick={toggleState} // Toggle to open
@@ -356,7 +356,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text max-w-md"
+											className="editable-text max-w-md "
+											style={{ 
+												overflowX: 'auto',
+												whiteSpace: 'nowrap',
+												display: 'block'
+											}}
 										>
 											{project.name}
 										</span>
@@ -384,7 +389,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{!isClosed ?
 						<div className='flex items-center space-x-3'>
-							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', gap: '10px' }}>
+							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center'}}>
 								{isEditing ? (
 									<>
 										<input
@@ -400,7 +405,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text max-w-md"
+											className="editable-text max-w-md "
+											style={{ 
+												overflowX: 'auto',
+												whiteSpace: 'nowrap',
+												display: 'block'
+											}}
 										>
 											{project.name}
 										</span>
