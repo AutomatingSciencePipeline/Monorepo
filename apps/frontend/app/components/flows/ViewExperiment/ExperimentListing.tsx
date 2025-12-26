@@ -356,11 +356,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text max-w-md "
+											className="editable-text scrollable_x"
 											style={{ 
 												overflowX: 'auto',
 												whiteSpace: 'nowrap',
-												display: 'block'
+												display: 'block',
+												width: '400px'
 											}}
 										>
 											{project.name}
@@ -405,11 +406,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text max-w-md "
+											className="editable-text scrollable_x"
 											style={{ 
 												overflowX: 'auto',
 												whiteSpace: 'nowrap',
-												display: 'block'
+												display: 'block',
+												width: '400px'
 											}}
 										>
 											{project.name}
