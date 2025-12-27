@@ -44,6 +44,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
 
 	const [projectName, setProjectName] = useState(projectData.name); // New state for edited project name
+	const [projectTags, setProjectTags] = useState(project.tags);
+	const [originalProjectTags, setOriginalProjectTags] = useState(project.tags);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
 	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
@@ -64,6 +66,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
 		setProjectName(project.name);
+		setProjectTags(project.tags);
 	};
 
 	const handleSave = (newProjectName) => {
@@ -77,6 +80,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const handleCancel = () => {
 		// Cancel the editing and revert to the original project name
 		setProjectName(originalProjectName); // Revert to the original name
+		setProjectTags(originalProjectTags);
 		setEditingCanceled(true);
 		setIsEditing(false);
 	};
@@ -90,11 +94,12 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	useEffect(() => {
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
+			setProjectTags(originalProjectTags);
 			setEditingCanceled(true);
 		} else {
 			// Do nothing here?
 		}
-	}, [editingCanceled, originalProjectName, project.expId]);
+	}, [editingCanceled, originalProjectName, originalProjectTags, project.expId]);
 
 	//Update the project when data is changed
 	useEffect(() => {
@@ -429,12 +434,29 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
+					{isEditing ? (
 					<div className="flex items-center flex-wrap gap-1 justify-left">
 						{project.tags &&
 							project.tags.map((title) =>(
 								<Tag key={title} deletable={false} text={title} />
 							))}
-					</div>
+						{project.creator == session?.user?.id! ? <MdEdit
+											className="icon edit-icon"
+											onClick={handleEdit}
+											style={{flexShrink: 0}}
+						/> : <></>}
+					</div>) :
+					(<div className="flex items-center flex-wrap gap-1 justify-left">
+						{project.tags &&
+							project.tags.map((title) =>(
+								<Tag key={title} deletable={false} text={title} />
+							))}
+						{project.creator == session?.user?.id! ? <MdEdit
+											className="icon edit-icon"
+											onClick={handleEdit}
+											style={{flexShrink: 0}}
+						/> : <></>}
+					</div>) }
 
 					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
 						{getStatusText(project, experimentStates[project.expId])}
