@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
-import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById, updateExperimentTagsById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
@@ -66,10 +66,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
 		setProjectName(project.name);
-		setProjectTags(project.tags);
+		setOriginalProjectTags(projectTags);
 	};
 
 	const handleSave = (newProjectName) => {
+		updateExperimentTagsById(project.expId, projectTags).catch((reason) => {
+			console.warn(`Failed to update experiment name, reason: ${reason}`);
+		});
 		updateExperimentNameById(project.expId, newProjectName).catch((reason) => {
 			console.warn(`Failed to update experiment name, reason: ${reason}`);
 		});
@@ -90,6 +93,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			console.warn(`Failed to update experiment archive status, reason: ${reason}`);
 		});
 	};
+
+	const deleteTag = (title) => {
+        setProjectTags(projectTags.filter(tagName => tagName !== title));
+    }
 
 	useEffect(() => {
 		if (editingCanceled) {
@@ -436,9 +443,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{isEditing ? (
 					<div className="flex items-center flex-wrap gap-1 justify-left">
-						{project.tags &&
-							project.tags.map((title) =>(
-								<Tag key={title} deletable={false} text={title} />
+						{projectTags &&
+							projectTags.map((title) =>(
+								<div key={title} onClick={() => deleteTag(title)}>
+									<Tag deletable={true} text={title}/>
+								</div>
 							))}
 						{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
@@ -446,17 +455,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 											style={{flexShrink: 0}}
 						/> : <></>}
 					</div>) :
-					(<div className="flex items-center flex-wrap gap-1 justify-left">
-						{project.tags &&
-							project.tags.map((title) =>(
+					(
+					<div className="flex items-center flex-wrap gap-1 justify-left">
+						{projectTags && projectTags.length > 0 ?
+							projectTags.map((title) =>(
 								<Tag key={title} deletable={false} text={title} />
-							))}
+							)) :
+							<p className="text-sm font-mono text-gray-500">Click to Add Tags</p>}
 						{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
 											style={{flexShrink: 0}}
 						/> : <></>}
-					</div>) }
+					</div>
+					) }
 
 					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
 						{getStatusText(project, experimentStates[project.expId])}
