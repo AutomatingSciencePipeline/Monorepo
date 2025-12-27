@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
-import {ReadOnlyTag} from '../../ReadOnlyTag'
+import {Tag} from '../../Tag'
 export interface ExperimentListingProps {
 	projectData: ExperimentData;
 	onCopyExperiment: (experimentId: string) => void;
@@ -432,7 +432,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					<div className="flex items-center flex-wrap gap-1 justify-left">
 						{project.tags &&
 							project.tags.map((title) =>(
-								<ReadOnlyTag key={title} text={title} />
+								<Tag key={title} deletable={false} text={title} />
 							))}
 					</div>
 
