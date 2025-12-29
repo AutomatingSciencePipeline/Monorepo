@@ -47,7 +47,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [projectTags, setProjectTags] = useState(project.tags);
 	const [originalProjectTags, setOriginalProjectTags] = useState(project.tags);
 	const [isEditing, setIsEditing] = useState(false);
+	const [isEditingTags, setIsEditingTags] = useState(false);
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
+	const [editingTagsCanceled, setEditingTagsCanceled] = useState(false); // New state for tracking editing cancellation
 	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -69,10 +71,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setOriginalProjectTags(projectTags);
 	};
 
+	const handleEditTags = () => {
+		// Enable editing and set the edited project name to the current project name
+		setIsEditingTags(true);
+		setOriginalProjectTags(projectTags);
+	};
+
 	const handleSave = (newProjectName) => {
-		updateExperimentTagsById(project.expId, projectTags).catch((reason) => {
-			console.warn(`Failed to update experiment name, reason: ${reason}`);
-		});
 		updateExperimentNameById(project.expId, newProjectName).catch((reason) => {
 			console.warn(`Failed to update experiment name, reason: ${reason}`);
 		});
@@ -80,10 +85,23 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setIsEditing(false);
 	};
 
+	const handleSaveTags = () => {
+		updateExperimentTagsById(project.expId, projectTags).catch((reason) => {
+			console.warn(`Failed to update experiment name, reason: ${reason}`);
+		});
+		// Exit the editing mode
+		setIsEditingTags(false);
+	};
+
+	const handleCancelTags = () => {
+		setProjectTags(originalProjectTags);
+		setEditingTagsCanceled(true);
+		setIsEditingTags(false);
+	}
+
 	const handleCancel = () => {
 		// Cancel the editing and revert to the original project name
 		setProjectName(originalProjectName); // Revert to the original name
-		setProjectTags(originalProjectTags);
 		setEditingCanceled(true);
 		setIsEditing(false);
 	};
@@ -101,12 +119,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	useEffect(() => {
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
-			setProjectTags(originalProjectTags);
 			setEditingCanceled(true);
+		} else if (editingTagsCanceled) {
+			setProjectTags(originalProjectTags);
+			setEditingTagsCanceled(true);
 		} else {
 			// Do nothing here?
 		}
-	}, [editingCanceled, originalProjectName, originalProjectTags, project.expId]);
+	}, [editingCanceled, editingTagsCanceled, originalProjectName, originalProjectTags, project.expId]);
 
 	//Update the project when data is changed
 	useEffect(() => {
@@ -441,7 +461,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
-					{isEditing ? (
+					{isEditingTags ? (
 					<div className="flex items-center flex-wrap gap-1 justify-left">
 						{projectTags &&
 							projectTags.map((title) =>(
@@ -449,12 +469,10 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									<Tag deletable={true} text={title}/>
 								</div>
 							))}
-						{project.creator == session?.user?.id! ? <MdEdit
-											className="icon edit-icon"
-											onClick={handleEdit}
-											style={{flexShrink: 0}}
-						/> : <></>}
-					</div>) :
+						<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
+											onClick={() => handleSaveTags()} />
+										<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancelTags} />
+						</div>) :
 					(
 					<div className="flex items-center flex-wrap gap-1 justify-left">
 						{projectTags && projectTags.length > 0 ?
@@ -464,7 +482,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							<p className="text-sm font-mono text-gray-500">Click to Add Tags</p>}
 						{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
-											onClick={handleEdit}
+											onClick={handleEditTags}
 											style={{flexShrink: 0}}
 						/> : <></>}
 					</div>
