@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const experiment_req = await req.json();
 
-    if (!experiment_req || !experiment_req ["token"] || !experiment_req ["exp_title"] ){
+    if (!experiment_req || !experiment_req ["token"] || !experiment_req["exp_title"]){
         return new Response('Other', { status: 400 });
     }
 
@@ -33,23 +33,29 @@ export async function POST(req: NextRequest) {
         }
         return NextResponse.json(processedResult);
     }
-    const title = experiment_req ["exp_title"];
-    
+
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
-    const sendAllRelevantDocs = async () => {
-                const docs = await experimentsCollection
-                    .find({ $and: [ {$or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }]}, {name: title}]})
-                    .toArray();
-                const array = convertToExpsArray(docs);
-                return array;
+    const sendAllRelevantDocs = async (title) => {
+        let docs;
+        if(title.trim() === "*"){
+            docs = await experimentsCollection
+                .find({ $and: [ {$or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }]}]})
+                .toArray();
+        } else {
+            docs = await experimentsCollection
+                .find({ $and: [ {$or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }]}, {name: title}]})
+                .toArray();
+        }
+        const array = convertToExpsArray(docs);
+        return array;
     };
 
     let processedResult;
     try{
-        const result = await sendAllRelevantDocs();
+        const result = await sendAllRelevantDocs(experiment_req["exp_title"]);
         processedResult = {
             "success": true,
             "error": undefined,
