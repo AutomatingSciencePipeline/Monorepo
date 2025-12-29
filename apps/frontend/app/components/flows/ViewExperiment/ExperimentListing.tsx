@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
 import {Tag} from '../../Tag'
+import {TAG_MAX_NUMBER} from '../AddExperiment/stepComponents/InformationStep'
 export interface ExperimentListingProps {
 	projectData: ExperimentData;
 	onCopyExperiment: (experimentId: string) => void;
@@ -52,7 +53,6 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [editingTagsCanceled, setEditingTagsCanceled] = useState(false); // New state for tracking editing cancellation
 	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
 	const [individualTag, setIndividualTag] = useState("");
-	const TAG_MAX_NUMBER = 5;
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
@@ -483,36 +483,44 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{isEditingTags ? (
 					<div className="flex items-center flex-wrap gap-1 justify-left">
-						{ <div className='w-full flex gap-2'>
-							<div className='col-span-9'>
-								<input
-                            	type='text'
-                            	value={individualTag}
-                            	maxLength={40}
-                            	placeholder='Enter tag name'
-                            	onChange={(e) => setIndividualTag(e.target.value)}
-                            	className="border rounded-md px-2 py-1 text-sm w-full sm:w-auto"
-                            	/>
+						{ <div className="flex items-center gap-2">
+  							<div className="flex items-center gap-1">
+    							<input
+      								type="text"
+      								value={individualTag}
+      								maxLength={40}
+      								placeholder='Select "Add" for New Tag'
+      								onChange={(e) => setIndividualTag(e.target.value)}
+      								className="py-2 px-3 text-sm text-left font-medium"
+    							/>
+    							<button
+      								onClick={addTagValue}
+      								className="rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+    							>
+      								Add
+    							</button>
+  							</div>
+							<div className="flex items-center gap-0">
+  								<CheckIcon
+    								className="w-10 h-5 text-green-500 cursor-pointer"
+    								onClick={handleSaveTags}
+  								/>
+  								<XMarkIcon
+    								className="w-5 h-5 text-red-500 cursor-pointer"
+    								onClick={handleCancelTags}
+  								/>
 							</div>
-							<div className='col-span-1'>
-                            	<button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                                 onClick={addTagValue}
-                            	>
-								Add
-                            	</button>
-							</div>
-							<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
-											onClick={() => handleSaveTags()} />
-							<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancelTags} />
-							</div>
+						</div>	
 						}
+						<div className="w-full flex flex-wrap gap-2">
 						{projectTags &&
 							projectTags.map((title) =>(
 								<div key={title} onClick={() => deleteTag(title)}>
 									<Tag deletable={true} text={title}/>
 								</div>
 							))}
-						</div>) :
+						</div>
+					</div>) :
 					(
 					<div className="flex items-center flex-wrap gap-1 justify-left">
 						{projectTags && projectTags.length > 0 ?
