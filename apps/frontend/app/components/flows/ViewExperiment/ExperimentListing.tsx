@@ -51,6 +51,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
 	const [editingTagsCanceled, setEditingTagsCanceled] = useState(false); // New state for tracking editing cancellation
 	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
+	const [individualTag, setIndividualTag] = useState("");
+	const TAG_MAX_NUMBER = 5;
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
@@ -90,11 +92,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			console.warn(`Failed to update experiment name, reason: ${reason}`);
 		});
 		// Exit the editing mode
+		setIndividualTag("");
 		setIsEditingTags(false);
 	};
 
 	const handleCancelTags = () => {
 		setProjectTags(originalProjectTags);
+		setIndividualTag("");
 		setEditingTagsCanceled(true);
 		setIsEditingTags(false);
 	}
@@ -181,6 +185,22 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	// 		? `${(averageTimePerRun * 60).toFixed(2)} seconds`
 	// 		: `${averageTimePerRun.toFixed(2)} minutes`
 	// 	: null;
+
+	const addTagValue = () => {
+        if(projectTags && (projectTags.includes(individualTag.trim()))){
+            toast.error("Experiment tags cannot be redundant.", {duration: 1500});
+            return;
+        } else if(projectTags && projectTags.length >= TAG_MAX_NUMBER){
+            toast.error(`Max number of experiment tags is ${TAG_MAX_NUMBER}.`, {duration: 1500});
+            return;
+        } else if(!individualTag || !individualTag.trim().length) {
+            toast.error("Experiment tag cannot be blank.", {duration: 1500});
+            return;
+        } else {
+			setProjectTags([...projectTags, individualTag]);
+            setIndividualTag("");
+        }
+    }
 
 	const formattedTotalTime = (project) => {
 		const totalTime =
@@ -463,15 +483,35 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{isEditingTags ? (
 					<div className="flex items-center flex-wrap gap-1 justify-left">
+						{ <div className='w-full flex gap-2'>
+							<div className='col-span-9'>
+								<input
+                            	type='text'
+                            	value={individualTag}
+                            	maxLength={40}
+                            	placeholder='Enter tag name'
+                            	onChange={(e) => setIndividualTag(e.target.value)}
+                            	className="border rounded-md px-2 py-1 text-sm w-full sm:w-auto"
+                            	/>
+							</div>
+							<div className='col-span-1'>
+                            	<button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                                 onClick={addTagValue}
+                            	>
+								Add
+                            	</button>
+							</div>
+							<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
+											onClick={() => handleSaveTags()} />
+							<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancelTags} />
+							</div>
+						}
 						{projectTags &&
 							projectTags.map((title) =>(
 								<div key={title} onClick={() => deleteTag(title)}>
 									<Tag deletable={true} text={title}/>
 								</div>
 							))}
-						<CheckIcon className="w-10 h-5 text-green-500 cursor-pointer"
-											onClick={() => handleSaveTags()} />
-										<XMarkIcon className="w-5 h-5 text-red-500 cursor-pointer" onClick={handleCancelTags} />
 						</div>) :
 					(
 					<div className="flex items-center flex-wrap gap-1 justify-left">
