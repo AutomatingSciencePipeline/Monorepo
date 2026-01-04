@@ -26,7 +26,7 @@ import { signOut, useSession } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import {ReadOnlyTag} from '../components/ReadOnlyTag'
+import {Tag} from '../components/Tag'
 import { Notification } from '@mantine/core';
 import { LightBulbIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -1210,7 +1210,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 															onChange={(newValue) => {
 															handleMultipleFilterTag(title, newValue);
 														}} />
-												 		<ReadOnlyTag key={title} text={title} />
+												 		<Tag key={title} text={title} deletable={false}/>
 														</a>
 													)}
 												</Menu.Item>

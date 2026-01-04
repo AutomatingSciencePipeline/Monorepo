@@ -2,15 +2,13 @@
 
 import { Fragment, useEffect } from 'react';
 import { InputSection } from '../../../InputSection';
-import {DeletableTag} from '../../../DeletableTag';
+import {Tag} from '../../../Tag';
 import React, {useState} from 'react';
 import toast from 'react-hot-toast';
+export const TAG_MAX_NUMBER = 5;
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
-
-    const [individualTag, setIndividualTag] = useState("")
-
-    const TAG_MAX_NUMBER = 5;
+    const [individualTag, setIndividualTag] = useState("");
 
     const addTagValue = () => {
         if(form.values.tags && (form.values.tags.includes(individualTag.trim()))){
@@ -94,7 +92,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                            {Array.isArray(form.values.tags) &&
                            form.values.tags.map((title) =>(
                                 <div key={title} onClick={() => deleteTag(title)}>
-                                    <DeletableTag text={title}/>
+                                    <Tag deletable={true} text={title}/>
                                 </div>
                             ))}
                         </div>
