@@ -28,7 +28,7 @@ VERSION_URL = (
     "https://api.github.com/repos/"
     "AutomatingSciencePipeline/Monorepo/"
     "contents/apps/frontend/public/cli/glados_cli.py"
-    "?ref=main"
+    "?ref=Test_Update_Feature"
 )
 DOWNLOAD_CLI_URL = ("https://raw.githubusercontent.com/"
                 "AutomatingSciencePipeline/Monorepo"
