@@ -5,6 +5,7 @@ import typing
 import zipfile
 import time
 from typing import Any, Dict, Optional
+import hashlib
 import requests
 from datetime import datetime
 import urllib3
@@ -21,6 +22,17 @@ UPLOAD_EXPERIMENT_URL = f"{API_HOST}/api/cli/uploadFile"
 SUBMIT_EXPERIMENT_URL = f"{API_HOST}/api/cli/submitExp"
 START_EXPERIMENT_URL = f"{API_HOST}/api/experiments/start/"
 DOWNLOAD_EXPERIMENT_RESULTS_URL = f"{API_HOST}/api/cli/downloadResult"
+DOWNLOAD_EXPERIMENT_LOG_URL = f"{API_HOST}/api/cli/downloadLogs"
+DOWNLOAD_EXPERIMENT_ZIP_URL = f"{API_HOST}/api/cli/downloadZip"
+VERSION_URL = (
+    "https://api.github.com/repos/"
+    "AutomatingSciencePipeline/Monorepo/"
+    "contents/apps/frontend/public/cli/glados_cli.py"
+    "?ref=main"
+)
+DOWNLOAD_CLI_URL = ("https://raw.githubusercontent.com/"
+                "AutomatingSciencePipeline/Monorepo"
+                "/main/apps/frontend/public/cli/glados_cli.py")
 
 EX_UNKNOWN = -2
 EX_PARSE_ERROR = -1
@@ -30,6 +42,11 @@ EX_NOTFOUND = 2
 EX_INVALID_EXP_FORMAT = 3
 EX_NOT_DONE = 4
 EX_EXP_FAILED = 5
+VERSION_CHECK_SUCCEED = 6
+VERSION_CHECK_FAILED = 7
+UNABLE_TO_CHECK_VERSION = 8
+UPDATE_SUCCEED = 9
+UPDATE_FAIL = 10
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -90,6 +107,43 @@ class RequestManager(object):
         except requests.RequestException as error:
             return {"uid": None, "error": f'{error}'}
         # Implementation for authenticating with the provided token
+        
+    def version(self, cli_path) -> Dict[str, typing.Any]:
+        try:
+            res = requests.get(VERSION_URL, timeout=10)
+            res.raise_for_status()
+
+            data = res.json()
+            remote_sha = data["sha"]
+            
+            with open(cli_path, "rb") as f:
+                content = f.read()
+
+            header = f"blob {len(content)}\0".encode()
+            store = header + content
+
+            local_sha = hashlib.sha1(store).hexdigest()
+            
+            if local_sha == remote_sha:
+                return {"up_to_date": True, "success": True}
+            else:
+                return {"up_to_date": False, "success": True}
+            
+        except requests.RequestException as error:
+            return {"error": error, "success": False}
+        
+    def update(self) -> Dict[str, typing.Any]:
+        try:
+            res = requests.get(DOWNLOAD_CLI_URL, timeout=10)
+            res.raise_for_status()
+
+            with open("glados_cli_new.py", "wb") as f:
+                f.write(res.content)
+                
+            return {"error": False, "success": True}
+        
+        except requests.RequestException as error:
+            return {"error": error, "success": False}
     
     def upload_and_start_experiment(self, experiment_path: str) -> Dict[str, typing.Any]:
         filename = os.path.basename(experiment_path)
@@ -167,8 +221,12 @@ class RequestManager(object):
         try:
             res = requests.post(DOWNLOAD_EXPERIMENT_RESULTS_URL, verify=False, json=experiment_req_json, timeout=20)
             
-            if(res.headers.get("Content-Disposition") is None):
-                return { 'success': False, 'error': res.content.decode('utf-8') }
+            if(res.status_code != 200):
+                try:
+                    error_msg = res.json().get("response", res.text)
+                except ValueError:
+                    error_msg = res.text
+                return {'success': False, 'error': error_msg}
             
             cd = res.headers.get("Content-Disposition", "")
             filename = "results.csv"
@@ -178,11 +236,51 @@ class RequestManager(object):
 
             with open(filename, "wb") as f:
                 f.write(res.content)
-
             return { 'success': True, 'files': [{'name': filename, 'content': res.content}] }
-            
         except requests.RequestException as error:
             perror(f'{error}')
+            
+    def download_all(self, experiment_id: str) -> Dict[str, typing.Any]:
+        experiment_req_json = {
+            "token": self.token,
+            "expID": experiment_id
+        }
+        try:
+            res = self.download_experiment_results(experiment_id)
+            if(res.get('success') is not True):
+                return res
+        except requests.RequestException as error:
+            perror(f'{error}')
+            
+        filename = res['files'][0]['name'].replace(".csv", "")
+            
+        try:
+            res = requests.post(DOWNLOAD_EXPERIMENT_LOG_URL, verify=False, json=experiment_req_json, timeout=20)
+            if(res.status_code != 200):
+                try:
+                    error_msg = res.json().get("response", res.text)
+                except ValueError:
+                    error_msg = res.text
+                return {'success': False, 'error': error_msg}
+            with open(f'{filename}_system_log.txt', "w", encoding="utf-8") as f:
+                f.write(res.text)
+        except requests.RequestException as error:
+            perror(f'{error}')
+           
+        try:
+            res = requests.post(DOWNLOAD_EXPERIMENT_ZIP_URL, verify=False, json=experiment_req_json, timeout=20)
+            if(res.status_code != 200):
+                try:
+                    error_msg = res.json().get("response", res.text)
+                except ValueError:
+                    error_msg = res.text
+                return {'success': False, 'error': error_msg}
+            with open(f"{filename}_results.zip", "wb") as f:
+                f.write(res.content)
+        except requests.RequestException as error:
+            perror(f'{error}')
+            
+        return { 'success': True, 'files': [{'name': "All System Artifacts", 'content': res.content}] }
     
 def perror(*args, **kwargs) -> None:
     """Prints to stderr."""
@@ -251,6 +349,43 @@ def download_experiment(request_manager: RequestManager, experiment_id: str) -> 
     print(f"Experiment results downloaded successfully to './{results['files'][0]['name']}'.")
     return EX_SUCCESS
 
+def download_all(request_manager: RequestManager, experiment_id: str) -> int:
+    results = request_manager.download_all(experiment_id)
+    if not results.get("success", False):
+        msg, status = {
+            'not_found': ("Experiment not found.", EX_NOTFOUND),
+            'not_done': ("Experiment is still running.", EX_NOT_DONE),
+            'exp_failed': ("Experiment did not complete successfully.", EX_EXP_FAILED)
+        }[results.get("error")]
+        perror(msg)
+        return status
+    
+    print("All experiment artifacts downloaded successfully to current directory.")
+    return EX_SUCCESS
+
+def check_version(request_manager: RequestManager, cli_path: str) -> int:
+    results = request_manager.version(cli_path)
+    if not results.get("success", False):
+        error = results.get("error", "Unknown")
+        print(f"Unable to confirm version of CLI.\nError: {error} \n It is recommended you re-download the script directly from the website: https://glados.csse.rose-hulman.edu/\n")
+        return UNABLE_TO_CHECK_VERSION
+    else:
+        if not results.get("up_to_date", False):
+            print("CLI version is not up to date. It is suggested to update the script by using -u command.")
+            return VERSION_CHECK_FAILED
+        else:
+            print("CLI version is up to date. No further action recommended.")
+            return VERSION_CHECK_SUCCEED
+        
+def update(request_manager: RequestManager) -> int:
+    results = request_manager.update()
+    if not results.get("success", False):
+        print("Unable to download most up-to-date version.")
+        return UPDATE_FAIL
+    else: 
+        print("Downloaded most up-to-date CLI successfully in local directory.")
+        return UPDATE_SUCCEED
+
 def validate_experiment_file(filepath: str) -> Optional[str]:
     if not zipfile.is_zipfile(filepath):
         return f"'{filepath}' is in an invalid format."
@@ -280,13 +415,24 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         description="The command line interface for GLADOS.")
     parser.add_argument('--generate-token', action='store_true', help='Generate a new authentication token and exit, regardless of other options used.')
     parser.add_argument('--token',  '-t', type=str, help='Authentication token to use. If none is provided, it will either read ".token.glados" or prompt to generate a new token.')
-    parser.add_argument('--upload', '-z', type=str, help='Upload a ZIP file. Cannot be used with -q, or -d.')
+    parser.add_argument('--upload', '-z', type=str, help='Upload an experiment file. Cannot be used with -q, or -d.')
     parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z or -d.')
     parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--version', '-v', type=str, help='Checks if current CLI is most recent version.')
+    parser.add_argument('--update', '-u', action='store_true', help='Downloads most up-to-date CLI version.')
     
     parsed = parser.parse_args(args)
+    
+    if parsed.version:
+        if not os.path.isfile(parsed.version):
+            perror(f"error: '{parsed.version}' is not a valid file path.")
+            return EX_PARSE_ERROR
+        return check_version(request_manager, parsed.version)
+    elif parsed.update:
+        return update(request_manager)
 
-    if not exactly_one([parsed.upload, parsed.query, parsed.download]) and not parsed.generate_token and not parsed.token:
+    if not exactly_one([parsed.upload, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
         perror("error: Exactly one of -z, -q, or -d must be provided.")
         return EX_PARSE_ERROR
     elif not parsed.token and not parsed.generate_token:
@@ -320,6 +466,8 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         result = query_experiments(request_manager, parsed.query)
     if parsed.download:
         result = download_experiment(request_manager, parsed.download)
+    if parsed.download_all:
+        result = download_all(request_manager, parsed.download_all)
     
     # Restore original stdout and stderr
     sys.stdout, sys.stderr = _out, _err
