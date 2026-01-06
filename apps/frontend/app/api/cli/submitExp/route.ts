@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     }
 
     parsed["file"] = fileId;
+    parsed["status"] = "CREATED";
 
     const expId = await submitExperimentCLI(parsed, userId, email, role, fileId);
 
