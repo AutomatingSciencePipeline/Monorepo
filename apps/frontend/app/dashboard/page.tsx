@@ -34,10 +34,12 @@ import Link from 'next/link';
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
 
+const GLADOS_CLI_LINK = '/cli/glados_cli.py';
 const REPORT_DESCRIPT = 'Report an issue you have encountered to our Google Forms.';
 const HELP_DESCRIPT = 'Open the GLADOS docs to learn how to use the application.';
 
 const navigation = [
+	{ name: 'CLI', href: GLADOS_CLI_LINK, current: false },
 	{ name: 'Report', href: REPORT_GOOGLE_FORM_LINK, current: false },
 	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false }
 ];
@@ -522,7 +524,7 @@ export default function DashboardPage() {
 					{bannerOpen ? (
 							<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
 								The GLADOS CLI is ready to be tested! 
-								<Link color='blue' href="/cli/glados_cli.py" download="glados_cli.py"> <u>Click here</u> </Link>
+								<Link color='blue' href={GLADOS_CLI_LINK} download="glados_cli.py"> <u>Click here</u> </Link>
 								to give it a try.
 							</Notification>
 						) : (<div/>)}
