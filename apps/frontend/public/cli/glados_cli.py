@@ -1,10 +1,13 @@
 import argparse
+from pathlib import Path
 import os
 import sys
 import typing
-import zipfile
+import yaml
 import time
+import zipfile
 from typing import Any, Dict, Optional
+import hashlib
 import requests
 from datetime import datetime
 import urllib3
@@ -22,7 +25,16 @@ SUBMIT_EXPERIMENT_URL = f"{API_HOST}/api/cli/submitExp"
 START_EXPERIMENT_URL = f"{API_HOST}/api/experiments/start/"
 DOWNLOAD_EXPERIMENT_RESULTS_URL = f"{API_HOST}/api/cli/downloadResult"
 DOWNLOAD_EXPERIMENT_LOG_URL = f"{API_HOST}/api/cli/downloadLogs"
-DOWNLOAD_EXPERIMENT_ZIP = f"{API_HOST}/api/cli/downloadZip"
+DOWNLOAD_EXPERIMENT_ZIP_URL = f"{API_HOST}/api/cli/downloadZip"
+VERSION_URL = (
+    "https://api.github.com/repos/"
+    "AutomatingSciencePipeline/Monorepo/"
+    "contents/apps/frontend/public/cli/glados_cli.py"
+    "?ref=main"
+)
+DOWNLOAD_CLI_URL = ("https://raw.githubusercontent.com/"
+                "AutomatingSciencePipeline/Monorepo"
+                "/main/apps/frontend/public/cli/glados_cli.py")
 
 EX_UNKNOWN = -2
 EX_PARSE_ERROR = -1
@@ -32,6 +44,12 @@ EX_NOTFOUND = 2
 EX_INVALID_EXP_FORMAT = 3
 EX_NOT_DONE = 4
 EX_EXP_FAILED = 5
+VERSION_CHECK_SUCCEED = 6
+VERSION_CHECK_FAILED = 7
+UNABLE_TO_CHECK_VERSION = 8
+UPDATE_SUCCEED = 9
+UPDATE_FAIL = 10
+VALID_EXP_FORMAT = 11
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -92,6 +110,49 @@ class RequestManager(object):
         except requests.RequestException as error:
             return {"uid": None, "error": f'{error}'}
         # Implementation for authenticating with the provided token
+        
+    def version(self, cli_path) -> Dict[str, typing.Any]:
+        try:
+            res = requests.get(VERSION_URL, timeout=10)
+            res.raise_for_status()
+
+            data = res.json()
+            remote_sha = data["sha"]
+            
+            with open(cli_path, "rb") as f:
+                content = f.read()
+
+            header = f"blob {len(content)}\0".encode()
+            store = header + content
+
+            local_sha = hashlib.sha1(store).hexdigest()
+            
+            if local_sha == remote_sha:
+                return {"up_to_date": True, "success": True}
+            else:
+                return {"up_to_date": False, "success": True}
+            
+        except requests.RequestException as error:
+            return {"error": error, "success": False}
+        
+    def update(self) -> Dict[str, typing.Any]:
+        try:
+            res = requests.get(DOWNLOAD_CLI_URL, timeout=10)
+            res.raise_for_status()
+            
+            path = Path("glados_cli.py")
+            old_path = path.with_stem(path.stem + "_old")
+
+            if path.exists():
+                os.replace(path, old_path) 
+
+            with open(path, "wb") as f:
+                f.write(res.content)
+                
+            return {"error": False, "success": True}
+        
+        except requests.RequestException as error:
+            return {"error": error, "success": False}
     
     def upload_and_start_experiment(self, experiment_path: str) -> Dict[str, typing.Any]:
         filename = os.path.basename(experiment_path)
@@ -216,7 +277,7 @@ class RequestManager(object):
             perror(f'{error}')
            
         try:
-            res = requests.post(DOWNLOAD_EXPERIMENT_ZIP, verify=False, json=experiment_req_json, timeout=20)
+            res = requests.post(DOWNLOAD_EXPERIMENT_ZIP_URL, verify=False, json=experiment_req_json, timeout=20)
             if(res.status_code != 200):
                 try:
                     error_msg = res.json().get("response", res.text)
@@ -250,10 +311,19 @@ def validate_token(request_manager: RequestManager, token: str) -> bool:
     return result['error'] is None
 
 def upload_and_start_experiment(request_manager: RequestManager, experiment_path: str) -> int:
-    """Uploads and starts an experiment given the path to the experiment ZIP file."""
+    """Uploads and starts an experiment given the path to the experiment file."""
     if not os.path.isfile(experiment_path):
         perror(f"error: Experiment file '{experiment_path}' not found.")
         return EX_NOTFOUND
+    
+    if not os.path.isfile("manifest.yml"):
+        perror("error: file 'manifest.yml' not in current directory.")
+        return EX_INVALID_EXP_FORMAT
+    else:
+        formatting_correctness = check_manifest_format("manifest.yml", zipfile.is_zipfile(experiment_path))
+        if formatting_correctness is EX_INVALID_EXP_FORMAT:
+            perror("error: Experiment cannot be submitted until above manifest.yml attributes errors are fixed.")
+            return EX_INVALID_EXP_FORMAT
 
     results = request_manager.upload_and_start_experiment(experiment_path)
     if not results.get('success', False):
@@ -308,16 +378,98 @@ def download_all(request_manager: RequestManager, experiment_id: str) -> int:
         perror(msg)
         return status
     
-    print(f"All experiment artifacts downloaded successfully to current directory.")
+    print("All experiment artifacts downloaded successfully to current directory.")
     return EX_SUCCESS
 
-def validate_experiment_file(filepath: str) -> Optional[str]:
-    if not zipfile.is_zipfile(filepath):
-        return f"'{filepath}' is in an invalid format."
-    with zipfile.ZipFile(filepath, 'r') as zf:
-        if 'manifest.yaml' not in zf.namelist():
-            return f"'{filepath}' is missing 'manifest.yaml'."
-    return None
+def check_version(request_manager: RequestManager, cli_path: str) -> int:
+    results = request_manager.version(cli_path)
+    if not results.get("success", False):
+        error = results.get("error", "Unknown")
+        print(f"Unable to confirm version of CLI.\nError: {error} \n It is recommended you re-download the script directly from the website: https://glados.csse.rose-hulman.edu/\n")
+        return UNABLE_TO_CHECK_VERSION
+    else:
+        if not results.get("up_to_date", False):
+            print("CLI version is not up to date. It is suggested to update the script by using -u command.\n")
+            return VERSION_CHECK_FAILED
+        else:
+            return VERSION_CHECK_SUCCEED
+        
+def update(request_manager: RequestManager) -> int:
+    results = request_manager.update()
+    if not results.get("success", False):
+        print("Unable to download most up-to-date version.")
+        return UPDATE_FAIL
+    else: 
+        print("Downloaded most up-to-date CLI successfully in local directory.")
+        return UPDATE_SUCCEED
+    
+def check_manifest_format(manifest_path: str, is_zip_file: bool) -> int:
+    with open(manifest_path, "r", encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+    experiment_correct_format = True
+    scatter_present = True
+    if config["hyperparameters"] is None or config["hyperparameters"] == "":
+        perror("hyperparameters attribute in 'manifest.yml' is empty or missing.")
+        experiment_correct_format = False
+    if not check_manifest_format_str_helper(config, "name"):
+        experiment_correct_format = False
+    if not check_manifest_format_str_helper(config, "trialResult"):
+        experiment_correct_format = False
+    if not check_manifest_format_int_helper(config, "trialResultLineNumber", -1):
+        experiment_correct_format = False
+    if not check_manifest_format_bool_helper(config, "scatter"):
+        experiment_correct_format = False
+        scatter_present = False
+    if not check_manifest_format_int_helper(config, "timeout", 0):
+        experiment_correct_format = False
+    if not check_manifest_format_bool_helper(config, "keepLogs"):
+        experiment_correct_format = False
+    if not check_manifest_format_bool_helper(config, "sendEmail"):
+        experiment_correct_format = False
+    if not check_manifest_format_int_helper(config, "workers", 0):
+        experiment_correct_format = False
+    if scatter_present and config["scatter"] is True:
+        if not check_manifest_format_str_helper(config, "scatterIndVar"):
+            experiment_correct_format = False
+        if not check_manifest_format_str_helper(config, "scatterDepVar"):
+            experiment_correct_format = False
+    if is_zip_file is True:
+        if not check_manifest_format_str_helper(config, "experimentExecutable"):
+            experiment_correct_format = False
+    if experiment_correct_format is False:
+        return EX_INVALID_EXP_FORMAT
+    else:
+        return VALID_EXP_FORMAT
+
+def check_manifest_format_int_helper(config: dict, key: str, greater_than: int) -> bool:
+    value = config.get(key, None)
+    if not(value is None or value == ""):
+        try:
+            value = int(value)
+            if value <= greater_than:
+                perror(f"{key} attribute in 'manifest.yml' is not greater than {greater_than}.")
+                return False
+        except ValueError:
+            perror(f"{key} attribute in 'manifest.yml' is not an integer.")
+            return False
+    else:
+        perror(f"{key} attribute in 'manifest.yml' is empty or missing.")
+        return False
+    return True
+
+def check_manifest_format_str_helper(config: dict, key: str) -> bool:
+    value = config.get(key, None)
+    if (value is None or value == "") or not isinstance(value, str):
+        perror(f"{key} attribute in 'manifest.yml' is empty, missing, or not a string.")
+        return False
+    return True
+    
+def check_manifest_format_bool_helper(config: dict, key: str) -> bool:
+    value = config.get(key, None)
+    if (value is None or value == "") or not isinstance(value, bool):
+        perror(f"{key} attribute in 'manifest.yml' is empty, missing, or not a true or false.")
+        return False
+    return True
 
 def store_token(token: str) -> str:
     with open(".token.glados", "w") as token_file:
@@ -340,12 +492,18 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         description="The command line interface for GLADOS.")
     parser.add_argument('--generate-token', action='store_true', help='Generate a new authentication token and exit, regardless of other options used.')
     parser.add_argument('--token',  '-t', type=str, help='Authentication token to use. If none is provided, it will either read ".token.glados" or prompt to generate a new token.')
-    parser.add_argument('--upload', '-z', type=str, help='Upload a ZIP file. Cannot be used with -q, or -d.')
+    parser.add_argument('--upload', '-z', type=str, help='Upload an experiment file. Cannot be used with -q, or -d.')
     parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z or -d.')
     parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
     parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--update', '-u', action='store_true', help='Downloads most up-to-date CLI version.')
     
     parsed = parser.parse_args(args)
+    
+    if parsed.update:
+        return update(request_manager)
+    else:
+        check_version(request_manager, "glados_cli.py")
 
     if not exactly_one([parsed.upload, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
         perror("error: Exactly one of -z, -q, or -d must be provided.")
