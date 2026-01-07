@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
-import { addShareLink, unfollowExperiment, updateExperimentNameById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
+import { addShareLink, unfollowExperiment, updateExperimentNameById, updateExperimentTagsById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { Minus } from 'tabler-icons-react';
-import {ReadOnlyTag} from '../../ReadOnlyTag'
+import {Tag} from '../../Tag'
+import {TAG_MAX_NUMBER} from '../AddExperiment/stepComponents/InformationStep'
 export interface ExperimentListingProps {
 	projectData: ExperimentData;
 	onCopyExperiment: (experimentId: string) => void;
@@ -44,9 +45,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	// 60000 milliseconds in a minute  // Set to null if the experiment is not in progress
 
 	const [projectName, setProjectName] = useState(projectData.name); // New state for edited project name
+	const [projectTags, setProjectTags] = useState(project.tags);
+	const [originalProjectTags, setOriginalProjectTags] = useState(project.tags);
 	const [isEditing, setIsEditing] = useState(false);
+	const [isEditingTags, setIsEditingTags] = useState(false);
 	const [editingCanceled, setEditingCanceled] = useState(false); // New state for tracking editing cancellation
+	const [editingTagsCanceled, setEditingTagsCanceled] = useState(false); // New state for tracking editing cancellation
 	const [originalProjectName, setOriginalProjectName] = useState(projectData.name); // State to store the original project name
+	const [individualTag, setIndividualTag] = useState("");
 
 	const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [showGraphModal, setShowGraphModal] = useState(false);
@@ -64,6 +70,13 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		// Enable editing and set the edited project name to the current project name
 		setIsEditing(true);
 		setProjectName(project.name);
+		setOriginalProjectTags(projectTags);
+	};
+
+	const handleEditTags = () => {
+		// Enable editing and set the edited project name to the current project name
+		setIsEditingTags(true);
+		setOriginalProjectTags(projectTags);
 	};
 
 	const handleSave = (newProjectName) => {
@@ -73,6 +86,22 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		// Exit the editing mode
 		setIsEditing(false);
 	};
+
+	const handleSaveTags = () => {
+		updateExperimentTagsById(project.expId, projectTags).catch((reason) => {
+			console.warn(`Failed to update experiment name, reason: ${reason}`);
+		});
+		// Exit the editing mode
+		setIndividualTag("");
+		setIsEditingTags(false);
+	};
+
+	const handleCancelTags = () => {
+		setProjectTags(originalProjectTags);
+		setIndividualTag("");
+		setEditingTagsCanceled(true);
+		setIsEditingTags(false);
+	}
 
 	const handleCancel = () => {
 		// Cancel the editing and revert to the original project name
@@ -87,14 +116,21 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		});
 	};
 
+	const deleteTag = (title) => {
+        setProjectTags(projectTags.filter(tagName => tagName !== title));
+    }
+
 	useEffect(() => {
 		if (editingCanceled) {
 			setProjectName(originalProjectName); // Revert to the original name
 			setEditingCanceled(true);
+		} else if (editingTagsCanceled) {
+			setProjectTags(originalProjectTags);
+			setEditingTagsCanceled(true);
 		} else {
 			// Do nothing here?
 		}
-	}, [editingCanceled, originalProjectName, project.expId]);
+	}, [editingCanceled, editingTagsCanceled, originalProjectName, originalProjectTags, project.expId]);
 
 	//Update the project when data is changed
 	useEffect(() => {
@@ -149,6 +185,22 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	// 		? `${(averageTimePerRun * 60).toFixed(2)} seconds`
 	// 		: `${averageTimePerRun.toFixed(2)} minutes`
 	// 	: null;
+
+	const addTagValue = () => {
+        if(projectTags && (projectTags.includes(individualTag.trim()))){
+            toast.error("Experiment tags cannot be redundant.", {duration: 1500});
+            return;
+        } else if(projectTags && projectTags.length >= TAG_MAX_NUMBER){
+            toast.error(`Max number of experiment tags is ${TAG_MAX_NUMBER}.`, {duration: 1500});
+            return;
+        } else if(!individualTag || !individualTag.trim().length) {
+            toast.error("Experiment tag cannot be blank.", {duration: 1500});
+            return;
+        } else {
+			setProjectTags([...projectTags, individualTag]);
+            setIndividualTag("");
+        }
+    }
 
 	const formattedTotalTime = (project) => {
 		const totalTime =
@@ -329,7 +381,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 				</div>
 			)}
 			<div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between w-full ${multiSelectMode ? 'ml-4' : ''}`}>
-				<div className="min-w-0 space-y-3">
+				<div className="min-w-0 space-y-3 max-w-md">
 					<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 						{isClosed ? (
 							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
@@ -356,13 +408,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text"
+											className="editable-text scrollable_x"
+											style={{ 
+												overflowX: 'auto',
+												whiteSpace: 'nowrap',
+												display: 'block',
+												width: '400px'
+											}}
 										>
 											{project.name}
 										</span>
 										{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
+											style={{flexShrink: 0}}
 										/> : <></>}
 
 									</>
@@ -383,7 +442,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 
 					{!isClosed ?
 						<div className='flex items-center space-x-3'>
-							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
+							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center'}}>
 								{isEditing ? (
 									<>
 										<input
@@ -399,13 +458,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								) : (
 									<>
 										<span
-											className="editable-text"
+											className="editable-text scrollable_x"
+											style={{ 
+												overflowX: 'auto',
+												whiteSpace: 'nowrap',
+												display: 'block',
+												width: '400px'
+											}}
 										>
 											{project.name}
 										</span>
 										{project.creator == session?.user?.id! ? <MdEdit
 											className="icon edit-icon"
 											onClick={handleEdit}
+											style={{flexShrink: 0}}
 										/> : <></>}
 
 									</>
@@ -415,12 +481,60 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						null
 					}
 
+					{isEditingTags ? (
 					<div className="flex items-center flex-wrap gap-1 justify-left">
-						{project.tags &&
-							project.tags.map((title) =>(
-								<ReadOnlyTag key={title} text={title} />
+						{ <div className="flex items-center gap-2">
+  							<div className="flex items-center gap-1">
+    							<input
+      								type="text"
+      								value={individualTag}
+      								maxLength={40}
+      								placeholder='Select "Add" for New Tag'
+      								onChange={(e) => setIndividualTag(e.target.value)}
+      								className="py-2 px-3 text-sm text-left font-medium"
+    							/>
+    							<button
+      								onClick={addTagValue}
+      								className="rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+    							>
+      								Add
+    							</button>
+  							</div>
+							<div className="flex items-center gap-0">
+  								<CheckIcon
+    								className="w-10 h-5 text-green-500 cursor-pointer"
+    								onClick={handleSaveTags}
+  								/>
+  								<XMarkIcon
+    								className="w-5 h-5 text-red-500 cursor-pointer"
+    								onClick={handleCancelTags}
+  								/>
+							</div>
+						</div>	
+						}
+						<div className="w-full flex flex-wrap gap-2">
+						{projectTags &&
+							projectTags.map((title) =>(
+								<div key={title} onClick={() => deleteTag(title)}>
+									<Tag deletable={true} text={title}/>
+								</div>
 							))}
+						</div>
+					</div>) :
+					(
+					<div className="flex items-center flex-wrap gap-1 justify-left">
+						{projectTags && projectTags.length > 0 ?
+							projectTags.map((title) =>(
+								<Tag key={title} deletable={false} text={title} />
+							)) :
+							<p className="text-sm font-mono text-gray-500">Click to Add Tags</p>}
+						{project.creator == session?.user?.id! ? <MdEdit
+											className="icon edit-icon"
+											onClick={handleEditTags}
+											style={{flexShrink: 0}}
+						/> : <></>}
 					</div>
+					) }
 
 					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
 						{getStatusText(project, experimentStates[project.expId])}

@@ -174,6 +174,20 @@ export async function updateExperimentNameById(expId: string, newExpName: string
     return Promise.resolve();
 }
 
+export async function updateExperimentTagsById(expId: string, newTags: string[]) {
+    'use server';
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+
+    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'tags': newTags } });
+
+    if (experiment.modifiedCount == 0) {
+        return Promise.reject(`Could not update document with id: ${expId}`);
+    }
+
+    return Promise.resolve();
+}
+
 export async function updateExperimentArchiveStatusById(expId: string, newStatus: string) {
     'use server';
     const client = await clientPromise;
