@@ -228,6 +228,7 @@ const NumberParam = ({ form, type, index, ...rest }) => {
 								className='block w-full last-of-type:rounded-r-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm'
 								{...form.getInputProps(`hyperparameters.${index}.${label}`)}
 								data-tip={tooltipText}
+								min={label == 'step'? 0 : Number.NEGATIVE_INFINITY}
 							/>
 						</Tooltip>
 					</Fragment>
