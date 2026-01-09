@@ -254,8 +254,6 @@ export default function DashboardPage() {
 	const [includeCompleted, setIncludeCompleted] = useState(true);
 	const [includeArchived, setIncludeArchived] = useState(false);
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
-	const [isDeleteSelectedModalOpen, setDeleteSelectedModalOpen] = useState(false);
-	const [isChecked, setIsChecked] = useState(false);
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -480,7 +478,9 @@ export default function DashboardPage() {
 			
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar setSearchTerm={setSearchTerm} />
+				<Navbar setSearchTerm={setSearchTerm} /> 
+				
+				{GladosCLINotification()}
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
@@ -855,6 +855,20 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
+const GladosCLINotification = () => {
+	const [bannerOpen, setBannerOpen] = useState(true);
+	
+	return <div className='float-right'>
+		{bannerOpen ? (
+			<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
+				The GLADOS CLI is ready to be tested!
+				<Link color='blue' href={GLADOS_CLI_LINK} download="glados_cli.py"> <u>Click here</u> </Link>
+				to give it a try.
+			</Notification>
+		) : (<div />)}
+	</div>;
+}
+
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
@@ -1078,9 +1092,39 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					</Menu.Button>
 					<MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 						<div className='py-1'>
-							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Name" onClick={() => displaySortOrder(SortingOptions.NAME)} />
-							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Date created" onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)} />
-							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Date uploaded" onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)} />
+							<MenuItem>
+								{({ active }) => (
+									<a
+										href="#"
+										className={menuHoverActiveCss(active)}
+										onClick={() => displaySortOrder(SortingOptions.NAME)}
+									>
+										Name
+									</a>
+								)}
+							</MenuItem>
+							<MenuItem>
+								{({ active }) => (
+									<a
+										href="#"
+										className={menuHoverActiveCss(active)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
+									>
+										Date created
+									</a>
+								)}
+							</MenuItem>
+							<MenuItem>
+								{({ active }) => (
+									<a
+										href="#"
+										className={menuHoverActiveCss(active)}
+										onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)}
+									>
+										Date uploaded
+									</a>
+								)}
+							</MenuItem>
 						</div>
 					</MenuItems>
 				</Menu>
