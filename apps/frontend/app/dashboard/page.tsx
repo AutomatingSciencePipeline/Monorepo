@@ -27,7 +27,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {Tag} from '../components/Tag'
 import { Notification } from '@mantine/core';
-import { LightBulbIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 const GLADOS_CLI_LINK = '/cli/glados_cli.py';
@@ -40,8 +39,8 @@ const navigation = [
 	{ name: 'Help', href: GLADOS_DOCS_LINK, desc: 'Open the GLADOS docs to learn how to use the application.', current: false }
 ];
 const userNavigation = [
-	{ name: 'Your Profile', href: '#' },
-	{ name: 'Sign out', href: '#' },
+	{ name: 'Your Profile', href: '#'},
+	{ name: 'Sign out', href: '#', onClick: () => signOut() },
 ];
 
 enum ExperimentTypes {
@@ -168,12 +167,7 @@ const Navbar = ({ setSearchTerm }) => {
 														{({ active }) => (
 															<a
 																href={item.href}
-																onClick={() => {
-																	return (
-																		item.name === 'Sign out' &&
-																		signOut()
-																	);
-																}}
+																onClick={item.onClick || (() => {})}
 																className={classNames(
 																	active ? 'bg-gray-100' : '',
 																	'block px-4 py-2 text-sm text-gray-700'
@@ -261,6 +255,8 @@ export default function DashboardPage() {
 	const [includeCompleted, setIncludeCompleted] = useState(true);
 	const [includeArchived, setIncludeArchived] = useState(false);
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
+	const [isDeleteSelectedModalOpen, setDeleteSelectedModalOpen] = useState(false);
+	const [isChecked, setIsChecked] = useState(false);
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -365,8 +361,6 @@ export default function DashboardPage() {
 		setSelectedExperimentType(defaultExpNum); // Set selected experiment type here
 	};
 
-	const [isDeleteSelectedModalOpen, setDeleteSelectedModalOpen] = useState(false);
-
 	const openDeleteSelectedModal = () => setDeleteSelectedModalOpen(true);
 	const closeDeleteSelectedModal = () => setDeleteSelectedModalOpen(false);
 
@@ -432,9 +426,6 @@ export default function DashboardPage() {
 			setSelectedExperiments([]); // Clear selections after archiving
 		});
 	};
-
-
-	const [isChecked, setIsChecked] = useState(false);
 
 	const handleSelectAll = (checked: boolean) => {
 		setIsChecked(checked);
@@ -1016,24 +1007,25 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		handleSortChange(newSortBy);
 	};
 
-	// Handle sorting option change
 	const handleSortChange = (newSortBy) => {
 		setSortBy(newSortBy);
 		handleDisplaySortingOptions(newSortBy);
 	};
 
-	const handleDisplaySortingOptions = (newSortBy) => {
+	function getSortingOptionLabel(sortBy) {
 		let sortingOption;
-
-		if (newSortBy == SortingOptions.NAME || newSortBy == SortingOptions.NAME_REVERSE) {
+		if (sortBy == SortingOptions.NAME || sortBy == SortingOptions.NAME_REVERSE) {
 			sortingOption = 'Name';
-		} else if (newSortBy == SortingOptions.DATE_CREATED || newSortBy == SortingOptions.DATE_CREATED_REVERSE) {
+		} else if (sortBy == SortingOptions.DATE_CREATED || sortBy == SortingOptions.DATE_CREATED_REVERSE) {
 			sortingOption = 'Date Created';
-		} else if (newSortBy == SortingOptions.DATE_UPLOADED || newSortBy == SortingOptions.DATE_UPLOADED_REVERSE) {
+		} else if (sortBy == SortingOptions.DATE_UPLOADED || sortBy == SortingOptions.DATE_UPLOADED_REVERSE) {
 			sortingOption = 'Date Uploaded';
 		}
+		return sortingOption;
+	}
 
-		setSelectedSortText(sortingOption);
+	const handleDisplaySortingOptions = (newSortBy) => {
+		setSelectedSortText(getSortingOptionLabel(newSortBy));
 	};
 
 	const menuHoverActiveCss = (active: boolean) => {
@@ -1096,39 +1088,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					</Menu.Button>
 					<MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 						<div className='py-1'>
-							<MenuItem>
-								{({ active }) => (
-									<a
-										href="#"
-										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.NAME)}
-									>
-										Name
-									</a>
-								)}
-							</MenuItem>
-							<MenuItem>
-								{({ active }) => (
-									<a
-										href="#"
-										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
-									>
-										Date created
-									</a>
-								)}
-							</MenuItem>
-							<MenuItem>
-								{({ active }) => (
-									<a
-										href="#"
-										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)}
-									>
-										Date uploaded
-									</a>
-								)}
-							</MenuItem>
+							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Name" onClick={() => displaySortOrder(SortingOptions.NAME)} />
+							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Date created" onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)} />
+							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Date uploaded" onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)} />
 						</div>
 					</MenuItems>
 				</Menu>
@@ -1253,6 +1215,20 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		</ul>
 	</div>);
 };
+
+const BasicMenuItem = ({menuHoverActiveCss, label, onClick}) => {
+	return <MenuItem>
+		{({ active }) => (
+			<a
+				href="#"
+				className={menuHoverActiveCss(active)}
+				onClick={onClick}
+			>
+				{label}
+			</a>
+		)}
+	</MenuItem>;
+}
 
 async function downloadResultsFile(expId: string) {
 	const result = await fetchResultsFile(expId);
