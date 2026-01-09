@@ -307,9 +307,8 @@ def determine_experiment_file_type(filepath: str):
         raise NotImplementedError("Unknown experiment file type") from err
 
 def download_experiment_files(experiment: ExperimentData):
-    if experiment.has_extra_files() or experiment.postProcess != '' or experiment.keepLogs:
-        explogger.info('There will be experiment outputs')
-        os.makedirs('ResCsvs')
+    explogger.info('There will be experiment outputs')
+    os.makedirs('ResCsvs')
     explogger.info(f'Downloading file for {experiment.expId}')
 
     filepath = experiment.file
@@ -360,26 +359,25 @@ def upload_experiment_results(experiment: ExperimentData):
 
     upload_experiment_aggregated_results(experiment, resultContent)
 
-    if experiment.has_extra_files() or experiment.postProcess or experiment.keepLogs:
-        explogger.info('Uploading Result Csvs')
-        
-        # Copy the configFiles to the ResCsvs folder
-        try:
-            # Check if configFiles dir exists
-            if os.path.exists('configFiles'):
-                shutil.copytree('configFiles', 'ResCsvs/configFiles')
-        except Exception as err:
-            raise GladosInternalError("Error copying config files to ResCsvs") from err
+    explogger.info('Uploading Result Csvs')
+    
+    # Copy the configFiles to the ResCsvs folder
+    try:
+        # Check if configFiles dir exists
+        if os.path.exists('configFiles'):
+            shutil.copytree('configFiles', 'ResCsvs/configFiles')
+    except Exception as err:
+        raise GladosInternalError("Error copying config files to ResCsvs") from err
 
-        encoded = None
-        try:
-            shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
-            with open("ResultCsvs.zip", "rb") as file:
-                encoded = Binary(file.read())
-        except Exception as err:
-            raise GladosInternalError("Error preparing experiment results zip") from err
+    encoded = None
+    try:
+        shutil.make_archive('ResultCsvs', 'zip', 'ResCsvs')
+        with open("ResultCsvs.zip", "rb") as file:
+            encoded = Binary(file.read())
+    except Exception as err:
+        raise GladosInternalError("Error preparing experiment results zip") from err
 
-        upload_experiment_zip(experiment, encoded)
+    upload_experiment_zip(experiment, encoded)
 
 def post_process_experiment(experiment: ExperimentData):
     if experiment.postProcess:
