@@ -2,11 +2,10 @@
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, Switch, Transition, TransitionChild } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, MenuItems, MenuItem, MenuButton, Switch, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
 	ChevronDownIcon,
-	RectangleStackIcon,
 	SwatchIcon,
 	QueueListIcon,
 	FunnelIcon,
@@ -31,17 +30,14 @@ import { Notification } from '@mantine/core';
 import { LightBulbIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
+const GLADOS_CLI_LINK = '/cli/glados_cli.py';
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
 
-const GLADOS_CLI_LINK = '/cli/glados_cli.py';
-const REPORT_DESCRIPT = 'Report an issue you have encountered to our Google Forms.';
-const HELP_DESCRIPT = 'Open the GLADOS docs to learn how to use the application.';
-
 const navigation = [
-	{ name: 'CLI', href: GLADOS_CLI_LINK, current: false },
-	{ name: 'Report', href: REPORT_GOOGLE_FORM_LINK, current: false },
-	{ name: 'Help', href: GLADOS_DOCS_LINK, current: false }
+	{ name: 'CLI', href: GLADOS_CLI_LINK, desc: 'Download, use, and read about the GLADOS CLI.', current: false },
+	{ name: 'Report', href: REPORT_GOOGLE_FORM_LINK, desc: 'Report an issue you have encountered to our Google Forms.', current: false },
+	{ name: 'Help', href: GLADOS_DOCS_LINK, desc: 'Open the GLADOS docs to learn how to use the application.', current: false }
 ];
 const userNavigation = [
 	{ name: 'Your Profile', href: '#' },
@@ -132,13 +128,7 @@ const Navbar = ({ setSearchTerm }) => {
 												target={['Help', 'Report'].includes(item.name) ? '_blank' : '_self'}
 												className='px-3 py-2 rounded-md text-sm font-medium text-blue-200 hover:text-white'
 												aria-current={item.current ? 'page' : undefined}
-												title={
-													item.name === 'Help'
-														? HELP_DESCRIPT
-														: item.name === 'Report'
-															? REPORT_DESCRIPT
-															: ''
-												}
+												title={item.desc}
 											>
 												{item.name}
 											</a>
@@ -147,7 +137,7 @@ const Navbar = ({ setSearchTerm }) => {
 									{/* Profile dropdown */}
 									<Menu as='div' className='ml-4 relative flex-shrink-0'>
 										<div>
-											<Menu.Button className='bg-blue-700 flex text-sm rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-700 focus:ring-white'>
+											<MenuButton className='bg-blue-700 flex text-sm rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-700 focus:ring-white'>
 												<span className='sr-only'>Open user menu</span>
 												{session?.user?.image ? (
 													<Image
@@ -161,7 +151,7 @@ const Navbar = ({ setSearchTerm }) => {
 													// Optionally, you could add a placeholder or leave this empty
 													<></>
 												)}
-											</Menu.Button>
+											</MenuButton>
 										</div>
 										<Transition
 											as={Fragment}
@@ -172,9 +162,9 @@ const Navbar = ({ setSearchTerm }) => {
 											leaveFrom='transform opacity-100 scale-100'
 											leaveTo='transform opacity-0 scale-95'
 										>
-											<Menu.Items className='origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+											<MenuItems className='origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 												{userNavigation.map((item) => (
-													<Menu.Item key={item.name}>
+													<MenuItem key={item.name}>
 														{({ active }) => (
 															<a
 																href={item.href}
@@ -192,9 +182,9 @@ const Navbar = ({ setSearchTerm }) => {
 																{item.name}
 															</a>
 														)}
-													</Menu.Item>
+													</MenuItem>
 												))}
-											</Menu.Items>
+											</MenuItems>
 										</Transition>
 									</Menu>
 								</div>
@@ -209,7 +199,7 @@ const Navbar = ({ setSearchTerm }) => {
 									key={item.name}
 									as='a'
 									href={item.href}
-									target={['Help', 'Report'].includes(item.name) ? '_blank' : '_self'}
+									target={navigation.map(i => i.name).includes(item.name) ? '_blank' : '_self'}
 									className={classNames(
 										item.current ?
 											'text-white bg-blue-800' :
@@ -217,13 +207,7 @@ const Navbar = ({ setSearchTerm }) => {
 										'block px-3 py-2 rounded-md text-base font-medium'
 									)}
 									aria-current={item.current ? 'page' : undefined}
-									title={
-										item.name === 'Help'
-											? HELP_DESCRIPT
-											: item.name === 'Report'
-												? REPORT_DESCRIPT
-												: ''
-									}
+									title={item.desc}
 								>
 									{item.name}
 								</Disclosure.Button>
@@ -254,14 +238,29 @@ const Navbar = ({ setSearchTerm }) => {
 };
 
 export default function DashboardPage() {
+
+	const QUEUE_UNKNOWN_LENGTH = -1;
+	const QUEUE_ERROR_LENGTH = -2;
+	const QUEUE_RECHECK_INTERVAL_MS = 4000;
+
 	const { data: session } = useSession();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState('');
-	const [isClosed, setClose] = useState(false);
 	const [multiSelectMode, setMultiSelectMode] = useState(false); // Multi-select mode state
 	const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]); // Selected experiments state
+	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
+	const [copyID, setCopyId] = useState<string>(null as unknown as string); // TODO: refactor copy system to not need this middleman
+	const [formState, setFormState] = useState(FormStates.Closed);
+	const [label, setLabel] = useState('New Experiment');
+	const [isDefault, setIsDefault] = useState(false);
+	const [selectedExperimentType, setSelectedExperimentType] = useState<ExperimentTypes | null>(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isEditMode, setIsEditMode] = useState(false);
+	const [includeCompleted, setIncludeCompleted] = useState(true);
+	const [includeArchived, setIncludeArchived] = useState(false);
+	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -299,15 +298,9 @@ export default function DashboardPage() {
 		return () => eventSource.close();
 	}, [session]);
 
-	const QUEUE_UNKNOWN_LENGTH = -1;
-	const QUEUE_ERROR_LENGTH = -2;
-	const [queueLength, setQueueLength] = useState(QUEUE_UNKNOWN_LENGTH);
-
 	const queryQueueLength = () => {
 		setQueueLength(0);
 	};
-
-	const QUEUE_RECHECK_INTERVAL_MS = 4000; // 4 seconds
 
 	useEffect(() => {
 		const intervalId = setInterval(() => {
@@ -318,27 +311,6 @@ export default function DashboardPage() {
 			clearInterval(intervalId); // Clear interval on component unmount
 		};
 	}, []);
-
-
-	const [copyID, setCopyId] = useState<string>(null as unknown as string); // TODO refactor copy system to not need this middleman
-	const [formState, setFormState] = useState(FormStates.Closed);
-	const [label, setLabel] = useState('New Experiment');
-	const [isDefault, setIsDefault] = useState(false);
-	const [selectedExperimentType, setSelectedExperimentType] = useState<ExperimentTypes | null>(null);
-
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isEditMode, setIsEditMode] = useState(false);
-
-	const [includeCompleted, setIncludeCompleted] = useState(true);
-	const [includeArchived, setIncludeArchived] = useState(false);
-
-	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
-
-	// TODO: this function is way too long. There are quite a bit of moving parts that maybe should get their own functions
-	const [bannerOpen, setBannerOpen] = useState(true);
-	const infoIcon = (
-		<LightBulbIcon className='h-6 w-6 text-blue-400' aria-hidden='true' />
-	);
 
 	useEffect(() => {
 		setExperimentStates((prevState) => {
@@ -520,15 +492,7 @@ export default function DashboardPage() {
 				{/* Navbar */}
 				<Navbar setSearchTerm={setSearchTerm} /> 
 				
-				<div className='float-right'>
-					{bannerOpen ? (
-							<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
-								The GLADOS CLI is ready to be tested! 
-								<Link color='blue' href={GLADOS_CLI_LINK} download="glados_cli.py"> <u>Click here</u> </Link>
-								to give it a try.
-							</Notification>
-						) : (<div/>)}
-				</div>
+				{GladosCLINotification()}
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
@@ -896,12 +860,30 @@ const SortingOptions = {
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
 
+const GladosCLINotification = () => {
+	const [bannerOpen, setBannerOpen] = useState(true);
+	
+	return <div className='float-right'>
+		{bannerOpen ? (
+			<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
+				The GLADOS CLI is ready to be tested!
+				<Link color='blue' href={GLADOS_CLI_LINK} download="glados_cli.py"> <u>Click here</u> </Link>
+				to give it a try.
+			</Notification>
+		) : (<div />)}
+	</div>;
+}
+
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
 	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
 	const [tags, setTags] = useState<string[]>([]);
 	const [tagsMultipleFilter, setTagsMultipleFilter] = useState<string[]>([]);
+
+	// State of arrow icon
+	const [sortArrowUp, setSortArrowUp] = useState(false);
+	const [selectedSortText, setSelectedSortText] = useState('Date Uploaded');
 
 	useEffect(() => {
 		let newTags = [] as string[];
@@ -917,10 +899,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		setTags(newTags);
 	}, [experiments]);
 
-	// State of arrow icon
-	const [sortArrowUp, setSortArrowUp] = useState(false);
-
-	const [selectedSortText, setSelectedSortText] = useState('Date Uploaded');
 
 	// Sorting functions
 	const sortByName = (a, b) => {
@@ -1116,9 +1094,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
 					</Menu.Button>
-					<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+					<MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 						<div className='py-1'>
-							<Menu.Item>
+							<MenuItem>
 								{({ active }) => (
 									<a
 										href="#"
@@ -1128,8 +1106,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 										Name
 									</a>
 								)}
-							</Menu.Item>
-							<Menu.Item>
+							</MenuItem>
+							<MenuItem>
 								{({ active }) => (
 									<a
 										href="#"
@@ -1139,8 +1117,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 										Date created
 									</a>
 								)}
-							</Menu.Item>
-							<Menu.Item>
+							</MenuItem>
+							<MenuItem>
 								{({ active }) => (
 									<a
 										href="#"
@@ -1150,9 +1128,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 										Date uploaded
 									</a>
 								)}
-							</Menu.Item>
+							</MenuItem>
 						</div>
-					</Menu.Items>
+					</MenuItems>
 				</Menu>
 				<Menu as='div' className='relative' style={{ marginLeft: '0.5rem' }}>
 					<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
@@ -1163,9 +1141,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 							className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 							aria-hidden='true' />
 					</Menu.Button>
-					<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+					<MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 						<div className='py-1'>
-							<Menu.Item>
+							<MenuItem>
 								{({ active }) => (
 									<div className={menuHoverActiveCss(active)}>
 										<Toggle
@@ -1176,8 +1154,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 											}} />
 									</div>
 								)}
-							</Menu.Item>
-							<Menu.Item>
+							</MenuItem>
+							<MenuItem>
 								{({ active }) => (
 									<a href='#' className={menuHoverActiveCss(active)}>
 										<Toggle
@@ -1188,8 +1166,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 											}} />
 									</a>
 								)}
-							</Menu.Item>
-							<Menu.Item>
+							</MenuItem>
+							<MenuItem>
 								<Menu as='div' className='relative' style={{ marginLeft: '0.5rem' }}>
 									<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 										Experiment Tags
@@ -1197,11 +1175,11 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 										className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
 										aria-hidden='true' />
 									</Menu.Button>
-									<Menu.Items className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+									<MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 										{tags &&
 											tags.map((title) =>(
 												<div key={title}>
-													<Menu.Item>
+													<MenuItem>
 													{({ active }) => (
 														<a href='#' className={`${menuHoverActiveCss(active)} flex items-center gap-1`}>
 														<Toggle
@@ -1215,14 +1193,14 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 												 		<Tag key={title} text={title} deletable={false}/>
 														</a>
 													)}
-												</Menu.Item>
+												</MenuItem>
 											</div>
 										))}
-									</Menu.Items>
+									</MenuItems>
 								</Menu>
-							</Menu.Item>
+							</MenuItem>
 						</div>
-					</Menu.Items>
+					</MenuItems>
 				</Menu>
 			</div>
 		</div>
