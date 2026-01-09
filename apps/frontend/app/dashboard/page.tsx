@@ -26,6 +26,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {Tag} from '../components/Tag'
+import { Notification } from '@mantine/core';
+import Link from 'next/link';
 
 const GLADOS_CLI_LINK = '/cli/glados_cli.py';
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
@@ -254,6 +256,8 @@ export default function DashboardPage() {
 	const [includeCompleted, setIncludeCompleted] = useState(true);
 	const [includeArchived, setIncludeArchived] = useState(false);
 	const [experimentStates, setExperimentStates] = useState<{ [key: string]: boolean }>({});
+	const [isDeleteSelectedModalOpen, setDeleteSelectedModalOpen] = useState(false);
+	const [isChecked, setIsChecked] = useState(false);
 
 	useEffect(() => {
 		const toastMessage = searchParams!.get('toastMessage');
@@ -1092,39 +1096,9 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					</Menu.Button>
 					<MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
 						<div className='py-1'>
-							<MenuItem>
-								{({ active }) => (
-									<a
-										href="#"
-										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.NAME)}
-									>
-										Name
-									</a>
-								)}
-							</MenuItem>
-							<MenuItem>
-								{({ active }) => (
-									<a
-										href="#"
-										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)}
-									>
-										Date created
-									</a>
-								)}
-							</MenuItem>
-							<MenuItem>
-								{({ active }) => (
-									<a
-										href="#"
-										className={menuHoverActiveCss(active)}
-										onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)}
-									>
-										Date uploaded
-									</a>
-								)}
-							</MenuItem>
+							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Name" onClick={() => displaySortOrder(SortingOptions.NAME)} />
+							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Date created" onClick={() => displaySortOrder(SortingOptions.DATE_CREATED)} />
+							<BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="Date uploaded" onClick={() => displaySortOrder(SortingOptions.DATE_UPLOADED)} />
 						</div>
 					</MenuItems>
 				</Menu>
