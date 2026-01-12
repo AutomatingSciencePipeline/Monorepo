@@ -6,7 +6,7 @@ from kubernetes import client, config
 from dotenv import load_dotenv
 # from init import should_force_update
 
-config.load_kugit be_config()
+config.load_kube_config()
 load_dotenv(path.join(getcwd(), ".env"))
 
 API = client.AppsV1Api()
