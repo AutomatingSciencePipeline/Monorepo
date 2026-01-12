@@ -9,11 +9,55 @@ spec:
       labels:
         app: GLADOS
     spec:
+      restartPolicy: Never 
+      shareProcessNamespace: true
+
+      initContainers:
+      - name: setup
+        image: datahandler
+        command: []
+        volumeMounts:
+        - name: shared-data
+          mountPath: /data
+        env:
+        - name: JOB_ID
+          value: unused
+        - name: MONGODB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: MONGODB_PORT
+        - name: BACKEND_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: BACKEND_PORT
+        - name: GMAIL_CREDS
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: GMAIL_CREDS
+        - name: SIGNALS_PATH
+          value: "/signals"
+        
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      
       containers:
       - name: runner
-        image: gladospipeline/glados-runner:main
-        imagePullPolicy: Always
+        image: runner
+        imagePullPolicy: IfNotPresent
         command: []
+        volumeMounts:
+        - name: shared-data
+          mountPath: /data
+        - name: signals
+          mountPath: /signals
         env:
         - name: MONGODB_PORT
           valueFrom:
@@ -30,6 +74,21 @@ spec:
             secretKeyRef:
               name: secret-env
               key: GMAIL_CREDS
-      restartPolicy: Never
+        - name: SIGNALS_PATH
+          value: "/signals"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      
+      volumes: 
+      - name: shared-data
+        emptyDir:
+          sizeLimit: 500Mi
+      - name: signals 
+        emptyDir: {}
   backoffLimit: 4
   ttlSecondsAfterFinished: 60

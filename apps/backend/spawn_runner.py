@@ -15,13 +15,13 @@ def create_job_object(experiment_data):
     # Configure Pod template container
     job_name = "runner-" + experiment_data['experiment']['id']
     
-    job_command = ["python3", "runner.py", json.dumps(experiment_data)]
+    job_command = ["python3", "runner_handler.py", json.dumps(experiment_data)]
 
     runner_body = get_yaml_file_body(RUNNER_PATH)
 
     runner_body['metadata']['name'] = job_name
     runner_body['spec']['template']['spec']['containers'][0]['command'] = job_command
-    
+    runner_body['spec']['template']['spec']['initContainers'][0]['command'] = ["python3", "data_handler.py", json.dumps(experiment_data)]
     if os.getenv("IMAGE_RUNNER"):
         # Get the image name
         image_name = str(os.getenv("IMAGE_RUNNER"))

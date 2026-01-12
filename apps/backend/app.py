@@ -59,6 +59,13 @@ def recv_experiment():
     """The query to run an experiment"""
     data = request.get_json()
     executor.submit(spawn_job, data)
+    # try:
+    #     spawn_job(data)
+    # except Exception as e:
+    # # This is “not accepted”
+    #     print("REJECTED:", e.status, e.reason)
+    #     print(e.body) 
+    #     return Response(status=500, message=e)
     return Response(status=200)
 
 def spawn_job(experiment_data):

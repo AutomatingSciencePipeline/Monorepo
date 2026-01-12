@@ -12,7 +12,8 @@ k8s_yaml([
     "kubernetes_init/tilt/service-frontend.yaml",
     "kubernetes_init/tilt/deployment-backend.yaml",
     "kubernetes_init/tilt/service-backend-dev.yaml",
-    "helm_packages/mongodb-helm/pvs.yaml"
+    "helm_packages/mongodb-helm/pvs.yaml",
+    "apps/backend/job-runner.yaml",
 ])
 
 # Setup the folder paths inside minikube
@@ -73,8 +74,17 @@ docker_build("backend",
 
 # Build the runner
 docker_build("runner", 
-    context='./apps/runner', 
+    context='./apps/runner',
+    live_update=[
+        sync("./apps/runner/", "/app")
+    ],
     dockerfile='./apps/runner/runner.Dockerfile',
+    match_in_env_vars=True)
+
+# Build the data handler
+docker_build("datahandler", 
+    context='./apps/runner', 
+    dockerfile='./apps/runner/data_handler.Dockerfile',
     match_in_env_vars=True)
 
 # add a command that will run on tilt down to cleanup the pv's that are made by helm
