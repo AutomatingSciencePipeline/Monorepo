@@ -44,12 +44,9 @@ EX_NOTFOUND = 2
 EX_INVALID_EXP_FORMAT = 3
 EX_NOT_DONE = 4
 EX_EXP_FAILED = 5
-VERSION_CHECK_SUCCEED = 6
-VERSION_CHECK_FAILED = 7
-UNABLE_TO_CHECK_VERSION = 8
-UPDATE_SUCCEED = 9
-UPDATE_FAIL = 10
-VALID_EXP_FORMAT = 11
+UPDATE_SUCCEED = 6
+UPDATE_FAIL = 7
+VALID_EXP_FORMAT = 8
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -167,16 +164,13 @@ class RequestManager(object):
             time.sleep(5)
         except requests.RequestException as error:
             perror(f'{error}')
-            
         if(res is None):
             return {
             'success': False,
             'error': 'other',
             'exp_id': ''
         }  
-
         submitted_exec_file = res.json()
-        
         if(submitted_exec_file.get("fileId") is None):
             return {
             'success': False,
@@ -222,7 +216,7 @@ class RequestManager(object):
             perror(f'{error}')
         return res.json()
     
-    def download_experiment_results(self, experiment_id: str) -> Dict[str, typing.Any]:
+    def download_experiment_results(self, experiment_id: str, output_directory: str) -> Dict[str, typing.Any]:
         experiment_req_json = {
             "token": self.token,
             "expID": experiment_id
@@ -243,19 +237,22 @@ class RequestManager(object):
             if "filename=" in cd:
                 filename = cd.split("filename=")[1].strip('"')
 
-            with open(filename, "wb") as f:
+            os.makedirs(output_directory, exist_ok=True)
+            output_path = os.path.join(output_directory, filename)
+
+            with open(output_path, "wb") as f:
                 f.write(res.content)
             return { 'success': True, 'files': [{'name': filename, 'content': res.content}] }
         except requests.RequestException as error:
             perror(f'{error}')
             
-    def download_all(self, experiment_id: str) -> Dict[str, typing.Any]:
+    def download_all(self, experiment_id: str, output_directory: str) -> Dict[str, typing.Any]:
         experiment_req_json = {
             "token": self.token,
             "expID": experiment_id
         }
         try:
-            res = self.download_experiment_results(experiment_id)
+            res = self.download_experiment_results(experiment_id, output_directory)
             if(res.get('success') is not True):
                 return res
         except requests.RequestException as error:
@@ -271,8 +268,10 @@ class RequestManager(object):
                 except ValueError:
                     error_msg = res.text
                 return {'success': False, 'error': error_msg}
-            with open(f'{filename}_system_log.txt', "w", encoding="utf-8") as f:
-                f.write(res.text)
+            os.makedirs(output_directory, exist_ok=True)
+            output_path = os.path.join(output_directory, f'{filename}_system_log.txt')
+            with open(output_path, "wb") as f:
+                f.write(res.content)
         except requests.RequestException as error:
             perror(f'{error}')
            
@@ -284,7 +283,9 @@ class RequestManager(object):
                 except ValueError:
                     error_msg = res.text
                 return {'success': False, 'error': error_msg}
-            with open(f"{filename}_results.zip", "wb") as f:
+            os.makedirs(output_directory, exist_ok=True)
+            output_path = os.path.join(output_directory, f"{filename}_results.zip")
+            with open(output_path, "wb") as f:
                 f.write(res.content)
         except requests.RequestException as error:
             perror(f'{error}')
@@ -341,20 +342,25 @@ def query_experiments(request_manager: RequestManager, title: str):
         return EX_NOTFOUND
     print("Matches:")
     for index, match in enumerate(results["matches"]):
-        s = match["started_on"] / 1000.0
-        time_started = datetime.fromtimestamp(s)
+        if match["started_on"]  == 0 or match["started_on"] is None:
+            time_started = "N/A"
+            status = "FAILED"
+        else:
+            s = match["started_on"] / 1000.0
+            time_started = datetime.fromtimestamp(s)
+            status = match['status']
         print("***********************************************")
         print(f"Experiment {index + 1}: {match['name']}")
         print("***********************************************")
         print(f"ID: {match['id']}")
         print(f"Tags: {match['tags']}")
-        print(f"Status: {match['status']}")
+        print(f"Status: {status}")
         print(f"Time Started: {time_started}")
         print(f"Trials: {match['current_permutation']}/{match['total_permutations']} Completed\n")
     return EX_SUCCESS
 
-def download_experiment(request_manager: RequestManager, experiment_id: str) -> int:
-    results = request_manager.download_experiment_results(experiment_id)
+def download_experiment(request_manager: RequestManager, experiment_id: str, output_directory: str) -> int:
+    results = request_manager.download_experiment_results(experiment_id, output_directory)
     if not results.get("success", False):
         msg, status = {
             'not_found': ("Experiment not found.", EX_NOTFOUND),
@@ -364,11 +370,11 @@ def download_experiment(request_manager: RequestManager, experiment_id: str) -> 
         perror(msg)
         return status
     
-    print(f"Experiment results downloaded successfully to './{results['files'][0]['name']}'.")
+    print(f"Experiment results {results['files'][0]['name']} downloaded successfully to {output_directory}.")
     return EX_SUCCESS
 
-def download_all(request_manager: RequestManager, experiment_id: str) -> int:
-    results = request_manager.download_all(experiment_id)
+def download_all(request_manager: RequestManager, experiment_id: str, output_directory: str) -> int:
+    results = request_manager.download_all(experiment_id, output_directory)
     if not results.get("success", False):
         msg, status = {
             'not_found': ("Experiment not found.", EX_NOTFOUND),
@@ -378,22 +384,18 @@ def download_all(request_manager: RequestManager, experiment_id: str) -> int:
         perror(msg)
         return status
     
-    print("All experiment artifacts downloaded successfully to current directory.")
+    print(f"All experiment artifacts downloaded successfully to {output_directory}.")
     return EX_SUCCESS
 
-def check_version(request_manager: RequestManager, cli_path: str) -> int:
+def check_version(request_manager: RequestManager, cli_path: str) -> None:
     results = request_manager.version(cli_path)
     if not results.get("success", False):
         error = results.get("error", "Unknown")
         print(f"Unable to confirm version of CLI.\nError: {error} \n It is recommended you re-download the script directly from the website: https://glados.csse.rose-hulman.edu/\n")
-        return UNABLE_TO_CHECK_VERSION
     else:
         if not results.get("up_to_date", False):
             print("CLI version is not up to date. It is suggested to update the script by using -u command.\n")
-            return VERSION_CHECK_FAILED
-        else:
-            return VERSION_CHECK_SUCCEED
-        
+       
 def update(request_manager: RequestManager) -> int:
     results = request_manager.update()
     if not results.get("success", False):
@@ -402,72 +404,120 @@ def update(request_manager: RequestManager) -> int:
     else: 
         print("Downloaded most up-to-date CLI successfully in local directory.")
         return UPDATE_SUCCEED
-    
+ 
 def check_manifest_format(manifest_path: str, is_zip_file: bool) -> int:
     with open(manifest_path, "r", encoding='utf-8') as f:
         config = yaml.safe_load(f)
-    experiment_correct_format = True
     scatter_present = True
-    if config["hyperparameters"] is None or config["hyperparameters"] == "":
-        perror("hyperparameters attribute in 'manifest.yml' is empty or missing.")
-        experiment_correct_format = False
-    if not check_manifest_format_str_helper(config, "name"):
-        experiment_correct_format = False
-    if not check_manifest_format_str_helper(config, "trialResult"):
-        experiment_correct_format = False
-    if not check_manifest_format_int_helper(config, "trialResultLineNumber", -1):
-        experiment_correct_format = False
-    if not check_manifest_format_bool_helper(config, "scatter"):
-        experiment_correct_format = False
+    results = [
+    check_manifest_format_str_helper(config, "name", "manifest.yml"),
+    check_manifest_format_str_helper(config, "trialResult", "manifest.yml"),
+    check_manifest_format_int_helper(config, "trialResultLineNumber", -1, True, "manifest.yml"),
+    check_manifest_format_int_helper(config, "timeout", 0, True, "manifest.yml"),
+    check_manifest_format_int_helper(config, "workers", 0, True, "manifest.yml"),
+    check_manifest_format_bool_helper(config, "keepLogs", "manifest.yml"),
+    check_manifest_format_bool_helper(config, "sendEmail", "manifest.yml"),
+    check_manifest_format_hyperparameter_helper(config, "hyperparameters"),
+    ]
+    if not check_manifest_format_bool_helper(config, "scatter", "manifest.yml"):
+        results.append(False)
         scatter_present = False
-    if not check_manifest_format_int_helper(config, "timeout", 0):
-        experiment_correct_format = False
-    if not check_manifest_format_bool_helper(config, "keepLogs"):
-        experiment_correct_format = False
-    if not check_manifest_format_bool_helper(config, "sendEmail"):
-        experiment_correct_format = False
-    if not check_manifest_format_int_helper(config, "workers", 0):
-        experiment_correct_format = False
-    if scatter_present and config["scatter"] is True:
-        if not check_manifest_format_str_helper(config, "scatterIndVar"):
-            experiment_correct_format = False
-        if not check_manifest_format_str_helper(config, "scatterDepVar"):
-            experiment_correct_format = False
+    if scatter_present:
+        if config["scatter"] is True:
+            results.append(check_manifest_format_str_helper(config, "scatterIndVar", "manifest.yml"))
+            results.append(check_manifest_format_str_helper(config, "scatterDepVar", "manifest.yml"))
+        elif config["scatter"] is False:
+            ind_var = config.get("scatterIndVar", None)
+            dep_var = config.get("scatterDepVar", None)
+            if not ((ind_var == "" ) and (dep_var == "")):
+                print("scatterIndVar and scatterDepVar attributes in manifest.yml must be '' when scatter is false.")
+                results.append(False)
     if is_zip_file is True:
-        if not check_manifest_format_str_helper(config, "experimentExecutable"):
-            experiment_correct_format = False
-    if experiment_correct_format is False:
+        results.append(check_manifest_format_str_helper(config, "experimentExecutable", "manifest.yml"))
+    if all(results) is False:
         return EX_INVALID_EXP_FORMAT
     else:
         return VALID_EXP_FORMAT
+    
+def check_manifest_format_hyperparameter_helper(config: dict, key: str) -> bool:
+    correct_param_formatting = True
+    value = config.get(key, None)
+    if value is None or value == "":
+        print("hyperparameters attribute in 'manifest.yml' is empty or missing.")
+        return False
+    else:
+        for param in config["hyperparameters"]:
+            name = param.get("name", None)
+            param_type = param.get("type", None)
+            result = [
+                check_manifest_format_str_helper(param, "name", "hyperparameter " + name),
+                check_manifest_format_str_helper(param, "type", "hyperparameter " + name),
+                check_manifest_format_bool_helper(param, "useDefault", "hyperparameter " + name)
+            ]
+            if all(result):
+                if param_type == "integer":
+                    correct_param_formatting = check_number_hyperparameter_helper(param, name, True)
+                elif param_type == "float":
+                    correct_param_formatting = check_number_hyperparameter_helper(param, name, False)
+                elif param_type == "bool":
+                    correct_param_formatting = check_manifest_format_bool_helper(param, "default", "hyperparameter " + name)
+                elif param_type == "stringlist":
+                    correct_param_formatting = check_string_list_hyperparameter_helper(param, name)
+                elif param_type == "paramgroup":
+                    pass
+                else:
+                    print(f"Type specified in hyperparameter {name} is not integer, float, bool, stringlist, or paramgroup.")
+                    correct_param_formatting = False
+    return all(result) and correct_param_formatting
 
-def check_manifest_format_int_helper(config: dict, key: str, greater_than: int) -> bool:
+def check_string_list_hyperparameter_helper(param: dict, name: str) -> bool:
+    correct_string_list_param_formatting = True
+    if not isinstance(param["values"], list):
+        print(f"values attribute in hyperparameter {name} is not a list.")
+        correct_string_list_param_formatting = False
+    elif not all(isinstance(item, str) for item in param["values"]):
+        print(f"values attribute in hyperparameter {name} is not a list of strings.")
+        correct_string_list_param_formatting = False
+    return correct_string_list_param_formatting and check_manifest_format_str_helper(param, "default", f"hyperparameter {name}")
+
+def check_number_hyperparameter_helper(param: dict, name: str, test_int: bool) -> bool:
+    correct_min = check_manifest_format_int_helper(param, "min", float('-inf'), test_int, "hyperparameter " + name )
+    if test_int:
+        correct_max = (check_manifest_format_int_helper(param, "max", int(param["min"]), test_int, "hyperparameter " + name) if correct_min else check_manifest_format_int_helper(param, "max", float('-inf'), True, "hyperparameter " + name))
+    else:
+        correct_max = (check_manifest_format_int_helper(param, "max", float(param["min"]), test_int, "hyperparameter " + name) if correct_min else check_manifest_format_int_helper(param, "max", float('-inf'), test_int, "hyperparameter " + name)) 
+    return correct_min and correct_max and check_manifest_format_int_helper(param, "step", -1, test_int, "hyperparameter " + name) and check_manifest_format_int_helper(param, "default", float('-inf'), test_int, "hyperparameter " + name)
+
+def check_manifest_format_int_helper(config: dict, key: str, greater_than: int, test_int: bool, message_name: str) -> bool:
     value = config.get(key, None)
     if not(value is None or value == ""):
         try:
-            value = int(value)
+            value = (int(value) if test_int else float(value))
             if value <= greater_than:
-                perror(f"{key} attribute in 'manifest.yml' is not greater than {greater_than}.")
+                print(f"{key} attribute in {message_name} is not greater than {greater_than}.")
                 return False
         except ValueError:
-            perror(f"{key} attribute in 'manifest.yml' is not an integer.")
+            if test_int:
+                print(f"{key} attribute in {message_name} is not an integer.")
+            else:
+                print(f"{key} attribute in {message_name} is not a float.")
             return False
     else:
-        perror(f"{key} attribute in 'manifest.yml' is empty or missing.")
+        print(f"{key} attribute in {message_name} is empty or missing.")
         return False
     return True
 
-def check_manifest_format_str_helper(config: dict, key: str) -> bool:
+def check_manifest_format_str_helper(config: dict, key: str, message_name: str) -> bool:
     value = config.get(key, None)
     if (value is None or value == "") or not isinstance(value, str):
-        perror(f"{key} attribute in 'manifest.yml' is empty, missing, or not a string.")
+        print(f"{key} attribute in {message_name} is empty, missing, or not a string.")
         return False
     return True
     
-def check_manifest_format_bool_helper(config: dict, key: str) -> bool:
+def check_manifest_format_bool_helper(config: dict, key: str, message_name: str) -> bool:
     value = config.get(key, None)
     if (value is None or value == "") or not isinstance(value, bool):
-        perror(f"{key} attribute in 'manifest.yml' is empty, missing, or not a true or false.")
+        print(f"{key} attribute in {message_name} is empty, missing, or not true or false.")
         return False
     return True
 
@@ -492,10 +542,10 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         description="The command line interface for GLADOS.")
     parser.add_argument('--generate-token', action='store_true', help='Generate a new authentication token and exit, regardless of other options used.')
     parser.add_argument('--token',  '-t', type=str, help='Authentication token to use. If none is provided, it will either read ".token.glados" or prompt to generate a new token.')
-    parser.add_argument('--upload', '-z', type=str, help='Upload an experiment file. Cannot be used with -q, or -d.')
+    parser.add_argument('--run-experiment', '-r', type=str, help='Upload an experiment file with a given file path. Cannot be used with -q, or -d.')
     parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z or -d.')
-    parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
-    parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--download', '-d', type=str, nargs=2, metavar=('ID', 'OUTPUT_DIRECTORY'), help='Download the results of a completed experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--download-all', '-da', type=str, nargs=2, metavar=('ID', 'OUTPUT_DIRECTORY'), help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
     parser.add_argument('--update', '-u', action='store_true', help='Downloads most up-to-date CLI version.')
     
     parsed = parser.parse_args(args)
@@ -505,8 +555,8 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     else:
         check_version(request_manager, "glados_cli.py")
 
-    if not exactly_one([parsed.upload, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
-        perror("error: Exactly one of -z, -q, or -d must be provided.")
+    if not exactly_one([parsed.run_experiment, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
+        perror("error: Exactly one of -r, -q, or -d must be provided.")
         return EX_PARSE_ERROR
     elif not parsed.token and not parsed.generate_token:
         if not os.path.exists(".token.glados"):
@@ -533,14 +583,16 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     # Authentication successful, proceed with requested operation
     result = EX_SUCCESS
         
-    if parsed.upload:
-        result = upload_and_start_experiment(request_manager, parsed.upload)
+    if parsed.run_experiment:
+        result = upload_and_start_experiment(request_manager, parsed.run_experiment)
     if parsed.query:
         result = query_experiments(request_manager, parsed.query)
     if parsed.download:
-        result = download_experiment(request_manager, parsed.download)
+        experiment_id, output_directory = parsed.download
+        result = download_experiment(request_manager, experiment_id, output_directory)
     if parsed.download_all:
-        result = download_all(request_manager, parsed.download_all)
+        experiment_id, output_directory = parsed.download_all
+        result = download_all(request_manager, experiment_id, output_directory)
     
     # Restore original stdout and stderr
     sys.stdout, sys.stderr = _out, _err
