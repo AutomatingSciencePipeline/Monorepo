@@ -19,6 +19,8 @@ spec:
         volumeMounts:
         - name: shared-data
           mountPath: /data
+        - name: signals
+          mountPath: /signals
         env:
         - name: JOB_ID
           value: unused

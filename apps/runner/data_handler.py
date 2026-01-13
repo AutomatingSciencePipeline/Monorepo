@@ -61,8 +61,8 @@ def run_batch(data: IncomingStartRequest):
         explogger.debug(f"experiment data retrieved:\n[START DATA]\n{experiment_data}\n[END]")
         explogger.debug("write to file")
         
-        with open("./data/my_data.txt", "w+") as file:
-            file.write(experiment_data)
+        with open("/data/my_data.txt", "w+") as file:
+            file.write(str(experiment_data))
             file.write("\n\n\n Hello from data_handler\n")
 
         explogger.debug("write to file finished")

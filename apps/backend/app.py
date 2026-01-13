@@ -58,14 +58,14 @@ def get_queue():
 def recv_experiment():
     """The query to run an experiment"""
     data = request.get_json()
-    executor.submit(spawn_job, data)
-    # try:
-    #     spawn_job(data)
-    # except Exception as e:
-    # # This is “not accepted”
-    #     print("REJECTED:", e.status, e.reason)
-    #     print(e.body) 
-    #     return Response(status=500, message=e)
+    # executor.submit(spawn_job, data)
+    try:
+        spawn_job(data)
+    except Exception as e:
+    # This is “not accepted”
+        print("REJECTED:", e.status, e.reason)
+        print(e.body) 
+        return Response(status=500, message=e.body)
     return Response(status=200)
 
 def spawn_job(experiment_data):
@@ -112,8 +112,8 @@ def check_mongo():
     try:
         verify_mongo_connection(mongoClient)
         return Response(status=200)
-    except Exception:
-        return Response(status=500)
+    except Exception as e:
+        return Response(status=500, message=e.message)
     
 @flaskApp.get("/downloadExpFile")
 def download_exp_file():
