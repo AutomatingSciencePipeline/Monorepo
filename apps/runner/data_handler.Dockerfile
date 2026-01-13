@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS base
+FROM python:3.8 AS base
 
 # Keeps Python from generating .pyc files in the container
 # This doesn't benefit the performance of the system
@@ -27,6 +27,8 @@ FROM base AS python_dependencies
 RUN pip install pipenv
 COPY Pipfile .
 COPY Pipfile.lock .
+
+RUN pipenv install --system --deploy --ignore-pipfile
 
 WORKDIR /app
 COPY . /app

@@ -24,6 +24,10 @@ def create_job_object(experiment_data):
     runner_body['spec']['template']['spec']['containers'][0]['command'] = ["python3", "data_handler.py", json.dumps(experiment_data)]
     if os.getenv("IMAGE_RUNNER"):
         # Get the image name
+        image_name = str(os.getenv("DATA_HANDLER"))
+        runner_body['spec']['template']['spec']['containers'][1]['image'] = image_name
+    
+    if os.getenv("DATA_HANDLER") :
         image_name = str(os.getenv("IMAGE_RUNNER"))
         runner_body['spec']['template']['spec']['containers'][0]['image'] = image_name
 

@@ -4,7 +4,7 @@ v1alpha1.extension(name='helm_resource', repo_name='default', repo_path='helm_re
 load("ext://helm_resource", "helm_resource")
 
 # register image locator
-k8s_kind('Job',
+k8s_kind('Pod',
 image_json_path=[
     '{.spec.template.spec.containers[*].image}',
     '{.spec.template.spec.initContainers[*].image}',
@@ -81,7 +81,7 @@ docker_build("backend",
     dockerfile='./apps/backend/backend-dev.Dockerfile')
 
 # Build the runner
-docker_build("runner:latest", 
+docker_build("runner", 
     context='./apps/runner',
     live_update=[
         sync("./apps/runner/", "/app")
@@ -90,8 +90,11 @@ docker_build("runner:latest",
     match_in_env_vars=True)
 
 # Build the data handler
-docker_build("datahandler:latest", 
+docker_build("datahandler", 
     context='./apps/runner', 
+    live_update=[
+        sync("./apps/runner/", "/app")
+    ],
     dockerfile='./apps/runner/data_handler.Dockerfile',
     match_in_env_vars=True)
 

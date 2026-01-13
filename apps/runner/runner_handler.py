@@ -34,9 +34,9 @@ def run_batch(data: IncomingStartRequest):
     
     explogger.debug(f"[DEBUG] Incoming start request: {data}")
     
-    explogger.debug(f"found in data: {os.listdir("/data")}")
+    explogger.debug(f"found in data: {str(os.listdir('/data'))}")
     
-    with("/data/my_data.txt", "r") as file:
+    with open("/data/my_data.txt", "r") as file:
         content = file.read()
         explogger.debug(f"file content: {content}")
         

@@ -61,22 +61,19 @@ def run_batch(data: IncomingStartRequest):
         explogger.debug(f"experiment data retrieved:\n[START DATA]\n{experiment_data}\n[END]")
         explogger.debug("write to file")
         
-        with open("/data/my_data.txt", "w+") as file:
-            file.write(str(experiment_data))
-            file.write("\n\n\n Hello from data_handler\n")
+        with open("/data/exp_data.json", "w+") as file:
+            json.dump(experiment_data, file)
 
         explogger.debug("write to file finished")
-        open('/signals/ready', 'w').close() # for signal
+        os.mkdir("/signals/ready")
     
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from mongo, aborting")
         explogger.exception(err)
         close_experiment_run(exp_id)
         return
-    
-        
-    explogger.info(f"[END] End of operation.")
-    close_experiment_run(exp_id)
+       
+    explogger.info(f"End of file handler operation.")
 
 def run_batch_and_catch_exceptions(data: IncomingStartRequest):
     try:
