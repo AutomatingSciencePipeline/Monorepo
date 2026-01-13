@@ -14,7 +14,7 @@ spec:
       
       containers:
       - name: datahandler
-        image: datahandler
+        image: datahandler:latest
         command: []
         volumeMounts:
         - name: shared-data
@@ -51,8 +51,8 @@ spec:
             cpu: "200m"
     
       - name: runner
-        image: runner
-        imagePullPolicy: IfNotPresent
+        image: runner:latest
+        imagePullPolicy: Never
         command: []
         volumeMounts:
         - name: shared-data

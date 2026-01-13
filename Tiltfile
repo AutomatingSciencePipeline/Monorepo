@@ -81,7 +81,7 @@ docker_build("backend",
     dockerfile='./apps/backend/backend-dev.Dockerfile')
 
 # Build the runner
-docker_build("runner", 
+docker_build("runner:latest", 
     context='./apps/runner',
     live_update=[
         sync("./apps/runner/", "/app")
@@ -90,7 +90,7 @@ docker_build("runner",
     match_in_env_vars=True)
 
 # Build the data handler
-docker_build("datahandler", 
+docker_build("datahandler:latest", 
     context='./apps/runner', 
     dockerfile='./apps/runner/data_handler.Dockerfile',
     match_in_env_vars=True)
