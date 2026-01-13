@@ -66,6 +66,7 @@ def run_batch(data: IncomingStartRequest):
             file.write("\n\n\n Hello from data_handler\n")
 
         explogger.debug("write to file finished")
+        open('/signals/ready', 'w').close() # for signal
     
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from mongo, aborting")

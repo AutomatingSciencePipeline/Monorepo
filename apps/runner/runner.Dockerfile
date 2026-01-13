@@ -15,7 +15,9 @@ RUN apt-get update && \
         # For file type identification via bytes
         libmagic1 \
         #Ths should also get Java 11? -David
-        default-jdk 
+        default-jdk \
+        # For intercontainers signals - khai
+        inotify-tools
 
 # Ability to pass in JVM options
 ARG JAVA_OPTS

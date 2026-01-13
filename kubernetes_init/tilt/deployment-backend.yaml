@@ -21,6 +21,8 @@ spec:
         env:
         - name: IMAGE_RUNNER
           value: runner
+        - name: DATA_HANDLER
+          value: datahandler
         - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:

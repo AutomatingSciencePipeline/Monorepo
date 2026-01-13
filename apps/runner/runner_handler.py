@@ -74,6 +74,10 @@ def close_experiment_run(expId: DocumentId):
 
 
 if __name__ == '__main__':
+    
+    while not os.path.exists('/signals/ready'):
+        time.sleep(1)
+    
     if len(sys.argv) < 2:
         raise ValueError("Error: Too few arguments. Needs ID (ex: python runner.py 1234)")
     elif len(sys.argv) > 2:

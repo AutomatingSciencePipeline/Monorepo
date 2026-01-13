@@ -3,6 +3,14 @@ v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-ex
 v1alpha1.extension(name='helm_resource', repo_name='default', repo_path='helm_resource')
 load("ext://helm_resource", "helm_resource")
 
+# register image locator
+k8s_kind('Job',
+image_json_path=[
+    '{.spec.template.spec.containers[*].image}',
+    '{.spec.template.spec.initContainers[*].image}',
+    '{.spec.template.spec.ephemeralContainers[*].image}'
+])
+
 # Setup the needed k8s yamls
 k8s_yaml([
     "kubernetes_init/tilt/cluster-role-job-creator.yaml",

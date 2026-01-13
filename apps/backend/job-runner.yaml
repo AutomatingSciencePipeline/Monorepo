@@ -11,9 +11,9 @@ spec:
     spec:
       restartPolicy: Never 
       shareProcessNamespace: true
-
-      initContainers:
-      - name: setup
+      
+      containers:
+      - name: datahandler
         image: datahandler
         command: []
         volumeMounts:
@@ -47,8 +47,7 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "200m"
-      
-      containers:
+    
       - name: runner
         image: runner
         imagePullPolicy: IfNotPresent
