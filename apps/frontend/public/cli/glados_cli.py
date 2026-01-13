@@ -216,7 +216,7 @@ class RequestManager(object):
             perror(f'{error}')
         return res.json()
     
-    def download_experiment_results(self, experiment_id: str) -> Dict[str, typing.Any]:
+    def download_experiment_results(self, experiment_id: str, output_directory: str) -> Dict[str, typing.Any]:
         experiment_req_json = {
             "token": self.token,
             "expID": experiment_id
@@ -237,19 +237,22 @@ class RequestManager(object):
             if "filename=" in cd:
                 filename = cd.split("filename=")[1].strip('"')
 
-            with open(filename, "wb") as f:
+            os.makedirs(output_directory, exist_ok=True)
+            output_path = os.path.join(output_directory, filename)
+
+            with open(output_path, "wb") as f:
                 f.write(res.content)
             return { 'success': True, 'files': [{'name': filename, 'content': res.content}] }
         except requests.RequestException as error:
             perror(f'{error}')
             
-    def download_all(self, experiment_id: str) -> Dict[str, typing.Any]:
+    def download_all(self, experiment_id: str, output_directory: str) -> Dict[str, typing.Any]:
         experiment_req_json = {
             "token": self.token,
             "expID": experiment_id
         }
         try:
-            res = self.download_experiment_results(experiment_id)
+            res = self.download_experiment_results(experiment_id, output_directory)
             if(res.get('success') is not True):
                 return res
         except requests.RequestException as error:
@@ -265,7 +268,9 @@ class RequestManager(object):
                 except ValueError:
                     error_msg = res.text
                 return {'success': False, 'error': error_msg}
-            with open(filename, "wb") as f:
+            os.makedirs(output_directory, exist_ok=True)
+            output_path = os.path.join(output_directory, f'{filename}_system_log.txt')
+            with open(output_path, "wb") as f:
                 f.write(res.content)
         except requests.RequestException as error:
             perror(f'{error}')
@@ -278,7 +283,9 @@ class RequestManager(object):
                 except ValueError:
                     error_msg = res.text
                 return {'success': False, 'error': error_msg}
-            with open(f"{filename}_results.zip", "wb") as f:
+            os.makedirs(output_directory, exist_ok=True)
+            output_path = os.path.join(output_directory, f"{filename}_results.zip")
+            with open(output_path, "wb") as f:
                 f.write(res.content)
         except requests.RequestException as error:
             perror(f'{error}')
@@ -352,8 +359,8 @@ def query_experiments(request_manager: RequestManager, title: str):
         print(f"Trials: {match['current_permutation']}/{match['total_permutations']} Completed\n")
     return EX_SUCCESS
 
-def download_experiment(request_manager: RequestManager, experiment_id: str) -> int:
-    results = request_manager.download_experiment_results(experiment_id)
+def download_experiment(request_manager: RequestManager, experiment_id: str, output_directory: str) -> int:
+    results = request_manager.download_experiment_results(experiment_id, output_directory)
     if not results.get("success", False):
         msg, status = {
             'not_found': ("Experiment not found.", EX_NOTFOUND),
@@ -363,11 +370,11 @@ def download_experiment(request_manager: RequestManager, experiment_id: str) -> 
         perror(msg)
         return status
     
-    print(f"Experiment results {results['files'][0]['name']} downloaded successfully.")
+    print(f"Experiment results {results['files'][0]['name']} downloaded successfully to {output_directory}.")
     return EX_SUCCESS
 
-def download_all(request_manager: RequestManager, experiment_id: str) -> int:
-    results = request_manager.download_all(experiment_id)
+def download_all(request_manager: RequestManager, experiment_id: str, output_directory: str) -> int:
+    results = request_manager.download_all(experiment_id, output_directory)
     if not results.get("success", False):
         msg, status = {
             'not_found': ("Experiment not found.", EX_NOTFOUND),
@@ -377,7 +384,7 @@ def download_all(request_manager: RequestManager, experiment_id: str) -> int:
         perror(msg)
         return status
     
-    print(f"All experiment artifacts downloaded successfully.")
+    print(f"All experiment artifacts downloaded successfully to {output_directory}.")
     return EX_SUCCESS
 
 def check_version(request_manager: RequestManager, cli_path: str) -> None:
@@ -535,10 +542,10 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         description="The command line interface for GLADOS.")
     parser.add_argument('--generate-token', action='store_true', help='Generate a new authentication token and exit, regardless of other options used.')
     parser.add_argument('--token',  '-t', type=str, help='Authentication token to use. If none is provided, it will either read ".token.glados" or prompt to generate a new token.')
-    parser.add_argument('--upload', '-z', type=str, help='Upload an experiment file with a given file path. Cannot be used with -q, or -d.')
+    parser.add_argument('--run-experiment', '-r', type=str, help='Upload an experiment file with a given file path. Cannot be used with -q, or -d.')
     parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z or -d.')
-    parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
-    parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--download', '-d', type=str, nargs=2, metavar=('ID', 'OUTPUT_DIRECTORY'), help='Download the results of a completed experiment. Cannot be used with -z or -s.')
+    parser.add_argument('--download-all', '-da', type=str, nargs=2, metavar=('ID', 'OUTPUT_DIRECTORY'), help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
     parser.add_argument('--update', '-u', action='store_true', help='Downloads most up-to-date CLI version.')
     
     parsed = parser.parse_args(args)
@@ -548,8 +555,8 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     else:
         check_version(request_manager, "glados_cli.py")
 
-    if not exactly_one([parsed.upload, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
-        perror("error: Exactly one of -z, -q, or -d must be provided.")
+    if not exactly_one([parsed.run_experiment, parsed.query, parsed.download, parsed.download_all]) and not parsed.generate_token and not parsed.token:
+        perror("error: Exactly one of -r, -q, or -d must be provided.")
         return EX_PARSE_ERROR
     elif not parsed.token and not parsed.generate_token:
         if not os.path.exists(".token.glados"):
@@ -576,14 +583,16 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
     # Authentication successful, proceed with requested operation
     result = EX_SUCCESS
         
-    if parsed.upload:
-        result = upload_and_start_experiment(request_manager, parsed.upload)
+    if parsed.run_experiment:
+        result = upload_and_start_experiment(request_manager, parsed.run_experiment)
     if parsed.query:
         result = query_experiments(request_manager, parsed.query)
     if parsed.download:
-        result = download_experiment(request_manager, parsed.download)
+        experiment_id, output_directory = parsed.download
+        result = download_experiment(request_manager, experiment_id, output_directory)
     if parsed.download_all:
-        result = download_all(request_manager, parsed.download_all)
+        experiment_id, output_directory = parsed.download_all
+        result = download_all(request_manager, experiment_id, output_directory)
     
     # Restore original stdout and stderr
     sys.stdout, sys.stderr = _out, _err
