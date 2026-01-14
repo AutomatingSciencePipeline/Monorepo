@@ -44,7 +44,7 @@ def parse_experiment_metadata(raw_data):
         raw_data = process_exp_metadata(raw_data, raw_data['expId'])
         experiment = ExperimentData(**raw_data)
         experiment.postProcess = experiment.scatter #bruh moment
-        experiment.experimentType = determine_experiment_file_type(experiment.file)
+        experiment.experimentType = determine_experiment_file_type(experiment.file, explogger)
         return experiment
         
     except ValueError as err:
