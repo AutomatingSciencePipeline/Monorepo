@@ -135,7 +135,7 @@ def run_batch(data: IncomingStartRequest):
     # Parsing into Datatype
     try:
         experiment = ExperimentData(**experiment_data)
-        experiment.postProcess = experiment.scatter
+        experiment.postProcess = experiment.scatter #bruh moment
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)

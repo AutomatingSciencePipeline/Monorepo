@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+gunicorn = "==20.1.0" # Was specifically versioned by the last team. TODO see if we can update it.
+numpy = "*"
+firebase-admin = "*"
+configparser = "*"
+python-magic = "*"
+python-dotenv = "*"
+matplotlib = "*"
+pymongo = "*"
+pydantic = "==1.10.7"
+pytest-cov = "*"
+pipreqs = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
+
+[dev-packages]
+python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
+yapf = "*"
+pylint = "*"
+pytest = "*"
+coverage = "*"
+
+[requires]
+python_version = "3.8"

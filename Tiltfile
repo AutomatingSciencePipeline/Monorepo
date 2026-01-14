@@ -98,6 +98,25 @@ docker_build("datahandler",
     dockerfile='./apps/runner/data_handler.Dockerfile',
     match_in_env_vars=True)
 
+# Runner 2
+docker_build("runner2",
+    context='apps/runner2',
+    live_update=[
+        sync("apps/runner2/", "/app")
+    ],
+    dockerfile="apps/runner2/runner/runner.Dockerfile",
+    match_in_env_vars=True
+)
+
+docker_build("datahandler2",
+    context='apps/runner2',
+    live_update=[
+        sync("apps/runner2/", "/app")
+    ],
+    dockerfile="apps/runner2/data_provider/data_provider.Dockerfile",
+    match_in_env_vars=True
+)
+
 # add a command that will run on tilt down to cleanup the pv's that are made by helm
 if config.tilt_subcommand == 'down':
     local("helm uninstall glados-mongodb")

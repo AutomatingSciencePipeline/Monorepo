@@ -19,10 +19,10 @@ spec:
         ports:
         - containerPort: 5050
         env:
-        - name: IMAGE_RUNNER
-          value: runner
+        - name: IMAGE_RUNNER # stuff that tilt needs to work
+          value: runner2
         - name: DATA_HANDLER
-          value: datahandler
+          value: datahandler2
         - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:
