@@ -90,8 +90,9 @@ def setup_data(metadata, exp_id):
     try:
         error_message = "This is not a supported experiment file type, aborting"
         experimentType = determine_experiment_file_type(filepath, explogger=explogger)
-        write_exp_metadata_to_file(exp_metadata=metadata)
         
+        write_exp_metadata_to_file(exp_metadata=metadata)
+        os.mkdir('/signals/metadata-ready') # signal runner to generate config
         
         if experimentType == ExperimentType.ZIP:
             error_message = "Failed to extract zip file"
@@ -100,13 +101,13 @@ def setup_data(metadata, exp_id):
             os.rename(filepath, "userProvidedFile.zip")
             shutil.unpack_archive("userProvidedFile.zip", '.')
         
-        role = metadata['creatorRole']
-        if role == "admin" or role == "privileged":
-            explogger.info("User is admin or privileged, installing packages from packages.txt")
-            install_additional_packages()
+        # role = metadata['creatorRole']
+        # if role == "admin" or role == "privileged":
+        #     explogger.info("User is admin or privileged, installing packages from packages.txt")
+        #     install_additional_packages()
             
-            explogger.info("User is admin or privileged, running commands from commandsToRun.txt") 
-            run_custom_command()
+            # explogger.info("User is admin or privileged, running commands from commandsToRun.txt") 
+            # run_custom_command()
         
         # this needs to happen after all dependencies are installed
         if experimentType == ExperimentType.ZIP:
@@ -130,7 +131,12 @@ def setup_data(metadata, exp_id):
             error_message = f"Failed to install pip requirements: {str(os.listdir())}"
             
             # do pip install -r userProvidedFileReqs.txt
-            os.system(f"pip install -r userProvidedFileReqs.txt")
+            subprocess.run([
+                'python', '-m', 'venv', 
+                '--system-site-packages', 
+                '/data/venv' # shared volume
+            ])
+            os.system(f"/data/venv/bin/pip install --no-cache-dir -r userProvidedFileReqs.txt")
 
         write_exp_metadata_to_file(exp_metadata=metadata) # write before json become unserializable
         
@@ -139,10 +145,6 @@ def setup_data(metadata, exp_id):
         # experiment = ExperimentData(**metadata)
         # metadata['totalExperimentRuns'] = generate_configs(experiment)
         # update_exp_value(exp_id, "totalExperimentRuns", metadata['totalExperimentRuns'])
-        
-        
-        
-
     except Exception as err:
         explogger.error(error_message)
         explogger.exception(err)
@@ -176,52 +178,52 @@ def setup_data(metadata, exp_id):
 #         explogger.exception(err)
 #         raise NotImplementedError("Unknown experiment file type") from err
 
-def install_packages(file_path):
-    try:
-        # Read the packages from the file
-        with open(file_path, "r") as file:
-            packages = file.read().splitlines()
+# def install_packages(file_path):
+#     try:
+#         # Read the packages from the file
+#         with open(file_path, "r") as file:
+#             packages = file.read().splitlines()
 
-        if not packages:
-            explogger.info("No packages to install.")
-            return
+#         if not packages:
+#             explogger.info("No packages to install.")
+#             return
 
-        # Update the package list
-        explogger.info("Updating package list...")
-        subprocess.run(["apt-get", "update"], check=True)
+#         # Update the package list
+#         explogger.info("Updating package list...")
+#         subprocess.run(["apt-get", "update"], check=True)
 
-        # Install the packages
-        explogger.info("Installing packages...")
-        subprocess.run(["apt-get", "install", "-y"] + packages, check=True)
+#         # Install the packages
+#         explogger.info("Installing packages...")
+#         subprocess.run(["apt-get", "install", "-y"] + packages, check=True)
         
-        # Update cache
-        explogger.info("Updating cache...")
-        subprocess.run(["ldconfig"], check=True)
+#         # Update cache
+#         explogger.info("Updating cache...")
+#         subprocess.run(["ldconfig"], check=True)
 
-        explogger.info("Packages installed successfully!")
-    except subprocess.CalledProcessError as e:
-        explogger.error(f"Error occurred while running a command: {e}")
-    except FileNotFoundError:
-        explogger.error(f"File '{file_path}' not found.")
-    except Exception as e:
-        explogger.error(f"An unexpected error occurred: {e}")
+#         explogger.info("Packages installed successfully!")
+#     except subprocess.CalledProcessError as e:
+#         explogger.error(f"Error occurred while running a command: {e}")
+#     except FileNotFoundError:
+#         explogger.error(f"File '{file_path}' not found.")
+#     except Exception as e:
+#         explogger.error(f"An unexpected error occurred: {e}")
 
-def install_additional_packages():
-    explogger.info("User is admin or privileged, installing packages from packages.txt")
+# def install_additional_packages():
+#     explogger.info("User is admin or privileged, installing packages from packages.txt")
     
-    try:
-        if os.path.exists("packages.txt"):
-            install_packages("packages.txt")
-    except Exception as e:
-        raise GladosUserError('Failed to install packages') from e
+#     try:
+#         if os.path.exists("packages.txt"):
+#             install_packages("packages.txt")
+#     except Exception as e:
+#         raise GladosUserError('Failed to install packages') from e
 
-def run_custom_command():
-    try:
-        if os.path.exists("commandsToRun.txt"):
-            for line in open("commandsToRun.txt"):
-                os.system(line)   
-    except Exception as e:
-        raise GladosUserError('Failed to run command') from e
+# def run_custom_command():
+#     try:
+#         if os.path.exists("commandsToRun.txt"):
+#             for line in open("commandsToRun.txt"):
+#                 os.system(line)   
+#     except Exception as e:
+#         raise GladosUserError('Failed to run command') from e
     
 def get_pip_reqs(fileWasZip, exp_id):
     # if the file exists, skip running the command

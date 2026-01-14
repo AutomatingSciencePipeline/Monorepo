@@ -57,7 +57,8 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     os.mkdir(f'trial{trialRun}')
     os.chdir(f'trial{trialRun}')
     if experiment.experimentType == ExperimentType.PYTHON:
-        with Popen(['python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+        # /data/venv/bin/ is a shared venv with data_handler.py
+        with Popen(['/data/venv/bin/python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
             _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
     elif experiment.experimentType == ExperimentType.JAVA:
         with Popen(['java', '-jar', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:

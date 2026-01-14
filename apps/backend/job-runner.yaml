@@ -44,10 +44,10 @@ spec:
         
         resources:
           requests:
-            memory: "64Mi"
+            memory: "250Mi"
             cpu: "100m"
           limits:
-            memory: "128Mi"
+            memory: "500Mi"
             cpu: "200m"
     
       - name: runner
@@ -78,10 +78,10 @@ spec:
           value: "/signals"
         resources:
           requests:
-            memory: "128Mi"
+            memory: "512Mi"
             cpu: "200m"
           limits:
-            memory: "256Mi"
+            memory: "1Gi"
             cpu: "500m"
       
       volumes: 

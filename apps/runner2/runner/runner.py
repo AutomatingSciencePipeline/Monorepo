@@ -4,6 +4,7 @@ import logging
 import json
 import time
 from bson.binary import Binary
+import subprocess
 
 from modules.data.types import DocumentId, IncomingStartRequest
 from modules.data.experiment import ExperimentData, ExperimentType
@@ -39,9 +40,57 @@ def process_exp_metadata(exp_metadata, exp_id):
     
     return exp_metadata
 
+def install_packages(file_path):
+    try:
+        # Read the packages from the file
+        with open(file_path, "r") as file:
+            packages = file.read().splitlines()
+
+        if not packages:
+            explogger.info("No packages to install.")
+            return
+
+        # Update the package list
+        explogger.info("Updating package list...")
+        subprocess.run(["apt-get", "update"], check=True)
+
+        # Install the packages
+        explogger.info("Installing packages...")
+        subprocess.run(["apt-get", "install", "-y"] + packages, check=True)
+        
+        # Update cache
+        explogger.info("Updating cache...")
+        subprocess.run(["ldconfig"], check=True)
+
+        explogger.info("Packages installed successfully!")
+    except subprocess.CalledProcessError as e:
+        explogger.error(f"Error occurred while running a command: {e}")
+    except FileNotFoundError:
+        explogger.error(f"File '{file_path}' not found.")
+    except Exception as e:
+        explogger.error(f"An unexpected error occurred: {e}")
+
+def install_additional_packages():
+    explogger.info("User is admin or privileged, installing packages from packages.txt")
+    
+    try:
+        if os.path.exists("packages.txt"):
+            install_packages("packages.txt")
+    except Exception as e:
+        raise GladosUserError('Failed to install packages') from e
+
+def run_custom_command():
+    try:
+        if os.path.exists("commandsToRun.txt"):
+            for line in open("commandsToRun.txt"):
+                os.system(line)   
+    except Exception as e:
+        raise GladosUserError('Failed to run command') from e
+
 def parse_experiment_metadata(raw_data):
     try:
         raw_data = process_exp_metadata(raw_data, raw_data['expId'])
+        
         experiment = ExperimentData(**raw_data)
         experiment.postProcess = experiment.scatter #bruh moment
         experiment.experimentType = determine_experiment_file_type(experiment.file, explogger)
@@ -140,12 +189,23 @@ def main():
             os.chdir(f'/data/ExperimentFiles/{exp_id}')
             experiment = parse_experiment_metadata(data)
             
+            role = data['creatorRole']
+            if role == "admin" or role == "privileged":
+                explogger.info("User is admin or privileged, installing packages from packages.txt")
+                install_additional_packages()
+                
+                explogger.info("User is admin or privileged, running commands from commandsToRun.txt") 
+                run_custom_command()
+            
             # generate configs
             experiment.totalExperimentRuns = generate_configs(experiment)
             update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
-           
+
+            # Hold until dependencies are installed
+            while not os.path.exists('/signals/done-setup'):
+                time.sleep(1)
+
             start_experiment(experiment=experiment)
-            
             explogger.info("Run finished, transferring control to data_handler")
    
         except Exception as err:
@@ -156,7 +216,7 @@ def main():
             os.mkdir("/signals/start-cleanup") # signal datahandler to cleanup
             
 if __name__ == '__main__':
-    while not os.path.exists('/signals/done-setup'):
+    while not os.path.exists('/signals/metadata-ready'):
         time.sleep(1)
     
     main()
