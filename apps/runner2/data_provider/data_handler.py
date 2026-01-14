@@ -52,7 +52,7 @@ def process_exp_metadata(exp_metadata, exp_id):
     
 def request_exp_metadata(exp_id):
     exp_metadata = get_experiment_with_id(exp_id)
-    return process_exp_metadata(exp_metadata, exp_id)
+    return exp_metadata
 
 def download_experiment_files(exp_metadata):
     if exp_metadata['trialExtraFile'] != '' or exp_metadata['scatter']:
@@ -63,7 +63,7 @@ def download_experiment_files(exp_metadata):
     expId = exp_metadata['expId']
     explogger.info(f'Downloading file for {expId}')
     
-    explogger.info(f"Downloading {filepath} to ExperimentFiles/{expId}/{filepath}")
+    explogger.info(f"Downloading {filepath} to /data/ExperimentFiles/{expId}/{filepath}")
     try:
         # try to call the backend to download
         url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?fileId={filepath}'
@@ -76,19 +76,22 @@ def download_experiment_files(exp_metadata):
     except Exception as err:
         explogger.error(f"Error {err} occurred while trying to download experiment file")
         raise GladosInternalError('Failed to download experiment files') from err
-    explogger.info(f"Downloaded {filepath} to ExperimentFiles/{expId}/{filepath}")
+    explogger.info(f"Downloaded {filepath} to /data/ExperimentFiles/{expId}/{filepath}")
     return filepath
 
 def setup_data(metadata, exp_id):
     #Downloading Experiment File
     # If the program errors here after you just deleted the ExperimentFiles on your dev machine, restart the docker container, seems to be volume mount weirdness
-    os.makedirs(f'ExperimentFiles/{exp_id}')
-    os.chdir(f'ExperimentFiles/{exp_id}')
+    os.makedirs(f'/data/ExperimentFiles/{exp_id}')
+    os.chdir(f'/data/ExperimentFiles/{exp_id}')
     filepath = download_experiment_files(exp_metadata=metadata)
+    fileWasZip = False
     
     try:
         error_message = "This is not a supported experiment file type, aborting"
-        experimentType = determine_experiment_file_type(filepath)
+        experimentType = determine_experiment_file_type(filepath, explogger=explogger)
+        write_exp_metadata_to_file(exp_metadata=metadata)
+        
         
         if experimentType == ExperimentType.ZIP:
             error_message = "Failed to extract zip file"
@@ -114,7 +117,7 @@ def setup_data(metadata, exp_id):
             
             # also update experiment.file
             exe_file = metadata['experimentExecutable']
-            experimentType = determine_experiment_file_type(exe_file)
+            experimentType = determine_experiment_file_type(exe_file, explogger)
             metadata['file'] = exe_file
             explogger.info(f"New experiment file type: {exe_file}")
         
@@ -124,21 +127,27 @@ def setup_data(metadata, exp_id):
         
         # check if the new requirements exists
         if os.path.exists("userProvidedFileReqs.txt"):
-            error_message = "Failed to install pip requirements"
+            error_message = f"Failed to install pip requirements: {str(os.listdir())}"
             
             # do pip install -r userProvidedFileReqs.txt
             os.system(f"pip install -r userProvidedFileReqs.txt")
+
+        write_exp_metadata_to_file(exp_metadata=metadata) # write before json become unserializable
         
         # generate configs
-        experiment = ExperimentData(**metadata)
-        metadata['totalExperimentRuns'] = generate_configs(experiment)
-        update_exp_value(exp_id, "totalExperimentRuns", metadata['totalExperimentRuns'])
+        # metadata = process_exp_metadata(metadata, exp_id)
+        # experiment = ExperimentData(**metadata)
+        # metadata['totalExperimentRuns'] = generate_configs(experiment)
+        # update_exp_value(exp_id, "totalExperimentRuns", metadata['totalExperimentRuns'])
         
-        write_exp_metadata_to_file(exp_metadata=metadata)
         
+        
+
     except Exception as err:
         explogger.error(error_message)
-        os.chdir('../..')
+        explogger.exception(err)
+        os.chdir('../../..')
+        
         raise err # propagate error
         
 
@@ -234,7 +243,7 @@ def generate_configs(experiment):
     return totalExperimentRuns
 
 def write_exp_metadata_to_file(exp_metadata):
-    explogger.debug("write to file")
+    explogger.debug("write metadata to file")
     with open("/data/exp_metadata.json", "w") as file:
         json.dump(exp_metadata, file)
         
@@ -253,7 +262,7 @@ def run_batch(data: IncomingStartRequest):
     
     try:
         metadata = request_exp_metadata(exp_id=exp_id)
-        setup_data(metadata)
+        setup_data(metadata, exp_id)
         
         explogger.info("Setup finished, transferring control to runner")
         os.mkdir("/signals/done-setup") #signal runner that data is ready

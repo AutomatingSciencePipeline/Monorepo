@@ -80,40 +80,40 @@ docker_build("backend",
     ],
     dockerfile='./apps/backend/backend-dev.Dockerfile')
 
-# Build the runner
-docker_build("runner", 
-    context='./apps/runner',
-    live_update=[
-        sync("./apps/runner/", "/app")
-    ],
-    dockerfile='./apps/runner/runner.Dockerfile',
-    match_in_env_vars=True)
+# # Build the runner
+# docker_build("runner", 
+#     context='./apps/runner',
+#     live_update=[
+#         sync("./apps/runner/", "/app")
+#     ],
+#     dockerfile='./apps/runner/runner.Dockerfile',
+#     match_in_env_vars=True)
 
-# Build the data handler
-docker_build("datahandler", 
-    context='./apps/runner', 
-    live_update=[
-        sync("./apps/runner/", "/app")
-    ],
-    dockerfile='./apps/runner/data_handler.Dockerfile',
-    match_in_env_vars=True)
+# # Build the data handler
+# docker_build("datahandler", 
+#     context='./apps/runner', 
+#     live_update=[
+#         sync("./apps/runner/", "/app")
+#     ],
+#     dockerfile='./apps/runner/data_handler.Dockerfile',
+#     match_in_env_vars=True)
 
 # Runner 2
 docker_build("runner2",
-    context='apps/runner2',
+    context='./apps/runner2',
     live_update=[
-        sync("apps/runner2/", "/app")
+        sync("./apps/runner2/", "/app")
     ],
-    dockerfile="apps/runner2/runner/runner.Dockerfile",
+    dockerfile="./apps/runner2/runner/runner.Dockerfile",
     match_in_env_vars=True
 )
 
 docker_build("datahandler2",
-    context='apps/runner2',
+    context='./apps/runner2',
     live_update=[
-        sync("apps/runner2/", "/app")
+        sync("./apps/runner2/", "/app")
     ],
-    dockerfile="apps/runner2/data_provider/data_provider.Dockerfile",
+    dockerfile="./apps/runner2/data_provider/data_provider.Dockerfile",
     match_in_env_vars=True
 )
 

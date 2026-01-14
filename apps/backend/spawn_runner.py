@@ -16,22 +16,23 @@ def create_job_object(experiment_data):
     job_name = "runner-" + experiment_data['experiment']['id']
     
     # job_command = ["python3", "runner.py", json.dumps(experiment_data)]
-    job_command = ["python3", "runner.py"]
+    job_command = ["sh", "-c", "find /app -type f -o -type d | sort && python3 runner.py"]
 
     runner_body = get_yaml_file_body(RUNNER_PATH)
 
     runner_body['metadata']['name'] = job_name
     runner_body['spec']['template']['spec']['containers'][1]['command'] = job_command
     runner_body['spec']['template']['spec']['containers'][0]['command'] = ["python3", "data_handler.py", json.dumps(experiment_data)]
+    # runner_body['spec']['template']['spec']['containers'][0]['command'] = ["sh", "-c", "find /app -type f -o -type d | sort && python3 runner.py"]
     
     # stuff for tilt image map to work properly
     if os.getenv("IMAGE_RUNNER"):
         # Get the image name
-        image_name = str(os.getenv("DATA_HANDLER"))
+        image_name = str(os.getenv("IMAGE_RUNNER"))
         runner_body['spec']['template']['spec']['containers'][1]['image'] = image_name
     
     if os.getenv("DATA_HANDLER") :
-        image_name = str(os.getenv("IMAGE_RUNNER"))
+        image_name = str(os.getenv("DATA_HANDLER"))
         runner_body['spec']['template']['spec']['containers'][0]['image'] = image_name
 
     return runner_body

@@ -18,11 +18,11 @@ RUN apt-get update && \
 FROM base AS python_dependencies
 # Copy in python requirements definitions, but don't install yet, dev and prod need different deps
 RUN pip install pipenv
-COPY Pipfile .
-COPY Pipfile.lock .
+COPY ./data_provider/Pipfile .
+COPY ./data_provider/Pipfile.lock .
 
 RUN pipenv install --system --deploy --ignore-pipfile
 
 WORKDIR /app
-COPY . /app
-COPY ../modules /app/modules
+COPY data_provider/ /app/ 
+COPY modules/ /app/modules/

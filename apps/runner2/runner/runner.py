@@ -1,13 +1,8 @@
 import os
 import shutil
 import logging
-import subprocess
-import sys
 import json
 import time
-import typing
-
-import requests
 from bson.binary import Binary
 
 from modules.data.types import DocumentId, IncomingStartRequest
@@ -16,7 +11,7 @@ from modules.data.parameters import Parameter, parseRawHyperparameterData
 #from modules.db.mongo import upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection
 from modules.logging.gladosLogging import EXPERIMENT_LOGGER, SYSTEM_LOGGER, close_experiment_logger, configure_root_logger, open_experiment_logger
 from modules.runner import conduct_experiment
-from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
+from modules.exceptions import GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
 from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id, update_exp_value, determine_experiment_file_type
@@ -28,8 +23,25 @@ from modules.lifecycle import close_experiment_run
 configure_root_logger()
 explogger = logging.getLogger(EXPERIMENT_LOGGER)
 
+def process_exp_metadata(exp_metadata, exp_id):
+    # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
+    try:
+        hyperparameters: "dict[str,Parameter]" = parseRawHyperparameterData(exp_metadata['hyperparameters'])
+    except (KeyError, ValueError) as err:
+        if isinstance(err, KeyError):
+            explogger.error("Error generating hyperparameters - hyperparameters not found in experiment object, aborting")
+        else:
+            explogger.error("Error generating hyperparameters - Validation error")
+        explogger.exception(err)
+        close_experiment_run(exp_id, explogger)
+        return
+    exp_metadata['hyperparameters'] = hyperparameters
+    
+    return exp_metadata
+
 def parse_experiment_metadata(raw_data):
     try:
+        raw_data = process_exp_metadata(raw_data, raw_data['expId'])
         experiment = ExperimentData(**raw_data)
         experiment.postProcess = experiment.scatter #bruh moment
         experiment.experimentType = determine_experiment_file_type(experiment.file)
@@ -110,6 +122,13 @@ def start_experiment(experiment):
         send_email(experiment, "FAILED")
     finally:
         raise GladosInternalError("Experiment run failed")
+
+def generate_configs(experiment):
+    totalExperimentRuns = generate_config_files(experiment)
+    if totalExperimentRuns == 0:
+        raise GladosInternalError("Error generating configs - somehow no config files were produced?")
+    
+    return totalExperimentRuns
       
 def main():
     """Function that gets called when the file is ran"""
@@ -118,8 +137,12 @@ def main():
         exp_id = data['expId']    
         
         try:
-            os.chdir(f'ExperimentFiles/{exp_id}')
+            os.chdir(f'/data/ExperimentFiles/{exp_id}')
             experiment = parse_experiment_metadata(data)
+            
+            # generate configs
+            experiment.totalExperimentRuns = generate_configs(experiment)
+            update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
            
             start_experiment(experiment=experiment)
             
@@ -128,8 +151,8 @@ def main():
         except Exception as err:
             explogger.exception(err)
         finally:
-            os.chdir('../..')
-            close_experiment_run(exp_id)
+            os.chdir('../../..')
+            close_experiment_run(exp_id, explogger)
             os.mkdir("/signals/start-cleanup") # signal datahandler to cleanup
             
 if __name__ == '__main__':

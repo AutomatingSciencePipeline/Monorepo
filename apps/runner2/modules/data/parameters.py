@@ -12,16 +12,17 @@ class ParamType(Enum):
     STRING = "string"
     STRING_LIST = "stringlist"
     PARAMGROUP = "paramgroup"
-
+    
 
 class Parameter(BaseModel):
     type: ParamType
+    
 
 
 class BoolParameter(Parameter):
     type = ParamType.BOOL
     default: bool
-
+    
 
 class StringParameter(Parameter):
     type = ParamType.STRING
@@ -36,7 +37,7 @@ class ParamGroupParameter(Parameter):
     type = ParamType.PARAMGROUP
     default: str
     values: dict
-
+    
 
 def _check_bounds(values):
     start, stop = values.get('min'), values.get('max')
@@ -63,6 +64,7 @@ class IntegerParam(Parameter):
         if step < 1:
             raise ValueError("Step value cannot be less than 1")
         return step
+    
 
 
 class FloatParam(Parameter):
@@ -83,11 +85,12 @@ class FloatParam(Parameter):
         if step <= 0:
             raise ValueError("Step value cannot be less than or equal to 0")
         return step
-
+    
 
 def parseRawHyperparameterData(hyperparameters):
     result = {}
     for entry in hyperparameters:
+        
         entryType = entry['type']
         entryName = entry['name']
         del entry['name']
