@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.8 as base
+FROM python:3.9 as base
 
 # Keeps Python from generating .pyc files in the container
 # This doesn't benefit the performance of the system
