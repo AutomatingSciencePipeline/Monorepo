@@ -27,6 +27,9 @@ y, default: 1, min: 1, max: 10, step: 1
 
 Paste into the User-Defined Contants field:
 
+[DEFAULT]
+x={x}
+y={y}
 [const]
 a = -1
 ;test comment
