@@ -26,8 +26,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {Tag} from '../components/Tag'
-import { Notification } from '@mantine/core';
-import Link from 'next/link';
 
 const GLADOS_CLI_LINK = '/cli/glados_cli.py';
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
@@ -481,9 +479,7 @@ export default function DashboardPage() {
 			
 			<div className='relative min-h-full min-w-full flex flex-col'>
 				{/* Navbar */}
-				<Navbar setSearchTerm={setSearchTerm} /> 
-				
-				{GladosCLINotification()}
+				<Navbar setSearchTerm={setSearchTerm} />
 
 				{/* 3 column wrapper */}
 				<div className='flex-grow w-full mx-auto px-4 sm:px-6 xl:px-8 lg:flex'>
@@ -850,20 +846,6 @@ const SortingOptions = {
 	DATE_UPLOADED: 'dateUploaded',
 	DATE_UPLOADED_REVERSE: 'dateUploadedReverse'
 };
-
-const GladosCLINotification = () => {
-	const [bannerOpen, setBannerOpen] = useState(true);
-	
-	return <div className='float-right'>
-		{bannerOpen ? (
-			<Notification title="Did you know?" onClose={() => setBannerOpen(false)}>
-				The GLADOS CLI is ready to be tested!
-				<Link color='blue' href={GLADOS_CLI_LINK} download="glados_cli.py"> <u>Click here</u> </Link>
-				to give it a try.
-			</Notification>
-		) : (<div />)}
-	</div>;
-}
 
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted }: ExperimentListProps) => {
 	// Initial sorting option
