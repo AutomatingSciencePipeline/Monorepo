@@ -15,7 +15,7 @@ import { DumbTextArea } from './stepComponents/DumbTextAreaStep';
 import { submitExperiment, copyFile, getDocumentFromId, refreshFileTimestamp, updateLastUsedDateFile } from '../../../../lib/mongodb_funcs';
 import { useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
-import { addNumsExpData, multistringPy, geneticalgo, paramGroupDefault } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
+import { addNumsExpData, multistringPy, geneticalgo, bistreamEvo, paramGroupDefault } from '../DefaultExperiments/ExpJSONs/DefaultExpJSONs';
 import { useDebouncedCallback } from "use-debounce";
 
 const DEFAULT_TRIAL_TIMEOUT_HOURS = 5;
@@ -74,6 +74,8 @@ function selectDefaultExpFile(selectedExperiment: number) {
 			return geneticalgo;
 		case 4:
 			return paramGroupDefault;
+		case 5:
+			return bistreamEvo;
 		default:
 			return addNumsExpData;
 	}
@@ -230,7 +232,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			status: 'CREATED',
 			keepLogs: expInfo['keepLogs'],
 			sendEmail: expInfo['sendEmail'],
-			experimentExecutable: '',
+			experimentExecutable: expInfo['experimentExecutable'],
 		});
 
 		setCopyId(null);
