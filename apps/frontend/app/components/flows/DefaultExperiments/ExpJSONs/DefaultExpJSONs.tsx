@@ -23,6 +23,7 @@ export const addNumsExpData = {
     "timeout": 5,
     "trialExtraFile": "AddNumResult.csv",
     "workers": 1,
+    "trialResultLineNumber": 0,
     "scatterDepVar": "",
     "scatterIndVar": "",
     "keepLogs": true,
@@ -33,7 +34,8 @@ export const addNumsExpData = {
     "dumbTextArea": "",
     "description": "",
     "name": "Add Nums Default Experiment Python",
-    "scatter": false
+    "scatter": false,
+    "experimentExecutable": ""
 }
 
 export const multistringPy = {
@@ -71,6 +73,7 @@ export const multistringPy = {
       ],
     "timeout": 5,
     "trialExtraFile": "stringResult.csv",
+    "trialResultLineNumber": 0,
     "scatterDepVar": "",
     "scatterIndVar": "",
     "workers": 1,
@@ -82,7 +85,8 @@ export const multistringPy = {
     "dumbTextArea": "",
     "description": "",
     "name": "Multi String Default Experiment Python",
-    "scatter": false
+    "scatter": false,
+    "experimentExecutable": ""
 }
 
 export const geneticalgo = {
@@ -138,6 +142,7 @@ export const geneticalgo = {
     "scatterDepVar": "",
     "scatterIndVar": "",
     "workers": 1,
+    "trialResultLineNumber": 0,
     "keepLogs": true,
     "sendEmail": false,
     "creator": "DefaultRunner",
@@ -146,7 +151,8 @@ export const geneticalgo = {
     "dumbTextArea": "",
     "description": "",
     "name": "Genetic Algorithm Default Experiment",
-    "scatter": false
+    "scatter": false,
+    "experimentExecutable": ""
 }
 
 export const paramGroupDefault =  {
@@ -244,7 +250,6 @@ export const bistreamEvo = {
   ],
   "name": "Bitstream Evolution",
   "description": "",
-  "tags": [],
   "trialExtraFile": "",
   "trialResult": "workspace/bestlivedata.log",
   "trialResultLineNumber": -1,
