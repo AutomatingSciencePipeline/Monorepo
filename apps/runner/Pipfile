@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+
 gunicorn = "==20.1.0" # Was specifically versioned by the last team. TODO see if we can update it.
 numpy = "*"
-firebase-admin = "*"
 configparser = "*"
 python-magic = "*"
 python-dotenv = "*"
@@ -18,6 +18,7 @@ pipreqs = "*"
 google-api-python-client = "*"
 google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
+websockets = "*"
 
 [dev-packages]
 python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
@@ -27,4 +28,4 @@ pytest = "*"
 coverage = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
