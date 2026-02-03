@@ -535,11 +535,11 @@ def parse_args(request_manager: RequestManager, args: Optional[typing.Sequence[s
         description="The command line interface for GLADOS.")
     parser.add_argument('--generate-token', action='store_true', help='Generate a new authentication token and exit, regardless of other options used.')
     parser.add_argument('--token',  '-t', type=str, help='Authentication token to use. If none is provided, it will either read ".token.glados" or prompt to generate a new token.')
-    parser.add_argument('--upload', '-z', type=str, help='Upload an experiment file with a given file path. Cannot be used with -q, or -d.')
-    parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z or -d.')
-    parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z or -s.')
-    parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z or -s.')
-    parser.add_argument('--update', '-u', action='store_true', help='Downloads most up-to-date CLI version.')
+    parser.add_argument('--upload', '-z', type=str, help='Upload an experiment file with a given file path. Cannot be used with -q, -d, or -da.')
+    parser.add_argument('--query',  '-q', type=str, help='Query experiment status of experiments with a given name. If the name is "*", show all experiments. Cannot be used with -z, -d, or -da.')
+    parser.add_argument('--download', '-d', type=str, help='Download the results of a completed experiment. Cannot be used with -z, -da, or -q.')
+    parser.add_argument('--download-all', '-da', type=str, help='Download all artifacts from an experiment. Cannot be used with -z, -d, or -q.')
+    parser.add_argument('--update', '-u', action='store_true', help='Downloads most up-to-date CLI version. Cannot be used with -z, -q, -d, or -da.')
     
     parsed = parser.parse_args(args)
     
