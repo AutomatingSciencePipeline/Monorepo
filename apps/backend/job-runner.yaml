@@ -14,6 +14,13 @@ spec:
         image: gladospipeline/glados-runner:main
         imagePullPolicy: Always
         command: []
+        resources:
+          requests:
+            cpu: "250m"      # 0.25 cores
+            memory: "256Mi"
+          limits:
+            cpu: "500m"      # 0.5 cores max
+            memory: "512Mi"
         env:
         - name: MONGODB_PORT
           valueFrom:
@@ -31,5 +38,5 @@ spec:
               name: secret-env
               key: GMAIL_CREDS
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 2
   ttlSecondsAfterFinished: 60
