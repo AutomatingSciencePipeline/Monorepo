@@ -29,7 +29,6 @@ class ExperimentData(BaseModel):
     file = ""  #Will be set either by initializing or by app.py
     timeout: int
     sendEmail: bool
-    keepLogs: bool
     scatter: bool
     scatterIndVar: Optional[str]
     scatterDepVar: Optional[str]

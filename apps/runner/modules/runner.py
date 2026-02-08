@@ -21,17 +21,16 @@ PROCESS_ERROR_STREAM = 1
 explogger = get_experiment_logger()
 
 
-def _get_data(process: 'Popen[str]', trialRun: int, keepLogs: bool, trialTimeout: int):
+def _get_data(process: 'Popen[str]', trialRun: int, trialTimeout: int):
     try:
         data = process.communicate(timeout=trialTimeout)
-        if keepLogs:
-            os.chdir('../ResCsvs')
-            with open(f"log{trialRun}.txt", 'w', encoding='utf8') as trialLogFile:
-                trialLogFile.write(data[PROCESS_OUT_STREAM])
-                if data[1]:
-                    trialLogFile.write(data[PROCESS_ERROR_STREAM])
-                trialLogFile.close()
-            os.chdir('..')
+        os.chdir('../ResCsvs')
+        with open(f"log{trialRun}.txt", 'w', encoding='utf8') as trialLogFile:
+            trialLogFile.write(data[PROCESS_OUT_STREAM])
+            if data[1]:
+                trialLogFile.write(data[PROCESS_ERROR_STREAM])
+            trialLogFile.close()
+        os.chdir('..')
         if data[PROCESS_ERROR_STREAM]:
             # pybullet build time is a common error that is not an error
             # the pybullet developers made this output on stderr because they are horrible developers
@@ -58,14 +57,14 @@ def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     os.chdir(f'trial{trialRun}')
     if experiment.experimentType == ExperimentType.PYTHON:
         with Popen(['python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
+            _get_data(process, trialRun, experiment.timeout)
     elif experiment.experimentType == ExperimentType.JAVA:
         with Popen(['java', '-jar', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
+            _get_data(process, trialRun, experiment.timeout)
     elif experiment.experimentType == ExperimentType.C:
         Popen(['chmod', '+x', "../" + experiment.file], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8')
         with Popen(['../' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            _get_data(process, trialRun, experiment.keepLogs, experiment.timeout)
+            _get_data(process, trialRun, experiment.timeout)
 
 
 def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):

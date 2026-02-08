@@ -77,7 +77,6 @@ function convertToExpsArray(arr: WithId<Document>[]) {
     trialResult: doc.trialResult || '',
     trialResultLineNumber: doc.trialResultLineNumber ?? 0,
     timeout: doc.timeout ?? 0,
-    keepLogs: doc.keepLogs ?? false,
     scatter: doc.scatter ?? false,
     scatterIndVar: doc.scatterIndVar || '',
     scatterDepVar: doc.scatterDepVar || '',
