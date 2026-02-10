@@ -261,7 +261,7 @@ export const bistreamEvo = {
   "keepLogs": true,
   "sendEmail": false,
   "workers": 1,
-  "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/BitstreamEvolution.zip",
+  "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/%23638/Feature/Bitstream-Evolution_Default_Experiment/example_experiments/python/BitstreamEvolution.zip",
   "status": "CREATED",
   "experimentExecutable": "src/evolve.py"
 }
