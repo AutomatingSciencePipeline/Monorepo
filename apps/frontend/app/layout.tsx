@@ -3,6 +3,8 @@ import '../styles/experimentListing.css';
 import RouteHandler from './RouteHandler';
 import { Metadata } from 'next';
 import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dropzone/styles.css';
 
 export const metadata: Metadata = {
   title: 'GLADOS',
