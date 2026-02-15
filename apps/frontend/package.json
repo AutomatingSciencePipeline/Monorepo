@@ -6,7 +6,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
 		"type-check": "tsc --noEmit",
 		"test": "echo TODO"
 	},
@@ -56,7 +56,7 @@
 		"@types/react-dom": "^19.2.3",
 		"@types/uuid": "^9.0.0",
 		"autoprefixer": "^10.4.12",
-		"eslint": "^8.57.0",
+		"eslint": "^9.19.0",
 		"eslint-config-google": "^0.14.0",
 		"eslint-config-next": "^16.1.6",
 		"postcss": "^8.4.18",
