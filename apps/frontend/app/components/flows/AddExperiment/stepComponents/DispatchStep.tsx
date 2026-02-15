@@ -82,7 +82,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 				// accept={SUPPORTED_FILE_TYPES}
 				>
 					<div className="flex items-center gap-6 pointer-events-none">
-    					<Group spacing="xl" style={{ pointerEvents: "none" }}>
+    					<Group gap="xl" style={{ pointerEvents: "none" }}>
 						<Dropzone.Accept>
 							<Upload size={80} strokeWidth={1} />
 						</Dropzone.Accept>
