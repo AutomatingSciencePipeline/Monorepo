@@ -2,7 +2,6 @@
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
 import { Fragment, useState, useEffect } from 'react';
-import React from "react";
 import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, MenuItems, MenuItem, MenuButton, Switch, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
@@ -758,10 +757,6 @@ export default function DashboardPage() {
 								<h2 className='text-sm font-semibold'>Activity</h2>
 							</div>
 							<div>
-								<h1>
-									We are currently using react version{" "}
-									{React.version}
-								</h1>
 								<ul role='list' className='divide-y divide-gray-200'>
 									{activityItems.map((item) => (
 										<li
