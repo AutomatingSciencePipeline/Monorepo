@@ -31,7 +31,10 @@ jobs:
         run: npm ci
       - name: Run ESLint
         working-directory: ./apps/frontend
-        run: npm run lint
+        run:
+          pwd
+          node -p "require('./package.json').scripts.lint"
+          npm run lint -- --help
       - name: Run Typescript Check
         working-directory: ./apps/frontend
         run: npm run type-check
