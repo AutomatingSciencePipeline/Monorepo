@@ -168,19 +168,24 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 async function downloadRecentFile(fileId: string, filename: string) {
 	const file = await downloadFile(fileId);
 	if (file) {
-		const chunks: Uint8Array[] = [];
-		for await (const chunk of file) {
-			chunks.push(chunk);
-		}
-		const blob = new Blob(chunks, { type: 'application/octet-stream' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename; // You can set the filename here
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		const chunks: BlobPart[] = [];
+
+  		for await (const chunk of file) {
+    		chunks.push(chunk); // chunk is a valid BlobPart at runtime
+  		}
+
+  		const blob = new Blob(chunks, { type: "application/octet-stream" });
+  		const url = URL.createObjectURL(blob);
+
+  		const a = document.createElement("a");
+  		a.href = url;
+  		a.download = filename;
+
+  		document.body.appendChild(a);
+  		a.click();
+  		document.body.removeChild(a);
+
+  		URL.revokeObjectURL(url);
 	} else {
 		console.error('File not found or download failed.');
 	}
