@@ -1111,7 +1111,43 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 									</a>
 								)}
 							</MenuItem>
-							<MenuItem>
+
+							<Disclosure>
+      							<Disclosure.Button
+        							className="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      							>
+        						Experiment Tags
+        						<ChevronDownIcon
+          							className={`ml-2.5 -mr-1.5 h-5 w-5 text-gray-400 transition-transform`}/>
+      							</Disclosure.Button>
+      								<Disclosure.Panel>
+        								{tags &&
+  											tags.map((title) => (
+    											<div key={title}>
+      												<MenuItem>
+        												{({ active }) => (
+          													<a
+            													href="#"
+            													className={`${menuHoverActiveCss(active)} flex items-center gap-1`}
+          													>
+            													<Toggle
+              														label={" "}
+              														initialValue={tagsMultipleFilter.indexOf(title) > -1}
+              														onChange={(newValue) => {
+                														handleMultipleFilterTag(title, newValue);
+              														}}
+            													/>
+            												<Tag text={title} deletable={false} />
+          												</a>
+        											)}
+      											</MenuItem>
+    										</div>
+  										))}
+      								</Disclosure.Panel>
+    						</Disclosure>
+
+							{/* <MenuItem>
+								
 								<Menu as='div' className='relative' style={{ marginLeft: '0.5rem' }}>
 									<Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
 										Experiment Tags
@@ -1137,12 +1173,12 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 												 		<Tag key={title} text={title} deletable={false}/>
 														</a>
 													)}
-												</MenuItem>
-											</div>
+												</MenuItem> */}
+											{/* </div>
 										))}
 									</MenuItems>
 								</Menu>
-							</MenuItem>
+							</MenuItem> */}
 						</div>
 					</MenuItems>
 				</Menu>
