@@ -6,7 +6,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+		"lint": "eslint .",
 		"type-check": "tsc --noEmit",
 		"test": "echo TODO"
 	},
@@ -49,6 +49,7 @@
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
+		"@eslint/eslintrc": "^3.3.3",
 		"@tailwindcss/forms": "^0.5.3",
 		"@types/js-yaml": "^4.0.0",
 		"@types/node": "^25.2.3",
