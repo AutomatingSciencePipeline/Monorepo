@@ -170,8 +170,7 @@ def run_batch(data: IncomingStartRequest):
             close_experiment_run(exp_id)
             return
     
-    # if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
-    if True:
+    if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
         explogger.info("User is admin or privileged, installing packages from packages.txt")
         
         if os.path.exists("packages.txt"):
