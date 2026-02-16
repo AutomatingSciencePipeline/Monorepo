@@ -453,7 +453,7 @@ const ParamGroup = ({ form, type, index, updateConfirmedParamValues, ...rest }) 
 				Edit Param Group
 			</Button>
 			<Modal opened={opened} onClose={() => setOpened(false)} title="Edit Params and Values" styles={{
-				modal: {
+				content: {
 					width: '30%', // Adjust the width as needed
 					maxWidth: 'none', // Ensure the modal can grow beyond the default max width
 				},
