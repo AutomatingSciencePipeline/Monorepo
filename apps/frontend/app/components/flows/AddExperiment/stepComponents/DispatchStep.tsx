@@ -77,11 +77,12 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 					}}
 					maxSize={MAXIMUM_SIZE_BYTES}
 					maxFiles={1}
-					className='justify-center m-4 items-center h-full'
+					className='m-4 min-h-[350px] flex items-center justify-center'
 					loading={loading}
 				// accept={SUPPORTED_FILE_TYPES}
 				>
-					<Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
+					<div className="flex items-center gap-6 pointer-events-none">
+    					<Group gap="xl" style={{ pointerEvents: "none" }}>
 						<Dropzone.Accept>
 							<Upload size={80} strokeWidth={1} />
 						</Dropzone.Accept>
@@ -96,7 +97,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 							<FileCode size={80} strokeWidth={1} />
 						</Dropzone.Idle>
 
-						<div>
+						<div className="text-center">
 							<Text size="xl" inline>
 								Upload your project executable.
 							</Text>
@@ -109,6 +110,7 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 							</Text>
 						</div>
 					</Group>
+					</div>
 				</Dropzone>
 			</div>
 			<div className='p-5 flex-1'>
@@ -166,19 +168,24 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 async function downloadRecentFile(fileId: string, filename: string) {
 	const file = await downloadFile(fileId);
 	if (file) {
-		const chunks: Uint8Array[] = [];
-		for await (const chunk of file) {
-			chunks.push(chunk);
-		}
-		const blob = new Blob(chunks, { type: 'application/octet-stream' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename; // You can set the filename here
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		const chunks: BlobPart[] = [];
+
+  		for await (const chunk of file) {
+    		chunks.push(chunk); // chunk is a valid BlobPart at runtime
+  		}
+
+  		const blob = new Blob(chunks, { type: "application/octet-stream" });
+  		const url = URL.createObjectURL(blob);
+
+  		const a = document.createElement("a");
+  		a.href = url;
+  		a.download = filename;
+
+  		document.body.appendChild(a);
+  		a.click();
+  		document.body.removeChild(a);
+
+  		URL.revokeObjectURL(url);
 	} else {
 		console.error('File not found or download failed.');
 	}
