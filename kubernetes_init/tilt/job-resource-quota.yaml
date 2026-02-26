@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: job-quota
+  namespace: default # TODO: Make new namespace with different resource quotas, for privilidged users to use
+spec:
+  hard:
+    requests.cpu: "4"           # Max cores total per user
+    requests.memory: "4Gi"      # Max RAM
+    pods: "50"                  # Max concurrent pods
+    count/jobs.batch: "50"      # Max concurrent jobs
