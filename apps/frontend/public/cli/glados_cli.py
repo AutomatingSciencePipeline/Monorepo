@@ -408,7 +408,6 @@ def check_manifest_format(manifest_path: str, is_zip_file: bool) -> int:
     check_manifest_format_int_helper(config, "trialResultLineNumber", -1, True, "manifest.yml"),
     check_manifest_format_int_helper(config, "timeout", 0, True, "manifest.yml"),
     check_manifest_format_int_helper(config, "workers", 0, True, "manifest.yml"),
-    check_manifest_format_bool_helper(config, "keepLogs", "manifest.yml"),
     check_manifest_format_bool_helper(config, "sendEmail", "manifest.yml"),
     check_manifest_format_hyperparameter_helper(config, "hyperparameters"),
     ]

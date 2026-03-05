@@ -140,10 +140,6 @@ The duration before the experiment automatically times out.
 
 If using a zip experiment, specify the main executable filename.
 
-#### Keep Logs *(Required)*
-
-Select this option to store logs from the experiment runner pod.
-
 ### Parameters Tab
 
 ![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-parameters_tab-05_2025.png)
