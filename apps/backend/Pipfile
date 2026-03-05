@@ -14,7 +14,7 @@ pylint = "*"
 
 [dev-packages]
 # libmagic dlls for windows hosts https://pypi.org/project/python-magic/ (when missing, vague errors and it crashes)
-python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
+python-magic-bin = {markers = "platform_system == 'Windows'"}
 yapf = "*"
 pylint = "*"
 pytest = "*"
