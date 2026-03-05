@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "31ef46256b9f50b71867162cc8a17e39ae279e1b8404974cb5c37cee5991dea8"
+            "sha256": "0b5e7196bf23cc163e6d7fe8fedcb6fb814a8c90d5cb942b9e3721980f3a1cb3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -937,8 +937,7 @@
             "version": "==8.3.5"
         },
         "python-magic-bin": {
-            "markers": "platform_system == 'Windows'",
-            "version": "==>=0"
+            "markers": "platform_system == 'Windows'"
         },
         "tomli": {
             "hashes": [
