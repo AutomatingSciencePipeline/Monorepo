@@ -5,6 +5,9 @@ import { InputSection } from '../../../InputSection';
 import {Tag} from '../../../Tag';
 import React, {useState} from 'react';
 import toast from 'react-hot-toast';
+import { Menu, MenuItems, MenuItem} from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import classNames from 'classnames';
 export const TAG_MAX_NUMBER = 5;
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
@@ -158,7 +161,45 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         </input>
                     </div>
                 </InputSection>
+                <br></br>
+                <Menu as='div' className='relative'>
+                    <Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+                        Config File Type: {form.values.configFileType}
+                        <ChevronDownIcon
+                            className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
+                            aria-hidden='true' />
+                    </Menu.Button>
+                    <MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                        <div className='py-1'>
+                            <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".ini" onClick={form.setFieldValue('configFileType', 'ini')} />
+                            <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".yaml" onClick={form.setFieldValue('configFileType', 'yaml')} />
+                        </div>
+                    </MenuItems>
+                </Menu>
             </Fragment>
         </div>
     );
+};
+
+const BasicMenuItem = ({menuHoverActiveCss, label, onClick}) => {
+	return <MenuItem>
+		{({ active }) => (
+			<a
+				href="#"
+				className={menuHoverActiveCss(active)}
+				onClick={onClick}
+			>
+				{label}
+			</a>
+		)}
+	</MenuItem>;
+}
+
+const menuHoverActiveCss = (active: boolean) => {
+        return classNames(
+            active ?
+                'bg-gray-100 text-gray-900' :
+                'text-gray-700',
+            'block px-4 py-2 text-sm'
+        );
 };
