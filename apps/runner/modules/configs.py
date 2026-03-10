@@ -186,6 +186,39 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
     os.chdir('..')
     return f'{configNum}.ini'
 
+def create_yaml_from_data(experiment: ExperimentData, configNum: int):
+    """
+    Call this function when inside the experiment folder!
+    """
+    if experiment.configs == {}:
+        explogger.info(f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty")
+    try:
+        configData = experiment.configs[f'config{configNum}'].data
+    except KeyError as err:  #TODO: Discuss how we handle this error
+        msg = f"There is no config {configNum} cannot generate this config, there are only {len(experiment.configs)} configs"
+        explogger.exception(err)
+        raise GladosInternalError(msg) from err
+
+    os.chdir('configFiles')
+    # DONE: Change to custom function to create ini file
+    configFileLines = ["[DEFAULT]"]
+    for line in experiment.dumbTextArea.split('\n'):
+        configFileLines.append(line.replace('\n', '')) 
+    
+    for key, value in configData.items():
+        if "{" + key + "}" in experiment.dumbTextArea:
+            for i, line in enumerate(configFileLines):
+                configFileLines[i] = line.replace("{" + key + "}", str(value))
+        else:
+            configFileLines.append(f"{key}: {value}")
+    
+    with open(f'{configNum}.yaml', 'w', encoding="utf8") as configFile:
+        configFile.write('\n'.join(configFileLines))
+        configFile.close()
+        explogger.info(f"Wrote config{configNum} to a file")
+    os.chdir('..')
+    return f'{configNum}.yaml'
+
 
 def get_default(parameter: Parameter):
     if parameter.type == ParamType.INTEGER:

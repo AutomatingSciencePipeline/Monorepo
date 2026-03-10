@@ -5,7 +5,7 @@ import time
 import os
 
 # from modules.data.trial import Trial
-from modules.configs import create_config_from_data, get_configs_ordered
+from modules.configs import create_config_from_data, create_yaml_from_data, get_configs_ordered
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.exceptions import ExperimentAbort, FileHandlingError, GladosInternalError, GladosUserError, TrialTimeoutError
 from modules.exceptions import InternalTrialFailedError
@@ -172,7 +172,10 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
     numOutputs = 0
 
     try:
-        configFileName = create_config_from_data(experiment, trialNum)
+        if(experiment.configFileType == "yaml"):
+            configFileName = create_yaml_from_data(experiment, trialNum)
+        else:
+            configFileName = create_config_from_data(experiment, trialNum)
         paramNames = get_config_paramNames('configFiles/0.ini')
     except Exception as err:
         raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
