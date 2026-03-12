@@ -47,7 +47,7 @@ export const experimentSchema = Joi.object().keys({
 	tags: Joi.array().items(Joi.string().required()),
 	hyperparameters: Joi.array().items(intschema, floatschema, boolschema, strschema, stringlistschema),
 	workers: Joi.number().integer().required(),
-	configFileType: Joi.string().valid('ini', 'yaml').required(),
+	configFileFormat: Joi.string().valid('ini', 'yaml').required(),
 });
 
 export const signUpSchema = Joi.object().keys({

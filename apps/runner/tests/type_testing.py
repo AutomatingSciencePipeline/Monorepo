@@ -29,7 +29,7 @@ if __name__ == "__main__":
         'created': 1679705027850,
         'scatter': True,
         'expId': 'V3dpcllHWPrK1Kgbyzqb',
-        'configFileType': "ini"
+        'configFileFormat': "ini"
     }
     # cspell:enable
     hyperparameters = parseRawHyperparameterData(json.loads(expInfo['hyperparameters'])['hyperparameters'])

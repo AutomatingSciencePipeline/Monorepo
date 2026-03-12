@@ -93,5 +93,5 @@ export interface ExperimentData {
     fails: number;
     totalExperimentRuns: number;
     experimentExecutable: string;
-    configFileType: string;
+    configFileFormat: string;
 }

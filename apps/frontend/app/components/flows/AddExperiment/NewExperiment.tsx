@@ -123,7 +123,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			file: '',
 			status: 'CREATED',
 			experimentExecutable: '',
-			configFileType: '',
+			configFileFormat: '',
 		},
 		validate: joiResolver(experimentSchema),
 	});
@@ -156,7 +156,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								file: newFileId,
 								status: 'CREATED',
 								experimentExecutable: expInfo['experimentExecutable'],
-								configFileType: expInfo['configFileType']
+								configFileFormat: expInfo['configFileFormat']
 							});
 							setCopyId(null);
 							setStatus(FormStates.Info);
@@ -183,7 +183,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 								file: expInfo['file'],
 								status: 'CREATED',
 								experimentExecutable: expInfo['experimentExecutable'],
-								configFileType: expInfo['configFileType']
+								configFileFormat: expInfo['configFileFormat']
 							});
 							setFileId(expInfo['file']);
 							setCopyId(null);
@@ -233,7 +233,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 			status: 'CREATED',
 			sendEmail: expInfo['sendEmail'],
 			experimentExecutable: expInfo['experimentExecutable'],
-			configFileType: expInfo['configFileType']
+			configFileFormat: expInfo['configFileFormat']
 		});
 
 		setCopyId(null);
