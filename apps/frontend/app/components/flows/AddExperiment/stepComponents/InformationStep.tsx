@@ -161,21 +161,22 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         </input>
                     </div>
                 </InputSection>
-                <br></br>
-                <Menu as='div' className='relative'>
-                    <Menu.Button className='w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
-                        Config File Type: {form.values.configFileType}
-                        <ChevronDownIcon
-                            className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
-                            aria-hidden='true' />
-                    </Menu.Button>
-                    <MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                        <div className='py-1'>
-                            <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".ini" onClick={form.setFieldValue('configFileType', 'ini')} />
-                            <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".yaml" onClick={form.setFieldValue('configFileType', 'yaml')} />
-                        </div>
-                    </MenuItems>
-                </Menu>
+                <InputSection header={'Config File Type'}>
+                    <Menu as='div' className='relative'>
+                        <Menu.Button className=' bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+                            {form.values.configFileType}
+                            <ChevronDownIcon
+                                className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
+                                aria-hidden='true' />
+                        </Menu.Button>
+                        <MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                            <div className='py-1'>
+                                <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".ini" onClick={() => form.setFieldValue('configFileType', 'ini')} />
+                                <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".yaml" onClick={() => form.setFieldValue('configFileType', 'yaml')} />
+                            </div>
+                        </MenuItems>
+                    </Menu>
+                </InputSection>
             </Fragment>
         </div>
     );
