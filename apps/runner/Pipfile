@@ -19,6 +19,7 @@ google-api-python-client = "*"
 google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
 websockets = "*"
+pyyaml = "*"
 
 [dev-packages]
 python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
