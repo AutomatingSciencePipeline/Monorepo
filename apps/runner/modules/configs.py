@@ -293,7 +293,7 @@ def get_config_paramNames_yaml(configfile: FilePath):
     return sorted(res)
 
 
-def get_configs_ordered(configfile: FilePath, parameterNames: "list[str]"):
+def get_configs_ordered_ini(configfile: FilePath, parameterNames: "list[str]"):
     config = configparser.ConfigParser()
     config.read(configfile)
     res = []
@@ -306,4 +306,24 @@ def get_configs_ordered(configfile: FilePath, parameterNames: "list[str]"):
             except KeyError as err:
                 if index >= len(parameterNames):
                     raise GladosInternalError(f"Somehow the parameter name {key} was not in any of the config sections") from err
+    return res
+
+def get_configs_ordered_yaml(configfile: FilePath, parameterNames: "list[str]"):
+    with open(configfile, "r") as f:
+        config = yaml.safe_load(f)
+
+    res = []
+
+    for key in parameterNames:
+        for index, section in enumerate(config):
+            try:
+                val = config[section][key]
+                res.append(val)
+                break
+            except KeyError as err:
+                if index >= len(config) - 1:
+                    raise GladosInternalError(
+                        f"Somehow the parameter name {key} was not in any of the config sections"
+                    ) from err
+
     return res
