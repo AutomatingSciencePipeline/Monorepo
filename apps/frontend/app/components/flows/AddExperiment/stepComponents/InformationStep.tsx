@@ -171,8 +171,8 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         </Menu.Button>
                         <MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
                             <div className='py-1'>
-                                <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".ini" onClick={() => form.setFieldValue('configFileType', 'ini')} />
-                                <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label=".yaml" onClick={() => form.setFieldValue('configFileType', 'yaml')} />
+                                <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="ini" onClick={() => form.setFieldValue('configFileType', 'ini')} />
+                                <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="yaml" onClick={() => form.setFieldValue('configFileType', 'yaml')} />
                             </div>
                         </MenuItems>
                     </Menu>
