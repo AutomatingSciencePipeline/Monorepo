@@ -192,33 +192,45 @@ def create_yaml_from_data(experiment: ExperimentData, configNum: int):
     Call this function when inside the experiment folder!
     """
     if experiment.configs == {}:
-        explogger.info(f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty")
+        explogger.info(
+            f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty"
+        )
     try:
         configData = experiment.configs[f'config{configNum}'].data
-    except KeyError as err:  #TODO: Discuss how we handle this error
+    except KeyError as err:  # TODO: Discuss how we handle this error
         msg = f"There is no config {configNum} cannot generate this config, there are only {len(experiment.configs)} configs"
         explogger.exception(err)
         raise GladosInternalError(msg) from err
 
     os.chdir('configFiles')
-    # DONE: Change to custom function to create ini file
-    configFileLines = ["[DEFAULT]"]
+    yaml_data = {}
+
+    # Parse the dumbTextArea template
     for line in experiment.dumbTextArea.split('\n'):
-        configFileLines.append(line.replace('\n', '')) 
-    
+        line = line.strip()
+        if not line:
+            continue
+
+        for key, value in configData.items():
+            line = line.replace("{" + key + "}", str(value))
+
+        if ":" in line:
+            key, val = line.split(":", 1)
+            yaml_data[key.strip()] = val.strip()
+
+    # Add values not referenced in template
     for key, value in configData.items():
-        if "{" + key + "}" in experiment.dumbTextArea:
-            for i, line in enumerate(configFileLines):
-                configFileLines[i] = line.replace("{" + key + "}", str(value))
-        else:
-            configFileLines.append(f"{key}: {value}")
-    
-    with open(f'{configNum}.yaml', 'w', encoding="utf8") as configFile:
-        configFile.write('\n'.join(configFileLines))
-        configFile.close()
-        explogger.info(f"Wrote config{configNum} to a file")
+        if key not in yaml_data:
+            yaml_data[key] = value
+
+    filename = f"{configNum}.yaml"
+
+    with open(filename, "w", encoding="utf8") as configFile:
+        yaml.dump(yaml_data, configFile, default_flow_style=False)
+
+    explogger.info(f"Wrote config{configNum} to a YAML file")
     os.chdir('..')
-    return f'{configNum}.yaml'
+    return filename
 
 
 def get_default(parameter: Parameter):
