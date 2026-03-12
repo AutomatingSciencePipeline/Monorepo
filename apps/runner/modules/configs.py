@@ -1,6 +1,7 @@
 import configparser
 import itertools
 import os
+import yaml
 from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 
@@ -274,7 +275,7 @@ def gather_parameters(hyperparams, constants, parameters, paramgroups):
             raise GladosInternalError('Error during finding constants') from err
 
 
-def get_config_paramNames(configfile: FilePath):
+def get_config_paramNames_ini(configfile: FilePath):
 
     config = configparser.ConfigParser()
     config.read(configfile)
@@ -283,6 +284,13 @@ def get_config_paramNames(configfile: FilePath):
         res += [key for key in list(config[section]) if key not in res]
     res.sort()
     return res
+
+def get_config_paramNames_yaml(configfile: FilePath):
+    with open(configfile, "r") as f:
+        config = yaml.safe_load(f)
+
+    res = {key for section in config.values() if isinstance(section, dict) for key in section}
+    return sorted(res)
 
 
 def get_configs_ordered(configfile: FilePath, parameterNames: "list[str]"):
