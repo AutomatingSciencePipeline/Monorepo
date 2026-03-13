@@ -14,6 +14,8 @@ If you need a local copy of the system, refer to the [installation guide](instal
 
 You must sign in with either a Google or GitHub account to run an experiment.
 
+You may also access experiments from the [GLADOS CLI](https://github.com/AutomatingSciencePipeline/GLADOS_CLI) (all documentation for it is there as well).
+
 ## Preparing Your Code
 
 GLADOS has limited support for experiments. To ensure your experiment runs properly, check whether it meets the [compatibility requirements](#compatibility).
