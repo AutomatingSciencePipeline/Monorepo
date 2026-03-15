@@ -10,7 +10,7 @@ def main():
     x = int(config["DEFAULT"]["x"])
     values = config["DEFAULT"]["values"]
     values2 = config["DEFAULT"]["values2"]
-    combined = f"{x}{values}{values2}"
+    combined = str(x) + values + values2
     
     with open('stringResult.csv', 'w', encoding="utf8") as result:
         writer = csv.writer(result)
