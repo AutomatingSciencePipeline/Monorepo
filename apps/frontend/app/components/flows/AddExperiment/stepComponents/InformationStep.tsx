@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Menu, MenuItems, MenuItem} from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import classNames from 'classnames';
+import BasicMenuItem from '../../../BasicMenuItem';
 export const TAG_MAX_NUMBER = 5;
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
@@ -170,7 +171,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                 aria-hidden='true' />
                         </Menu.Button>
                         <MenuItems className='origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                            <div className='py-1'>
+                            <div className='py-1 text-center'>
                                 <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="ini" onClick={() => form.setFieldValue('configFileFormat', 'ini')} />
                                 <BasicMenuItem menuHoverActiveCss={menuHoverActiveCss} label="yaml" onClick={() => form.setFieldValue('configFileFormat', 'yaml')} />
                             </div>
@@ -181,20 +182,6 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
         </div>
     );
 };
-
-const BasicMenuItem = ({menuHoverActiveCss, label, onClick}) => {
-	return <MenuItem>
-		{({ active }) => (
-			<a
-				href="#"
-				className={menuHoverActiveCss(active)}
-				onClick={onClick}
-			>
-				{label}
-			</a>
-		)}
-	</MenuItem>;
-}
 
 const menuHoverActiveCss = (active: boolean) => {
         return classNames(
