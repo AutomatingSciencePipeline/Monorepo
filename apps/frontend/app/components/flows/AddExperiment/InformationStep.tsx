@@ -1,11 +1,12 @@
 'use client'
 
 import { Fragment, useEffect } from 'react';
-import { InputSection } from '../../../InputSection';
-import {Tag} from '../../../Tag';
+import { InputSection } from '../../InputSection';
+import {Tag} from '../../Tag';
+import BasicMenuItem from '../../BasicMenuItem';
 import React, {useState} from 'react';
 import toast from 'react-hot-toast';
-import { Menu, MenuItems, MenuItem} from '@headlessui/react';
+import { Menu, MenuItems} from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import classNames from 'classnames';
 export const TAG_MAX_NUMBER = 5;
@@ -181,20 +182,6 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
         </div>
     );
 };
-
-const BasicMenuItem = ({menuHoverActiveCss, label, onClick}) => {
-	return <MenuItem>
-		{({ active }) => (
-			<a
-				href="#"
-				className={menuHoverActiveCss(active)}
-				onClick={onClick}
-			>
-				{label}
-			</a>
-		)}
-	</MenuItem>;
-}
 
 const menuHoverActiveCss = (active: boolean) => {
         return classNames(
