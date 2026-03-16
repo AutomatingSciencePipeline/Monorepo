@@ -8,6 +8,15 @@ export const PostProcessStep = ({ form, ...props }) => {
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
 			<Fragment>
+				<InputSection header={'Send Email Upon Completion'}>
+					<div className='sm:col-span-4'>
+						<input
+							type='checkbox'
+							checked={form.values.sendEmail}
+							onChange={() => form.setFieldValue('sendEmail', !form.values.sendEmail)}>
+						</input>
+					</div>
+				</InputSection>
 				<InputSection header={'Scatter Plot'}>
 					<div className='sm:col-span-4'>
 						<input
