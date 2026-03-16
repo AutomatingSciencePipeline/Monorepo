@@ -22,7 +22,7 @@ websockets = "*"
 pyyaml = "*"
 
 [dev-packages]
-python-magic-bin = {version = "*", markers = "platform_system == 'Windows'"}
+python-magic-bin = {markers = "platform_system == 'Windows'"}
 yapf = "*"
 pylint = "*"
 pytest = "*"
