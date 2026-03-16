@@ -351,7 +351,8 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
         const errors = {
             name: !form.values.name,
             trialResult: !form.values.trialResult,
-			timeout: (!form.values.timeout || form.values.timeout <= 0)
+			timeout: (!form.values.timeout || form.values.timeout <= 0),
+			configFileFormat: !form.values.configFileFormat
         };
         setValidationErrors(errors);
         if (errors.name) {
@@ -362,6 +363,9 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 		}
 		if (errors.timeout) {
 			return "Timeout must be greater than 0."
+		}
+		if (errors.configFileFormat) {
+			return "Please select a config file format."
 		}
 		return "";
     };
