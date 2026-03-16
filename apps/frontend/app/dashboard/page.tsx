@@ -235,7 +235,6 @@ export default function DashboardPage() {
 
 	const QUEUE_UNKNOWN_LENGTH = -1;
 	const QUEUE_ERROR_LENGTH = -2;
-	const QUEUE_RECHECK_INTERVAL_MS = 4000;
 
 	const { data: session } = useSession();
 	const [experiments, setExperiments] = useState<ExperimentData[]>([] as ExperimentData[]);
@@ -294,19 +293,16 @@ export default function DashboardPage() {
 		return () => eventSource.close();
 	}, [session]);
 
-	const queryQueueLength = () => {
-		setQueueLength(0);
-	};
-
 	useEffect(() => {
-		const intervalId = setInterval(() => {
-			queryQueueLength(); // Call the function to fetch queue length
-		}, QUEUE_RECHECK_INTERVAL_MS);
-
-		return () => {
-			clearInterval(intervalId); // Clear interval on component unmount
-		};
-	}, []);
+		let queuedCounter = 0;
+		for(let k=0; k<experiments.length; k++){
+			let experiment = experiments[k];
+			if(!experiment.finished && experiment.status !== 'CANCELLED' && !experiment['startedAtEpochMillis']){
+				queuedCounter++;
+			}
+		}
+		setQueueLength(queuedCounter);
+	}, [experiments]);
 
 	useEffect(() => {
 		setExperimentStates((prevState) => {

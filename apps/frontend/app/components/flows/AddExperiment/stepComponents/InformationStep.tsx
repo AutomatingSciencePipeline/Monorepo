@@ -153,15 +153,6 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         />
                     </div>
                 </InputSection>
-                <InputSection header={'Send Email Upon Completion'}>
-                    <div className='sm:col-span-4'>
-                        <input
-                            type='checkbox'
-                            checked={form.values.sendEmail}
-                            onChange={() => form.setFieldValue('sendEmail', !form.values.sendEmail)}>
-                        </input>
-                    </div>
-                </InputSection>
                 <InputSection header={'Config File Format'}>
                     <Menu as='div' className='relative'>
                         <Menu.Button className=' bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
