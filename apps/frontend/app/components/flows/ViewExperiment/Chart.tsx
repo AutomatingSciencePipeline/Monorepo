@@ -25,7 +25,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     const [xAxis, setXAxis] = useState('X');
     const [aggregateMode, setAggregateMode] = useState('sum');
     const [headers, setHeaders] = useState<string[]>([]);
-    const [img, setImg] = useState<string>('');
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [aggregateData, setAggregateData] = useState(false);
     const [canAggregate, setCanAggregate] = useState(true);
@@ -61,8 +60,10 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
     }, [project.expId]);
 
     const downloadImage = () => {
+        if(chartInstance == null) return;
+
         const a = document.createElement('a');
-        a.href = img;
+        a.href = chartInstance.toBase64Image();
         a.download = `${project.name}.png`;
         a.click();
     };
@@ -303,11 +304,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                 },
                                 min: getAxisRange(true),
                                 max: getAxisRange(false) 
-                            }
-                        },
-                        animation: {
-                            onComplete: function () {
-                                setImg(newChartInstance.toBase64Image());
                             }
                         }
                     },
