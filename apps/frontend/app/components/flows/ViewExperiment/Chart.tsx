@@ -304,11 +304,6 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                                 min: getAxisRange(true),
                                 max: getAxisRange(false) 
                             }
-                        },
-                        animation: {
-                            onComplete: function () {
-                                setImg(newChartInstance.toBase64Image());
-                            }
                         }
                     },
                     //https://stackoverflow.com/questions/66489632/how-to-export-chart-js-chart-using-tobase64image-but-with-no-transparency
@@ -359,6 +354,8 @@ const ChartModal: React.FC<ChartModalProps> = ({ onClose, project }) => {
                 newChartInstance.update();
 
                 setChartInstance(newChartInstance);
+
+                setImg(newChartInstance.toBase64Image());
 
                 setHeaders(headers);
             } catch (e) {
