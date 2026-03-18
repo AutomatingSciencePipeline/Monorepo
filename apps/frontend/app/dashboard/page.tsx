@@ -26,6 +26,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {Tag} from '../components/Tag'
+import BasicMenuItem from '../components/BasicMenuItem'
 
 const GLADOS_CLI_LINK = 'https://github.com/AutomatingSciencePipeline/GLADOS_CLI/';
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
@@ -1237,20 +1238,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		</ul>
 	</div>);
 };
-
-const BasicMenuItem = ({menuHoverActiveCss, label, onClick}) => {
-	return <MenuItem>
-		{({ active }) => (
-			<a
-				href="#"
-				className={menuHoverActiveCss(active)}
-				onClick={onClick}
-			>
-				{label}
-			</a>
-		)}
-	</MenuItem>;
-}
 
 async function downloadResultsFile(expId: string) {
 	const result = await fetchResultsFile(expId);

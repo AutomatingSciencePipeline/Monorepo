@@ -28,7 +28,8 @@ if __name__ == "__main__":
         'totalExperimentRuns': 0,
         'created': 1679705027850,
         'scatter': True,
-        'expId': 'V3dpcllHWPrK1Kgbyzqb'
+        'expId': 'V3dpcllHWPrK1Kgbyzqb',
+        'configFileFormat': "ini"
     }
     # cspell:enable
     hyperparameters = parseRawHyperparameterData(json.loads(expInfo['hyperparameters'])['hyperparameters'])

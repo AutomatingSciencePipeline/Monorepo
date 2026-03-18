@@ -5,11 +5,11 @@ import time
 import os
 
 # from modules.data.trial import Trial
-from modules.configs import create_config_from_data, get_configs_ordered
+from modules.configs import create_config_from_data, create_yaml_from_data, get_configs_ordered_ini, get_configs_ordered_yaml
 from modules.data.experiment import ExperimentData, ExperimentType
 from modules.exceptions import ExperimentAbort, FileHandlingError, GladosInternalError, GladosUserError, TrialTimeoutError
 from modules.exceptions import InternalTrialFailedError
-from modules.configs import get_config_paramNames
+from modules.configs import get_config_paramNames_ini, get_config_paramNames_yaml
 from modules.logging.gladosLogging import get_experiment_logger
 from modules.utils import update_exp_value
 
@@ -112,7 +112,6 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
     with open('results.csv', 'w', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
         explogger.info(f"Running Trial {trialNum}")
-        paramNames = get_config_paramNames('configFiles/0.ini')
         numOutputs = 0
         
         startSeconds = time.time()
@@ -120,7 +119,10 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
             update_exp_value(experiment.expId, "startedAtEpochMillis", int(startSeconds * 1000))
         try:
             configFileName = create_config_from_data(experiment, trialNum)
-            paramNames = get_config_paramNames('configFiles/0.ini')
+            if(experiment.configFileFormat == "yaml"):
+                paramNames = get_config_paramNames_yaml('configFiles/0.yaml')
+            else:
+                paramNames = get_config_paramNames_ini('configFiles/0.ini')
         except Exception as err:
             raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
                 
@@ -159,7 +161,11 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
         except GladosUserError as err:
             _handle_trial_error(experiment, numOutputs, paramNames, None, trialNum, err)
             return
-        writer.writerow([trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+        if(experiment.configFileFormat == "yaml"):
+            ordered_configs = get_configs_ordered_yaml(f'configFiles/{trialNum}.yaml', paramNames)
+        else:
+            ordered_configs = get_configs_ordered_ini(f'configFiles/{trialNum}.ini', paramNames)
+        writer.writerow([trialNum] + output + ordered_configs)
 
         explogger.info(f'Trial#{trialNum} completed')
         experiment.passes += 1
@@ -168,12 +174,15 @@ def _run_trial_zero(experiment: ExperimentData, trialNum: int):
         
 def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
     explogger.info(f"Running Trial {trialNum}")
-    paramNames = get_config_paramNames('configFiles/0.ini')
     numOutputs = 0
 
     try:
-        configFileName = create_config_from_data(experiment, trialNum)
-        paramNames = get_config_paramNames('configFiles/0.ini')
+        if(experiment.configFileFormat == "yaml"):
+            configFileName = create_yaml_from_data(experiment, trialNum)
+            paramNames = get_config_paramNames_yaml('configFiles/0.yaml')
+        else:
+            configFileName = create_config_from_data(experiment, trialNum)
+            paramNames = get_config_paramNames_ini('configFiles/0.ini')
     except Exception as err:
         raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
                
@@ -198,7 +207,11 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
         return
     
     # return the object that will be written to a row
-    return [trialNum] + output + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames)
+    if(experiment.configFileFormat == "yaml"):
+        ordered_configs = get_configs_ordered_yaml(f'configFiles/{trialNum}.yaml', paramNames)
+    else:
+        ordered_configs = get_configs_ordered_ini(f'configFiles/{trialNum}.ini', paramNames)
+    return [trialNum] + output + ordered_configs
 
 
 def conduct_experiment(experiment: ExperimentData):
@@ -235,8 +248,10 @@ def conduct_experiment(experiment: ExperimentData):
     with open('results.csv', 'w', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
         if not header:
-            paramNames = get_config_paramNames('configFiles/0.ini')
-            # paramNames = get_configs_ordered(f'configFiles/0.ini', paramNames)
+            if(experiment.configFileFormat == "yaml"):
+                paramNames = get_config_paramNames_yaml('configFiles/0.yaml')
+            else:
+                paramNames = get_config_paramNames_ini('configFiles/0.ini')
             csvHeader = _get_line_n_of_trial_results_csv(0, f"trial0/" + experiment.trialResult)
             writer.writerow(["Experiment Run"] + csvHeader + paramNames)
             header = True
@@ -265,4 +280,8 @@ def _handle_trial_error(experiment: ExperimentData, numOutputs: int, paramNames:
         message = f"First trial of {experiment.expId} ran into an error while running, aborting the whole experiment. Read the traceback to find out what the actual cause of this problem is (it will not necessarily be at the top of the stack trace)."
         raise ExperimentAbort(message) from err
     else:
-        writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + get_configs_ordered(f'configFiles/{trialNum}.ini', paramNames))
+        if(experiment.configFileFormat == "yaml"):
+            ordered_configs = get_configs_ordered_yaml(f'configFiles/{trialNum}.yaml', paramNames)
+        else:
+            ordered_configs = get_configs_ordered_ini(f'configFiles/{trialNum}.ini', paramNames)
+        writer.writerow([trialNum] + [csvErrorValue for i in range(numOutputs)] + ordered_configs)
