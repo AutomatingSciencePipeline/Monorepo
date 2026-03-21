@@ -461,7 +461,7 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 												</div>
 												<button
 													type='button'
-													className='rounded-md border w-1/6 border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+													className='rounded-md border w-1/6 border-gray-300 bg-red-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 													onClick={
 														() => {
 															localStorage.removeItem('ID');
