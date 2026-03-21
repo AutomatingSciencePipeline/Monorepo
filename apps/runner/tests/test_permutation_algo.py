@@ -89,11 +89,11 @@ def generate_permutations(parameters, paramgroup=None):
   # Handle paramgroup if provided
     if paramgroup:
         paramgroup_permutations = []
-        for param in paramgroup.values():
-            param_names = list(param.values.keys())
-            param_values = list(itertools.product(*param.values.values()))
-            for values in param_values:
-                paramgroup_permutations.append(dict(zip(param_names, values)))
+        param_names = list(paramgroup.keys())
+        param_values = list(itertools.product(*paramgroup.values()))
+
+        for values in param_values:
+            paramgroup_permutations.append(dict(zip(param_names, values)))
 
         combined_permutations = []
         for perm in filtered_permutations:

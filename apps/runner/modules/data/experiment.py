@@ -34,6 +34,7 @@ class ExperimentData(BaseModel):
     scatterDepVar: Optional[str]
     dumbTextArea: str
     postProcess = False
+    configFileFormat : str
 
     hyperparameters: Dict[str, Parameter]
     configs = {}  #Will be set Later

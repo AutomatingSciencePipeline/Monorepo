@@ -3,14 +3,19 @@
 import { Fragment } from 'react';
 import { InputSection } from '../../../InputSection';
 
-const PLACEHOLDER_TEXT = `; Example of what you could paste in here (sections and comments supported)
+const PLACEHOLDER_TEXT = `; Example of what you could paste in here (sections and comments supported for INI formatting)
 [const]
 a = -1
 ;test comment
 b = 10.5
 invert = False
 [Strings]
-c = Test String`;
+c = Test String
+
+Example of what you could paste in here (YAML formatting)
+a: -1
+b: 10.5
+invert: false`;
 
 export const DumbTextArea = ({ form, ...props }) => {
 	return (
@@ -19,6 +24,8 @@ export const DumbTextArea = ({ form, ...props }) => {
 				<InputSection header={'User Constants'}>
 					<div className='sm:col-span-4'>
 						<p className='text-gray-500'>Enter additional text to be appended to the bottom of each config file.</p>
+						<p className='text-gray-500'>Utilize syntax for the format type of your config file (INI syntax for INI files, and YAML syntax for YAML files).</p>
+						<br></br>
 						<p className='text-red-500 mb-2'>Disclaimer - these values are not validated, be sure to input them correctly!</p>
 						<textarea
 							{...form.getInputProps('dumbTextArea')}

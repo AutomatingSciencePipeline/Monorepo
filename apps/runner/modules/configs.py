@@ -1,6 +1,7 @@
 import configparser
 import itertools
 import os
+import yaml
 from modules.data.configData import ConfigData
 from modules.data.experiment import ExperimentData
 
@@ -186,6 +187,51 @@ def create_config_from_data(experiment: ExperimentData, configNum: int):
     os.chdir('..')
     return f'{configNum}.ini'
 
+def create_yaml_from_data(experiment: ExperimentData, configNum: int):
+    """
+    Call this function when inside the experiment folder!
+    """
+    if experiment.configs == {}:
+        explogger.info(
+            f"Configs for experiment{experiment.expId} is Empty at create_config_from_data, Config File will be empty"
+        )
+    try:
+        configData = experiment.configs[f'config{configNum}'].data
+    except KeyError as err:  # TODO: Discuss how we handle this error
+        msg = f"There is no config {configNum} cannot generate this config, there are only {len(experiment.configs)} configs"
+        explogger.exception(err)
+        raise GladosInternalError(msg) from err
+
+    os.chdir('configFiles')
+    yaml_data = {}
+
+    # Parse the dumbTextArea template
+    for line in experiment.dumbTextArea.split('\n'):
+        line = line.strip()
+        if not line:
+            continue
+
+        for key, value in configData.items():
+            line = line.replace("{" + key + "}", str(value))
+
+        if ":" in line:
+            key, val = line.split(":", 1)
+            yaml_data[key.strip()] = val.strip()
+
+    # Add values not referenced in template
+    for key, value in configData.items():
+        if key not in yaml_data:
+            yaml_data[key] = value
+
+    filename = f"{configNum}.yaml"
+
+    with open(filename, "w", encoding="utf8") as configFile:
+        yaml.dump(yaml_data, configFile, default_flow_style=False)
+
+    explogger.info(f"Wrote config{configNum} to a YAML file")
+    os.chdir('..')
+    return filename
+
 
 def get_default(parameter: Parameter):
     if parameter.type == ParamType.INTEGER:
@@ -241,7 +287,7 @@ def gather_parameters(hyperparams, constants, parameters, paramgroups):
             raise GladosInternalError('Error during finding constants') from err
 
 
-def get_config_paramNames(configfile: FilePath):
+def get_config_paramNames_ini(configfile: FilePath):
 
     config = configparser.ConfigParser()
     config.read(configfile)
@@ -251,8 +297,15 @@ def get_config_paramNames(configfile: FilePath):
     res.sort()
     return res
 
+def get_config_paramNames_yaml(configfile: FilePath):
+    with open(configfile, "r") as f:
+        config = yaml.safe_load(f)
 
-def get_configs_ordered(configfile: FilePath, parameterNames: "list[str]"):
+    res = {key for section in config.values() if isinstance(section, dict) for key in section}
+    return sorted(res)
+
+
+def get_configs_ordered_ini(configfile: FilePath, parameterNames: "list[str]"):
     config = configparser.ConfigParser()
     config.read(configfile)
     res = []
@@ -265,4 +318,24 @@ def get_configs_ordered(configfile: FilePath, parameterNames: "list[str]"):
             except KeyError as err:
                 if index >= len(parameterNames):
                     raise GladosInternalError(f"Somehow the parameter name {key} was not in any of the config sections") from err
+    return res
+
+def get_configs_ordered_yaml(configfile: FilePath, parameterNames: "list[str]"):
+    with open(configfile, "r") as f:
+        config = yaml.safe_load(f)
+
+    res = []
+
+    for key in parameterNames:
+        for index, section in enumerate(config):
+            try:
+                val = config[section][key]
+                res.append(val)
+                break
+            except KeyError as err:
+                if index >= len(config) - 1:
+                    raise GladosInternalError(
+                        f"Somehow the parameter name {key} was not in any of the config sections"
+                    ) from err
+
     return res

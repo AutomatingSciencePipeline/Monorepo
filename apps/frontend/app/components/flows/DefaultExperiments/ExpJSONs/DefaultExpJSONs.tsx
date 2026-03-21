@@ -34,7 +34,8 @@ export const addNumsExpData = {
     "description": "",
     "name": "Add Nums Default Experiment Python",
     "scatter": false,
-    "experimentExecutable": ""
+    "experimentExecutable": "",
+    "configFileFormat": "ini"
 }
 
 export const multistringPy = {
@@ -84,7 +85,8 @@ export const multistringPy = {
     "description": "",
     "name": "Multi String Default Experiment Python",
     "scatter": false,
-    "experimentExecutable": ""
+    "experimentExecutable": "",
+    "configFileFormat": "ini"
 }
 
 export const geneticalgo = {
@@ -149,7 +151,8 @@ export const geneticalgo = {
     "description": "",
     "name": "Genetic Algorithm Default Experiment",
     "scatter": false,
-    "experimentExecutable": ""
+    "experimentExecutable": "",
+    "configFileFormat": "ini"
 }
 
 export const paramGroupDefault =  {
@@ -202,7 +205,8 @@ export const paramGroupDefault =  {
   "workers": 1,
  "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/addNums.py",
   "status": "CREATED",
-  "experimentExecutable": ""
+  "experimentExecutable": "",
+  "configFileFormat": "ini"
 }
 
 export const bistreamEvo = {
@@ -258,5 +262,6 @@ export const bistreamEvo = {
   "workers": 1,
   "file": "https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/example_experiments/python/BitstreamEvolution.zip",
   "status": "CREATED",
-  "experimentExecutable": "src/evolve.py"
+  "experimentExecutable": "src/evolve.py",
+  "configFileFormat": "ini"
 }

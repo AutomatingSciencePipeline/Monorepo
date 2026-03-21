@@ -26,13 +26,14 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import {Tag} from '../components/Tag'
+import BasicMenuItem from '../components/BasicMenuItem'
 
-const GLADOS_CLI_LINK = '/cli/glados_cli.py';
+const GLADOS_CLI_LINK = 'https://github.com/AutomatingSciencePipeline/GLADOS_CLI/';
 const REPORT_GOOGLE_FORM_LINK = 'https://docs.google.com/forms/d/1sLjV6x_R8C80mviEcrZv9wiDPe5nOxt47g_pE_7xCyE';
 const GLADOS_DOCS_LINK = 'https://automatingsciencepipeline.github.io/Monorepo/tutorial/usage/';
 
 const navigation = [
-	{ name: 'CLI', href: GLADOS_CLI_LINK, desc: 'Download, use, and read about the GLADOS CLI.', current: false },
+	{ name: 'CLI', href: GLADOS_CLI_LINK, desc: 'Go to the command-line interface repository.', current: false },
 	{ name: 'Report', href: REPORT_GOOGLE_FORM_LINK, desc: 'Report an issue you have encountered to our Google Forms.', current: false },
 	{ name: 'Help', href: GLADOS_DOCS_LINK, desc: 'Open the GLADOS docs to learn how to use the application.', current: false }
 ];
@@ -1124,7 +1125,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
         						<ChevronDownIcon
           							className={`ml-2.5 -mr-1.5 h-5 w-5 text-gray-400 transition-transform`}/>
       							</Disclosure.Button>
-      								<Disclosure.Panel>
+      								<Disclosure.Panel
+										className={`overflow-auto h-[200px] scrollable_y`}>
         								{tags &&
   											tags.map((title) => (
     											<div key={title}>
@@ -1237,20 +1239,6 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 		</ul>
 	</div>);
 };
-
-const BasicMenuItem = ({menuHoverActiveCss, label, onClick}) => {
-	return <MenuItem>
-		{({ active }) => (
-			<a
-				href="#"
-				className={menuHoverActiveCss(active)}
-				onClick={onClick}
-			>
-				{label}
-			</a>
-		)}
-	</MenuItem>;
-}
 
 async function downloadResultsFile(expId: string) {
 	const result = await fetchResultsFile(expId);
