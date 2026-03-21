@@ -1125,7 +1125,8 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
         						<ChevronDownIcon
           							className={`ml-2.5 -mr-1.5 h-5 w-5 text-gray-400 transition-transform`}/>
       							</Disclosure.Button>
-      								<Disclosure.Panel>
+      								<Disclosure.Panel
+										className={`overflow-auto h-[200px] scrollable_y`}>
         								{tags &&
   											tags.map((title) => (
     											<div key={title}>

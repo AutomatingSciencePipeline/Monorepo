@@ -61,3 +61,16 @@
       border-radius: 1px;
   }
 
+    /* Vertical scrollbar */
+  .scrollable_y::-webkit-scrollbar {
+      width: 7px;
+  }
+
+  .scrollable_y::-webkit-scrollbar-track {
+      background: #f1f1f1;
+  }
+
+  .scrollable_y::-webkit-scrollbar-thumb {
+      background: #b9b9b9;
+      border-radius: 1px;
+  }
