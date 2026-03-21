@@ -469,23 +469,33 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 												</div>
 												<button
 													type='button'
-													className='rounded-md border w-1/6 border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+													className='rounded-md border w-1/6 border-gray-300 bg-red-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 													onClick={
-														status === FormStates.Info ?
-															() => {
-																localStorage.removeItem('ID');
-																setFormState(-1);
-																setIsDefault(false);
-																setConfirmedParamGroups([]);
-																setConfirmedValues([]);
-															} :
-															() => {
-																setStatus(status - 1);
-															}
+														() => {
+															localStorage.removeItem('ID');
+															setFormState(-1);
+															setStatus(0);
+															setIsDefault(false);
+															setConfirmedParamGroups([]);
+															setConfirmedValues([]);
+														} 
 													}
 												>
-													{status === FormStates.Info ? 'Cancel' : 'Back'}
+													Cancel
 												</button>
+												{status !== FormStates.Info && (
+												<button
+													type='button'
+													className='rounded-md border w-1/6 border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+													onClick={
+														() => {
+															setStatus(status - 1);
+														}
+													}
+												>
+													Back
+												</button>
+												)}
 												<button
 													className='rounded-md w-1/6 border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
 													{...(status === FormStates.Dispatch ?
