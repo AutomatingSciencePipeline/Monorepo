@@ -10,8 +10,6 @@ This section covers how to run an experiment on the system.
 
 When connected to the Rose-Hulman network, you can access the live system at <https://glados.csse.rose-hulman.edu/>.
 
-If you need a local copy of the system, refer to the [installation guide](installation.md).
-
 You must sign in with either a Google or GitHub account to run an experiment.
 
 You may also access experiments from the [GLADOS CLI](https://github.com/AutomatingSciencePipeline/GLADOS_CLI) (all documentation for it is there as well).
@@ -39,6 +37,7 @@ mr = 0.2
 s = 1
 ```
 
+`.yaml` config files are structured as follows:
 ```yaml
 g: 5
 p: 50
