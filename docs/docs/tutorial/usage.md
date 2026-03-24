@@ -28,7 +28,7 @@ The main steps to prepare an experiment are:
 
 We provide example experiments in the [repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for formatting your experiment.
 
-Your experiment must be configured to accept a `.ini` config file structured as follows:
+Your experiment must be configured to accept either a `.ini` config file or `.yaml`. `.ini` config files are structured as follows:
 
 ```ini
 [DEFAULT]
@@ -37,6 +37,14 @@ p = 50
 gl = 1
 mr = 0.2
 s = 1
+```
+
+```yaml
+g: 5
+p: 50
+gl: 1
+mr: 0.2
+s: 1
 ```
 
 You can format the generated `.ini` file using the "User Defined Constants" tab while creating an experiment. Use curly brackets `{}` to reference parameter names.
@@ -71,7 +79,7 @@ Once your experiment is set up, proceed to [Running the Experiment](#running-exp
 
 GLADOS supports experiments that:
 
-- Run on Python 3.8 as a single Python file.
+- Run on Python 3.9 as a single Python file.
 - Are packaged as an executable `.jar` file.
 - Are compiled into a binary executable for Unix systems, runnable on a base Debian system.
 - Are contained in a zip file that includes one of the above file types.
@@ -126,9 +134,17 @@ The name displayed in the UI for this experiment.
 
 A description stored with the experiment record.
 
+#### Experiment Tags *(Optional)*
+
+These are the tags which can be defined for an experiment, allowing for more filtering options.
+
 #### Trial Result *(Required)*
 
 The CSV file captured as the experiment result.
+
+#### Trial Result Line Number *(Required)*
+
+Specifies the line number being captured from a single trial run csv result that is then aggregated into the final trial result file. 0 specifies the first line; -1 specifies the last.
 
 #### Trial's Extra File *(Optional)*
 
@@ -142,6 +158,10 @@ The duration before the experiment automatically times out.
 
 If using a zip experiment, specify the main executable filename.
 
+#### Config File Format *(Required)*
+
+Defines the format of the config file generated for each trial. There are two options: `.ini` or `.yaml`.
+
 ### Parameters Tab
 
 ![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-parameters_tab-05_2025.png)
@@ -150,7 +170,7 @@ There are five parameter types:
 
 #### Integer
 
-- **Name**: The parameter name used in the `.ini` file.
+- **Name**: The parameter name used in the config file.
 - **Min**: Minimum value.
 - **Max**: Maximum value.
 - **Step**: Increment value.
@@ -182,7 +202,7 @@ Similar to Integer but supports decimal values.
 
 ![user_defined_constants_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-user_defined_constants_tab-05_2025.png)
 
-This tab allows defining a text block appended to every generated `.ini` config file. You can use parameters from the "Parameters" tab inside curly brackets.
+This tab allows defining a text block appended to every generated `.ini` or `.yaml` config file. You can use parameters from the "Parameters" tab inside curly brackets.
 
 Example:
 
@@ -251,7 +271,7 @@ To visualize results, click "See Graph" on the dashboard.
 
 Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.
 
-By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived".
+By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived". You can also filter experiments by tags by using the Experiment Tags dropdown.
 
 ![filter_archive](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_archive-05_2025.png)
 
@@ -371,7 +391,7 @@ test="three"
 
 That will be all generated permutations.
 
-> **Note:** Some of the examples shown were duplicates and would be removed automatically.
+> **Note:** Some of the examples shown were duplicates and would be removed automatically. Additionally, while the above examples are shown using `.ini` syntax, the same permutation logic is used in `.yaml` config files.
 
 ## Chart
 
@@ -415,3 +435,5 @@ Finally, you can download the resulting chart as an image by clicking the "Downl
 ## Known Bugs
 
 - If an experiment crashes, users are not notified. If an experiment is stuck on "Experiment Awaiting Start" or a trial takes too long, it has likely failed. A fix is in progress.
+
+- On occasion, an experiment csv result will omit one of the first few trial's parameter values. This likely originates from a bug within the runner's code structure. We will continue to experiment to find the exact bug source.
