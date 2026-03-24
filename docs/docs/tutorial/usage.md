@@ -23,7 +23,7 @@ GLADOS has limited support for experiments. To ensure your experiment runs prope
 The main steps to prepare an experiment are:
 
 1. Ensure GLADOS supports your experiment. Details are available under [Compatibility](#compatibility).
-2. Use a `.ini` file to input parameters, passed as a command-line argument.
+2. Use a `.ini` or `.yaml` file to input parameters, passed as a command-line argument.
 3. Output results to a CSV file, or return a single value as the output.
 
 We provide example experiments in the [repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for formatting your experiment.
@@ -216,6 +216,8 @@ test_var = {test}
 ![post_process_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-post_process_tab-05_2025.png)
 
 This tab allows you to include a scatter plot in the downloadable Project Zip. This feature will be replaced by ChartJS functionality on the dashboard in future updates.
+
+This tab also allows for an email to be sent to the email affiliated with the GLADOS account when the experiment is completed, stating the status of the experiment.
 
 ### Confirmation Tab
 
