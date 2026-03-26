@@ -26,8 +26,9 @@ The main steps to prepare an experiment are:
 
 We provide example experiments in the [repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for formatting your experiment.
 
-Your experiment must be configured to accept either a `.ini` config file or `.yaml`. `.ini` config files are structured as follows:
+Your experiment must be configured to accept either a `.ini` config file or `.yaml`.
 
+`.ini` config files are structured as follows:
 ```ini
 [DEFAULT]
 g = 5
@@ -50,8 +51,9 @@ You can format the generated `.ini` file using the "User Defined Constants" tab 
 
 Example:
 
-If you have a parameter named `seed` ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as:
+If you have a parameter named `seed` ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as it is shown in the below example.
 
+`.ini` config file example:
 ```ini
 [SEED]
 random_seed = {seed}
@@ -203,7 +205,7 @@ Similar to Integer but supports decimal values.
 
 This tab allows defining a text block appended to every generated `.ini` or `.yaml` config file. You can use parameters from the "Parameters" tab inside curly brackets.
 
-Example:
+`.ini` config file example:
 
 ```ini
 [DEFAULT]
@@ -272,9 +274,13 @@ To visualize results, click "See Graph" on the dashboard.
 
 Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.
 
-By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived". You can also filter experiments by tags by using the Experiment Tags dropdown.
+By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived". You can unarchive experiments by first including archived experiments in the dashboard and then clicking on "Unarchive Experiment".
 
 ![filter_archive](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_archive-03_2026.png)
+
+You can also filter experiments by tags by using the Experiment Tags dropdown.
+
+![filter_tags](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_tags-03_2026.png)
 
 If you don't have any further use for an experiment, feel free to delete it by clicking "Delete Experiment".
 
@@ -300,6 +306,7 @@ An integer parameter `test` with:
 
 will generate 10 configurations:
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 test=1
@@ -335,8 +342,9 @@ An stringlist parameter `test` with:
 - Values: `["one", "two", "three"]`
 - Default: `two`
 
-will generate 21 configurations (after duplicates are removed):
+will generate 21 configurations (after duplicates are removed).
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 x=1
@@ -353,6 +361,7 @@ test="two"
 
 ... up to `x=10, y=11, test="two"`
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 x=1
@@ -369,6 +378,7 @@ test="two"
 
 ... up to `x=1, y=20, test="two"`
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 x=1
