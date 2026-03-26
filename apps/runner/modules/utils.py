@@ -1,7 +1,7 @@
 import os
 import base64
 import logging
-from bson import Binary
+from bson.binary import Binary
 import requests
 
 from modules.data.experiment import ExperimentData
