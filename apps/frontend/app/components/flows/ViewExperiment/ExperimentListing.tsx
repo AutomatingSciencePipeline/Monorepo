@@ -146,6 +146,14 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		}
 	};
 
+	const handleKeyUpForTags = (e) => {
+		if (e.key === 'Enter') {
+			addTagValue();
+		} else if (e.key === 'Escape') {
+			handleCancel();
+		}
+	};
+
 	// Function to open the delete modal
 	const openDeleteModal = () => {
 		setDeleteModalOpen(true);
@@ -489,16 +497,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
       								type="text"
       								value={individualTag}
       								maxLength={40}
-      								placeholder='Select "Add" for New Tag'
+      								placeholder='Press "Return" for New Tag'
       								onChange={(e) => setIndividualTag(e.target.value)}
+      								onKeyUp={handleKeyUpForTags}
       								className="py-2 px-3 text-sm text-left font-medium"
     							/>
-    							<button
-      								onClick={addTagValue}
-      								className="rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-    							>
-      								Add
-    							</button>
   							</div>
 							<div className="flex items-center gap-0">
   								<CheckIcon
