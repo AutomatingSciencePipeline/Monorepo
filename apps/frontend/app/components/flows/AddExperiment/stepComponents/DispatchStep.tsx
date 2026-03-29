@@ -166,28 +166,21 @@ export const DispatchStep = ({ id, form, fileId, fileLink, updateId, ...props })
 };
 
 async function downloadRecentFile(fileId: string, filename: string) {
-	const file = await downloadFile(fileId);
-	if (file) {
-		const chunks: BlobPart[] = [];
+	try {
+        const dataUrl = await downloadFile(fileId);
+        if (!dataUrl) {
+            throw new Error('File not found or download failed.');
+        }
 
-  		for await (const chunk of file) {
-    		chunks.push(chunk); // chunk is a valid BlobPart at runtime
-  		}
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = filename;
 
-  		const blob = new Blob(chunks, { type: "application/octet-stream" });
-  		const url = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
 
-  		const a = document.createElement("a");
-  		a.href = url;
-  		a.download = filename;
-
-  		document.body.appendChild(a);
-  		a.click();
-  		document.body.removeChild(a);
-
-  		URL.revokeObjectURL(url);
-	} else {
-		console.error('File not found or download failed.');
-	}
-
+    } catch (err) {
+        console.error('Download failed:', err);
+    }
 }
