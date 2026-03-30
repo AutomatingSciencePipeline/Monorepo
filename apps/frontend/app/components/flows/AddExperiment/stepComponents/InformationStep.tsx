@@ -95,9 +95,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                         <div className='w-full flex flex-wrap gap-1'>
                            {Array.isArray(form.values.tags) &&
                            form.values.tags.map((title) =>(
-                                <div key={title} onClick={() => deleteTag(title)}>
-                                    <Tag deletable={true} text={title}/>
-                                </div>
+                                    <Tag text={title} onDelete={() => deleteTag(title)}/>
                             ))}
                         </div>
                     </div>
