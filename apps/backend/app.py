@@ -4,7 +4,7 @@ import threading
 import base64
 from concurrent.futures import ProcessPoolExecutor
 import os
-import bson
+from bson.binary import Binary
 from flask import Flask, Response, request, jsonify, send_file
 from kubernetes import client, config
 import pymongo
@@ -89,7 +89,7 @@ def upload_zip():
     json = request.get_json()
     # Get JSON requests
     experimentId = json['experimentId']
-    encoded = bson.Binary(base64.b64decode(json['encoded']))
+    encoded = Binary(base64.b64decode(json['encoded']))
     return {'id': upload_experiment_zip(experimentId, encoded, mongoClient)}
 
 @flaskApp.post("/uploadLog")
