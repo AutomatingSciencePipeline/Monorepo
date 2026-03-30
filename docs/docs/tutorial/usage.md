@@ -10,8 +10,6 @@ This section covers how to run an experiment on the system.
 
 When connected to the Rose-Hulman network, you can access the live system at <https://glados.csse.rose-hulman.edu/>.
 
-If you need a local copy of the system, refer to the [installation guide](installation.md).
-
 You must sign in with either a Google or GitHub account to run an experiment.
 
 You may also access experiments from the [GLADOS CLI](https://github.com/AutomatingSciencePipeline/GLADOS_CLI) (all documentation for it is there as well).
@@ -23,13 +21,14 @@ GLADOS has limited support for experiments. To ensure your experiment runs prope
 The main steps to prepare an experiment are:
 
 1. Ensure GLADOS supports your experiment. Details are available under [Compatibility](#compatibility).
-2. Use a `.ini` file to input parameters, passed as a command-line argument.
+2. Use a `.ini` or `.yaml` file to input parameters, passed as a command-line argument.
 3. Output results to a CSV file, or return a single value as the output.
 
 We provide example experiments in the [repository](https://github.com/AutomatingSciencePipeline/Monorepo/tree/main/example_experiments). Consider using them as a guideline for formatting your experiment.
 
-Your experiment must be configured to accept a `.ini` config file structured as follows:
+Your experiment must be configured to accept either a `.ini` config file or `.yaml`.
 
+`.ini` config files are structured as follows:
 ```ini
 [DEFAULT]
 g = 5
@@ -39,12 +38,22 @@ mr = 0.2
 s = 1
 ```
 
+`.yaml` config files are structured as follows:
+```yaml
+g: 5
+p: 50
+gl: 1
+mr: 0.2
+s: 1
+```
+
 You can format the generated `.ini` file using the "User Defined Constants" tab while creating an experiment. Use curly brackets `{}` to reference parameter names.
 
 Example:
 
-If you have a parameter named `seed` ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as:
+If you have a parameter named `seed` ranging from 1 to 10 (incrementing by 1), you can define it in the "User Defined Constants" tab as it is shown in the below example.
 
+`.ini` config file example:
 ```ini
 [SEED]
 random_seed = {seed}
@@ -71,7 +80,7 @@ Once your experiment is set up, proceed to [Running the Experiment](#running-exp
 
 GLADOS supports experiments that:
 
-- Run on Python 3.8 as a single Python file.
+- Run on Python 3.9 as a single Python file.
 - Are packaged as an executable `.jar` file.
 - Are compiled into a binary executable for Unix systems, runnable on a base Debian system.
 - Are contained in a zip file that includes one of the above file types.
@@ -102,21 +111,21 @@ To create a new experiment, click the "New Experiment" button below your email i
 
 Upon first login, your dashboard will be empty.
 
-![dashboard](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-dashboard-05_2025.png)
+![dashboard](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-dashboard-03_2026.png)
 
 To run a default experiment, click the "Run a Default Experiment" button on the right side of the screen.
 
-![run_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-run_default-05_2025.png)
+![run_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-run_default-03_2026.png)
 
 You will see a modal where you can select "Add Nums (Python)." This will present an already configured experiment.
 
-![select_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_default-05_2025.png)
+![select_default](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_default-03_2026.png)
 
 The experiment creation interface consists of multiple tabs:
 
 ### Information Tab
 
-![information_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-information_tab-05_2025.png)
+![information_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-information_tab-03_2026.png)
 
 #### Name *(Required)*
 
@@ -126,9 +135,17 @@ The name displayed in the UI for this experiment.
 
 A description stored with the experiment record.
 
+#### Experiment Tags *(Optional)*
+
+These are the tags which can be defined for an experiment, allowing for more filtering options.
+
 #### Trial Result *(Required)*
 
 The CSV file captured as the experiment result.
+
+#### Trial Result Line Number *(Required)*
+
+Specifies the line number being captured from a single trial run csv result that is then aggregated into the final trial result file. 0 specifies the first line; -1 specifies the last.
 
 #### Trial's Extra File *(Optional)*
 
@@ -142,15 +159,19 @@ The duration before the experiment automatically times out.
 
 If using a zip experiment, specify the main executable filename.
 
+#### Config File Format *(Required)*
+
+Defines the format of the config file generated for each trial. There are two options: `.ini` or `.yaml`.
+
 ### Parameters Tab
 
-![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-parameters_tab-05_2025.png)
+![parameters_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-parameters_tab-03_2026.png)
 
 There are five parameter types:
 
 #### Integer
 
-- **Name**: The parameter name used in the `.ini` file.
+- **Name**: The parameter name used in the config file.
 - **Min**: Minimum value.
 - **Max**: Maximum value.
 - **Step**: Increment value.
@@ -180,11 +201,11 @@ Similar to Integer but supports decimal values.
 
 ### User Defined Constants Tab
 
-![user_defined_constants_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-user_defined_constants_tab-05_2025.png)
+![user_defined_constants_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-user_defined_constants_tab-03_2026.png)
 
-This tab allows defining a text block appended to every generated `.ini` config file. You can use parameters from the "Parameters" tab inside curly brackets.
+This tab allows defining a text block appended to every generated `.ini` or `.yaml` config file. You can use parameters from the "Parameters" tab inside curly brackets.
 
-Example:
+`.ini` config file example:
 
 ```ini
 [DEFAULT]
@@ -193,19 +214,21 @@ test_var = {test}
 
 ### Post Process Tab
 
-![post_process_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-post_process_tab-05_2025.png)
+![post_process_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-post_process_tab-03_2026.png)
 
 This tab allows you to include a scatter plot in the downloadable Project Zip. This feature will be replaced by ChartJS functionality on the dashboard in future updates.
 
+This tab also allows for an email to be sent to the email affiliated with the GLADOS account when the experiment is completed, stating the status of the experiment.
+
 ### Confirmation Tab
 
-![confirmation_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-confirmation_tab-05_2025.png)
+![confirmation_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-confirmation_tab-03_2026.png)
 
 This tab allows you to review all hyperparameters and settings before running the experiment.
 
 ### Dispatch Tab
 
-![dispatch_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-dispatch_tab-05_2025.png)
+![dispatch_tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-dispatch_tab-03_2026.png)
 
 You can start an experiment from this tab by either:
 
@@ -218,7 +241,7 @@ If you copied an experiment, the file will be preselected.
 
 After dispatching the experiment, it will take a little bit before starting.
 
-![awaiting_start_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-awaiting_start_exp-05_2025.png)
+![awaiting_start_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-awaiting_start_exp-03_2026.png)
 
 Once the experiment starts, you can monitor progress in real time.
 
@@ -231,7 +254,7 @@ The dashboard will display:
 
 Example below:
 
-![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-in_progress_exp-05_2025.png)
+![in_progress_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-in_progress_exp-03_2026.png)
 
 For longer experiments, you can click the "Open Live Log" button to see live log updates from the configurations files. It updates every 5 seconds. This can help you identify when an error occurred mid experiment run.
 
@@ -241,7 +264,7 @@ You can cancel an experiment at any time. However, small experiments may finish 
 
 Example of completed experiment:
 
-![finished_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-finished_exp-05_2025.png)
+![finished_exp](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-finished_exp-03_2026.png)
 
 After completion, you can download the `results.csv` file, which contains output data and configurations for each trial. If extra files were generated, logs were kept, or post-processing was applied, a zip file will also be available.
 
@@ -251,17 +274,21 @@ To visualize results, click "See Graph" on the dashboard.
 
 Experiments can also be shared with other users. Click "Share Experiment" to copy a shareable link. Shared users can view but not delete the experiment.
 
-By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived".
+By clicking on "Archive Experiment", you can hide the experiment from view. You can see archived experiments by clicking on the "Filter" button and toggling "Include Archived". You can unarchive experiments by first including archived experiments in the dashboard and then clicking on "Unarchive Experiment".
 
-![filter_archive](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_archive-05_2025.png)
+![filter_archive](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_archive-03_2026.png)
+
+You can also filter experiments by tags by using the Experiment Tags dropdown.
+
+![filter_tags](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-filter_tags-03_2026.png)
 
 If you don't have any further use for an experiment, feel free to delete it by clicking "Delete Experiment".
 
-![select-exps](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_exps-05_2025.png)
+![select-exps](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-select_exps-03_2026.png)
 
 In order to select experiments, you need to turn on ‘Edit Mode’, which is off by default. You will find it below the 'Expand All' and 'Collapse All' buttons. Each experiment will have a radio button to the left of it that allows you to select it. This enables you to delete or archive as many selected experiments as you would like.
 
-![collapse](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-collapse-05_2025.png)
+![collapse](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/usage-collapse-03_2026.png)
 
 By default, experiments will be open, and will all reopen on refresh of the page. In order to close all of your experiments, you can use the ‘Select All’ button under ‘Edit Mode’.
 
@@ -279,6 +306,7 @@ An integer parameter `test` with:
 
 will generate 10 configurations:
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 test=1
@@ -314,8 +342,9 @@ An stringlist parameter `test` with:
 - Values: `["one", "two", "three"]`
 - Default: `two`
 
-will generate 21 configurations (after duplicates are removed):
+will generate 21 configurations (after duplicates are removed).
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 x=1
@@ -332,6 +361,7 @@ test="two"
 
 ... up to `x=10, y=11, test="two"`
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 x=1
@@ -348,6 +378,7 @@ test="two"
 
 ... up to `x=1, y=20, test="two"`
 
+`.ini` config file examples:
 ```ini
 [DEFAULT]
 x=1
@@ -371,7 +402,7 @@ test="three"
 
 That will be all generated permutations.
 
-> **Note:** Some of the examples shown were duplicates and would be removed automatically.
+> **Note:** Some of the examples shown were duplicates and would be removed automatically. Additionally, while the above examples are shown using `.ini` syntax, the same permutation logic is used in `.yaml` config files.
 
 ## Chart
 
@@ -415,3 +446,5 @@ Finally, you can download the resulting chart as an image by clicking the "Downl
 ## Known Bugs
 
 - If an experiment crashes, users are not notified. If an experiment is stuck on "Experiment Awaiting Start" or a trial takes too long, it has likely failed. A fix is in progress.
+
+- On occasion, an experiment csv result will omit one of the first few trial's parameter values. This likely originates from a bug within the runner's code structure. We will continue to experiment to find the exact bug source.

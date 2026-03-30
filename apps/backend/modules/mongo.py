@@ -1,7 +1,8 @@
 import json
 import pymongo
 from pymongo.errors import ConnectionFailure
-from bson import Binary, ObjectId
+from bson.objectid import ObjectId
+from bson.binary import Binary
 from gridfs import GridFSBucket
 
 def verify_mongo_connection(mongoClient: pymongo.MongoClient):
