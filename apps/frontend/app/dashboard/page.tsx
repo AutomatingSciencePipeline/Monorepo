@@ -1143,7 +1143,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
                 														handleMultipleFilterTag(title, newValue);
               														}}
             													/>
-            												<Tag text={title} onDelete={() => {}}/>
+            												<Tag deletable={false} text={title} onDelete={() => {}}/>
           												</a>
         											)}
       											</MenuItem>

@@ -490,8 +490,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					}
 
 					{isEditingTags ? (
-					<div className="flex items-center flex-wrap gap-1 justify-left">
-						{<div className="flex items-center gap-2">
+					<div className="flex flex-col gap-1 justify-left">
+						{<div className="flex items-center flex-wrap gap-1">
   							<div className="inline-flex items-center">
     							<input
       								type="text"
@@ -505,24 +505,25 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
   							</div>
 							{projectTags &&
 							projectTags.map((title) =>(
-								<Tag text={title} onDelete={() => deleteTag(title)}/>
+								<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
 							))}
 						</div>}
 						<div className="flex items-center gap-2">
-							<p className="text-xs text-gray-400 font-mono mt-2">
-								Press <kbd className="bg-gray-100 border border-gray-300 rounded px-1 py-0.5 text-xs">Enter</kbd> to confirm,{" "}
-								<kbd className="bg-gray-100 border border-gray-300 rounded px-1 py-0.5 text-xs">Esc</kbd> to cancel.
+							<p className="text-gray-400 font-mono mt-2" style={{ fontSize: 10 }}>
+								Press <kbd className="bg-gray-100 border border-gray-300 rounded px-0.5 py-0.5 text-xs">Return</kbd> to confirm,{" "}
+								<kbd className="bg-gray-100 border border-gray-300 rounded px-0.5 py-0.5 text-xs">Esc</kbd> to cancel.
 							</p>
 						</div>
 					</div>) :
 					(
 					<div className="flex items-center flex-wrap gap-1 justify-left">
+						{projectTags.length < TAG_MAX_NUMBER && project.creator == session?.user?.id! &&
 						<p className="inline-flex items-center gap-1 border border-dashed border-blue-300 rounded-full px-3 py-1 text-xs text-blue-400 hover:border-blue-400 font-medium"
 							onClick={handleEditTags}>
 							+ add tags 
-						</p>
+						</p>}
 						{projectTags.map((title) =>(
-							<Tag text={title} onDelete={() => deleteTag(title)}/>
+							<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
 						))}
 					</div>
 					)}
