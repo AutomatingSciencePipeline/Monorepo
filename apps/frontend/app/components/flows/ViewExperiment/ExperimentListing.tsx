@@ -520,7 +520,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						{projectTags.length < TAG_MAX_NUMBER && project.creator == session?.user?.id! &&
 						<p className="inline-flex items-center gap-1 border border-dashed border-blue-300 rounded-full px-3 py-1 text-xs text-blue-400 hover:border-blue-400 font-medium"
 							onClick={handleEditTags}>
-							+ add tags 
+							+ Add tag 
 						</p>}
 						{projectTags.map((title) =>(
 							<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
