@@ -46,11 +46,15 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 			}
 			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
+				console.log('Boolean Hyperparameter: ' + hyperparameter.default);
+				// default value when it's default
+				// not for is it default value or not
+				// toggle indicates the default value
 				if (!hyperparameter.default) {
 					noDefaultCount = noDefaultCount * 2;
 				}
 				else {
-					defaultCount = defaultCount + 2;
+					defaultCount = defaultCount + 1;
 					countDefaults++;
 				}
 			}
@@ -78,10 +82,12 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 		if (totalObjs < 3 && allInts && countDefaults > 0) {
 			const total = (noDefaultCount + defaultCount) - 1;
+			console.log('Total Permutations: ' + total);
 			return total;
 		}
 		else {
 			const total = (noDefaultCount * defaultCount) - (noDefaultCount * (countDefaults - 1));
+			console.log('Total Permutations: ' + total);
 			return total;
 		}
 	}
