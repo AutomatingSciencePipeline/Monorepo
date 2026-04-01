@@ -139,14 +139,15 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 					/>
 				)}
 
-				<Component
+				{type !== 'bool' && 
+				(<Component
 					form={form}
 					type={type}
 					index={index}
 					updateConfirmedValues={updateConfirmedValues}
 					updateConfirmedParamValues={updateConfirmedParamValues}
 					{...rest}
-				/>
+				/>)}
 
 				{type !== 'paramgroup' && (
 					<div className='flex flex-col items-center ml-2'>
