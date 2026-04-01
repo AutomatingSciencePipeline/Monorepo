@@ -119,7 +119,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									onClick={() => {
 										form.insertListItem('hyperparameters', {
 											name: '',
-											default: -1,
+											default: (type === 'bool') ? false : -1,
 											...((type === 'paramgroup') && { params: {} }),
 											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {

@@ -81,7 +81,12 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 
 	useEffect(() => {
 		if (form.values.hyperparameters[index].useDefault == false) {
+			if (type === 'bool') {
+				form.setFieldValue(`hyperparameters.${index}.default`, false);
+			}
+			else {
 			form.setFieldValue(`hyperparameters.${index}.default`, -1);
+			}
 		}
 	}, [useDefault]);
 
