@@ -46,7 +46,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 			}
 			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-				if (hyperparameter.default != true && hyperparameter.default != false) {
+				if (!hyperparameter.default) {
 					noDefaultCount = noDefaultCount * 2;
 				}
 				else {

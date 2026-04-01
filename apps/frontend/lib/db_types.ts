@@ -10,7 +10,7 @@ export enum HyperparameterTypes {
     INTEGER = 'integer',
     FLOAT = 'float',
     STRING = 'string',
-    BOOLEAN = 'boolean',
+    BOOLEAN = 'bool',
     STRING_LIST = 'stringlist',
     PARAM_GROUP = 'paramgroup'
 }
