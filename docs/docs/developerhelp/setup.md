@@ -24,6 +24,9 @@ VS Code has great integrations with Dev Containers and the ability to connect di
 
 ## Using Gitpod
 
+!!! warning
+    GitPod (now Ona) recently deprecated their Linux runner. This means that, for now, the GitPod environment does not work. In the meantime, refer to "Local Via Docker" for setting up environments.
+
 From Gitpod.io:
 
 Gitpod is a zero-trust platform that provides automated and standardized development environments in your own infrastructure—whether on your local machine, in your cloud account (VPC), or on-prem. It streamlines coding workflows and boosts collaboration by letting teams spin up secure, preconfigured dev environments quickly and consistently.
