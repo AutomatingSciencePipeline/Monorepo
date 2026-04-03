@@ -89,7 +89,9 @@ Skip step 2 if you are not using Windows!
 
 4. In the bottom right of the VS Code window you should be prompted to open as a dev container, if not press F1 and search for "Rebuild", click "Rebuild and Reopen in Container"
 
-5. You should then have the Monorepo open inside of a dev container
+5. If you are using Mac OS, ensure that you have the VS Code extension "Dev Container" installed. If you are on Windows, it can be installed automatically.
+
+6. You should then have the Monorepo open inside of a dev container. 
 
 ## Getting Started with the Monorepo
 
