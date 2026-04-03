@@ -47,10 +47,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 			}
 			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
 				console.log('Boolean Hyperparameter: ' + hyperparameter.default);
-				// default value when it's default
-				// not for is it default value or not
-				// toggle indicates the default value
-				if (!hyperparameter.default) {
+				if (!hyperparameter.useDefault) {
 					noDefaultCount = noDefaultCount * 2;
 				}
 				else {

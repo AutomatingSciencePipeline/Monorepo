@@ -48,6 +48,7 @@ export interface FloatHyperparameter extends GenericHyperparameter {
 export interface BooleanHyperparameter extends GenericHyperparameter {
     default: boolean;
     type: HyperparameterTypes.BOOLEAN;
+    useDefault: boolean;
 }
 
 export interface StringHyperparameter extends GenericHyperparameter {
