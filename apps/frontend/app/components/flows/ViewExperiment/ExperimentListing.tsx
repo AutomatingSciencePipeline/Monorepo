@@ -88,9 +88,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	const handleCancelTags = () => {
-		//setProjectTags(originalProjectTags);
 		setIndividualTag("");
-		//setEditingTagsCanceled(true);
 		setIsEditingTags(false);
 	}
 
