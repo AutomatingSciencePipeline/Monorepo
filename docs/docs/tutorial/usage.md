@@ -2,7 +2,7 @@
 
 This section covers how to run an experiment on the system.
 
-## Definitions
+## Definition
 
 - **Trial**: A single run of submitted code with a corresponding config file.
 
