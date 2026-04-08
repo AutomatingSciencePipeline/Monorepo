@@ -8,7 +8,7 @@ The deployment process for GLADOS has been made easy for any admin on the system
 There are two ways to deploy to production:
 
 1. **Through the Frontend**
-2. **SSH through the glados.csse.rose-hulman.edu Server**
+2. **Through the glados.csse.rose-hulman.edu Server**
 
 ---
 

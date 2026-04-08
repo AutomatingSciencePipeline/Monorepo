@@ -1,6 +1,6 @@
 # Overview
 
-Documentation is powered by [MkDocs](https://www.mkdocs.org/) with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), hosted on [Github Pages](https://pages.github.com/). Older docs still exist on the [Monorepo's Github Wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki), but it is being migrated to this page. 
+Documentation is powered by [MkDocs](https://www.mkdocs.org/) with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), hosted on [Github Pages](https://pages.github.com/). [Pipenv](https://pipenv.pypa.io/en/latest/) is the package manager the documentation uses.
 
 ## Setup
 For developers, an MkDocs setup is included as part of the dev install script.
@@ -8,31 +8,17 @@ For developers, an MkDocs setup is included as part of the dev install script.
 !!! note
     The dev install script requires a .env file for any environment variables needed. To create a .env file, copy ".example.env" and make any necessary changes.
 
-When working with the documentation locally, remember to activate the venv:
-
-```sh
-source docs/.venv/Scripts/activate
-```
-
-Otherwise, mkdocs commands will likely not work.
-
-To exit the venv, while in the venv, run
-
-```sh
-deactivate
-```
-
-!!! note
-
-    For any mkdocs commands, you must be in the outermost `docs` folder for it to find your files correctly.
-
 ## Updating
 Updating documentation is as simple as updating Markdown files, all contained within the `docs` folder in the Monorepo. 
 
 To preview your changes, this will build the site locally, with automatic updates as you make changes:
+
 ```sh
 pipenv run mkdocs serve
 ```
+
+!!! note
+    For any mkdocs commands, you must be in the outermost `docs` folder for it to find your files correctly.
 
 ## Deploying
 
@@ -48,7 +34,7 @@ pipenv run mkdocs gh-deploy --force
 
 To preview what files will be generated and published, this generates the static website files under `docs/site/`:
 ```sh
-mkdocs build
+pipenv run mkdocs build
 ```
 
 ## Notes
