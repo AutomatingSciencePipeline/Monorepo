@@ -64,4 +64,7 @@ echo "🛑 You will need to manually install Minikube, kubectl, and python-kuber
 echo "============================================================================================="
 echo "▶ Before you begin working in Python in each new terminal shell, activate the respective pyenv by running \`source <apps/backend,apps/runner,docs>/.venv/Scripts/activate\` from the repo root to enter the Virtual Env. You do NOT need to use \`pipenv shell\` like pipenv suggests. You should see \`(backend)\` on your console line when you are in a virtual env. To exit the venv, just close the shell or send the command \`deactivate\`."
 echo "▶ Note that VSCode might automatically do this for you in new terminal windows."
-source setup/exit_await_input.sh 0
+
+# https://www.linuxquestions.org/questions/linux-general-1/how-to-make-shell-script-wait-for-key-press-to-proceed-687491/
+read -p "▶ Installation complete. Press any key to continue..." -r -n 1 -s
+exit "$1"
