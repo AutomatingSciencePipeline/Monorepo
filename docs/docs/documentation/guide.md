@@ -3,7 +3,12 @@
 Documentation is powered by [MkDocs](https://www.mkdocs.org/) with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), hosted on [Github Pages](https://pages.github.com/). Older docs still exist on the [Monorepo's Github Wiki](https://github.com/AutomatingSciencePipeline/Monorepo/wiki), but it is being migrated to this page. 
 
 ## Setup
-For developers, a MkDocs setup is included as part of the dev install script. When working with the documentation locally, remember to activate the venv:
+For developers, an MkDocs setup is included as part of the dev install script.
+
+!!! note
+    The dev install script requires a .env file for any environment variables needed. To create a .env file, copy ".example.env" and make any necessary changes.
+
+When working with the documentation locally, remember to activate the venv:
 
 ```sh
 source docs/.venv/Scripts/activate
@@ -26,7 +31,7 @@ Updating documentation is as simple as updating Markdown files, all contained wi
 
 To preview your changes, this will build the site locally, with automatic updates as you make changes:
 ```sh
-mkdocs serve
+pipenv run mkdocs serve
 ```
 
 ## Deploying
@@ -35,11 +40,12 @@ With Github Actions, updates to the `main` branch will automatically build and d
 
 To deploy manually, run
 ```sh
-mkdocs gh-deploy --force
+pipenv run mkdocs gh-deploy --force
 ```
 
-This updates the `gh-pages` branch with the static site. Keep in mind, if there are unpublished changes, it will display those changes as well, so beware!
-<!-- TODO: maybe put this warning in a warning block -->
+!!! warning
+    This updates the `gh-pages` branch with the static site. Keep in mind, if there are unpublished changes, it will display those changes as well, so beware!
+
 To preview what files will be generated and published, this generates the static website files under `docs/site/`:
 ```sh
 mkdocs build
