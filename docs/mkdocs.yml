@@ -21,6 +21,7 @@ nav:
     - VMs: infrastructure/vms.md
     - Cluster Upgrade: infrastructure/cluster_update.md
     - Used Technologies: infrastructure/used_technologies.md
+    - Architecture Documentation: infrastructure/architecture.md
   - Developer Help:
     - Developer Setup: developerhelp/setup.md
     - Helpful Commands: developerhelp/helpful_commands.md
@@ -48,6 +49,10 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
+plugins:
+  - search
+  - mermaid2
+
 # Markdown Extensions supported by mkdocs-material here: https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/
 markdown_extensions:
   # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
@@ -59,3 +64,13 @@ markdown_extensions:
   # # https://yakworks.github.io/docmark/extensions/permalinks/
   # - toc(permalink=true)
   - tables
+
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+# Point to mermaid.js to render mermaid code to graph
+extra_javascript:
+  - https://unpkg.com/mermaid/dist/mermaid.min.js
