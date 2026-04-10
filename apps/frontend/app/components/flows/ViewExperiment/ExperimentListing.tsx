@@ -503,7 +503,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
   							</div>
 							{projectTags &&
 							projectTags.map((title) =>(
-								<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
+								<div key={title}>
+									<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
+								</div>
 							))}
 						</div>}
 						<div className="flex items-center gap-2">
@@ -521,7 +523,9 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							+ Add tag 
 						</p>}
 						{projectTags.map((title) =>(
-							<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
+							<div key={title}>
+								<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
+							</div>
 						))}
 					</div>
 					)}
