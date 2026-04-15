@@ -495,7 +495,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
       								type="text"
       								value={individualTag}
       								maxLength={40}
-      								placeholder='new Tag'
+      								placeholder='New tag'
       								onChange={(e) => setIndividualTag(e.target.value)}
       								onKeyUp={handleKeyUpForTags}
       								className="outline-none bg-transparent text-xs border border-blue-500 border-solid rounded-full px-2 py-1  font-mono"
