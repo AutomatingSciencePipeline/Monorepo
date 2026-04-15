@@ -74,7 +74,7 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                                     type='text'
                                     value={individualTag}
                                     maxLength={40}
-                                    placeholder='Enter tag name and select "Add" or press "Return" to submit'
+                                    placeholder='Press "Return" or click "Add tag" to confirm tag'
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault(); 
@@ -86,17 +86,17 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                             />
                             </div>
                             <div className=''>
-                                <button className='rounded-md w-full border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                                <button className='w-full border border-dashed border-blue-500 rounded-md px-3 py-2 text-sm font-medium text-blue-500 hover:text-blue-700 hover:border-blue-700'
                                 onClick={addTagValue}>
-                                    Add
+                                    + Add tag
                                 </button>
                             </div>
                         </div>
                         <div className='w-full flex flex-wrap gap-1'>
                            {Array.isArray(form.values.tags) &&
                            form.values.tags.map((title) =>(
-                                <div key={title} onClick={() => deleteTag(title)}>
-                                    <Tag deletable={true} text={title}/>
+                                <div key={title}>
+                                    <Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
                                 </div>
                             ))}
                         </div>

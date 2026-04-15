@@ -87,19 +87,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 		setIsEditing(false);
 	};
 
-	const handleSaveTags = () => {
-		updateExperimentTagsById(project.expId, projectTags).catch((reason) => {
-			console.warn(`Failed to update experiment name, reason: ${reason}`);
-		});
-		// Exit the editing mode
-		setIndividualTag("");
-		setIsEditingTags(false);
-	};
-
 	const handleCancelTags = () => {
-		setProjectTags(originalProjectTags);
 		setIndividualTag("");
-		setEditingTagsCanceled(true);
 		setIsEditingTags(false);
 	}
 
@@ -117,7 +106,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	};
 
 	const deleteTag = (title) => {
-        setProjectTags(projectTags.filter(tagName => tagName !== title));
+		const newTags = projectTags.filter(tagName => tagName !== title);
+        setProjectTags(newTags);
+		updateExperimentTagsById(project.expId, newTags).catch((reason) => {
+    		console.warn(`Failed to delete tag, reason: ${reason}`);
+  		});
     }
 
 	useEffect(() => {
@@ -143,6 +136,16 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 			handleSave(e.target.value);
 		} else if (e.key === 'Escape') {
 			handleCancel();
+		}
+	};
+
+	const handleKeyUpForTags = (e) => {
+		if (e.key === 'Enter') {
+			const newTags = [...projectTags, individualTag.trim()];
+			addTagValue(newTags);
+		} else if (e.key === 'Escape') {
+			handleCancel();
+			handleCancelTags();
 		}
 	};
 
@@ -186,7 +189,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 	// 		: `${averageTimePerRun.toFixed(2)} minutes`
 	// 	: null;
 
-	const addTagValue = () => {
+	const addTagValue = (newTags: string[]) => {
         if(projectTags && (projectTags.includes(individualTag.trim()))){
             toast.error("Experiment tags cannot be redundant.", {duration: 1500});
             return;
@@ -197,8 +200,11 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
             toast.error("Experiment tag cannot be blank.", {duration: 1500});
             return;
         } else {
-			setProjectTags([...projectTags, individualTag]);
-            setIndividualTag("");
+			setProjectTags(newTags);
+			updateExperimentTagsById(project.expId, newTags).catch((reason) => {
+			console.warn(`Failed to update experiment name, reason: ${reason}`);
+			});
+		    setIndividualTag("");
         }
     }
 
@@ -482,59 +488,47 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					}
 
 					{isEditingTags ? (
-					<div className="flex items-center flex-wrap gap-1 justify-left">
-						{ <div className="flex items-center gap-2">
-  							<div className="flex items-center gap-1">
+					<div className="flex flex-col gap-1 justify-left">
+						{<div className="flex items-center flex-wrap gap-1">
+  							<div className="inline-flex items-center">
     							<input
       								type="text"
       								value={individualTag}
       								maxLength={40}
-      								placeholder='Select "Add" for New Tag'
+      								placeholder='New tag'
       								onChange={(e) => setIndividualTag(e.target.value)}
-      								className="py-2 px-3 text-sm text-left font-medium"
+      								onKeyUp={handleKeyUpForTags}
+      								className="outline-none bg-transparent text-xs border border-blue-500 border-solid rounded-full px-2 py-1  font-mono"
     							/>
-    							<button
-      								onClick={addTagValue}
-      								className="rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-    							>
-      								Add
-    							</button>
   							</div>
-							<div className="flex items-center gap-0">
-  								<CheckIcon
-    								className="w-10 h-5 text-green-500 cursor-pointer"
-    								onClick={handleSaveTags}
-  								/>
-  								<XMarkIcon
-    								className="w-5 h-5 text-red-500 cursor-pointer"
-    								onClick={handleCancelTags}
-  								/>
-							</div>
-						</div>	
-						}
-						<div className="w-full flex flex-wrap gap-2">
-						{projectTags &&
+							{projectTags &&
 							projectTags.map((title) =>(
-								<div key={title} onClick={() => deleteTag(title)}>
-									<Tag deletable={true} text={title}/>
+								<div key={title}>
+									<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
 								</div>
 							))}
+						</div>}
+						<div className="flex items-center gap-2">
+							<p className="text-gray-400 font-mono mt-2" style={{ fontSize: 10 }}>
+								Press <kbd className="bg-gray-100 border border-gray-300 rounded px-0.5 py-0.5 text-xs">Return</kbd> to confirm,{" "}
+								<kbd className="bg-gray-100 border border-gray-300 rounded px-0.5 py-0.5 text-xs">Esc</kbd> to cancel.
+							</p>
 						</div>
 					</div>) :
 					(
 					<div className="flex items-center flex-wrap gap-1 justify-left">
-						{projectTags && projectTags.length > 0 ?
-							projectTags.map((title) =>(
-								<Tag key={title} deletable={false} text={title} />
-							)) :
-							<p className="text-sm font-mono text-gray-500">Click to Add Tags</p>}
-						{project.creator == session?.user?.id! ? <MdEdit
-											className="icon edit-icon"
-											onClick={handleEditTags}
-											style={{flexShrink: 0}}
-						/> : <></>}
+						{projectTags.length < TAG_MAX_NUMBER && project.creator == session?.user?.id! &&
+						<p className="inline-flex items-center gap-1 border border-dashed border-blue-300 rounded-full px-3 py-1 text-xs text-blue-400 hover:border-blue-400 font-medium"
+							onClick={handleEditTags}>
+							+ Add tag 
+						</p>}
+						{projectTags.map((title) =>(
+							<div key={title}>
+								<Tag deletable={true} text={title} onDelete={() => deleteTag(title)}/>
+							</div>
+						))}
 					</div>
-					) }
+					)}
 
 					<div className="text-sm font-mono text-gray-500 sm:hidden text-left">
 						{getStatusText(project, experimentStates[project.expId])}
