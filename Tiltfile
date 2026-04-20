@@ -12,7 +12,8 @@ k8s_yaml([
     "kubernetes_init/tilt/service-frontend.yaml",
     "kubernetes_init/tilt/deployment-backend.yaml",
     "kubernetes_init/tilt/service-backend-dev.yaml",
-    "helm_packages/mongodb-helm/pvs.yaml"
+    "helm_packages/mongodb-helm/pvs.yaml",
+    "kubernetes_init/tilt/job-resource-quota.yaml"
 ])
 
 # Setup the folder paths inside minikube
