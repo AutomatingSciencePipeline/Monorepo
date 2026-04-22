@@ -96,4 +96,4 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --system --deploy
-          mkdocs build --config-file docs/mkdocs.yml --site-dir ./site
+          mkdocs build --config-file mkdocs.yml --site-dir ./site
