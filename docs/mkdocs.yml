@@ -27,6 +27,8 @@ nav:
     - Helpful Commands: developerhelp/helpful_commands.md
   - BioAI User Guides:
     - HW8: bioai/hw8.md
+  - Architecture and Design Decisions:
+    - Architecture and Design Decisions: '#'
 
 # Drafts are excluded from deployments, but are shown while using `mkdocs serve`.
 draft_docs: |
