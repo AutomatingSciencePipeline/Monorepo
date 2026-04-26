@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect } from 'react';
+import { Fragment, useEffect, useRef} from 'react';
 import { InputSection } from '../../../InputSection';
 import {Tag} from '../../../Tag';
 import React, {useState} from 'react';
@@ -13,6 +13,16 @@ export const TAG_MAX_NUMBER = 5;
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
     const [individualTag, setIndividualTag] = useState("");
+    const configMenuRef = useRef(null);
+
+    const scrollToConfig = () => {
+        setTimeout(() => {
+            configMenuRef.current?.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center'
+            });
+        }, 50); 
+    };
 
     const addTagValue = () => {
         if(form.values.tags && (form.values.tags.includes(individualTag.trim()))){
@@ -154,8 +164,11 @@ export const InformationStep = ({ form, validationErrors, setValidationErrors, .
                     </div>
                 </InputSection>
                 <InputSection header={'Config File Format'}>
-                    <Menu as='div' className='relative'>
-                        <Menu.Button className=' bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
+                    <Menu as='div' className='relative' ref={configMenuRef}>
+                        <Menu.Button 
+                            onClick={scrollToConfig}
+                            className='bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                        >
                             {form.values.configFileFormat}
                             <ChevronDownIcon
                                 className='ml-2.5 -mr-1.5 h-5 w-5 text-gray-400'
