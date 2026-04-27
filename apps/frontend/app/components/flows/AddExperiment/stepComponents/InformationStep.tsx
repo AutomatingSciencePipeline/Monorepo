@@ -13,15 +13,15 @@ export const TAG_MAX_NUMBER = 5;
 
 export const InformationStep = ({ form, validationErrors, setValidationErrors, ...props }) => {
     const [individualTag, setIndividualTag] = useState("");
-    const configMenuRef = useRef(null);
+    const configMenuRef = useRef<HTMLDivElement>(null);
 
     const scrollToConfig = () => {
         setTimeout(() => {
-            configMenuRef.current?.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center'
-            });
-        }, 50); 
+        configMenuRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+        });
+    }, 50); 
     };
 
     const addTagValue = () => {
