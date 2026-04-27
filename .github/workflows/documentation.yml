@@ -18,7 +18,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: 3.9
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
       - uses: actions/cache@v4
         with:
@@ -26,7 +26,12 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      - run: |
+      - name: Install dependencies
+        working-directory: docs
+        run: |
           pip install pipenv
           pipenv install --system --deploy
-      - run: mkdocs gh-deploy --config-file docs/mkdocs.yml --force
+      - name: Deploy documentation
+        working-directory: docs
+        run: mkdocs gh-deploy --config-file mkdocs.yml --force
+

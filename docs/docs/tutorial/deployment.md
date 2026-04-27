@@ -5,21 +5,21 @@ The deployment process for GLADOS has been made easy for any admin on the system
 !!! Note
     A change needs to be reviewed, approved, and merged into the `main` branch. Then, the GitHub Actions to build the new production images needs to be completed before a deployment can be performed.
 
-There are two ways to do a production deployment:
+There are two ways to deploy to production:
 
-1. **On the Frontend**
-2. **SSH through the glados.csse.rose-hulman.edu Server**
+1. **Through the Frontend**
+2. **Through the glados.csse.rose-hulman.edu Server**
 
 ---
 
-## On the Frontend
+## Through the Frontend
 
-This method is the primary method of deploying new changes to GLADOS and will work 99% of the time.
+This method is the primary method of deploying new changes to GLADOS and should work most of the time. If the frontend is unavailable, see "Through The Server".
 
 To complete this method:
 
 1. Ensure that the user on GLADOS is an Admin.
-2. Go to the Admin dashboard and select the appropriate deployment section.
+2. Go to the Admin dashboard and navigate to the deployment section.
 3. There will be a red **Redeploy** button. Clicking this button will redeploy the application images and may take up to a couple of minutes.
 4. Refreshing the page or opening it in a new tab will show when the application is back up and running.
 
@@ -36,7 +36,7 @@ To complete a redeployment this way:
 3. From the main page of the server CLI, run:
 
    ```sh
-   ./Deploy-Server
+   ./update.sh
    ```
 
 This will deploy the newly created images in the same fashion as the frontend button. Refreshing the page will show when the changes are live.
