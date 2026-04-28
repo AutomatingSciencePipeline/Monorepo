@@ -90,10 +90,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: 3.9
       - name: Install Dependencies and Build Documentation
         working-directory: ./docs
         run: |
           pip install pipenv
           pipenv install --system --deploy
-          mkdocs build --config-file docs/mkdocs.yml --site-dir ./site
+          mkdocs build --config-file mkdocs.yml --site-dir ./site
