@@ -37,7 +37,7 @@ function calcPermutations(parameters: HyperparametersCollection) {
 				}
 
 
-				if (hyper.default == -1) {
+				if (hyper.useDefault == false) {
 					noDefaultCount = noDefaultCount * numObjs;
 				} else {
 					defaultCount = defaultCount + numObjs;

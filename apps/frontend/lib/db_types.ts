@@ -34,6 +34,7 @@ export interface IntegerHyperparameter extends GenericHyperparameter {
     max: number;
     step: number;
     default: number;
+    useDefault: boolean;
     type: HyperparameterTypes.INTEGER;
 }
 
