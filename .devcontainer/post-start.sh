@@ -3,7 +3,7 @@ cd /workspaces/Monorepo/apps/frontend || echo 'folder not found!'
 npm i
  
 minikube config set cpus 3
-minikube config set memory 12000
+minikube config set memory 7800
 minikube delete
 
 # wait for docker daemon to start
