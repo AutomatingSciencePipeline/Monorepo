@@ -46,7 +46,6 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 			}
 			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-				console.log('Boolean Hyperparameter: ' + hyperparameter.default);
 				if (!hyperparameter.useDefault) {
 					noDefaultCount = noDefaultCount * 2;
 				}
@@ -79,12 +78,10 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 		if (totalObjs < 3 && allInts && countDefaults > 0) {
 			const total = (noDefaultCount + defaultCount) - 1;
-			console.log('Total Permutations: ' + total);
 			return total;
 		}
 		else {
 			const total = (noDefaultCount * defaultCount) - (noDefaultCount * (countDefaults - 1));
-			console.log('Total Permutations: ' + total);
 			return total;
 		}
 	}
