@@ -16,14 +16,15 @@ function getParamRange(param: any): number {
         case HyperparameterTypes.FLOAT:
             return Math.floor((param.max - param.min) / param.step) + 1;
         case HyperparameterTypes.BOOLEAN:
-            return 2;
-        case HyperparameterTypes.STRING:
-            return 1;
+            return 2; // Values either true or false
         case HyperparameterTypes.STRING_LIST:
             return param.values.length;
+        case HyperparameterTypes.STRING:
+            return 1;
         case HyperparameterTypes.PARAM_GROUP:
-            // Calculate product of all groups
-            return Object.values(param.values as any[][]).reduce((acc, list) => acc * list.length, 1);
+            // Returns length of a grouping
+            const values = Object.values(param.values as any[][]);
+            return values.length > 0 ? values[0].length : 0;
         default:
             return 1;
     }
@@ -31,52 +32,38 @@ function getParamRange(param: any): number {
 
 function calcPermutations(parameters: HyperparametersCollection) {
     const params = parameters.hyperparameters;
-    if ((params.length as number) === 0) return 0;
+    const paramGroups = params.filter(p => p.type === HyperparameterTypes.PARAM_GROUP);
+    const normalParams = params.filter(p => p.type !== HyperparameterTypes.PARAM_GROUP);
 
-    // 1. Calculate counts and metadata in one pass
-    let nonDefaultCount = 0;
-    let defaultCount = 0;
-    
-    params.forEach(p => {
-        if (p.type === HyperparameterTypes.PARAM_GROUP) {
-            nonDefaultCount += Object.keys(p.values).length;
-        } else if (p.useDefault) {
-            defaultCount++;
-        } else {
-            nonDefaultCount++;
-        }
+    const defaultParams = normalParams.filter(p => 
+        p.useDefault 
+    );
+
+    let count = 1; // The "Base Default" config
+
+    defaultParams.forEach(p => {
+        const range = getParamRange(p);
+        // -1 is to account for the 1 that is included in the count for the default config 
+        count += (range - 1);
     });
 
-    // 2. Logic Branching
-    // Scenario A: 2+ non-defaults -> Standard Cartesian Product (Multiply everything)
-    if (nonDefaultCount >= 2) {
-        return params.reduce((total, p) => total * getParamRange(p), 1);
-    }
+    const nonDefaultParams = normalParams.filter(p => 
+        p.useDefault === false
+    );
 
-    // Default parameters logic
-    if (defaultCount > 0) {
-        let sumOfRanges = 0;
-        let rangeMultiplier = 1;
-        let defaultTypeCount = 0;
+    nonDefaultParams.forEach(p => {
+        count *= getParamRange(p);
+    });
 
-        params.forEach(p => {
-            const range = getParamRange(p);
-            const isNumeric = p.type === HyperparameterTypes.INTEGER || p.type === HyperparameterTypes.FLOAT;
-
-            if (isNumeric && !p.useDefault) {
-                rangeMultiplier = range; // Special case for if a numeris param is non-default
-            } else {
-                if (isNumeric && p.useDefault) defaultTypeCount++;
-                // sum (range - 1) for groups/lists, or just range for others
-                const adjustment = (p.type === HyperparameterTypes.STRING_LIST || p.type === HyperparameterTypes.PARAM_GROUP) ? -1 : 0;
-                sumOfRanges += (range + adjustment);
-            }
+    if (paramGroups.length > 0) {
+        let groupMultiplier = 1;
+        paramGroups.forEach(pg => {
+            groupMultiplier *= getParamRange(pg);
         });
-
-        return (sumOfRanges - defaultTypeCount + 1) * rangeMultiplier;
+        count *= groupMultiplier;
     }
 
-    return 0;
+    return count;
 }
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
