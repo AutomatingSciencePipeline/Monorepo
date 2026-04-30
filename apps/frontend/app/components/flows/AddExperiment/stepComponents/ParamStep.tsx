@@ -7,102 +7,76 @@ import { HyperparametersCollection, HyperparameterTypes, IntegerHyperparameter }
 import { useDebounce } from "use-debounce";
 import { final } from 'pino';
 
-function defaultNonDefaultCount(parameters: HyperparametersCollection) {
-	let nonDefaultCount = 0;
-	let defaultCount = 0;
-	if (parameters.hyperparameters.length > 0) {
-		//Calculate if non default values are above one
-		for (const param of parameters.hyperparameters) {
-			if(param.type === HyperparameterTypes.PARAM_GROUP) {
-				for (const key in param.values) {
-					const groupParamsLength = param.values[key].length;
-					nonDefaultCount += groupParamsLength;
-				}
-			} else if (param.useDefault) {
-				defaultCount++;
-				continue;
-			}
-			nonDefaultCount++;
-		}
-	}
-	return { nonDefaultCount, defaultCount };
-}
-
-function nonDefaultPermCalculation(parameters: HyperparametersCollection, finalPermutations: number) {
-	parameters.hyperparameters.forEach(hyperparameter => {
-		if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
-			const intFloatParam = hyperparameter as IntegerHyperparameter;
-			const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
-			finalPermutations *= range;
-		} else if (hyperparameter.type == HyperparameterTypes.STRING) {
-			finalPermutations *= 1;
-		} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-			console.log("Calculating permutations for boolean ", hyperparameter.name);
-			finalPermutations *= 2;
-		} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
-			finalPermutations *= hyperparameter.values.length;
-				} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
-					console.log("Calculating permutations for param group ", hyperparameter.name, " with values ", hyperparameter.values);
-					let groupPermutations = 1;
-					for (const key in hyperparameter.values) {
-						console.log("Calculating permutations for param group ", hyperparameter.name, " with key ", key, " and values ", hyperparameter.values[key]);
-				 		groupPermutations *= hyperparameter.values[key].length;
-						break;
-					}
-					finalPermutations *= groupPermutations;
-			}
-		});
-	return finalPermutations;
-}
-
-function defaultPermCalculation(parameters: HyperparametersCollection, finalPermutations: number) {
-	let numberTotal = 0;
-	let rangeMultiplier = 1;
-	parameters.hyperparameters.forEach(hyperparameter => {
-		if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
-			if(hyperparameter.useDefault) {
-				const intFloatParam = hyperparameter as IntegerHyperparameter;
-				const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
-				numberTotal += 1;
-				finalPermutations += range;
-			} else {
-				const intFloatParam = hyperparameter as IntegerHyperparameter;
-				rangeMultiplier = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
-			}
-		} else if (hyperparameter.type == HyperparameterTypes.STRING) {
-			finalPermutations += 1;
-		} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-			finalPermutations += 2;
-		} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
-			const stringListParam = hyperparameter as any;
-			finalPermutations += stringListParam.values.length - 1;
-		} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
-			const paramGroupParam = hyperparameter as any; 
-			let groupPermutations = 1;
-			for (const key in paramGroupParam.values) {
-				groupPermutations *= paramGroupParam.values[key].length;
-			}
-			finalPermutations += groupPermutations - 1;
-		}
-		});
-	finalPermutations = finalPermutations - numberTotal  + 1;
-	finalPermutations *= rangeMultiplier;
-	return finalPermutations;
+/** 
+ * Helper to get the number of possible values for a single hyperparameter 
+ */
+function getParamRange(param: any): number {
+    switch (param.type) {
+        case HyperparameterTypes.INTEGER:
+        case HyperparameterTypes.FLOAT:
+            return Math.floor((param.max - param.min) / param.step) + 1;
+        case HyperparameterTypes.BOOLEAN:
+            return 2;
+        case HyperparameterTypes.STRING:
+            return 1;
+        case HyperparameterTypes.STRING_LIST:
+            return param.values.length;
+        case HyperparameterTypes.PARAM_GROUP:
+            // Calculate product of all groups
+            return Object.values(param.values as any[][]).reduce((acc, list) => acc * list.length, 1);
+        default:
+            return 1;
+    }
 }
 
 function calcPermutations(parameters: HyperparametersCollection) {
-	let finalPermutations;
-	const { nonDefaultCount, defaultCount } = defaultNonDefaultCount(parameters);
+    const params = parameters.hyperparameters;
+    if ((params.length as number) === 0) return 0;
 
-	// If there are 2 or more non default values, calculate permutations as normal with all parameters. 
-	// If there are 0 or 1 non default values, calculate permutations with only non default values and then add the default values at the end.
-	if (nonDefaultCount >= 2) {
-		finalPermutations = nonDefaultPermCalculation(parameters, 1);
-	} else if (nonDefaultCount <= 1 && defaultCount > 0) {
-		finalPermutations = defaultPermCalculation(parameters, 1);
-	}
+    // 1. Calculate counts and metadata in one pass
+    let nonDefaultCount = 0;
+    let defaultCount = 0;
+    
+    params.forEach(p => {
+        if (p.type === HyperparameterTypes.PARAM_GROUP) {
+            nonDefaultCount += Object.keys(p.values).length;
+        } else if (p.useDefault) {
+            defaultCount++;
+        } else {
+            nonDefaultCount++;
+        }
+    });
 
-	return finalPermutations;
+    // 2. Logic Branching
+    // Scenario A: 2+ non-defaults -> Standard Cartesian Product (Multiply everything)
+    if (nonDefaultCount >= 2) {
+        return params.reduce((total, p) => total * getParamRange(p), 1);
+    }
+
+    // Default parameters logic
+    if (defaultCount > 0) {
+        let sumOfRanges = 0;
+        let rangeMultiplier = 1;
+        let defaultTypeCount = 0;
+
+        params.forEach(p => {
+            const range = getParamRange(p);
+            const isNumeric = p.type === HyperparameterTypes.INTEGER || p.type === HyperparameterTypes.FLOAT;
+
+            if (isNumeric && !p.useDefault) {
+                rangeMultiplier = range; // Special case for if a numeris param is non-default
+            } else {
+                if (isNumeric && p.useDefault) defaultTypeCount++;
+                // sum (range - 1) for groups/lists, or just range for others
+                const adjustment = (p.type === HyperparameterTypes.STRING_LIST || p.type === HyperparameterTypes.PARAM_GROUP) ? -1 : 0;
+                sumOfRanges += (range + adjustment);
+            }
+        });
+
+        return (sumOfRanges - defaultTypeCount + 1) * rangeMultiplier;
+    }
+
+    return 0;
 }
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
