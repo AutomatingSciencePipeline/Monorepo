@@ -5,66 +5,101 @@ import { InputSection } from '../../../InputSection';
 //import { formList } from '@mantine/form';
 import { HyperparametersCollection, HyperparameterTypes, IntegerHyperparameter } from '../../../../../lib/db_types';
 import { useDebounce } from "use-debounce";
+import { final } from 'pino';
 
-function calcPermutations(parameters: HyperparametersCollection) {
-
-	let finalPermutations = 1;
-
+function defaultNonDefaultCount(parameters: HyperparametersCollection) {
+	let nonDefaultCount = 0;
+	let defaultCount = 0;
 	if (parameters.hyperparameters.length > 0) {
 		//Calculate if non default values are above one
-		let nonDefaultCount = 0;
-		let defaultCount = 0;
 		for (const param of parameters.hyperparameters) {
-			if (param.useDefault) {
+			if(param.type === HyperparameterTypes.PARAM_GROUP) {
+				for (const key in param.values) {
+					const groupParamsLength = param.values[key].length;
+					nonDefaultCount += groupParamsLength;
+				}
+			} else if (param.useDefault) {
 				defaultCount++;
 				continue;
 			}
 			nonDefaultCount++;
 		}
+	}
+	return { nonDefaultCount, defaultCount };
+}
 
-		if (nonDefaultCount >= 2) {
-			parameters.hyperparameters.forEach(hyperparameter => {
-				if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
-					const intFloatParam = hyperparameter as IntegerHyperparameter;
-					const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
-					finalPermutations *= range;
-				} else if (hyperparameter.type == HyperparameterTypes.STRING) {
-					finalPermutations *= 1;
-				} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-					finalPermutations *= 2;
-				} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
-					finalPermutations *= hyperparameter .values.length;
+function nonDefaultPermCalculation(parameters: HyperparametersCollection, finalPermutations: number) {
+	parameters.hyperparameters.forEach(hyperparameter => {
+		if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
+			const intFloatParam = hyperparameter as IntegerHyperparameter;
+			const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
+			finalPermutations *= range;
+		} else if (hyperparameter.type == HyperparameterTypes.STRING) {
+			finalPermutations *= 1;
+		} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
+			console.log("Calculating permutations for boolean ", hyperparameter.name);
+			finalPermutations *= 2;
+		} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
+			finalPermutations *= hyperparameter.values.length;
 				} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
+					console.log("Calculating permutations for param group ", hyperparameter.name, " with values ", hyperparameter.values);
 					let groupPermutations = 1;
 					for (const key in hyperparameter.values) {
+						console.log("Calculating permutations for param group ", hyperparameter.name, " with key ", key, " and values ", hyperparameter.values[key]);
 				 		groupPermutations *= hyperparameter.values[key].length;
+						break;
 					}
 					finalPermutations *= groupPermutations;
 			}
 		});
-		} else if (nonDefaultCount <= 1 && defaultCount > 0) {
-			parameters.hyperparameters.forEach(hyperparameter => {
-				if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
-					const intFloatParam = hyperparameter as IntegerHyperparameter;
-					const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
-					finalPermutations += range - 1;
-				} else if (hyperparameter.type == HyperparameterTypes.STRING) {
-					finalPermutations += 1;
-				} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-					finalPermutations += 2;
-				} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
-					const stringListParam = hyperparameter as any; // Replace 'any' with the correct type
-					finalPermutations += stringListParam.values.length - 1;
-				} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
-					const paramGroupParam = hyperparameter as any; // Replace 'any' with the correct type
-					let groupPermutations = 1;
-					for (const key in paramGroupParam.values) {
-				 		groupPermutations *= paramGroupParam.values[key].length;
-					}
-					finalPermutations += groupPermutations - 1;
+	return finalPermutations;
+}
+
+function defaultPermCalculation(parameters: HyperparametersCollection, finalPermutations: number) {
+	let numberTotal = 0;
+	let rangeMultiplier = 1;
+	parameters.hyperparameters.forEach(hyperparameter => {
+		if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
+			if(hyperparameter.useDefault) {
+				const intFloatParam = hyperparameter as IntegerHyperparameter;
+				const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
+				numberTotal += 1;
+				finalPermutations += range;
+			} else {
+				const intFloatParam = hyperparameter as IntegerHyperparameter;
+				rangeMultiplier = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
 			}
-		});
+		} else if (hyperparameter.type == HyperparameterTypes.STRING) {
+			finalPermutations += 1;
+		} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
+			finalPermutations += 2;
+		} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
+			const stringListParam = hyperparameter as any;
+			finalPermutations += stringListParam.values.length - 1;
+		} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
+			const paramGroupParam = hyperparameter as any; 
+			let groupPermutations = 1;
+			for (const key in paramGroupParam.values) {
+				groupPermutations *= paramGroupParam.values[key].length;
+			}
+			finalPermutations += groupPermutations - 1;
 		}
+		});
+	finalPermutations = finalPermutations - numberTotal  + 1;
+	finalPermutations *= rangeMultiplier;
+	return finalPermutations;
+}
+
+function calcPermutations(parameters: HyperparametersCollection) {
+	let finalPermutations;
+	const { nonDefaultCount, defaultCount } = defaultNonDefaultCount(parameters);
+
+	// If there are 2 or more non default values, calculate permutations as normal with all parameters. 
+	// If there are 0 or 1 non default values, calculate permutations with only non default values and then add the default values at the end.
+	if (nonDefaultCount >= 2) {
+		finalPermutations = nonDefaultPermCalculation(parameters, 1);
+	} else if (nonDefaultCount <= 1 && defaultCount > 0) {
+		finalPermutations = defaultPermCalculation(parameters, 1);
 	}
 
 	return finalPermutations;
