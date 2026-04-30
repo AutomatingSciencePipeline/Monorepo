@@ -7,85 +7,67 @@ import { HyperparametersCollection, HyperparameterTypes, IntegerHyperparameter }
 import { useDebounce } from "use-debounce";
 
 function calcPermutations(parameters: HyperparametersCollection) {
-	var noDefaultCount = 1;
-	var defaultCount = 0;
 
-	var countDefaults = 0;
-	var totalObjs = 0;
-
-	var allInts = true;
+	let finalPermutations = 1;
 
 	if (parameters.hyperparameters.length > 0) {
-
-		parameters.hyperparameters.forEach(hyperparameter => {
-			totalObjs++;
-			if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
-
-				if (isNaN(hyperparameter.step) || hyperparameter.step == 0) {
-					hyperparameter.step = 1;
-					return -1;
-				}
-
-				if (hyperparameter.type == HyperparameterTypes.FLOAT)
-					allInts = false;
-
-				let hyper = hyperparameter;
-				let numObjs = 0;
-
-				for (let i = hyper.min * 100; i <= hyper.max * 100; i += hyper.step * 100) {
-					numObjs++;
-				}
-
-
-				if (hyper.useDefault == false) {
-					noDefaultCount = noDefaultCount * numObjs;
-				} else {
-					defaultCount = defaultCount + numObjs;
-					countDefaults++;
-				}
-
+		//Calculate if non default values are above one
+		let nonDefaultCount = 0;
+		let defaultCount = 0;
+		for (const param of parameters.hyperparameters) {
+			if (param.useDefault) {
+				defaultCount++;
+				continue;
 			}
-			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-				if (hyperparameter.default != true && hyperparameter.default != false) {
-					noDefaultCount = noDefaultCount * 2;
-				}
-				else {
-					defaultCount = defaultCount + 2;
-					countDefaults++;
-				}
-			}
-			else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
-				if (hyperparameter.default == '-1') {
-					noDefaultCount = noDefaultCount * hyperparameter.values.length;
-				}
-				else {
-					defaultCount = defaultCount + hyperparameter.values.length;
-					countDefaults++;
-				}
-			}
-			else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
-				let hyper = hyperparameter;
-				let numObjs = 0;
-				for (let key in hyper.values) {
-					numObjs = hyper.values[key].length;
-					break;
-				}
+			nonDefaultCount++;
+		}
 
-				noDefaultCount = noDefaultCount * numObjs;
-
+		if (nonDefaultCount >= 2) {
+			parameters.hyperparameters.forEach(hyperparameter => {
+				if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
+					const intFloatParam = hyperparameter as IntegerHyperparameter;
+					const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
+					finalPermutations *= range;
+				} else if (hyperparameter.type == HyperparameterTypes.STRING) {
+					finalPermutations *= 1;
+				} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
+					finalPermutations *= 2;
+				} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
+					finalPermutations *= hyperparameter .values.length;
+				} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
+					let groupPermutations = 1;
+					for (const key in hyperparameter.values) {
+				 		groupPermutations *= hyperparameter.values[key].length;
+					}
+					finalPermutations *= groupPermutations;
 			}
 		});
-
-		if (totalObjs < 3 && allInts && countDefaults > 0) {
-			const total = (noDefaultCount + defaultCount) - 1;
-			return total;
-		}
-		else {
-			const total = (noDefaultCount * defaultCount) - (noDefaultCount * (countDefaults - 1));
-			return total;
+		} else if (nonDefaultCount <= 1 && defaultCount > 0) {
+			parameters.hyperparameters.forEach(hyperparameter => {
+				if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
+					const intFloatParam = hyperparameter as IntegerHyperparameter;
+					const range = Math.floor((intFloatParam.max - intFloatParam.min) / intFloatParam.step) + 1;
+					finalPermutations += range - 1;
+				} else if (hyperparameter.type == HyperparameterTypes.STRING) {
+					finalPermutations += 1;
+				} else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
+					finalPermutations += 2;
+				} else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
+					const stringListParam = hyperparameter as any; // Replace 'any' with the correct type
+					finalPermutations += stringListParam.values.length - 1;
+				} else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
+					const paramGroupParam = hyperparameter as any; // Replace 'any' with the correct type
+					let groupPermutations = 1;
+					for (const key in paramGroupParam.values) {
+				 		groupPermutations *= paramGroupParam.values[key].length;
+					}
+					finalPermutations += groupPermutations - 1;
+			}
+		});
 		}
 	}
 
+	return finalPermutations;
 }
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;

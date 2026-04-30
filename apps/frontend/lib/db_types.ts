@@ -20,6 +20,7 @@ export enum HyperparameterTypes {
 export interface GenericHyperparameter {
     name: string;
     type: HyperparameterTypes;
+    useDefault: boolean;
 }
 
 export interface ParamGroupHyperparameter extends GenericHyperparameter {
@@ -34,7 +35,6 @@ export interface IntegerHyperparameter extends GenericHyperparameter {
     max: number;
     step: number;
     default: number;
-    useDefault: boolean;
     type: HyperparameterTypes.INTEGER;
 }
 
