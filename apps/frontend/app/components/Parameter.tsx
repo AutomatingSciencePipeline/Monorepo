@@ -71,7 +71,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 			updateConfirmedParamValues(index, form.values.hyperparameters[index].values);
 		}
 
-		if (form.values.hyperparameters[index].default && form.values.hyperparameters[index].default != -1) {
+		if ((form.values.hyperparameters[index].default && form.values.hyperparameters[index].default != -1)
+			|| !form.values.hyperparameters[index].default && form.values.hyperparameters[index].useDefault)
+		{
 			setUseDefault(true);
 		}
 		else {
@@ -85,7 +87,7 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 				form.setFieldValue(`hyperparameters.${index}.default`, false);
 			}
 			else {
-			form.setFieldValue(`hyperparameters.${index}.default`, -1);
+				form.setFieldValue(`hyperparameters.${index}.default`, -1);
 			}
 		}
 	}, [useDefault]);
