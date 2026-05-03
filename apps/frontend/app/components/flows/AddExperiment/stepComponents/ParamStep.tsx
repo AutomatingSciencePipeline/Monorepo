@@ -30,28 +30,42 @@ function getParamRange(param: any): number {
     }
 }
 
+function hasDefault(p: any): boolean {
+    return p.default !== -1 && p.default !== '' && p.default !== undefined;
+}
+
 function calcPermutations(parameters: HyperparametersCollection) {
     const params = parameters.hyperparameters;
 
     const paramGroups = params.filter(p => p.type === HyperparameterTypes.PARAM_GROUP);
     const normalParams = params.filter(p => p.type !== HyperparameterTypes.PARAM_GROUP);
 
-    let totalCount = 1; // all-default case
+    const constrained = normalParams.filter(p => hasDefault(p));
+    const free = normalParams.filter(p => !hasDefault(p));
 
-    for (const p of normalParams) {
-        const range = getParamRange(p);
-        totalCount += (range - 1);
+    let constrainedTotal = 1;
+
+    for (const p of constrained) {
+        constrainedTotal += (getParamRange(p) - 1);
     }
+
+    let freeMultiplier = 1;
+
+    for (const p of free) {
+        freeMultiplier *= getParamRange(p);
+    }
+
+    let total = constrainedTotal * freeMultiplier;
 
     if (paramGroups.length > 0) {
         let groupMultiplier = 1;
         for (const pg of paramGroups) {
             groupMultiplier *= getParamRange(pg);
         }
-        totalCount *= groupMultiplier;
+        total *= groupMultiplier;
     }
 
-    return totalCount;
+    return total;
 }
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
