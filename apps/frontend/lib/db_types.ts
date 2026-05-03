@@ -10,7 +10,7 @@ export enum HyperparameterTypes {
     INTEGER = 'integer',
     FLOAT = 'float',
     STRING = 'string',
-    BOOLEAN = 'boolean',
+    BOOLEAN = 'bool',
     STRING_LIST = 'stringlist',
     PARAM_GROUP = 'paramgroup'
 }
@@ -49,6 +49,7 @@ export interface FloatHyperparameter extends GenericHyperparameter {
 export interface BooleanHyperparameter extends GenericHyperparameter {
     default: boolean;
     type: HyperparameterTypes.BOOLEAN;
+    useDefault: boolean;
 }
 
 export interface StringHyperparameter extends GenericHyperparameter {
