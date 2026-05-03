@@ -71,7 +71,9 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 			updateConfirmedParamValues(index, form.values.hyperparameters[index].values);
 		}
 
-		if (form.values.hyperparameters[index].default && form.values.hyperparameters[index].default != -1) {
+		if ((form.values.hyperparameters[index].default && form.values.hyperparameters[index].default != -1)
+			|| !form.values.hyperparameters[index].default && form.values.hyperparameters[index].useDefault)
+		{
 			setUseDefault(true);
 		}
 		else {
@@ -81,7 +83,12 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 
 	useEffect(() => {
 		if (form.values.hyperparameters[index].useDefault == false) {
-			form.setFieldValue(`hyperparameters.${index}.default`, -1);
+			if (type === 'bool') {
+				form.setFieldValue(`hyperparameters.${index}.default`, false);
+			}
+			else {
+				form.setFieldValue(`hyperparameters.${index}.default`, -1);
+			}
 		}
 	}, [useDefault]);
 
@@ -134,14 +141,15 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 					/>
 				)}
 
-				<Component
+				{type !== 'bool' && 
+				(<Component
 					form={form}
 					type={type}
 					index={index}
 					updateConfirmedValues={updateConfirmedValues}
 					updateConfirmedParamValues={updateConfirmedParamValues}
 					{...rest}
-				/>
+				/>)}
 
 				{type !== 'paramgroup' && (
 					<div className='flex flex-col items-center ml-2'>

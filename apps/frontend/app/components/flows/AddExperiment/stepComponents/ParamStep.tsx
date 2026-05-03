@@ -46,11 +46,11 @@ function calcPermutations(parameters: HyperparametersCollection) {
 
 			}
 			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-				if (hyperparameter.default != true && hyperparameter.default != false) {
+				if (!hyperparameter.useDefault) {
 					noDefaultCount = noDefaultCount * 2;
 				}
 				else {
-					defaultCount = defaultCount + 2;
+					defaultCount = defaultCount + 1;
 					countDefaults++;
 				}
 			}
@@ -119,7 +119,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									onClick={() => {
 										form.insertListItem('hyperparameters', {
 											name: '',
-											default: -1,
+											default: (type === 'bool') ? false : -1,
 											...((type === 'paramgroup') && { params: {} }),
 											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {
