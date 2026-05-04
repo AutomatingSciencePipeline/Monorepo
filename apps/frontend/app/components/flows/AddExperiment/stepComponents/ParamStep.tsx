@@ -13,60 +13,71 @@ import { final } from 'pino';
 function getParamRange(param: any): number {
     switch (param.type) {
         case HyperparameterTypes.INTEGER:
-        case HyperparameterTypes.FLOAT:
             return Math.floor((param.max - param.min) / param.step) + 1;
+        case HyperparameterTypes.FLOAT:
+            return Math.floor(((param.max - param.min) / param.step) + 1e-9) + 1;
         case HyperparameterTypes.BOOLEAN:
-            return 2; // Values either true or false
+            return 2;
         case HyperparameterTypes.STRING_LIST:
-            return param.values.length;
+            return param.values ? param.values.length : 0;
         case HyperparameterTypes.STRING:
             return 1;
         case HyperparameterTypes.PARAM_GROUP:
-            // Returns length of a grouping
-            const values = Object.values(param.values as any[][]);
+            const values = Object.values((param.values || {}) as any[][]);
             return values.length > 0 ? values[0].length : 0;
         default:
             return 1;
     }
 }
 
-function hasDefault(p: any): boolean {
-    return p.default !== -1 && p.default !== '' && p.default !== undefined;
-}
-
-function calcPermutations(parameters: HyperparametersCollection) {
+function calcPermutations(parameters: HyperparametersCollection): number {
     const params = parameters.hyperparameters;
 
     const paramGroups = params.filter(p => p.type === HyperparameterTypes.PARAM_GROUP);
     const normalParams = params.filter(p => p.type !== HyperparameterTypes.PARAM_GROUP);
 
-    const constrained = normalParams.filter(p => hasDefault(p));
-    const free = normalParams.filter(p => !hasDefault(p));
+    // A parameter is "constrained" if useDefault is true AND it has a meaningful default
+    // Python: param["useDefault"] and (param["default"] != -1 and param["default"] != "-1" and param["default"] != '')
+    const hasValidDefault = (p: any): boolean => {
+        const def = p.default;
+        return p.useDefault || (def !== -1 && def !== "-1" && def !== '' && def !== undefined && def !== null);
+    };
 
-    let constrainedTotal = 1;
+    const isConstrained = (p: any): boolean => 
+        p.useDefault === true && hasValidDefault(p);
 
-    for (const p of constrained) {
-        constrainedTotal += (getParamRange(p) - 1);
+    const D = normalParams.filter(isConstrained);   // constrained params
+    const F = normalParams.filter(p => !isConstrained(p));  // free params
+
+    // Free parameters: full Cartesian product
+    let freeProduct = 1;
+    for (const p of F) {
+        freeProduct *= getParamRange(p);
     }
 
-    let freeMultiplier = 1;
-
-    for (const p of free) {
-        freeMultiplier *= getParamRange(p);
+    // Constrained parameters: allow at most 1 to deviate from default
+    // Valid combinations = 1 (all at default) + sum of (range - 1) for each constrained param
+    // (range - 1) because the default value itself doesn't count as "changed"
+    let constrainedCombinations = 1; // all constrained params at their defaults
+    for (const p of D) {
+        constrainedCombinations += (getParamRange(p) - 1);
     }
 
-    let total = constrainedTotal * freeMultiplier;
+    let total = freeProduct * constrainedCombinations;
 
+    // Param groups: Python generates all group permutations then does Cartesian product
+    // Multiple param groups are summed (appended to same list), then multiplied with filtered_permutations
     if (paramGroups.length > 0) {
-        let groupMultiplier = 1;
+        let groupTotal = 0;
         for (const pg of paramGroups) {
-            groupMultiplier *= getParamRange(pg);
+            groupTotal += getParamRange(pg);
         }
-        total *= groupMultiplier;
+        total *= groupTotal;
     }
 
     return total;
 }
+
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
 
