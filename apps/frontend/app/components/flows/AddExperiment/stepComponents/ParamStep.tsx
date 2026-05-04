@@ -36,17 +36,11 @@ function calcPermutations(parameters: HyperparametersCollection): number {
     const paramGroups = params.filter(p => p.type === HyperparameterTypes.PARAM_GROUP);
     const normalParams = params.filter(p => p.type !== HyperparameterTypes.PARAM_GROUP);
 
-    /**
-     * Matches Python: 
-     * param["default"] != -1 and param["default"] != "-1" and param["default"] != ''
-     */
     const hasValidDefault = (p: any): boolean => {
         const def = p.default;
         return p.useDefault || (def !== -1 && def !== "-1" && def !== '' && def !== undefined && def !== null);
     };
 
-    // A parameter is constrained if it has a default value set, 
-    // mimicking the Python 'num_defaults_changed' filter logic.
     const D = normalParams.filter(hasValidDefault); 
     const F = normalParams.filter(p => !hasValidDefault(p));
 
