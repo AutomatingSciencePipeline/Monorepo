@@ -36,37 +36,39 @@ function calcPermutations(parameters: HyperparametersCollection): number {
     const paramGroups = params.filter(p => p.type === HyperparameterTypes.PARAM_GROUP);
     const normalParams = params.filter(p => p.type !== HyperparameterTypes.PARAM_GROUP);
 
-    // A parameter is "constrained" if useDefault is true AND it has a meaningful default
-    // Python: param["useDefault"] and (param["default"] != -1 and param["default"] != "-1" and param["default"] != '')
+    /**
+     * Matches Python: 
+     * param["default"] != -1 and param["default"] != "-1" and param["default"] != ''
+     */
     const hasValidDefault = (p: any): boolean => {
         const def = p.default;
         return p.useDefault || (def !== -1 && def !== "-1" && def !== '' && def !== undefined && def !== null);
     };
 
-    const isConstrained = (p: any): boolean => 
-        p.useDefault === true && hasValidDefault(p);
+    // A parameter is constrained if it has a default value set, 
+    // mimicking the Python 'num_defaults_changed' filter logic.
+    const D = normalParams.filter(hasValidDefault); 
+    const F = normalParams.filter(p => !hasValidDefault(p));
 
-    const D = normalParams.filter(isConstrained);   // constrained params
-    const F = normalParams.filter(p => !isConstrained(p));  // free params
-
-    // Free parameters: full Cartesian product
+    // 1. Calculate Product of Free Parameters
     let freeProduct = 1;
     for (const p of F) {
         freeProduct *= getParamRange(p);
     }
 
-    // Constrained parameters: allow at most 1 to deviate from default
-    // Valid combinations = 1 (all at default) + sum of (range - 1) for each constrained param
-    // (range - 1) because the default value itself doesn't count as "changed"
-    let constrainedCombinations = 1; // all constrained params at their defaults
+    // 2. Calculate Combinations of Constrained Parameters (One-at-a-time deviation)
+    // Formula: 1 (all at default) + Sum of (range - 1) for each param
+    let constrainedCombinations = 1; 
     for (const p of D) {
-        constrainedCombinations += (getParamRange(p) - 1);
+        const range = getParamRange(p);
+        if (range > 1) {
+            constrainedCombinations += (range - 1);
+        }
     }
 
     let total = freeProduct * constrainedCombinations;
 
-    // Param groups: Python generates all group permutations then does Cartesian product
-    // Multiple param groups are summed (appended to same list), then multiplied with filtered_permutations
+    // 3. Handle Param Groups (Sum of group lengths multiplied by current total)
     if (paramGroups.length > 0) {
         let groupTotal = 0;
         for (const pg of paramGroups) {
@@ -77,7 +79,6 @@ function calcPermutations(parameters: HyperparametersCollection): number {
 
     return total;
 }
-
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
 
