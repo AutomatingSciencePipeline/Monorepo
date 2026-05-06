@@ -1,4 +1,10 @@
 #!/bin/bash
+echo NOTE: This is NOT the setup script the most recent GLADOS team used.
+echo We recommend running /.devcontainer/post-start.sh instead.
+echo This script may break things when run. We have preserved the original script, and you may run it by opening the file and removing the first "exit".
+exit
+
+
 # You need Bash installed to run this script. Follow the setup directions here: https://github.com/AutomatingSciencePipeline/Monorepo/wiki
 
 # Load variables for other script files to use (versions to download and such)
