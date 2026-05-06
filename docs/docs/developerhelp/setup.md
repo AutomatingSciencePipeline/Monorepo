@@ -92,7 +92,16 @@ Skip step 2 if you are not using Windows!
 
 4. In the bottom right of the VS Code window you should be prompted to open as a dev container, if not press F1 and search for "Rebuild", click "Rebuild and Reopen in Container"
 
-5. If you are using Mac OS, ensure that you have the VS Code extension "Dev Container" installed. If you are on Windows, it can be installed automatically.
+5. Run the "post-start.sh" script from the root folder:
+    ```bash
+    ./post-start.sh
+    ```
+
+5. Start MiniKube by typing the following:
+
+    ```bash
+    minikube start
+    ``` 
 
 6. You should then have the Monorepo open inside of a dev container. 
 
@@ -107,6 +116,9 @@ Now that you are inside of a dev container, we will go over how to get a running
     ```bash
     tilt up
     ```
+
+!!!note
+    Make sure that you have the secrets file and that minikube is running.
 
 3. Now control + click on the URL that is shown: http://localhost:10350
 
