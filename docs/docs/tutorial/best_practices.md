@@ -4,6 +4,9 @@ This page will give a brief overview of the best practices for using GLADOS. For
 
 ## Repository Structure
 
+!!!note
+    The GLADOS CLI is contained within a separate repository. This section refers to the main repository, Monorepo.
+
 The GLADOS repository is structured to allow for easy navigation and understanding of the system. The main components of the repository are:
 
 ### Code Structure

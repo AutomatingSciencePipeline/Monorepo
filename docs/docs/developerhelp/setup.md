@@ -118,7 +118,7 @@ Now that you are inside of a dev container, we will go over how to get a running
     ```
 
 !!!note
-    Make sure that you have the secrets file and that minikube is running.
+    Make sure the secrets file is present and MiniKube is running.
 
 3. Now control + click on the URL that is shown: http://localhost:10350
 
