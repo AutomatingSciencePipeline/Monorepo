@@ -1,6 +1,7 @@
 FROM node:20-alpine AS base
 
 # Add essential utilities
+RUN apk add --no-cache ca-certificates
 RUN apk add --no-cache bash libc6-compat
 
 WORKDIR /app
