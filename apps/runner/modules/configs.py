@@ -70,7 +70,7 @@ def generate_permutations(parameters, paramgroup=None):
     explogger.info("paramgroup vals: %s", str(paramgroup))
           
     for param in parameters:
-        if param["default"] != -1 and param["default"] != "-1" and param["default"] != '':
+        if param["useDefault"] or (param["default"] != -1 and param["default"] != "-1" and param["default"] != ''):
             default_vals[param["name"]] = [param["default"]]
         else:
             default_vals[param["name"]] = expand_values(param)
