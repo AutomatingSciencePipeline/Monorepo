@@ -53,14 +53,11 @@ The team initially considered the possibility of extending the current service l
 
 ## 7. Threat Modeling
 
+## 8. Testing strategy
 
-## 8. Security Invariants
+## 9. Unresolved decisions
 
-## 9. Testing strategy
-
-## 10. Unresolved decisions
-
-## 11. References
+## 10. References
 
 
 
