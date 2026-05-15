@@ -16,6 +16,7 @@ class ParamType(Enum):
 
 class Parameter(BaseModel):
     type: ParamType
+    useDefault: bool
 
 
 class BoolParameter(Parameter):
