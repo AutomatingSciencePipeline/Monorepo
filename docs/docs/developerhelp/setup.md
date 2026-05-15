@@ -94,7 +94,7 @@ Skip step 2 if you are not using Windows!
 
 5. Run the "post-start.sh" script from the `.devcontainer` folder:
     ```bash
-    ./.devcotainer/post-start.sh
+    ./.devcontainer/post-start.sh
     ```
 
 6. You should then have the Monorepo open inside of a dev container. 
