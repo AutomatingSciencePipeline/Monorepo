@@ -92,18 +92,20 @@ Skip step 2 if you are not using Windows!
 
 4. In the bottom right of the VS Code window you should be prompted to open as a dev container, if not press F1 and search for "Rebuild", click "Rebuild and Reopen in Container"
 
-5. Run the "post-start.sh" script from the root folder:
+5. Run the "post-start.sh" script from the `.devcontainer` folder:
     ```bash
-    ./post-start.sh
+    ./.devcotainer/post-start.sh
     ```
 
-5. Start MiniKube by typing the following:
+6. You should then have the Monorepo open inside of a dev container. 
+
+7. Start MiniKube by typing the following:
 
     ```bash
     minikube start
     ``` 
 
-6. You should then have the Monorepo open inside of a dev container. 
+    This is necessary for Tilt to work.
 
 ## Getting Started with the Monorepo
 
@@ -118,7 +120,7 @@ Now that you are inside of a dev container, we will go over how to get a running
     ```
 
 !!!note
-    Make sure the secrets file is present and MiniKube is running.
+    Make sure the secrets file is present and MiniKube is running (see "How to setup").
 
 3. Now control + click on the URL that is shown: http://localhost:10350
 
