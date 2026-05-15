@@ -5,15 +5,15 @@ from modules.data.parameters import BoolParameter, FloatParam, IntegerParam, Par
 class TestIntParameter(unittest.TestCase):
     intDefault, intStart, intStop, intStep, intStepInvalid = 0, 0, 10, 1, 0
 
-    int_param_dict = {"default": intDefault, "min": intStart, "max": intStop, "step": intStep, "type": ParamType.INTEGER}
-    int_param_dict_min_equal_max = {"default": intDefault, "min": intStart, "max": intStart, "step": intStep, "type": ParamType.INTEGER}
-    int_param_dict_no_default = {"min": intStart, "max": intStop, "step": intStep, "type": ParamType.INTEGER}
-    int_param_dict_no_min = {"default": intDefault, "max": intStop, "step": intStep, "type": ParamType.INTEGER}
-    int_param_dict_no_max = {"default": intDefault, "min": intStart, "step": intStep, "type": ParamType.INTEGER}
-    int_param_dict_no_step = {"default": intDefault, "min": intStart, "max": intStop, "type": ParamType.INTEGER}
+    int_param_dict = {"default": intDefault, "min": intStart, "max": intStop, "step": intStep, "type": ParamType.INTEGER, "useDefault": True}
+    int_param_dict_min_equal_max = {"default": intDefault, "min": intStart, "max": intStart, "step": intStep, "type": ParamType.INTEGER, "useDefault": False}
+    int_param_dict_no_default = {"min": intStart, "max": intStop, "step": intStep, "type": ParamType.INTEGER, "useDefault": True}
+    int_param_dict_no_min = {"default": intDefault, "max": intStop, "step": intStep, "type": ParamType.INTEGER, "useDefault": True}
+    int_param_dict_no_max = {"default": intDefault, "min": intStart, "step": intStep, "type": ParamType.INTEGER, "useDefault": True}
+    int_param_dict_no_step = {"default": intDefault, "min": intStart, "max": intStop, "type": ParamType.INTEGER, "useDefault": True}
 
-    int_param_dict_min_greater_than_max = {"default": intDefault, "min": intStop, "max": intStart, "step": intStep, "type": ParamType.INTEGER}
-    int_param_dict_invalid_step = {"default": intDefault, "min": intStart, "max": intStop, "step": intStepInvalid, "type": ParamType.INTEGER}
+    int_param_dict_min_greater_than_max = {"default": intDefault, "min": intStop, "max": intStart, "step": intStep, "type": ParamType.INTEGER, "useDefault": True}
+    int_param_dict_invalid_step = {"default": intDefault, "min": intStart, "max": intStop, "step": intStepInvalid, "type": ParamType.INTEGER, "useDefault": True}
 
     def test_normal(self):
         intParam = IntegerParam(**self.int_param_dict)
@@ -57,14 +57,14 @@ class TestIntParameter(unittest.TestCase):
 class TestFloatParameter(unittest.TestCase):
     floatDefault, floatStart, floatStop, floatStep, invalidFloatStep = 0.0, 0.1, 1, 0.1, 0
 
-    float_param_dict = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT}
-    float_param_dict_min_equal_max = {"default": floatDefault, "min": floatStart, "max": floatStart, "step": floatStep, "type": ParamType.FLOAT}
-    float_param_dict_no_default = {"min": floatStart, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT}
-    float_param_dict_no_min = {"default": floatDefault, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT}
-    float_param_dict_no_max = {"default": floatDefault, "min": floatStart, "step": floatStep, "type": ParamType.FLOAT}
-    float_param_dict_no_step = {"default": floatDefault, "min": floatStart, "max": floatStop, "type": ParamType.FLOAT}
-    float_param_dict_min_greater_max = {"default": floatDefault, "min": floatStop, "max": floatStart, "step": invalidFloatStep, "type": ParamType.FLOAT}
-    float_param_dict_invalid_step = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": invalidFloatStep, "type": ParamType.FLOAT}
+    float_param_dict = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT, "useDefault": True}
+    float_param_dict_min_equal_max = {"default": floatDefault, "min": floatStart, "max": floatStart, "step": floatStep, "type": ParamType.FLOAT, "useDefault": True}
+    float_param_dict_no_default = {"min": floatStart, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT, "useDefault": False}
+    float_param_dict_no_min = {"default": floatDefault, "max": floatStop, "step": floatStep, "type": ParamType.FLOAT, "useDefault": True}
+    float_param_dict_no_max = {"default": floatDefault, "min": floatStart, "step": floatStep, "type": ParamType.FLOAT, "useDefault": True}
+    float_param_dict_no_step = {"default": floatDefault, "min": floatStart, "max": floatStop, "type": ParamType.FLOAT, "useDefault": True}
+    float_param_dict_min_greater_max = {"default": floatDefault, "min": floatStop, "max": floatStart, "step": invalidFloatStep, "type": ParamType.FLOAT, "useDefault": True}
+    float_param_dict_invalid_step = {"default": floatDefault, "min": floatStart, "max": floatStop, "step": invalidFloatStep, "type": ParamType.FLOAT, "useDefault": True}
 
     def test_creating_object_does_not_mutate_input_fields(self):
         floatParam = FloatParam(**self.float_param_dict)

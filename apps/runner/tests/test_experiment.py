@@ -6,7 +6,7 @@ from modules.data.experiment import ExperimentData, ExperimentType
 
 
 class TestExperimentData(unittest.TestCase):
-    params = parseRawHyperparameterData([{"name": "iparam", "default": "1", "min": "1", "max": "10", "step": "1", "type": "integer"}, {"name": "fparam", "default": "1.0", "min": "1.0", "max": "10.0", "step": "1.0", "type": "float"}, {"name": "sparam", "default": "Hi", "type": "string"}, {"name": "bparam", "default": True, "type": "bool"}])
+    params = parseRawHyperparameterData([{"name": "iparam", "default": "1", "min": "1", "max": "10", "step": "1", "type": "integer", "useDefault": True}, {"name": "fparam", "default": "1.0", "min": "1.0", "max": "10.0", "step": "1.0", "type": "float", "useDefault": True}, {"name": "sparam", "default": "Hi", "type": "string", "useDefault": True}, {"name": "bparam", "default": True, "type": "bool", "useDefault": True}])
     configs = {"config0": ConfigData(**{"data":{"key":"value"}})}
     optional = ["trialExtraFile", "scatterIndVar", "scatterDepVar", "startedAtEpochMillis", "finishedAtEpochMillis"]
     fields_with_default = {"file": "", "postProcess": False, "configs": {}, "totalExperimentRuns": 0, "experimentType": ExperimentType.UNKNOWN, "finished": False,"passes":0, "fails":0}
