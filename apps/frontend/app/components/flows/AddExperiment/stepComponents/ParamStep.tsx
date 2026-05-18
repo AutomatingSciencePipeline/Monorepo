@@ -5,87 +5,73 @@ import { InputSection } from '../../../InputSection';
 //import { formList } from '@mantine/form';
 import { HyperparametersCollection, HyperparameterTypes, IntegerHyperparameter } from '../../../../../lib/db_types';
 import { useDebounce } from "use-debounce";
+import { final } from 'pino';
 
-function calcPermutations(parameters: HyperparametersCollection) {
-	var noDefaultCount = 1;
-	var defaultCount = 0;
+/** 
+ * Helper to get the number of possible values for a single hyperparameter 
+ */
+function getParamRange(param: any): number {
+    switch (param.type) {
+        case HyperparameterTypes.INTEGER:
+            return Math.floor((param.max - param.min) / param.step) + 1;
+        case HyperparameterTypes.FLOAT:
+            return Math.floor(((param.max - param.min) / param.step) + 1e-9) + 1;
+        case HyperparameterTypes.BOOLEAN:
+            return 2;
+        case HyperparameterTypes.STRING_LIST:
+            return param.values ? param.values.length : 0;
+        case HyperparameterTypes.STRING:
+            return 1;
+        case HyperparameterTypes.PARAM_GROUP:
+            const values = Object.values((param.values || {}) as any[][]);
+            return values.length > 0 ? values[0].length : 0;
+        default:
+            return 1;
+    }
+}
 
-	var countDefaults = 0;
-	var totalObjs = 0;
+function calcPermutations(parameters: HyperparametersCollection): number {
+    const params = parameters.hyperparameters;
 
-	var allInts = true;
+    const paramGroups = params.filter(p => p.type === HyperparameterTypes.PARAM_GROUP);
+    const normalParams = params.filter(p => p.type !== HyperparameterTypes.PARAM_GROUP);
 
-	if (parameters.hyperparameters.length > 0) {
+    const hasValidDefault = (p: any): boolean => {
+        const def = p.default;
+        return p.useDefault || (def !== -1 && def !== "-1" && def !== '' && def !== undefined && def !== null);
+    };
 
-		parameters.hyperparameters.forEach(hyperparameter => {
-			totalObjs++;
-			if (hyperparameter.type == HyperparameterTypes.INTEGER || hyperparameter.type == HyperparameterTypes.FLOAT) {
+    const D = normalParams.filter(hasValidDefault); 
+    const F = normalParams.filter(p => !hasValidDefault(p));
 
-				if (isNaN(hyperparameter.step) || hyperparameter.step == 0) {
-					hyperparameter.step = 1;
-					return -1;
-				}
+    // 1. Calculate Product of Free Parameters
+    let freeProduct = 1;
+    for (const p of F) {
+        freeProduct *= getParamRange(p);
+    }
 
-				if (hyperparameter.type == HyperparameterTypes.FLOAT)
-					allInts = false;
+    // 2. Calculate Combinations of Constrained Parameters (One-at-a-time deviation)
+    // Formula: 1 (all at default) + Sum of (range - 1) for each param
+    let constrainedCombinations = 1; 
+    for (const p of D) {
+        const range = getParamRange(p);
+        if (range > 1) {
+            constrainedCombinations += (range - 1);
+        }
+    }
 
-				let hyper = hyperparameter;
-				let numObjs = 0;
+    let total = freeProduct * constrainedCombinations;
 
-				for (let i = hyper.min * 100; i <= hyper.max * 100; i += hyper.step * 100) {
-					numObjs++;
-				}
+    // 3. Handle Param Groups (Sum of group lengths multiplied by current total)
+    if (paramGroups.length > 0) {
+        let groupTotal = 0;
+        for (const pg of paramGroups) {
+            groupTotal += getParamRange(pg);
+        }
+        total *= groupTotal;
+    }
 
-
-				if (hyper.default == -1) {
-					noDefaultCount = noDefaultCount * numObjs;
-				} else {
-					defaultCount = defaultCount + numObjs;
-					countDefaults++;
-				}
-
-			}
-			else if (hyperparameter.type == HyperparameterTypes.BOOLEAN) {
-				if (hyperparameter.default != true && hyperparameter.default != false) {
-					noDefaultCount = noDefaultCount * 2;
-				}
-				else {
-					defaultCount = defaultCount + 2;
-					countDefaults++;
-				}
-			}
-			else if (hyperparameter.type == HyperparameterTypes.STRING_LIST) {
-				if (hyperparameter.default == '-1') {
-					noDefaultCount = noDefaultCount * hyperparameter.values.length;
-				}
-				else {
-					defaultCount = defaultCount + hyperparameter.values.length;
-					countDefaults++;
-				}
-			}
-			else if (hyperparameter.type == HyperparameterTypes.PARAM_GROUP) {
-				let hyper = hyperparameter;
-				let numObjs = 0;
-				for (let key in hyper.values) {
-					numObjs = hyper.values[key].length;
-					break;
-				}
-
-				noDefaultCount = noDefaultCount * numObjs;
-
-			}
-		});
-
-		if (totalObjs < 3 && allInts && countDefaults > 0) {
-			const total = (noDefaultCount + defaultCount) - 1;
-			return total;
-		}
-		else {
-			const total = (noDefaultCount * defaultCount) - (noDefaultCount * (countDefaults - 1));
-			return total;
-		}
-	}
-
+    return total;
 }
 
 export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'paramgroup'] as const;
@@ -119,7 +105,7 @@ export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props 
 									onClick={() => {
 										form.insertListItem('hyperparameters', {
 											name: '',
-											default: -1,
+											default: (type === 'bool') ? false : -1,
 											...((type === 'paramgroup') && { params: {} }),
 											...((type === 'stringlist') && { values: [''] }),
 											...((type === 'integer' || type === 'float') && {

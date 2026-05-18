@@ -24,6 +24,9 @@ VS Code has great integrations with Dev Containers and the ability to connect di
 
 ## Using Gitpod
 
+!!! warning
+    GitPod (now Ona) recently deprecated their Linux runner. This means that, for now, the GitPod environment does not work. In the meantime, refer to "Local Via Docker" for setting up environments.
+
 From Gitpod.io:
 
 Gitpod is a zero-trust platform that provides automated and standardized development environments in your own infrastructure—whether on your local machine, in your cloud account (VPC), or on-prem. It streamlines coding workflows and boosts collaboration by letting teams spin up secure, preconfigured dev environments quickly and consistently.
@@ -89,7 +92,20 @@ Skip step 2 if you are not using Windows!
 
 4. In the bottom right of the VS Code window you should be prompted to open as a dev container, if not press F1 and search for "Rebuild", click "Rebuild and Reopen in Container"
 
-5. You should then have the Monorepo open inside of a dev container
+5. Run the "post-start.sh" script from the `.devcontainer` folder:
+    ```bash
+    ./.devcontainer/post-start.sh
+    ```
+
+6. You should then have the Monorepo open inside of a dev container. 
+
+7. Start MiniKube by typing the following:
+
+    ```bash
+    minikube start
+    ``` 
+
+    This is necessary for Tilt to work.
 
 ## Getting Started with the Monorepo
 
@@ -102,6 +118,9 @@ Now that you are inside of a dev container, we will go over how to get a running
     ```bash
     tilt up
     ```
+
+!!!note
+    Make sure the secrets file is present and MiniKube is running (see "How to setup").
 
 3. Now control + click on the URL that is shown: http://localhost:10350
 
