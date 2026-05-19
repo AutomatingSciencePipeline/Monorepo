@@ -55,10 +55,22 @@ The team initially considered the possibility of extending the current service l
 
 ## 8. Testing strategy
 
+### 8.1 Agent Testing to test End-to-end Operations and Monitor Nondeterministic Interactions 
+
+This testing would verify that end-to-end operations of a local agent using the locally hosted MCP servers to call the REST API endpoints, be recorded in the audit log, and then return the expected payload. This would ensure that the correct sequency of calls could occur. 
+
+This test would use the addnums experiment (located here: [Add Nums Experiment](https://github.com/AutomatingSciencePipeline/Monorepo/blob/main/example_experiments/python/addNums.py)) 
+
+A 32 GB VM for running local models can be available at request from the CSSE Department system admin.  
+
+Using Ollama to run models locally will enable effective model management- utilize a model with Ollama that uses approximately 8B-16B parameter size model in order to not use resources available via the VM effectively. 
+ 
+
 ## 9. Unresolved decisions
 
 ## 10. References
 
+[Utilizing Ollama](https://www.mindstudio.ai/blog/ollama-run-ai-models-locally-claude-code-workflows)
 
 
 
