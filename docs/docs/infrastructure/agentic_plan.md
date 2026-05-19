@@ -55,6 +55,8 @@ The team initially considered the possibility of extending the current service l
 
 ## 8. Testing strategy
 
+To ensure that the features associated with enabling agentic workflows in GLADOS are properly implemented, creating a multi-faceted testing strategy is crucial. The following tests can establish correctness and also ensure implementation matches security specifications: 
+
 ### 8.1 Agent Testing to test End-to-end Operations and Monitor Nondeterministic Interactions 
 
 This testing would verify that end-to-end operations of a local agent using the locally hosted MCP servers to call the REST API endpoints, be recorded in the audit log, and then return the expected payload. This would ensure that the correct sequency of calls could occur. 
@@ -64,6 +66,16 @@ This test would use the addnums experiment (located here: [Add Nums Experiment](
 A 32 GB VM for running local models can be available at request from the CSSE Department system admin.  
 
 Using Ollama to run models locally will enable effective model management- utilize a model with Ollama that uses approximately 8B-16B parameter size model in order to not use resources available via the VM effectively. 
+
+### 8.2 Unit Testing of MCP Endpoints 
+
+Create a test suite composed of unit tests that mock the Next.js REST endpoints to ensure that the MCP server calls in order to test conformation of the functional invariants defined in 3.1. 
+
+To test the structural invariant, each MCP tool call should result in one HTTP request sent to the REST endpoint, with successful calls tested as well as calls that require retries before surfaced failure. 
+
+To test the payload invariant, create unit tests with a variety of arguments to ensure that the corresponding REST requests has the proper schema with no incorrect changing of the values. 
+
+To test the response invariant, mock custom payloads from the REST API to ensure that the MCP server does not create, add, or remove fabricated data in the responses.
  
 
 ## 9. Unresolved decisions
