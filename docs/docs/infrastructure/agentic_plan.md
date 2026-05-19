@@ -7,7 +7,11 @@ After some consideration, the team decided that it is recommended to pursure a l
 
 
 ## 2. Scope and limitations
-Limitation and scope, what the feature can do and can't do
+The following describes both the scope of the agentic implementation feature as well as possible limitations:
+
+- The agentic model used by the user is not within scope; the mistakes the model might make in utilizing MCP tool calls or in adjusting the hyperparameters of an experiment for a new run is not within scope. Ergo, the infrastructure for such calls to occur securely and consistently is within scope; the quality of the model is not.
+- The user of this feature is assumed to have a GitHub account for which a GitHub token can be gained through device flow authentication, which allows for authentication to GLADOS; Google OAuth or other provider specific Oauth routes are not within scope.
+- We recommend limiting this feature to user's of priviledged or admin permission levels, however this feature does have the possibility to be open to users at all permission levels.
 
 
 ## 3. Invariants
