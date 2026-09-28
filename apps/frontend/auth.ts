@@ -2,6 +2,7 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import { googleProfile } from "./lib/google-profile.mjs";
 import clientPromise from "./lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -15,9 +16,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }}),
       Google({
         allowDangerousEmailAccountLinking: true,
-        profile(profile) {
-          return { role: (profile as any).role ?? "user", image: profile.picture, email: profile.email }
-        }
+        profile: googleProfile
       })
     ],
   callbacks: {
