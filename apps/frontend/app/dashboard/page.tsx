@@ -435,7 +435,7 @@ export default function DashboardPage() {
 						return false;
 					}
 					// Apply other filters (e.g., completed or archived)
-					if (!includeCompleted && experiment.finished && experiment.status === 'COMPLETED') {
+					if (!includeCompleted && experiment.finished && (experiment.status === 'COMPLETED' || experiment.status === 'FAILED')) {
 						return false;
 					}
 					if (!includeArchived && experiment.status === 'ARCHIVED') {
@@ -1202,7 +1202,7 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					}
 					return project.name.toLowerCase().includes(searchTerm.toLowerCase()) || filterTags(searchTerm, project.tags);
 				}).map((project: ExperimentData) => {
-					if (!includeCompleted && project.finished && (project.status == 'COMPLETED')) {
+					if (!includeCompleted && project.finished && (project.status == 'COMPLETED' || project.status == 'FAILED')) {
 						return null;
 					}
 					if (!includeArchived && (project.status == 'ARCHIVED')) {

@@ -466,6 +466,8 @@ export async function fetchResultsFileCLI(expId: string, userId: string): Promis
         return { success: false, status: 'not_found'};
     }
 
+    if(experiment.status == 'FAILED') return { success: false, status: 'exp_failed'};
+
     if(experiment.status != 'COMPLETED') return { success: false, status: 'not_done'};
 
     if(experiment.fails > 0) return { success: false, status: 'exp_failed'};
