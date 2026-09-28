@@ -15,3 +15,6 @@ setup/temp/
 data/*
 
 # All below this point is uncategorized (categorize them!)
+
+# pnpm local package store
+.pnpm-store/
