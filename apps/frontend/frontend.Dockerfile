@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json pnpm-workspace.yaml ./
 RUN npm install -g pnpm
 RUN pnpm import
 RUN pnpm install --frozen-lockfile
