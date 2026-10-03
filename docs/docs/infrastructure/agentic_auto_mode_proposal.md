@@ -160,11 +160,16 @@ sequenceDiagram
 
     User->>MCP: start session (template, bounds, limits)
     Note over User,MCP: Out of band, not an agent tool
+    MCP->>REST: create session
+    REST->>REST: check template is non-sensitive and owned by user
+    REST->>Audit: log session start (bounds, limits)
+    Audit-->>REST: written
+    REST-->>MCP: session ID
 
     Agent->>MCP: create_run(new parameter values)
     MCP->>MCP: check call rate and session is active
     MCP->>REST: create experiment from template (session ID)
-    REST->>REST: check template non-sensitive, bounds, budget, concurrency
+    REST->>REST: check session, bounds, budget, concurrency
     alt check fails
         REST-->>MCP: refused (reason only)
         MCP-->>Agent: refused (reason only)
