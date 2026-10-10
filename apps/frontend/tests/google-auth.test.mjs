@@ -3,8 +3,7 @@ import { randomUUID, generateKeyPairSync, sign } from "node:crypto";
 import { test } from "node:test";
 import { MongoClient } from "mongodb";
 import { Auth, customFetch } from "@auth/core";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import Google from "next-auth/providers/google";
+import { createAuthOptions } from "../auth-options.mjs";
 import { googleProfile } from "../lib/google-profile.mjs";
 
 test("Google profile rejects missing, empty, and non-string subjects", () => {
@@ -23,7 +22,7 @@ test("Google OIDC callback and MongoDB account identity", async (t) => {
   const dbName = `glados_google_test_${randomUUID().replaceAll("-", "")}`;
   const db = client.db(dbName);
   const issuer = "https://accounts.google.com";
-  const origin = "http://localhost:3300";
+  const origin = "http://localhost:3000";
   const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   let claims, errors, config;
   function token() {
@@ -35,14 +34,15 @@ test("Google OIDC callback and MongoDB account identity", async (t) => {
   function setup() {
     claims = { sub: "google-subject-123", name: "Test Researcher", email: "researcher@example.test", email_verified: true, picture: "https://example.test/avatar" };
     errors = [];
-    config = {
-      adapter: MongoDBAdapter(client, { databaseName: dbName }),
-      secret: "local-test-only-google-session-secret-32-characters",
-      trustHost: true, basePath: "/api/auth",
-      logger: { error: (e) => errors.push(e.type), warn() {}, debug() {} },
-      providers: [Google({
+    config = createAuthOptions(client, dbName);
+    config.secret = "local-test-only-google-session-secret-32-characters";
+    config.trustHost = true;
+    config.basePath = "/api/auth";
+    config.logger = { error: (e) => errors.push(e.type), warn() {}, debug() {} };
+    const google = config.providers.find((provider) => provider.id === "google");
+    google.options = {
+        ...google.options,
         clientId: "test-google-client", clientSecret: "synthetic-secret",
-        allowDangerousEmailAccountLinking: true, profile: googleProfile,
         [customFetch]: async (url) => {
           switch (new URL(url).href) {
             case `${issuer}/.well-known/openid-configuration`:
@@ -52,12 +52,6 @@ test("Google OIDC callback and MongoDB account identity", async (t) => {
             default: throw new Error("Unexpected provider request in Google test");
           }
         },
-      })],
-      callbacks: { session({ session, user }) {
-        session.user.id = user.id;
-        session.user.role = user.role;
-        return session;
-      } },
     };
   }
   async function request(path, jar, init = {}) {
@@ -89,6 +83,16 @@ test("Google OIDC callback and MongoDB account identity", async (t) => {
   async function scenario(name, fn) {
     await t.test(name, async () => { await db.dropDatabase(); setup(); await fn(); });
   }
+  async function legacyLogin() {
+    const google = config.providers.find((provider) => provider.id === "google");
+    const currentProfile = google.options.profile;
+    // Reproduce the old mapping through Auth.js to retain a real pre-upgrade session.
+    google.options.profile = (profile) => ({
+      role: profile.role ?? "user", image: profile.picture, email: profile.email,
+    });
+    try { return await login(); }
+    finally { google.options.profile = currentProfile; }
+  }
   try {
     await scenario("new login stores the Google subject and display name", async () => {
       const { result, session, jar } = await login();
@@ -109,8 +113,71 @@ test("Google OIDC callback and MongoDB account identity", async (t) => {
       const second = await login();
       assert.equal(second.session.user.id, first.session.user.id);
       assert.equal(second.session.user.role, "admin");
+      assert.equal(second.session.user.email, first.session.user.email);
       assert.equal(await db.collection("users").countDocuments(), 1);
       assert.equal(await db.collection("accounts").countDocuments(), 1);
+    });
+    await scenario("legacy Google login retains the user, admin role, active session and owned data", async () => {
+      const previous = await legacyLogin();
+      const legacyAccount = await db.collection("accounts").findOne({ provider: "google" });
+      assert.notEqual(legacyAccount.providerAccountId, claims.sub);
+      await db.collection("users").updateOne({ _id: legacyAccount.userId }, { $set: { role: "admin" } });
+      const experiment = { creator: previous.session.user.id, name: "Existing experiment", status: "completed" };
+      const sharedExperiment = { creator: "another-user", sharedUsers: [previous.session.user.id] };
+      const file = { filename: "existing-result.csv", metadata: { userId: previous.session.user.id } };
+      await db.collection("experiments").insertMany([experiment, sharedExperiment]);
+      await db.collection("fileBucket.files").insertOne(file);
+      const existingSession = await db.collection("sessions").findOne({ userId: legacyAccount.userId });
+
+      const current = await login();
+      assert.equal(current.result.headers.get("location"), `${origin}/dashboard`);
+      assert.equal(current.session.user.id, previous.session.user.id);
+      assert.equal(current.session.user.role, "admin");
+      assert.equal(await db.collection("users").countDocuments(), 1);
+      assert.equal(await db.collection("accounts").countDocuments(), 2);
+      assert.deepEqual(await db.collection("accounts").findOne({ _id: legacyAccount._id }), legacyAccount);
+      const stableAccount = await db.collection("accounts").findOne({ provider: "google", providerAccountId: claims.sub });
+      assert.ok(stableAccount.userId.equals(legacyAccount.userId));
+      assert.deepEqual(await db.collection("sessions").findOne({ _id: existingSession._id }), existingSession);
+      const retainedSession = await (await request("session", previous.jar)).json();
+      assert.equal(retainedSession.user.id, previous.session.user.id);
+      assert.equal(retainedSession.user.role, "admin");
+      assert.deepEqual(await db.collection("experiments").findOne({ _id: experiment._id }), experiment);
+      assert.deepEqual(await db.collection("fileBucket.files").findOne({ _id: file._id }), file);
+      assert.equal(await db.collection("experiments").countDocuments({
+        $or: [{ creator: current.session.user.id }, { sharedUsers: { $in: [current.session.user.id] } }],
+      }), 2);
+      const again = await login();
+      assert.equal(again.session.user.id, previous.session.user.id);
+      assert.equal(await db.collection("accounts").countDocuments(), 2);
+    });
+    await scenario("legacy Google account with changed email remains separate without a verified link", async () => {
+      const previous = await legacyLogin();
+      const legacyAccount = await db.collection("accounts").findOne({ provider: "google" });
+      await db.collection("users").updateOne({ _id: legacyAccount.userId }, { $set: { role: "admin" } });
+      const experiment = { creator: previous.session.user.id, name: "Existing experiment" };
+      await db.collection("experiments").insertOne(experiment);
+      claims.email = "changed@example.test";
+
+      const current = await login();
+      assert.notEqual(current.session.user.id, previous.session.user.id);
+      assert.equal(current.session.user.role, "user");
+      assert.equal(await db.collection("users").countDocuments(), 2);
+      assert.equal(await db.collection("accounts").countDocuments(), 2);
+      assert.deepEqual(await db.collection("accounts").findOne({ _id: legacyAccount._id }), legacyAccount);
+      assert.deepEqual(await db.collection("experiments").findOne({ _id: experiment._id }), experiment);
+      assert.equal(await db.collection("experiments").countDocuments({ creator: current.session.user.id }), 0);
+      assert.equal((await (await request("session", previous.jar)).json()).user.id, previous.session.user.id);
+    });
+    await scenario("an active legacy session can link the stable Google identity after email changes", async () => {
+      const previous = await legacyLogin();
+      claims.email = "changed@example.test";
+      const current = await login(previous.jar);
+      assert.equal(current.session.user.id, previous.session.user.id);
+      assert.equal(await db.collection("users").countDocuments(), 1);
+      assert.equal(await db.collection("accounts").countDocuments(), 2);
+      const stableAccount = await db.collection("accounts").findOne({ provider: "google", providerAccountId: claims.sub });
+      assert.equal(stableAccount.userId.toHexString(), previous.session.user.id);
     });
     await scenario("Google links to an existing GitHub user without rewriting that account", async () => {
       const user = await config.adapter.createUser({ email: claims.email, role: "user", emailVerified: null });
