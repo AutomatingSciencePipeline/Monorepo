@@ -8,7 +8,11 @@ import { toast } from 'react-hot-toast';
 
 const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, confirmedParamGroups, setConfirmedParamGroups, ...rest }) => {
 
-	const [useDefault, setUseDefault] = useState(form.values.hyperparameters[index].useDefault || false);
+	const [useDefault, setUseDefault] = useState(() => {
+		const parameter = form.values.hyperparameters[index];
+		return Boolean((parameter.default && parameter.default != -1)
+			|| (!parameter.default && parameter.useDefault));
+	});
 
 	const remains = {
 		string: StringParam,
@@ -71,14 +75,6 @@ const Parameter = ({ form, type, index, confirmedValues, setConfirmedValues, con
 			updateConfirmedParamValues(index, form.values.hyperparameters[index].values);
 		}
 
-		if ((form.values.hyperparameters[index].default && form.values.hyperparameters[index].default != -1)
-			|| !form.values.hyperparameters[index].default && form.values.hyperparameters[index].useDefault)
-		{
-			setUseDefault(true);
-		}
-		else {
-			setUseDefault(false);
-		}
 	}, []);
 
 	useEffect(() => {
@@ -307,7 +303,7 @@ const MultiStringParam = ({ form, type, index, updateConfirmedValues, ...rest })
 	};
 
 	const handleConfirm = () => {
-		form.values.hyperparameters[index].values = values;
+		form.setFieldValue(`hyperparameters.${index}.values`, values);
 		updateConfirmedValues(index, values);
 		setOpened(false);
 	};
@@ -405,7 +401,7 @@ const ParamGroup = ({ form, type, index, updateConfirmedParamValues, ...rest }) 
 	};
 
 	const handleConfirm = () => {
-		form.values.hyperparameters[index].values = values;
+		form.setFieldValue(`hyperparameters.${index}.values`, values);
 		updateConfirmedParamValues(index, values);
 		setOpened(false);
 	};

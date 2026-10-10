@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint .",
-		"type-check": "tsc --noEmit",
+		"type-check": "next typegen && tsc --noEmit",
 		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs",
 		"test:auth": "node --test tests/auth.test.mjs",
 		"test:google-auth": "node --test tests/google-auth.test.mjs"
