@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint .",
-		"type-check": "tsc --noEmit",
+		"type-check": "next typegen && tsc --noEmit",
 		"test": "npm run test:auth",
 		"test:auth": "node --test tests/auth.test.mjs"
 	},

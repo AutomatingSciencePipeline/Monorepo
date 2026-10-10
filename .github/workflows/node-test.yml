@@ -47,12 +47,12 @@ jobs:
       - name: Install dependencies
         working-directory: ./apps/frontend
         run: npm ci
-      - name: Run ESLint
-        working-directory: ./apps/frontend
-        run: npm run lint
       - name: Run Typescript Check
         working-directory: ./apps/frontend
         run: npm run type-check
       - name: Run authentication regression tests
         working-directory: ./apps/frontend
         run: npm test
+      - name: Run ESLint
+        working-directory: ./apps/frontend
+        run: npm run lint
