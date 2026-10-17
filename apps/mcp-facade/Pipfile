@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+mcp = ">=2.3,<3" # 2.x renamed FastMCP to MCPServer; pin the major so the next API change can't break us silently
+# mcp only needs pywin32 on Windows; pipenv drops that marker when locking on Windows, so restate it here
+pywin32 = {version = ">=311", markers = "sys_platform == 'win32'"}
+
+[dev-packages]
+pylint = "*"
+pytest = "*"
+pytest-cov = "*"
+coverage = "*"
+
+[requires]
+python_version = "3.12"

@@ -1,0 +1,10 @@
+# pylint python linter configuration
+
+[MASTER]
+disable=
+    C0301, # line too long
+    C0303,  # trailing whitespace
+    C0114, # missing-module-docstring
+    C0116, # missing-function-docstring
+    C0115, # missing-class-docstring
+    W1203, # f-strings in log messages are fine for readability
