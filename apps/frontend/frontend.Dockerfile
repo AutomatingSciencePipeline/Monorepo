@@ -7,17 +7,14 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json package-lock.json ./
-RUN npm install -g pnpm
+COPY package.json package-lock.json pnpm-workspace.yaml ./
+RUN npm install -g pnpm@10.33.0
 RUN pnpm import
 RUN pnpm install --frozen-lockfile
 
-# Install sharp to optimize images
-RUN pnpm add sharp
-
 # Build the application
 FROM base AS builder
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.33.0
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
