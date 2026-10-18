@@ -2,6 +2,7 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import { logAuthError } from "./lib/auth-diagnostics.mjs";
+import { googleProfile } from "./lib/google-profile.mjs";
 
 /**
  * Keep configuration independent of the live database connection for integration tests.
@@ -28,13 +29,7 @@ export function createAuthOptions(clientPromise, databaseName = "gladosdb") {
       }),
       Google({
         allowDangerousEmailAccountLinking: true,
-        profile(profile) {
-          return {
-            role: profile.role ?? "user",
-            image: profile.picture,
-            email: profile.email,
-          };
-        },
+        profile: googleProfile,
       }),
     ],
     logger: { error: logAuthError },
