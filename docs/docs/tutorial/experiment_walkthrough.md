@@ -71,7 +71,7 @@ The row's status text moves through three phrases:
     ![Awaiting start](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-09-awaiting_start-09_2026.jpg)
 
 2. **Experiment In Progress.** The runner is up. The row shows successes, failures, and runs remaining. An **Open Live Log** button appears and polls the runner pod's output every five seconds.
-3. **Experiment Completed.** The row shows fails, successes, timestamps, total time, and average time per run.
+3. **Experiment Completed.** The row shows fails, successes, timestamps, total time, and average time per run. If no trial succeeded, the row says **Experiment Failed** instead. [Part 3](#experiment-3-every-trial-fails) shows what that looks like.
 
     ![Completed](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-10-completed-09_2026.jpg)
 
@@ -128,8 +128,10 @@ sequenceDiagram
     R->>BE: POST /getExperiment
     R->>BE: GET /downloadExpFile?fileId
     R->>R: generate configs, run trials
-    R->>BE: POST /uploadResults, /uploadZip
-    R->>BE: POST /updateExperiment finished, COMPLETED
+    opt at least one trial passed
+        R->>BE: POST /uploadResults, /uploadZip
+    end
+    R->>BE: POST /updateExperiment finished, COMPLETED or FAILED
     R->>BE: POST /uploadLog
     FE-->>UI: live updates over SSE /api/experiments/listen
 ```
@@ -185,9 +187,10 @@ INFO | glados.experiment | Running Trial 2
 ```
 
 6. Launches every trial at once in a process pool. Trial `n` runs in its own folder `trial<n>` as `python ../addNums.py ../configFiles/<n>.ini`, with the timeout from the form. Standard output and error go to `ResCsvs/log<n>.txt`.
-7. After each trial, reads line `Trial Result Line Number` of `trial<n>/AddNumResult.csv` and appends it, plus that trial's parameter values, to `results.csv`.
-8. Uploads `results.csv` to GridFS bucket `resultsBucket` and a zip of configs, logs, and extra files to `zipsBucket`.
-9. Sets `finished: true` and `status: "COMPLETED"`, uploads its own log to `logsBucket`, and deletes its working directory.
+7. Each trial reads line `Trial Result Line Number` of `trial<n>/AddNumResult.csv` and hands it back to the main runner process. That process is the only one that counts: it bumps `passes` or `fails` in the database as each trial finishes, which is what moves the counters in the UI. A trial that errors or times out is logged with its error and counted as a fail, and the other trials keep running.
+8. Once every trial is done, writes `results.csv` sorted by trial number: one row per trial with its outputs and parameter values. Failed trials get a row too, with `ERROR` or `TIMEOUT` in the output columns. The log line `Finished running Trials: N succeeded, M failed` gives the totals.
+9. If at least one trial passed, uploads `results.csv` to GridFS bucket `resultsBucket` and a zip of configs, logs, and extra files to `zipsBucket`. If every trial failed, it skips post-processing and uploads nothing.
+10. Sets `finished: true` and `status` to `"COMPLETED"` if at least one trial passed or `"FAILED"` if none did, uploads its own log to `logsBucket`, and deletes its working directory. A setup error before any trial runs (unsupported file type, failed `pip install`, no configs generated) also ends the experiment `FAILED`.
 
 Trials 0, 2, 4, 3, 1 start in that order in the real log, which is the process pool at work. The Python 3.9 end-of-life warnings at the top of the log are from the Google auth library and are harmless.
 
@@ -228,17 +231,25 @@ Upload `example_experiments/python/addNumsFailsOnXis1Yis5.py` as a new experimen
 
 What you should observe:
 
-- The row finishes with `FAILS: 1`.
-- `status` in the database is still `COMPLETED`. The runner sets that unconditionally. The only failure signal is the `fails` count, so never filter by status when looking for broken runs.
-- The failing trial's message is in `ResCsvs/log<n>.txt` inside the Project Zip, and in the System Log.
+- The row finishes with `FAILS: 1` and `SUCCESSES: 99` and still says "Experiment Completed".
+- `status` in the database is `COMPLETED`, because at least one trial passed. `COMPLETED` does not mean every trial passed, so look at the `fails` count, not `status`, when hunting for partial failures.
+- `results.csv` has a row for the failing trial (`x = 1`, `y = 5`) with `ERROR` in the `Addition` and `Subtraction` columns.
+- The failing trial's standard error output is in `ResCsvs/log<n>.txt` inside the Project Zip. The System Log has it too, on the line `Trial#<n> Encountered an Error: ...`.
 
-### Experiment 3: the first trial fails
+### Experiment 3: every trial fails
 
-Upload `example_experiments/python/alwaysFail.py`. When trial 0 fails, the runner aborts the whole experiment. No `results.csv` and no zip are uploaded, so **Download Results** returns nothing useful. The row shows "Experiment Aborted". The reason is only in the System Log.
+Upload `example_experiments/python/alwaysFail.py` with the same settings as Add Nums. Every trial raises a `KeyError`. A failing first trial no longer stops the run, so all 100 trials still run and each one is counted.
+
+What you should observe:
+
+- The row shows "Experiment Failed" with `FAILS: 100` and `SUCCESSES: 0`, and `status` in the database is `FAILED`.
+- No `results.csv` and no Project Zip are uploaded, so **Download Results** and **Download Project Zip** have nothing to give you.
+- The reason is only in the System Log: one `Trial#<n> Encountered an Error` entry per trial with the `KeyError` traceback, then `Every trial of experiment <expId> failed, not doing any result uploading or post processing`.
+- Failed experiments are grouped with completed ones by the Filter menu, so switching off "Include Completed" hides them too.
 
 ### Experiment 4: a timeout
 
-Upload `example_experiments/python/addNumsTimeOutOnXis1Yis5.py` and set `Trial Timeout (hours)` to something tiny like 0.001. The hung trial is killed after the timeout and counted as a failure.
+Upload `example_experiments/python/addNumsTimeOutOnXis1Yis5.py` and set `Trial Timeout (hours)` to something tiny like 0.001. The hung trial is killed after the timeout and counted as a failure, and its row in `results.csv` has `TIMEOUT` in the output columns.
 
 ### Stuck at "Experiment Awaiting Start"
 
@@ -277,9 +288,8 @@ The `example_experiments` folder has a working sample of each kind, including YA
 These are real behaviors in the code today, not opinions. Each is a reasonable first task.
 
 - **Dispatch failures are invisible.** The backend hands job creation to a background worker and drops the result. A 409 conflict or RBAC error leaves the experiment at `CREATED` forever.
-- **`status` is not a failure signal.** Every experiment ends `COMPLETED`. The UI derives "Aborted" from `passes == 0`.
+- **`COMPLETED` does not mean every trial passed.** An experiment ends `FAILED` only when no trial passed. A partial failure ends `COMPLETED` and shows up only in the `fails` count.
 - **All trials run concurrently with no limits.** The runner pod has no CPU or memory request, and the process pool has no worker cap. A large sweep can evict everything else on the node.
 - **Standard error means failure.** Any library that logs warnings to stderr will fail its trial.
-- **Failed trials may not appear in `results.csv`.** The error-row writer is called with a null writer for trials after the first, so the `fails` count increments but the row is missing.
 - **Cancel is written by the frontend, not the runner.** Cancelling deletes the job and sets `CANCELLED` directly in the database. The runner never learns it was cancelled.
 - **The runner pins pydantic 1.x and Python 3.9.** Do not upgrade either without reworking the validators in `apps/runner/modules/data/experiment.py`.
