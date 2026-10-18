@@ -116,7 +116,7 @@ def run_batch(data: IncomingStartRequest):
     except Exception as err:  # pylint: disable=broad-exception-caught
         explogger.error("Error retrieving experiment data from mongo, aborting")
         explogger.exception(err)
-        close_experiment_run(exp_id)
+        close_experiment_run(exp_id, "FAILED")
         return
 
     # Parse hyperaparameters into their datatype. Required to parse the rest of the experiment data
@@ -128,7 +128,7 @@ def run_batch(data: IncomingStartRequest):
         else:
             explogger.error("Error generating hyperparameters - Validation error")
         explogger.exception(err)
-        close_experiment_run(exp_id)
+        close_experiment_run(exp_id, "FAILED")
         return
     experiment_data['hyperparameters'] = hyperparameters
 
@@ -139,7 +139,7 @@ def run_batch(data: IncomingStartRequest):
     except ValueError as err:
         explogger.error("Experiment data was not formatted correctly, aborting")
         explogger.exception(err)
-        close_experiment_run(exp_id)
+        close_experiment_run(exp_id, "FAILED")
         return
 
     #Downloading Experiment File
@@ -154,7 +154,7 @@ def run_batch(data: IncomingStartRequest):
         explogger.error("This is not a supported experiment file type, aborting")
         explogger.exception(err)
         os.chdir('../..')
-        close_experiment_run(exp_id)
+        close_experiment_run(exp_id, "FAILED")
         return
     
     # If it is a zip file, extract it
@@ -167,7 +167,7 @@ def run_batch(data: IncomingStartRequest):
             explogger.error("Failed to extract zip file")
             explogger.exception(err)
             os.chdir('../..')
-            close_experiment_run(exp_id)
+            close_experiment_run(exp_id, "FAILED")
             return
     
     if experiment.creatorRole == "admin" or experiment.creatorRole == "privileged":
@@ -180,7 +180,7 @@ def run_batch(data: IncomingStartRequest):
                 explogger.error("Failed to install packages")
                 explogger.exception(err)
                 os.chdir('../..')
-                close_experiment_run(exp_id)
+                close_experiment_run(exp_id, "FAILED")
         
         explogger.info("User is admin or privileged, running commands from commandsToRun.txt")
             
@@ -192,7 +192,7 @@ def run_batch(data: IncomingStartRequest):
                     explogger.error(f"Failed to run command: {line}")
                     explogger.exception(err)
                     os.chdir('../..')
-                    close_experiment_run(exp_id)
+                    close_experiment_run(exp_id, "FAILED")
                     return        
             
     # this needs to happen after all dependencies are installed
@@ -208,7 +208,7 @@ def run_batch(data: IncomingStartRequest):
             explogger.error("This is not a supported experiment file type, aborting")
             explogger.exception(err)
             os.chdir('../..')
-            close_experiment_run(exp_id)
+            close_experiment_run(exp_id, "FAILED")
             return
       
     # If it is a python file get the pipreqs
@@ -225,7 +225,7 @@ def run_batch(data: IncomingStartRequest):
             explogger.error("Failed to generate pip requirements")
             explogger.exception(err)
             os.chdir('../..')
-            close_experiment_run(exp_id)
+            close_experiment_run(exp_id, "FAILED")
             return
 
     # check if the new requirements exists
@@ -237,7 +237,7 @@ def run_batch(data: IncomingStartRequest):
             explogger.error("Failed to install pip requirements")
             explogger.exception(err)
             os.chdir('../..')
-            close_experiment_run(exp_id)
+            close_experiment_run(exp_id, "FAILED")
             return
 
     explogger.info(f"Generating configs and downloading to ExperimentFiles/{exp_id}/configFiles")
@@ -246,18 +246,23 @@ def run_batch(data: IncomingStartRequest):
     if totalExperimentRuns == 0:
         os.chdir('../..')
         explogger.exception(GladosInternalError("Error generating configs - somehow no config files were produced?"))
-        close_experiment_run(exp_id)
+        close_experiment_run(exp_id, "FAILED")
         return
 
     experiment.totalExperimentRuns = totalExperimentRuns
 
     update_exp_value(exp_id, "totalExperimentRuns", experiment.totalExperimentRuns)
 
+    finalStatus = "FAILED"
     try:
         conduct_experiment(experiment)
-        post_process_experiment(experiment)
-        upload_experiment_results(experiment)
-        send_email(experiment, "COMPLETED")
+        if experiment.status == "FAILED":
+            explogger.error(f'Every trial of experiment {exp_id} failed, not doing any result uploading or post processing')
+        else:
+            post_process_experiment(experiment)
+            upload_experiment_results(experiment)
+        finalStatus = experiment.status
+        send_email(experiment, finalStatus)
     except ExperimentAbort as err:
         explogger.error(f'Experiment {exp_id} critical failure, not doing any result uploading or post processing')
         explogger.exception(err)
@@ -269,12 +274,13 @@ def run_batch(data: IncomingStartRequest):
     finally:
         # We need to be out of the dir for the log file upload to work
         os.chdir('../..')
-        close_experiment_run(exp_id)
+        close_experiment_run(exp_id, finalStatus)
 
-def close_experiment_run(expId: DocumentId):
-    explogger.info(f'Exiting experiment {expId}')
+def close_experiment_run(expId: DocumentId, status: str):
+    """status is "COMPLETED" if at least one trial succeeded, otherwise "FAILED" """
+    explogger.info(f'Exiting experiment {expId} with status {status}')
     update_exp_value(expId, 'finished', True)
-    update_exp_value(expId, 'status', "COMPLETED")
+    update_exp_value(expId, 'status', status)
     endSeconds = time.time()
     update_exp_value(expId, 'finishedAtEpochMilliseconds', int(endSeconds * 1000))
     close_experiment_logger()
