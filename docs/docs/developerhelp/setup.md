@@ -2,6 +2,9 @@
 
 We use VS Code dev containers for our developer environment because it greatly simplifies dependency setup.
 
+!!! tip "New to the project?"
+    If you have not set up anything yet (accounts, Docker, WSL, secrets), start with [Getting Started From Zero](getting_started_from_zero.md). It covers everything this page assumes and links back here.
+
 There are 2 ways to deploy GLADOS that we will cover in this document:
 
 1. Gitpod developer environment
