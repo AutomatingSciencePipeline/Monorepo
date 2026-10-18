@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json package-lock.json pnpm-workspace.yaml ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
 # Build the application
