@@ -1,5 +1,5 @@
 import { submitExperimentCLI } from '../../../../lib/mongodb_funcs';
-import { tokenBasedAuth } from "../../../../tokenAuth";
+import { authenticateCli, invalidArguments, isNonEmptyString, isObjectId } from '../request';
 import * as yaml from "js-yaml";
 import { NextResponse } from "next/server";
 
@@ -7,19 +7,27 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const formVals = await req.formData();
-
-  const userToken = formVals.get("userToken");
-  const fileId = formVals.get("execFileID") as string;
-  const file = formVals.get("file") as File | null;
-
-  if (!userToken || !file) {
-    return NextResponse.json({ response: 'Not enough arguments!' }, { status: 400 });
+  let formVals: FormData;
+  try {
+    formVals = await req.formData();
+  } catch {
+    return invalidArguments();
   }
 
+  const userToken = formVals.get("userToken");
+  const fileId = formVals.get("execFileID");
+  const file = formVals.get("file");
+
+  if (!isNonEmptyString(userToken) || !isObjectId(fileId)
+      || !file || typeof file !== 'object' || typeof file.text !== 'function') {
+    return invalidArguments();
+  }
+
+  const auth = await authenticateCli(userToken);
+  if (!auth.user) return auth.response;
+
   try {
-    const resp = await tokenBasedAuth(String(userToken));
-    const user = await resp.json();
+    const user = auth.user;
     const userId = user["_id"];
     const email = user['email'];
     const role = user['role'];
@@ -28,11 +36,11 @@ export async function POST(req: Request) {
     let parsed: any;
     try {
         parsed = yaml.load(yamlText);
-        if (!parsed || typeof parsed !== "object") {
-        throw new Error("YAML did not produce an object");
+        if (Object.prototype.toString.call(parsed) !== '[object Object]') {
+        throw new Error("YAML did not produce a mapping");
         }
-    } catch (err: any) {
-        return NextResponse.json({ error: "Invalid YAML: " + err.message }, { status: 400 });
+    } catch {
+        return NextResponse.json({ error: 'Invalid YAML' }, { status: 400 });
     }
 
     parsed["file"] = fileId;
@@ -46,7 +54,6 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error('Error submitting experiment.', error);
     return NextResponse.json({ response: 'Failed to submit experiment!' }, { status: 500 });
   }
 }

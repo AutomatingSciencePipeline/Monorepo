@@ -1,18 +1,18 @@
 import { GridFSBucket, ObjectId } from 'mongodb';
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
-import { tokenBasedAuth } from '../../../../tokenAuth';
+import { authenticateCli, invalidArguments, isNonEmptyString, isObjectId, readJsonObject } from '../request';
 
 export async function POST(req: NextRequest) {
-    const experiment_req = await req.json();
+    const experiment_req = await readJsonObject(req);
 
-    if (!experiment_req || !experiment_req ["token"] || !experiment_req["expID"]){
-        return new Response('Other', { status: 400 });
+    if (!experiment_req || !isNonEmptyString(experiment_req.token) || !isObjectId(experiment_req.expID)) {
+        return invalidArguments();
     }
     
-    const user = await tokenBasedAuth(experiment_req ["token"]);
-    const userData = await user.json();
-    const uid = userData["_id"];
+    const auth = await authenticateCli(experiment_req.token);
+    if (!auth.user) return auth.response;
+    const uid = auth.user._id;
 
     const expID = experiment_req["expID"];
 
@@ -83,7 +83,6 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Error contacting server: ', error);
         return NextResponse.json({ response: 'not_found' }, { status: 500 });
     }
 }
