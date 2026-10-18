@@ -7,13 +7,8 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json package-lock.json pnpm-workspace.yaml ./
-RUN npm install -g pnpm
-RUN pnpm import
-RUN pnpm install --frozen-lockfile
-
-# Install sharp to optimize images
-RUN pnpm add sharp
+COPY package.json package-lock.json ./
+RUN npm ci
 
 ADD . .
 
