@@ -8,20 +8,14 @@ WORKDIR /app
 # Install dependencies
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm install -g pnpm
-RUN pnpm import
-RUN pnpm install --frozen-lockfile
-
-# Install sharp to optimize images
-RUN pnpm add sharp
+RUN npm ci
 
 # Build the application
 FROM base AS builder
-RUN npm install -g pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm run build
+RUN npm run build
 
 # Prepare the production image
 FROM base AS runner
