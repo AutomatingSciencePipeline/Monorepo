@@ -1,0 +1,1225 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for GLADOS - Automated Science Pipeline" name="description"/>
+<link href="https://automatingsciencepipeline.github.io/Monorepo/tutorial/experiment_walkthrough/" rel="canonical"/>
+<link href="../best_practices/" rel="prev"/>
+<link href="../usage/" rel="next"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
+<title>Your First Experiment - GLADOS</title>
+<link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#your-first-experiment-happy-path">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="GLADOS" class="md-header__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            GLADOS
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Your First Experiment
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="GLADOS" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    GLADOS
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../about/">
+<span class="md-ellipsis">
+    
+  
+    About GLADOS
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../best_practices/">
+<span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Your First Experiment
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Your First Experiment
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-you-are-about-to-run">
+<span class="md-ellipsis">
+      
+        What you are about to run
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-1-the-happy-path-in-the-ui">
+<span class="md-ellipsis">
+      
+        Part 1: The happy path in the UI
+      
+    </span>
+</a>
+<nav aria-label="Part 1: The happy path in the UI" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-open-the-default-experiment">
+<span class="md-ellipsis">
+      
+        Step 1. Open the default experiment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-walk-the-tabs">
+<span class="md-ellipsis">
+      
+        Step 2. Walk the tabs
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-watch-it-run">
+<span class="md-ellipsis">
+      
+        Step 3. Watch it run
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-look-at-the-results">
+<span class="md-ellipsis">
+      
+        Step 4. Look at the results
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-2-what-just-happened-layer-by-layer">
+<span class="md-ellipsis">
+      
+        Part 2: What just happened, layer by layer
+      
+    </span>
+</a>
+<nav aria-label="Part 2: What just happened, layer by layer" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#21-the-frontend-writes-the-document">
+<span class="md-ellipsis">
+      
+        2.1 The frontend writes the document
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#22-the-frontend-asks-the-backend-to-start-it">
+<span class="md-ellipsis">
+      
+        2.2 The frontend asks the backend to start it
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#23-the-runner-does-all-the-work">
+<span class="md-ellipsis">
+      
+        2.3 The runner does all the work
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#24-poking-at-the-database">
+<span class="md-ellipsis">
+      
+        2.4 Poking at the database
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-3-when-it-goes-wrong">
+<span class="md-ellipsis">
+      
+        Part 3: When it goes wrong
+      
+    </span>
+</a>
+<nav aria-label="Part 3: When it goes wrong" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#experiment-2-a-trial-that-fails">
+<span class="md-ellipsis">
+      
+        Experiment 2: a trial that fails
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#experiment-3-the-first-trial-fails">
+<span class="md-ellipsis">
+      
+        Experiment 3: the first trial fails
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#experiment-4-a-timeout">
+<span class="md-ellipsis">
+      
+        Experiment 4: a timeout
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#stuck-at-experiment-awaiting-start">
+<span class="md-ellipsis">
+      
+        Stuck at "Experiment Awaiting Start"
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-backend-offline-in-the-sidebar">
+<span class="md-ellipsis">
+      
+        "Error - Backend Offline" in the sidebar
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#live-log-says-experiment-is-not-running">
+<span class="md-ellipsis">
+      
+        Live log says "Experiment is not running!"
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#rerunning-after-a-code-change-to-the-runner">
+<span class="md-ellipsis">
+      
+        Rerunning after a code change to the runner
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-4-uploading-your-own-program">
+<span class="md-ellipsis">
+      
+        Part 4: Uploading your own program
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#things-a-new-team-should-know-before-changing-this-flow">
+<span class="md-ellipsis">
+      
+        Things a new team should know before changing this flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../usage/">
+<span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../documentation/guide/">
+<span class="md-ellipsis">
+    
+  
+    Updating Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/architecture/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/kubernetes/">
+<span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/vms/">
+<span class="md-ellipsis">
+    
+  
+    VMs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/cluster_update/">
+<span class="md-ellipsis">
+    
+  
+    Cluster Upgrade
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/used_technologies/">
+<span class="md-ellipsis">
+    
+  
+    Used Technologies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Developer Help
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Help
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/getting_started_from_zero/">
+<span class="md-ellipsis">
+    
+  
+    Getting Started From Zero
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/setup/">
+<span class="md-ellipsis">
+    
+  
+    Developer Setup
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/helpful_commands/">
+<span class="md-ellipsis">
+    
+  
+    Helpful Commands
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    BioAI User Guides
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    BioAI User Guides
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../bioai/hw8/">
+<span class="md-ellipsis">
+    
+  
+    HW8
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Design Decisions
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#what-you-are-about-to-run">
+<span class="md-ellipsis">
+      
+        What you are about to run
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-1-the-happy-path-in-the-ui">
+<span class="md-ellipsis">
+      
+        Part 1: The happy path in the UI
+      
+    </span>
+</a>
+<nav aria-label="Part 1: The happy path in the UI" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-1-open-the-default-experiment">
+<span class="md-ellipsis">
+      
+        Step 1. Open the default experiment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-2-walk-the-tabs">
+<span class="md-ellipsis">
+      
+        Step 2. Walk the tabs
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-3-watch-it-run">
+<span class="md-ellipsis">
+      
+        Step 3. Watch it run
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#step-4-look-at-the-results">
+<span class="md-ellipsis">
+      
+        Step 4. Look at the results
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-2-what-just-happened-layer-by-layer">
+<span class="md-ellipsis">
+      
+        Part 2: What just happened, layer by layer
+      
+    </span>
+</a>
+<nav aria-label="Part 2: What just happened, layer by layer" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#21-the-frontend-writes-the-document">
+<span class="md-ellipsis">
+      
+        2.1 The frontend writes the document
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#22-the-frontend-asks-the-backend-to-start-it">
+<span class="md-ellipsis">
+      
+        2.2 The frontend asks the backend to start it
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#23-the-runner-does-all-the-work">
+<span class="md-ellipsis">
+      
+        2.3 The runner does all the work
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#24-poking-at-the-database">
+<span class="md-ellipsis">
+      
+        2.4 Poking at the database
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-3-when-it-goes-wrong">
+<span class="md-ellipsis">
+      
+        Part 3: When it goes wrong
+      
+    </span>
+</a>
+<nav aria-label="Part 3: When it goes wrong" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#experiment-2-a-trial-that-fails">
+<span class="md-ellipsis">
+      
+        Experiment 2: a trial that fails
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#experiment-3-the-first-trial-fails">
+<span class="md-ellipsis">
+      
+        Experiment 3: the first trial fails
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#experiment-4-a-timeout">
+<span class="md-ellipsis">
+      
+        Experiment 4: a timeout
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#stuck-at-experiment-awaiting-start">
+<span class="md-ellipsis">
+      
+        Stuck at "Experiment Awaiting Start"
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-backend-offline-in-the-sidebar">
+<span class="md-ellipsis">
+      
+        "Error - Backend Offline" in the sidebar
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#live-log-says-experiment-is-not-running">
+<span class="md-ellipsis">
+      
+        Live log says "Experiment is not running!"
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#rerunning-after-a-code-change-to-the-runner">
+<span class="md-ellipsis">
+      
+        Rerunning after a code change to the runner
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#part-4-uploading-your-own-program">
+<span class="md-ellipsis">
+      
+        Part 4: Uploading your own program
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#things-a-new-team-should-know-before-changing-this-flow">
+<span class="md-ellipsis">
+      
+        Things a new team should know before changing this flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="your-first-experiment-happy-path">Your First Experiment (Happy Path)</h1>
+<p>This page walks a new developer through running one experiment on a local GLADOS, watching what happens at every layer, and then breaking it on purpose. It assumes you finished <a href="../../developerhelp/getting_started_from_zero/">Getting Started From Zero</a> and have <a href="http://localhost:3000">http://localhost:3000</a> open and signed in.</p>
+<p>The <a href="../usage/">Usage</a> page documents every field in the UI. This page is narrower: one experiment, start to finish, with the internals exposed so you know where to look when it does not work.</p>
+<h2 id="what-you-are-about-to-run">What you are about to run</h2>
+<p>The "Add Nums" default experiment uses <code>example_experiments/python/addNums.py</code>. It reads two integers <code>x</code> and <code>y</code> from an INI config file, and writes a two-line CSV:</p>
+<div class="highlight"><pre><span></span><code>Addition,Subtraction
+8,2
+</code></pre></div>
+<p>You will sweep <code>x</code> and <code>y</code> from 1 to 10. Neither parameter has a default set, so GLADOS takes the full cross product: 100 trials. Each trial runs the script once with its own generated config file. If you give a parameter a default, the sweep changes to one-factor-at-a-time around the defaults, which is far fewer trials. The <a href="../usage/#permutations">Permutations</a> section explains the rule.</p>
+<h2 id="part-1-the-happy-path-in-the-ui">Part 1: The happy path in the UI</h2>
+<h3 id="step-1-open-the-default-experiment">Step 1. Open the default experiment</h3>
+<p>A fresh account sees an empty dashboard. The "Activity" panel on the right is a hard-coded placeholder, not real data.</p>
+<p><img alt="Empty dashboard" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-01-empty_dashboard-09_2026.jpg"/></p>
+<p>Click <strong>Run a Default Experiment</strong> in the left sidebar. A modal titled "Select Default Experiment" lists five presets. Pick <strong>Add Nums (Python)</strong>.</p>
+<p><img alt="Select Default Experiment modal" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-02-select_default-09_2026.jpg"/></p>
+<p>Behind the scenes the frontend downloads <code>addNums.py</code> from GitHub and uploads it to your local database for you. If you click <strong>Next</strong> before that finishes you will see "Still setting up... wait a couple seconds and try again." Wait and try again.</p>
+<h3 id="step-2-walk-the-tabs">Step 2. Walk the tabs</h3>
+<p>The form slides in from the right with six steps across the top. Every step has a <strong>Number of Workers</strong> box, <strong>Cancel</strong>, <strong>Back</strong>, and <strong>Next</strong> at the bottom.</p>
+<ol>
+<li>
+<p><strong>Information.</strong> Already filled in. The important fields are <code>Trial Result</code> = <code>AddNumResult.csv</code> (the file the runner reads each trial's output from) and <code>Config File Format</code> = <code>ini</code>. Leave <code>Trial Result Line Number</code> at 0. Give the experiment your own name so you can find it later.</p>
+<p><img alt="Information tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-03-information_tab-09_2026.jpg"/></p>
+</li>
+<li>
+<p><strong>Parameters.</strong> Two integer parameters <code>x</code> and <code>y</code>, each min 1, max 10, step 1, with the "Default?" switch off. The "Expected Permutations" counter in the corner shows 100. Keep the full 10×10 run: the timings and the chart check below assume 100 trials, and it only takes a few seconds.</p>
+<p><img alt="Parameters tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-04-parameters_tab-09_2026.jpg"/></p>
+</li>
+<li>
+<p><strong>User Defined Constants.</strong> Empty. Anything you type here is appended verbatim to every generated config file, and the red disclaimer is accurate: nothing is validated. Leave it empty for now.</p>
+<p><img alt="User Defined Constants tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-05-user_constants_tab-09_2026.jpg"/></p>
+</li>
+<li>
+<p><strong>Post Process.</strong> Leave both checkboxes off. "Send Email Upon Completion" needs Gmail credentials in the secrets file. "Scatter Plot" needs two column names from your results.</p>
+<p><img alt="Post Process tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-06-post_process_tab-09_2026.jpg"/></p>
+</li>
+<li>
+<p><strong>Confirmation.</strong> The raw JSON that will be stored as the experiment document. Skim it. This is exactly what you will see in MongoDB later. Note <code>"default": -1</code> on each parameter, which is how "no default" is encoded, and <code>"file"</code>, the id of the uploaded script in GridFS.</p>
+<p><img alt="Confirmation tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-07-confirmation_tab-09_2026.jpg"/></p>
+</li>
+<li>
+<p><strong>Dispatch.</strong> Normally you would drop a file here. For a default experiment <code>addNums.py</code> is already marked "Selected" in the "Recent Files" table below the drop zone. Click <strong>Dispatch</strong>.</p>
+<p><img alt="Dispatch tab" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-08-dispatch_tab-09_2026.jpg"/></p>
+</li>
+</ol>
+<p>You should see the green toast "Started experiment!" and a new row in the list. The form panel briefly reopens as a blank "New Experiment" form with red required fields before closing on its own. That is a quirk, not an error.</p>
+<div class="admonition note">
+<p class="admonition-title">Number of Workers does nothing</p>
+<p>The value is saved on the experiment document but the runner never reads it. All trials are launched at once regardless.</p>
+</div>
+<h3 id="step-3-watch-it-run">Step 3. Watch it run</h3>
+<p>The row's status text moves through three phrases:</p>
+<ol>
+<li>
+<p><strong>Experiment Awaiting Start.</strong> The document exists but no runner has picked it up. The sidebar counter "N experiments in queue" counts experiments in this state. The buttons available now are <strong>Copy</strong>, <strong>Share</strong>, and <strong>Cancel</strong>.</p>
+<p><img alt="Awaiting start" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-09-awaiting_start-09_2026.jpg"/></p>
+</li>
+<li>
+<p><strong>Experiment In Progress.</strong> The runner is up. The row shows successes, failures, and runs remaining. An <strong>Open Live Log</strong> button appears and polls the runner pod's output every five seconds.</p>
+</li>
+<li>
+<p><strong>Experiment Completed.</strong> The row shows fails, successes, timestamps, total time, and average time per run.</p>
+<p><img alt="Completed" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-10-completed-09_2026.jpg"/></p>
+</li>
+</ol>
+<p>Timing from a real local run of this experiment on a laptop, measured on 2026-09-20:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Awaiting Start (runner pod pulling image and starting)</td>
+<td>about 50 s the first time, a few seconds after that</td>
+</tr>
+<tr>
+<td>Running 100 trials</td>
+<td>3.55 s</td>
+</tr>
+<tr>
+<td>Runner Job and pod deleted after finishing</td>
+<td>about 60 s later</td>
+</tr>
+</tbody>
+</table>
+<p>"Awaiting Start" is long on the first run because the runner container has to be created. If it sits there for several minutes, something failed silently. Jump to <a href="#part-3-when-it-goes-wrong">Part 3</a>.</p>
+<h3 id="step-4-look-at-the-results">Step 4. Look at the results</h3>
+<p>Expand the row. The buttons that appear once an experiment is finished:</p>
+<ul>
+<li><strong>Download Results</strong> gives <code>results.csv</code>. One row per trial with the <code>Addition</code> and <code>Subtraction</code> columns from the script plus the <code>x</code> and <code>y</code> values that produced them.</li>
+<li><strong>Download Project Zip</strong> gives every trial's config file and log, plus any extra file you asked for.</li>
+<li>
+<p><strong>See Graph</strong> opens the chart modal on <code>results.csv</code>. All series start hidden, so the chart is empty at first. Pick <code>x</code> as the X-Axis Column, then click the <strong>Addition</strong> legend entry to show it. Changing the x-axis hides every series again, so pick the axis first. Tick "Aggregate data?" with mode <code>sum</code> and you get a straight line from 65 to 155, which is the sum over all ten <code>y</code> values of <code>x + y</code>, or <code>10x + 55</code>. That is a quick sanity check that the results are real.</p>
+<p><img alt="Chart modal, empty" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-11-chart_modal_empty-09_2026.jpg"/></p>
+<p><img alt="Chart of Addition summed over y" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-12-chart_addition_sum-09_2026.png"/>
+- <strong>View System Log</strong> opens the runner's own log for the whole experiment.
+- <strong>Copy Experiment</strong> reopens the form prefilled so you can change parameters and rerun.
+- <strong>Share Experiment</strong> copies a link. Anyone signed in who opens it gets read access.
+- <strong>Archive Experiment</strong> and <strong>Delete Experiment</strong>. Archiving hides the row immediately and the header changes to "Projects (0 of 1)". Open the <strong>Filter</strong> menu and switch on "Include Archived" to see it again with an <strong>Unarchive Experiment</strong> button.</p>
+<p><img alt="Filter menu" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-13-filter_menu-09_2026.jpg"/></p>
+<p><img alt="Archived experiment" src="https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-14-archived-09_2026.jpg"/></p>
+</li>
+</ul>
+<p>That is the whole user-facing loop. Now look underneath it.</p>
+<h2 id="part-2-what-just-happened-layer-by-layer">Part 2: What just happened, layer by layer</h2>
+<p>Keep a container terminal open next to the browser and repeat the run. The sequence is the same for every experiment.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant UI as Browser
+    participant FE as glados-frontend
+    participant DB as MongoDB
+    participant BE as glados-backend
+    participant K8s as Kubernetes
+    participant R as runner-&lt;expId&gt; Job
+    UI-&gt;&gt;FE: Dispatch (server action)
+    FE-&gt;&gt;DB: insert experiment doc, status CREATED
+    UI-&gt;&gt;FE: POST /api/experiments/start/&lt;expId&gt;
+    FE-&gt;&gt;BE: POST /experiment {id}
+    BE-&gt;&gt;K8s: create Job runner-&lt;expId&gt;
+    R-&gt;&gt;BE: POST /updateExperiment status RUNNING
+    R-&gt;&gt;BE: POST /getExperiment
+    R-&gt;&gt;BE: GET /downloadExpFile?fileId
+    R-&gt;&gt;R: generate configs, run trials
+    R-&gt;&gt;BE: POST /uploadResults, /uploadZip
+    R-&gt;&gt;BE: POST /updateExperiment finished, COMPLETED
+    R-&gt;&gt;BE: POST /uploadLog
+    FE--&gt;&gt;UI: live updates over SSE /api/experiments/listen</code></pre>
+<h3 id="21-the-frontend-writes-the-document">2.1 The frontend writes the document</h3>
+<p>Clicking Dispatch calls a Next.js server action that inserts the form JSON into the <code>experiments</code> collection of the <code>gladosdb</code> database with <code>status: "CREATED"</code>, <code>finished: false</code>, and your user id as <code>creator</code>. The uploaded file was already stored in the GridFS bucket <code>fileBucket</code> when you picked it, and the document only holds its id.</p>
+<p>The dashboard does not poll. It holds a server-sent events connection to <code>/api/experiments/listen</code> that pushes every experiment you created or that was shared with you. That is why rows update without a refresh.</p>
+<h3 id="22-the-frontend-asks-the-backend-to-start-it">2.2 The frontend asks the backend to start it</h3>
+<p>The frontend then posts to its own route <code>/api/experiments/start/&lt;expId&gt;</code>, which forwards to the backend inside the cluster at <code>http://glados-service-backend:5050/experiment</code>. The backend returns 200 immediately and creates the Kubernetes Job in the background.</p>
+<p>Watch it appear:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pods
+</code></pre></div>
+<p>You will see a job and a pod both named <code>runner-&lt;expId&gt;</code>. The pod uses the <code>runner</code> image that Tilt built from <code>apps/runner</code>. The whole Job (and its pod) is deleted automatically about 60 seconds after it finishes (<code>ttlSecondsAfterFinished: 60</code> in <code>apps/backend/job-runner.yaml</code>). After that, <code>kubectl get jobs</code> no longer lists it and <code>kubectl logs job/runner-&lt;expId&gt;</code> fails, so look quickly or read the uploaded log instead.</p>
+<h3 id="23-the-runner-does-all-the-work">2.3 The runner does all the work</h3>
+<p>Everything below happens inside that pod. Follow along with:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>job/runner-&lt;expId&gt;
+</code></pre></div>
+<ol>
+<li>Sets the experiment <code>status</code> to <code>RUNNING</code>. Note that the runner never touches MongoDB directly. Every read and write goes through the backend's HTTP API. You can see this from the other side with <code>kubectl logs deploy/glados-backend</code>, which fills with <code>POST /updateExperiment</code> lines while a runner is active.</li>
+<li>Fetches the experiment document and downloads the executable into <code>ExperimentFiles/&lt;expId&gt;/</code>.</li>
+<li>Detects the file type with libmagic. Python, JAR, ELF binary, and zip are the supported kinds. A zip is unpacked and the <code>Executable File</code> field says what to run inside it.</li>
+<li>For Python files, runs <code>pipreqs</code> to guess dependencies and <code>pip install</code>s them, unless you shipped a <code>userProvidedFileReqs.txt</code> in a zip. The log shows <code>Generated pip requirements</code> at this point.</li>
+<li>Generates one config file per permutation into <code>configFiles/0.ini</code>, <code>1.ini</code>, and so on. Your User Defined Constants text is the template and <code>{x}</code> style placeholders are substituted. The log line <code>Generated 100 configs</code> confirms the count.</li>
+</ol>
+<p>A real runner log for this experiment looks like this, trimmed:</p>
+<div class="highlight"><pre><span></span><code>INFO | glados | GLADOS Runner Started
+INFO | glados.experiment | Downloading file for 6ab0413b1d02668b76465656
+INFO | glados.experiment | Raw Filetype: Python script, ASCII text executable, Filtered Filetype: python
+INFO | glados.experiment | Generated pip requirements
+INFO | glados.experiment | param x varies, adding to batch
+INFO | glados.experiment | param y varies, adding to batch
+INFO | glados.experiment | Generated 100 configs
+INFO | glados.experiment | Now Running 100 trials
+INFO | glados.experiment | Running Trial 0
+INFO | glados.experiment | Wrote config0 to a file
+INFO | glados.experiment | Running Trial 2
+...
+</code></pre></div>
+<ol>
+<li>Launches every trial at once in a process pool. Trial <code>n</code> runs in its own folder <code>trial&lt;n&gt;</code> as <code>python ../addNums.py ../configFiles/&lt;n&gt;.ini</code>, with the timeout from the form. Standard output and error go to <code>ResCsvs/log&lt;n&gt;.txt</code>.</li>
+<li>After each trial, reads line <code>Trial Result Line Number</code> of <code>trial&lt;n&gt;/AddNumResult.csv</code> and appends it, plus that trial's parameter values, to <code>results.csv</code>.</li>
+<li>Uploads <code>results.csv</code> to GridFS bucket <code>resultsBucket</code> and a zip of configs, logs, and extra files to <code>zipsBucket</code>.</li>
+<li>Sets <code>finished: true</code> and <code>status: "COMPLETED"</code>, uploads its own log to <code>logsBucket</code>, and deletes its working directory.</li>
+</ol>
+<p>Trials 0, 2, 4, 3, 1 start in that order in the real log, which is the process pool at work. The Python 3.9 end-of-life warnings at the top of the log are from the Google auth library and are harmless.</p>
+<h3 id="24-poking-at-the-database">2.4 Poking at the database</h3>
+<p>Tilt forwards MongoDB to port 30000 on your machine. The root user name and password are in <code>helm_packages/mongodb-helm/tilt/values.yaml</code> under <code>auth</code>. From the container terminal:</p>
+<div class="highlight"><pre><span></span><code>mongosh<span class="w"> </span><span class="s2">"mongodb://&lt;user&gt;:&lt;password&gt;@localhost:30000/gladosdb?authSource=admin&amp;directConnection=true"</span>
+</code></pre></div>
+<p>Useful queries:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// every experiment, one line each</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">experiments</span><span class="p">.</span><span class="nx">find</span><span class="p">({},</span><span class="w"> </span><span class="p">{</span><span class="nx">name</span><span class="o">:</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">passes</span><span class="o">:</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">fails</span><span class="o">:</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">totalExperimentRuns</span><span class="o">:</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">finished</span><span class="o">:</span><span class="mf">1</span><span class="p">})</span>
+
+<span class="c1">// the most recent one in full</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">experiments</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">sort</span><span class="p">({</span><span class="nx">created</span><span class="o">:-</span><span class="mf">1</span><span class="p">}).</span><span class="nx">limit</span><span class="p">(</span><span class="mf">1</span><span class="p">).</span><span class="nx">pretty</span><span class="p">()</span>
+
+<span class="c1">// what got uploaded for it (replace the id)</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">getCollection</span><span class="p">(</span><span class="s1">'resultsBucket.files'</span><span class="p">).</span><span class="nx">find</span><span class="p">({</span><span class="nx">filename</span><span class="o">:</span><span class="w"> </span><span class="sr">/&lt;expId&gt;/</span><span class="p">})</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">getCollection</span><span class="p">(</span><span class="s1">'logsBucket.files'</span><span class="p">).</span><span class="nx">find</span><span class="p">().</span><span class="nx">sort</span><span class="p">({</span><span class="nx">uploadDate</span><span class="o">:-</span><span class="mf">1</span><span class="p">}).</span><span class="nx">limit</span><span class="p">(</span><span class="mf">3</span><span class="p">)</span>
+
+<span class="c1">// make yourself an admin</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">users</span><span class="p">.</span><span class="nx">updateOne</span><span class="p">({</span><span class="nx">email</span><span class="o">:</span><span class="w"> </span><span class="s2">"you@example.com"</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nx">$set</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="nx">role</span><span class="o">:</span><span class="w"> </span><span class="s2">"admin"</span><span class="p">}})</span>
+</code></pre></div>
+<p>Collections you will see: <code>experiments</code>, <code>users</code>, <code>accounts</code>, <code>sessions</code>, <code>defaultExperiments</code>, <code>shareLinks</code>, and the GridFS pairs <code>fileBucket</code>, <code>resultsBucket</code>, <code>zipsBucket</code>, <code>logsBucket</code> (each has <code>.files</code> and <code>.chunks</code>).</p>
+<h2 id="part-3-when-it-goes-wrong">Part 3: When it goes wrong</h2>
+<p>Run these on purpose once. Each one teaches you where a class of failures shows up.</p>
+<h3 id="experiment-2-a-trial-that-fails">Experiment 2: a trial that fails</h3>
+<p>Upload <code>example_experiments/python/addNumsFailsOnXis1Yis5.py</code> as a new experiment with the same settings as Add Nums. One trial writes to standard error, and the runner treats <strong>any</strong> standard error output as a failed trial.</p>
+<p>What you should observe:</p>
+<ul>
+<li>The row finishes with <code>FAILS: 1</code>.</li>
+<li><code>status</code> in the database is still <code>COMPLETED</code>. The runner sets that unconditionally. The only failure signal is the <code>fails</code> count, so never filter by status when looking for broken runs.</li>
+<li>The failing trial's message is in <code>ResCsvs/log&lt;n&gt;.txt</code> inside the Project Zip, and in the System Log.</li>
+</ul>
+<h3 id="experiment-3-the-first-trial-fails">Experiment 3: the first trial fails</h3>
+<p>Upload <code>example_experiments/python/alwaysFail.py</code>. When trial 0 fails, the runner aborts the whole experiment. No <code>results.csv</code> and no zip are uploaded, so <strong>Download Results</strong> returns nothing useful. The row shows "Experiment Aborted". The reason is only in the System Log.</p>
+<h3 id="experiment-4-a-timeout">Experiment 4: a timeout</h3>
+<p>Upload <code>example_experiments/python/addNumsTimeOutOnXis1Yis5.py</code> and set <code>Trial Timeout (hours)</code> to something tiny like 0.001. The hung trial is killed after the timeout and counted as a failure.</p>
+<h3 id="stuck-at-experiment-awaiting-start">Stuck at "Experiment Awaiting Start"</h3>
+<p>The document was written but no runner ever started. The backend swallows errors from job creation, so the UI never learns. Check in this order:</p>
+<ol>
+<li><code>kubectl get jobs</code>. If there is no <code>runner-&lt;expId&gt;</code>, the backend failed to create it. Read <code>kubectl logs deploy/glados-backend</code>.</li>
+<li>If the job exists but the pod is <code>ImagePullBackOff</code> or <code>ErrImagePull</code>, the <code>runner</code> image was not built or Tilt's registry is down. Look at the <code>runner</code> resource in the Tilt UI.</li>
+<li>If the pod is <code>Pending</code>, minikube is out of memory or CPU. <code>kubectl describe pod &lt;pod&gt;</code> says which.</li>
+<li>A job named <code>runner-&lt;expId&gt;</code> already existing (from a previous attempt) makes the create fail with a conflict. <code>kubectl delete job runner-&lt;expId&gt;</code> and dispatch again.</li>
+</ol>
+<h3 id="error-backend-offline-in-the-sidebar">"Error - Backend Offline" in the sidebar</h3>
+<p>The frontend cannot reach the backend service. Check the <code>glados-backend</code> resource in Tilt. It crashes at startup if MongoDB is not up yet, so restart it once MongoDB is green.</p>
+<h3 id="live-log-says-experiment-is-not-running">Live log says "Experiment is not running!"</h3>
+<p>The live log only works while <code>status</code> is <code>RUNNING</code> and the runner pod still exists. For short experiments it is gone before you click. Use <strong>View System Log</strong> after completion instead.</p>
+<h3 id="rerunning-after-a-code-change-to-the-runner">Rerunning after a code change to the runner</h3>
+<p>Changes under <code>apps/runner</code> are not hot-reloaded into a running pod. Tilt rebuilds the image, and the <strong>next</strong> experiment you dispatch uses it. Changes under <code>apps/frontend</code> and <code>apps/backend</code> sync into the running pods within seconds.</p>
+<h2 id="part-4-uploading-your-own-program">Part 4: Uploading your own program</h2>
+<p>Once the defaults work, try your own. The rules the runner enforces:</p>
+<ul>
+<li>Accept the config file path as the first command line argument. Read it as INI (<code>[DEFAULT]</code> section) or YAML, matching the <code>Config File Format</code> you pick.</li>
+<li>Write results as a CSV with a header row and at least one value row, named whatever you put in <code>Trial Result</code>. <code>Trial Result Line Number</code> picks which value row is collected, and -1 means the last.</li>
+<li>Write nothing to standard error unless you want the trial marked failed.</li>
+<li>Python runs on 3.9 in the runner image. Java must be a runnable JAR. C must be a Linux ELF binary. Anything with several files goes in a zip, with <code>Executable File</code> naming the entry point.</li>
+</ul>
+<p>The <code>example_experiments</code> folder has a working sample of each kind, including YAML variants and a numpy example that exercises dependency installation.</p>
+<h2 id="things-a-new-team-should-know-before-changing-this-flow">Things a new team should know before changing this flow</h2>
+<p>These are real behaviors in the code today, not opinions. Each is a reasonable first task.</p>
+<ul>
+<li><strong>Dispatch failures are invisible.</strong> The backend hands job creation to a background worker and drops the result. A 409 conflict or RBAC error leaves the experiment at <code>CREATED</code> forever.</li>
+<li><strong><code>status</code> is not a failure signal.</strong> Every experiment ends <code>COMPLETED</code>. The UI derives "Aborted" from <code>passes == 0</code>.</li>
+<li><strong>All trials run concurrently with no limits.</strong> The runner pod has no CPU or memory request, and the process pool has no worker cap. A large sweep can evict everything else on the node.</li>
+<li><strong>Standard error means failure.</strong> Any library that logs warnings to stderr will fail its trial.</li>
+<li><strong>Failed trials may not appear in <code>results.csv</code>.</strong> The error-row writer is called with a null writer for trials after the first, so the <code>fails</code> count increments but the row is missing.</li>
+<li><strong>Cancel is written by the frontend, not the runner.</strong> Cancelling deletes the job and sets <code>CANCELLED</code> directly in the database. The runner never learns it was cancelled.</li>
+<li><strong>The runner pins pydantic 1.x and Python 3.9.</strong> Do not upgrade either without reworking the validators in <code>apps/runner/modules/data/experiment.py</code>.</li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>

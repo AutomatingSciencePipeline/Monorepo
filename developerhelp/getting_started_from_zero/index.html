@@ -1,0 +1,1315 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for GLADOS - Automated Science Pipeline" name="description"/>
+<link href="https://automatingsciencepipeline.github.io/Monorepo/developerhelp/getting_started_from_zero/" rel="canonical"/>
+<link href="../../infrastructure/agentic_plan/" rel="prev"/>
+<link href="../setup/" rel="next"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
+<title>Getting Started From Zero - GLADOS</title>
+<link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#getting-started-from-zero">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="GLADOS" class="md-header__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            GLADOS
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Getting Started From Zero
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="GLADOS" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    GLADOS
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../about/">
+<span class="md-ellipsis">
+    
+  
+    About GLADOS
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/best_practices/">
+<span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/experiment_walkthrough/">
+<span class="md-ellipsis">
+    
+  
+    Your First Experiment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/usage/">
+<span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../documentation/guide/">
+<span class="md-ellipsis">
+    
+  
+    Updating Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/architecture/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/kubernetes/">
+<span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/vms/">
+<span class="md-ellipsis">
+    
+  
+    VMs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/cluster_update/">
+<span class="md-ellipsis">
+    
+  
+    Cluster Upgrade
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/used_technologies/">
+<span class="md-ellipsis">
+    
+  
+    Used Technologies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../infrastructure/agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Developer Help
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Help
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Getting Started From Zero
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Getting Started From Zero
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#0-vocabulary">
+<span class="md-ellipsis">
+      
+        0. Vocabulary
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-accounts-and-access-to-ask-for-in-week-one">
+<span class="md-ellipsis">
+      
+        1. Accounts and access to ask for in week one
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-install-tools-on-your-laptop">
+<span class="md-ellipsis">
+      
+        2. Install tools on your laptop
+      
+    </span>
+</a>
+<nav aria-label="2. Install tools on your laptop" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#windows">
+<span class="md-ellipsis">
+      
+        Windows
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mac-and-linux">
+<span class="md-ellipsis">
+      
+        Mac and Linux
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-clone-the-repo">
+<span class="md-ellipsis">
+      
+        3. Clone the repo
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-open-the-dev-container">
+<span class="md-ellipsis">
+      
+        4. Open the dev container
+      
+    </span>
+</a>
+<nav aria-label="4. Open the dev container" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#windows_1">
+<span class="md-ellipsis">
+      
+        Windows
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mac-and-linux_1">
+<span class="md-ellipsis">
+      
+        Mac and Linux
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#everyone">
+<span class="md-ellipsis">
+      
+        Everyone
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-get-the-secrets-file">
+<span class="md-ellipsis">
+      
+        5. Get the secrets file
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-one-time-cluster-setup">
+<span class="md-ellipsis">
+      
+        6. One-time cluster setup
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-start-glados">
+<span class="md-ellipsis">
+      
+        7. Start GLADOS
+      
+    </span>
+</a>
+<nav aria-label="7. Start GLADOS" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#sign-in-for-the-first-time">
+<span class="md-ellipsis">
+      
+        Sign in for the first time
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#8-daily-workflow">
+<span class="md-ellipsis">
+      
+        8. Daily workflow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#9-when-things-go-wrong">
+<span class="md-ellipsis">
+      
+        9. When things go wrong
+      
+    </span>
+</a>
+<nav aria-label="9. When things go wrong" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#rebuilt-container-everything-is-gone">
+<span class="md-ellipsis">
+      
+        Rebuilt container: everything is gone
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-backend-offline-in-the-dashboard-sidebar">
+<span class="md-ellipsis">
+      
+        "Error - Backend Offline" in the dashboard sidebar
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#sign-in-loops-back-to-the-landing-page">
+<span class="md-ellipsis">
+      
+        Sign-in loops back to the landing page
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ports-3000-or-10350-do-not-open-in-the-browser">
+<span class="md-ellipsis">
+      
+        Ports 3000 or 10350 do not open in the browser
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#docker-is-not-running">
+<span class="md-ellipsis">
+      
+        Docker is not running
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mongodb-pods-restart-or-stay-pending">
+<span class="md-ellipsis">
+      
+        MongoDB pods restart or stay Pending
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#10-where-to-go-next">
+<span class="md-ellipsis">
+      
+        10. Where to go next
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../setup/">
+<span class="md-ellipsis">
+    
+  
+    Developer Setup
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../helpful_commands/">
+<span class="md-ellipsis">
+    
+  
+    Helpful Commands
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    BioAI User Guides
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    BioAI User Guides
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../bioai/hw8/">
+<span class="md-ellipsis">
+    
+  
+    HW8
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Design Decisions
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#0-vocabulary">
+<span class="md-ellipsis">
+      
+        0. Vocabulary
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-accounts-and-access-to-ask-for-in-week-one">
+<span class="md-ellipsis">
+      
+        1. Accounts and access to ask for in week one
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-install-tools-on-your-laptop">
+<span class="md-ellipsis">
+      
+        2. Install tools on your laptop
+      
+    </span>
+</a>
+<nav aria-label="2. Install tools on your laptop" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#windows">
+<span class="md-ellipsis">
+      
+        Windows
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mac-and-linux">
+<span class="md-ellipsis">
+      
+        Mac and Linux
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-clone-the-repo">
+<span class="md-ellipsis">
+      
+        3. Clone the repo
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-open-the-dev-container">
+<span class="md-ellipsis">
+      
+        4. Open the dev container
+      
+    </span>
+</a>
+<nav aria-label="4. Open the dev container" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#windows_1">
+<span class="md-ellipsis">
+      
+        Windows
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mac-and-linux_1">
+<span class="md-ellipsis">
+      
+        Mac and Linux
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#everyone">
+<span class="md-ellipsis">
+      
+        Everyone
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-get-the-secrets-file">
+<span class="md-ellipsis">
+      
+        5. Get the secrets file
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-one-time-cluster-setup">
+<span class="md-ellipsis">
+      
+        6. One-time cluster setup
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-start-glados">
+<span class="md-ellipsis">
+      
+        7. Start GLADOS
+      
+    </span>
+</a>
+<nav aria-label="7. Start GLADOS" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#sign-in-for-the-first-time">
+<span class="md-ellipsis">
+      
+        Sign in for the first time
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#8-daily-workflow">
+<span class="md-ellipsis">
+      
+        8. Daily workflow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#9-when-things-go-wrong">
+<span class="md-ellipsis">
+      
+        9. When things go wrong
+      
+    </span>
+</a>
+<nav aria-label="9. When things go wrong" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#rebuilt-container-everything-is-gone">
+<span class="md-ellipsis">
+      
+        Rebuilt container: everything is gone
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-backend-offline-in-the-dashboard-sidebar">
+<span class="md-ellipsis">
+      
+        "Error - Backend Offline" in the dashboard sidebar
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#sign-in-loops-back-to-the-landing-page">
+<span class="md-ellipsis">
+      
+        Sign-in loops back to the landing page
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ports-3000-or-10350-do-not-open-in-the-browser">
+<span class="md-ellipsis">
+      
+        Ports 3000 or 10350 do not open in the browser
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#docker-is-not-running">
+<span class="md-ellipsis">
+      
+        Docker is not running
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mongodb-pods-restart-or-stay-pending">
+<span class="md-ellipsis">
+      
+        MongoDB pods restart or stay Pending
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#10-where-to-go-next">
+<span class="md-ellipsis">
+      
+        10. Where to go next
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="getting-started-from-zero">Getting Started From Zero</h1>
+<p>This page is for a brand-new team member who has <strong>nothing</strong> set up yet: no accounts, no tools, no repo. It walks from a blank laptop to a running local copy of GLADOS that you can sign in to and run an experiment on. The other developer pages assume most of this is already done.</p>
+<p>Read it top to bottom the first time. Afterwards, the <a href="#8-daily-workflow">Daily workflow</a> section is the only part you will need.</p>
+<div class="admonition note">
+<p class="admonition-title">How long this takes</p>
+<p>Plan for one afternoon. Most of the time is spent downloading Docker images and waiting for the Kubernetes cluster to come up. Nothing here needs to be done twice.</p>
+</div>
+<h2 id="0-vocabulary">0. Vocabulary</h2>
+<p>You will see these words everywhere in the code and docs.</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Experiment</strong></td>
+<td>One submission from the web UI or CLI: a program plus a set of parameters to sweep over.</td>
+</tr>
+<tr>
+<td><strong>Trial</strong> (also "run")</td>
+<td>One execution of that program with one generated config file.</td>
+</tr>
+<tr>
+<td><strong>Permutation</strong></td>
+<td>One combination of parameter values. Each permutation becomes one trial.</td>
+</tr>
+<tr>
+<td><strong>Runner</strong></td>
+<td>A short-lived Kubernetes Job that executes all trials of one experiment and writes results back to the database.</td>
+</tr>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>The Next.js web app in <code>apps/frontend</code>. Talks to MongoDB directly and calls the backend to start experiments.</td>
+</tr>
+<tr>
+<td><strong>Backend</strong></td>
+<td>The Flask app in <code>apps/backend</code>. Its main job is creating runner Jobs.</td>
+</tr>
+<tr>
+<td><strong>Tilt</strong></td>
+<td>The tool that builds the three images, deploys them into your local cluster, and hot-reloads on code changes.</td>
+</tr>
+<tr>
+<td><strong>minikube</strong></td>
+<td>A single-node Kubernetes cluster that runs inside Docker on your laptop.</td>
+</tr>
+<tr>
+<td><strong>Dev container</strong></td>
+<td>A Docker image with every tool preinstalled. VS Code runs your terminal and editor inside it.</td>
+</tr>
+<tr>
+<td><strong>GridFS</strong></td>
+<td>The MongoDB feature used to store uploaded experiment files and result zips.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-accounts-and-access-to-ask-for-in-week-one">1. Accounts and access to ask for in week one</h2>
+<p>Ask the previous team or the faculty advisor for these on day one. Some take days to get.</p>
+<ol>
+<li><strong>GitHub organization membership</strong> for <a href="https://github.com/AutomatingSciencePipeline">AutomatingSciencePipeline</a>. You need write access to push branches and open pull requests. The task board is the <a href="https://github.com/orgs/AutomatingSciencePipeline/projects/1/views/1">GitHub Project</a>.</li>
+<li><strong>The team Discord.</strong> The Kubernetes secrets file (<code>secret.yaml</code>) is not in git. The previous team stored it in the private Discord. You cannot run the system locally without it. See <a href="#5-get-the-secrets-file">step 5</a>.</li>
+<li><strong>Rose-Hulman network or VPN access.</strong> The production site <a href="https://glados.csse.rose-hulman.edu/">https://glados.csse.rose-hulman.edu/</a> is only reachable on campus network.</li>
+<li><strong>OAuth app ownership.</strong> Sign-in uses Google and GitHub OAuth apps. Find out who owns them and get added as an owner. If the local callback URL is not registered on those apps, local sign-in will fail. See <a href="#sign-in-for-the-first-time">Sign in for the first time</a>.</li>
+<li><strong>Server access</strong> (later, not week one). The production cluster and the <code>glados-forge</code> development VM are documented under <a href="../../infrastructure/vms/">VMs</a> and <a href="../../tutorial/deployment/">Deployment</a>.</li>
+</ol>
+<h2 id="2-install-tools-on-your-laptop">2. Install tools on your laptop</h2>
+<p>These instructions were last verified on Windows 11 with Docker Desktop. Mac and Linux users skip the WSL parts.</p>
+<h3 id="windows">Windows</h3>
+<ol>
+<li><strong>WSL2 with Ubuntu.</strong> Open PowerShell as administrator and run <code>wsl --install -d Ubuntu</code>. Reboot, then open "Ubuntu" from the Start menu once to create your Linux user. Confirm with <code>wsl -l -v</code> that Ubuntu shows <code>VERSION 2</code>.</li>
+<li><strong>Docker Desktop.</strong> Install from <a href="https://www.docker.com/products/docker-desktop/">https://www.docker.com/products/docker-desktop/</a>. In Settings, enable "Use the WSL 2 based engine" and, under Resources, WSL Integration, turn on integration for Ubuntu.</li>
+<li><strong>VS Code</strong> with these extensions: "Dev Containers" (<code>ms-vscode-remote.remote-containers</code>) and "WSL" (<code>ms-vscode-remote.remote-wsl</code>).</li>
+<li><strong>Git</strong> on Windows, and <code>git</code> inside Ubuntu (<code>sudo apt install git rsync</code>). The copy script uses <code>rsync</code>.</li>
+<li><strong>Python 3</strong> on Windows, only to run the one helper script in the next step.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Why WSL is required on Windows</p>
+<p>Tilt's live update watches files with Linux file events. Files on the Windows filesystem mounted into Docker do not send those events, so hot reload does not work. The project therefore copies the repo into the WSL filesystem and runs the dev container from there.</p>
+</div>
+<h3 id="mac-and-linux">Mac and Linux</h3>
+<ol>
+<li><strong>Docker Desktop</strong> (Mac) or Docker Engine (Linux). Give Docker at least 4 CPUs and 10 GB of memory in its settings, because minikube will ask for 3 CPUs and about 8 GB.</li>
+<li><strong>VS Code</strong> with the "Dev Containers" extension.</li>
+<li><strong>Git.</strong></li>
+</ol>
+<h2 id="3-clone-the-repo">3. Clone the repo</h2>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/AutomatingSciencePipeline/Monorepo.git
+<span class="nb">cd</span><span class="w"> </span>Monorepo
+</code></pre></div>
+<p>On Windows, clone it anywhere on your Windows drive. The next step copies it into WSL.</p>
+<h2 id="4-open-the-dev-container">4. Open the dev container</h2>
+<h3 id="windows_1">Windows</h3>
+<p>From the repo root in a Windows terminal:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>.devcontainer/start_in_wsl.py
+</code></pre></div>
+<p>The script copies the repo to <code>~/Monorepo</code> inside Ubuntu with <code>rsync --delete</code>, then opens VS Code on that copy. It warns you that it is destructive to the WSL copy. Say yes the first time.</p>
+<div class="admonition danger">
+<p class="admonition-title">You now have two copies of the repo</p>
+<p>The Windows folder you cloned and <code>~/Monorepo</code> inside WSL are separate. The dev container mounts the <strong>WSL</strong> copy. Edit, commit, and push from inside the container terminal (or from the WSL copy). If you edit the Windows copy, nothing happens in the running app. Rerunning <code>start_in_wsl.py</code> overwrites uncommitted work in the WSL copy.</p>
+</div>
+<h3 id="mac-and-linux_1">Mac and Linux</h3>
+<p>Open the cloned folder in VS Code.</p>
+<h3 id="everyone">Everyone</h3>
+<p>VS Code will show a prompt in the bottom right: "Reopen in Container". Click it. If it does not appear, press <code>F1</code>, type "Dev Containers: Rebuild and Reopen in Container", and run that.</p>
+<p>The first time this pulls the <code>gladospipeline/glados-dev-container:main</code> image, which is large. Wait until the VS Code terminal opens with a prompt like <code>codespace ➜ /workspaces/Monorepo</code>. That terminal is inside the container. Every command below is run there.</p>
+<p>The container already has Python, Node, Docker CLI, <code>kubectl</code>, <code>minikube</code>, <code>ctlptl</code>, <code>helm</code>, and <code>tilt</code> installed. You should not install those on your laptop.</p>
+<h2 id="5-get-the-secrets-file">5. Get the secrets file</h2>
+<p>Ask the team for <code>secret.yaml</code> and place it at:</p>
+<div class="highlight"><pre><span></span><code>kubernetes_init/kubernetes_secrets/secret.yaml
+</code></pre></div>
+<p>It is listed in <code>.gitignore</code> and must never be committed. It is a Kubernetes <code>Secret</code> named <code>secret-env</code> with these keys. The values are base64 encoded.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Used by</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FRONTEND_WEBSERVER_PORT</code>, <code>BACKEND_PORT</code>, <code>MONGODB_PORT</code></td>
+<td>all</td>
+<td>Ports. Normally 3000, 5050, 27017.</td>
+</tr>
+<tr>
+<td><code>MONGODB_USERNAME</code>, <code>MONGODB_PASSWORD</code></td>
+<td>frontend, backend, runner</td>
+<td>Database login. Must match the root user in <code>helm_packages/mongodb-helm/tilt/values.yaml</code>.</td>
+</tr>
+<tr>
+<td><code>AUTH_SECRET</code></td>
+<td>frontend</td>
+<td>Auth.js session signing key.</td>
+</tr>
+<tr>
+<td><code>AUTH_GITHUB_ID</code>, <code>AUTH_GITHUB_SECRET</code></td>
+<td>frontend</td>
+<td>GitHub OAuth app.</td>
+</tr>
+<tr>
+<td><code>AUTH_GOOGLE_ID</code>, <code>AUTH_GOOGLE_SECRET</code></td>
+<td>frontend</td>
+<td>Google OAuth app.</td>
+</tr>
+<tr>
+<td><code>AUTH_URL</code>, <code>AUTH_REDIRECT_PROXY_URL</code>, <code>AUTH_TRUST_HOST</code></td>
+<td>frontend</td>
+<td>Where Auth.js thinks the site lives. For local work this must point at <code>http://localhost:3000</code>.</td>
+</tr>
+<tr>
+<td><code>GMAIL_CREDS</code></td>
+<td>runner</td>
+<td>Credentials for the "email me when done" feature.</td>
+</tr>
+</tbody>
+</table>
+<p>If nobody can find the file, you can build a new one for local use: copy the structure above, generate a random <code>AUTH_SECRET</code>, create your own GitHub OAuth app with callback URL <code>http://localhost:3000/api/auth/callback/github</code>, and reuse the MongoDB values from the helm values file. Everything else can be a placeholder until you need that feature. The frontend deployment that mounts these keys is <code>kubernetes_init/tilt/deployment-frontend.yaml</code>, so that file is the source of truth for which keys must exist.</p>
+<h2 id="6-one-time-cluster-setup">6. One-time cluster setup</h2>
+<p>Run this once per dev container, from the repo root inside the container:</p>
+<div class="highlight"><pre><span></span><code>./.devcontainer/post-start.sh
+</code></pre></div>
+<p>It does four things:</p>
+<ol>
+<li><code>npm i</code> in <code>apps/frontend</code>.</li>
+<li>Sets minikube to 3 CPUs and 7800 MB of memory, then <strong>deletes</strong> any existing minikube cluster.</li>
+<li>Creates a fresh cluster with <code>ctlptl create cluster minikube --registry=ctlptl-registry</code>. The registry is what lets Tilt push locally built images into the cluster.</li>
+<li><code>pip install</code>s the Python packages the backend and runner need.</li>
+</ol>
+<p>It takes several minutes. When it finishes, <code>minikube status</code> should report the host, kubelet, and apiserver as <code>Running</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Not enough memory?</p>
+<p>If cluster creation fails with a memory error, lower the number in the <code>minikube config set memory</code> line of <code>post-start.sh</code> to fit your machine, or raise Docker Desktop's memory limit. A recent teammate ran with 7600 MB.</p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Never rerun this script casually</p>
+<p>It runs <code>minikube delete</code>, which wipes the cluster and with it your local database. Only run it again when you have a <strong>fresh</strong> container (see <a href="#rebuilt-container-everything-is-gone">Rebuilt container</a> below).</p>
+</div>
+<h2 id="7-start-glados">7. Start GLADOS</h2>
+<p>From the repo root inside the container:</p>
+<div class="highlight"><pre><span></span><code>tilt<span class="w"> </span>up
+</code></pre></div>
+<p>Press space to open the Tilt web UI, or go to <a href="http://localhost:10350">http://localhost:10350</a>. Tilt builds the <code>frontend</code>, <code>backend</code>, and <code>runner</code> images, installs MongoDB with Helm, and deploys everything. The first build is slow. When the header shows all resources green (10/10), open <a href="http://localhost:3000">http://localhost:3000</a>.</p>
+<p>What Tilt is running:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>What it is</th>
+<th>Reach it at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>glados-frontend</code></td>
+<td>Next.js app</td>
+<td><a href="http://localhost:3000">http://localhost:3000</a></td>
+</tr>
+<tr>
+<td><code>glados-backend</code></td>
+<td>Flask API</td>
+<td><a href="http://localhost:5050">http://localhost:5050</a></td>
+</tr>
+<tr>
+<td><code>glados-mongodb</code></td>
+<td>MongoDB replica set via Helm</td>
+<td><code>localhost:30000</code></td>
+</tr>
+<tr>
+<td><code>fix-minikube-folder-perms-*</code></td>
+<td>One-shot jobs that create the MongoDB data folders inside minikube</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>runner</code></td>
+<td>Image only. A Job is created from it each time an experiment starts</td>
+<td>see the experiment walkthrough</td>
+</tr>
+</tbody>
+</table>
+<p>You can confirm from the terminal:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>pods
+</code></pre></div>
+<p>You should see one frontend pod, one backend pod, and three MongoDB pods (<code>glados-mongodb-0</code>, <code>glados-mongodb-1</code>, <code>glados-mongodb-arbiter-0</code>), all <code>Running</code>.</p>
+<h3 id="sign-in-for-the-first-time">Sign in for the first time</h3>
+<p>The landing page offers "Sign in with Google" and "Sign in with GitHub". There is no username and password login and no mock login for development. Use a real account.</p>
+<p>If sign-in bounces back to the landing page or shows an OAuth error, the cause is almost always one of:</p>
+<ul>
+<li><code>AUTH_URL</code> in <code>secret.yaml</code> does not say <code>http://localhost:3000</code>.</li>
+<li>The OAuth app does not have <code>http://localhost:3000/api/auth/callback/github</code> (or <code>/google</code>) registered as a callback URL.</li>
+</ul>
+<p>After you change <code>secret.yaml</code>, Tilt reapplies it, but the frontend pod only reads it at start. Click the refresh arrow on <code>glados-frontend</code> in the Tilt UI to restart it.</p>
+<p>Your account is created in the <code>gladosdb</code> database with role <code>user</code>. Roles are <code>user</code>, <code>privileged</code>, and <code>admin</code>. Only an admin sees the "Admin" link in the profile menu. To make yourself admin locally, edit your document in the <code>users</code> collection and set <code>role</code> to <code>admin</code>. The <a href="../../tutorial/experiment_walkthrough/#24-poking-at-the-database">experiment walkthrough</a> shows how to connect to the database.</p>
+<h2 id="8-daily-workflow">8. Daily workflow</h2>
+<p>Once the steps above are done, a normal day looks like this.</p>
+<ol>
+<li>Open VS Code on the WSL copy (Windows: open a WSL terminal, <code>cd ~/Monorepo</code>, <code>code .</code>) and choose "Reopen in Container".</li>
+<li>In the container terminal, check the cluster is up: <code>minikube status</code>. If it is stopped, <code>minikube start</code>.</li>
+<li><code>tilt up</code>, wait for green, open <a href="http://localhost:3000">http://localhost:3000</a>.</li>
+<li>Edit code. Frontend and backend changes sync into the running pods automatically. Runner changes rebuild the runner image and apply to the next experiment you start.</li>
+<li>When you are done, <code>Ctrl+C</code> in the Tilt terminal, then <code>tilt down</code>. This also uninstalls the MongoDB chart and deletes its volume claims. The database files themselves stay inside minikube under <code>/srv/data/mongo-*</code> (hostPath volumes with the <code>Retain</code> policy), so the next <code>tilt up</code> normally picks your experiments back up. To start from an empty database, see the hard reset in <a href="../helpful_commands/">Helpful Commands</a>.</li>
+<li>Commit from the container terminal. Branch off <code>main</code> (there is currently no <code>dev</code> branch, despite what older pages say) and open a pull request per <a href="../../tutorial/best_practices/">Best Practices</a>.</li>
+</ol>
+<h2 id="9-when-things-go-wrong">9. When things go wrong</h2>
+<h3 id="rebuilt-container-everything-is-gone">Rebuilt container: everything is gone</h3>
+<p>If VS Code rebuilt the dev container (after a <code>devcontainer.json</code> change, a Docker reset, or a long gap), the new container has <strong>no cluster and no pip packages</strong>, because those live inside the container. Symptoms:</p>
+<ul>
+<li><code>minikube status</code> says <code>the "minikube" host does not exist</code>.</li>
+<li><code>kubectl get pods</code> says <code>connection to the server localhost:8080 was refused</code>.</li>
+<li>Every Tilt resource is red immediately after <code>tilt up</code>.</li>
+</ul>
+<p>Fix: stop Tilt, run <code>./.devcontainer/post-start.sh</code> once, then <code>tilt up</code> again. Your <code>node_modules</code> and source are on the mounted volume and survive.</p>
+<h3 id="error-backend-offline-in-the-dashboard-sidebar">"Error - Backend Offline" in the dashboard sidebar</h3>
+<p>The frontend cannot reach <code>glados-backend</code> on port 5050. Check the backend pod in Tilt for a crash, usually an import error or a MongoDB connection failure.</p>
+<h3 id="sign-in-loops-back-to-the-landing-page">Sign-in loops back to the landing page</h3>
+<p>See <a href="#sign-in-for-the-first-time">Sign in for the first time</a>.</p>
+<h3 id="ports-3000-or-10350-do-not-open-in-the-browser">Ports 3000 or 10350 do not open in the browser</h3>
+<p>Open the "Ports" tab in VS Code (next to Terminal). Make sure 3000, 5050, and 10350 are forwarded. Remove and re-add a port if it is stuck.</p>
+<h3 id="docker-is-not-running">Docker is not running</h3>
+<p>The container needs the host Docker daemon. Start Docker Desktop, then reopen the container.</p>
+<h3 id="mongodb-pods-restart-or-stay-pending">MongoDB pods restart or stay <code>Pending</code></h3>
+<p>Usually memory. Lower minikube memory per <a href="#6-one-time-cluster-setup">step 6</a>, or check <code>kubectl describe pod glados-mongodb-0</code>.</p>
+<h2 id="10-where-to-go-next">10. Where to go next</h2>
+<ul>
+<li><a href="../../tutorial/experiment_walkthrough/">Your first experiment</a>: the happy path through the UI and what happens behind it.</li>
+<li><a href="../../infrastructure/architecture/">Architecture</a> and <a href="../../infrastructure/kubernetes/">Kubernetes</a>: how the pieces fit.</li>
+<li><a href="../../tutorial/best_practices/">Best Practices</a>: branching, the task board, and code review.</li>
+<li><a href="../../documentation/guide/">Updating Documentation</a>: how to preview and publish this site.</li>
+</ul>
+<p>Repo map for orientation:</p>
+<div class="highlight"><pre><span></span><code>apps/frontend      Next.js web UI, Auth.js, direct MongoDB access, /api routes
+apps/backend       Flask API that creates runner Jobs
+apps/runner        Python code that runs inside each runner Job
+kubernetes_init    Kubernetes manifests (tilt/ for local, others for production)
+helm_packages      Helm values for MongoDB and ingress
+example_experiments  Sample programs you can upload as experiments
+docs               This site (MkDocs)
+Tiltfile           Local dev orchestration
+.devcontainer      Dev container definition and one-time setup script
+</code></pre></div>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>

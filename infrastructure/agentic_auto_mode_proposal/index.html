@@ -1,0 +1,1230 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for GLADOS - Automated Science Pipeline" name="description"/>
+<link href="https://automatingsciencepipeline.github.io/Monorepo/infrastructure/agentic_auto_mode_proposal/" rel="canonical"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
+<title>Proposal: Adding an Auto Mode to the Agentic Plan - GLADOS</title>
+<link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#proposal-adding-an-auto-mode-to-the-agentic-plan">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="GLADOS" class="md-header__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            GLADOS
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Proposal: Adding an Auto Mode to the Agentic Plan
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="GLADOS" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    GLADOS
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../about/">
+<span class="md-ellipsis">
+    
+  
+    About GLADOS
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/best_practices/">
+<span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/experiment_walkthrough/">
+<span class="md-ellipsis">
+    
+  
+    Your First Experiment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/usage/">
+<span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../documentation/guide/">
+<span class="md-ellipsis">
+    
+  
+    Updating Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../architecture/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../kubernetes/">
+<span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../vms/">
+<span class="md-ellipsis">
+    
+  
+    VMs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../cluster_update/">
+<span class="md-ellipsis">
+    
+  
+    Cluster Upgrade
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../used_technologies/">
+<span class="md-ellipsis">
+    
+  
+    Used Technologies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Developer Help
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Help
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/getting_started_from_zero/">
+<span class="md-ellipsis">
+    
+  
+    Getting Started From Zero
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/setup/">
+<span class="md-ellipsis">
+    
+  
+    Developer Setup
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/helpful_commands/">
+<span class="md-ellipsis">
+    
+  
+    Helpful Commands
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    BioAI User Guides
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    BioAI User Guides
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../bioai/hw8/">
+<span class="md-ellipsis">
+    
+  
+    HW8
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Design Decisions
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-summary">
+<span class="md-ellipsis">
+      
+        1. Summary
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-why-the-original-plan-is-strict">
+<span class="md-ellipsis">
+      
+        2. Why the Original Plan Is Strict
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-what-we-keep">
+<span class="md-ellipsis">
+      
+        3. What We Keep
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-what-we-change-or-remove">
+<span class="md-ellipsis">
+      
+        4. What We Change or Remove
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-auto-mode-design">
+<span class="md-ellipsis">
+      
+        5. Auto Mode Design
+      
+    </span>
+</a>
+<nav aria-label="5. Auto Mode Design" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-sensitive-vs-non-sensitive-experiments">
+<span class="md-ellipsis">
+      
+        5.1 Sensitive vs. Non-Sensitive Experiments
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-what-the-agent-can-and-cannot-do">
+<span class="md-ellipsis">
+      
+        5.2 What the Agent Can and Cannot Do
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-auto-sessions">
+<span class="md-ellipsis">
+      
+        5.3 Auto Sessions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-session-limits">
+<span class="md-ellipsis">
+      
+        5.4 Session Limits
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#55-security-carried-over-from-the-original-plan">
+<span class="md-ellipsis">
+      
+        5.5 Security Carried Over from the Original Plan
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#56-one-auto-mode-iteration">
+<span class="md-ellipsis">
+      
+        5.6 One Auto Mode Iteration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#57-audit-and-invariant-changes">
+<span class="md-ellipsis">
+      
+        5.7 Audit and Invariant Changes
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-phase-scope">
+<span class="md-ellipsis">
+      
+        6. Phase Scope
+      
+    </span>
+</a>
+<nav aria-label="6. Phase Scope" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-phase-1-auto-mode-infrastructure-and-permissions">
+<span class="md-ellipsis">
+      
+        6.1 Phase 1: Auto Mode Infrastructure and Permissions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-phase-2-automatic-tuning-loop">
+<span class="md-ellipsis">
+      
+        6.2 Phase 2: Automatic Tuning Loop
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#63-why-this-split">
+<span class="md-ellipsis">
+      
+        6.3 Why This Split
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-risks-and-tradeoffs">
+<span class="md-ellipsis">
+      
+        7. Risks and Tradeoffs
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#8-proposed-milestones">
+<span class="md-ellipsis">
+      
+        8. Proposed Milestones
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#9-questions-for-the-client">
+<span class="md-ellipsis">
+      
+        9. Questions for the Client
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="proposal-adding-an-auto-mode-to-the-agentic-plan">Proposal: Adding an Auto Mode to the Agentic Plan</h1>
+<h2 id="1-summary">1. Summary</h2>
+<p>The current <a href="../agentic_plan/">Agentic Implementation Plan</a> was written last year under the assumption that the AI agent should be trusted as little as possible. Every result is kept away from the agent, and the user has to manually release data before the agent can see it. Following client feedback that this is too strict given how far AI agents have come, we propose splitting agent behavior into two modes:</p>
+<ul>
+<li><strong>Manual mode</strong>: the current plan, essentially unchanged.</li>
+<li><strong>Auto mode</strong>: inside a time-limited, budget-limited session the user opens, the agent can run experiments and read their results without asking each time. Only non-sensitive experiments can be used.</li>
+</ul>
+<p>This document explains what we keep from the original plan, what we change or remove and why, and how auto mode would work. The longer-term goal the client described, where the agent tries inputs, looks at the results, and tunes the inputs on its own, is covered as a second phase (Section 6), since it builds on auto mode but adds its own problems.</p>
+<h2 id="2-why-the-original-plan-is-strict">2. Why the Original Plan Is Strict</h2>
+<p>The original plan treats the agent and its LLM provider as untrusted (the "CHELL"). Two rules follow from that:</p>
+<ul>
+<li><strong>S-1 / S-2:</strong> the agent never sees experiment results or artifacts. Sensitive results are written to a local "handoff region" instead of being returned to the agent.</li>
+<li><strong>Consent gesture (§4.3, §5.7):</strong> the user must take an explicit action (copy/paste, moving a file, etc.) to release each result to the agent. §5.7 says friction here is deliberate and that requests to make consent easier should be treated with skepticism.</li>
+</ul>
+<p>Most of the human-in-the-loop cost in the plan comes from these two rules. In contrast, the plan asks for very little approval on <em>actions</em>: submitting an experiment only needs an audit record (S-8).</p>
+<p>This matters for the client's goal. <strong>An agent that cannot see results cannot tune inputs.</strong> As written, the plan makes the "try, observe, adjust" loop impossible without a human copying results back to the agent after every run.</p>
+<h2 id="3-what-we-keep">3. What We Keep</h2>
+<p>Most of the original plan does not create friction for the user and still makes sense. We propose keeping all of the following in both modes.</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Section</th>
+<th>Why we keep it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local MCP facade calling the existing REST API</td>
+<td>§4.1, §4.3, §6.1</td>
+<td>The architecture decision is unrelated to strictness. It reuses the CLI's auth and the existing endpoints.</td>
+</tr>
+<tr>
+<td>GitHub token introspection for auth</td>
+<td>§4.1, §6.2</td>
+<td>Same as above. No reason to revisit.</td>
+</tr>
+<tr>
+<td>Functional invariants I-1, I-2, I-3</td>
+<td>§3.1</td>
+<td>These are about correctness (one call per tool call, no altered arguments, no made-up response data), not about restricting the agent.</td>
+</tr>
+<tr>
+<td>S-3 Credential confinement</td>
+<td>§3.2</td>
+<td>The agent never needs the token. Keeping it hidden costs the user nothing.</td>
+</tr>
+<tr>
+<td>S-4 Bounded tool surface (static allowlist)</td>
+<td>§3.2, §5.3</td>
+<td>More important in auto mode. With no human approving each call, the fixed set of tools is the main limit on what the agent can do.</td>
+</tr>
+<tr>
+<td>S-5 Diagnostic discipline, S-6 Egress confinement</td>
+<td>§3.2</td>
+<td>No user friction, and they protect the token and data from leaking through logs or network calls.</td>
+</tr>
+<tr>
+<td>S-8 Audit integrity, health check, degraded mode</td>
+<td>§3.2, §4.2</td>
+<td>More important in auto mode. When nobody approves actions as they happen, the audit log is how the user finds out afterward what the agent did.</td>
+</tr>
+<tr>
+<td>Fail closed, CI checks, refusal tests, SDK telemetry caution</td>
+<td>§5.4, §5.5, §5.6, §5.8, §5.9</td>
+<td>Good engineering practices that apply to either mode.</td>
+</tr>
+<tr>
+<td>Localhost-only binding for the facade</td>
+<td>§7 Gaps</td>
+<td>More important in auto mode, since a spoofed caller would also get auto-mode permissions.</td>
+</tr>
+<tr>
+<td>The HIGH-sensitivity handoff path</td>
+<td>§4.3</td>
+<td>Kept as the behavior for manual mode, which is the only mode sensitive experiments can use.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-what-we-change-or-remove">4. What We Change or Remove</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Current</th>
+<th>Proposed</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>S-1 Result confidentiality</strong></td>
+<td>Absolute: the agent never sees results.</td>
+<td>Applies to every experiment in manual mode. Sensitive experiments can't enter auto mode at all (5.1). Inside an auto session, the agent sees the results of the experiments it creates.</td>
+<td>The tuning loop requires the agent to read results. Many experiments (addNums, class projects, benchmarks) have no confidentiality requirement.</td>
+</tr>
+<tr>
+<td><strong>S-2 Artifact confidentiality</strong></td>
+<td>Absolute.</td>
+<td>Same condition as S-1, plus a size cap on anything returned to the agent.</td>
+<td>Same reason. The size cap keeps large artifacts from flooding the agent's context.</td>
+</tr>
+<tr>
+<td><strong>Per-result consent gesture</strong></td>
+<td>Required for every HIGH result.</td>
+<td>Not needed in auto mode, since only non-sensitive experiments enter it. Kept for manual mode.</td>
+<td>This is the main source of friction the client objected to.</td>
+</tr>
+<tr>
+<td><strong>§5.7 "The user is a cooperator, not an obstacle"</strong></td>
+<td>Treat requests to ease consent with skepticism.</td>
+<td>Rewrite: friction is still the right choice for sensitive data, but the user decides what is sensitive, per experiment.</td>
+<td>The client has made this decision explicitly, and it should be recorded in the plan rather than left in conflict with it.</td>
+</tr>
+<tr>
+<td><strong>§5.2 Default new operations to HIGH</strong></td>
+<td>Per tool.</td>
+<td>Keep, and add a per-experiment sensitivity classification that also defaults to sensitive (5.1).</td>
+<td>Keeps the safe default. Marking an experiment non-sensitive is a one-time choice by the user, not a step for every result.</td>
+</tr>
+<tr>
+<td><strong>Local log <code>user_approval</code> field</strong></td>
+<td>Yes/no.</td>
+<td>Replace with <code>mode</code> and <code>approved_by</code> (<code>user</code> or <code>auto</code>).</td>
+<td>So the log can tell a user-approved action apart from one auto mode did on its own.</td>
+</tr>
+<tr>
+<td><strong>Scope: agent quality out of scope</strong></td>
+<td>§2</td>
+<td>Still true for the model's choices, but loop limits (budgets, stopping rules) come into scope.</td>
+<td>Once the agent can act repeatedly without a human, limiting how much it can do becomes an infrastructure concern.</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing is deleted outright. The strict path becomes manual mode, which remains the only option for sensitive experiments.</p>
+<h2 id="5-auto-mode-design">5. Auto Mode Design</h2>
+<p>Auto mode is not a global switch. It exists only inside an <strong>auto session</strong>: a time-limited, budget-limited window the user opens around one template experiment. Outside a session, the agent is in manual mode and the original plan applies unchanged.</p>
+<h3 id="51-sensitive-vs-non-sensitive-experiments">5.1 Sensitive vs. Non-Sensitive Experiments</h3>
+<p><strong>Definition.</strong> An experiment is <strong>sensitive</strong> if any part of it (code, input data, configuration, or results) must not be shared with a third-party AI provider. It is <strong>non-sensitive</strong> if its owner is comfortable with all of it being sent to the agent's LLM provider.</p>
+<p>An experiment is sensitive if it meets <strong>any</strong> of these:</p>
+<ol>
+<li><strong>Personal data:</strong> it uses or produces data about identifiable people (student records under FERPA, health data, human-subjects research under IRB, survey responses).</li>
+<li><strong>Restricted data:</strong> its data comes with a license, data use agreement, or NDA that limits who may see it.</li>
+<li><strong>Confidential work:</strong> its code or results are unpublished, or belong to a sponsor or collaborator who has not agreed to sharing.</li>
+<li><strong>Secrets:</strong> its code or config files contain credentials, API keys, or internal hostnames.</li>
+</ol>
+<p>Everything else is non-sensitive: synthetic data, public datasets, public benchmarks, and course or demo experiments.</p>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Classification</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>addNums (<code>example_experiments/python/addNums.py</code>)</td>
+<td>Non-sensitive</td>
+<td>Synthetic inputs and outputs</td>
+</tr>
+<tr>
+<td>Genetic algorithm tuned on a standard benchmark function</td>
+<td>Non-sensitive</td>
+<td>No real-world data</td>
+</tr>
+<tr>
+<td>Classifier trained on a public dataset (e.g., UCI Iris)</td>
+<td>Non-sensitive</td>
+<td>Data is already public</td>
+</tr>
+<tr>
+<td>Model trained on student grades or enrollment records</td>
+<td>Sensitive</td>
+<td>Personal data (FERPA)</td>
+</tr>
+<tr>
+<td>Simulation using a sponsor's proprietary model or data</td>
+<td>Sensitive</td>
+<td>Restricted data, confidential work</td>
+</tr>
+<tr>
+<td>Results a research group has not published yet</td>
+<td>Sensitive</td>
+<td>Confidential work</td>
+</tr>
+<tr>
+<td>Any experiment whose script contains an API key</td>
+<td>Sensitive</td>
+<td>Secrets</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rules:</strong></p>
+<ul>
+<li>The experiment owner sets the classification. GLADOS cannot verify it, so it is the owner's statement, and it is recorded in the audit log.</li>
+<li>Every experiment is <strong>sensitive by default</strong> (following §5.2 of the original plan). The owner has to mark it non-sensitive.</li>
+<li><strong>Only non-sensitive experiments can be used in auto mode.</strong> Sensitive experiments stay in manual mode, where S-1, S-2 and the consent gesture from the original plan still apply.</li>
+<li>The agent cannot change any experiment's classification.</li>
+</ul>
+<p>This is the main change from the first draft of this proposal. Sensitivity no longer hides some results <em>inside</em> auto mode. Instead it decides which experiments can enter auto mode at all, and inside a session the agent can see every result it produces.</p>
+<h3 id="52-what-the-agent-can-and-cannot-do">5.2 What the Agent Can and Cannot Do</h3>
+<table>
+<thead>
+<tr>
+<th>The agent CAN</th>
+<th>The agent CANNOT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read the configuration of the session's template experiment (parameters, ranges, description)</td>
+<td>See or act on any experiment outside its current session, including the user's other experiments and other users'</td>
+</tr>
+<tr>
+<td>Create new experiments from the template, changing only hyperparameter values within the session's bounds</td>
+<td>Upload, edit, or replace experiment code, or change which files an experiment reads or writes</td>
+</tr>
+<tr>
+<td>Start the experiments it created, within the session limits</td>
+<td>Modify the template experiment itself</td>
+</tr>
+<tr>
+<td>Check the status of its session's experiments</td>
+<td>Delete experiments or results, including its own</td>
+</tr>
+<tr>
+<td>Read the results of its session's experiments (result CSV, pass/fail counts, short error summaries)</td>
+<td>Start, extend, or end a session, or change its limits or parameter bounds</td>
+</tr>
+<tr>
+<td>Cancel its session's experiments</td>
+<td>Change any experiment's sensitivity classification</td>
+</tr>
+<tr>
+<td>See how much of the session's budget is left</td>
+<td>Use a sensitive experiment as a template</td>
+</tr>
+<tr>
+<td></td>
+<td>Set <code>workers</code> or <code>timeout</code> above the session caps</td>
+</tr>
+<tr>
+<td></td>
+<td>Access the token, read files by path or URL, or reach anything other than the GLADOS REST API (S-3, S-4, S-6)</td>
+</tr>
+<tr>
+<td></td>
+<td>Take any auto-mode action after the session ends (it falls back to manual mode)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-auto-sessions">5.3 Auto Sessions</h3>
+<p><strong>Starting a session.</strong> The user starts a session outside the agent, for example with a CLI command. There is no MCP tool for it. When starting, the user chooses:</p>
+<ul>
+<li><strong>Template:</strong> one of their own non-sensitive experiments. The agent's experiments are copies of it with different parameter values.</li>
+<li><strong>Parameter bounds:</strong> which hyperparameters the agent may change, and the allowed range for each.</li>
+<li><strong>Limits:</strong> the values in 5.4. If the user doesn't set them, the defaults apply.</li>
+</ul>
+<p><strong>Session boundary.</strong> The server tags every experiment the agent creates with the session ID and checks that tag on every request. Because the check happens on the server and not only in the local facade, the boundary still holds if the facade restarts. Each experiment belongs to exactly one session, and the agent can only see experiments from its current session.</p>
+<p><strong>Ending a session.</strong> A session ends at the first of:</p>
+<ul>
+<li>the user ends it,</li>
+<li>the time limit runs out,</li>
+<li>the experiment or trial budget runs out, or</li>
+<li>the audit log becomes unavailable (degraded mode, original plan S-8).</li>
+</ul>
+<p>When a session ends, the agent loses auto-mode access immediately. Queued experiments are cancelled, and running experiments finish normally. If the user ends the session with a "stop all" option, running experiments are cancelled too. Everything created in the session stays in the user's account like any other experiment.</p>
+<h3 id="54-session-limits">5.4 Session Limits</h3>
+<p>These are proposed starting values. They need client input (Section 9).</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Proposed default</th>
+<th>Enforced by</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session length</td>
+<td>4 hours</td>
+<td>Server</td>
+<td>No session runs unattended indefinitely</td>
+</tr>
+<tr>
+<td>Experiments created per session</td>
+<td>10</td>
+<td>Server</td>
+<td>Caps the number of rounds</td>
+</tr>
+<tr>
+<td>Total trials per session (sum over all experiments)</td>
+<td>500</td>
+<td>Server</td>
+<td>One experiment can expand into many trials through parameter ranges</td>
+</tr>
+<tr>
+<td>Experiments running at once</td>
+<td>2</td>
+<td>Server</td>
+<td>Leaves cluster capacity for other users</td>
+</tr>
+<tr>
+<td><code>workers</code> per experiment</td>
+<td>No more than the template's value</td>
+<td>Server</td>
+<td>The agent can't claim more parallelism than the user chose</td>
+</tr>
+<tr>
+<td><code>timeout</code> per trial</td>
+<td>No more than the template's value</td>
+<td>Server</td>
+<td>Same reason</td>
+</tr>
+<tr>
+<td>Tool calls</td>
+<td>30 per minute, 1,000 per session</td>
+<td>Facade</td>
+<td>Stops a runaway agent and protects the GitHub 5,000 requests/hour limit</td>
+</tr>
+<tr>
+<td>Status checks</td>
+<td>At most once every 30 seconds per experiment</td>
+<td>Facade</td>
+<td>Polling is the most likely source of excess calls</td>
+</tr>
+<tr>
+<td>Result size returned to the agent</td>
+<td>64 KB per call</td>
+<td>Facade</td>
+<td>Keeps responses predictable. Larger results are cut off, with a note saying so</td>
+</tr>
+</tbody>
+</table>
+<p>When a limit is reached, the request is refused with a short reason, such as "trial budget exhausted." Following the fail-closed rule (original plan §5.5), it is never partly carried out.</p>
+<p>The agent's own LLM token use happens on the agent's side, where GLADOS can't see or limit it. The tool-call limit is the closest control GLADOS has.</p>
+<h3 id="55-security-carried-over-from-the-original-plan">5.5 Security Carried Over from the Original Plan</h3>
+<table>
+<thead>
+<tr>
+<th>Original rule</th>
+<th>In auto mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S-1, S-2: the agent never sees results or artifacts</td>
+<td>Replaced by the admission rule in 5.1: sensitive experiments never enter auto mode. Still applies in full to manual mode.</td>
+</tr>
+<tr>
+<td>S-3: credential confinement</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>S-4: fixed tool list, no free-form paths or URLs</td>
+<td>Unchanged, and extended: parameter values must fall within the session bounds</td>
+</tr>
+<tr>
+<td>S-5, S-6: logs and network restrictions</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>S-8: audit integrity</td>
+<td>Unchanged. No session action completes without an audit record.</td>
+</tr>
+<tr>
+<td>I-3: responses carry nothing the REST API didn't return</td>
+<td>Unchanged. The size limit only cuts results off, and says so.</td>
+</tr>
+<tr>
+<td>Fail closed, localhost-only facade</td>
+<td>Unchanged</td>
+</tr>
+</tbody>
+</table>
+<h3 id="56-one-auto-mode-iteration">5.6 One Auto Mode Iteration</h3>
+<p>GitHub token checks happen on every REST call, as in the original plan §4.1. They're left out of the diagram for readability.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    actor User
+    participant Agent as AI Agent (CHELL)
+    participant MCP as MCP Facade
+    participant REST as REST API
+    participant Audit as Audit Log
+    participant Runner as Runner
+
+    User-&gt;&gt;MCP: start session (template, bounds, limits)
+    Note over User,MCP: Out of band, not an agent tool
+    MCP-&gt;&gt;REST: create session
+    REST-&gt;&gt;REST: check template is non-sensitive and owned by user
+    REST-&gt;&gt;Audit: log session start (bounds, limits)
+    Audit--&gt;&gt;REST: written
+    REST--&gt;&gt;MCP: session ID
+
+    Agent-&gt;&gt;MCP: create_run(new parameter values)
+    MCP-&gt;&gt;MCP: check call rate and session is active
+    MCP-&gt;&gt;REST: create experiment from template (session ID)
+    REST-&gt;&gt;REST: check session, bounds, budget, concurrency
+    alt check fails
+        REST--&gt;&gt;MCP: refused (reason only)
+        MCP--&gt;&gt;Agent: refused (reason only)
+    else check passes
+        REST-&gt;&gt;Audit: append record
+        Audit--&gt;&gt;REST: written
+        REST-&gt;&gt;Runner: start experiment
+        REST--&gt;&gt;MCP: experiment ID, budget left
+        MCP--&gt;&gt;Agent: experiment ID, budget left
+    end
+
+    loop at most once every 30 s
+        Agent-&gt;&gt;MCP: get_status(experiment ID)
+        MCP-&gt;&gt;REST: get status
+        REST--&gt;&gt;MCP: status
+        MCP--&gt;&gt;Agent: status
+    end
+
+    Agent-&gt;&gt;MCP: get_results(experiment ID)
+    MCP-&gt;&gt;REST: get results
+    REST-&gt;&gt;REST: check experiment belongs to this session
+    REST--&gt;&gt;MCP: result CSV
+    MCP-&gt;&gt;MCP: drop unknown fields, apply size limit
+    MCP--&gt;&gt;Agent: results
+    Agent-&gt;&gt;Agent: choose next values (Phase 2) or report to user (Phase 1)</code></pre>
+<h3 id="57-audit-and-invariant-changes">5.7 Audit and Invariant Changes</h3>
+<p><strong>Audit records</strong> gain <code>session_id</code>, <code>mode</code>, <code>approved_by</code> (<code>user</code> or <code>auto</code>), and <code>template_experiment_id</code>. Session start and end are also logged, with the bounds and limits chosen and the reason the session ended.</p>
+<p><strong>Invariants:</strong></p>
+<ul>
+<li><strong>S-1, S-2:</strong> apply to all experiments in manual mode. In auto mode they are replaced by S-9.</li>
+<li><strong>S-9 Admission:</strong> only experiments the owner marked non-sensitive can be session templates, and every experiment created in a session inherits that classification.</li>
+<li><strong>S-10 Session boundary:</strong> the agent can only read or act on experiments tagged with its current, active session.</li>
+<li><strong>S-11 Limits:</strong> no action that would exceed a session limit is carried out.</li>
+<li><strong>S-12 User control:</strong> sessions, bounds, limits, and classifications are set only by the user, never through an agent tool.</li>
+</ul>
+<p>Each one can be tested in CI the same way as original plan §5.6, by attempting every CANNOT action in 5.2 and checking that it is refused.</p>
+<h2 id="6-phase-scope">6. Phase Scope</h2>
+<h3 id="61-phase-1-auto-mode-infrastructure-and-permissions">6.1 Phase 1: Auto Mode Infrastructure and Permissions</h3>
+<p><strong>Goal:</strong> the agent can run experiments and read results inside a session, one step at a time as the user prompts it (for example, "try x from 1 to 20 and tell me what you see").</p>
+<p><strong>In scope:</strong></p>
+<ul>
+<li>Sensitivity classification on experiments, defaulting to sensitive</li>
+<li>Starting and ending sessions, with session tagging and server-side checks</li>
+<li>The session limits in 5.4</li>
+<li>MCP tools for each action in the CAN column of 5.2</li>
+<li>The audit and invariant changes in 5.7</li>
+<li>Tests showing every CANNOT action is refused (original plan §5.9: test refusals, not just success)</li>
+</ul>
+<p><strong>Out of scope:</strong> the agent deciding on its own what to run next, objectives, and stopping rules.</p>
+<p><strong>Done when:</strong> with addNums as the template, an agent can create, run, and read results for experiments in a session, and tests show every CANNOT action in 5.2 is refused.</p>
+<h3 id="62-phase-2-automatic-tuning-loop">6.2 Phase 2: Automatic Tuning Loop</h3>
+<p><strong>Goal:</strong> the user states a goal once, and the agent runs several rounds on its own without a prompt between rounds.</p>
+<p><strong>Adds:</strong></p>
+<ul>
+<li><strong>Objective:</strong> the user names one result column to maximize or minimize when starting the session.</li>
+<li><strong>Stopping rules:</strong> the loop stops when the target is reached, when there has been no improvement for N rounds, or when the budget runs out. The facade enforces these, since it sees every result. Trusting the agent to stop on its own would go against original plan §5.1.</li>
+<li><strong>Coarse-to-fine rounds:</strong> GLADOS already runs every combination of a parameter's min/max/step range (<code>apps/runner/modules/configs.py</code>). So each round is one experiment: a wide grid first, then narrower ranges around the best results.</li>
+<li><strong>Round history:</strong> each round records its parameter values, its best result, and the round it came from, so the user can see how the agent reached its answer.</li>
+<li><strong>Final report:</strong> the best parameter values found and the round history, returned to the user when the loop stops.</li>
+</ul>
+<p><strong>Out of scope:</strong> multiple objectives, parameters not in the template, and changes to experiment code.</p>
+<p><strong>Done when:</strong> given a template and an objective, the agent completes at least three rounds, stops on its own by one of the stopping rules, and every round appears in the audit log.</p>
+<h3 id="63-why-this-split">6.3 Why This Split</h3>
+<p>Phase 1 is useful by itself. Even without a loop, a user can ask the agent to run a few variations and compare them. It also builds every permission the loop relies on. Phase 2 adds no new permissions: it only adds the objective, stopping rules, and round history on top of Phase 1.</p>
+<h2 id="7-risks-and-tradeoffs">7. Risks and Tradeoffs</h2>
+<ul>
+<li><strong>Results reach the LLM provider.</strong> This is accepted by design for non-sensitive experiments. Sensitive experiments can't enter auto mode.</li>
+<li><strong>Owners may misclassify experiments.</strong> The default is sensitive, so a mistake means marking something non-sensitive on purpose. The audit log records who marked it and when.</li>
+<li><strong>Prompt injection through results.</strong> A result file could contain text that tries to steer the agent. The fixed tool list, session boundary, limits, and the no-delete rule limit what a steered agent can do.</li>
+<li><strong>Less oversight while a session runs.</strong> Offset by the session limits and audit records. The tradeoff is reviewing after the fact instead of approving each action.</li>
+</ul>
+<h2 id="8-proposed-milestones">8. Proposed Milestones</h2>
+<ol>
+<li>Revise the original plan's sections listed in Section 4, after this proposal is approved.</li>
+<li>Build the MCP facade with manual mode as specified in the original plan.</li>
+<li>Phase 1: sensitivity classification, auto sessions, session limits, and audit changes.</li>
+<li>Test end to end with addNums in both modes (original plan §8.1).</li>
+<li>Phase 2: the tuning loop.</li>
+</ol>
+<h2 id="9-questions-for-the-client">9. Questions for the Client</h2>
+<ol>
+<li>Is the owner's own classification enough, or should non-sensitive status be confirmed by an admin or tied to something like IRB status?</li>
+<li>Are the default limits in 5.4 reasonable for the cluster? Should admins be able to set per-user maximums?</li>
+<li>Should the agent be able to read the template's code and <code>trialExtraFile</code> archives, or only the result CSV? Code helps it understand the parameters, but sends more to the provider.</li>
+<li>When a session ends, should running experiments finish or be cancelled?</li>
+<li>Should auto mode be open to all users, or only privileged/admin users at first?</li>
+<li>For non-sensitive experiments, is it acceptable that the LLM provider may retain the data under its own policies?</li>
+</ol>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>
