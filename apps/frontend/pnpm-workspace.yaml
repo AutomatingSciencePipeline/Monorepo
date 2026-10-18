@@ -1,5 +1,0 @@
-strictDepBuilds: true
-
-allowBuilds:
-  sharp: true
-  unrs-resolver: true

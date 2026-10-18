@@ -12,6 +12,7 @@ nav:
   - About GLADOS: about.md
   - Tutorial:
     - Best Practices: tutorial/best_practices.md
+    - Your First Experiment: tutorial/experiment_walkthrough.md
     - Usage: tutorial/usage.md
     - Deployment: tutorial/deployment.md
   - Documentation:
@@ -25,6 +26,7 @@ nav:
     - Used Technologies: infrastructure/used_technologies.md
     - Agentic Implementation Plan: infrastructure/agentic_plan.md
   - Developer Help:
+    - Getting Started From Zero: developerhelp/getting_started_from_zero.md
     - Developer Setup: developerhelp/setup.md
     - Helpful Commands: developerhelp/helpful_commands.md
   - BioAI User Guides:

@@ -7,18 +7,15 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json package-lock.json pnpm-workspace.yaml ./
-RUN npm install -g pnpm@10.33.0
-RUN pnpm import
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Build the application
 FROM base AS builder
-RUN npm install -g pnpm@10.33.0
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm run build
+RUN npm run build
 
 # Prepare the production image
 FROM base AS runner

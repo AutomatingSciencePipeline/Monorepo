@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment } from 'react';
 import { InputSection } from '../../../InputSection';
 //import { formList } from '@mantine/form';
 import { HyperparametersCollection, HyperparameterTypes, IntegerHyperparameter } from '../../../../../lib/db_types';
@@ -78,15 +78,12 @@ export const ParameterOptions = ['integer', 'float', 'bool', 'stringlist', 'para
 
 export const ParamStep = ({ form, confirmedValues, setConfirmedValues, ...props }) => {
 
-	const [text, setText] = useState('');
-	const [permutations, setPermutations] = useState(0);
 	const [debouncedFormValues] = useDebounce(form.values, 300);
-
-	useEffect(() => {
-		const permutations = calcPermutations(debouncedFormValues);
-		setText(permutations !== undefined ? permutations.toString() : 'Permutations Unable to be Calculated');
-		setPermutations(permutations ?? 0);
-	}, [debouncedFormValues, confirmedValues]);
+	const calculatedPermutations = calcPermutations(debouncedFormValues);
+	const permutations = calculatedPermutations ?? 0;
+	const text = calculatedPermutations !== undefined
+		? calculatedPermutations.toString()
+		: 'Permutations Unable to be Calculated';
 
 	return (
 		<div className='h-full flex flex-col space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0'>
