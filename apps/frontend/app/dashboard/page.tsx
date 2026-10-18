@@ -1,7 +1,7 @@
 'use client'
 
 import NewExperiment, { FormStates } from '../components/flows/AddExperiment/NewExperiment';
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Disclosure, Menu, MenuItems, MenuItem, MenuButton, Switch, Transition, TransitionChild } from '@headlessui/react';
 import {
 	CheckBadgeIcon,
@@ -855,16 +855,14 @@ const SortingOptions = {
 const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, searchTerm, experimentStates, setExperimentStates, multiSelectMode, selectedExperiments, setSelectedExperiments, toggleExperimentState, includeCompleted, includeArchived, setIncludeArchived, setIncludeCompleted }: ExperimentListProps) => {
 	// Initial sorting option
 	const [sortBy, setSortBy] = useState(SortingOptions.DATE_UPLOADED_REVERSE);
-	const [sortedExperiments, setSortedExperiments] = useState([...experiments]);
-	const [tags, setTags] = useState<string[]>([]);
 	const [tagsMultipleFilter, setTagsMultipleFilter] = useState<string[]>([]);
 
 	// State of arrow icon
 	const [sortArrowUp, setSortArrowUp] = useState(false);
 	const [selectedSortText, setSelectedSortText] = useState('Date Uploaded');
 
-	useEffect(() => {
-		let newTags = [] as string[];
+	const tags = useMemo(() => {
+		const newTags: string[] = [];
 		for(let k=0; k<experiments.length; k++){
 			if(experiments[k].tags){
 					for(let i=0; i<experiments[k].tags.length; i++){
@@ -874,59 +872,34 @@ const ExperimentList = ({ experiments, onCopyExperiment, onDeleteExperiment, sea
 					}
 				}
 			}
-		setTags(newTags);
+		return newTags;
 	}, [experiments]);
 
 
-	// Sorting functions
-	const sortByName = (a, b) => {
-		return b.name.localeCompare(a.name);
-	};
-	const sortByNameReverse = (a, b) => {
-		return a.name.localeCompare(b.name);
-	};
-	const sortByDateCreated = (a, b) => {
-		return b.startedAtEpochMillis - a.startedAtEpochMillis;
-	};
-	const sortByDateCreatedReverse = (a, b) => {
-		return a.startedAtEpochMillis - b.startedAtEpochMillis;
-	};
-	const sortByDateUploaded = (a, b) => {
-		return a.created - b.created;
-	};
-	const sortByDateUploadedReverse = (a, b) => {
-		return b.created - a.created;
-	};
-
 	// Sort the experiments based on the selected sorting option
-	useEffect(() => {
+	const sortedExperiments = useMemo(() => {
+		const sorted = [...experiments];
 		switch (sortBy) {
 			case SortingOptions.NAME:
-				setSortedExperiments([...experiments].sort(sortByName));
-				break;
+				return sorted.sort((a, b) => b.name.localeCompare(a.name));
 
 			case SortingOptions.NAME_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByNameReverse));
-				break;
+				return sorted.sort((a, b) => a.name.localeCompare(b.name));
 
 			case SortingOptions.DATE_CREATED:
-				setSortedExperiments([...experiments].sort(sortByDateCreated));
-				break;
+				return sorted.sort((a, b) => b.startedAtEpochMillis - a.startedAtEpochMillis);
 
 			case SortingOptions.DATE_CREATED_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByDateCreatedReverse));
-				break;
+				return sorted.sort((a, b) => a.startedAtEpochMillis - b.startedAtEpochMillis);
 
 			case SortingOptions.DATE_UPLOADED:
-				setSortedExperiments([...experiments].sort(sortByDateUploaded));
-				break;
+				return sorted.sort((a, b) => a.created - b.created);
 
 			case SortingOptions.DATE_UPLOADED_REVERSE:
-				setSortedExperiments([...experiments].sort(sortByDateUploadedReverse));
-				break;
+				return sorted.sort((a, b) => b.created - a.created);
 
 			default:
-				break;
+				return sorted;
 		}
 	}, [sortBy, experiments]);
 
