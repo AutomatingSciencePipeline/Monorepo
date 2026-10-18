@@ -8,12 +8,7 @@ WORKDIR /usr/src/app
 # Install dependencies
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm install -g pnpm
-RUN pnpm import
-RUN pnpm install --frozen-lockfile
-
-# Install sharp to optimize images
-RUN pnpm add sharp
+RUN npm ci
 
 ADD . .
 
