@@ -185,8 +185,8 @@ Once the steps above are done, a normal day looks like this.
 2. In the container terminal, check the cluster is up: `minikube status`. If it is stopped, `minikube start`.
 3. `tilt up`, wait for green, open <http://localhost:3000>.
 4. Edit code. Frontend and backend changes sync into the running pods automatically. Runner changes rebuild the runner image and apply to the next experiment you start.
-5. When you are done, `Ctrl+C` in the Tilt terminal, then `tilt down`. This also uninstalls the MongoDB chart and deletes its volume claims, so local experiments do not survive `tilt down`. If you want to keep your data, just stop Tilt with `Ctrl+C` and leave the pods running.
-6. Commit from the container terminal. Branch off `dev` or `main` per [Best Practices](../tutorial/best_practices.md).
+5. When you are done, `Ctrl+C` in the Tilt terminal, then `tilt down`. This also uninstalls the MongoDB chart and deletes its volume claims. The database files themselves stay inside minikube under `/srv/data/mongo-*` (hostPath volumes with the `Retain` policy), so the next `tilt up` normally picks your experiments back up. To start from an empty database, see the hard reset in [Helpful Commands](helpful_commands.md).
+6. Commit from the container terminal. Branch off `main` (there is currently no `dev` branch, despite what older pages say) and open a pull request per [Best Practices](../tutorial/best_practices.md).
 
 ## 9. When things go wrong
 

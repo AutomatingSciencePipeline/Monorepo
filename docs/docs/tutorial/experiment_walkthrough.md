@@ -37,7 +37,7 @@ The form slides in from the right with six steps across the top. Every step has 
 
     ![Information tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-03-information_tab-09_2026.jpg)
 
-2. **Parameters.** Two integer parameters `x` and `y`, each min 1, max 10, step 1, with the "Default?" switch off. The "Expected Permutations" counter in the corner shows 100. To make the first run faster, drop both maxes to 3.
+2. **Parameters.** Two integer parameters `x` and `y`, each min 1, max 10, step 1, with the "Default?" switch off. The "Expected Permutations" counter in the corner shows 100. Keep the full 10×10 run: the timings and the chart check below assume 100 trials, and it only takes a few seconds.
 
     ![Parameters tab](https://raw.githubusercontent.com/AutomatingSciencePipeline/Monorepo/refs/heads/main/docs/images/walkthrough-04-parameters_tab-09_2026.jpg)
 
@@ -81,7 +81,7 @@ Timing from a real local run of this experiment on a laptop, measured on 2026-09
 |-------|------|
 | Awaiting Start (runner pod pulling image and starting) | about 50 s the first time, a few seconds after that |
 | Running 100 trials | 3.55 s |
-| Runner pod deleted after finishing | about 60 s later |
+| Runner Job and pod deleted after finishing | about 60 s later |
 
 "Awaiting Start" is long on the first run because the runner container has to be created. If it sits there for several minutes, something failed silently. Jump to [Part 3](#part-3-when-it-goes-wrong).
 
@@ -151,7 +151,7 @@ kubectl get jobs
 kubectl get pods
 ```
 
-You will see a job and a pod both named `runner-<expId>`. The pod uses the `runner` image that Tilt built from `apps/runner`. It is deleted automatically about 60 seconds after it finishes, so look quickly or read the uploaded log instead.
+You will see a job and a pod both named `runner-<expId>`. The pod uses the `runner` image that Tilt built from `apps/runner`. The whole Job (and its pod) is deleted automatically about 60 seconds after it finishes (`ttlSecondsAfterFinished: 60` in `apps/backend/job-runner.yaml`). After that, `kubectl get jobs` no longer lists it and `kubectl logs job/runner-<expId>` fails, so look quickly or read the uploaded log instead.
 
 ### 2.3 The runner does all the work
 
@@ -184,11 +184,12 @@ INFO | glados.experiment | Running Trial 2
 ...
 ```
 
-Trials 0, 2, 4, 3, 1 start in that order in the real log, which is the process pool at work. The Python 3.9 end-of-life warnings at the top of the log are from the Google auth library and are harmless.
 6. Launches every trial at once in a process pool. Trial `n` runs in its own folder `trial<n>` as `python ../addNums.py ../configFiles/<n>.ini`, with the timeout from the form. Standard output and error go to `ResCsvs/log<n>.txt`.
 7. After each trial, reads line `Trial Result Line Number` of `trial<n>/AddNumResult.csv` and appends it, plus that trial's parameter values, to `results.csv`.
 8. Uploads `results.csv` to GridFS bucket `resultsBucket` and a zip of configs, logs, and extra files to `zipsBucket`.
 9. Sets `finished: true` and `status: "COMPLETED"`, uploads its own log to `logsBucket`, and deletes its working directory.
+
+Trials 0, 2, 4, 3, 1 start in that order in the real log, which is the process pool at work. The Python 3.9 end-of-life warnings at the top of the log are from the Google auth library and are harmless.
 
 ### 2.4 Poking at the database
 

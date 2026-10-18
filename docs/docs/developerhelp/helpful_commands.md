@@ -15,7 +15,7 @@ minikube status                 # cluster up? if "host does not exist", run ./.d
 minikube start                  # start a stopped cluster
 tilt up                         # build + deploy everything, UI at http://localhost:10350
 tilt trigger glados-backend     # rebuild/restart one resource (also: glados-frontend, glados-mongodb, runner)
-tilt down                       # tear down; also uninstalls MongoDB and deletes its volumes
+tilt down                       # tear down; uninstalls MongoDB and deletes its volume claims (data files stay in minikube)
 ```
 
 ### Look at what is running
