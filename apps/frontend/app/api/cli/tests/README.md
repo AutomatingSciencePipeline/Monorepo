@@ -12,11 +12,11 @@ The CLI tests run on Node.js 20 or later. They execute the actual TypeScript aut
 
 Coverage includes first-time and existing users, authentication refusals before data access, owner/shared-user visibility, malformed arguments, and successful CLI response compatibility.
 
-`npm test` runs both the Auth.js regression suite (`npm run test:auth`) and this CLI suite. Start an isolated local MongoDB instance and set its URI before running all tests:
+`npm test` runs the GitHub and Google Auth.js regression suites, followed by this CLI suite. The OAuth suites can also run separately with `npm run test:auth` and `npm run test:google-auth`. Start an isolated local MongoDB instance and set its URI before running all tests:
 
 ```powershell
 $env:GLADOS_AUTH_TEST_MONGODB_URI = 'mongodb://127.0.0.1:27017/'
 npm test
 ```
 
-The Auth.js suite requires a credential-free loopback MongoDB URI, creates a random `glados_auth_test_*` database, and drops that database after testing. A missing URI fails the run. It exercises the real Auth.js OAuth flow and MongoDB adapter with synthetic GitHub responses; no GitHub credentials are required. See [the Auth.js test README](../../../../tests/README.md) for coverage and setup details. The frontend CI workflow provides the isolated MongoDB service and runs both suites through `npm test`.
+The Auth.js suites require a credential-free loopback MongoDB URI, create random `glados_auth_test_*` and `glados_google_test_*` databases, and drop those databases after testing. A missing URI fails the run. They exercise the real Auth.js OAuth flows and MongoDB adapter with synthetic provider responses; no GitHub or Google credentials are required. See the [GitHub Auth.js test README](../../../../tests/README.md) and [Google authentication test README](../../../../tests/GOOGLE-AUTH.md) for coverage and setup details. The frontend CI workflow provides the isolated MongoDB service and runs all three suites through `npm test`.
