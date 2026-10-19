@@ -8,9 +8,10 @@
 		"start": "next start",
 		"lint": "eslint .",
 		"type-check": "next typegen && tsc --noEmit",
-		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs",
+		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs tests/agentAudit.test.mjs",
 		"test:auth": "node --test tests/auth.test.mjs",
-		"test:google-auth": "node --test tests/google-auth.test.mjs"
+		"test:google-auth": "node --test tests/google-auth.test.mjs",
+		"test:agent-audit": "node --test tests/agentAudit.test.mjs"
 	},
 	"dependencies": {
 		"@auth/mongodb-adapter": "^3.7.2",
