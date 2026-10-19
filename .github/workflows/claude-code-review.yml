@@ -1,0 +1,362 @@
+# Diff-only Claude code review: one Anthropic API call per push, posted as a single PR comment
+# that is updated on later pushes. Adapted from rhventures/claude-codereviews (V10).
+# Requires the ANTHROPIC_API_KEY repository secret. Review instructions live in .github/review.md.
+
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security-review:
+    name: Claude Code Review
+    # Fork PRs get no secrets and a read-only token, so they cannot be reviewed
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get diff of changed files
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD \
+            -- \
+            '*.js' '*.ts' '*.tsx' '*.jsx' '*.mjs' '*.cjs' \
+            '*.py' '*.pyw' '*.pyi' \
+            '*.cs' '*.fs' '*.fsx' '*.vb' \
+            '*.java' '*.kt' '*.kts' '*.scala' '*.groovy' \
+            '*.go' '*.rs' '*.swift' '*.m' '*.mm' \
+            '*.rb' '*.rake' '*.gemspec' \
+            '*.php' '*.phtml' \
+            '*.cpp' '*.cc' '*.cxx' '*.c' '*.h' '*.hpp' '*.hxx' \
+            '*.vue' '*.svelte' '*.astro' \
+            '*.html' '*.htm' '*.xhtml' \
+            '*.css' '*.scss' '*.sass' '*.less' '*.styl' \
+            '*.json' '*.jsonc' '*.json5' \
+            '*.yml' '*.yaml' \
+            '*.toml' '*.ini' '*.cfg' '*.conf' '*.env.example' \
+            '*.xml' '*.xsl' '*.xslt' '*.wsdl' \
+            '*.sh' '*.bash' '*.zsh' '*.fish' '*.ps1' '*.psm1' '*.psd1' \
+            '*.tf' '*.tfvars' '*.hcl' \
+            '*.graphql' '*.gql' \
+            '*.prisma' \
+            '*.sql' \
+            '*.dart' \
+            '*.lua' \
+            '*.r' '*.R' \
+            'Dockerfile' 'Dockerfile.*' '*.dockerfile' \
+            'Makefile' 'Rakefile' 'Gemfile' 'Podfile' \
+            > raw_diff.txt
+
+          python3 - << 'PYEOF'
+          import re
+
+          with open("raw_diff.txt", "r", encoding="utf-8", errors="ignore") as f:
+              raw = f.read()
+
+          autogen_patterns = [
+              ".Designer.cs", ".designer.cs",
+              "Migrations/", "migrations/",
+              ".g.cs", ".generated.", ".auto.",
+              "AssemblyInfo.cs", "GlobalUsings.g.cs",
+              "Scaffold",
+              ".dbml",
+              "__pycache__/",
+              ".pyc",
+              "alembic/versions/",
+              "migrations/versions/",
+              "_pb2.py",
+              "_pb2_grpc.py",
+              ".egg-info/",
+              ".d.ts",
+              "__generated__/",
+              ".generated.ts",
+              ".generated.tsx",
+              ".generated.js",
+              "node_modules/",
+              "/dist/",
+              "/build/",
+              "/.next/",
+              "/.nuxt/",
+              "/out/",
+              "/coverage/",
+              "storybook-static/",
+              ".pb.go",
+              ".pb.swift",
+              ".pb.cs",
+              "_grpc.pb.go",
+              ".grpc.swift",
+              ".terraform/",
+              ".terraform.lock.hcl",
+              "gql/__generated__",
+              "graphql/__generated__",
+              "package-lock.json",
+              "npm-shrinkwrap.json",
+              "pnpm-lock.yaml",
+              "packages.lock.json",
+              "composer.lock",
+              ".min.js",
+              ".min.css",
+          ]
+
+          chunks = re.split(r'(?=^diff --git )', raw, flags=re.MULTILINE)
+          kept = []
+          skipped = []
+          for chunk in chunks:
+              if not chunk.strip():
+                  continue
+              header = chunk.split("\n", 1)[0]
+              is_autogen = any(p in header for p in autogen_patterns)
+              if is_autogen:
+                  match = re.search(r'diff --git a/(\S+)', header)
+                  skipped.append(match.group(1) if match else "unknown")
+              else:
+                  kept.append(chunk)
+
+          filtered = "".join(kept)
+          with open("code_diff.txt", "w", encoding="utf-8") as f:
+              f.write(filtered)
+
+          print("Kept " + str(len(kept)) + " file diffs, skipped " + str(len(skipped)) + " auto-generated: " + str(skipped))
+          PYEOF
+
+          echo "Diff size: $(wc -c < code_diff.txt) bytes"
+
+      - name: Find existing bot comment
+        id: find_comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, urllib.request
+
+          repo  = os.environ["REPO"]
+          pr    = os.environ["PR_NUMBER"]
+          token = os.environ["GITHUB_TOKEN"]
+          page  = 1
+          comment_id = ""
+
+          while True:
+              url = "https://api.github.com/repos/" + repo + "/issues/" + pr + "/comments?per_page=100&page=" + str(page)
+              req = urllib.request.Request(url, headers={
+                  "Authorization": "Bearer " + token,
+                  "Accept": "application/vnd.github+json"
+              })
+              with urllib.request.urlopen(req) as resp:
+                  comments = json.loads(resp.read())
+              if not comments:
+                  break
+              for c in comments:
+                  if c.get("body", "").startswith("## Claude Code Review") and c.get("user", {}).get("login") == "github-actions[bot]":
+                      comment_id = str(c["id"])
+                      break
+              if comment_id or len(comments) < 100:
+                  break
+              page += 1
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write("comment_id=" + comment_id + "\n")
+
+          print("Existing comment ID: " + (comment_id or "none"))
+          PYEOF
+
+      - name: Run Claude Code Review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - << 'PYEOF'
+          import hashlib, json, os, re, urllib.request, urllib.error
+
+          with open("code_diff.txt", "r", encoding="utf-8", errors="ignore") as fh:
+              raw = fh.read()
+
+          autogen_patterns = [
+              ".Designer.cs", ".designer.cs",
+              "Migrations/", "migrations/",
+              ".g.cs", ".generated.", ".auto.",
+              "AssemblyInfo.cs", "GlobalUsings.g.cs",
+              "scaffolding", "Scaffold",
+          ]
+          chunks = re.split(r"(?=^diff --git )", raw, flags=re.MULTILINE)
+          kept = [c for c in chunks if c.strip() and not any(p in c[:300] for p in autogen_patterns)]
+          diff = "".join(kept)
+
+          PER_FILE_LIMIT = 10000
+          MAX_CHARS = 80000
+          truncated = False
+
+          file_chunks = re.split(r"(?=^diff --git )", diff, flags=re.MULTILINE)
+          capped_chunks = []
+          for chunk in file_chunks:
+              if not chunk.strip():
+                  continue
+              if len(chunk) > PER_FILE_LIMIT:
+                  chunk = chunk[:PER_FILE_LIMIT] + "\n... [FILE DIFF TRUNCATED AT 10,000 CHARS]\n"
+                  truncated = True
+              capped_chunks.append(chunk)
+          diff = "".join(capped_chunks)
+
+          if len(diff) > MAX_CHARS:
+              diff = diff[:MAX_CHARS] + "\n... [TOTAL DIFF TRUNCATED AT 80,000 CHARS]"
+              truncated = True
+
+          if not diff.strip():
+              with open("review_output.md", "w") as fh:
+                  fh.write("## Claude Code Review\n\nNo reviewable code changes detected in this PR.")
+              exit(0)
+
+          # Build full list of changed file paths from the diff headers
+          repo     = os.environ.get("REPO", "")
+          pr_num   = os.environ["PR_NUMBER"]
+          base_url = "https://github.com/" + repo + "/pull/" + pr_num + "/files"
+
+          changed_paths = []
+          for m in re.finditer(r'diff --git a/\S+ b/(\S+)', raw):
+              if m.group(1) not in changed_paths:
+                  changed_paths.append(m.group(1))
+
+          # Pre-build a ready-to-use markdown link for each file. We hand these
+          # to Claude so it can paste the correct link straight into the table.
+          def make_md_link(full_path):
+              file_hash = hashlib.sha256(full_path.encode()).hexdigest()
+              return "[" + full_path + "](" + base_url + "#diff-" + file_hash + ")"
+
+          link_reference = "\n".join(
+              "- `" + p + "` -> " + make_md_link(p) for p in changed_paths
+          )
+
+          review_md_path = ".github/review.md"
+          if os.path.exists(review_md_path):
+              with open(review_md_path, "r", encoding="utf-8") as fh:
+                  custom_prompt = fh.read().strip()
+          else:
+              custom_prompt = (
+                  "Find syntax errors. Identify potential security vulnerabilities "
+                  "(e.g., injection risks, insecure dependencies, secrets, misconfigurations). "
+                  "Suggest improvements. Be concise but thorough.\n\n"
+                  "For deleted code (lines starting with '-'): only report a finding if the deletion "
+                  "itself breaks the remaining code (e.g., a removed function is still called elsewhere). "
+                  "Never report flaws that existed in the removed code, and never output findings that "
+                  "conclude the removal is correct or an improvement - a correct change is not a finding.\n\n"
+                  "Present all findings in a markdown table with columns: # | Category | File | Line(s) | Issue\n"
+                  "Category must be one of: Syntax Error, Security, Improvement, Dead Code\n"
+                  "For the Line(s) column: always include a single exact line number from the diff. Never leave this blank and never give a range.\n"
+                  "For the Issue column: be specific about what variable/function/value is affected and why it is a problem.\n"
+                  "After the table, one line only: Clean / Minor Issues / Needs Work / Critical Problems\n"
+                  "If nothing found, respond with only: No issues detected."
+              )
+
+          link_instructions = (
+              "IMPORTANT - File column formatting:\n"
+              "In the File column of your table, you MUST use the exact pre-built markdown "
+              "link for that file from the reference list below. Copy the link verbatim. "
+              "Do NOT write the filename as plain text - always use its markdown link.\n\n"
+              "File link reference (use the right-hand side in the File column):\n"
+              + link_reference + "\n"
+          )
+
+          prompt = (
+              "Review the following code diff from a pull request titled: " + os.environ["PR_TITLE"] + "\n\n"
+              + custom_prompt + "\n\n"
+              + link_instructions + "\n"
+              "## Diff:\n```diff\n" + diff + "\n```"
+          )
+
+          api_payload = {
+              "model": "claude-sonnet-5-5",
+              "max_tokens": 4096,
+              "messages": [{"role": "user", "content": prompt}]
+          }
+
+          req = urllib.request.Request(
+              "https://api.anthropic.com/v1/messages",
+              data=json.dumps(api_payload).encode(),
+              headers={
+                  "Content-Type": "application/json",
+                  "x-api-key": os.environ["ANTHROPIC_API_KEY"],
+                  "anthropic-version": "2023-06-01"
+              },
+              method="POST"
+          )
+
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  data = json.loads(resp.read())
+              review = data["content"][0]["text"]
+          except urllib.error.HTTPError as e:
+              review = "API error: " + str(e.code) + " " + str(e.reason) + "\n\nPlease check your ANTHROPIC_API_KEY secret."
+
+          trunc_note = "\n> NOTE: Diff was truncated to 80,000 chars. Some files may not be fully reviewed.\n" if truncated else ""
+
+          output = (
+              "## Claude Code Review\n\n"
+              "> Automated review powered by Claude. Read-only. PR proceeds regardless of findings.\n"
+              + trunc_note + "\n"
+              + review + "\n\n"
+              "---\n"
+              "*PR #" + pr_num + "*"
+          )
+
+          with open("review_output.md", "w") as fh:
+              fh.write(output)
+
+          print("Review complete.")
+          PYEOF
+
+      - name: Post or update review comment on PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          EXISTING_COMMENT_ID: ${{ steps.find_comment.outputs.comment_id }}
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, urllib.request
+
+          with open("review_output.md") as fh:
+              body = fh.read()
+
+          token    = os.environ["GITHUB_TOKEN"]
+          repo     = os.environ["REPO"]
+          pr       = os.environ["PR_NUMBER"]
+          existing = os.environ.get("EXISTING_COMMENT_ID", "").strip()
+
+          headers = {
+              "Authorization": "Bearer " + token,
+              "Accept": "application/vnd.github+json",
+              "Content-Type": "application/json"
+          }
+
+          payload = json.dumps({"body": body}).encode()
+
+          if existing:
+              url    = "https://api.github.com/repos/" + repo + "/issues/comments/" + existing
+              method = "PATCH"
+              action = "Updated"
+          else:
+              url    = "https://api.github.com/repos/" + repo + "/issues/" + pr + "/comments"
+              method = "POST"
+              action = "Created"
+
+          req = urllib.request.Request(url, data=payload, headers=headers, method=method)
+
+          with urllib.request.urlopen(req) as resp:
+              print(action + " comment: HTTP " + str(resp.status))
+          PYEOF
