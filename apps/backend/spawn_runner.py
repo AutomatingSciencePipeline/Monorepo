@@ -26,6 +26,8 @@ def create_job_object(experiment_data):
         # Get the image name
         image_name = str(os.getenv("IMAGE_RUNNER"))
         runner_body['spec']['template']['spec']['containers'][0]['image'] = image_name
+        # The dev image is built locally by Tilt and doesn't exist in a registry, so don't try to pull it
+        runner_body['spec']['template']['spec']['containers'][0]['imagePullPolicy'] = "IfNotPresent"
 
     return runner_body
 
