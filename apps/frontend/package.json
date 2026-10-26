@@ -8,9 +8,10 @@
 		"start": "next start",
 		"lint": "eslint .",
 		"type-check": "next typegen && tsc --noEmit",
-		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs && npm run test:cli",
+		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs tests/agentAudit.test.mjs && npm run test:cli",
 		"test:auth": "node --test tests/auth.test.mjs",
 		"test:google-auth": "node --test tests/google-auth.test.mjs",
+		"test:agent-audit": "node --test tests/agentAudit.test.mjs",
 		"test:cli": "node --test app/api/cli/tests/token-auth.test.cjs app/api/cli/tests/routes.test.cjs app/api/cli/tests/integration.test.cjs"
 	},
 	"dependencies": {
