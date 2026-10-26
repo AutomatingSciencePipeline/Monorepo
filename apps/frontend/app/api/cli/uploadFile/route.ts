@@ -4,7 +4,7 @@ import formidable, { Files, Fields } from 'formidable';
 import { Readable } from 'stream';
 import fs from 'fs';
 import { NextResponse } from 'next/server';
-import { tokenBasedAuth } from "../../../../tokenAuth";
+import { authenticateCli, isNonEmptyString } from '../request';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -25,17 +25,18 @@ export async function POST(req: Request) {
   const userToken = Array.isArray(fields.userToken) ? fields.userToken[0] : fields.userToken;
   const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
-  if (!file || !userToken) {
+  if (!file || !isNonEmptyString(file.filepath) || !isNonEmptyString(userToken)) {
     return NextResponse.json(
-      { message: "File or userId missing" },
+      { message: "File or userToken missing" },
       { status: 400 }
     );
   }
 
+  const auth = await authenticateCli(userToken);
+  if (!auth.user) return auth.response;
+
   try {
-    const resp = await tokenBasedAuth(String(userToken));
-    const user = await resp.json();
-    const userId = user["_id"];
+    const userId = auth.user._id;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
