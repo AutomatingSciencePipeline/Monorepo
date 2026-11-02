@@ -1,6 +1,7 @@
 import csv
 import os
 import tempfile
+import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from unittest import mock
@@ -39,13 +40,13 @@ class TestConductExperiment(unittest.TestCase):
         os.chdir(self.originalDir)
         self.tempDir.cleanup()
 
-    def _make_experiment(self, numTrials: int):
+    def _make_experiment(self, numTrials: int, configFileFormat: str = "ini", extraParams: "dict | None" = None):
         params = parseRawHyperparameterData([{"name": "x", "default": "1", "min": "1", "max": "2", "step": "1", "type": "integer", "useDefault": False}])
-        configs = {f"config{n}": ConfigData(data={"x": str(n)}) for n in range(numTrials)}
+        configs = {f"config{n}": ConfigData(data={"x": str(n), **(extraParams or {})}) for n in range(numTrials)}
         experiment = ExperimentData(
             expId="exp", creator="user", creatorRole="user", creatorEmail="user@example.com",
             trialExtraFile="", trialResult=RESULT_FILE, trialResultLineNumber=1, timeout=5, sendEmail=False,
-            scatter=True, scatterIndVar="x", scatterDepVar="sum", dumbTextArea="", configFileFormat="ini", hyperparameters=params,
+            scatter=True, scatterIndVar="x", scatterDepVar="sum", dumbTextArea="", configFileFormat=configFileFormat, hyperparameters=params,
             configs=configs, experimentType=ExperimentType.PYTHON, totalExperimentRuns=numTrials,
         )
         return experiment
@@ -110,6 +111,75 @@ class TestConductExperiment(unittest.TestCase):
 
         self.assertEqual((experiment.passes, experiment.fails, experiment.status), (2, 0, "COMPLETED"))
         self.assertEqual(self._read_results()[1:], [["0", "10", "0"], ["1", "11", "1"]])
+
+    def test_failed_config_generation_row_matches_header(self):
+        experiment = self._make_experiment(3, extraParams={"y": "7"})
+        self._fake_trials({0: "ok", 1: "ok", 2: "ok"})
+        realCreateConfig = runner.create_config_from_data
+
+        def create_config_failing_trial_0(exp, trialNum):
+            if trialNum == 0:
+                raise OSError("disk full")
+            return realCreateConfig(exp, trialNum)
+
+        with mock.patch.object(runner, "create_config_from_data", side_effect=create_config_failing_trial_0), \
+                self.assertLogs(runner.explogger, level="ERROR"):
+            runner.conduct_experiment(experiment)
+
+        self.assertEqual((experiment.passes, experiment.fails, experiment.status), (2, 1, "COMPLETED"))
+        rows = self._read_results()
+        self.assertEqual(rows, [
+            ["Experiment Run", "sum", "x", "y"],
+            ["0", "ERROR", "", ""],
+            ["1", "11", "1", "7"],
+            ["2", "12", "2", "7"],
+        ])
+
+    def test_trial_does_not_read_trial_0_config(self):
+        # Trial 0 may not have written its config yet when another worker runs, so trial 1 must not depend on it
+        for configFileFormat in ("ini", "yaml"):
+            with self.subTest(configFileFormat=configFileFormat):
+                os.mkdir(configFileFormat)
+                os.chdir(configFileFormat)
+                os.mkdir('configFiles')
+                experiment = self._make_experiment(2, configFileFormat=configFileFormat)
+                self._fake_trials({1: "ok"})
+
+                outcome = runner._run_trial_wrapper(experiment, 1)
+
+                os.chdir('..')
+                self.assertTrue(outcome["ok"], outcome["error"])
+                if configFileFormat == "ini":
+                    self.assertEqual(outcome["configs"], {"x": "1"})
+
+
+class TestRunTrialTimeout(unittest.TestCase):
+    """Runs a real trial subprocess that hangs past its timeout"""
+
+    def setUp(self):
+        self.originalDir = os.getcwd()
+        self.tempDir = tempfile.TemporaryDirectory()
+        os.chdir(self.tempDir.name)
+        os.mkdir('ResCsvs')
+        with open('hang.py', 'w', encoding="utf8") as file:
+            file.write("import time\ntime.sleep(60)\n")
+
+    def tearDown(self):
+        os.chdir(self.originalDir)
+        self.tempDir.cleanup()
+
+    def test_timeout_kills_trial_and_restores_cwd(self):
+        experiment = mock.Mock(experimentType=ExperimentType.PYTHON, file="hang.py", timeout=1)
+        experimentDir = os.getcwd()
+        start = time.monotonic()
+
+        with self.assertRaises(TrialTimeoutError), self.assertLogs(runner.explogger, level="ERROR"):
+            runner._run_trial(experiment, "../configFiles/0.ini", 0)
+
+        # The worker is reused for later trials, so it must be back in the experiment folder
+        self.assertEqual(os.getcwd(), experimentDir)
+        # The hung process was killed instead of waited on for the full 60 seconds
+        self.assertLess(time.monotonic() - start, 15)
 
 
 

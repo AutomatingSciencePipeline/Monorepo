@@ -42,29 +42,36 @@ def _get_data(process: 'Popen[str]', trialRun: int, trialTimeout: int):
             raise InternalTrialFailedError(errorMessage)
     except TimeoutExpired as timeErr:
         explogger.error(f"{timeErr} Trial timed out")
+        # Kill the hung trial so the worker can move on; otherwise the Popen context manager waits for it forever
+        process.kill()
+        process.communicate()
         raise TrialTimeoutError("Trial took too long to complete") from timeErr
     except Exception as err:
-        explogger.error("Encountered another exception while reading pipe: {err}")
+        explogger.error(f"Encountered another exception while reading pipe: {err}")
         raise InternalTrialFailedError("Encountered another exception while reading pipe") from err
 
 
 def _run_trial(experiment: ExperimentData, config_path: str, trialRun: int):
     """
-    make sure that the cwd is ExperimentsFiles/{ExperimentId}/trial{trialNum}
+    Call this function when inside the experiment folder; the trial runs in trial{trialNum}.
+    The cwd is always restored, because worker processes are reused for later trials even after this one fails.
     """
-    # set the paths
-    os.mkdir(f'trial{trialRun}')
-    os.chdir(f'trial{trialRun}')
-    if experiment.experimentType == ExperimentType.PYTHON:
-        with Popen(['python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            _get_data(process, trialRun, experiment.timeout)
-    elif experiment.experimentType == ExperimentType.JAVA:
-        with Popen(['java', '-jar', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            _get_data(process, trialRun, experiment.timeout)
-    elif experiment.experimentType == ExperimentType.C:
-        Popen(['chmod', '+x', "../" + experiment.file], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8')
-        with Popen(['../' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
-            _get_data(process, trialRun, experiment.timeout)
+    experimentDir = os.getcwd()
+    try:
+        os.mkdir(f'trial{trialRun}')
+        os.chdir(f'trial{trialRun}')
+        if experiment.experimentType == ExperimentType.PYTHON:
+            with Popen(['python', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+                _get_data(process, trialRun, experiment.timeout)
+        elif experiment.experimentType == ExperimentType.JAVA:
+            with Popen(['java', '-jar', "../" + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+                _get_data(process, trialRun, experiment.timeout)
+        elif experiment.experimentType == ExperimentType.C:
+            Popen(['chmod', '+x', "../" + experiment.file], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8')
+            with Popen(['../' + experiment.file, config_path], stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='utf8') as process:
+                _get_data(process, trialRun, experiment.timeout)
+    finally:
+        os.chdir(experimentDir)
 
 
 def _get_line_n_of_trial_results_csv(targetLineNumber: int, filename: str):
@@ -108,19 +115,23 @@ def _add_to_output_batch(trialExtraFile: str, ExpRun: int):
         raise FileHandlingError("Failed to copy results csv. Maybe there was a typo in the filepath?") from err
    
     
-def _get_param_names(experiment: ExperimentData):
+def _read_trial_configs(experiment: ExperimentData, trialNum: int):
+    """
+    Returns {paramName: value} for this trial, read from the trial's own config file.
+    Other trials' files are not read because they may not have been written yet by another worker.
+    """
     if(experiment.configFileFormat == "yaml"):
-        return get_config_paramNames_yaml('configFiles/0.yaml')
-    return get_config_paramNames_ini('configFiles/0.ini')
+        configFile = f'configFiles/{trialNum}.yaml'
+        paramNames = get_config_paramNames_yaml(configFile)
+        values = get_configs_ordered_yaml(configFile, paramNames)
+    else:
+        configFile = f'configFiles/{trialNum}.ini'
+        paramNames = get_config_paramNames_ini(configFile)
+        values = get_configs_ordered_ini(configFile, paramNames)
+    return dict(zip(paramNames, values))
 
 
-def _get_ordered_configs(experiment: ExperimentData, trialNum: int, paramNames: "list"):
-    if(experiment.configFileFormat == "yaml"):
-        return get_configs_ordered_yaml(f'configFiles/{trialNum}.yaml', paramNames)
-    return get_configs_ordered_ini(f'configFiles/{trialNum}.ini', paramNames)
-
-
-def _failed_outcome(trialNum: int, err: BaseException, configs: "list"):
+def _failed_outcome(trialNum: int, err: BaseException, configs: "dict"):
     return {
         "trialNum": trialNum,
         "ok": False,
@@ -137,7 +148,7 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
     so that the parent process is the single source of truth for pass/fail counts.
     """
     explogger.info(f"Running Trial {trialNum}")
-    configs = []
+    configs = {}
 
     try:
         try:
@@ -145,7 +156,7 @@ def _run_trial_wrapper(experiment: ExperimentData, trialNum: int):
                 configFileName = create_yaml_from_data(experiment, trialNum)
             else:
                 configFileName = create_config_from_data(experiment, trialNum)
-            configs = _get_ordered_configs(experiment, trialNum, _get_param_names(experiment))
+            configs = _read_trial_configs(experiment, trialNum)
         except Exception as err:
             raise GladosInternalError(f"Failed to generate config {trialNum} file") from err
 
@@ -187,7 +198,7 @@ def conduct_experiment(experiment: ExperimentData):
             except Exception as err:  # pylint: disable=broad-exception-caught
                 # The worker process itself failed, count it as a failed trial
                 _log_trial_error(futures[future], err)
-                outcome = _failed_outcome(futures[future], err, [])
+                outcome = _failed_outcome(futures[future], err, {})
             outcomes.append(outcome)
             # Counts are aggregated here in the parent; each worker process only has its own copy of the experiment
             if outcome["ok"]:
@@ -210,17 +221,20 @@ def _write_results_csv(experiment: ExperimentData, outcomes: "list"):
         explogger.error("Every trial failed, not producing results.csv")
         return
 
-    paramNames = _get_param_names(experiment)
+    # Every trial has the same parameters, so the header uses the names from a trial whose config was read
+    paramNames = list(firstSuccess["configs"].keys())
     csvHeader = _get_line_n_of_trial_results_csv(0, f"trial{firstSuccess['trialNum']}/" + experiment.trialResult)
     numOutputs = len(csvHeader)
     with open('results.csv', 'w', encoding="utf8") as expResults:
         writer = csv.writer(expResults)
         writer.writerow(["Experiment Run"] + csvHeader + paramNames)
         for outcome in outcomes:
+            # Failed trials may have no configs (config generation or the worker failed), so missing values are left blank
+            configValues = [outcome["configs"].get(name, "") for name in paramNames]
             if outcome["ok"]:
-                writer.writerow([outcome["trialNum"]] + outcome["output"] + outcome["configs"])
+                writer.writerow([outcome["trialNum"]] + outcome["output"] + configValues)
             else:
-                writer.writerow([outcome["trialNum"]] + [outcome["errorValue"] for i in range(numOutputs)] + outcome["configs"])
+                writer.writerow([outcome["trialNum"]] + [outcome["errorValue"]] * numOutputs + configValues)
 
 
 def _log_trial_error(trialNum: int, err: BaseException):
