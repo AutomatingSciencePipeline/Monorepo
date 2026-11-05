@@ -254,8 +254,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						{project.finished && project.status !== 'CANCELLED' ? (
 							project.status === 'ARCHIVED' ? (
 								'Experiment Archived'
-							) : failures <= 1 && successes === 0 ? (
-								'Experiment Aborted'
+							) : project.status === 'FAILED' || successes === 0 ? (
+								'Experiment Failed'
 							) : (
 								'Experiment Completed'
 							)
@@ -285,8 +285,8 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 						{project.finished && project.status !== 'CANCELLED' ? (
 							project.status === 'ARCHIVED' ? (
 								'Experiment Archived'
-							) : failures <= 1 && successes === 0 ? (
-								'Experiment Aborted'
+							) : project.status === 'FAILED' || successes === 0 ? (
+								'Experiment Failed'
 							) : (
 								'Experiment Completed'
 							)
@@ -326,7 +326,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) : null}
 
 					{/* Runs Left */}
-					{runsLeft !== null && project.status !== "COMPLETED" && runsLeft > 0 ? (
+					{runsLeft !== null && project.status !== "COMPLETED" && project.status !== "FAILED" && runsLeft > 0 ? (
 						<p className="text-sm font-mono text-gray-500">
 							{`${runsLeft} run${runsLeft === 1 ? '' : 's'} remain${runsLeft === 1 ? 's' : ''} (of ${project.totalExperimentRuns})`}
 						</p>
@@ -354,7 +354,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					) : null}
 
 					{/* Total Time */}
-					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && project.status === 'COMPLETED' ? (
+					{project.finishedAtEpochMilliseconds && project.startedAtEpochMillis && (project.status === 'COMPLETED' || project.status === 'FAILED') ? (
 						<p className="text-sm font-mono text-gray-500">
 							Total Time: {formattedTotalTime(project)}
 						</p>
@@ -391,7 +391,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					<div className="inline-flex items-center justify-center cursor-pointer hover:opacity-80">
 						{isClosed ? (
 							<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
-								{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
+								{project.status == 'COMPLETED' || project.status == 'FAILED' || project.status == 'ARCHIVED' ?
 									(<ChevronRightIcon
 										onClick={toggleState} // Toggle to open
 										className="h-5 w-5 text-gray-400"
@@ -435,7 +435,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							</span>
 						) :
 							(<span className='text-sm font-medium' style={{ display: 'flex', alignItems: 'center' }}>
-								{project.status == 'COMPLETED' || project.status == 'ARCHIVED' ?
+								{project.status == 'COMPLETED' || project.status == 'FAILED' || project.status == 'ARCHIVED' ?
 									(<ChevronDownIcon
 										onClick={toggleState} // Toggle to close
 										className="h-5 w-5 text-gray-400"
@@ -618,7 +618,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 							</button> : null
 					}
 					{
-						project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
+						project.status != 'COMPLETED' && project.status != 'FAILED' && project.status != 'ARCHIVED' ?
 							<button type="button"
 								className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full"
 								onClick={() => {
@@ -685,7 +685,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 					}
 
 					{
-						project.status != 'COMPLETED' && project.status != 'ARCHIVED' ?
+						project.status != 'COMPLETED' && project.status != 'FAILED' && project.status != 'ARCHIVED' ?
 							(project.creator == session?.user?.id! && project.status != 'CANCELLED' ?
 								<button
 									type="button"
@@ -718,7 +718,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								</button> : null)
 					}
 					{
-						project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'CANCELLED' && project.status != 'ARCHIVED' &&
+						project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'FAILED' && project.status != 'CANCELLED' && project.status != 'ARCHIVED' &&
 						<button type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full'
 							onClick={() => {
@@ -781,7 +781,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 w-full`}
 								onClick={() => {
 									const newArchiveStatus = project.status !== 'ARCHIVED';
-									const newStatus = newArchiveStatus ? 'ARCHIVED' : 'COMPLETED';
+									const newStatus = newArchiveStatus ? 'ARCHIVED' : (project.passes ? 'COMPLETED' : 'FAILED');
 									handleArchiveStatus(newStatus);
 								}}
 							>
