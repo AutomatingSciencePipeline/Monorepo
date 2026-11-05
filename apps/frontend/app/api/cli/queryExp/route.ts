@@ -1,75 +1,39 @@
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/mongodb';
 import { WithId, Document } from 'mongodb';
-import { NextRequest } from 'next/server';
-import { NextResponse } from "next/server";
-import { tokenBasedAuth } from '../../../../tokenAuth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authenticateCli, invalidArguments, isNonEmptyString, readJsonObject } from '../request';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-    const experiment_req = await req.json();
+    const experiment_req = await readJsonObject(req);
 
-    if (!experiment_req || !experiment_req ["token"] || !experiment_req["exp_title"]){
-        return new Response('Other', { status: 400 });
+    if (!experiment_req || !isNonEmptyString(experiment_req.token) || !isNonEmptyString(experiment_req.exp_title)) {
+        return invalidArguments();
     }
 
-     const user = await tokenBasedAuth(experiment_req ["token"]);
-     const userData = await user.json();
-        if(userData["response"]){
-            let processedResult = {
-                "success": false,
-                "error": "Other",
-                "matches": undefined
-            }
-            return NextResponse.json(processedResult);
-        }
-    const uid = userData["_id"];
-    if (!uid){
-        let processedResult = {
-            "success": false,
-            "error": "auth_error",
-            "matches": undefined
-        }
-        return NextResponse.json(processedResult);
+    const auth = await authenticateCli(experiment_req.token);
+    if (!auth.user) return auth.response;
+    const uid = auth.user._id;
+
+    try {
+        const client = await clientPromise;
+        const db = client.db(DB_NAME);
+        const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
+        const visibility = { $or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }] };
+        const filters = experiment_req.exp_title.trim() === '*'
+            ? [visibility]
+            : [visibility, { name: experiment_req.exp_title }];
+        const docs = await experimentsCollection.find({ $and: filters }).toArray();
+        const result = convertToExpsArray(docs);
+        return NextResponse.json({
+            success: true,
+            matches: result.sort((a, b) => b.started_on - a.started_on),
+        });
+    } catch {
+        return NextResponse.json({ success: false, error: 'Other' }, { status: 500 });
     }
-
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
-
-    const sendAllRelevantDocs = async (title) => {
-        let docs;
-        if(title.trim() === "*"){
-            docs = await experimentsCollection
-                .find({ $and: [ {$or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }]}]})
-                .toArray();
-        } else {
-            docs = await experimentsCollection
-                .find({ $and: [ {$or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }]}, {name: title}]})
-                .toArray();
-        }
-        const array = convertToExpsArray(docs);
-        return array;
-    };
-
-    let processedResult;
-    try{
-        const result = await sendAllRelevantDocs(experiment_req["exp_title"]);
-        processedResult = {
-            "success": true,
-            "error": undefined,
-            "matches": result.sort((a, b) => b.started_on - a.started_on)
-        }
-    } catch (error){
-        processedResult = {
-            "success": false,
-            "error": "Other",
-            "matches": undefined
-        }
-    }
-
-    return NextResponse.json(processedResult);
 }
 
 

@@ -1,18 +1,17 @@
 import { NextRequest } from 'next/server';
 import { NextResponse } from "next/server";
-import { tokenBasedAuth } from '../../../../tokenAuth';
+import { authenticateCli, invalidArguments, isNonEmptyString, readJsonObject } from '../request';
 
 export async function POST(req: NextRequest) {
 
-    const experiment_req = await req.json();
+    const experiment_req = await readJsonObject(req);
 
-    if (!experiment_req || !experiment_req ["token"]){
-        return NextResponse.json({error: 'Other', status: 400 });
+    if (!experiment_req || !isNonEmptyString(experiment_req.token)) {
+        return invalidArguments();
     }
 
-    const resp = await tokenBasedAuth(experiment_req["token"]);
-    const user = await resp.json();
-
-    return NextResponse.json(user); 
+    const auth = await authenticateCli(experiment_req.token);
+    if (!auth.user) return auth.response;
+    return NextResponse.json(auth.user);
 
 }
