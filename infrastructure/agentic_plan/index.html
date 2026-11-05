@@ -1,0 +1,2311 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for GLADOS - Automated Science Pipeline" name="description"/>
+<link href="https://automatingsciencepipeline.github.io/Monorepo/infrastructure/agentic_plan/" rel="canonical"/>
+<link href="../used_technologies/" rel="prev"/>
+<link href="../../developerhelp/getting_started_from_zero/" rel="next"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
+<title>Agentic Implementation Plan - GLADOS</title>
+<link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#agentic-implementation-plan">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="GLADOS" class="md-header__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            GLADOS
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Agentic Implementation Plan
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="GLADOS" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    GLADOS
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../about/">
+<span class="md-ellipsis">
+    
+  
+    About GLADOS
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/best_practices/">
+<span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/experiment_walkthrough/">
+<span class="md-ellipsis">
+    
+  
+    Your First Experiment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/usage/">
+<span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../documentation/guide/">
+<span class="md-ellipsis">
+    
+  
+    Updating Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../architecture/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-problem-and-context">
+<span class="md-ellipsis">
+      
+        1. Problem and Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-scope-and-limitations">
+<span class="md-ellipsis">
+      
+        2. Scope and limitations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-invariants">
+<span class="md-ellipsis">
+      
+        3. Invariants
+      
+    </span>
+</a>
+<nav aria-label="3. Invariants" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-functional-invariant">
+<span class="md-ellipsis">
+      
+        3.1 Functional Invariant
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-security-invariant">
+<span class="md-ellipsis">
+      
+        3.2 Security Invariant
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-architecture-overview">
+<span class="md-ellipsis">
+      
+        4. Architecture Overview
+      
+    </span>
+</a>
+<nav aria-label="4. Architecture Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-authentication-subsystem">
+<span class="md-ellipsis">
+      
+        4.1 Authentication Subsystem
+      
+    </span>
+</a>
+<nav aria-label="4.1 Authentication Subsystem" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-audit-logs">
+<span class="md-ellipsis">
+      
+        4.2 Audit Logs
+      
+    </span>
+</a>
+<nav aria-label="4.2 Audit Logs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-remote-audit-log">
+<span class="md-ellipsis">
+      
+        1. Remote Audit Log
+      
+    </span>
+</a>
+<nav aria-label="1. Remote Audit Log" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#document-fields">
+<span class="md-ellipsis">
+      
+        Document Fields:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#synchronous">
+<span class="md-ellipsis">
+      
+        Synchronous:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#append-only">
+<span class="md-ellipsis">
+      
+        Append-Only:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-health-check">
+<span class="md-ellipsis">
+      
+        Continuous Health Check:
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-local-audit-log">
+<span class="md-ellipsis">
+      
+        2. Local Audit Log
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-mcp-facade">
+<span class="md-ellipsis">
+      
+        4.3 MCP Facade
+      
+    </span>
+</a>
+<nav aria-label="4.3 MCP Facade" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_1">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#data-paths">
+<span class="md-ellipsis">
+      
+        Data paths
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#consent-gesture-suggested-mechanisms">
+<span class="md-ellipsis">
+      
+        Consent gesture - suggested mechanisms
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-implementation-notes">
+<span class="md-ellipsis">
+      
+        5. Implementation notes
+      
+    </span>
+</a>
+<nav aria-label="5. Implementation notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-strive-for-enforcement-through-architecture-and-design-rather-than-prompt-engineering">
+<span class="md-ellipsis">
+      
+        5.1 Strive for enforcement through architecture and design rather than prompt engineering
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-default-new-operations-to-high-sensitivity">
+<span class="md-ellipsis">
+      
+        5.2 Default new operations to HIGH sensitivity
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-allowlist-never-blocklist">
+<span class="md-ellipsis">
+      
+        5.3 Allowlist, never blocklist
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-treat-error-paths-like-response-paths">
+<span class="md-ellipsis">
+      
+        5.4 Treat error paths like response paths
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#55-fail-closed">
+<span class="md-ellipsis">
+      
+        5.5 Fail closed
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#56-encode-invariants-as-ci-checks">
+<span class="md-ellipsis">
+      
+        5.6 Encode invariants as CI checks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#57-the-user-is-a-cooperator-not-an-obstacle">
+<span class="md-ellipsis">
+      
+        5.7 The user is a cooperator, not an obstacle
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#58-beware-third-party-sdk-telemetry">
+<span class="md-ellipsis">
+      
+        5.8 Beware third-party SDK telemetry
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#59-test-refusal-not-just-success">
+<span class="md-ellipsis">
+      
+        5.9 Test refusal, not just success
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-alternatives-considered">
+<span class="md-ellipsis">
+      
+        6. Alternatives Considered
+      
+    </span>
+</a>
+<nav aria-label="6. Alternatives Considered" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-mcp-as-an-extention-of-the-current-nextjs-rest-api">
+<span class="md-ellipsis">
+      
+        6.1 MCP as an extention of the current Next.js REST API
+      
+    </span>
+</a>
+<nav aria-label="6.1 MCP as an extention of the current Next.js REST API" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-not-adopted">
+<span class="md-ellipsis">
+      
+        Why not adopted
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conditions-to-reconsider">
+<span class="md-ellipsis">
+      
+        Conditions to reconsider
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-self-issued-jwts-in-place-of-github-token-introspection">
+<span class="md-ellipsis">
+      
+        6.2 Self-issued JWTs in place of GitHub token introspection
+      
+    </span>
+</a>
+<nav aria-label="6.2 Self-issued JWTs in place of GitHub token introspection" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-state-of-the-system">
+<span class="md-ellipsis">
+      
+        Current state of the system
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-not-adopted_1">
+<span class="md-ellipsis">
+      
+        Why not adopted
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conditions-to-reconsider_1">
+<span class="md-ellipsis">
+      
+        Conditions to reconsider
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#implementation-costs-if-reconsidered">
+<span class="md-ellipsis">
+      
+        Implementation Costs if reconsidered
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-threat-modeling">
+<span class="md-ellipsis">
+      
+        7. Threat Modeling
+      
+    </span>
+</a>
+<nav aria-label="7. Threat Modeling" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#threats-by-flow-element">
+<span class="md-ellipsis">
+      
+        Threats by flow / element
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gaps">
+<span class="md-ellipsis">
+      
+        Gaps
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#8-testing-strategy">
+<span class="md-ellipsis">
+      
+        8. Testing strategy
+      
+    </span>
+</a>
+<nav aria-label="8. Testing strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-agent-testing-to-test-end-to-end-operations-and-monitor-nondeterministic-interactions">
+<span class="md-ellipsis">
+      
+        8.1 Agent Testing to test End-to-end Operations and Monitor Nondeterministic Interactions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-unit-testing-of-mcp-endpoints">
+<span class="md-ellipsis">
+      
+        8.2 Unit Testing of MCP Endpoints
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#83-security-evaluation-involving-integration-and-component-testing">
+<span class="md-ellipsis">
+      
+        8.3 Security Evaluation Involving Integration and Component Testing
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#9-references">
+<span class="md-ellipsis">
+      
+        9. References
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../kubernetes/">
+<span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../vms/">
+<span class="md-ellipsis">
+    
+  
+    VMs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../cluster_update/">
+<span class="md-ellipsis">
+    
+  
+    Cluster Upgrade
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../used_technologies/">
+<span class="md-ellipsis">
+    
+  
+    Used Technologies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-problem-and-context">
+<span class="md-ellipsis">
+      
+        1. Problem and Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-scope-and-limitations">
+<span class="md-ellipsis">
+      
+        2. Scope and limitations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-invariants">
+<span class="md-ellipsis">
+      
+        3. Invariants
+      
+    </span>
+</a>
+<nav aria-label="3. Invariants" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-functional-invariant">
+<span class="md-ellipsis">
+      
+        3.1 Functional Invariant
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-security-invariant">
+<span class="md-ellipsis">
+      
+        3.2 Security Invariant
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-architecture-overview">
+<span class="md-ellipsis">
+      
+        4. Architecture Overview
+      
+    </span>
+</a>
+<nav aria-label="4. Architecture Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-authentication-subsystem">
+<span class="md-ellipsis">
+      
+        4.1 Authentication Subsystem
+      
+    </span>
+</a>
+<nav aria-label="4.1 Authentication Subsystem" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-audit-logs">
+<span class="md-ellipsis">
+      
+        4.2 Audit Logs
+      
+    </span>
+</a>
+<nav aria-label="4.2 Audit Logs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-remote-audit-log">
+<span class="md-ellipsis">
+      
+        1. Remote Audit Log
+      
+    </span>
+</a>
+<nav aria-label="1. Remote Audit Log" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#document-fields">
+<span class="md-ellipsis">
+      
+        Document Fields:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#synchronous">
+<span class="md-ellipsis">
+      
+        Synchronous:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#append-only">
+<span class="md-ellipsis">
+      
+        Append-Only:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-health-check">
+<span class="md-ellipsis">
+      
+        Continuous Health Check:
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-local-audit-log">
+<span class="md-ellipsis">
+      
+        2. Local Audit Log
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-mcp-facade">
+<span class="md-ellipsis">
+      
+        4.3 MCP Facade
+      
+    </span>
+</a>
+<nav aria-label="4.3 MCP Facade" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_1">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#data-paths">
+<span class="md-ellipsis">
+      
+        Data paths
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#consent-gesture-suggested-mechanisms">
+<span class="md-ellipsis">
+      
+        Consent gesture - suggested mechanisms
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-implementation-notes">
+<span class="md-ellipsis">
+      
+        5. Implementation notes
+      
+    </span>
+</a>
+<nav aria-label="5. Implementation notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-strive-for-enforcement-through-architecture-and-design-rather-than-prompt-engineering">
+<span class="md-ellipsis">
+      
+        5.1 Strive for enforcement through architecture and design rather than prompt engineering
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-default-new-operations-to-high-sensitivity">
+<span class="md-ellipsis">
+      
+        5.2 Default new operations to HIGH sensitivity
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-allowlist-never-blocklist">
+<span class="md-ellipsis">
+      
+        5.3 Allowlist, never blocklist
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-treat-error-paths-like-response-paths">
+<span class="md-ellipsis">
+      
+        5.4 Treat error paths like response paths
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#55-fail-closed">
+<span class="md-ellipsis">
+      
+        5.5 Fail closed
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#56-encode-invariants-as-ci-checks">
+<span class="md-ellipsis">
+      
+        5.6 Encode invariants as CI checks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#57-the-user-is-a-cooperator-not-an-obstacle">
+<span class="md-ellipsis">
+      
+        5.7 The user is a cooperator, not an obstacle
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#58-beware-third-party-sdk-telemetry">
+<span class="md-ellipsis">
+      
+        5.8 Beware third-party SDK telemetry
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#59-test-refusal-not-just-success">
+<span class="md-ellipsis">
+      
+        5.9 Test refusal, not just success
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-alternatives-considered">
+<span class="md-ellipsis">
+      
+        6. Alternatives Considered
+      
+    </span>
+</a>
+<nav aria-label="6. Alternatives Considered" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-mcp-as-an-extention-of-the-current-nextjs-rest-api">
+<span class="md-ellipsis">
+      
+        6.1 MCP as an extention of the current Next.js REST API
+      
+    </span>
+</a>
+<nav aria-label="6.1 MCP as an extention of the current Next.js REST API" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-not-adopted">
+<span class="md-ellipsis">
+      
+        Why not adopted
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conditions-to-reconsider">
+<span class="md-ellipsis">
+      
+        Conditions to reconsider
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-self-issued-jwts-in-place-of-github-token-introspection">
+<span class="md-ellipsis">
+      
+        6.2 Self-issued JWTs in place of GitHub token introspection
+      
+    </span>
+</a>
+<nav aria-label="6.2 Self-issued JWTs in place of GitHub token introspection" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-state-of-the-system">
+<span class="md-ellipsis">
+      
+        Current state of the system
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-not-adopted_1">
+<span class="md-ellipsis">
+      
+        Why not adopted
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conditions-to-reconsider_1">
+<span class="md-ellipsis">
+      
+        Conditions to reconsider
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#implementation-costs-if-reconsidered">
+<span class="md-ellipsis">
+      
+        Implementation Costs if reconsidered
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-threat-modeling">
+<span class="md-ellipsis">
+      
+        7. Threat Modeling
+      
+    </span>
+</a>
+<nav aria-label="7. Threat Modeling" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#threats-by-flow-element">
+<span class="md-ellipsis">
+      
+        Threats by flow / element
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gaps">
+<span class="md-ellipsis">
+      
+        Gaps
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#8-testing-strategy">
+<span class="md-ellipsis">
+      
+        8. Testing strategy
+      
+    </span>
+</a>
+<nav aria-label="8. Testing strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-agent-testing-to-test-end-to-end-operations-and-monitor-nondeterministic-interactions">
+<span class="md-ellipsis">
+      
+        8.1 Agent Testing to test End-to-end Operations and Monitor Nondeterministic Interactions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-unit-testing-of-mcp-endpoints">
+<span class="md-ellipsis">
+      
+        8.2 Unit Testing of MCP Endpoints
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#83-security-evaluation-involving-integration-and-component-testing">
+<span class="md-ellipsis">
+      
+        8.3 Security Evaluation Involving Integration and Component Testing
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#9-references">
+<span class="md-ellipsis">
+      
+        9. References
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Developer Help
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Help
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/getting_started_from_zero/">
+<span class="md-ellipsis">
+    
+  
+    Getting Started From Zero
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/setup/">
+<span class="md-ellipsis">
+    
+  
+    Developer Setup
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/helpful_commands/">
+<span class="md-ellipsis">
+    
+  
+    Helpful Commands
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    BioAI User Guides
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    BioAI User Guides
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../bioai/hw8/">
+<span class="md-ellipsis">
+    
+  
+    HW8
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Design Decisions
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-problem-and-context">
+<span class="md-ellipsis">
+      
+        1. Problem and Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-scope-and-limitations">
+<span class="md-ellipsis">
+      
+        2. Scope and limitations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-invariants">
+<span class="md-ellipsis">
+      
+        3. Invariants
+      
+    </span>
+</a>
+<nav aria-label="3. Invariants" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-functional-invariant">
+<span class="md-ellipsis">
+      
+        3.1 Functional Invariant
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-security-invariant">
+<span class="md-ellipsis">
+      
+        3.2 Security Invariant
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-architecture-overview">
+<span class="md-ellipsis">
+      
+        4. Architecture Overview
+      
+    </span>
+</a>
+<nav aria-label="4. Architecture Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-authentication-subsystem">
+<span class="md-ellipsis">
+      
+        4.1 Authentication Subsystem
+      
+    </span>
+</a>
+<nav aria-label="4.1 Authentication Subsystem" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-audit-logs">
+<span class="md-ellipsis">
+      
+        4.2 Audit Logs
+      
+    </span>
+</a>
+<nav aria-label="4.2 Audit Logs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-remote-audit-log">
+<span class="md-ellipsis">
+      
+        1. Remote Audit Log
+      
+    </span>
+</a>
+<nav aria-label="1. Remote Audit Log" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#document-fields">
+<span class="md-ellipsis">
+      
+        Document Fields:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#synchronous">
+<span class="md-ellipsis">
+      
+        Synchronous:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#append-only">
+<span class="md-ellipsis">
+      
+        Append-Only:
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-health-check">
+<span class="md-ellipsis">
+      
+        Continuous Health Check:
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-local-audit-log">
+<span class="md-ellipsis">
+      
+        2. Local Audit Log
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-mcp-facade">
+<span class="md-ellipsis">
+      
+        4.3 MCP Facade
+      
+    </span>
+</a>
+<nav aria-label="4.3 MCP Facade" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_1">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#data-paths">
+<span class="md-ellipsis">
+      
+        Data paths
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#consent-gesture-suggested-mechanisms">
+<span class="md-ellipsis">
+      
+        Consent gesture - suggested mechanisms
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-implementation-notes">
+<span class="md-ellipsis">
+      
+        5. Implementation notes
+      
+    </span>
+</a>
+<nav aria-label="5. Implementation notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-strive-for-enforcement-through-architecture-and-design-rather-than-prompt-engineering">
+<span class="md-ellipsis">
+      
+        5.1 Strive for enforcement through architecture and design rather than prompt engineering
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-default-new-operations-to-high-sensitivity">
+<span class="md-ellipsis">
+      
+        5.2 Default new operations to HIGH sensitivity
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-allowlist-never-blocklist">
+<span class="md-ellipsis">
+      
+        5.3 Allowlist, never blocklist
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-treat-error-paths-like-response-paths">
+<span class="md-ellipsis">
+      
+        5.4 Treat error paths like response paths
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#55-fail-closed">
+<span class="md-ellipsis">
+      
+        5.5 Fail closed
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#56-encode-invariants-as-ci-checks">
+<span class="md-ellipsis">
+      
+        5.6 Encode invariants as CI checks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#57-the-user-is-a-cooperator-not-an-obstacle">
+<span class="md-ellipsis">
+      
+        5.7 The user is a cooperator, not an obstacle
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#58-beware-third-party-sdk-telemetry">
+<span class="md-ellipsis">
+      
+        5.8 Beware third-party SDK telemetry
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#59-test-refusal-not-just-success">
+<span class="md-ellipsis">
+      
+        5.9 Test refusal, not just success
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-alternatives-considered">
+<span class="md-ellipsis">
+      
+        6. Alternatives Considered
+      
+    </span>
+</a>
+<nav aria-label="6. Alternatives Considered" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-mcp-as-an-extention-of-the-current-nextjs-rest-api">
+<span class="md-ellipsis">
+      
+        6.1 MCP as an extention of the current Next.js REST API
+      
+    </span>
+</a>
+<nav aria-label="6.1 MCP as an extention of the current Next.js REST API" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-not-adopted">
+<span class="md-ellipsis">
+      
+        Why not adopted
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conditions-to-reconsider">
+<span class="md-ellipsis">
+      
+        Conditions to reconsider
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-self-issued-jwts-in-place-of-github-token-introspection">
+<span class="md-ellipsis">
+      
+        6.2 Self-issued JWTs in place of GitHub token introspection
+      
+    </span>
+</a>
+<nav aria-label="6.2 Self-issued JWTs in place of GitHub token introspection" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-state-of-the-system">
+<span class="md-ellipsis">
+      
+        Current state of the system
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-not-adopted_1">
+<span class="md-ellipsis">
+      
+        Why not adopted
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conditions-to-reconsider_1">
+<span class="md-ellipsis">
+      
+        Conditions to reconsider
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#implementation-costs-if-reconsidered">
+<span class="md-ellipsis">
+      
+        Implementation Costs if reconsidered
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-threat-modeling">
+<span class="md-ellipsis">
+      
+        7. Threat Modeling
+      
+    </span>
+</a>
+<nav aria-label="7. Threat Modeling" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#threats-by-flow-element">
+<span class="md-ellipsis">
+      
+        Threats by flow / element
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gaps">
+<span class="md-ellipsis">
+      
+        Gaps
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#8-testing-strategy">
+<span class="md-ellipsis">
+      
+        8. Testing strategy
+      
+    </span>
+</a>
+<nav aria-label="8. Testing strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-agent-testing-to-test-end-to-end-operations-and-monitor-nondeterministic-interactions">
+<span class="md-ellipsis">
+      
+        8.1 Agent Testing to test End-to-end Operations and Monitor Nondeterministic Interactions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-unit-testing-of-mcp-endpoints">
+<span class="md-ellipsis">
+      
+        8.2 Unit Testing of MCP Endpoints
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#83-security-evaluation-involving-integration-and-component-testing">
+<span class="md-ellipsis">
+      
+        8.3 Security Evaluation Involving Integration and Component Testing
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#9-references">
+<span class="md-ellipsis">
+      
+        9. References
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="agentic-implementation-plan">Agentic Implementation Plan</h1>
+<h2 id="1-problem-and-context">1. Problem and Context</h2>
+<p>With the successful launch of the CLI, the next step is to make the GLaDOS platform compatible with Model Context Protocol (MCP) tool calls so that experiments can be carried out be autonomous Artificial General Inteligence (AGI) agents. Specifically, the goal is to give the user the ability to delegate actions they can take on the platform manually to an AI agent that performs them on their behalf.</p>
+<p>After some consideration, the team decided that it is recommended to pursue a local MCP facade that calls to existing REST endpoints with authentication done via token introspection. For more details on this decision consult section 5 and 6 of this document. </p>
+<h2 id="2-scope-and-limitations">2. Scope and limitations</h2>
+<p>The following describes both the scope of the agentic implementation feature as well as possible limitations:</p>
+<ul>
+<li>The agentic model used by the user is not within scope; the mistakes the model might make in utilizing MCP tool calls or in adjusting the hyperparameters of an experiment for a new run is not within scope. Ergo, the infrastructure for such calls to occur securely and consistently is within scope; the quality of the model is not.</li>
+<li>The user of this feature is assumed to have a GitHub account for which a GitHub token can be gained through device flow authentication, which allows for authentication to GLADOS; Google OAuth or other provider specific Oauth routes are not within scope.</li>
+<li>We recommend limiting this feature to user's of priviledged or admin permission levels, however this feature does have the possibility to be open to users at all permission levels.</li>
+<li>All operations requires a verification step via GitHub api, users who hit their GitHub api limit of <a href="https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2026-03-10">5000 requests per hour</a> will not be able to access MCP features and have to use the browser GUI manually</li>
+</ul>
+<h2 id="3-invariants">3. Invariants</h2>
+<p>Let <code>t</code> be an MCP tool call, and <code>ENDPOINT</code> be an authenticated call (using a stored <code>token</code> for the active session) to the existing REST API counterpart for <code>t</code>.</p>
+<h4 id="31-functional-invariant"><strong>3.1 Functional Invariant</strong></h4>
+<p>For all tool invocation with arguments <code>t(args)</code>, the following premises must hold:</p>
+<p><strong>I-1 - Structural</strong>. The invocation of <code>t(args)</code> causes exactly one ENDPOINT call to be reported to the caller. The MCP <em>MAY</em> retry on transport failure up to a bounded number of times before surfacing failure; retries are not counted as separate logical calls.</p>
+<p><strong>I-2 - Payload</strong>. Content of <code>args</code> must not be modified beyond translation to comply with <code>ENDPOINT</code> argument schema. A translation here is defined as a syntactic transformation using a declared schema, no values should be transformed.</p>
+<p><strong>I-3 - Response Content</strong>. Given that the MCP tool call is going to translate the REST response into an MCP response, the MCP response carries no information not present in the REST response; fields may be dropped, but never fabricated, inferred, or sourced from outside the REST response.</p>
+<h4 id="32-security-invariant"><strong>3.2 Security Invariant</strong></h4>
+<p>The LLM agent and its provider sit outside of GLADOS's trust boundary and are therefore modeled as a Compromisable Host or External LLM Liaison (CHELL). The following invariants must hold against the CHELL:</p>
+<p><strong>S-1 - Result Confidentiality</strong>. CHELL shall not gain read access to result data returned by any <code>ENDPOINT</code> call. MCP responses, error messages, transport metadata, and diagnostic output shall not carry result content to CHELL.</p>
+<p><strong>S-2 - Artifact Confidentiality</strong>. CHELL shall not gain read or write access to artifacts that a tool call requires or produces. Artifact content reaches CHELL only through channels the user explicitly drives (e.g., paste, upload).</p>
+<p><strong>S-3 - Credential Confinement</strong>. The <code>token</code> shall not be observable by CHELL through any MCP tool result, error path, argument echo, or diagnostic output.</p>
+<p><strong>S-4 - Bounded Tool Surface</strong>. CHELL may only invoke <code>t</code> drawn from a statically declared allowlist. No <code>t</code> shall accept free-form filesystem paths, URLs, shell expressions, or ENDPOINT specifiers as arguments. This prevents CHELL from inducing arbitrary reads, writes, or egress through <code>args</code>.</p>
+<p><strong>S-5 - Diagnostic Discipline</strong>. MCP facade logs, stderr, crash output, and telemetry shall not contain result data, artifact content, or credential material in any form CHELL or its host can read.</p>
+<p><strong>S-6 - Egress Confinement</strong>. The MCP facade shall initiate no outbound network connection other than to ENDPOINT over verified TLS. CHELL shall not be able to induce arbitrary egress through <code>args</code>.</p>
+<p><strong>S-7 - User Override</strong>. Voluntary delivery of data to CHELL by the user (paste, upload, screen sharing, dictation) lies outside the protection of <code>S-1 … S-6</code>. The facade shall neither facilitate, conceal, nor attempt to detect such transfers.</p>
+<p><strong>S-8 - Audit Integrity</strong>. No state-mutating tool call shall complete without a corresponding append-only audit record being durably written. Records shall be neither modifiable nor deletable through any system interface. The audit log shall contain no silent gaps: any period during which audit writes were unavailable shall itself be reflected in the log as a degraded-mode record.</p>
+<h2 id="4-architecture-overview">4. Architecture Overview</h2>
+<h3 id="41-authentication-subsystem">4.1 Authentication Subsystem</h3>
+<p>The system establishes caller identity at the REST API via RFC 7662 token introspection. The MCP facade is the sole custodian of the user's token within the local environment; this placement is what realizes <code>S-3</code> (credential confinement).</p>
+<blockquote>
+<p>No MCP tool surface can expose the token to CHELL, by construction.</p>
+</blockquote>
+<h4 id="components">Components</h4>
+<ol>
+<li><strong>AI agent (within CHELL).</strong> Issues MCP tool calls. Never observes the token.</li>
+<li><strong>MCP facade.</strong> Holds the token, attaches it to REST calls, translates responses per <code>I-2</code> and <code>I-3</code>, returns them to the agent subject to <code>Section 3.2</code>.</li>
+<li><strong>REST API</strong>. Validates the token via introspection, resolves identity, executes the requested operation under the resolved identity.
+GitHub. Issues the token and serves the RFC 7662 introspection endpoint. Source of external identity.</li>
+<li><strong>MongoDB.</strong> Maps external (GitHub) identity to internal system identity U. Source of truth for per-user authorization.</li>
+</ol>
+<p><pre class="mermaid"><code>sequenceDiagram
+    actor User
+    participant Agent as AI Agent (CHELL)
+    participant MCP as MCP Facade
+    participant REST as REST API
+    participant GH as GitHub
+    participant DB as MongoDB
+
+    User-&gt;&gt;Agent: prompt: task A on data D
+    Agent-&gt;&gt;MCP: t(ref(D))
+    Note over Agent,MCP: S-2: D passed by reference
+    MCP-&gt;&gt;REST: request task A (Authorization: Bearer &lt;token&gt;)
+    Note over MCP,REST: S-3: token held only by MCP
+    REST-&gt;&gt;GH: POST /introspect (token)
+    GH--&gt;&gt;REST: { active, external identity }
+    REST-&gt;&gt;DB: lookup(external identity)
+    DB--&gt;&gt;REST: internal identity U
+    REST-&gt;&gt;REST: execute task A as U
+    REST--&gt;&gt;MCP: result
+    MCP--&gt;&gt;Agent: translated result (subject to S-1)
+    Agent--&gt;&gt;User: response</code></pre>
+1. User prompts the AI agent to perform task <code>A</code> on data <code>D</code>.
+2. The agent invokes the corresponding MCP tool with a reference to <code>D</code>, not its contents (<code>S-2</code>).
+3. The MCP facade issues a REST call for task A with the token attached (per <code>I-2</code>).
+4. The REST API introspects the token at GitHub and receives the external identity.
+5. The REST API resolves external identity to internal identity <code>U</code> via MongoDB.
+6. The REST API executes task <code>A</code> under <code>U</code> and returns the result. The facade translates the response per <code>I-3</code> and surfaces it to the agent subject to <code>S-1</code>.</p>
+<h3 id="42-audit-logs">4.2 Audit Logs</h3>
+<p>To appropriately log the actions of the agent, we recommend a two-pronged approach with an audit log both locally available for a user as well as a remote audit log for GLADOS's server. This ensures that the user can reread the local log to be aware of the actions of the agent, and developers can monitor agent activity via the remote log. </p>
+<h4 id="1-remote-audit-log"><strong>1. Remote Audit Log</strong></h4>
+<p>Creating a new capped collection on GLADOS’s MongoDB with role-based restrictions that prevent editing operations is our recommended implementation of a synchronous append-only sink. </p>
+<p>In this collection, record an agent request’s  <code>event_id, user_id, timestamp, action_type, action_result, and agent_id</code>. A successful write/insertion to the collection allows the request to go through (the action to occur on the server); otherwise, the request is denied. A health check, implemented by a ping command to the database via a Next.js endpoint on GLADOS’s server, checks if an insertion could happen to the collection; if the check returns unhealthy, allow agentic non-mutating requests (i.e. read operations) but return degraded-mode error on mutating requests.</p>
+<p>The following subsections provide more implementation details on the above description.</p>
+<h5 id="document-fields">Document Fields:</h5>
+<p>For this collection, we recommend enforcing that each of the documents have the following fields for ensuring an accurate and thorough log of agentic activities is recorded: </p>
+<ul>
+<li>event_id — Unique identifier for each audit event </li>
+<li>user_id — Unique identifier for the user who initiated the action </li>
+<li>timestamp — UTC timestamp indicating when the action occurred </li>
+<li>action_type — Type of action performed (e.g., file_read, file_write) </li>
+<li>action_result — Outcome of the action (e.g., success, failure) </li>
+<li>agent_id — Identifier of the agent or model that performed the action </li>
+</ul>
+<h5 id="synchronous">Synchronous:</h5>
+<p>In this setup, when an agent sends a request via an endpoint to GLADOS, an entry would be made in the MongoDB collection reflecting the event. And once this insertion is successfully made, the requested action can go through. Otherwise, the action would fail as the log insertion was not successful. </p>
+<h5 id="append-only">Append-Only:</h5>
+<p>Developers should restrict editing or delete permissions for this collection- this log is intended as a non-mutable record of events. Should a correction need to be made, a new entry should be inserted. </p>
+<p>To implement this, developers can use a capped MongoDB collection, which is a type of collection ideal for maintaining logs because delete operations are restricted and, when the fixed size of the collection is reached, old entries are overwritten, which is ideal for audit logs as the most recent entries are most valued. Additionally, edit operations from users should be restricted via role-based checks in GLADOS server endpoints. </p>
+<h5 id="continuous-health-check">Continuous Health Check:</h5>
+<p>The MCP endpoint can ping the database to ensure that the audit log is healthy can be inserted into. Should this ping fail, agent action requests should be rejected automatically as the log cannot be inserted into. Otherwise, successful health checks mean that the database is healthy and ready for insertion. </p>
+<p>To implement this, developers can create a Next.js health check endpoint that pings the MongoDB pod every certain time increments.  </p>
+<h4 id="2-local-audit-log"><strong>2. Local Audit Log</strong></h4>
+<p>While the current CLI produces a brief log of results/errors as the user runs commands, given the nature of agents, users likely would expect a more thorough record in order to examine what actions the agents took while utilizing their account. Utilizing the Python logging module may be most effective and allow flexibility. The module allows to write to a user’s local file to implement more extensive logging beyond the CLI’s current printouts to the console. Record agentic actions, including <code>datetime, action_taken, user_approval, result (Success or Failure), error (High Level Description Based Off Stack Trace If it Exists)</code>, to ensure that the dynamic information is included efficiently within a file that can then be scanned for certain keywords.</p>
+<p>A basic logging example is the following: </p>
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; import logging 
+&gt;&gt;&gt; logging.basicConfig( 
+...    filename='glados_audit.log', 
+...    level=logging.INFO, 
+... ) 
+&gt;&gt;&gt; logging.error("Something went wrong!")
+</code></pre></div>
+<p>By saving the logs to a file, such as “glados_audit.log” as in the above example, instead of simply printing to a terminal, we can ensure that the dynamic information is included efficiently within a file that can then be scanned for certain keywords. </p>
+<h3 id="43-mcp-facade">4.3 MCP Facade</h3>
+<p>The system follows a facade architecture: a local process on the user's machine sits between the agent (running under the Claude Code TUI, or any equivalent host) and the remote REST API. The facade is the only component that holds credentials, makes outbound REST calls, and decides what crosses the trust boundary to the agent. Data classified high-sensitivity does not flow to the agent through facade responses; instead, the facade places it in a handoff region on the local filesystem, and the user performs an explicit gesture to release it. The mechanism for that gesture is intentionally underspecified at this layer; suggested implementations are listed below.</p>
+<h4 id="components_1"><strong>Components</strong></h4>
+<p><pre class="mermaid"><code>flowchart TB
+    User((User))
+
+    subgraph LocalHost["Local host (user's machine)"]
+        TUI["Claude Code TUI&lt;br/&gt;(user-facing surface)"]
+        MCP["MCP Facade&lt;br/&gt;(token custodian, allowlisted tools)"]
+        FS[("Artifact handoff region&lt;br/&gt;(filesystem)")]
+    end
+
+    subgraph CHELLBox["CHELL (untrusted)"]
+        Agent["AI Agent + LLM provider"]
+    end
+
+    subgraph Remote["Remote infrastructure (GLADOS)"]
+        REST["REST API"]
+    end
+
+    User --&gt;|prompt| TUI
+    User --&gt;|reviews| FS
+    User -.-&gt;|consent gesture| FS
+    TUI &lt;--&gt;|input / output stream| Agent
+    Agent --&gt;|MCP tool calls| MCP
+    MCP --&gt;|LOW data response| Agent
+    MCP &lt;--&gt;|TLS, bearer token| REST
+    MCP --&gt;|HIGH artifact write| FS</code></pre>
+- <strong>Claude Code TUI.</strong> User's terminal interface to the agent. Treated as a trusted surface for input/display; does not enforce policy itself.
+- <strong>AI Agent + LLM provider.</strong> The reasoning and tool-invocation loop. Modeled as CHELL — anything the agent observes is assumed to be observable by an adversary.
+- <strong>MCP Facade.</strong> Local process. Holds the REST API credentials, exposes a static allowlist of tools, and decides per tool whether the result returns inline (low-sensitivity path) or via the handoff region (high-sensitivity path).
+- <strong>Artifact handoff region.</strong> A filesystem location where the facade deposits high-sensitivity results. The release of content from this region to the agent is mediated entirely by the user.
+REST API. Remote service; authenticates via token introspection, authorizes per-identity.</p>
+<h4 id="data-paths"><strong>Data paths</strong></h4>
+<ul>
+<li><code>LOW</code> - <strong>Low-sensitivity path.</strong> Agent → MCP tool call → REST → translated MCP response → agent. Constrained by S-1 (no high-sensitivity content in responses) and §3.1 (response translation).</li>
+<li><code>HIGH</code> - <strong>High-sensitivity path.</strong> Agent → MCP tool call → REST → artifact written to handoff region. The agent receives only an acknowledgement; the result content sits at rest until the user acts.</li>
+</ul>
+<h4 id="consent-gesture-suggested-mechanisms"><strong>Consent gesture - suggested mechanisms</strong></h4>
+<p>The architecture does not mandate a specific gesture; future contributors should pick what fits their platform. Non-exhaustive options:</p>
+<ul>
+<li><strong>Copy / paste.</strong> User pastes artifact content into the TUI. Unforgeable; manual.</li>
+<li><strong>Permission flip (chmod).</strong> User grants the agent's runtime UID read access; an allowlisted tool then fetches. Requires UID separation between facade and agent.</li>
+<li><strong>Move into a watched inbox.</strong> User drops the artifact into a designated directory the agent reads on demand. Same UID consideration as above.
+Confirmation token. User reviews the artifact, types a short token displayed alongside it into the TUI; facade releases on next reference. Adds binding/expiry complexity.</li>
+<li><strong>Out-of-band CLI helper.</strong> User runs a small command that pushes content into the agent's input stream. Useful where clipboard integration is poor.</li>
+</ul>
+<p>These are not mutually exclusive, a system may offer several.</p>
+<h2 id="5-implementation-notes">5. Implementation notes</h2>
+<p>Some useful implementation notes</p>
+<h3 id="51-strive-for-enforcement-through-architecture-and-design-rather-than-prompt-engineering">5.1 Strive for enforcement through architecture and design rather than prompt engineering</h3>
+<p>An LLM at the end of the day is a probabilistic model. Because of that, banking on the fact that it output will be governable and deterministic is a naive assumption. If you wish for the agent to not attempt an action, then the architecture should never allow for such cases.</p>
+<h3 id="52-default-new-operations-to-high-sensitivity">5.2 Default new operations to HIGH sensitivity</h3>
+<p>Sensitivity classification is the most consequential decision per tool: LOW means the result flows directly to CHELL. Defaulting to HIGH forces contributors to argue explicitly that a given response field is safe to expose, and creates an auditable trail of those arguments. LOW-by-default silently leaks whatever a less careful contributor didn't think to question.</p>
+<h3 id="53-allowlist-never-blocklist">5.3 Allowlist, never blocklist</h3>
+<p>The set of tools, response fields, and outbound destinations the facade may emit must be statically enumerated. Resist any pattern that lets configuration, runtime conditions, or model output expand these sets. Every such pattern is a path by which CHELL or a misconfigured deployment widens the attack surface.</p>
+<h3 id="54-treat-error-paths-like-response-paths">5.4 Treat error paths like response paths</h3>
+<p>The agent reads errors as eagerly as it reads successful responses. A stack trace, an exception message, or a "field X was missing" complaint is a data channel. The invariants on response content (<code>S-1</code>, <code>S-3</code>, <code>S-5</code>) apply equally to every place the facade can emit text (exceptions, transport errors, debug output, etc...).</p>
+<h3 id="55-fail-closed">5.5 Fail closed</h3>
+<p>When in doubt (introspection times out, schema validation fails, the audit sink is unavailable, an argument is unrecognized) reject the call. A broken feature is recoverable; a silent leak is not. This is the default that makes <code>S-1</code> (unknown fields dropped) and <code>S-8</code> (no mutation without audit) cheap to implement: when behavior is ambiguous, the safe answer is to do nothing.</p>
+<h3 id="56-encode-invariants-as-ci-checks">5.6 Encode invariants as CI checks</h3>
+<p>Formal invariants are written to be mechanically translatable. Every invariants that admits a test should have one wired into the CI pipeline: shape assertions for <code>S-1</code>, emit-path scanning for <code>S-3</code>, static analysis of the tool registry for <code>S-4</code>, failure-injection on the audit sink for <code>S-8</code>, and so on. This moves security from contributor discipline (which decays under deadline pressure) to executable proof (which is regenerated on every commit), and makes audits cheap by giving reviewers running tests rather than arguments. The residual judgment (recognizing when a new tool introduces a surface no existing test covers) cannot be mechanized, but it becomes narrower and more honest once routine checks are automatic.</p>
+<h3 id="57-the-user-is-a-cooperator-not-an-obstacle">5.7 The user is a cooperator, not an obstacle</h3>
+<p>The high-sensitivity consent gesture exists because <strong>the user is a participant in the security model, not friction to be optimized away</strong>. Future requests to "make consent easier" by weakening the gesture should be treated with skepticism. UX friction in the consent mechanism is a deliberate choice.</p>
+<h3 id="58-beware-third-party-sdk-telemetry">5.8 Beware third-party SDK telemetry</h3>
+<p>Logging libraries, error trackers, and observability SDKs frequently capture function arguments, request bodies, and stack-local variables. Any such SDK installed in the facade process becomes part of <code>S-5</code>'s threat surface. Audit every dependency for outbound behavior; prefer libraries with explicit, controllable telemetry.</p>
+<h3 id="59-test-refusal-not-just-success">5.9 Test refusal, not just success</h3>
+<p>The interesting tests in this system are the ones that confirm the facade <em>won't</em> do something: malformed args are rejected, unknown response fields are dropped, audit failure blocks the mutation. Tests that only exercise the happy path leave the actual security properties unverified.</p>
+<h2 id="6-alternatives-considered">6. Alternatives Considered</h2>
+<p>This section details alternative implementations that were considered during initial architecting and design of the agentic workflow integration.</p>
+<h3 id="61-mcp-as-an-extention-of-the-current-nextjs-rest-api">6.1 MCP as an extention of the current <code>Next.js</code> REST API</h3>
+<p>Rather than running the MCP facade locally on the user's machine, MCP tool calls could be served directly from the existing Next.js REST API, with clients connecting over the network.</p>
+<h4 id="why-not-adopted"><strong>Why not adopted</strong></h4>
+<p>The REST API authenticates callers by introspecting GitHub-issued tokens (Secion 6.2). In a co-hosted model, the MCP transport would need to deliver those tokens from client to backend. However, MCP's transport-level authorization, defined in the <a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization">MCP authorization</a> specification, is OAuth-based and does not accommodate passing arbitrary upstream credentials. Adopting this alternative would require either re-implementing the backend's authentication layer to comply with the MCP authorization spec, or inventing a non-standard credential-passing mechanism that would break compatibility with conforming MCP clients. The current team judged the local-facade approach preferable, as it preserves the introspection-based auth model unchanged and reuses REST endpoints without modification.</p>
+<h4 id="conditions-to-reconsider"><strong>Conditions to reconsider</strong></h4>
+<p>This decision should be revisited if the system migrates authentication to a flow compatible with the MCP authorization spec, or if operating a per-user local facade becomes a deployment burden disproportionate to the cost of MCP-spec auth compliance.</p>
+<h3 id="62-self-issued-jwts-in-place-of-github-token-introspection">6.2 Self-issued JWTs in place of GitHub token introspection</h3>
+<p>Rather than delegating authentication to GitHub and introspecting GitHub-issued tokens at the REST API (RFC 7662), the system could mint its own JWTs after a user authenticates via the web frontend. Clients (web, CLI, and MCP facade) would present these JWTs in REST calls; the REST API would verify them locally without a round trip to an external provider.</p>
+<h4 id="current-state-of-the-system"><strong>Current state of the system</strong></h4>
+<p>The web frontend authenticates users via Auth.js against GitHub or Google. Auth.js manages session state for the browser flow; no JWT is minted or consumed anywhere in the system today. For the CLI (a browserless client that calls the REST API directly), authentication is delegated to GitHub via the OAuth device authorization flow (RFC 8628); the CLI then presents the resulting GitHub token to the REST API, which introspects it. The MCP facade is a browserless client of the same shape and inherits the same pattern.</p>
+<h4 id="why-not-adopted_1"><strong>Why not adopted</strong></h4>
+<p>Introducing JWTs would require:</p>
+<ul>
+<li>A token issuance path on the REST API, including signing key management and rotation.</li>
+<li>A browserless acquisition flow, either user-driven copy/paste of a token minted in the web frontend, or a custom device-flow analogue against our own issuer.</li>
+<li>Token revocation and lifecycle handling at the API layer, since one of introspection's benefits (immediate revocation by the identity provider) would no longer come for free.</li>
+</ul>
+<p>The current team judged this disproportionate to the value gained, particularly because:</p>
+<ul>
+<li>The CLI was built first under the same constraint; delegating browserless auth to GitHub's device flow solved the UX problem at zero implementation cost.</li>
+<li>The REST API already supports introspection, so the MCP facade reuses existing infrastructure without modification.</li>
+<li>Cross-client identity remains anchored at a single source (GitHub), removing the need for the system to maintain its own identity claims.</li>
+</ul>
+<h4 id="conditions-to-reconsider_1"><strong>Conditions to reconsider</strong></h4>
+<p>This decision should be revisited if any of the following becomes true:</p>
+<ul>
+<li>Introspection latency becomes a measurable bottleneck and caching proves insufficient.</li>
+<li>The system requires identity claims or scopes that GitHub does not carry.</li>
+<li>Dependency on GitHub's introspection endpoint availability becomes operationally unacceptable.</li>
+<li>A second-class identity provider (beyond GitHub and Google) is introduced and federation becomes preferable to per-provider token validation.</li>
+</ul>
+<h4 id="implementation-costs-if-reconsidered"><strong>Implementation Costs if reconsidered</strong></h4>
+<p>Future contributors taking this on should expect to implement token issuance, signing key rotation, a browserless token acquisition UX (the painful part), local JWT verification at REST, and a revocation strategy. None of this is intractable; the current team simply judged the present arrangement adequate for the system's needs.</p>
+<h2 id="7-threat-modeling">7. Threat Modeling</h2>
+<p>This section enumerates threats within the system's scope using the STRIDE framework (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege). The aim is to document the attack surface so new contributors can reason about changes, and to make existing mitigations and known gaps legible. Threats outside the scope of the system (credentialed insiders, social engineering, supply-chain compromise of dependencies) are noted only where they meaningfully shape design decisions.</p>
+<pre class="mermaid"><code>flowchart TB
+    User(["User"])
+    subgraph CHELL_TB["CHELL (untrusted)"]
+        Agent["AI Agent + LLM provider"] 
+    end
+
+
+
+    subgraph LocalHost["Local host (trusted)"]
+        TUI["Claude Code TUI"]
+        MCP(("MCP Facade"))
+        Token[("Token store")]
+        FS[("Artifact handoff region")]
+        Logs[("Local Logs")]
+    end
+
+    subgraph Remote["Remote infra (trusted)"]
+        REST(("REST API"))
+    end
+
+    User --&gt;|f1: prompt| TUI
+    TUI &lt;--&gt;|f2: I/O stream| Agent
+    Agent --&gt;|f3: tool call args| MCP
+    MCP --&gt;|f4: LOW response| Agent
+    MCP &lt;==&gt;|f5: REST over TLS — crosses public network| REST
+    MCP --&gt;|f6: HIGH artifact write| FS
+    User --&gt;|f7: review| FS
+    User -.-&gt;|f8: consent gesture| FS
+    Token -.-&gt;|read by| MCP 
+    TUI --&gt; Logs</code></pre>
+<h4 id="threats-by-flow-element"><strong>Threats by flow / element</strong></h4>
+<ul>
+<li><strong>f3 (Agent → MCP):</strong><ol>
+<li>User Spoofing via impersonating an LLM. If MCP is visible outside of localhost, an actor can pose as an LLM and invoke tool calls on the MCP without restriction</li>
+</ol>
+</li>
+<li><strong>f4 (MCP → Agent):</strong><ol>
+<li>High-sensitivity content leaks via result field, error, or metadata</li>
+</ol>
+</li>
+<li><strong>f5 (MCP ↔ REST, over public network):</strong><ol>
+<li>Traffic blocking, accepted as observable failure</li>
+</ol>
+</li>
+<li><strong>Token store:</strong><ol>
+<li>Disclosure via logs, stderr, crash dumps, telemetry</li>
+</ol>
+</li>
+<li><strong>MCP facade (process):</strong><ol>
+<li>CHELL induces tool-call flood, exhausting facade or REST quota</li>
+</ol>
+</li>
+<li><strong>f8 (user consent gesture):</strong><ol>
+<li>rubber-stamped consent indistinguishable from reviewed consent</li>
+</ol>
+</li>
+</ul>
+<h3 id="gaps"><strong>Gaps</strong></h3>
+<p>The following surfaces are not currently covered by security invariants and should be designed deliberately before launch:</p>
+<ul>
+<li>
+<p><strong>Spoofing mitigations.</strong> The MCP trusts all LLM as originating from the user. In therory, an attacker, knowing the address of the MCP, can interact with the MCP to perform arbitrary operations under the user's credentials.</p>
+<ul>
+<li>Possible mitigation:<ul>
+<li>Use a digital signature algorithm (DSA) such that the user must provide a public key to the MCP in advance. If the user cannot provide a valid signature, do not run those operations</li>
+<li>Only allow MCP to accept calls from localhost</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Consent quality.</strong> The model assumes the user reviews artifact content before releasing it; rubber-stamping is acknowledged but not defended. Future work could explore review-friendliness (diffs, summaries, size warnings) without weakening the gesture itself.</p>
+</li>
+</ul>
+<blockquote>
+<p>Mitigation research and developing an incident response plan for the above is left to whoever picks them up.</p>
+</blockquote>
+<h2 id="8-testing-strategy">8. Testing strategy</h2>
+<p>To ensure that the features associated with enabling agentic workflows in GLADOS are properly implemented, creating a multi-faceted testing strategy is crucial. The following tests can establish correctness and also ensure implementation matches security specifications: </p>
+<h3 id="81-agent-testing-to-test-end-to-end-operations-and-monitor-nondeterministic-interactions">8.1 Agent Testing to test End-to-end Operations and Monitor Nondeterministic Interactions</h3>
+<p>This testing would verify that end-to-end operations of a local agent using the locally hosted MCP servers to call the REST API endpoints, be recorded in the audit log, and then return the expected payload. This would ensure that the correct sequency of calls could occur. </p>
+<p>This test would use the addnums experiment (located here: <a href="https://github.com/AutomatingSciencePipeline/Monorepo/blob/main/example_experiments/python/addNums.py">Add Nums Experiment</a>) with a description of the experiment <a href="https://github.com/AutomatingSciencePipeline/Monorepo/blob/main/docs/docs/deafult-exp-guides/addNums.md">on this documentation page</a>.</p>
+<p>This test would require a full sequence of calls to execute the experiment: Starting with authentication, then proceeding to submitting and running the experiment, querying to check on experiment status, and downloading all relevant experiment artifacts. See security testing in 8.3 which elaborates on some of the security standards that need to be tested for these actions; however, this end-to-end testing will check for functionality first. </p>
+<p>A 32 GB VM for running local models can be available at request from the CSSE Department system admin.  </p>
+<p>Using Ollama to run models locally will enable effective model management- utilize a model with Ollama that uses approximately 8B-16B parameter size model in order to use resources available via the VM effectively. </p>
+<h3 id="82-unit-testing-of-mcp-endpoints">8.2 Unit Testing of MCP Endpoints</h3>
+<p>Create a test suite composed of unit tests that mock the Next.js REST endpoints to ensure that the MCP server calls in order to test conformation of the functional invariants defined in 3.1. </p>
+<ul>
+<li>To test the structural invariant, each MCP tool call should result in one HTTP request sent to the REST endpoint, with successful calls tested as well as calls that require retries before surfaced failure. </li>
+<li>To test the payload invariant, create unit tests with a variety of arguments to ensure that the corresponding REST requests has the proper schema with no incorrect changing of the values. </li>
+<li>To test the response invariant, mock custom payloads from the REST API to ensure that the MCP server does not create, add, or remove fabricated data in the responses.</li>
+</ul>
+<h3 id="83-security-evaluation-involving-integration-and-component-testing">8.3 Security Evaluation Involving Integration and Component Testing</h3>
+<p>To ensure our security architecture functions as expected, a variety of tests, mainly following under integration and component level testing, are recommended.</p>
+<ul>
+<li>Data access for the CHELL is restricted to protect against improper leakage of credentials, experiment results, and other sensitive information. To test this, walk through a full experiment creation process using an agent, with one walk through being happy path and another with a purposefully-thrown crash. Then monitor all generated telemetry streams for sensitive data to see if any such information was logged by the agent.</li>
+<li>The audit log collection is intended to record mutable actions taken by agents interacting with the system (full schema of the collection included in the architecture section). To test this, execute a series of mutable actions (running a new experiment, updating experiment information, deleting experiment information, or any other mutable actions that are implemented), and confirm that the collection writes that occurred to log these actions properly record each. To ensure full coverage beyond just the happy path testing, temporarily scale down the MongoDB pods (which should cause the health check associated with the audit log to fail), and then attempt to make the same mutable actions. Each action should be denied, with degraded-mode error returned as its reason.</li>
+</ul>
+<h2 id="9-references">9. References</h2>
+<ul>
+<li><a href="https://www.mindstudio.ai/blog/ollama-run-ai-models-locally-claude-code-workflows">Utilizing Ollama</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7662">RFC7662</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8628">RFC8628</a></li>
+<li><a href="https://modelcontextprotocol.io/specification/2025-11-25">MCP Specification</a></li>
+<li><a href="https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2026-03-10">Github API Request Limit</a></li>
+<li><a href="https://realpython.com/python-logging/">Logging in Python</a></li>
+<li><a href="https://oneuptime.com/blog/post/2026-03-31-mongodb-how-to-implement-audit-logging-in-mongodb/view">Audit Logs in MongoDB</a></li>
+<li><a href="https://www.loginradius.com/blog/engineering/auditing-and-logging-ai-agent-activity">Audit Logs with Agentic Systems</a></li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>
