@@ -14,7 +14,7 @@ Here, "phase" means a block of calendar time with a demo at the end. Each phase 
 | Decision | Choice | Where it came from |
 |---|---|---|
 | Order of work | Finish manual mode first, then auto mode | Team decision, 2026-10-29. Proposal §8 milestones 2 and 3. |
-| Client questions in proposal §9 | Not yet answered. Defaults from the proposal are used and marked **CLIENT-PENDING(n)**, where *n* is the row in Section 9 of this document. | Section 9 lists every pending item. |
+| Client questions in proposal §9 | Answered at the client meeting in the week of 2026-11-02. Questions the client did not discuss keep the default the team proposed. Each decision is marked **CLIENT-DECISION(n)**, where *n* is the row in Section 9 of this document. | Section 9 records every answer. |
 | Team split | Vertical by feature, three tracks per phase | Team decision. Shared conventions are enforced through `AGENTS.md` / `CLAUDE.md` because every member codes with an AI coding agent (Appendix A). |
 | Calendar | Quarter system, 10-week quarters | Fall quarter has about two weeks left as of 2026-10-29. Winter and spring quarters follow. The project does not have to end exactly at the end of spring. |
 
@@ -50,7 +50,7 @@ Tracks are called **T1, T2, T3** in every phase. The same person keeps the same 
 | T1 | Open and merge the `mcp-facade` PR against `main`, with the CI workflow green. Fix the README note about `/api/cli/status` now that #704 is merged. | Facade on `main`, CI passing. |
 | T2 | Revise `agentic_plan.md` as listed in proposal §4 (S-1/S-2 scope, §5.7 rewrite, local log fields `mode` and `approved_by`, scope note on loop limits). | PR merged; proposal §8 milestone 1 done. |
 | T3 | Write the shared conventions from Appendix A into `apps/mcp-facade/AGENTS.md` and `apps/frontend/app/api/cli/AGENTS.md`, with a `CLAUDE.md` next to each that imports it. Fill the REST contract table (Appendix B) for every Phase 1 route. | Both files merged; each Phase 1 route has an owner and a contract row. |
-| All | Send proposal §9 questions to the client with this roadmap, and record the answers in the proposal. Agree on who is T1/T2/T3. | Client meeting held; Section 9 of this document updated. |
+| All | Send proposal §9 questions to the client with this roadmap, and record the answers in the proposal. Agree on who is T1/T2/T3. | Client meeting held (week of 2026-11-02) and Section 9 of this document updated. Answers recorded in proposal §9.1. Still to do: assign T1/T2/T3. |
 
 ## 4. Phase 1: Manual mode complete (winter weeks 1-5)
 
@@ -66,6 +66,7 @@ Tracks are called **T1, T2, T3** in every phase. The same person keeps the same 
 **Facade**
 
 - An **outbox** directory, `~/.glados/outbox/<bundle>/`, holding `experiment.yaml` and the experiment file. The user puts files there; the agent refers to a bundle by name. This satisfies S-4: the tool argument is a name matched against `[A-Za-z0-9_-]{1,64}` and resolved inside the outbox, never a path.
+- One-time setup (**CLIENT-DECISION(7)**): the client liked the designated trusted folder but asked that it be easy to use. `python -m glados_mcp login` creates `~/.glados/outbox/` and `~/.glados/handoff/` (with `released/`) if they are missing and prints their locations. Nothing else needs to be configured, and later tool calls never ask the user to set up folders again.
 - Tools: `upload_bundle_file(bundle)` returns the `fileId`; `submit_experiment(bundle, file_id)` returns `exp_id`; `cancel_experiment(exp_id)`. Two tools for submit keeps I-1 intact (one REST call per tool). Alternative: one composite tool plus an amendment to I-1. **Decision for T1 in week 1; recommended: two tools.**
 - Local audit log at `~/.glados/audit.log` using the `logging` module: `datetime, tool, mode, approved_by, result, error_code`. Written for every tool call, including reads and refusals. No arguments or response bodies are logged (S-5).
 
@@ -84,7 +85,8 @@ Tracks are called **T1, T2, T3** in every phase. The same person keeps the same 
 **Facade**
 
 - Tools `fetch_results(exp_id)`, `fetch_logs(exp_id)`, `fetch_zip(exp_id)`. Each writes to `~/.glados/handoff/<exp_id>/` and returns only `{ok, exp_id, artifact, bytes}`. No path and no content is returned (S-1, S-2).
-- Consent gesture: the **watched inbox** from plan §4.3. The user moves a file from `handoff/<exp_id>/` to `handoff/released/<exp_id>/`. Tool `read_released(exp_id, artifact)` returns at most 64 KB from the released directory only, with a truncation note. Copy/paste remains available as the zero-code fallback.
+- Consent gesture: the **watched inbox** from plan §4.3 (**CLIENT-DECISION(8)**). The user moves a file from `handoff/<exp_id>/` to `handoff/released/<exp_id>/`. Tool `read_released(exp_id, artifact)` returns at most 64 KB from the released directory only, with a truncation note. Copy/paste remains available as the zero-code fallback.
+- Provider notice (**CLIENT-DECISION(6)**): the first `login` prints a notice that the user must acknowledge once: anything the agent reads, including released results of sensitive experiments, goes to the user's own LLM provider, and GLADOS only provides the connection. The acknowledgement is stored in `~/.glados/config` with a date; `login` prints it again if the notice text changes. The same text goes at the top of the facade README.
 - Document the UID limitation from the facade README: the agent's shell runs as the same OS user, so the inbox is a guard against accidental reads, not a hard boundary. Phase 3 T2 looks at UID separation.
 
 **Tests**
@@ -133,7 +135,9 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 **Server**
 
 - Add `sensitive: boolean` to the experiment document types and to `submitExp`; new experiments default to `true`. A one-time migration sets `sensitive: true` on every existing experiment.
-- Web UI toggle on the experiment page, showing the four criteria from proposal §5.1 and requiring confirmation to mark non-sensitive. Only the owner can change it; the change is written to `agent_audit` with `approved_by: user`. **CLIENT-PENDING(1)**: owner's own statement is sufficient; no admin confirmation. **CLIENT-PENDING(6)**: UI text states the LLM provider may retain data.
+- Web UI toggle on the experiment page, showing the four criteria from proposal §5.1 and requiring confirmation to mark non-sensitive. Only the owner can change it; the change is written to `agent_audit` with `approved_by: user`. **CLIENT-DECISION(1)**: the owner's own classification is enough, and no admin confirmation is needed.
+- Provider notice (**CLIENT-DECISION(6)**): the toggle and the experiment page say that when the user works with an experiment through an agent, the user's LLM provider can see the data and may keep it under its own policy, and that GLADOS only provides the connection. For a sensitive experiment the page also says the agent can see released results in manual mode but can never use the experiment in auto mode.
+- Sharing restriction (**CLIENT-DECISION(1)**): when the owner clicks **Share Experiment** (`ExperimentListing.tsx`, `addShareLink`) on a sensitive experiment, show a dialog before the link is created. The dialog shows the current sensitivity setting with a link to change it and warns that anyone who redeems the link gets a copy of the experiment. The link is created only after the owner confirms. Non-sensitive experiments keep the current one-click share.
 - No CLI route for changing classification. The `agent` request marker on any route that could change it is rejected (S-12).
 - Helper used by T2: `assertNonSensitive(expId, userId)`.
 
@@ -145,6 +149,7 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 
 - New experiment via `submitExp` is sensitive by default.
 - Classification change with the `agent` marker is refused.
+- Sharing a sensitive experiment: no share link is created until the dialog is confirmed, and cancelling leaves no link behind. Sharing a non-sensitive experiment shows no dialog.
 - Static check: the facade tool registry has no tool whose name or arguments mention sensitivity.
 
 ### 5.2 T2: Auto sessions and limits (S-10, S-11, S-12, proposal §5.3-5.4)
@@ -152,10 +157,11 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 **Server**
 
 - Collection `agent_sessions`: `session_id, user_id, template_experiment_id, bounds, limits, started_at, expires_at, ended_at, end_reason, counters (experiments, trials, running)`.
-- Routes `/api/cli/session/start`, `/api/cli/session/end`, `/api/cli/session/get`. Start checks the template is owned by the user and non-sensitive (T1 helper) and that the user is privileged or admin (**CLIENT-PENDING(5)**). Start and end write `agent_audit` records with the bounds, limits, and end reason.
+- Routes `/api/cli/session/start`, `/api/cli/session/end`, `/api/cli/session/get`. Start checks the template is owned by the user and non-sensitive (T1 helper) and that the user is privileged or admin (**CLIENT-DECISION(5)**: auto mode is limited to privileged and admin users for now). Start and end write `agent_audit` records with the bounds, limits, and end reason.
 - Session tagging: experiments created through the session route carry `session_id`; every session route checks the tag against the active session (S-10).
-- Enforcement of proposal §5.4 server-side limits with the proposed defaults (**CLIENT-PENDING(2)**): 4 h length, 10 experiments, 500 trials (computed the same way `apps/runner/modules/configs.py` expands ranges), 2 running at once, `workers` and `timeout` no higher than the template. Refusals return a short reason string from §5.4.
-- Session end: queued experiments cancelled, running ones finish; `stop_all` option cancels running ones too (**CLIENT-PENDING(4)**).
+- Enforcement of proposal §5.4 server-side limits with the proposed defaults (**CLIENT-DECISION(2)**): 4 h length, 10 experiments, 500 trials (computed the same way `apps/runner/modules/configs.py` expands ranges), 2 running at once, `workers` and `timeout` no higher than the template. Refusals return a short reason string from §5.4.
+- Admin override of limits (**CLIENT-DECISION(2)**): an `agent_limit_overrides` collection (`user_id, limits, set_by, set_at`) holds per-user maximums. Only admins can write it, from an admin section of the web UI, and each change goes to `agent_audit` with `approved_by: admin`. Session start uses the user's override if there is one and the defaults otherwise. A session can ask for limits at or below the user's maximum but never above it. Other users, and any request carrying the `agent` marker, cannot change limits (S-12).
+- Session end: queued experiments cancelled, running ones finish; `stop_all` option cancels running ones too (**CLIENT-DECISION(4)**).
 
 **Out-of-band CLI (not an MCP tool, S-12)**
 
@@ -166,6 +172,7 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 - One test per limit at the boundary value and one past it.
 - Expired session: every session route refuses.
 - Sensitive template, template owned by someone else, non-privileged user: start refused.
+- Limit overrides: an admin's override raises the maximum for that user only; an override write by a non-admin or with the `agent` marker is refused; a session asking for more than the user's maximum is refused.
 - Static check: no MCP tool is registered for start, end, or limit changes.
 
 ### 5.3 T3: Session tool set and audit field changes (proposal §5.2 CAN column, §5.7)
@@ -173,12 +180,14 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 **Server**
 
 - `/api/cli/session/createRun`: copies the template, replaces only the hyperparameter values the agent supplied, rejects anything outside the bounds or any field other than hyperparameter values. Starts the run. Returns `exp_id` and remaining budget.
-- `/api/cli/session/results`: returns the result CSV for an experiment tagged with the active session, nothing else (**CLIENT-PENDING(3)**: results and template parameters only, no code or `trialExtraFile`).
+- `/api/cli/session/results`: returns the result CSV for an experiment tagged with the active session, nothing else.
+- `/api/cli/session/templateFile` (**CLIENT-DECISION(3)**: the agent can read the template's code and `trialExtraFile` by default): takes `artifact` = `code` or `trial_extra_file` and returns that file from the session's template only. The template is already known to be non-sensitive, because session start requires it.
 - Audit records for session actions carry `session_id`, `mode: auto`, `approved_by: auto`, `template_experiment_id`.
 
 **Facade**
 
-- Tools: `get_template()`, `create_run(values)`, `get_run_status(exp_id)`, `get_run_results(exp_id)`, `cancel_run(exp_id)`, `get_budget()`. All refuse with `NO_SESSION` when no active session exists.
+- Tools: `get_template()`, `get_template_file(artifact)`, `create_run(values)`, `get_run_status(exp_id)`, `get_run_results(exp_id)`, `cancel_run(exp_id)`, `get_budget()`. All refuse with `NO_SESSION` when no active session exists.
+- `get_template_file` returns text only, within the 64 KB cap. For a `trialExtraFile` archive it returns the text members, plus the name and size of each binary member without its content. `artifact` is matched against a fixed list; it is not a path (S-4).
 - Facade-side limits from §5.4: 30 tool calls per minute, 1,000 per session, status at most every 30 s per experiment, 64 KB result cap with a truncation note.
 - Results pass through the same allowlist discipline: unknown fields dropped, nothing added (I-3).
 
@@ -187,6 +196,7 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 - The CANNOT column of proposal §5.2 as one parametrized test file, one case per row, each asserting a refusal. This file becomes the S-9..S-12 CI check in Phase 3.
 - Rate limiter and poll cadence tests with a fake clock.
 - 64 KB cap: response is cut, note present, nothing else changed.
+- `get_template_file`: an unknown `artifact` value is refused; binary archive members come back as name and size only; a request for a file from an experiment other than the session template is refused.
 
 **Phase 2 done when** a session can be opened from the CLI against the dev cluster with addNums as the template, `create_run` succeeds inside the bounds and is refused outside them, and the CANNOT test file passes.
 
@@ -198,7 +208,7 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 
 - Request the 32 GB VM from the CSSE system administrator; install Ollama with an 8B-16B model, and Claude Code or an equivalent MCP host.
 - Scripted scenarios: the manual mode flow from Phase 1, and "try x from 1 to 20 and tell me what you see" in a session. Save the transcripts in `docs/docs/infrastructure/agentic_test_runs/`.
-- Prompt injection probe (proposal §7): a template whose result CSV contains text telling the agent to delete experiments or exceed the budget. Confirm every attempted CANNOT action is refused and audited.
+- Prompt injection probe (proposal §7): a template whose result CSV, code comments, and `trialExtraFile` contain text telling the agent to delete experiments or exceed the budget. These are the places the agent reads untrusted text, now that it can read code and `trialExtraFile` (CLIENT-DECISION(3)). Confirm every attempted CANNOT action is refused and audited.
 
 ### 6.2 T2: Security evaluation (plan §8.3, §7 gaps)
 
@@ -246,21 +256,20 @@ Phase 2 is the most server-heavy phase. T3 depends on T2's session routes. T2 wr
 | T2 | Developer and security documentation: threat model updates, incident response, open gaps for the next team. |
 | T3 | Final presentation and recorded demo; issue list for anything not finished. |
 
-## 9. Pending client confirmations
+## 9. Client decisions
 
-Defaults in use until the client answers. Each marker in this document and in code comments reads `CLIENT-PENDING(n)`.
+Answers from the client meeting in the week of 2026-11-02. A question the client did not discuss keeps the default the team proposed ("Default kept"). Each marker in this document and in code comments reads `CLIENT-DECISION(n)`.
 
-| n | Question (proposal §9) | Default assumed | First affected |
-|---|---|---|---|
-| 1 | Is the owner's classification enough? | Yes; no admin confirmation | Phase 2 T1 |
-| 2 | Are the §5.4 limits reasonable? | Yes; proposed values used | Phase 2 T2 |
-| 3 | Can the agent read template code and `trialExtraFile`? | No; results CSV and parameters only | Phase 2 T3 |
-| 4 | Running experiments at session end? | Finish; queued ones cancelled; `--stop-all` cancels running | Phase 2 T2 |
-| 5 | Open to all users or privileged only? | Privileged and admin only | Phase 2 T2 |
-| 6 | Provider data retention acceptable for non-sensitive? | Yes | Phase 2 T1 |
-| 7 | *(new)* Submit through an outbox directory the user fills by hand? | Yes | Phase 1 T1 |
-| 8 | *(new)* Consent gesture is the watched inbox? | Yes, with copy/paste as fallback | Phase 1 T2 |
-
+| n | Question (proposal §9) | Decision | Source | First affected |
+|---|---|---|---|---|
+| 1 | Is the owner's classification enough? | Yes, and no admin confirmation is needed. Sharing is slightly restricted: sharing a sensitive experiment first shows its sensitivity setting and a warning that the experiment may be copied. | Client | Phase 2 T1 |
+| 2 | Are the §5.4 limits reasonable? | Use the proposed defaults. Limits are editable: admins can override them per user, and other users cannot. | Client (admin-only override confirmed by the team after the meeting) | Phase 2 T2 |
+| 3 | Can the agent read template code and `trialExtraFile`? | Yes, by default. | Client | Phase 2 T3 |
+| 4 | Running experiments at session end? | Running experiments finish and queued ones are cancelled; `--stop-all` also cancels running ones. | Default kept | Phase 2 T2 |
+| 5 | Open to all users or privileged only? | Auto mode is limited to privileged and admin users for now. | Client | Phase 2 T2 |
+| 6 | Provider data retention acceptable for non-sensitive? | Yes. When a user works with sensitive data through an agent, warn them that their LLM provider can see the data and that GLADOS only provides the connection. | Client | Phase 1 T2, Phase 2 T1 |
+| 7 | *(new)* Submit through an outbox directory the user fills by hand? | Yes. The client liked having a designated trusted folder but wants it to be easy to use, so setup happens once and automatically at `login`. | Client | Phase 1 T1 |
+| 8 | *(new)* Consent gesture is the watched inbox? | Yes, with copy/paste as the fallback. | Default kept | Phase 1 T2 |
 ## 10. Risks and how the plan handles them
 
 | Risk | Handling |
@@ -271,6 +280,7 @@ Defaults in use until the client answers. Each marker in this document and in co
 | GitHub rate limit (5,000 requests per hour) with polling | Facade poll cadence (30 s per experiment) and call caps from §5.4 are in Phase 2 T3. |
 | Production TLS certificate expired 2026-10-23 | Demos use the dev cluster until renewed. Raise with infrastructure in Phase 0. |
 | Phase 4 slips | Phases 1-3 are a complete, demoable product on their own. |
+| Reading template code and `trialExtraFile` sends more to the provider and gives prompt injection more places to hide (CLIENT-DECISION(3)) | Only the session template can be read, and session start requires it to be non-sensitive. Output is text only and capped at 64 KB. The Phase 3 injection probe plants instructions in code and archive members as well as in results. |
 
 ## Appendix A: Shared conventions for `AGENTS.md` / `CLAUDE.md`
 
@@ -315,8 +325,8 @@ Read docs/docs/infrastructure/agentic_plan.md sections 3 and 5 before changing a
   team members. Feature PRs depend on that PR instead of editing these files.
 
 ## Markers
-- Decisions waiting on the client are marked CLIENT-PENDING(n) in comments, where n is the
-  row in agentic_roadmap.md section 9.
+- Code that implements a client decision is marked CLIENT-DECISION(n) in a comment, where n
+  is the row in agentic_roadmap.md section 9.
 ```
 
 ## Appendix B: REST contract table
@@ -327,11 +337,12 @@ Filled in by the owning track before implementation starts. The facade's `fake_g
 |---|---|---|---|---|---|
 | `/api/cli/cancelExp` | 1 / T1 | `eid` | `{success, status}` | `auth_error, not_found, degraded` | stub |
 | `/api/cli/auditHealth` | 1 / T3 | none | `{success, healthy}` | `auth_error` | stub |
-| `/api/cli/session/start` | 2 / T2 | `template_eid, bounds, limits` | `{success, session_id, expires_at}` | `auth_error, not_found, sensitive_template, not_privileged, degraded` | stub |
+| `/api/cli/session/start` | 2 / T2 | `template_eid, bounds, limits` | `{success, session_id, expires_at, limits}` | `auth_error, not_found, sensitive_template, not_privileged, limit_above_max, degraded` | stub |
 | `/api/cli/session/end` | 2 / T2 | `session_id, stop_all` | `{success, end_reason}` | `auth_error, not_found, degraded` | stub |
 | `/api/cli/session/get` | 2 / T2 | `session_id` | `{success, template, bounds, limits, budget}` | `auth_error, not_found` | stub |
 | `/api/cli/session/createRun` | 2 / T3 | `session_id, values, parent_round` | `{success, eid, budget}` | `auth_error, no_session, out_of_bounds, budget_exhausted, concurrency_limit, degraded` | stub |
 | `/api/cli/session/results` | 2 / T3 | `session_id, eid` | `{success, csv}` | `auth_error, no_session, not_found` | stub |
+| `/api/cli/session/templateFile` | 2 / T3 | `session_id, artifact` (`code` or `trial_extra_file`) | `{success, name, content}` or, for an archive, `{success, members}` | `auth_error, no_session, not_found, too_large` | stub |
 | `/api/cli/session/rounds` | 4 / T2 | `session_id` | `{success, rounds}` | `auth_error, no_session` | stub |
 
 Existing routes (`tokenAuth`, `uploadFile`, `submitExp`, `queryExp`, `status`, `downloadResult`, `downloadZip`, `downloadLogs`) keep their current shapes. Phase 1 adds the `agent` marker and the audit insert to the mutating ones without changing their responses.
