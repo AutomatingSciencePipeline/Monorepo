@@ -333,10 +333,19 @@ Read docs/docs/infrastructure/agentic_plan.md sections 3 and 5 before changing a
 
 Filled in by the owning track before implementation starts. The facade's `fake_glados` is written from this table.
 
+Status values: **stub** means the route does not exist yet; **exists** means the row describes the current code on `main`; **exists + change** means the route exists and the listed Phase 1 change is still to do. Where the track cell names a second track, that track owns the audit insert in the route (Phase 1 T3).
+
 | Route | Phase / track | Request fields (besides `token`, `agent`) | Success response | Error codes | Status |
 |---|---|---|---|---|---|
-| `/api/cli/cancelExp` | 1 / T1 | `eid` | `{success, status}` | `auth_error, not_found, degraded` | stub |
+| `/api/cli/cancelExp` | 1 / T1; audit insert T3 | `eid` | `{success, status}` | `auth_error, not_found, degraded` | stub |
 | `/api/cli/auditHealth` | 1 / T3 | none | `{success, healthy}` | `auth_error` | stub |
+| `/api/cli/queryExp` | 1 / T1 (read, no change) | `exp_title` (`"*"` returns every visible experiment) | `{success, matches: [{id, name, tags, status, started_on, current_permutation, total_permutations}]}`, newest first | `auth_error` (401); `Other` (400 bad arguments, 500) | exists |
+| `/api/cli/status` | 1 / T1 (read, no change) | `eid` | `{success, status, current_permutation, total_permutations}` | `auth_error` (401); `not_found` (200 with `success: false`, also for experiments the user cannot see); `Other` (400, 500) | exists |
+| `/api/cli/uploadFile` | 1 / T1; audit insert T3 | multipart form: `userToken` (the token), `file` | `{message, fileId, fileName, reuse}` (no `success` field; `reuse: true` when the same user already uploaded the same SHA-256) | `auth_error` (401); `degraded` (503, Phase 1); otherwise only `{message}` free text (400, 500) | exists + change: `agent` field and audit insert |
+| `/api/cli/submitExp` | 1 / T1; audit insert T3 | multipart form: `userToken` (the token), `execFileID` (the `fileId` from `uploadFile`), `file` (the experiment YAML) | `{success, expId}` | `auth_error` (401); `Other` (400 bad arguments); `Invalid YAML` (400); `degraded` (503, Phase 1); `{response}` free text (500) | exists + change: `agent` field and audit insert |
+| `/api/cli/downloadResult` | 1 / T2 | `expID` | Raw CSV body (`text/csv`), not JSON | `auth_error` (401); `Other` (400, 500); plain-text `not_found` (404) | exists + change: size before streaming |
+| `/api/cli/downloadZip` | 1 / T2 | `expID` | Raw zip body (`application/zip`) with `Content-Length` | `auth_error` (401); `Other` (400, 500); plain-text `not_found` (404); plain-text `Empty zip contents` (500) | exists |
+| `/api/cli/downloadLogs` | 1 / T2 | `expID` | Raw log body (`text/plain`); an empty log returns 200 with a placeholder sentence | `auth_error` (401); `Other` (400); `{response: "not_found"}` (404, and 500 on any server error) | exists + change: size before streaming |
 | `/api/cli/session/start` | 2 / T2 | `template_eid, bounds, limits` | `{success, session_id, expires_at, limits}` | `auth_error, not_found, sensitive_template, not_privileged, limit_above_max, degraded` | stub |
 | `/api/cli/session/end` | 2 / T2 | `session_id, stop_all` | `{success, end_reason}` | `auth_error, not_found, degraded` | stub |
 | `/api/cli/session/get` | 2 / T2 | `session_id` | `{success, template, bounds, limits, budget}` | `auth_error, not_found` | stub |
@@ -345,4 +354,11 @@ Filled in by the owning track before implementation starts. The facade's `fake_g
 | `/api/cli/session/templateFile` | 2 / T3 | `session_id, artifact` (`code` or `trial_extra_file`) | `{success, name, content}` or, for an archive, `{success, members}` | `auth_error, no_session, not_found, too_large` | stub |
 | `/api/cli/session/rounds` | 4 / T2 | `session_id` | `{success, rounds}` | `auth_error, no_session` | stub |
 
-Existing routes (`tokenAuth`, `uploadFile`, `submitExp`, `queryExp`, `status`, `downloadResult`, `downloadZip`, `downloadLogs`) keep their current shapes. Phase 1 adds the `agent` marker and the audit insert to the mutating ones without changing their responses.
+Existing routes keep their current shapes. Phase 1 adds the `agent` marker and the audit insert to the mutating ones without changing their responses. `tokenAuth` is not listed because no Phase 1 track uses or changes it; the facade logs in through the GitHub device flow.
+
+Things to know about the existing routes when writing `fake_glados` handlers:
+
+- `uploadFile` and `submitExp` are multipart forms and name the token `userToken`. Every other route takes JSON with `token`.
+- The experiment id is `eid` in `status` and the new routes, and `expID` in the three download routes.
+- Error bodies are not uniform yet: depending on the route and the failure, the code is in `error`, `response`, or only in a free-text `message`. Only `auth_error` (401) is the same everywhere. The facade maps by HTTP status and the known codes above and never passes the text through.
+- The three download routes return raw bodies, not JSON. Only `downloadZip` sends `Content-Length` today; T2 adds a size to the other two so the facade can refuse oversize downloads before reading the body.
