@@ -8,13 +8,13 @@ export async function GET(
     { params }: { params: Promise<{ idOfLogFile: string }> }
 ) {
     const session = await auth();
-    if (!session) {
+    if (!session?.user?.id) {
         return NextResponse.json({ response: 'Unauthorized' }, { status: 401 });
     }
 
     const { idOfLogFile } = await params;
 
-    if (!idOfLogFile || typeof idOfLogFile !== 'string') {
+    if (typeof idOfLogFile !== 'string' || !/^[a-fA-F0-9]{24}$/.test(idOfLogFile)) {
         return NextResponse.json({ response: 'Missing experiment ID' }, { status: 400 });
     }
 
@@ -24,7 +24,10 @@ export async function GET(
 
         const experiment = await db
             .collection('experiments')
-            .findOne({ _id: new ObjectId(idOfLogFile) });
+            .findOne({
+                _id: new ObjectId(idOfLogFile),
+                $or: [{ creator: session.user.id }, { sharedUsers: { $in: [session.user.id] } }],
+            });
 
         if (!experiment) {
             return NextResponse.json(
@@ -35,22 +38,10 @@ export async function GET(
             );
         }
 
-        if (
-            session.user?.id !== experiment.creator &&
-            !experiment.sharedUsers?.includes(session.user?.id)
-        ) {
-            return NextResponse.json(
-                {
-                    response: `You are not authorized to access this experiment. Please contact the GLADOS team for further troubleshooting.`,
-                },
-                { status: 403 }
-            );
-        }
-
         const logsBucket = new GridFSBucket(db, { bucketName: 'logsBucket' });
 
         const results = await logsBucket
-            .find({ 'metadata.experimentId': idOfLogFile })
+            .find({ 'metadata.experimentId': experiment._id.toHexString() })
             .toArray();
 
         if (results.length !== 1) {

@@ -29,7 +29,7 @@ export async function fetchResultsFileCLI(expId: string, userId: string): Promis
 
     if(experiment.fails > 0) return { success: false, status: 'exp_failed'};
 
-    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
+    const results = await resultsBucket.find({ 'metadata.experimentId': experiment._id.toHexString() }).toArray();
     if (results.length === 0)  return { success: false, status: 'not_done'};
 
     const expName = experiment.name;
@@ -63,7 +63,7 @@ export async function fetchProjectZipCLI(expId: string, userId: string): Promise
         return null;
     }
 
-    const results = await zipsBucket.find({ 'metadata.experimentId': expId }).toArray();
+    const results = await zipsBucket.find({ 'metadata.experimentId': experiment._id.toHexString() }).toArray();
     if (results.length === 0) return null;
 
     const expName = experiment.name;

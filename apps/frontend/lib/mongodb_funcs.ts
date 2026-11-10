@@ -458,13 +458,10 @@ export async function updateUserRole(userId: string, role: string) {
 export async function fetchResultsFile(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();
-    if (!session) return null;
+    if (!session?.user?.id || typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) return null;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
-
-    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0) return null;
 
     const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
     if (!experiment) return null;
@@ -473,6 +470,9 @@ export async function fetchResultsFile(expId: string): Promise<{ contents: strin
     if (experiment.creator !== session?.user?.id && (!experiment.sharedUsers || !experiment.sharedUsers.includes(session.user?.id))) {
         return null;
     }
+
+    const results = await resultsBucket.find({ 'metadata.experimentId': experiment._id.toHexString() }).toArray();
+    if (results.length === 0) return null;
 
     const expName = experiment.name;
     const expCreated = experiment.created;
@@ -495,13 +495,10 @@ export async function fetchResultsFile(expId: string): Promise<{ contents: strin
 export async function fetchProjectZip(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();
-    if (!session) return null;
+    if (!session?.user?.id || typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) return null;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const zipsBucket = new GridFSBucket(db, { bucketName: 'zipsBucket' });
-
-    const results = await zipsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0) return null;
 
     const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
     if (!experiment) return null;
@@ -510,6 +507,9 @@ export async function fetchProjectZip(expId: string): Promise<{ contents: string
     if (experiment.creator !== session?.user?.id && (!experiment.sharedUsers || !experiment.sharedUsers.includes(session.user?.id))) {
         return null;
     }
+
+    const results = await zipsBucket.find({ 'metadata.experimentId': experiment._id.toHexString() }).toArray();
+    if (results.length === 0) return null;
 
     const expName = experiment.name;
     const expCreated = experiment.created;

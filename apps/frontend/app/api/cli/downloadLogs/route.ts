@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         const logsBucket = new GridFSBucket(db, { bucketName: 'logsBucket' });
 
         const results = await logsBucket
-            .find({ 'metadata.experimentId': expID })
+            .find({ 'metadata.experimentId': experiment._id.toHexString() })
             .toArray();
 
         if (results.length !== 1) {

@@ -325,6 +325,36 @@ test('tokenAuth: a valid identity remains a JSON response', async () => {
 });
 
 for (const route of ['downloadResult', 'downloadLogs', 'downloadZip']) {
+  test(`${route}: an accessible decoy cannot authorize a foreign or missing requested experiment`, async () => {
+    const decoy = experiment({ _id: new mongodb.ObjectId(FILE_ID), fails: 0 });
+    for (const documents of [
+      [decoy, experiment({ creator: STRANGER, sharedUsers: [] })],
+      [decoy],
+    ]) {
+      const { post, calls } = harness(route, { documents });
+      const response = await post(jsonRequest(validBody(route)));
+      assert.equal(response.status, 404);
+      assert.equal(calls.files.length, 0, 'denied target reached artifact lookup');
+      assert.equal(calls.reads.length, 0, 'denied target opened an artifact stream');
+    }
+  });
+
+  for (const identity of [OWNER, SHARED]) {
+    test(`${route}: uppercase experiment IDs download the exact artifact for ${identity === OWNER ? 'owners' : 'shared users'}`, async () => {
+      const { post, calls } = harness(route, { identity });
+      const response = await post(jsonRequest({ ...validBody(route), expID: EID.toUpperCase() }));
+      assert.equal(response.status, 200);
+      if (route === 'downloadZip') {
+        assert.deepEqual(Buffer.from(await response.arrayBuffer()), Buffer.from('PK\u0003\u0004zip bytes'));
+      } else {
+        assert.equal(await response.text(), route === 'downloadResult' ? 'trial,result\n1,pass\n' : 'private logs\n');
+      }
+      assert.equal(calls.files.length, 1);
+      assert.equal(calls.files[0].query['metadata.experimentId'], EID);
+      assert.deepEqual(calls.reads.map(String), [FILE_ID]);
+    });
+  }
+
   test(`${route}: valid requests preserve raw download responses`, async () => {
     const { post } = harness(route);
     const response = await post(jsonRequest(validBody(route)));
