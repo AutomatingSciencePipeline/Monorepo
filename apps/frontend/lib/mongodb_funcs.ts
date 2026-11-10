@@ -3,6 +3,8 @@ import { GridFSBucket, ObjectId } from "mongodb";
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS } from "./mongodb";
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
+import { cancelExperimentAsUser } from "./experimentCancel";
+import type { CancelResult } from "./experimentCancel";
 
 export async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
@@ -130,34 +132,40 @@ export async function deleteDocumentById(expId: string) {
 
 export async function cancelExperimentById(expId: string) {
     'use server';
-    //Call the backend at the endpoint to cancel the experiment
-    const BACKEND_PORT = process.env.BACKEND_PORT || '5050';
-    const url = `http://glados-service-backend:${BACKEND_PORT}/cancelExperiment`;
-    //Just post a json object with the experiment id
-    const backendResponse = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({ jobName: 'runner-' + expId }),
-    });
-
-    //Mark the experiment as completed
-    const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
-    await collection
-        .updateOne({ '_id': new ObjectId(expId) }, { $set: { 'finished': true } });
-
-    await collection
-        .updateOne({ '_id': new ObjectId(expId) }, { $set: { 'status': 'CANCELLED' } });
-
-    //If the backend returns a 200 status code, the experiment was successfully cancelled
-    if (backendResponse.status === 200) {
-        return Promise.resolve(true);
-    } else {
-        return Promise.resolve(false);
+    // Server actions can be called directly by any client, so the caller's identity and role
+    // come from the session, never from arguments.
+    const session = await auth();
+    const userId = session?.user?.id;
+    if (!userId) {
+        throw new Error('You must be signed in to cancel an experiment');
+    }
+    if (typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) {
+        throw new Error('Invalid experiment id');
     }
 
+    const result = await cancelExperimentAsUser(expId, {
+        userId: String(userId),
+        isAdmin: session?.user?.role === 'admin',
+    });
+    if (!result.ok) {
+        // Rejecting lets toast.promise in the UI show the failure instead of a false success.
+        throw new Error(cancelErrorMessage(result));
+    }
+    return true;
+}
+
+function cancelErrorMessage(result: Extract<CancelResult, { ok: false }>): string {
+    switch (result.error) {
+        case 'not_found':
+        case 'forbidden':
+            return 'You do not have permission to cancel this experiment';
+        case 'not_cancellable':
+            return `Experiment cannot be cancelled while ${result.status ?? 'in its current state'}`;
+        case 'status_update_failed':
+            return 'The experiment was stopped but its status could not be saved; please try again';
+        default:
+            return 'Failed to cancel experiment';
+    }
 }
 
 export async function updateExperimentNameById(expId: string, newExpName: string) {

@@ -7,6 +7,7 @@ import os
 from bson.binary import Binary
 from flask import Flask, Response, request, jsonify, send_file
 from kubernetes import client, config
+from kubernetes.client.rest import ApiException
 import pymongo
 from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file, get_experiment, update_exp_value
 
@@ -69,10 +70,19 @@ def spawn_job(experiment_data):
 @flaskApp.post("/cancelExperiment")
 def cancel_experiment():
     """The query to cancel an experiment"""
-    data = request.get_json()
-    job_name = data['jobName']
-    # kill the job
-    BATCH_API.delete_namespaced_job(job_name, "default", propagation_policy="Background")
+    data = request.get_json(silent=True) or {}
+    job_name = data.get('jobName')
+    if not isinstance(job_name, str) or not job_name.startswith('runner-'):
+        return Response(status=400)
+    # Deletion is asynchronous: 200 means Kubernetes accepted it, not that the pod has stopped.
+    try:
+        BATCH_API.delete_namespaced_job(job_name, "default", propagation_policy="Background")
+    except ApiException as err:
+        # A missing Job (already finished or already deleted) gets its own status so the
+        # frontend can treat a repeated cancel as safe instead of as a failure.
+        if err.status == 404:
+            return Response(status=404)
+        raise
     return Response(status=200)
     
 @flaskApp.post("/uploadResults")
