@@ -1,4 +1,5 @@
-import { submitExperimentCLI } from '../../../../lib/mongodb_funcs';
+import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../lib/mongodb';
+import { ExperimentData } from '../../../../lib/db_types';
 import { authenticateCli, invalidArguments, isNonEmptyString, isObjectId } from '../request';
 import * as yaml from "js-yaml";
 import { NextResponse } from "next/server";
@@ -56,4 +57,29 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json({ response: 'Failed to submit experiment!' }, { status: 500 });
   }
+}
+
+async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
+    values.creator = userId;
+    values.creatorEmail = userEmail;
+    values.creatorRole = role;
+    values.created = Date.now();
+    values.finished = false;
+    values.estimatedTotalTimeMinutes = 0;
+    values.totalExperimentRuns = 0;
+    values.file = fileId;
+    // Make sure that the trialResultLineNumber is a number, not a string
+    if (!values.trialResultLineNumber) {
+        values.trialResultLineNumber = 1;
+    }
+    values.trialResultLineNumber = Number(values.trialResultLineNumber);
+    const expData: Partial<ExperimentData> = values;
+
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
+    if (result) {
+        return result.insertedId.toString();
+    }
+    return Promise.reject(`Failed to insert experiment data`);
 }

@@ -1,5 +1,16 @@
 # Authentication regression tests
 
+The authorization unit tests run without a database or credentials:
+
+```sh
+npm run test:authorization
+```
+
+They execute the Server Actions and upload/start routes with mocked sessions,
+MongoDB, GridFS, and backend requests. Coverage includes current database roles,
+trusted submission identity, session-owned uploads, Web/CLI owner-only starts,
+and refusal before mutation or backend dispatch. `npm test` includes this suite.
+
 Install frontend dependencies using the repository lockfile. Start an isolated local
 MongoDB instance, then run from `apps/frontend`:
 

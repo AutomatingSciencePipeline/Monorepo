@@ -69,7 +69,7 @@ function multipartRequest(options = {}) {
 
 function harness(route, options = {}) {
   const calls = {
-    auth: [], db: [], queries: [], files: [], reads: [], writes: [], helpers: [], errors: [],
+    auth: [], db: [], queries: [], files: [], reads: [], writes: [], helpers: [], errors: [], submissions: [],
   };
   const documents = options.documents ?? [experiment()];
   const identity = options.identity ?? OWNER;
@@ -83,6 +83,11 @@ function harness(route, options = {}) {
     },
   };
   const collection = {
+    insertOne: async (document) => {
+      if (options.dataError) throw options.dataError;
+      calls.submissions.push(document);
+      return { acknowledged: true, insertedId: new mongodb.ObjectId(EID) };
+    },
     findOne: async (query) => {
       calls.queries.push(query);
       if (options.dataError) throw options.dataError;
@@ -125,11 +130,6 @@ function harness(route, options = {}) {
     && (sameValue(document.creator, uid) || document.sharedUsers?.some((user) => sameValue(user, uid)))
   ));
   const helpers = {
-    submitExperimentCLI: async (...args) => {
-      calls.helpers.push({ name: 'submitExperimentCLI', args });
-      if (options.dataError) throw options.dataError;
-      return EID;
-    },
     fetchResultsFileCLI: async (eid, uid) => {
       calls.helpers.push({ name: 'fetchResultsFileCLI', args: [eid, uid] });
       if (options.dataError) throw options.dataError;
@@ -189,6 +189,7 @@ function assertNoDataAccess(calls) {
   assert.equal(calls.reads.length, 0, 'unauthenticated request read a file');
   assert.equal(calls.writes.length, 0, 'unauthenticated request wrote a file');
   assert.equal(calls.helpers.length, 0, 'unauthenticated request called a data helper');
+  assert.equal(calls.submissions.length, 0, 'unauthenticated request inserted an experiment');
 }
 
 for (const route of ROUTES) {
@@ -372,12 +373,13 @@ test('submitExp: valid YAML submission uses authenticated identity and returns e
   const response = await post(multipartRequest());
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { success: true, expId: EID });
-  const submission = calls.helpers[0];
-  assert.equal(submission.name, 'submitExperimentCLI');
-  assert.equal(submission.args[0].name, 'CLI experiment');
-  assert.equal(submission.args[0].file, FILE_ID);
-  assert.equal(submission.args[0].status, 'CREATED');
-  assert.deepEqual(submission.args.slice(1), [OWNER, 'owner@example.test', 'user', FILE_ID]);
+  const submission = calls.submissions[0];
+  assert.equal(submission.name, 'CLI experiment');
+  assert.equal(submission.file, FILE_ID);
+  assert.equal(submission.status, 'CREATED');
+  assert.equal(submission.creator, OWNER);
+  assert.equal(submission.creatorEmail, 'owner@example.test');
+  assert.equal(submission.creatorRole, 'user');
 });
 
 test('submitExp: invalid YAML returns HTTP 400 before submission', async () => {

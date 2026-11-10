@@ -26,6 +26,10 @@ function setup({ githubStatus = 200 } = {}) {
       collection: (name) => {
         if (name === 'experiments') {
           return {
+            insertOne: async (document) => {
+              calls.submissions.push(document);
+              return { acknowledged: true, insertedId: new ObjectId(EXPERIMENT_ID) };
+            },
             findOne: async (query) => {
               calls.experiments++;
               const experiment = {
@@ -61,12 +65,6 @@ function setup({ githubStatus = 200 } = {}) {
     return loadSource(`app/api/cli/${name}/route.ts`, {
       '../../../../tokenAuth': auth,
       '../../../../lib/mongodb': mongodb,
-      '../../../../lib/mongodb_funcs': {
-        submitExperimentCLI: async (...args) => {
-          calls.submissions.push(args);
-          return EXPERIMENT_ID;
-        },
-      },
     }).POST;
   }
   return { route, calls, documents };
@@ -108,7 +106,10 @@ test('real authentication passes the first-time user identity into experiment su
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { success: true, expId: EXPERIMENT_ID });
   assert.equal(calls.submissions.length, 1);
-  assert.deepEqual(calls.submissions[0].slice(1), [USER_ID, 'new@example.test', 'user', FILE_ID]);
+  assert.equal(calls.submissions[0].creator, USER_ID);
+  assert.equal(calls.submissions[0].creatorEmail, 'new@example.test');
+  assert.equal(calls.submissions[0].creatorRole, 'user');
+  assert.equal(calls.submissions[0].file, FILE_ID);
 });
 
 test('real invalid-token authentication stops both status queries and submissions', async () => {

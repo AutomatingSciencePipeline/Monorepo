@@ -4,41 +4,28 @@ import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS 
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
 
-export async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
-    'use server';
-    values.creator = userId;
-    values.creatorEmail = userEmail;
-    values.creatorRole = role;
-    values.created = Date.now();
-    values.finished = false;
-    values.estimatedTotalTimeMinutes = 0;
-    values.totalExperimentRuns = 0;
-    values.file = fileId;
-    // Make sure that the trialResultLineNumber is a number, not a string
-    if (!values.trialResultLineNumber) {
-        values.trialResultLineNumber = 1;
-    }
-    values.trialResultLineNumber = Number(values.trialResultLineNumber);
-    const expData: Partial<ExperimentData> = values;
-
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    
-    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
-
-    if (result){
-        return Promise.resolve(result.insertedId.toString());
-    }
-    else {
-        return Promise.reject(`Failed to insert experiment data`);
-    }
-}
-
 export async function submitExperiment(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
-    values.creator = userId;
-    values.creatorEmail = userEmail;
-    values.creatorRole = role;
+    const user = await getCurrentUser();
+    if (user._id.toString() !== userId) {
+        return Promise.reject(`User is not who they say they are`);
+    }
+    if (typeof fileId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(fileId)) {
+        return Promise.reject(`Invalid file ID`);
+    }
+
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const file = await db.collection('fileBucket.files').findOne({
+        _id: new ObjectId(fileId), 'metadata.userId': userId,
+    });
+    if (!file) {
+        return Promise.reject(`File not found`);
+    }
+
+    values.creator = user._id.toString();
+    values.creatorEmail = user.email ?? '';
+    values.creatorRole = user.role === 'admin' || user.role === 'privileged' ? user.role : 'user';
     values.created = Date.now();
     values.finished = false;
     values.estimatedTotalTimeMinutes = 0;
@@ -51,18 +38,6 @@ export async function submitExperiment(values: Partial<ExperimentData>, userId: 
     values.trialResultLineNumber = Number(values.trialResultLineNumber);
     const expData: Partial<ExperimentData> = values;
 
-    const session = await auth();
-    // Make sure that the user is who they say they are
-    if (!session) {
-        return Promise.reject(`User is not authenticated`);
-    }
-    if (session.user?.id !== userId) {
-        return Promise.reject(`User is not who they say they are`);
-    }
-
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    
     const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
 
     if (result){
@@ -414,6 +389,10 @@ export async function unfollowExperiment(expId: string, userId: string) {
 
 export async function getUsers() {
     'use server';
+    const currentUser = await getCurrentUser();
+    if (currentUser.role !== 'admin') {
+        return Promise.reject(`User is not an admin`);
+    }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const users = db.collection('users');
@@ -432,8 +411,15 @@ export async function getUsers() {
 
 export async function updateUserRole(userId: string, role: string) {
     'use server';
+    const currentUser = await getCurrentUser();
+    if (currentUser.role !== 'admin') {
+        return Promise.reject(`User is not an admin`);
+    }
     if (role !== 'admin' && role !== 'privileged' && role !== 'user') {
         return Promise.reject(`Invalid role: ${role}`);
+    }
+    if (typeof userId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(userId)) {
+        return Promise.reject(`Invalid user ID`);
     }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -603,6 +589,22 @@ export async function fetchProjectZipCLI(expId: string, userId: string): Promise
 }
 
 // Auxiliary functions, keep at the bottom of the file
+async function getCurrentUser() {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return Promise.reject(`User is not authenticated`);
+    }
+    const userId = session.user.id;
+    const client = await clientPromise;
+    const user = await client.db(DB_NAME)
+        .collection<{ _id: ObjectId | string; email?: string; role?: string }>('users')
+        .findOne({ _id: /^[a-fA-F0-9]{24}$/.test(userId) ? new ObjectId(userId) : userId });
+    if (!user) {
+        return Promise.reject(`User is not authenticated`);
+    }
+    return user;
+}
+
 const formatFilename = (name: string, timestamp: string, extension: string) => {
     const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
     const formattedTimestamp = formatTimestamp(timestamp);

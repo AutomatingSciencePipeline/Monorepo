@@ -45,7 +45,7 @@ function unauthorized(): Response {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
-export async function tokenBasedAuth(token: string): Promise<Response> {
+export async function tokenBasedAuth(token: string, registerUser = true): Promise<Response> {
     if (typeof token !== "string" || token.trim().length === 0) {
         return unauthorized();
     }
@@ -86,6 +86,10 @@ export async function tokenBasedAuth(token: string): Promise<Response> {
                 return unauthorized();
             }
             return NextResponse.json(user);
+        }
+
+        if (!registerUser) {
+            return unauthorized();
         }
 
         const user = {
