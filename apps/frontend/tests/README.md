@@ -9,7 +9,9 @@ npm run test:authorization
 They execute the Server Actions and upload/start routes with mocked sessions,
 MongoDB, GridFS, and backend requests. Coverage includes current database roles,
 trusted submission identity, session-owned uploads, Web/CLI owner-only starts,
-and refusal before mutation or backend dispatch. `npm test` includes this suite.
+and refusal before mutation or backend dispatch. The ownership tests also cover
+owner/shared experiment and file access, owner-only edits and metadata updates,
+current-admin cancellation, and session-bound sharing. `npm test` includes these suites.
 
 Install frontend dependencies using the repository lockfile. Start an isolated local
 MongoDB instance, then run from `apps/frontend`:

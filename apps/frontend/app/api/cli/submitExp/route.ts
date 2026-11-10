@@ -1,5 +1,6 @@
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../lib/mongodb';
 import { ExperimentData } from '../../../../lib/db_types';
+import { ObjectId } from 'mongodb';
 import { authenticateCli, invalidArguments, isNonEmptyString, isObjectId } from '../request';
 import * as yaml from "js-yaml";
 import { NextResponse } from "next/server";
@@ -24,7 +25,8 @@ export async function POST(req: Request) {
     return invalidArguments();
   }
 
-  const auth = await authenticateCli(userToken);
+  // An executable owner must already have an account from login or upload.
+  const auth = await authenticateCli(userToken, false);
   if (!auth.user) return auth.response;
 
   try {
@@ -47,7 +49,16 @@ export async function POST(req: Request) {
     parsed["file"] = fileId;
     parsed["status"] = "CREATED";
 
-    const expId = await submitExperimentCLI(parsed, userId, email, role, fileId);
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const executable = await db.collection('fileBucket.files').findOne({
+      _id: new ObjectId(fileId), 'metadata.userId': userId,
+    });
+    if (!executable) {
+      return NextResponse.json({ response: 'File not found' }, { status: 404 });
+    }
+
+    const expId = await submitExperimentCLI(parsed, userId, email, role, new ObjectId(fileId).toHexString());
 
     return NextResponse.json({
       success: true,

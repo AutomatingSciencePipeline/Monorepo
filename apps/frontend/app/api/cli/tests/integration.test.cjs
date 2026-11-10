@@ -24,6 +24,11 @@ function setup({ githubStatus = 200 } = {}) {
   const clientPromise = Promise.resolve({
     db: () => ({
       collection: (name) => {
+        if (name === 'fileBucket.files') {
+          return { findOne: async (query) => matches({
+            _id: new ObjectId(FILE_ID), 'metadata.userId': USER_ID,
+          }, query) ? { _id: new ObjectId(FILE_ID) } : null };
+        }
         if (name === 'experiments') {
           return {
             insertOne: async (document) => {
@@ -100,8 +105,13 @@ test('real authentication and status preserve the new user identity on the first
   assert.equal(calls.experiments, 2);
 });
 
-test('real authentication passes the first-time user identity into experiment submission', async () => {
+test('real first-time login preserves the identity in subsequent experiment submission', async () => {
   const { route, calls } = setup();
+  const login = new Request('http://localhost/api/cli/tokenAuth', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token: 'synthetic-token' }),
+  });
+  assert.equal((await route('tokenAuth')(login)).status, 200);
   const response = await route('submitExp')(submitRequest());
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { success: true, expId: EXPERIMENT_ID });
@@ -110,6 +120,15 @@ test('real authentication passes the first-time user identity into experiment su
   assert.equal(calls.submissions[0].creatorEmail, 'new@example.test');
   assert.equal(calls.submissions[0].creatorRole, 'user');
   assert.equal(calls.submissions[0].file, FILE_ID);
+});
+
+test('an unregistered token cannot create accounts during a rejected experiment submission', async () => {
+  const { route, documents, calls } = setup();
+  const response = await route('submitExp')(submitRequest());
+  assert.equal(response.status, 401);
+  assert.equal(documents.users.length, 0);
+  assert.equal(documents.accounts.length, 0);
+  assert.equal(calls.submissions.length, 0);
 });
 
 test('real invalid-token authentication stops both status queries and submissions', async () => {

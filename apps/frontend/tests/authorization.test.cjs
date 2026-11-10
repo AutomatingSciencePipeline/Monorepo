@@ -183,6 +183,12 @@ test('Web submission selects current identity among multiple DB users', async ()
   assert.equal(h.calls.writes[0].document.creatorEmail, 'owner@example.test');
 });
 
+test('Web submission stores uppercase file IDs canonically', async () => {
+  const h = setup();
+  await h.actions.submitExperiment({}, OWNER, '', 'user', FID.toUpperCase());
+  assert.equal(h.calls.writes[0].document.file, FID);
+});
+
 test('Web submission overrides forged email, role, and creator with current DB identity', async () => {
   const h = setup({ sessionRole: 'admin' });
   const result = await h.actions.submitExperiment({
