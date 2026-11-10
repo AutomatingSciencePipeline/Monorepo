@@ -7,14 +7,22 @@ const USER_ID = '507f1f77bcf86cd799439011';
 const EXPERIMENT_ID = '507f1f77bcf86cd799439012';
 const FILE_ID = '507f1f77bcf86cd799439013';
 
+function equal(actual, expected) {
+  if (actual instanceof ObjectId || expected instanceof ObjectId) {
+    return actual instanceof ObjectId && expected instanceof ObjectId && actual.equals(expected);
+  }
+  return actual != null && actual === expected;
+}
+
 function matches(document, query) {
   return Object.entries(query).every(([key, value]) => {
     if (key === '$and') return value.every((part) => matches(document, part));
     if (key === '$or') return value.some((part) => matches(document, part));
     if (value && typeof value === 'object' && '$in' in value) {
-      return Array.isArray(document[key]) && document[key].some((item) => value.$in.includes(item));
+      if (value.$type === 'array' && !Array.isArray(document[key])) return false;
+      return Array.isArray(document[key]) && document[key].some((item) => value.$in.some((expected) => equal(item, expected)));
     }
-    return document[key] != null && String(document[key]) === String(value);
+    return equal(document[key], value);
   });
 }
 
@@ -46,8 +54,7 @@ function setup({ githubStatus = 200 } = {}) {
           };
         }
         return {
-          findOne: async (query) => documents[name].find((document) =>
-            Object.entries(query).every(([key, value]) => String(document[key]) === String(value))) ?? null,
+          findOne: async (query) => documents[name].find((document) => matches(document, query)) ?? null,
           insertOne: async (document) => {
             const insertedId = document._id ?? new ObjectId(USER_ID);
             documents[name].push({ ...document, _id: insertedId });

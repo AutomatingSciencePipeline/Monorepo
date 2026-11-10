@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
             const options = { fullDocument: 'updateLookup' };
             const changeStream = experimentsCollection.watch(pipeline, options);
             let closed = false;
+            let latestQuerySequence = 0;
             let heartbeat: ReturnType<typeof setInterval> | undefined;
             const abort = () => close();
             const close = (closeController = true) => {
@@ -77,10 +78,11 @@ export async function GET(req: NextRequest) {
             const sendAllRelevantDocs = async () => {
                 try {
                     if (!await isAuthorized() || closed) return;
+                    const querySequence = ++latestQuerySequence;
                     const docs = await experimentsCollection
-                        .find({ $or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }] })
+                        .find({ $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] })
                         .toArray();
-                    if (!await isAuthorized() || closed) return;
+                    if (!await isAuthorized() || closed || querySequence !== latestQuerySequence) return;
                     const array = convertToExpsArray(docs);
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(array)}\n\n`));
                 } catch {

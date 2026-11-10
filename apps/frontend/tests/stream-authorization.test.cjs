@@ -18,6 +18,7 @@ function matches(doc, query) {
   return Object.entries(query).every(([field, expected]) => {
     if (field === '$or') return expected.some((condition) => matches(doc, condition));
     const actual = doc[field];
+    if (expected && typeof expected === 'object' && expected.$type === 'array' && !Array.isArray(actual)) return false;
     if (expected && typeof expected === 'object' && '$in' in expected) {
       return expected.$in.some((value) => Array.isArray(actual) ? actual.includes(value) : actual === value);
     }
@@ -284,7 +285,62 @@ test('valid admin streams retain unfinished queue updates across reauthorization
   assert.ok(h.calls.auth > authBefore, 'queue changes must reauthorize the current admin');
 });
 
+test('user snapshots exclude malformed shares while preserving ownership', async (t) => {
+  const h = setup('listen');
+  t.after(() => h.abort());
+  h.docs[0].sharedUsers = OWNER;
+  h.docs.push(
+    { _id: '000000000000000000000005', creator: OTHER, sharedUsers: OWNER, name: 'Scalar share', finished: false },
+    { _id: '000000000000000000000006', creator: OTHER, sharedUsers: 42, name: 'Numeric share', finished: false },
+    { _id: '000000000000000000000007', creator: OTHER, sharedUsers: { id: OWNER }, name: 'Object share', finished: false },
+  );
+  const response = await h.get();
+  const reader = response.body.getReader();
+  assert.deepEqual((await data(reader)).map((doc) => doc.name), ['Owned', 'Shared']);
+  await h.change();
+  assert.deepEqual((await data(reader)).map((doc) => doc.name), ['Owned', 'Shared']);
+});
+
 for (const route of ['listen', 'adminListen']) {
+  for (const phase of ['initial', 'change']) {
+    for (const delay of ['query', 'final authorization']) {
+      test(`${route} discards an older ${phase} snapshot delayed by its ${delay}`, async (t) => {
+        const h = setup(route);
+        t.after(() => h.abort());
+        let reader;
+        if (phase === 'change') reader = await open(h);
+        const enqueueCount = h.calls.enqueues.length;
+        const queryGate = h.blockQuery();
+        const older = phase === 'initial' ? h.get() : h.change();
+        await queryGate.entered.promise;
+        if (phase === 'initial') reader = (await older).body.getReader();
+        let authGate;
+        if (delay === 'final authorization') {
+          authGate = h.blockAuth();
+          queryGate.release.resolve();
+          await authGate.entered.promise;
+        }
+
+        // A newer snapshot removes a revoked share or a completed admin queue entry.
+        if (route === 'listen') h.docs[1].sharedUsers = [];
+        else h.docs[1].finished = true;
+        const names = route === 'listen' ? ['Owned'] : ['Owned', 'Private'];
+        await h.change();
+        assert.deepEqual((await data(reader)).map((doc) => doc.name), names);
+
+        (authGate ?? queryGate).release.resolve();
+        await older;
+        await drain();
+        assert.equal(h.calls.enqueues.length, enqueueCount + 1, 'a superseded snapshot must not restore removed experiments');
+
+        h.docs[0].name = 'Updated owned';
+        await h.change();
+        assert.deepEqual((await data(reader)).map((doc) => doc.name), names.map((name) => name === 'Owned' ? 'Updated owned' : name));
+        assert.equal(h.calls.enqueues.length, enqueueCount + 2, 'valid later snapshots must keep flowing');
+      });
+    }
+  }
+
   for (const [reason, identity] of [
     ['revoked session', null],
     ['expired session', null],

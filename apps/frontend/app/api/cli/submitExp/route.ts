@@ -32,8 +32,8 @@ export async function POST(req: Request) {
   try {
     const user = auth.user;
     const userId = user["_id"];
-    const email = user['email'];
-    const role = user['role'];
+    const email = typeof user['email'] === 'string' ? user['email'] : '';
+    const role = user['role'] === 'admin' || user['role'] === 'privileged' ? user['role'] : 'user';
     const yamlText = await file.text();
 
     let parsed: any;
@@ -45,9 +45,6 @@ export async function POST(req: Request) {
     } catch {
         return NextResponse.json({ error: 'Invalid YAML' }, { status: 400 });
     }
-
-    parsed["file"] = fileId;
-    parsed["status"] = "CREATED";
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -71,20 +68,28 @@ export async function POST(req: Request) {
 }
 
 async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
-    values.creator = userId;
-    values.creatorEmail = userEmail;
-    values.creatorRole = role;
-    values.created = Date.now();
-    values.finished = false;
-    values.estimatedTotalTimeMinutes = 0;
-    values.totalExperimentRuns = 0;
-    values.file = fileId;
-    // Make sure that the trialResultLineNumber is a number, not a string
-    if (!values.trialResultLineNumber) {
-        values.trialResultLineNumber = 1;
-    }
-    values.trialResultLineNumber = Number(values.trialResultLineNumber);
-    const expData: Partial<ExperimentData> = values;
+    const expData = {
+        ...values,
+        creator: userId,
+        creatorEmail: userEmail,
+        creatorRole: role,
+        created: Date.now(),
+        finished: false,
+        estimatedTotalTimeMinutes: 0,
+        totalExperimentRuns: 0,
+        file: fileId,
+        trialResultLineNumber: Number(values.trialResultLineNumber || 1),
+        sharedUsers: [],
+        status: 'CREATED',
+        passes: 0,
+        fails: 0,
+    };
+    delete (expData as typeof expData & { _id?: unknown })._id;
+    delete expData.expId;
+    delete expData.startedAtEpochMillis;
+    delete expData.finishedAtEpochMilliseconds;
+    delete expData.expToRun;
+    delete (expData as typeof expData & { finishedAtEpochMillis?: unknown }).finishedAtEpochMillis;
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);

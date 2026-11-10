@@ -26,7 +26,7 @@ export async function GET(
             .collection('experiments')
             .findOne({
                 _id: new ObjectId(idOfLogFile),
-                $or: [{ creator: session.user.id }, { sharedUsers: { $in: [session.user.id] } }],
+                $or: [{ creator: session.user.id }, { sharedUsers: { $type: 'array', $in: [session.user.id] } }],
             });
 
         if (!experiment) {

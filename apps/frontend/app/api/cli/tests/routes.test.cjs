@@ -27,7 +27,10 @@ function experiment(overrides = {}) {
 }
 
 function sameValue(left, right) {
-  return left !== undefined && right !== undefined && String(left) === String(right);
+  if (left instanceof mongodb.ObjectId || right instanceof mongodb.ObjectId) {
+    return left instanceof mongodb.ObjectId && right instanceof mongodb.ObjectId && left.equals(right);
+  }
+  return left !== undefined && right !== undefined && left === right;
 }
 
 // Evaluate the route's real query so an accidentally omitted access predicate fails.
@@ -36,6 +39,7 @@ function matches(document, query) {
     if (key === '$and') return value.every((part) => matches(document, part));
     if (key === '$or') return value.some((part) => matches(document, part));
     if (value && typeof value === 'object' && '$in' in value) {
+      if (value.$type === 'array' && !Array.isArray(document[key])) return false;
       const values = Array.isArray(document[key]) ? document[key] : [document[key]];
       return value.$in.some((item) => values.some((entry) => sameValue(entry, item)));
     }
@@ -439,6 +443,45 @@ test('submitExp: YAML cannot override authenticated identity or role', async () 
   assert.equal(calls.submissions[0].creatorEmail, 'owner@example.test');
   assert.equal(calls.submissions[0].creatorRole, 'user');
 });
+
+test('submitExp: YAML cannot supply identifiers, sharing, state, or counters', async () => {
+  const { post, calls } = harness('submitExp');
+  const yaml = `_id: caller-id\nname: Retained\nsharedUsers: [${SHARED}]\nstatus: COMPLETED\npasses: 99\nfails: 88\nexpToRun: 42\nfinishedAtEpochMillis: 3\ntrialResultLineNumber: 7\n`;
+  assert.equal((await post(multipartRequest({ yaml }))).status, 200);
+  const stored = calls.submissions[0];
+  assert.equal(Object.hasOwn(stored, '_id'), false);
+  assert.equal(Object.hasOwn(stored, 'expToRun'), false);
+  assert.equal(Object.hasOwn(stored, 'finishedAtEpochMillis'), false);
+  assert.deepEqual(Array.from(stored.sharedUsers), []);
+  assert.equal(stored.status, 'CREATED');
+  assert.equal(stored.passes, 0);
+  assert.equal(stored.fails, 0);
+  assert.equal(stored.name, 'Retained');
+  assert.equal(stored.trialResultLineNumber, 7);
+});
+
+test('submitExp: private emails and legacy roles normalize without losing trusted privileges', async () => {
+  for (const role of [undefined, null, 'other', 'user', 'admin', 'privileged']) {
+    const { post, calls } = harness('submitExp', { authBody: { _id: OWNER, email: null, role } });
+    assert.equal((await post(multipartRequest())).status, 200);
+    assert.equal(calls.submissions[0].creatorEmail, '');
+    assert.equal(calls.submissions[0].creatorRole, role === 'admin' || role === 'privileged' ? role : 'user');
+  }
+});
+
+for (const route of ['status', 'queryExp', 'downloadResult', 'downloadLogs', 'downloadZip']) {
+  test(`${route}: non-array sharing never authorizes another user`, async () => {
+    for (const sharedUsers of [SHARED, `prefix${SHARED}suffix`, 7, {}]) {
+      const { post, calls } = harness(route, { identity: SHARED, documents: [experiment({ sharedUsers, fails: 0 })] });
+      const response = await post(jsonRequest(validBody(route)));
+      if (route === 'status') assert.equal((await response.json()).success, false);
+      else if (route === 'queryExp') assert.deepEqual((await response.json()).matches, []);
+      else assert.equal(response.status, 404);
+      assert.equal(calls.files.length, 0);
+      assert.equal(calls.reads.length, 0);
+    }
+  });
+}
 
 test('submitExp: uppercase executable IDs are stored canonically for shared file access', async () => {
   const { post, calls } = harness('submitExp');

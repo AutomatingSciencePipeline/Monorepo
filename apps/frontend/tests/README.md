@@ -13,7 +13,10 @@ and refusal before mutation or backend dispatch. The ownership tests also cover
 owner/shared experiment and file access, owner-only edits and metadata updates,
 current-admin cancellation, and session-bound sharing. Artifact tests cover uniform
 log-download denials and canonical experiment IDs. Stream tests cover session/role
-revocation and connection cleanup with deterministic timers. `npm test` includes these suites.
+revocation, snapshot ordering, and connection cleanup with deterministic timers.
+Submission regressions cover server-owned fields and malformed historical sharing.
+`npm test` includes these suites and real-MongoDB token identity tests that distinguish
+string and ObjectId user records and refuse ambiguous account mappings.
 
 Install frontend dependencies using the repository lockfile. Start an isolated local
 MongoDB instance, then run from `apps/frontend`:

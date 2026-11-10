@@ -13,17 +13,24 @@ const FILE_ID = '507f1f77bcf86cd799439016';
 const OTHER_FILE_ID = '507f1f77bcf86cd799439017';
 const oid = (id) => new mongodb.ObjectId(id);
 
+function equal(actual, expected) {
+  if (actual instanceof mongodb.ObjectId || expected instanceof mongodb.ObjectId) {
+    return actual instanceof mongodb.ObjectId && expected instanceof mongodb.ObjectId && actual.equals(expected);
+  }
+  return actual != null && actual === expected;
+}
+
 function matches(document, query) {
   return Object.entries(query).every(([key, expected]) => {
     if (key === '$or') return expected.some((condition) => matches(document, condition));
     if (key === '$and') return expected.every((condition) => matches(document, condition));
     const actual = key.split('.').reduce((value, part) => value?.[part], document);
-    const equals = (value) => actual != null && value != null && String(actual) === String(value);
     if (expected && typeof expected === 'object' && '$in' in expected) {
+      if (expected.$type === 'array' && !Array.isArray(actual)) return false;
       const values = Array.isArray(actual) ? actual : [actual];
-      return expected.$in.some((value) => values.some((entry) => entry != null && String(entry) === String(value)));
+      return expected.$in.some((value) => values.some((entry) => equal(entry, value)));
     }
-    return Array.isArray(actual) ? actual.some((entry) => String(entry) === String(expected)) : equals(expected);
+    return Array.isArray(actual) ? actual.some((entry) => equal(entry, expected)) : equal(actual, expected);
   });
 }
 
@@ -90,6 +97,19 @@ for (const session of [null, {}, { user: {} }]) {
     assert.equal(h.calls.reads.length, 0);
   });
 }
+
+test('non-array sharing never grants Web artifact access', async () => {
+  for (const sharedUsers of [SHARED, `prefix${SHARED}suffix`, 7, {}, null]) {
+    for (const name of ['fetchResultsFile', 'fetchProjectZip', 'getLogs']) {
+      const h = setup({ userId: SHARED });
+      h.experiment.sharedUsers = sharedUsers;
+      if (name === 'getLogs') assert.equal((await h.getLogs()).status, 404);
+      else assert.equal(await h.actions[name](EID), null);
+      assert.equal(h.calls.files.length, 0);
+      assert.equal(h.calls.reads.length, 0);
+    }
+  }
+});
 
 test('Web logs return the same denial for private and nonexistent experiments', async () => {
   const foreign = setup({ userId: FOREIGN });

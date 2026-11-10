@@ -19,7 +19,7 @@ export async function fetchResultsFileCLI(expId: string, userId: string): Promis
     if (!experiment) return { success: false, status: 'not_found'};
 
     // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
+    if (experiment.creator !== userId && (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(userId))) {
         return { success: false, status: 'not_found'};
     }
 
@@ -59,7 +59,7 @@ export async function fetchProjectZipCLI(expId: string, userId: string): Promise
     if (!experiment) return null;
 
     // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
+    if (experiment.creator !== userId && (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(userId))) {
         return null;
     }
 

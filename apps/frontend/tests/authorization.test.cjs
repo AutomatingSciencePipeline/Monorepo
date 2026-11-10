@@ -13,7 +13,10 @@ const FID = '507f1f77bcf86cd799439014';
 function matches(document, query) {
   return Object.entries(query).every(([key, expected]) => {
     const actual = key.split('.').reduce((value, part) => value?.[part], document);
-    return actual !== undefined && String(actual) === String(expected);
+    if (actual instanceof mongodb.ObjectId || expected instanceof mongodb.ObjectId) {
+      return actual instanceof mongodb.ObjectId && expected instanceof mongodb.ObjectId && actual.equals(expected);
+    }
+    return actual !== undefined && actual === expected;
   });
 }
 
@@ -187,6 +190,48 @@ test('Web submission stores uppercase file IDs canonically', async () => {
   const h = setup();
   await h.actions.submitExperiment({}, OWNER, '', 'user', FID.toUpperCase());
   assert.equal(h.calls.writes[0].document.file, FID);
+});
+
+test('Web submission initializes server fields without mutating supplied settings', async () => {
+  const h = setup();
+  const values = Object.freeze({
+    _id: 'caller-id', name: 'Settings retained', sharedUsers: [OTHER],
+    status: 'COMPLETED', passes: 99, fails: 88, created: 1, finished: true,
+    trialResultLineNumber: '7', totalExperimentRuns: 55, expId: 'caller-exp',
+    startedAtEpochMillis: 1, finishedAtEpochMilliseconds: 2, finishedAtEpochMillis: 3, expToRun: 42,
+  });
+  assert.equal(await h.actions.submitExperiment(values, OWNER, '', 'admin', FID), EID);
+  const stored = h.calls.writes[0].document;
+  assert.equal(Object.hasOwn(stored, '_id'), false);
+  assert.equal(Object.hasOwn(stored, 'expId'), false);
+  assert.equal(Object.hasOwn(stored, 'startedAtEpochMillis'), false);
+  assert.equal(Object.hasOwn(stored, 'finishedAtEpochMilliseconds'), false);
+  assert.equal(Object.hasOwn(stored, 'finishedAtEpochMillis'), false);
+  assert.equal(Object.hasOwn(stored, 'expToRun'), false);
+  assert.deepEqual(Array.from(stored.sharedUsers), []);
+  assert.equal(stored.status, 'CREATED');
+  assert.equal(stored.passes, 0);
+  assert.equal(stored.fails, 0);
+  assert.equal(stored.finished, false);
+  assert.equal(stored.totalExperimentRuns, 0);
+  assert.notEqual(stored.created, 1);
+  assert.equal(stored.name, 'Settings retained');
+  assert.equal(stored.trialResultLineNumber, 7);
+  assert.equal(values.status, 'COMPLETED');
+});
+
+test('Web submission rejects non-object settings without insertion', async () => {
+  for (const values of [null, undefined, [], 'settings', 7, true]) {
+    const h = setup();
+    await assert.rejects(h.actions.submitExperiment(values, OWNER, '', 'user', FID));
+    noEffects(h.calls);
+  }
+});
+
+test('submission file ownership checks preserve BSON ID types', async () => {
+  const h = setup({ files: [{ _id: FID, metadata: { userId: OWNER } }] });
+  await assert.rejects(h.actions.submitExperiment({}, OWNER, '', 'user', FID));
+  noEffects(h.calls);
 });
 
 test('Web submission overrides forged email, role, and creator with current DB identity', async () => {

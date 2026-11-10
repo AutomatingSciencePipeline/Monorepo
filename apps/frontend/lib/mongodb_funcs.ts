@@ -6,6 +6,9 @@ import { ExperimentData } from "./db_types";
 
 export async function submitExperiment(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
+    if (!values || Object.prototype.toString.call(values) !== '[object Object]') {
+        return Promise.reject(`Invalid experiment settings`);
+    }
     const user = await getCurrentUser();
     if (user._id.toString() !== userId) {
         return Promise.reject(`User is not who they say they are`);
@@ -23,20 +26,28 @@ export async function submitExperiment(values: Partial<ExperimentData>, userId: 
         return Promise.reject(`File not found`);
     }
 
-    values.creator = user._id.toString();
-    values.creatorEmail = user.email ?? '';
-    values.creatorRole = user.role === 'admin' || user.role === 'privileged' ? user.role : 'user';
-    values.created = Date.now();
-    values.finished = false;
-    values.estimatedTotalTimeMinutes = 0;
-    values.totalExperimentRuns = 0;
-    values.file = new ObjectId(fileId).toHexString();
-    // Make sure that the trialResultLineNumber is a number, not a string
-    if (!values.trialResultLineNumber) {
-        values.trialResultLineNumber = 1;
-    }
-    values.trialResultLineNumber = Number(values.trialResultLineNumber);
-    const expData: Partial<ExperimentData> = values;
+    const expData = {
+        ...values,
+        creator: user._id.toString(),
+        creatorEmail: typeof user.email === 'string' ? user.email : '',
+        creatorRole: user.role === 'admin' || user.role === 'privileged' ? user.role : 'user',
+        created: Date.now(),
+        finished: false,
+        estimatedTotalTimeMinutes: 0,
+        totalExperimentRuns: 0,
+        file: new ObjectId(fileId).toHexString(),
+        trialResultLineNumber: Number(values.trialResultLineNumber || 1),
+        sharedUsers: [],
+        status: 'CREATED',
+        passes: 0,
+        fails: 0,
+    };
+    delete (expData as typeof expData & { _id?: unknown })._id;
+    delete expData.expId;
+    delete expData.startedAtEpochMillis;
+    delete expData.finishedAtEpochMilliseconds;
+    delete expData.expToRun;
+    delete (expData as typeof expData & { finishedAtEpochMillis?: unknown }).finishedAtEpochMillis;
 
     const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
 
@@ -59,7 +70,7 @@ export async function getDocumentFromId(expId: string) {
 
     const expDoc = await collection.findOne({
         _id: new ObjectId(expId),
-        $or: [{ creator: session.user.id }, { sharedUsers: { $in: [session.user.id] } }],
+        $or: [{ creator: session.user.id }, { sharedUsers: { $type: 'array', $in: [session.user.id] } }],
     });
     if (!expDoc) {
         return null;
@@ -375,10 +386,11 @@ export async function redeemShareLink(link: string, userId: string) {
     if (!experiment) {
         return Promise.reject(`Could not find experiment with id: ${shareLink.experimentId}`);
     }
-    if (experiment.sharedUsers) {
-        if (experiment.sharedUsers.includes(userId)) {
-            return Promise.reject(`User already has access to this experiment`);
-        }
+    if (experiment.sharedUsers !== undefined && !Array.isArray(experiment.sharedUsers)) {
+        return Promise.reject(`Invalid sharing metadata`);
+    }
+    if (experiment.sharedUsers?.includes(userId)) {
+        return Promise.reject(`User already has access to this experiment`);
     }
 
     //Append that user to the sharedUsers array
@@ -402,11 +414,11 @@ export async function unfollowExperiment(expId: string, userId: string) {
         return Promise.reject(`Could not find experiment with id: ${expId}`);
     }
 
-    if (!experiment.sharedUsers?.includes(userId)) {
+    if (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(userId)) {
         return Promise.reject(`User does not have access to this experiment`);
     }
 
-    await collection.updateOne({ '_id': new ObjectId(expId), sharedUsers: { $in: [userId] } }, { $pull: { 'sharedUsers': userId as any } });
+    await collection.updateOne({ '_id': new ObjectId(expId), sharedUsers: { $type: 'array', $in: [userId] } }, { $pull: { 'sharedUsers': userId as any } });
 
     return Promise.resolve();
 }
@@ -467,7 +479,7 @@ export async function fetchResultsFile(expId: string): Promise<{ contents: strin
     if (!experiment) return null;
 
     // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== session?.user?.id && (!experiment.sharedUsers || !experiment.sharedUsers.includes(session.user?.id))) {
+    if (experiment.creator !== session.user.id && (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(session.user.id))) {
         return null;
     }
 
@@ -504,7 +516,7 @@ export async function fetchProjectZip(expId: string): Promise<{ contents: string
     if (!experiment) return null;
 
     // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== session?.user?.id && (!experiment.sharedUsers || !experiment.sharedUsers.includes(session.user?.id))) {
+    if (experiment.creator !== session.user.id && (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(session.user.id))) {
         return null;
     }
 
@@ -560,7 +572,7 @@ async function getReadableFile(fileId: string, userId: string) {
     if (file.metadata.userId !== userId) {
         const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({
             file: new RegExp(`^${new ObjectId(fileId).toHexString()}$`, 'i'), creator: file.metadata.userId,
-            sharedUsers: { $in: [userId] },
+            sharedUsers: { $type: 'array', $in: [userId] },
         });
         if (!experiment) {
             return Promise.reject(`File not found`);

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         const experimentsCollection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
         const result = await experimentsCollection.findOne({
             $and: [
-                { $or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }] },
+                { $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] },
                 { _id: new ObjectId(experiment_req.eid) },
             ],
         });

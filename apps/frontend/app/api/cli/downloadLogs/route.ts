@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
         if (
             uid !== experiment.creator &&
-            !experiment.sharedUsers?.includes(uid)
+            (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(uid))
         ) {
             return NextResponse.json(
                 {

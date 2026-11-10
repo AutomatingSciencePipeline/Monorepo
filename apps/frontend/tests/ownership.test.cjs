@@ -25,7 +25,7 @@ const oid = (id) => new mongodb.ObjectId(id);
 
 function equal(actual, expected) {
   if (actual instanceof mongodb.ObjectId || expected instanceof mongodb.ObjectId) {
-    return actual != null && expected != null && String(actual) === String(expected);
+    return actual instanceof mongodb.ObjectId && expected instanceof mongodb.ObjectId && actual.equals(expected);
   }
   if (actual instanceof Date || expected instanceof Date) return +actual === +expected;
   return actual === expected;
@@ -54,6 +54,7 @@ function matches(document, query = {}) {
           if (operator === '$eq') return contained(value);
           if (operator === '$ne') return !contained(value);
           if (operator === '$exists') return (actual !== undefined) === value;
+          if (operator === '$type' && value === 'array') return Array.isArray(actual);
           if (operator === '$gt') return actual > value;
           if (operator === '$gte') return actual >= value;
           if (operator === '$lt') return actual < value;
@@ -498,4 +499,20 @@ test('CLI result and project download helpers are not exported as Server Actions
   const { actions } = setup();
   assert.equal(actions.fetchResultsFileCLI, undefined);
   assert.equal(actions.fetchProjectZipCLI, undefined);
+});
+
+test('malformed historical sharing is not a read, copy, or membership grant', async () => {
+  for (const sharedUsers of [SHARED, `prefix${SHARED}suffix`, 7, {}, null]) {
+    const options = { userId: SHARED, experiments: [{
+      _id: oid(EOWN), creator: OWNER, file: FOWN, name: 'Owned', sharedUsers,
+    }] };
+    const h = setup(options);
+    assert.equal(await h.actions.getDocumentFromId(EOWN), null);
+    await refused(h, () => h.actions.downloadFile(FOWN));
+    await refused(h, () => h.actions.copyFile(FOWN, SHARED));
+    await refused(h, () => h.actions.unfollowExperiment(EOWN, SHARED));
+    await assert.rejects(h.actions.redeemShareLink(VALID_LINK, SHARED),
+      error => error === 'Invalid sharing metadata');
+    noEffects(h);
+  }
 });

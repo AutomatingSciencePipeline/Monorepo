@@ -8,7 +8,7 @@
 		"start": "next start",
 		"lint": "eslint .",
 		"type-check": "next typegen && tsc --noEmit",
-		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs tests/agentAudit.test.mjs && npm run test:cli && npm run test:authorization",
+		"test": "node --test tests/auth.test.mjs tests/google-auth.test.mjs tests/agentAudit.test.mjs tests/token-auth-bson.test.mjs && npm run test:cli && npm run test:authorization",
 		"test:authorization": "node --test tests/authorization.test.cjs tests/ownership.test.cjs tests/artifact-access.test.cjs tests/stream-authorization.test.cjs",
 		"test:auth": "node --test tests/auth.test.mjs",
 		"test:google-auth": "node --test tests/google-auth.test.mjs",
