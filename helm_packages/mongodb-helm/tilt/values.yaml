@@ -21,6 +21,7 @@ persistence:
 auth:
   enabled: true
   rootUser: "adminuser"
+  # Local development only (minikube). Production gets its password from a Secret, see ../values.yaml
   rootPassword: "password123"
 
 service:

@@ -21,6 +21,7 @@ nav:
     - Agentic Implementation Plan: infrastructure/agentic_plan.md
   - Infrastructure:
     - Kubernetes: infrastructure/kubernetes.md
+    - Security Boundaries: infrastructure/security.md
     - VMs: infrastructure/vms.md
     - Cluster Upgrade: infrastructure/cluster_update.md
     - Used Technologies: infrastructure/used_technologies.md

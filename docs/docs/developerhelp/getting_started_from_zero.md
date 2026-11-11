@@ -104,12 +104,12 @@ It is listed in `.gitignore` and must never be committed. It is a Kubernetes `Se
 | Key | Used by | Purpose |
 |-----|---------|---------|
 | `FRONTEND_WEBSERVER_PORT`, `BACKEND_PORT`, `MONGODB_PORT` | all | Ports. Normally 3000, 5050, 27017. |
-| `MONGODB_USERNAME`, `MONGODB_PASSWORD` | frontend, backend, runner | Database login. Must match the root user in `helm_packages/mongodb-helm/tilt/values.yaml`. |
+| `MONGODB_USERNAME`, `MONGODB_PASSWORD` | frontend, backend | Database login. Must match the root user in `helm_packages/mongodb-helm/tilt/values.yaml`. |
 | `AUTH_SECRET` | frontend | Auth.js session signing key. |
 | `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET` | frontend | GitHub OAuth app. |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | frontend | Google OAuth app. |
 | `AUTH_URL`, `AUTH_REDIRECT_PROXY_URL`, `AUTH_TRUST_HOST` | frontend | Where Auth.js thinks the site lives. For local work this must point at `http://localhost:3000`. |
-| `GMAIL_CREDS` | runner | Credentials for the "email me when done" feature. |
+| `GMAIL_CREDS` | backend | Credentials for the "email me when done" feature. |
 
 If nobody can find the file, you can build a new one for local use: copy the structure above, generate a random `AUTH_SECRET`, create your own GitHub OAuth app with callback URL `http://localhost:3000/api/auth/callback/github`, and reuse the MongoDB values from the helm values file. Everything else can be a placeholder until you need that feature. The frontend deployment that mounts these keys is `kubernetes_init/tilt/deployment-frontend.yaml`, so that file is the source of truth for which keys must exist.
 
