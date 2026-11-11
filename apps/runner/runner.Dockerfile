@@ -31,3 +31,11 @@ RUN pipenv install --system --deploy --ignore-pipfile
 
 WORKDIR /app
 COPY . /app
+
+# Experiments run as this unprivileged user. Only the scratch folders are writable for it.
+# The backend starts the container as root only for admin/privileged experiments that need apt-get.
+RUN groupadd --gid 10001 runner && \
+    useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin runner && \
+    mkdir -p /app/ExperimentFiles /app/logs && \
+    chown -R 10001:10001 /app/ExperimentFiles /app/logs
+USER 10001:10001
