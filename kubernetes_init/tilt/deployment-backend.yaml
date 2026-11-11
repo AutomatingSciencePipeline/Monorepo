@@ -12,7 +12,9 @@ spec:
     metadata:
       labels:
         app: backend
+        glados-component: backend
     spec:
+      serviceAccountName: glados-backend
       containers:
       - name: backend
         image: backend
@@ -41,3 +43,10 @@ spec:
             secretKeyRef:
               name: secret-env
               key: MONGODB_PASSWORD
+        # Used to send "experiment finished" emails. Runner Pods no longer receive this.
+        - name: GMAIL_CREDS
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: GMAIL_CREDS
+              optional: true

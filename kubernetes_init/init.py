@@ -4,6 +4,7 @@ from backend import init_backend
 from frontend import init_frontend
 from kubernetes_secrets import init_secret
 from mongodb import init_mongodb
+from security import init_security
 
 def clean_up():
     """Deletes all Kubernetes objects created"""
@@ -34,10 +35,11 @@ def clean_up():
     # init_mongodb.cleanup_persistent_volume()
     # init_mongodb.cleanup_persistent_volume_claim()
 
-    print("Cleaning up: Backend Job Creation Cluster Permissions")
-    init_backend.cleanup_cluster_role()
-    init_backend.cleanup_role_binding()
-    
+    print("Cleaning up: Service Accounts, Permissions and Network Policies")
+    init_security.cleanup_security()
+    init_security.cleanup_legacy_permissions()
+
+
 def run_update():
     """Skips cleaning up the services"""
     print("Cleaning up: Deployments")
@@ -48,7 +50,11 @@ def run_update():
     
     print("Cleaning up: Secrets")
     init_secret.cleanup_secret()
-    
+
+    # The deployments refer to these accounts, so they have to exist first
+    print("Setting up: Service Accounts, Permissions and Network Policies")
+    init_security.setup_security()
+
     print("Setting up: Secrets")
     # TODO: Secrets are split between secret-env and .env. Fix this
     init_secret.setup_secret()
@@ -59,10 +65,13 @@ def run_update():
     print("- Backend")
     init_backend.setup_deployment()
 
+    print("Cleaning up: Permissions of the default Service Account")
+    init_security.cleanup_legacy_permissions()
+
 def set_up():
-    print("Setting up: Backend Job Creation Cluster Permissions")
-    init_backend.setup_cluster_role()
-    init_backend.setup_role_binding()
+    # The deployments refer to these accounts, so they have to exist first
+    print("Setting up: Service Accounts, Permissions and Network Policies")
+    init_security.setup_security()
     print("Setting up: Secrets")
     # TODO: Secrets are split between secret-env and .env. Fix this
     init_secret.setup_secret()
@@ -90,6 +99,9 @@ def set_up():
     # print("Setting up: MongoDB Persistent Volume")
     # init_mongodb.setup_persistent_volume()
     # init_mongodb.setup_persistent_volume_claim()
+
+    print("Cleaning up: Permissions of the default Service Account")
+    init_security.cleanup_legacy_permissions()
 
 def main():
     """Function that gets called when the file is ran"""

@@ -15,7 +15,9 @@ spec:
       labels:
         app: frontend
         tier: web
+        glados-component: frontend
     spec:
+      serviceAccountName: glados-frontend
       containers:
         - name: glados-frontend
           image: frontend
@@ -87,3 +89,16 @@ spec:
                 secretKeyRef:
                   name: secret-env
                   key: AUTH_REDIRECT_PROXY_URL
+          volumeMounts:
+            # Short-lived token the frontend uses to prove its identity to the backend
+            - name: backend-token
+              mountPath: /var/run/secrets/glados/backend
+              readOnly: true
+      volumes:
+        - name: backend-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: glados-backend
+                  expirationSeconds: 3600
+                  path: token
