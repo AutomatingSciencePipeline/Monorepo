@@ -4,10 +4,15 @@ on:
   push:
     paths:
       - 'apps/backend/**'
+      # The backend tests also check the cluster manifests
+      - 'kubernetes_init/**'
+      - 'helm_packages/**'
     branches: [ main ]
   pull_request:
     paths:
       - 'apps/backend/**'
+      - 'kubernetes_init/**'
+      - 'helm_packages/**'
     branches: [ main ]
 
 permissions:
