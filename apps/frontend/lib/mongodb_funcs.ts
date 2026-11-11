@@ -3,6 +3,7 @@ import { GridFSBucket, ObjectId } from "mongodb";
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS } from "./mongodb";
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
+import { backendAuthHeaders } from "./backendAuth";
 
 export async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
@@ -59,6 +60,9 @@ export async function submitExperiment(values: Partial<ExperimentData>, userId: 
     if (session.user?.id !== userId) {
         return Promise.reject(`User is not who they say they are`);
     }
+    // The role decides how much the runner is allowed to do, so it comes from the session and not from the caller
+    expData.creatorRole = session.user?.role ?? 'user';
+    expData.creatorEmail = session.user?.email ?? userEmail;
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -138,6 +142,7 @@ export async function cancelExperimentById(expId: string) {
         method: 'POST',
         headers: new Headers({
             'Content-Type': 'application/json',
+            ...(await backendAuthHeaders()),
         }),
         body: JSON.stringify({ jobName: 'runner-' + expId }),
     });
