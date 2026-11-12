@@ -787,7 +787,7 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 									} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 w-full`}
 								onClick={() => {
 									const newArchiveStatus = project.status !== 'ARCHIVED';
-									const newStatus = newArchiveStatus ? 'ARCHIVED' : (project.passes ? 'COMPLETED' : 'FAILED');
+									const newStatus = newArchiveStatus ? 'ARCHIVED' : 'UNARCHIVED';
 									handleArchiveStatus(newStatus);
 								}}
 							>

@@ -460,6 +460,33 @@ test('submitExp: YAML cannot supply identifiers, sharing, state, or counters', a
   assert.equal(stored.trialResultLineNumber, 7);
 });
 
+test('submitExp: YAML cannot inject runner internals or unknown server fields', async () => {
+  const { post, calls } = harness('submitExp');
+  const yaml = 'name: Retained\nconfigs: {config0: {injected: true}}\nexperimentType: zip\npostProcess: true\nrunnerToken: forged\nfutureServerField: injected\n';
+  assert.equal((await post(multipartRequest({ yaml }))).status, 200);
+  const stored = calls.submissions[0];
+  for (const field of ['configs', 'experimentType', 'postProcess', 'runnerToken', 'futureServerField']) {
+    assert.equal(Object.hasOwn(stored, field), false, `Stored unexpected field ${field}`);
+  }
+  assert.equal(stored.name, 'Retained');
+});
+
+test('submitExp: shared submission preserves all supported user experiment settings', async () => {
+  const { post, calls } = harness('submitExp');
+  const settings = {
+    name: 'ZIP experiment', description: 'CLI settings', tags: ['fixture'], workers: 2,
+    trialExtraFile: 'extra.csv', trialResult: 'result.csv', trialResultLineNumber: -1,
+    timeout: 600, sendEmail: true, scatter: true, scatterIndVar: 'x', scatterDepVar: 'score',
+    dumbTextArea: 'constant = 3',
+    hyperparameters: [{ name: 'x', type: 'integer', default: 1, min: 1, max: 3, step: 1, useDefault: false }],
+    experimentExecutable: 'experiment.py', configFileFormat: 'yaml',
+  };
+  assert.equal((await post(multipartRequest({ yaml: JSON.stringify(settings) }))).status, 200);
+  for (const [field, value] of Object.entries(settings)) {
+    assert.deepEqual(JSON.parse(JSON.stringify(calls.submissions[0][field])), value, `Lost ${field}`);
+  }
+});
+
 test('submitExp: private emails and legacy roles normalize without losing trusted privileges', async () => {
   for (const role of [undefined, null, 'other', 'user', 'admin', 'privileged']) {
     const { post, calls } = harness('submitExp', { authBody: { _id: OWNER, email: null, role } });
