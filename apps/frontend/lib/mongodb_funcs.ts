@@ -3,6 +3,8 @@ import { GridFSBucket, ObjectId } from "mongodb";
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS } from "./mongodb";
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
+import { cancelExperimentAsUser } from "./experimentCancel";
+import type { CancelResult } from "./experimentCancel";
 import { submitExperimentForUser } from "./experimentSubmission";
 import { formatFilename, isObjectId } from "./serverUtils";
 
@@ -83,40 +85,39 @@ export async function deleteDocumentById(expId: string) {
     return Promise.resolve();
 }
 
-export async function cancelExperimentById(expId: string) {
+// Expected refusals are returned rather than thrown: in production Next.js replaces the message of
+// an error thrown by a server action with a generic one, so the UI could not show why it failed.
+export type CancelExperimentOutcome = { ok: true } | { ok: false; message: string };
+
+export async function cancelExperimentById(expId: string): Promise<CancelExperimentOutcome> {
     'use server';
     const user = await getCurrentUser();
     if (!isObjectId(expId)) {
-        return Promise.reject(`Invalid experiment ID`);
+        throw new Error('Invalid experiment id');
     }
-    const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
-    const query = user.role === 'admin'
-        ? { _id: new ObjectId(expId) }
-        : { _id: new ObjectId(expId), creator: user._id.toString() };
-    const experiment = await collection.findOne(query);
-    if (!experiment) return Promise.reject(`Experiment not found`);
-    if (experiment.status === 'CANCELLED') return true;
-    if (experiment.status !== 'RUNNING') return Promise.reject(`Experiment is not running`);
-    //Call the backend at the endpoint to cancel the experiment
-    const BACKEND_PORT = process.env.BACKEND_PORT || '5050';
-    const url = `http://glados-service-backend:${BACKEND_PORT}/cancelExperiment`;
-    //Just post a json object with the experiment id
-    const backendResponse = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({ jobName: 'runner-' + query._id.toHexString() }),
-    });
 
-    if (!backendResponse.ok) return Promise.reject(`Backend refused cancellation`);
-    const result = await collection.updateOne(
-        { ...query, status: 'RUNNING' },
-        { $set: { finished: true, status: 'CANCELLED' } },
-    );
-    if (result.matchedCount === 0) return Promise.reject(`Experiment state changed during cancellation`);
-    return true;
+    const result = await cancelExperimentAsUser(expId, {
+        userId: user._id.toString(),
+        isAdmin: user.role === 'admin',
+    });
+    if (!result.ok) {
+        return { ok: false, message: cancelErrorMessage(result) };
+    }
+    return { ok: true };
+}
+
+function cancelErrorMessage(result: Extract<CancelResult, { ok: false }>): string {
+    switch (result.error) {
+        case 'not_found':
+        case 'forbidden':
+            return 'You do not have permission to cancel this experiment';
+        case 'not_cancellable':
+            return `Experiment cannot be cancelled while ${result.status ?? 'in its current state'}`;
+        case 'status_update_failed':
+            return 'The experiment was stopped but its status could not be saved; please try again';
+        default:
+            return 'Failed to cancel experiment';
+    }
 }
 
 export async function updateExperimentNameById(expId: string, newExpName: string) {

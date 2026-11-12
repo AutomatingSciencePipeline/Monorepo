@@ -8,6 +8,7 @@ import { Logo } from "../components/Logo";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
 import { cancelExperimentById, getUsers, updateUserRole } from "../../lib/mongodb_funcs";
+import { CANCELLABLE_STATUSES } from "../../lib/experimentCancelCore.mjs";
 import toast, { Toaster } from "react-hot-toast";
 import { triggerRedeploy } from "../../lib/k8s_funcs";
 
@@ -403,13 +404,20 @@ export default function Page() {
                                         </th>
                                         <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             <button
-                                                className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                                                className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                                disabled={!CANCELLABLE_STATUSES.includes(experiment.status)}
+                                                title={CANCELLABLE_STATUSES.includes(experiment.status) ? undefined : 'Only running experiments can be stopped'}
                                                 onClick={() => {
-                                                    toast.promise(cancelExperimentById(experiment.id), {
-                                                        loading: 'Cancelling experiment...',
-                                                        success: 'Experiment cancelled successfully!',
-                                                        error: 'Failed to cancel experiment!'
-                                                    });
+                                                    toast.promise(
+                                                        cancelExperimentById(experiment.id).then((result) => {
+                                                            if (!result.ok) throw new Error(result.message);
+                                                        }),
+                                                        {
+                                                            loading: 'Cancelling experiment...',
+                                                            success: 'Experiment cancelled successfully!',
+                                                            error: (error: Error) => error.message || 'Failed to cancel experiment!'
+                                                        }
+                                                    );
                                                 }}>
                                                 Stop
                                             </button>

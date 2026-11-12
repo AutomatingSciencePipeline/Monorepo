@@ -58,7 +58,7 @@ function setup(options = {}) {
     if (options.authError) throw new Error('Mock session failure');
     return session;
   } };
-  const actions = loadSource('lib/mongodb_funcs.ts', { './mongodb': database, '../auth': auth });
+  const actions = loadSource('lib/mongodb_funcs.ts', { './mongodb': database, '../auth': auth, './experimentCancel': {} });
   let tokenAuth = {
     tokenBasedAuth: async (token) => Response.json(
       token === 'valid-token' ? { _id: options.tokenUser ?? OWNER, role: options.tokenRole ?? 'user' } : { error: 'Unauthorized' },

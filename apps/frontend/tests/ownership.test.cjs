@@ -194,18 +194,45 @@ function setup(options = {}) {
       if (index >= 0) files.splice(index, 1);
     }
   }
-  const actions = loadSource('lib/mongodb_funcs.ts', {
-    './mongodb': { __esModule: true, default: Promise.resolve(client), DB_NAME: 'test-db', COLLECTION_EXPERIMENTS: 'experiments', COLLECTION_SHARE_LINKS: 'shareLinks' },
-    '../auth': { auth: async () => session },
-    mongodb: { ...mongodb, GridFSBucket },
-  }, {
+  const database = { __esModule: true, default: Promise.resolve(client), DB_NAME: 'test-db', COLLECTION_EXPERIMENTS: 'experiments', COLLECTION_SHARE_LINKS: 'shareLinks' };
+  const globals = {
     process: { env: options.backendPort ? { BACKEND_PORT: options.backendPort } : {} },
+    AbortSignal,
     fetch: async (url, init) => {
       calls.backend.push({ url, init });
       return new Response(null, { status: options.backendStatus ?? 200 });
     },
+  };
+  const cancelCore = loadSource('lib/experimentCancelCore.mjs');
+  const cancelStore = loadSource('lib/experimentCancelStore.ts', {
+    './mongodb': database,
+    './experimentCancelCore.mjs': cancelCore,
+  }, globals);
+  const cancellation = loadSource('lib/experimentCancel.ts', {
+    './agentAudit': {},
+    './experimentCancelCore.mjs': cancelCore,
+    './experimentCancelStore': cancelStore,
   });
+  const actions = loadSource('lib/mongodb_funcs.ts', {
+    './mongodb': database,
+    '../auth': { auth: async () => session },
+    './experimentCancel': cancellation,
+    mongodb: { ...mongodb, GridFSBucket },
+  }, globals);
   return { actions, calls, documents, initial };
+}
+
+// cancelExperimentById reports expected refusals as { ok: false } instead of rejecting
+async function refusedCancel(h, action) {
+  let result;
+  try { result = await action(); } catch (error) {
+    if (error?.code === 'ERR_ASSERTION') throw error;
+    noEffects(h);
+    return;
+  }
+  assert.equal(result?.ok, false, 'Denied cancellation reported success');
+  assert.equal(typeof result?.message, 'string');
+  noEffects(h);
 }
 
 function noEffects(h) {
@@ -302,7 +329,7 @@ for (const [name, args] of mutations) {
 test('cancel permits owner and current database admin while preserving backend mechanics', async () => {
   for (const userId of [OWNER, ADMIN]) {
     const h = setup({ userId, sessionRole: 'user', backendPort: '6060' });
-    assert.equal(await h.actions.cancelExperimentById(EOWN), true);
+    assert.equal((await h.actions.cancelExperimentById(EOWN)).ok, true);
     assert.equal(h.calls.backend.length, 1);
     const { url, init } = h.calls.backend[0];
     assert.equal(url, 'http://glados-service-backend:6060/cancelExperiment');
@@ -316,18 +343,28 @@ test('cancel permits owner and current database admin while preserving backend m
   }
 });
 
-test('cancel preserves the running state on backend refusal', async () => {
+test('cancel rejects backend refusal without changing experiment state', async () => {
   const h = setup({ backendStatus: 503 });
-  await assert.rejects(h.actions.cancelExperimentById(EOWN));
+  const result = await h.actions.cancelExperimentById(EOWN);
+  assert.equal(result.ok, false);
+  assert.equal(result.message, 'Failed to cancel experiment');
+  assert.equal(h.calls.backend.length, 1);
   assert.equal(h.calls.writes.length, 0);
   assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'RUNNING');
+});
+
+test('uppercase experiment IDs cancel the canonical Kubernetes Job', async () => {
+  const h = setup();
+  assert.equal((await h.actions.cancelExperimentById(EOWN.toUpperCase())).ok, true);
+  assert.deepEqual(JSON.parse(h.calls.backend[0].init.body), { jobName: `runner-${EOWN}` });
+  assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'CANCELLED');
 });
 
 test('cancel refuses non-running experiments before contacting the backend', async () => {
   for (const status of ['CREATED', 'COMPLETED', 'FAILED', 'ARCHIVED']) {
     const h = setup();
     h.documents.experiments.find(document => String(document._id) === EOWN).status = status;
-    await assert.rejects(h.actions.cancelExperimentById(EOWN));
+    assert.equal((await h.actions.cancelExperimentById(EOWN)).ok, false);
     assert.equal(h.calls.backend.length, 0);
     assert.equal(h.calls.writes.length, 0);
   }
@@ -382,7 +419,8 @@ test('archive and cancellation cannot overwrite a concurrent terminal state', as
     const result = action === 'archive'
       ? h.actions.updateExperimentArchiveStatusById(EOWN, 'ARCHIVED')
       : h.actions.cancelExperimentById(EOWN);
-    await assert.rejects(result);
+    if (action === 'archive') await assert.rejects(result);
+    else assert.equal((await result).ok, false);
     assert.equal(document.status, 'FAILED');
   }
 });
@@ -390,18 +428,18 @@ test('archive and cancellation cannot overwrite a concurrent terminal state', as
 test('privileged users do not inherit admin cancellation rights', async () => {
   for (const userId of [SHARED, FOREIGN]) {
     const h = setup({ userId, users: [{ _id: oid(userId), role: 'privileged' }] });
-    await refused(h, () => h.actions.cancelExperimentById(EOWN));
+    await refusedCancel(h, () => h.actions.cancelExperimentById(EOWN));
   }
 });
 
 test('cancel denies shared readers, stale session admins, unknown IDs, and missing identities before backend calls', async () => {
   for (const options of [{ userId: SHARED }, { userId: FOREIGN, sessionRole: 'admin' }, { session: null }, { session: { user: {} } }, { users: [] }]) {
     const h = setup(options);
-    await refused(h, () => h.actions.cancelExperimentById(EOWN));
+    await refusedCancel(h, () => h.actions.cancelExperimentById(EOWN));
   }
   for (const id of [UNKNOWN, 'invalid', 'abcdefghijkl', 'g'.repeat(24), null]) {
     const h = setup({ userId: ADMIN });
-    await refused(h, () => h.actions.cancelExperimentById(id));
+    await refusedCancel(h, () => h.actions.cancelExperimentById(id));
   }
 });
 

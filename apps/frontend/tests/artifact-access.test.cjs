@@ -77,6 +77,7 @@ function setup(options = {}) {
     mongodb: { ...mongodb, GridFSBucket },
   });
   const actions = loadSource('lib/mongodb_funcs.ts', {
+    './experimentCancel': {},
     './mongodb': database, '../auth': auth, mongodb: { ...mongodb, GridFSBucket },
   });
   return {

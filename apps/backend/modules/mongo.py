@@ -101,5 +101,9 @@ def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
 
 def update_exp_value(expId: str, field: str, newValue: str, mongoClient: pymongo.MongoClient):
     experimentsCollection = mongoClient["gladosdb"].experiments
-    experimentsCollection.update_one({"_id": ObjectId(expId)}, {"$set": {field: newValue}})
+    # Late runner writes must not change cancelled or archived experiments.
+    experimentsCollection.update_one(
+        {"_id": ObjectId(expId), "status": {"$nin": ["CANCELLED", "ARCHIVED"]}},
+        {"$set": {field: newValue}},
+    )
     return
