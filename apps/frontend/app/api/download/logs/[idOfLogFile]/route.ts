@@ -2,6 +2,7 @@ import { GridFSBucket, ObjectId } from 'mongodb';
 import clientPromise, { DB_NAME } from '../../../../../lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '../../../../../auth';
+import { isObjectId } from '../../../../../lib/serverUtils';
 
 export async function GET(
     req: NextRequest,
@@ -14,7 +15,7 @@ export async function GET(
 
     const { idOfLogFile } = await params;
 
-    if (typeof idOfLogFile !== 'string' || !/^[a-fA-F0-9]{24}$/.test(idOfLogFile)) {
+    if (!isObjectId(idOfLogFile)) {
         return NextResponse.json({ response: 'Missing experiment ID' }, { status: 400 });
     }
 

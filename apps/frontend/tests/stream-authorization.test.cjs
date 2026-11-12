@@ -17,8 +17,12 @@ function deferred() {
 function matches(doc, query) {
   return Object.entries(query).every(([field, expected]) => {
     if (field === '$or') return expected.some((condition) => matches(doc, condition));
-    const actual = doc[field];
+    const actual = field.split('.').reduce((value, key) => value?.[key], doc);
     if (expected && typeof expected === 'object' && expected.$type === 'array' && !Array.isArray(actual)) return false;
+    if (expected && typeof expected === 'object' && '$exists' in expected) return (actual !== undefined) === expected.$exists;
+    if (expected && typeof expected === 'object' && '$nin' in expected) {
+      return expected.$nin.every((value) => Array.isArray(actual) ? !actual.includes(value) : actual !== value);
+    }
     if (expected && typeof expected === 'object' && '$in' in expected) {
       return expected.$in.some((value) => Array.isArray(actual) ? actual.includes(value) : actual === value);
     }
@@ -117,7 +121,20 @@ function setup(route, initialSession = session(route === 'adminListen' ? 'admin'
     }
   }
 
+  const globals = {
+    ReadableStream: ObservedStream,
+    TextEncoder,
+    setInterval(callback, interval) {
+      assert.equal(interval, 2500);
+      const id = ++nextTimer;
+      timers.set(id, callback);
+      return id;
+    },
+    clearInterval(id) { timers.delete(id); },
+  };
+  const streamHelper = loadSource('lib/authorizedExperimentStream.ts', { 'server-only': {} }, globals);
   const mod = loadSource(`app/api/experiments/${route}/route.ts`, {
+    '../../../../lib/authorizedExperimentStream': streamHelper,
     '../../../../auth': { auth: async () => {
       const call = ++calls.auth;
       const gate = authGate;
@@ -142,17 +159,7 @@ function setup(route, initialSession = session(route === 'adminListen' ? 'admin'
       DB_NAME: 'test-db',
       COLLECTION_EXPERIMENTS: 'experiments',
     },
-  }, {
-    ReadableStream: ObservedStream,
-    TextEncoder,
-    setInterval(callback, interval) {
-      assert.equal(interval, 2500);
-      const id = ++nextTimer;
-      timers.set(id, callback);
-      return id;
-    },
-    clearInterval(id) { timers.delete(id); },
-  });
+  }, globals);
   const abort = new AbortController();
   const request = {
     nextUrl: new URL(`http://localhost/api/experiments/${route}?uid=${OWNER}`),
@@ -171,10 +178,18 @@ function setup(route, initialSession = session(route === 'adminListen' ? 'admin'
     }
     await drain();
   }
+  async function emitChange(change) {
+    const filter = calls.watches.at(-1)?.pipeline[0]?.$match;
+    if (!filter || matches(change, filter)) await emit('change', change);
+  }
   return {
     calls, docs, request, timers,
     get: () => mod.GET(request),
-    change: () => emit('change', { operationType: 'update', fullDocument: docs[0] }),
+    change: (fields = { passes: 1 }) => emitChange({
+      operationType: 'update', fullDocument: docs[0],
+      updateDescription: { updatedFields: fields },
+    }),
+    replace: (document) => emitChange({ operationType: 'replace', fullDocument: document }),
     watchError: () => emit('error', new Error('Mock change stream failure')),
     async tick() {
       const results = await Promise.allSettled(Array.from(timers.values(), (callback) => callback()));
@@ -185,7 +200,7 @@ function setup(route, initialSession = session(route === 'adminListen' ? 'admin'
     blockQuery: () => block('query'),
     afterAuthChecks(count, callback) { authReturnHook = { call: calls.auth + count, callback }; },
     setSession(value) { currentSession = value; },
-    failAuth() { authError = true; },
+    failAuth(value = true) { authError = value; },
     failQuery() { queryError = true; },
     abort: () => abort.abort(),
     assertClean() {
@@ -301,10 +316,94 @@ test('user snapshots exclude malformed shares while preserving ownership', async
   assert.deepEqual((await data(reader)).map((doc) => doc.name), ['Owned', 'Shared']);
 });
 
+test('replacement revocation passes the watch filter and invalidates an in-flight user snapshot', async (t) => {
+  const h = setup('listen');
+  t.after(() => h.abort());
+  const reader = await open(h);
+  const enqueueCount = h.calls.enqueues.length;
+  const gate = h.blockQuery();
+  const sending = h.change();
+  await gate.entered.promise;
+  h.docs[1].sharedUsers = [];
+  await h.replace(h.docs[1]);
+  gate.release.resolve();
+  await sending;
+  assert.deepEqual((await data(reader)).map((doc) => doc.name), ['Owned']);
+  assert.equal(h.calls.enqueues.length, enqueueCount + 1, 'captured shared rows must not survive replacement revocation');
+});
+
 for (const route of ['listen', 'adminListen']) {
+  test(`${route} delivers progress under continuous changes with one query in flight`, async (t) => {
+    const h = setup(route);
+    t.after(() => h.abort());
+    const reader = await open(h);
+    const queryCount = h.calls.queries.length;
+    const firstGate = h.blockQuery();
+    const sending = h.change();
+    await firstGate.entered.promise;
+    h.docs[0].name = 'Second snapshot';
+    for (let index = 0; index < 20; index++) await h.change();
+    assert.equal(h.calls.queries.length, queryCount + 1);
+
+    const secondGate = h.blockQuery();
+    firstGate.release.resolve();
+    await secondGate.entered.promise;
+    assert.equal((await data(reader))[0].name, 'Owned', 'completed snapshots must flow while later changes are pending');
+    h.docs[0].name = 'Latest snapshot';
+    for (let index = 0; index < 20; index++) await h.change();
+    assert.equal(h.calls.queries.length, queryCount + 2);
+    secondGate.release.resolve();
+    await sending;
+    assert.equal((await data(reader))[0].name, 'Second snapshot');
+    assert.equal((await data(reader))[0].name, 'Latest snapshot');
+    assert.equal(h.calls.queries.length, queryCount + 3);
+  });
+
+  test(`${route} coalesces slow heartbeat and change authorization without overlap`, async (t) => {
+    const h = setup(route);
+    t.after(() => h.abort());
+    const reader = await open(h);
+    const enqueueCount = h.calls.enqueues.length;
+    const queryCount = h.calls.queries.length;
+    const authCount = h.calls.auth;
+    const gate = h.blockAuth();
+    const ticking = h.tick();
+    await gate.entered.promise;
+    for (let index = 0; index < 20; index++) {
+      await h.tick();
+      await h.change();
+    }
+    assert.equal(h.calls.auth, authCount + 1);
+    assert.equal(h.calls.queries.length, queryCount);
+    h.setSession(null);
+    gate.release.resolve();
+    await ticking;
+    await closed(h, reader, enqueueCount);
+    assert.equal(h.calls.queries.length, queryCount, 'pending changes cannot bypass failed reauthorization');
+  });
+
+  test(`${route} discards captured data after a transient final authorization failure`, async (t) => {
+    const h = setup(route);
+    t.after(() => h.abort());
+    const reader = await open(h);
+    const enqueueCount = h.calls.enqueues.length;
+    const gate = h.blockQuery();
+    const sending = h.change();
+    await gate.entered.promise;
+    h.failAuth();
+    gate.release.resolve();
+    await sending;
+    assert.equal(h.calls.enqueues.length, enqueueCount);
+    assert.equal(h.calls.closes, 0);
+    h.docs[0].name = 'Fresh after recovery';
+    h.failAuth(false);
+    await h.tick();
+    assert.equal((await data(reader))[0].name, 'Fresh after recovery');
+  });
+
   for (const phase of ['initial', 'change']) {
     for (const delay of ['query', 'final authorization']) {
-      test(`${route} discards an older ${phase} snapshot delayed by its ${delay}`, async (t) => {
+      test(`${route} coalesces an access change during a ${phase} snapshot delayed by its ${delay}`, async (t) => {
         const h = setup(route);
         t.after(() => h.abort());
         let reader;
@@ -325,12 +424,11 @@ for (const route of ['listen', 'adminListen']) {
         if (route === 'listen') h.docs[1].sharedUsers = [];
         else h.docs[1].finished = true;
         const names = route === 'listen' ? ['Owned'] : ['Owned', 'Private'];
-        await h.change();
-        assert.deepEqual((await data(reader)).map((doc) => doc.name), names);
-
+        await h.change(route === 'listen' ? { sharedUsers: [] } : { finished: true });
         (authGate ?? queryGate).release.resolve();
         await older;
         await drain();
+        assert.deepEqual((await data(reader)).map((doc) => doc.name), names);
         assert.equal(h.calls.enqueues.length, enqueueCount + 1, 'a superseded snapshot must not restore removed experiments');
 
         h.docs[0].name = 'Updated owned';
@@ -367,7 +465,7 @@ for (const route of ['listen', 'adminListen']) {
   }
 
   for (const trigger of ['change', 'heartbeat']) {
-    test(`${route} fails closed when reauthorization throws during ${trigger}`, async (t) => {
+    test(`${route} suspends delivery and recovers when reauthorization throws during ${trigger}`, async (t) => {
       const h = setup(route);
       t.after(() => h.abort());
       const reader = await open(h);
@@ -375,7 +473,14 @@ for (const route of ['listen', 'adminListen']) {
       h.failAuth();
       if (trigger === 'change') await h.change();
       else await h.tick();
-      await closed(h, reader, enqueueCount);
+      assert.equal(h.calls.enqueues.length, enqueueCount);
+      assert.equal(h.calls.closes, 0);
+      assert.equal(h.timers.size, 1);
+      h.failAuth(false);
+      await h.tick();
+      if (trigger === 'change') await data(reader);
+      else assert.equal(decoder.decode((await read(reader)).value), ': heartbeat\n\n');
+      assert.equal(h.calls.enqueues.length, enqueueCount + 1);
     });
   }
 

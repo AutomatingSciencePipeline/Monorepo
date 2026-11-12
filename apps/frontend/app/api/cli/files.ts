@@ -1,6 +1,7 @@
 import 'server-only';
 import { GridFSBucket, ObjectId } from 'mongodb';
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../lib/mongodb';
+import { formatFilename } from '../../../lib/serverUtils';
 
 export async function fetchResultsFileCLI(expId: string, userId: string): Promise<| { contents: string; name: string }| { success: boolean; status: string }> {
     const client = await clientPromise;
@@ -83,21 +84,3 @@ export async function fetchProjectZipCLI(expId: string, userId: string): Promise
         name: formatFilename(expName, expCreated, 'zip'),
     };
 }
-
-const formatFilename = (name: string, timestamp: string, extension: string) => {
-    const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
-    const formattedTimestamp = formatTimestamp(timestamp);
-    return `${formattedName}_${formattedTimestamp}.${extension}`;
-};
-
-const formatTimestamp = (timestamp: string) => {
-    const partiallyFormattedTimestamp = new Date(timestamp).toISOString().replace(/[:.]/g, '-');
-    let formatted = partiallyFormattedTimestamp.replace(/Z$/, '');
-    formatted = formatted.replace('T', '_');
-    const [date, time] = formatted.split('_');
-    const timeParts = time.split('-');
-    let hours = parseInt(timeParts[0], 10) - 5;
-    timeParts[0] = hours.toString();
-    const formattedTime = timeParts.join('-');
-    return `${date}_${formattedTime}`;
-};

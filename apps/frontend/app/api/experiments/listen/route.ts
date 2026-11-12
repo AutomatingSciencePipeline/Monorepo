@@ -4,6 +4,7 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/
 import { WithId, Document } from 'mongodb';
 import { NextRequest } from 'next/server';
 import { auth } from '../../../../auth';
+import { createAuthorizedExperimentStream } from '../../../../lib/authorizedExperimentStream';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,90 +31,36 @@ export async function GET(req: NextRequest) {
     const db = client.db(DB_NAME);
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
-    const encoder = new TextEncoder();
-    const heartbeatIntervalMs = 2500;
-    let cancelStream = () => {};
-
-    const stream = new ReadableStream({
-        async start(controller) {
-            const pipeline = [
-                {
-                    $match: {
-                        $or: [
-                            { 'fullDocument.creator': uid },
-                            { operationType: 'delete', 'documentKey._id': { $exists: true } },
-                            { 'fullDocument.sharedUsers': { $in: [uid] } },
-                            { operationType: 'update', 'updateDescription.updatedFields.sharedUsers': { $nin: [uid] } },
-                        ],
-                    },
-                },
-            ];
-
-            const options = { fullDocument: 'updateLookup' };
-            const changeStream = experimentsCollection.watch(pipeline, options);
-            let closed = false;
-            let latestQuerySequence = 0;
-            let heartbeat: ReturnType<typeof setInterval> | undefined;
-            const abort = () => close();
-            const close = (closeController = true) => {
-                if (closed) return;
-                closed = true;
-                clearInterval(heartbeat);
-                req.signal.removeEventListener('abort', abort);
-                void Promise.resolve(changeStream.close()).catch(() => undefined);
-                if (closeController) controller.close();
-            };
-            cancelStream = () => close(false);
-            const isAuthorized = async () => {
-                if (closed) return false;
-                const current = await auth();
-                if (closed) return false;
-                if (current?.user?.id !== uid) {
-                    close();
-                    return false;
-                }
-                return true;
-            };
-
-            const sendAllRelevantDocs = async () => {
-                try {
-                    if (!await isAuthorized() || closed) return;
-                    const querySequence = ++latestQuerySequence;
-                    const docs = await experimentsCollection
-                        .find({ $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] })
-                        .toArray();
-                    if (!await isAuthorized() || closed || querySequence !== latestQuerySequence) return;
-                    const array = convertToExpsArray(docs);
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(array)}\n\n`));
-                } catch {
-                    close();
-                }
-            };
-
-            req.signal.addEventListener('abort', abort, { once: true });
-            changeStream.on('error', () => close());
-            changeStream.on('change', sendAllRelevantDocs);
-            if (req.signal.aborted) {
-                close();
-                return;
-            }
-
-            // Send initial documents
-            await sendAllRelevantDocs();
-            if (closed) return;
-
-            // Heartbeat to keep the connection alive
-            heartbeat = setInterval(async () => {
-                try {
-                    if (await isAuthorized() && !closed) controller.enqueue(encoder.encode(': heartbeat\n\n'));
-                } catch {
-                    close();
-                }
-            }, heartbeatIntervalMs);
+    const pipeline = [
+        {
+            $match: {
+                $or: [
+                    { 'fullDocument.creator': uid },
+                    { operationType: 'delete', 'documentKey._id': { $exists: true } },
+                    { operationType: 'replace' },
+                    { 'fullDocument.sharedUsers': { $in: [uid] } },
+                    { operationType: 'update', 'updateDescription.updatedFields.sharedUsers': { $nin: [uid] } },
+                ],
+            },
         },
-        cancel() { cancelStream(); },
+    ];
+    const stream = createAuthorizedExperimentStream({
+        signal: req.signal,
+        watch: experimentsCollection.watch(pipeline, { fullDocument: 'updateLookup' }),
+        isAuthorized: async () => (await auth())?.user?.id === uid,
+        query: async () => convertToExpsArray(await experimentsCollection
+            .find({ $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] })
+            .toArray()),
+        invalidatesSnapshot: (change) => {
+            if (change.operationType !== 'update') return change.operationType !== 'insert';
+            const fields = [
+                ...Object.keys(change.updateDescription.updatedFields ?? {}),
+                ...(change.updateDescription.removedFields ?? []),
+                ...(change.updateDescription.truncatedArrays ?? []).map((array) => array.field),
+            ];
+            return fields.some((field) => field === 'creator' || field === 'sharedUsers' || field.startsWith('sharedUsers.'));
+        },
     });
-
     return new Response(stream, {
         headers: {
             'Content-Type': 'text/event-stream',

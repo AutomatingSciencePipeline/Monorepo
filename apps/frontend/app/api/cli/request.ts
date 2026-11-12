@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { tokenBasedAuth } from '../../../tokenAuth';
+import { isObjectId } from '../../../lib/serverUtils';
+
+export { isObjectId } from '../../../lib/serverUtils';
 
 type CliUser = { _id: string; [key: string]: any };
 
@@ -16,10 +19,6 @@ export async function readJsonObject(req: Request): Promise<Record<string, unkno
 
 export function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value.trim().length > 0;
-}
-
-export function isObjectId(value: unknown): value is string {
-    return typeof value === 'string' && /^[a-fA-F0-9]{24}$/.test(value);
 }
 
 export function invalidArguments(): Response {

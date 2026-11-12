@@ -200,6 +200,8 @@ test('Web submission initializes server fields without mutating supplied setting
     status: 'COMPLETED', passes: 99, fails: 88, created: 1, finished: true,
     trialResultLineNumber: '7', totalExperimentRuns: 55, expId: 'caller-exp',
     startedAtEpochMillis: 1, finishedAtEpochMilliseconds: 2, finishedAtEpochMillis: 3, expToRun: 42,
+    configs: { injected: true }, experimentType: 'python', postProcess: true,
+    archivedFromStatus: 'COMPLETED', unknownServerField: 'injected',
   });
   assert.equal(await h.actions.submitExperiment(values, OWNER, '', 'admin', FID), EID);
   const stored = h.calls.writes[0].document;
@@ -209,6 +211,9 @@ test('Web submission initializes server fields without mutating supplied setting
   assert.equal(Object.hasOwn(stored, 'finishedAtEpochMilliseconds'), false);
   assert.equal(Object.hasOwn(stored, 'finishedAtEpochMillis'), false);
   assert.equal(Object.hasOwn(stored, 'expToRun'), false);
+  for (const field of ['configs', 'experimentType', 'postProcess', 'archivedFromStatus', 'unknownServerField']) {
+    assert.equal(Object.hasOwn(stored, field), false);
+  }
   assert.deepEqual(Array.from(stored.sharedUsers), []);
   assert.equal(stored.status, 'CREATED');
   assert.equal(stored.passes, 0);
