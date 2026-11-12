@@ -92,27 +92,53 @@ class DownloadExperimentFileTests(unittest.TestCase):
 
 
 class CancelledExperimentUpdateTests(unittest.TestCase):
-    def test_late_runner_updates_cannot_overwrite_cancellation(self):
-        experiment_id = ObjectId("507f1f77bcf86cd799439015")
-        document = {"_id": experiment_id, "status": "RUNNING", "finished": False}
-        client = MagicMock()
-        collection = client["gladosdb"].experiments
+    def setUp(self):
+        self.experiment_id = ObjectId("507f1f77bcf86cd799439015")
+        self.document = {"_id": self.experiment_id, "status": "RUNNING", "finished": False}
+        self.client = MagicMock()
+        self.collection = self.client["gladosdb"].experiments
 
         def update_one(query, update):
-            if document["_id"] == query["_id"] and document["status"] != query["status"]["$ne"]:
-                document.update(update["$set"])
+            status_filter = query.get("status", {})
+            status = self.document.get("status")
+            if self.document["_id"] != query["_id"]:
+                return
+            if "$ne" in status_filter and status == status_filter["$ne"]:
+                return
+            if status in status_filter.get("$nin", []):
+                return
+            self.document.update(update["$set"])
 
-        collection.update_one.side_effect = update_one
-        mongo.update_exp_value(str(experiment_id), "status", "COMPLETED", client)
-        self.assertEqual(document["status"], "COMPLETED")
+        self.collection.update_one.side_effect = update_one
 
+    def test_running_and_legacy_experiments_still_accept_runner_updates(self):
+        for status in ("RUNNING", None):
+            with self.subTest(status=status):
+                if status is None:
+                    self.document.pop("status", None)
+                else:
+                    self.document["status"] = status
+                mongo.update_exp_value(str(self.experiment_id), "status", "COMPLETED", self.client)
+                self.assertEqual(self.document["status"], "COMPLETED")
+
+    def test_late_runner_updates_cannot_overwrite_cancellation(self):
         # Cancellation wins before a runner's already admitted update reaches MongoDB.
-        document.update(status="CANCELLED", finished=True)
+        self.document.update(status="CANCELLED", finished=True)
         for field, value in [("status", "COMPLETED"), ("status", "FAILED"), ("finished", False)]:
-            mongo.update_exp_value(str(experiment_id), field, value, client)
-        self.assertEqual(document["status"], "CANCELLED")
-        self.assertTrue(document["finished"])
-        self.assertEqual(collection.update_one.call_count, 4)
+            mongo.update_exp_value(str(self.experiment_id), field, value, self.client)
+        self.assertEqual(self.document["status"], "CANCELLED")
+        self.assertTrue(self.document["finished"])
+
+    def test_archiving_terminal_experiments_does_not_reopen_runner_updates(self):
+        for original_status in ("CANCELLED", "COMPLETED", "FAILED"):
+            with self.subTest(original_status=original_status):
+                self.document.update(status=original_status, finished=True)
+                self.document.update(status="ARCHIVED", archivedFromStatus=original_status)
+                for field, value in [("status", "COMPLETED"), ("status", "FAILED"), ("finished", False)]:
+                    mongo.update_exp_value(str(self.experiment_id), field, value, self.client)
+                self.assertEqual(self.document["status"], "ARCHIVED")
+                self.assertEqual(self.document["archivedFromStatus"], original_status)
+                self.assertTrue(self.document["finished"])
 
 
 if __name__ == "__main__":
