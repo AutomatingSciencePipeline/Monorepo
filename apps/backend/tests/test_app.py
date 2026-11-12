@@ -3,6 +3,8 @@ import os
 import unittest
 from unittest import mock
 
+from bson import ObjectId
+from kubernetes.client.rest import ApiException
 from tests.fakes import FakeAuthenticationApi, FakeTokenCollection
 
 os.environ.setdefault("MONGODB_PORT", "27017")
@@ -16,6 +18,8 @@ from modules import auth
 EXPERIMENT_A = "a" * 24
 EXPERIMENT_B = "b" * 24
 FILE_A = "f" * 24
+USER_A = "1" * 24
+USER_B = "2" * 24
 FRONTEND = "system:serviceaccount:default:glados-frontend"
 RUNNER = "system:serviceaccount:default:glados-runner"
 
@@ -50,9 +54,12 @@ class BackendTestCase(unittest.TestCase):
     def setUp(self):
         self.tokens = FakeTokenCollection()
         self.experiments = {
-            EXPERIMENT_A: {"creatorRole": "user", "file": FILE_A, "sendEmail": True, "creatorEmail": "a@example.com"},
-            EXPERIMENT_B: {"creatorRole": "admin", "file": "e" * 24, "sendEmail": False},
+            EXPERIMENT_A: {"creator": USER_A, "creatorRole": "user", "file": FILE_A, "sendEmail": True, "creatorEmail": "a@example.com"},
+            EXPERIMENT_B: {"creator": USER_B, "creatorRole": "admin", "file": "e" * 24, "sendEmail": False},
         }
+        self.users = {ObjectId(USER_A): {"role": "user"}, ObjectId(USER_B): {"role": "admin"}}
+        self.database = mock.Mock()
+        self.database.users.find_one.side_effect = lambda query, _projection: self.users.get(query['_id'])
         self.batch_api = mock.Mock()
         self.updates = []
         self.uploads = []
@@ -78,6 +85,7 @@ class BackendTestCase(unittest.TestCase):
             mock.patch.object(auth, "_token_collection", return_value=self.tokens),
             mock.patch.object(backend, "controlPlaneAuth", authenticator),
             mock.patch.object(backend, "BATCH_API", self.batch_api),
+            mock.patch.object(backend, "gladosDB", self.database),
             mock.patch.object(backend, "executor", SynchronousExecutor()),
             mock.patch.object(backend, "get_experiment", get_experiment),
             mock.patch.object(backend, "update_exp_value", lambda exp, field, value, _client: self.updates.append((exp, field, value))),
@@ -132,8 +140,9 @@ class TestControlPlaneEndpoints(BackendTestCase):
         self.assertEqual(auth.experiment_for_runner_token(None, env["RUNNER_TOKEN"]), EXPERIMENT_A)
         self.assertNotEqual(env["RUNNER_TOKEN"], self.token_a)
 
-    def test_runner_privileges_follow_the_role_stored_in_the_database(self):
-        # The request claims admin, but experiment A was created by a normal user
+    def test_runner_privileges_follow_the_current_user_role(self):
+        # Both request metadata and stored experiment metadata claim admin for a normal user.
+        self.experiments[EXPERIMENT_A]['creatorRole'] = 'admin'
         self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_A, "creatorRole": "admin"}, "creatorRole": "admin"}, "frontend-token")
         job_a = self.batch_api.create_namespaced_job.call_args.kwargs["body"]
         self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_B}}, "frontend-token")
@@ -142,9 +151,42 @@ class TestControlPlaneEndpoints(BackendTestCase):
         self.assertIs(job_a["spec"]["template"]["spec"]["securityContext"]["runAsNonRoot"], True)
         self.assertEqual(job_b["spec"]["template"]["spec"]["securityContext"]["runAsUser"], 0)
 
+    def test_changed_user_roles_apply_to_existing_experiments(self):
+        for role in ('user', 'privileged', 'admin'):
+            self.users[ObjectId(USER_B)]['role'] = role
+            response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_B}}, "frontend-token")
+            self.assertEqual(response.status_code, 200)
+            job = self.batch_api.create_namespaced_job.call_args.kwargs['body']
+            security = job['spec']['template']['spec']['securityContext']
+            self.assertEqual(security['runAsUser'] == 0, role in ('admin', 'privileged'))
+
+    def test_legacy_string_user_id_uses_the_current_user_record(self):
+        self.experiments[EXPERIMENT_A]['creator'] = 'legacy-user'
+        self.users['legacy-user'] = {'role': 'privileged'}
+        response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_A}}, "frontend-token")
+        self.assertEqual(response.status_code, 200)
+        self.database.users.find_one.assert_called_once_with({'_id': 'legacy-user'}, {'role': 1})
+        job = self.batch_api.create_namespaced_job.call_args.kwargs['body']
+        self.assertEqual(job['spec']['template']['spec']['securityContext']['runAsUser'], 0)
+
+    def test_missing_or_invalid_creator_cannot_grant_privileges(self):
+        for creator in (None, {}, {'$ne': None}, 'unknown-user'):
+            self.experiments[EXPERIMENT_B]['creator'] = creator
+            response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_B}}, "frontend-token")
+            self.assertEqual(response.status_code, 200)
+            job = self.batch_api.create_namespaced_job.call_args.kwargs['body']
+            self.assertTrue(job['spec']['template']['spec']['securityContext']['runAsNonRoot'])
+
+    def test_user_lookup_failure_does_not_start_a_runner(self):
+        self.database.users.find_one.side_effect = RuntimeError('Database unavailable')
+        response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_B}}, "frontend-token")
+        self.assertEqual(response.status_code, 404)
+        self.batch_api.create_namespaced_job.assert_not_called()
+
     def test_invalid_or_unknown_experiments_are_not_started(self):
         cases = [
             ({"experiment": {"id": "../../etc"}}, 400), ({"experiment": {}}, 400), ({}, 400), ([], 400),
+            ({"experiment": ["invalid"]}, 400), ({"experiment": "invalid"}, 400),
             ({"experiment": {"id": "c" * 24}}, 404),
         ]
         for body, expected in cases:
@@ -161,6 +203,23 @@ class TestControlPlaneEndpoints(BackendTestCase):
         self.assertEqual(self.batch_api.delete_namespaced_job.call_args.args[0], "runner-" + EXPERIMENT_A)
         self.assertIsNone(auth.experiment_for_runner_token(None, self.token_a))
         self.assertEqual(auth.experiment_for_runner_token(None, self.token_b), EXPERIMENT_B)
+
+    def test_failed_job_deletion_preserves_the_runner_token(self):
+        self.batch_api.delete_namespaced_job.side_effect = ApiException(status=503)
+
+        response = self.call("post", "/cancelExperiment", {"jobName": "runner-" + EXPERIMENT_A}, "frontend-token")
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(auth.experiment_for_runner_token(None, self.token_a), EXPERIMENT_A)
+
+    def test_missing_job_revokes_tokens_and_is_safe_to_retry(self):
+        self.batch_api.delete_namespaced_job.side_effect = ApiException(status=404)
+
+        for _attempt in range(2):
+            response = self.call("post", "/cancelExperiment", {"jobName": "runner-" + EXPERIMENT_A}, "frontend-token")
+            self.assertEqual(response.status_code, 404)
+            self.assertIsNone(auth.experiment_for_runner_token(None, self.token_a))
+            self.assertEqual(auth.experiment_for_runner_token(None, self.token_b), EXPERIMENT_B)
 
 
 class TestRunnerEndpoints(BackendTestCase):

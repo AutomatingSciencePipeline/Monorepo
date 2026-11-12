@@ -5,9 +5,11 @@ import threading
 import base64
 from concurrent.futures import ProcessPoolExecutor
 import os
+from bson import ObjectId
 from bson.binary import Binary
 from flask import Flask, Response, request, jsonify, send_file, g
 from kubernetes import client, config
+from kubernetes.client.rest import ApiException
 import pymongo
 from modules.mongo import upload_experiment_aggregated_results, upload_experiment_zip, upload_log_file, verify_mongo_connection, check_insert_default_experiments, download_experiment_file, get_experiment, update_exp_value
 from modules.auth import ServiceAccountAuthenticator, bearer_token, claim_email_send, experiment_for_runner_token, is_allowed_runner_update, is_valid_experiment_id, is_valid_job_name, issue_runner_token, revoke_runner_token, revoke_runner_tokens, EMAIL_ALLOWED_STATUSES
@@ -114,12 +116,20 @@ def get_queue():
 @require_control_plane
 def recv_experiment():
     """The query to run an experiment"""
-    experiment_id = (_json_body().get('experiment') or {}).get('id')
+    experiment = _json_body().get('experiment')
+    if not isinstance(experiment, dict):
+        return Response(status=400)
+    experiment_id = experiment.get('id')
     if not is_valid_experiment_id(experiment_id):
         return Response(status=400)
     try:
-        # The role comes from the database, never from the request
-        creator_role = get_experiment(experiment_id, mongoClient).get('creatorRole')
+        creator_id = get_experiment(experiment_id, mongoClient).get('creator')
+        creator = None
+        if isinstance(creator_id, (str, ObjectId)) and creator_id:
+            user_id = ObjectId(creator_id) if ObjectId.is_valid(creator_id) else creator_id
+            creator = gladosDB.users.find_one({'_id': user_id}, {'role': 1})
+        # Historical experiment metadata cannot grant privileges after a role change.
+        creator_role = creator.get('role') if creator else None
     except Exception:  # pylint: disable=broad-exception-caught
         return Response(status=404)
     runner_token = issue_runner_token(mongoClient, experiment_id, token_ttl_seconds(load_runner_template()))
@@ -137,10 +147,15 @@ def cancel_experiment():
     job_name = _json_body().get('jobName')
     if not is_valid_job_name(job_name):
         return Response(status=400)
-    # the runner may not report anything for this experiment from now on
+    try:
+        BATCH_API.delete_namespaced_job(job_name, "default", propagation_policy="Background")
+    except ApiException as err:
+        if err.status != 404:
+            raise
+        revoke_runner_tokens(mongoClient, job_name[len("runner-"):])
+        return Response(status=404)
+    # Revoke only after deletion is accepted, so a failed delete leaves the runner usable.
     revoke_runner_tokens(mongoClient, job_name[len("runner-"):])
-    # kill the job
-    BATCH_API.delete_namespaced_job(job_name, "default", propagation_policy="Background")
     return Response(status=200)
 
 @flaskApp.post("/uploadResults")
