@@ -20,8 +20,8 @@ from modules.runner import conduct_experiment
 from modules.exceptions import CustomFlaskError, DatabaseConnectionError, GladosInternalError, ExperimentAbort, GladosUserError
 from modules.output.plots import generateScatterPlot
 from modules.configs import generate_config_files
-from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id, update_exp_value
-import modules.mailSend
+from modules.utils import _get_env, upload_experiment_aggregated_results, upload_experiment_log, upload_experiment_zip, verify_mongo_connection, get_experiment_with_id, update_exp_value, backend_url, backend_auth_headers, request_experiment_email, release_runner_token
+from modules.archive import safe_extract_zip
 
 try:
     import magic  # Crashes on windows if you're missing the 'python-magic-bin' python package
@@ -146,7 +146,14 @@ def run_batch(data: IncomingStartRequest):
     # If the program errors here after you just deleted the ExperimentFiles on your dev machine, restart the docker container, seems to be volume mount weirdness
     os.makedirs(f'ExperimentFiles/{exp_id}')
     os.chdir(f'ExperimentFiles/{exp_id}')
-    filepath = download_experiment_files(experiment)
+    try:
+        filepath = download_experiment_files(experiment)
+    except GladosInternalError as err:
+        explogger.error("Could not download the experiment file, aborting")
+        explogger.exception(err)
+        os.chdir('../..')
+        close_experiment_run(exp_id, "FAILED")
+        return
 
     try:
         experiment.experimentType = determine_experiment_file_type(filepath)
@@ -162,7 +169,8 @@ def run_batch(data: IncomingStartRequest):
         try:
             # rename the file to a zip file
             os.rename(filepath, "userProvidedFile.zip")
-            shutil.unpack_archive("userProvidedFile.zip", '.')
+            # The archive is user supplied, so it is checked for path escapes and unreasonable sizes
+            safe_extract_zip("userProvidedFile.zip", '.')
         except Exception as err:
             explogger.error("Failed to extract zip file")
             explogger.exception(err)
@@ -285,6 +293,8 @@ def close_experiment_run(expId: DocumentId, status: str):
     update_exp_value(expId, 'finishedAtEpochMilliseconds', int(endSeconds * 1000))
     close_experiment_logger()
     upload_experiment_log(expId)
+    # Nothing else is reported to the backend after this point
+    release_runner_token()
     remove_downloaded_directory(expId)
 
 def determine_experiment_file_type(filepath: str):
@@ -321,8 +331,9 @@ def download_experiment_files(experiment: ExperimentData):
     explogger.info(f"Downloading {filepath} to ExperimentFiles/{experiment.expId}/{filepath}")
     try:
         # try to call the backend to download
-        url = f'http://glados-service-backend:{os.getenv("BACKEND_PORT")}/downloadExpFile?fileId={experiment.file}'
-        response = requests.get(url, timeout=60)
+        url = backend_url(f'/downloadExpFile?fileId={experiment.file}')
+        response = requests.get(url, headers=backend_auth_headers(), timeout=60)
+        response.raise_for_status()
         file_contents = response.content
         # write the file contents to file path
         with open(filepath, "xb") as file:
@@ -402,9 +413,8 @@ def send_email(experiment: ExperimentData, status: str):
     if experiment.sendEmail:
         explogger.info(f"Sending email to {experiment.creatorEmail}")
         experiment.status = status
-        modules.mailSend.send_email(experiment)
-    
-        
+        # The backend owns the mail credentials and sends the email
+        request_experiment_email(experiment.expId, status)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

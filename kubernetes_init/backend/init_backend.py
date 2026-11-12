@@ -7,8 +7,6 @@ from kubernetes_helper import get_yaml_file_body, get_env_variable, handle_kuber
 DEPLOYMENT_BACKEND_FILE_NAME = "deployment-backend.yaml"
 SERVICE_BACKEND_FILE_NAME = "service-backend.yaml"
 ENDPOINT_SLICE_BACKEND_FILE_NAME = "endpoint-slice-backend.yaml"
-CLUSTER_ROLE_FILE_NAME = "cluster-role-job-creator.yaml"
-ROLE_BINDING_FILE_NAME = "role-binding-job-creator.yaml"
 
 def setup_deployment():
     """Function to either update or create the backend deployment"""
@@ -88,44 +86,4 @@ def cleanup_endpoint_slice():
     handle_kubernetes_namespace_cleanup(
         endpoint_slice_body,
         DISCOVERY_API.delete_namespaced_endpoint_slice
-    )
-
-def setup_cluster_role():
-    file_path = path.join(path.dirname(__file__), CLUSTER_ROLE_FILE_NAME)
-    cluster_role_body = get_yaml_file_body(file_path)
-    handle_kubernetes_setup(
-        cluster_role_body,
-        RBAC_AUTH_API.read_cluster_role,
-        RBAC_AUTH_API.patch_cluster_role,
-        RBAC_AUTH_API.create_cluster_role,
-        RBAC_AUTH_API.delete_cluster_role
-    )
-
-def cleanup_cluster_role():
-    file_path = path.join(path.dirname(__file__), CLUSTER_ROLE_FILE_NAME)
-    cluster_role_body = get_yaml_file_body(file_path)
-
-    handle_kubernetes_cleanup(
-        cluster_role_body,
-        RBAC_AUTH_API.delete_cluster_role
-    )
-
-def setup_role_binding():
-    file_path = path.join(path.dirname(__file__), ROLE_BINDING_FILE_NAME)
-    role_binding_body = get_yaml_file_body(file_path)
-    handle_kubernetes_namespace_setup(
-        role_binding_body,
-        RBAC_AUTH_API.read_namespaced_role_binding,
-        RBAC_AUTH_API.patch_namespaced_role_binding,
-        RBAC_AUTH_API.create_namespaced_role_binding,
-        RBAC_AUTH_API.delete_namespaced_role_binding
-    )
-
-def cleanup_role_binding():
-    file_path = path.join(path.dirname(__file__), ROLE_BINDING_FILE_NAME)
-    role_binding_body = get_yaml_file_body(file_path)
-
-    handle_kubernetes_namespace_cleanup(
-        role_binding_body,
-        RBAC_AUTH_API.delete_namespaced_role_binding
     )

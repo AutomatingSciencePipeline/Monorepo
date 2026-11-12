@@ -1,0 +1,61 @@
+# The frontend shows live runner logs and has an admin-only "redeploy" button (see lib/k8s_funcs.ts).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: glados-frontend
+  namespace: default
+rules:
+# Find the runner Pod of an experiment and read its log
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+# Restart the two GLADOS deployments
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  resourceNames: ["glados-frontend", "glados-backend"]
+  verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: glados-frontend
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: glados-frontend
+  namespace: default
+roleRef:
+  kind: Role
+  name: glados-frontend
+  apiGroup: rbac.authorization.k8s.io
+---
+# The redeploy button cordons and uncordons one worker node while the deployments restart.
+# Nodes are cluster-scoped, so this needs a ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: glados-frontend-nodes
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  resourceNames: ["glados-w0"]
+  verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: glados-frontend-nodes
+subjects:
+- kind: ServiceAccount
+  name: glados-frontend
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: glados-frontend-nodes
+  apiGroup: rbac.authorization.k8s.io

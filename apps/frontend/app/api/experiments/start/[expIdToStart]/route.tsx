@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { auth } from '../../../../../auth';
+import { backendAuthHeaders } from '../../../../../lib/backendAuth';
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS } from '../../../../../lib/mongodb';
 import { authenticateCli, isNonEmptyString, isObjectId, readJsonObject } from '../../../cli/request';
 
@@ -58,6 +59,7 @@ export async function POST(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(await backendAuthHeaders()),
       },
       body: JSON.stringify({ experiment: { id: new ObjectId(expIdToStart).toHexString(), key: body.key } }),
     });

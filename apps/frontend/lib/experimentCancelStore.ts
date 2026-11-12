@@ -4,6 +4,7 @@
 // references the audit log performs update or delete operations.
 import { ObjectId } from 'mongodb';
 import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from './mongodb';
+import { backendAuthHeaders } from './backendAuth';
 import { CANCELLED_STATUS } from './experimentCancelCore.mjs';
 import type { CancelDeps, JobDeletionResult, StoredExperiment } from './experimentCancelCore.mjs';
 
@@ -17,7 +18,7 @@ async function requestJobDeletion(expId: string): Promise<JobDeletionResult> {
 	const backendPort = process.env.BACKEND_PORT || '5050';
 	const response = await fetch(`http://glados-service-backend:${backendPort}/cancelExperiment`, {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json', ...(await backendAuthHeaders()) },
 		body: JSON.stringify({ jobName: 'runner-' + new ObjectId(expId).toHexString() }),
 		signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
 	});

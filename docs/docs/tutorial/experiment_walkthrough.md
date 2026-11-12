@@ -122,8 +122,8 @@ sequenceDiagram
     UI->>FE: Dispatch (server action)
     FE->>DB: insert experiment doc, status CREATED
     UI->>FE: POST /api/experiments/start/<expId>
-    FE->>BE: POST /experiment {id}
-    BE->>K8s: create Job runner-<expId>
+    FE->>BE: POST /experiment {id} (with the frontend's ServiceAccount token)
+    BE->>K8s: create Job runner-<expId> (with a token for this experiment only)
     R->>BE: POST /updateExperiment status RUNNING
     R->>BE: POST /getExperiment
     R->>BE: GET /downloadExpFile?fileId
@@ -133,6 +133,7 @@ sequenceDiagram
     end
     R->>BE: POST /updateExperiment finished, COMPLETED or FAILED
     R->>BE: POST /uploadLog
+    R->>BE: POST /runnerFinished (the runner's token stops working)
     FE-->>UI: live updates over SSE /api/experiments/listen
 ```
 

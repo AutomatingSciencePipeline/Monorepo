@@ -1,0 +1,68 @@
+# Network boundaries around user-submitted code.
+#
+# IMPORTANT: NetworkPolicies are only enforced when the cluster's network plugin supports them
+# (for example Calico or Cilium). Flannel on its own, and minikube's default network, ignore them.
+# Until an enforcing plugin is installed these are documentation of intent, and the token checks
+# in the backend are the boundary that actually holds.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: glados-runner-isolation
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      glados-component: runner
+  policyTypes: ["Ingress", "Egress"]
+  # Nothing may connect to a runner
+  ingress: []
+  egress:
+  # DNS lookups
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # The backend API, which is the only GLADOS service a runner talks to
+  - to:
+    - podSelector:
+        matchLabels:
+          glados-component: backend
+  # The public internet (pip install, datasets), but no private ranges. That keeps runners away from
+  # MongoDB, the Kubernetes API, other Pods, the nodes and cloud metadata endpoints.
+  # If the cluster nodes have addresses outside these ranges, add the node network to "except".
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 169.254.0.0/16
+        - 100.64.0.0/10
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: glados-backend-ingress
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      glados-component: backend
+  policyTypes: ["Ingress"]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          glados-component: frontend
+    - podSelector:
+        matchLabels:
+          glados-component: runner

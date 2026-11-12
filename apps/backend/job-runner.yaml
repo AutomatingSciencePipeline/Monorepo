@@ -1,3 +1,7 @@
+# Template for the Job that runs one experiment. The backend fills in the name, command, token and
+# resource settings (see modules/runner_job.py). User-submitted code runs inside this Pod, so the
+# template is the "standard" profile: no Kubernetes API token, non-root, no capabilities, and a
+# read-only root filesystem with a few writable scratch volumes.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,28 +12,71 @@ spec:
     metadata:
       labels:
         app: GLADOS
+        glados-component: runner
     spec:
+      # Dedicated identity with no RBAC permissions, and no API token mounted into the Pod
+      serviceAccountName: glados-runner
+      automountServiceAccountToken: false
+      # Do not inject the addresses of every Service in the namespace as environment variables
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: runner
         image: gladospipeline/glados-runner:main
         imagePullPolicy: Always
         command: []
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+            # Without this the request would default to the limit and the Pod might not fit on a node
+            ephemeral-storage: 1Gi
+          limits:
+            cpu: "4"
+            memory: 8Gi
+            ephemeral-storage: 20Gi
         env:
-        - name: MONGODB_PORT
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: MONGODB_PORT
+        # The only values a runner needs: where the backend is, and (added by the backend) a token
+        # that is valid for this experiment only. No database or mail credentials belong here.
         - name: BACKEND_PORT
           valueFrom:
             secretKeyRef:
               name: secret-env
               key: BACKEND_PORT
-        - name: GMAIL_CREDS
-          valueFrom:
-            secretKeyRef:
-              name: secret-env
-              key: GMAIL_CREDS
+        - name: HOME
+          value: /home/runner
+        volumeMounts:
+        - name: experiment-files
+          mountPath: /app/ExperimentFiles
+        - name: logs
+          mountPath: /app/logs
+        - name: home
+          mountPath: /home/runner
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      # Usage of these volumes counts against the ephemeral-storage limit above
+      - name: experiment-files
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+      - name: home
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
       restartPolicy: Never
   backoffLimit: 4
   ttlSecondsAfterFinished: 60
+  # Upper bound on how long one experiment may run, including retries
+  activeDeadlineSeconds: 604800

@@ -75,6 +75,7 @@ function setup(options = {}) {
   }
   const start = loadSource('app/api/experiments/start/[expIdToStart]/route.tsx', {
     '../../../../../auth': auth,
+    '../../../../../lib/backendAuth': { backendAuthHeaders: async () => ({ Authorization: 'Bearer service-token' }) },
     '../../../../../lib/mongodb': database,
     '../../../../../tokenAuth': tokenAuth,
   }, {
@@ -340,6 +341,7 @@ test('Web owner start preserves existing body and backend contract with empty HT
   assert.equal(url, 'http://glados-service-backend:5050/experiment');
   assert.equal(init.method, 'POST');
   assert.equal(init.headers['Content-Type'], 'application/json');
+  assert.equal(init.headers.Authorization, 'Bearer service-token');
   assert.deepEqual(JSON.parse(init.body), { experiment: { id: EID } });
 });
 
@@ -374,6 +376,7 @@ for (const realTokenAuth of [false, true]) {
     const h = setup({ session: null, realTokenAuth });
     assert.equal((await startRequest(h, { id: EID, token: 'valid-token' })).status, 200);
     assert.equal(h.calls.backend.length, 1);
+    assert.equal(h.calls.backend[0].init.headers.Authorization, 'Bearer service-token');
     assert.equal(JSON.stringify(h.calls.backend).includes('valid-token'), false);
     if (realTokenAuth) assert.equal(h.calls.provider.length, 1);
   });

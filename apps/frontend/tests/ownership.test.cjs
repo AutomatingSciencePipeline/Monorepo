@@ -206,10 +206,11 @@ function setup(options = {}) {
   const cancelCore = loadSource('lib/experimentCancelCore.mjs');
   const cancelStore = loadSource('lib/experimentCancelStore.ts', {
     './mongodb': database,
+    './backendAuth': { backendAuthHeaders: async () => ({ Authorization: 'Bearer service-token' }) },
     './experimentCancelCore.mjs': cancelCore,
   }, globals);
   const cancellation = loadSource('lib/experimentCancel.ts', {
-    './agentAudit': {},
+    './agentAudit': { withAudit: async (_request, action) => action() },
     './experimentCancelCore.mjs': cancelCore,
     './experimentCancelStore': cancelStore,
   });
@@ -219,7 +220,7 @@ function setup(options = {}) {
     './experimentCancel': cancellation,
     mongodb: { ...mongodb, GridFSBucket },
   }, globals);
-  return { actions, calls, documents, initial };
+  return { actions, cancellation, calls, documents, initial };
 }
 
 // cancelExperimentById reports expected refusals as { ok: false } instead of rejecting
@@ -241,6 +242,25 @@ function noEffects(h) {
   }
   assert.equal(JSON.stringify(h.documents), h.initial, 'Denied call changed in-memory metadata');
 }
+
+test('CLI cancellation uses the service credential and canonical Job ID through the shared store', async () => {
+  const h = setup();
+  const result = await h.cancellation.cancelExperimentFromCli(EOWN.toUpperCase(), OWNER);
+  assert.equal(result.ok, true);
+  assert.equal(h.calls.backend.length, 1);
+  const { init } = h.calls.backend[0];
+  assert.equal(new Headers(init.headers).get('authorization'), 'Bearer service-token');
+  assert.equal(JSON.parse(init.body).jobName, 'runner-' + EOWN);
+  assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'CANCELLED');
+});
+
+test('shared CLI users cannot use the service credential to cancel another owner\'s experiment', async () => {
+  const h = setup();
+  const result = await h.cancellation.cancelExperimentFromCli(EOWN, SHARED);
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'forbidden');
+  noEffects(h);
+});
 
 async function refused(h, action) {
   let result;
@@ -335,6 +355,7 @@ test('cancel permits owner and current database admin while preserving backend m
     assert.equal(url, 'http://glados-service-backend:6060/cancelExperiment');
     assert.equal(init.method, 'POST');
     assert.equal(new Headers(init.headers).get('content-type'), 'application/json');
+      assert.equal(new Headers(init.headers).get('authorization'), 'Bearer service-token');
     assert.deepEqual(JSON.parse(init.body), { jobName: `runner-${EOWN}` });
     const experiment = h.documents.experiments.find((document) => String(document._id) === EOWN);
     assert.equal(experiment.finished, true);

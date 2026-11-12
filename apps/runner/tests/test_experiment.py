@@ -9,14 +9,31 @@ class TestExperimentData(unittest.TestCase):
     params = parseRawHyperparameterData([{"name": "iparam", "default": "1", "min": "1", "max": "10", "step": "1", "type": "integer", "useDefault": True}, {"name": "fparam", "default": "1.0", "min": "1.0", "max": "10.0", "step": "1.0", "type": "float", "useDefault": True}, {"name": "sparam", "default": "Hi", "type": "string", "useDefault": True}, {"name": "bparam", "default": True, "type": "bool", "useDefault": True}])
     configs = {"config0": ConfigData(**{"data":{"key":"value"}})}
     optional = ["trialExtraFile", "scatterIndVar", "scatterDepVar", "startedAtEpochMillis", "finishedAtEpochMillis"]
-    fields_with_default = {"file": "", "postProcess": False, "configs": {}, "totalExperimentRuns": 0, "experimentType": ExperimentType.UNKNOWN, "finished": False,"passes":0, "fails":0}
+    fields_with_default = {"file": "", "postProcess": False, "configs": {}, "totalExperimentRuns": 0, "experimentType": ExperimentType.UNKNOWN, "finished": False,"passes":0, "fails":0, "experimentExecutable": "", "status": "RUNNING"}
 
 
-    exp_info = {'configs':configs,'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 5, 'workers': 1, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb', 'configFileFormat': "ini"}
+    exp_info = {'configs':configs,'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 5, 'workers': 1, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb', 'configFileFormat': "ini",
+        'creatorRole': 'user',
+        'creatorEmail': 'owner@example.test',
+        'trialResultLineNumber': 1,
+        'sendEmail': False,
+    }
 
-    exp_info_has_all_optional = {'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', "startedAtEpochMillis": 0, "finishedAtEpochMillis": 0, 'timeout': 5, 'workers': 1, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb', 'configFileFormat': "ini"}
+    exp_info_has_all_optional = {'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', "startedAtEpochMillis": 0, "finishedAtEpochMillis": 0, 'timeout': 5, 'workers': 1, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, 'created': 1679705027850, 'scatter': True, 'expId': 'V3dpcllHWPrK1Kgbyzqb', 'configFileFormat': "ini",
+        'creatorRole': 'user',
+        'creatorEmail': 'owner@example.test',
+        'trialResultLineNumber': 1,
+        'sendEmail': False,
+    }
 
-    exp_info_has_all_default = {'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, "experimentType": ExperimentType.PYTHON, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 5, 'workers': 1, "configs": {}, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, "passes": 0, "fails": 0, 'created': 1679705027850, 'scatter': True, "postProcess": True, 'expId': 'V3dpcllHWPrK1Kgbyzqb', 'configFileFormat': "ini"}
+    exp_info_has_all_default = {'trialExtraFile': 'Testing Data', 'description': 'Testing Data', 'file': 'experimentV3dpcllHWPrK1Kgbyzqb', 'creator': 'U0EmxpfuqWM2fSa1LKmpFiqLj0V2', 'finished': False, "experimentType": ExperimentType.PYTHON, 'estimatedTotalTimeMinutes': 0, 'dumbTextArea': 'dummy = dummy\na = 100', 'scatterIndVar': 'iparam', 'scatterDepVar': 'fparam', 'timeout': 5, 'workers': 1, "configs": {}, 'hyperparameters': params, 'name': 'Testing Data', 'trialResult': 'Testing Data', 'totalExperimentRuns': 0, "passes": 0, "fails": 0, 'created': 1679705027850, 'scatter': True, "postProcess": True, 'expId': 'V3dpcllHWPrK1Kgbyzqb', 'configFileFormat': "ini",
+        'creatorRole': 'user',
+        'creatorEmail': 'owner@example.test',
+        'trialResultLineNumber': 1,
+        'sendEmail': False,
+        'experimentExecutable': '',
+        'status': 'RUNNING',
+    }
 
     def test_creating_object_does_not_mutate_input_fields(self):
         experiment = ExperimentData(**self.exp_info)

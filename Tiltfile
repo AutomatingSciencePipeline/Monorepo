@@ -5,8 +5,10 @@ load("ext://helm_resource", "helm_resource")
 
 # Setup the needed k8s yamls
 k8s_yaml([
-    "kubernetes_init/tilt/cluster-role-job-creator.yaml",
-    "kubernetes_init/tilt/role-binding-job-creator.yaml",
+    "kubernetes_init/security/service-accounts.yaml",
+    "kubernetes_init/security/rbac-backend.yaml",
+    "kubernetes_init/security/rbac-frontend.yaml",
+    "kubernetes_init/security/network-policies.yaml",
     "kubernetes_init/kubernetes_secrets/secret.yaml",
     "kubernetes_init/tilt/deployment-frontend.yaml",
     "kubernetes_init/tilt/service-frontend.yaml",
@@ -14,6 +16,15 @@ k8s_yaml([
     "kubernetes_init/tilt/service-backend-dev.yaml",
     "helm_packages/mongodb-helm/pvs.yaml"
 ])
+
+# Older versions of this Tiltfile gave job permissions to the namespace's default ServiceAccount,
+# which runner Pods (user code) also used. Remove them from clusters that were set up before.
+local_resource("remove-legacy-default-sa-permissions",
+    cmd="kubectl delete rolebinding job-creator -n default --ignore-not-found && " +
+        "kubectl delete clusterrolebinding job-creator-binding --ignore-not-found && " +
+        "kubectl delete clusterrole job-creator --ignore-not-found",
+    labels=["security"]
+)
 
 # Setup the folder paths inside minikube
 local_resource("fix-minikube-folder-perms-setup-data", 

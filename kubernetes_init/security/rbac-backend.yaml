@@ -1,0 +1,48 @@
+# The backend starts and cancels runner Jobs, nothing else.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: glados-backend
+  namespace: default
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["create", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: glados-backend
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: glados-backend
+  namespace: default
+roleRef:
+  kind: Role
+  name: glados-backend
+  apiGroup: rbac.authorization.k8s.io
+---
+# Lets the backend ask the API server who a caller's ServiceAccount token belongs to.
+# This is how it checks that a "start experiment" request really comes from the frontend.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: glados-backend-token-review
+rules:
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: glados-backend-token-review
+subjects:
+- kind: ServiceAccount
+  name: glados-backend
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: glados-backend-token-review
+  apiGroup: rbac.authorization.k8s.io

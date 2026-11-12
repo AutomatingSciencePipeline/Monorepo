@@ -21,7 +21,10 @@ persistence:
 auth:
   enabled: true
   rootUser: "adminuser"
-  rootPassword: "password123"
+  # The password is not stored in this repository. deploy.sh creates this Secret, with the keys
+  # mongodb-root-password and mongodb-replica-set-key. The password must match MONGODB_PASSWORD
+  # in the secret-env Secret that the frontend and backend read.
+  existingSecret: glados-mongodb-auth
 
 service:
   nameOverride: glados-service-mongodb
