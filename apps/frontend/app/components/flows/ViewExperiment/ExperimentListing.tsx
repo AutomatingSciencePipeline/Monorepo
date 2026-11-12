@@ -4,6 +4,7 @@ import { ExperimentData } from '../../../../lib/db_types';
 import { MdEdit } from 'react-icons/md';
 import Chart from './Chart';
 import { addShareLink, unfollowExperiment, updateExperimentNameById, updateExperimentTagsById, cancelExperimentById, updateExperimentArchiveStatusById } from '../../../../lib/mongodb_funcs';
+import { CANCELLABLE_STATUSES } from '../../../../lib/experimentCancelCore.mjs';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { CheckIcon, ChevronRightIcon, ShareIcon, FolderArrowDownIcon, DocumentDuplicateIcon, ChartBarIcon, XMarkIcon, MinusIcon, ExclamationTriangleIcon, DocumentCheckIcon, ChevronDownIcon, ArchiveBoxIcon, BookOpenIcon } from '@heroicons/react/24/solid';
@@ -718,15 +719,20 @@ export const ExperimentListing = ({ projectData: projectData, onCopyExperiment, 
 								</button> : null)
 					}
 					{
-						project.creator == session?.user?.id! && project.status != 'COMPLETED' && project.status != 'FAILED' && project.status != 'CANCELLED' && project.status != 'ARCHIVED' &&
+						project.creator == session?.user?.id! && CANCELLABLE_STATUSES.includes(project.status) &&
 						<button type="button"
 							className='inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto xl:w-full'
 							onClick={() => {
-								toast.promise(cancelExperimentById(project.expId), {
-									success: 'Cancelled experiment',
-									error: 'Failed to cancel experiment',
-									loading: 'Cancelling experiment...'
-								});
+								toast.promise(
+									cancelExperimentById(project.expId).then((result) => {
+										if (!result.ok) throw new Error(result.message);
+									}),
+									{
+										success: 'Cancelled experiment',
+										error: (error: Error) => error.message || 'Failed to cancel experiment',
+										loading: 'Cancelling experiment...'
+									}
+								);
 							}}
 						>
 							Cancel Experiment

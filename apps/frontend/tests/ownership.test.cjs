@@ -222,6 +222,19 @@ function setup(options = {}) {
   return { actions, cancellation, calls, documents, initial };
 }
 
+// cancelExperimentById reports expected refusals as { ok: false } instead of rejecting
+async function refusedCancel(h, action) {
+  let result;
+  try { result = await action(); } catch (error) {
+    if (error?.code === 'ERR_ASSERTION') throw error;
+    noEffects(h);
+    return;
+  }
+  assert.equal(result?.ok, false, 'Denied cancellation reported success');
+  assert.equal(typeof result?.message, 'string');
+  noEffects(h);
+}
+
 function noEffects(h) {
   for (const name of ['writes', 'downloads', 'uploads', 'bucketDeletes', 'backend']) {
     assert.equal(h.calls[name].length, 0, `Denied call caused ${name}`);
@@ -332,7 +345,7 @@ for (const [name, args] of mutations) {
 test('cancel permits owner and current database admin while preserving backend mechanics', async () => {
   for (const userId of [OWNER, ADMIN]) {
     const h = setup({ userId, sessionRole: 'user', backendPort: '6060' });
-    assert.equal(await h.actions.cancelExperimentById(EOWN), true);
+    assert.equal((await h.actions.cancelExperimentById(EOWN)).ok, true);
     assert.equal(h.calls.backend.length, 1);
     const { url, init } = h.calls.backend[0];
     assert.equal(url, 'http://glados-service-backend:6060/cancelExperiment');
@@ -349,7 +362,9 @@ test('cancel permits owner and current database admin while preserving backend m
 
 test('cancel rejects backend refusal without changing experiment state', async () => {
   const h = setup({ backendStatus: 503 });
-  await assert.rejects(h.actions.cancelExperimentById(EOWN), /Failed to cancel experiment/);
+  const result = await h.actions.cancelExperimentById(EOWN);
+  assert.equal(result.ok, false);
+  assert.equal(result.message, 'Failed to cancel experiment');
   assert.equal(h.calls.backend.length, 1);
   assert.equal(h.calls.writes.length, 0);
   assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'RUNNING');
@@ -357,7 +372,7 @@ test('cancel rejects backend refusal without changing experiment state', async (
 
 test('uppercase experiment IDs cancel the canonical Kubernetes Job', async () => {
   const h = setup();
-  assert.equal(await h.actions.cancelExperimentById(EOWN.toUpperCase()), true);
+  assert.equal((await h.actions.cancelExperimentById(EOWN.toUpperCase())).ok, true);
   assert.deepEqual(JSON.parse(h.calls.backend[0].init.body), { jobName: `runner-${EOWN}` });
   assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'CANCELLED');
 });
@@ -365,18 +380,18 @@ test('uppercase experiment IDs cancel the canonical Kubernetes Job', async () =>
 test('privileged users do not inherit admin cancellation rights', async () => {
   for (const userId of [SHARED, FOREIGN]) {
     const h = setup({ userId, users: [{ _id: oid(userId), role: 'privileged' }] });
-    await refused(h, () => h.actions.cancelExperimentById(EOWN));
+    await refusedCancel(h, () => h.actions.cancelExperimentById(EOWN));
   }
 });
 
 test('cancel denies shared readers, stale session admins, unknown IDs, and missing identities before backend calls', async () => {
   for (const options of [{ userId: SHARED }, { userId: FOREIGN, sessionRole: 'admin' }, { session: null }, { session: { user: {} } }, { users: [] }]) {
     const h = setup(options);
-    await refused(h, () => h.actions.cancelExperimentById(EOWN));
+    await refusedCancel(h, () => h.actions.cancelExperimentById(EOWN));
   }
   for (const id of [UNKNOWN, 'invalid', 'abcdefghijkl', 'g'.repeat(24), null]) {
     const h = setup({ userId: ADMIN });
-    await refused(h, () => h.actions.cancelExperimentById(id));
+    await refusedCancel(h, () => h.actions.cancelExperimentById(id));
   }
 });
 

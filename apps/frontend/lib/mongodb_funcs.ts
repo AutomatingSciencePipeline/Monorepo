@@ -124,7 +124,11 @@ export async function deleteDocumentById(expId: string) {
     return Promise.resolve();
 }
 
-export async function cancelExperimentById(expId: string) {
+// Expected refusals are returned rather than thrown: in production Next.js replaces the message of
+// an error thrown by a server action with a generic one, so the UI could not show why it failed.
+export type CancelExperimentOutcome = { ok: true } | { ok: false; message: string };
+
+export async function cancelExperimentById(expId: string): Promise<CancelExperimentOutcome> {
     'use server';
     const user = await getCurrentUser();
     if (typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) {
@@ -136,10 +140,9 @@ export async function cancelExperimentById(expId: string) {
         isAdmin: user.role === 'admin',
     });
     if (!result.ok) {
-        // Rejecting lets toast.promise in the UI show the failure instead of a false success.
-        throw new Error(cancelErrorMessage(result));
+        return { ok: false, message: cancelErrorMessage(result) };
     }
-    return true;
+    return { ok: true };
 }
 
 function cancelErrorMessage(result: Extract<CancelResult, { ok: false }>): string {
