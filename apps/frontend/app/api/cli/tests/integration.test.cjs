@@ -7,14 +7,22 @@ const USER_ID = '507f1f77bcf86cd799439011';
 const EXPERIMENT_ID = '507f1f77bcf86cd799439012';
 const FILE_ID = '507f1f77bcf86cd799439013';
 
+function equal(actual, expected) {
+  if (actual instanceof ObjectId || expected instanceof ObjectId) {
+    return actual instanceof ObjectId && expected instanceof ObjectId && actual.equals(expected);
+  }
+  return actual != null && actual === expected;
+}
+
 function matches(document, query) {
   return Object.entries(query).every(([key, value]) => {
     if (key === '$and') return value.every((part) => matches(document, part));
     if (key === '$or') return value.some((part) => matches(document, part));
     if (value && typeof value === 'object' && '$in' in value) {
-      return Array.isArray(document[key]) && document[key].some((item) => value.$in.includes(item));
+      if (value.$type === 'array' && !Array.isArray(document[key])) return false;
+      return Array.isArray(document[key]) && document[key].some((item) => value.$in.some((expected) => equal(item, expected)));
     }
-    return document[key] != null && String(document[key]) === String(value);
+    return equal(document[key], value);
   });
 }
 
@@ -24,8 +32,17 @@ function setup({ githubStatus = 200 } = {}) {
   const clientPromise = Promise.resolve({
     db: () => ({
       collection: (name) => {
+        if (name === 'fileBucket.files') {
+          return { findOne: async (query) => matches({
+            _id: new ObjectId(FILE_ID), 'metadata.userId': USER_ID,
+          }, query) ? { _id: new ObjectId(FILE_ID) } : null };
+        }
         if (name === 'experiments') {
           return {
+            insertOne: async (document) => {
+              calls.submissions.push(document);
+              return { acknowledged: true, insertedId: new ObjectId(EXPERIMENT_ID) };
+            },
             findOne: async (query) => {
               calls.experiments++;
               const experiment = {
@@ -37,8 +54,7 @@ function setup({ githubStatus = 200 } = {}) {
           };
         }
         return {
-          findOne: async (query) => documents[name].find((document) =>
-            Object.entries(query).every(([key, value]) => String(document[key]) === String(value))) ?? null,
+          findOne: async (query) => documents[name].find((document) => matches(document, query)) ?? null,
           insertOne: async (document) => {
             const insertedId = document._id ?? new ObjectId(USER_ID);
             documents[name].push({ ...document, _id: insertedId });
@@ -61,12 +77,6 @@ function setup({ githubStatus = 200 } = {}) {
     return loadSource(`app/api/cli/${name}/route.ts`, {
       '../../../../tokenAuth': auth,
       '../../../../lib/mongodb': mongodb,
-      '../../../../lib/mongodb_funcs': {
-        submitExperimentCLI: async (...args) => {
-          calls.submissions.push(args);
-          return EXPERIMENT_ID;
-        },
-      },
     }).POST;
   }
   return { route, calls, documents };
@@ -102,13 +112,30 @@ test('real authentication and status preserve the new user identity on the first
   assert.equal(calls.experiments, 2);
 });
 
-test('real authentication passes the first-time user identity into experiment submission', async () => {
+test('real first-time login preserves the identity in subsequent experiment submission', async () => {
   const { route, calls } = setup();
+  const login = new Request('http://localhost/api/cli/tokenAuth', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token: 'synthetic-token' }),
+  });
+  assert.equal((await route('tokenAuth')(login)).status, 200);
   const response = await route('submitExp')(submitRequest());
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { success: true, expId: EXPERIMENT_ID });
   assert.equal(calls.submissions.length, 1);
-  assert.deepEqual(calls.submissions[0].slice(1), [USER_ID, 'new@example.test', 'user', FILE_ID]);
+  assert.equal(calls.submissions[0].creator, USER_ID);
+  assert.equal(calls.submissions[0].creatorEmail, 'new@example.test');
+  assert.equal(calls.submissions[0].creatorRole, 'user');
+  assert.equal(calls.submissions[0].file, FILE_ID);
+});
+
+test('an unregistered token cannot create accounts during a rejected experiment submission', async () => {
+  const { route, documents, calls } = setup();
+  const response = await route('submitExp')(submitRequest());
+  assert.equal(response.status, 401);
+  assert.equal(documents.users.length, 0);
+  assert.equal(documents.accounts.length, 0);
+  assert.equal(calls.submissions.length, 0);
 });
 
 test('real invalid-token authentication stops both status queries and submissions', async () => {

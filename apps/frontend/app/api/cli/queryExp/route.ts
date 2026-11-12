@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db(DB_NAME);
         const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
-        const visibility = { $or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }] };
+        const visibility = { $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] };
         const filters = experiment_req.exp_title.trim() === '*'
             ? [visibility]
             : [visibility, { name: experiment_req.exp_title }];

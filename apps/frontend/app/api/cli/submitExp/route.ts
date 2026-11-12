@@ -1,4 +1,4 @@
-import { submitExperimentCLI } from '../../../../lib/mongodb_funcs';
+import { submitExperimentForUser } from '../../../../lib/experimentSubmission';
 import { authenticateCli, invalidArguments, isNonEmptyString, isObjectId } from '../request';
 import * as yaml from "js-yaml";
 import { NextResponse } from "next/server";
@@ -23,14 +23,12 @@ export async function POST(req: Request) {
     return invalidArguments();
   }
 
-  const auth = await authenticateCli(userToken);
+  // An executable owner must already have an account from login or upload.
+  const auth = await authenticateCli(userToken, false);
   if (!auth.user) return auth.response;
 
   try {
     const user = auth.user;
-    const userId = user["_id"];
-    const email = user['email'];
-    const role = user['role'];
     const yamlText = await file.text();
 
     let parsed: any;
@@ -43,10 +41,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid YAML' }, { status: 400 });
     }
 
-    parsed["file"] = fileId;
-    parsed["status"] = "CREATED";
-
-    const expId = await submitExperimentCLI(parsed, userId, email, role, fileId);
+    const expId = await submitExperimentForUser(parsed, user, fileId);
+    if (expId === null) {
+      return NextResponse.json({ response: 'File not found' }, { status: 404 });
+    }
 
     return NextResponse.json({
       success: true,

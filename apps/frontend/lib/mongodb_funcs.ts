@@ -3,84 +3,38 @@ import { GridFSBucket, ObjectId } from "mongodb";
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS } from "./mongodb";
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
-
-export async function submitExperimentCLI(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
-    'use server';
-    values.creator = userId;
-    values.creatorEmail = userEmail;
-    values.creatorRole = role;
-    values.created = Date.now();
-    values.finished = false;
-    values.estimatedTotalTimeMinutes = 0;
-    values.totalExperimentRuns = 0;
-    values.file = fileId;
-    // Make sure that the trialResultLineNumber is a number, not a string
-    if (!values.trialResultLineNumber) {
-        values.trialResultLineNumber = 1;
-    }
-    values.trialResultLineNumber = Number(values.trialResultLineNumber);
-    const expData: Partial<ExperimentData> = values;
-
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    
-    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
-
-    if (result){
-        return Promise.resolve(result.insertedId.toString());
-    }
-    else {
-        return Promise.reject(`Failed to insert experiment data`);
-    }
-}
+import { submitExperimentForUser } from "./experimentSubmission";
+import { formatFilename, isObjectId } from "./serverUtils";
 
 export async function submitExperiment(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
-    values.creator = userId;
-    values.creatorEmail = userEmail;
-    values.creatorRole = role;
-    values.created = Date.now();
-    values.finished = false;
-    values.estimatedTotalTimeMinutes = 0;
-    values.totalExperimentRuns = 0;
-    values.file = fileId;
-    // Make sure that the trialResultLineNumber is a number, not a string
-    if (!values.trialResultLineNumber) {
-        values.trialResultLineNumber = 1;
+    if (!values || Object.prototype.toString.call(values) !== '[object Object]') {
+        return Promise.reject(`Invalid experiment settings`);
     }
-    values.trialResultLineNumber = Number(values.trialResultLineNumber);
-    const expData: Partial<ExperimentData> = values;
-
-    const session = await auth();
-    // Make sure that the user is who they say they are
-    if (!session) {
-        return Promise.reject(`User is not authenticated`);
-    }
-    if (session.user?.id !== userId) {
+    const user = await getCurrentUser();
+    if (user._id.toString() !== userId) {
         return Promise.reject(`User is not who they say they are`);
     }
-
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    
-    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
-
-    if (result){
-        return Promise.resolve(result.insertedId.toString());
-    }
-    else {
-        return Promise.reject(`Failed to insert experiment data`);
-    }
+    const expId = await submitExperimentForUser(values, user, fileId);
+    if (expId === null) return Promise.reject(`File not found`);
+    return expId;
 }
 
 export async function getDocumentFromId(expId: string) {
     'use server';
+    const session = await auth();
+    if (!session?.user?.id || !isObjectId(expId)) {
+        return null;
+    }
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
-    const expDoc = await collection.findOne({ "_id": new ObjectId(expId) });
+    const expDoc = await collection.findOne({
+        _id: new ObjectId(expId),
+        $or: [{ creator: session.user.id }, { sharedUsers: { $type: 'array', $in: [session.user.id] } }],
+    });
     if (!expDoc) {
-        return Promise.reject(`Could not find document with id: ${expId}`);
+        return null;
     }
 
     // Make a new object with the same properties as expDoc, but with the _id property as a string
@@ -95,10 +49,11 @@ export async function getDocumentFromId(expId: string) {
 
 export async function deleteDocumentById(expId: string) {
     'use server';
+    const { collection, query } = await getOwnedExperiment(expId);
+    expId = query._id.toHexString();
     const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
-    const deleted = await collection.deleteOne({ "_id": new ObjectId(expId) });
+    const deleted = await collection.deleteOne(query);
 
     if (deleted.deletedCount == 0) {
         return Promise.reject(`Could not find document with id: ${expId}`);
@@ -130,6 +85,19 @@ export async function deleteDocumentById(expId: string) {
 
 export async function cancelExperimentById(expId: string) {
     'use server';
+    const user = await getCurrentUser();
+    if (!isObjectId(expId)) {
+        return Promise.reject(`Invalid experiment ID`);
+    }
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+    const query = user.role === 'admin'
+        ? { _id: new ObjectId(expId) }
+        : { _id: new ObjectId(expId), creator: user._id.toString() };
+    const experiment = await collection.findOne(query);
+    if (!experiment) return Promise.reject(`Experiment not found`);
+    if (experiment.status === 'CANCELLED') return true;
+    if (experiment.status !== 'RUNNING') return Promise.reject(`Experiment is not running`);
     //Call the backend at the endpoint to cancel the experiment
     const BACKEND_PORT = process.env.BACKEND_PORT || '5050';
     const url = `http://glados-service-backend:${BACKEND_PORT}/cancelExperiment`;
@@ -139,33 +107,23 @@ export async function cancelExperimentById(expId: string) {
         headers: new Headers({
             'Content-Type': 'application/json',
         }),
-        body: JSON.stringify({ jobName: 'runner-' + expId }),
+        body: JSON.stringify({ jobName: 'runner-' + query._id.toHexString() }),
     });
 
-    //Mark the experiment as completed
-    const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
-    await collection
-        .updateOne({ '_id': new ObjectId(expId) }, { $set: { 'finished': true } });
-
-    await collection
-        .updateOne({ '_id': new ObjectId(expId) }, { $set: { 'status': 'CANCELLED' } });
-
-    //If the backend returns a 200 status code, the experiment was successfully cancelled
-    if (backendResponse.status === 200) {
-        return Promise.resolve(true);
-    } else {
-        return Promise.resolve(false);
-    }
-
+    if (!backendResponse.ok) return Promise.reject(`Backend refused cancellation`);
+    const result = await collection.updateOne(
+        { ...query, status: 'RUNNING' },
+        { $set: { finished: true, status: 'CANCELLED' } },
+    );
+    if (result.matchedCount === 0) return Promise.reject(`Experiment state changed during cancellation`);
+    return true;
 }
 
 export async function updateExperimentNameById(expId: string, newExpName: string) {
     'use server';
-    const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+    const { collection, query } = await getOwnedExperiment(expId);
 
-    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'name': newExpName } });
+    const experiment = await collection.updateOne(query, { $set: { 'name': newExpName } });
 
     if (experiment.modifiedCount == 0) {
         return Promise.reject(`Could not update document with id: ${expId}`);
@@ -176,10 +134,9 @@ export async function updateExperimentNameById(expId: string, newExpName: string
 
 export async function updateExperimentTagsById(expId: string, newTags: string[]) {
     'use server';
-    const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+    const { collection, query } = await getOwnedExperiment(expId);
 
-    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'tags': newTags } });
+    const experiment = await collection.updateOne(query, { $set: { 'tags': newTags } });
 
     if (experiment.modifiedCount == 0) {
         return Promise.reject(`Could not update document with id: ${expId}`);
@@ -190,31 +147,43 @@ export async function updateExperimentTagsById(expId: string, newTags: string[])
 
 export async function updateExperimentArchiveStatusById(expId: string, newStatus: string) {
     'use server';
-    const client = await clientPromise;
-    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
-
-    const experiment = await collection.updateOne({ '_id': new ObjectId(expId) }, { $set: { 'status': newStatus } });
-
-    if (experiment.modifiedCount == 0) {
-        return Promise.reject(`Could not update document with id: ${expId}`);
+    if (newStatus !== 'ARCHIVED' && newStatus !== 'UNARCHIVED') {
+        return Promise.reject(`Invalid archive action`);
     }
-
-    return Promise.resolve();
+    const { collection, query, document } = await getOwnedExperiment(expId);
+    const terminalStatuses = ['COMPLETED', 'FAILED', 'CANCELLED'];
+    if (newStatus === 'ARCHIVED') {
+        if (!terminalStatuses.includes(document.status)) return Promise.reject(`Experiment is not finished`);
+    } else if (document.status !== 'ARCHIVED') {
+        return Promise.reject(`Experiment is not archived`);
+    }
+    const restoredStatus = terminalStatuses.includes(document.archivedFromStatus)
+        ? document.archivedFromStatus : (document.passes > 0 ? 'COMPLETED' : 'FAILED');
+    const update = newStatus === 'ARCHIVED'
+        ? { status: 'ARCHIVED', archivedFromStatus: document.status }
+        : { status: restoredStatus, archivedFromStatus: null };
+    const result = await collection.updateOne({ ...query, status: document.status }, { $set: update });
+    if (result.matchedCount === 0) return Promise.reject(`Experiment state changed during archive update`);
 }
 
 export async function refreshFileTimestamp(fileId: string) {
     'use server';
+    const user = await getCurrentUser();
+    if (!isObjectId(fileId)) {
+        return Promise.reject(`Invalid file ID`);
+    }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
 
-    const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+    const query = { _id: new ObjectId(fileId), 'metadata.userId': user._id.toString() };
+    const file = await bucket.find(query).toArray();
     if (file.length === 0) {
         return Promise.reject(`Could not find file with id: ${fileId}`);
     }
 
     await db.collection('fileBucket.files').updateOne(
-        { _id: new ObjectId(fileId) },
+        query,
         { $set: { 'metadata.lastUsedDate': new Date() } }
     );
 
@@ -223,11 +192,12 @@ export async function refreshFileTimestamp(fileId: string) {
 
 export async function getRecentFiles(userId: string) {
     'use server';
+    const user = await getCurrentUser();
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
 
-    const userFiles = await bucket.find({ "metadata.userId": userId })
+    const userFiles = await bucket.find({ "metadata.userId": user._id.toString() })
         .sort({ "metadata.lastUsedDate": -1 })
         .limit(5)
         .toArray();
@@ -247,17 +217,11 @@ export async function getRecentFiles(userId: string) {
 
 export async function downloadFile(fileId: string) {
     'use server';
+    const user = await getCurrentUser();
+    const file = await getReadableFile(fileId, user._id.toString());
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
-    const session = await auth();
-    if (!session) {
-        return Promise.reject(`User not authenticated`);
-    }
-    const files = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
-    if (files.length === 0) {
-        return Promise.reject(`Could not find file with id: ${fileId}`);
-    }
     
     return new Promise<string>((resolve, reject) => {
         const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
@@ -271,7 +235,7 @@ export async function downloadFile(fileId: string) {
             try {
                 const buffer = Buffer.concat(chunks);
                 const base64String = buffer.toString('base64');
-                const dataUrl = `data:${files[0].contentType};base64,${base64String}`;
+                const dataUrl = `data:${file.contentType};base64,${base64String}`;
                 resolve(dataUrl);
             } catch (err) {
                 reject(err);
@@ -286,25 +250,22 @@ export async function downloadFile(fileId: string) {
 
 export async function copyFile(fileID: string, userId: string) {
     'use server';
+    const user = await getCurrentUser();
+    userId = user._id.toString();
+    const fileData = await getReadableFile(fileID, userId);
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
 
-    const file = await bucket.find({ _id: new ObjectId(fileID) }).toArray();
-    if (file.length === 0) {
-        return Promise.reject(`Could not find file with id: ${fileID}`);
-    }
-
     //First check if the user already has a file with the same hash
-    const userFile = await bucket.find({ "metadata.hash": file[0].metadata!.hash, "metadata.userId": userId }).toArray();
+    const userFile = fileData.metadata?.hash
+        ? await bucket.find({ "metadata.hash": fileData.metadata.hash, "metadata.userId": userId }).toArray()
+        : [];
     if (userFile.length > 0) {
         return userFile[0]._id.toString();
     }
 
-    const fileData = file[0];
-    const metadata = fileData.metadata!;
-    metadata.userId = userId;
-    metadata.lastUsedDate = new Date();
+    const metadata = { ...fileData.metadata, userId, lastUsedDate: new Date() };
 
     const downloadStream = bucket.openDownloadStream(new ObjectId(fileID));
     const uploadStream = bucket.openUploadStream(fileData.filename, { metadata });
@@ -320,23 +281,29 @@ export async function copyFile(fileID: string, userId: string) {
 
 export async function updateLastUsedDateFile(fileId: string) {
     'use server';
+    const user = await getCurrentUser();
+    if (!isObjectId(fileId)) {
+        return Promise.reject(`Invalid file ID`);
+    }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
 
-    const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+    const query = { _id: new ObjectId(fileId), 'metadata.userId': user._id.toString() };
+    const file = await bucket.find(query).toArray();
     if (file.length === 0) {
         return;
     }
 
     await db.collection('fileBucket.files').updateOne(
-        { _id: new ObjectId(fileId) },
+        query,
         { $set: { 'metadata.lastUsedDate': new Date() } }
     );
 }
 
 export async function addShareLink(expId: string) {
     'use server';
+    await getOwnedExperiment(expId);
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_SHARE_LINKS);
 
@@ -354,6 +321,10 @@ export async function addShareLink(expId: string) {
 
 export async function redeemShareLink(link: string, userId: string) {
     'use server';
+    const user = await getCurrentUser();
+    if (user._id.toString() !== userId || typeof link !== 'string' || !link.trim()) {
+        return Promise.reject(`User is not who they say they are`);
+    }
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_SHARE_LINKS);
 
@@ -378,10 +349,11 @@ export async function redeemShareLink(link: string, userId: string) {
     if (!experiment) {
         return Promise.reject(`Could not find experiment with id: ${shareLink.experimentId}`);
     }
-    if (experiment.sharedUsers) {
-        if (experiment.sharedUsers.includes(userId)) {
-            return Promise.reject(`User already has access to this experiment`);
-        }
+    if (experiment.sharedUsers !== undefined && !Array.isArray(experiment.sharedUsers)) {
+        return Promise.reject(`Invalid sharing metadata`);
+    }
+    if (experiment.sharedUsers?.includes(userId)) {
+        return Promise.reject(`User already has access to this experiment`);
     }
 
     //Append that user to the sharedUsers array
@@ -392,6 +364,10 @@ export async function redeemShareLink(link: string, userId: string) {
 
 export async function unfollowExperiment(expId: string, userId: string) {
     'use server';
+    const user = await getCurrentUser();
+    if (user._id.toString() !== userId || !isObjectId(expId)) {
+        return Promise.reject(`Invalid arguments`);
+    }
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
 
@@ -401,19 +377,21 @@ export async function unfollowExperiment(expId: string, userId: string) {
         return Promise.reject(`Could not find experiment with id: ${expId}`);
     }
 
-    if (experiment.sharedUsers) {
-        if (!experiment.sharedUsers.includes(userId)) {
-            return Promise.reject(`User does not have access to this experiment`);
-        }
+    if (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(userId)) {
+        return Promise.reject(`User does not have access to this experiment`);
     }
 
-    await collection.updateOne({ '_id': new ObjectId(expId) }, { $pull: { 'sharedUsers': userId as any } });
+    await collection.updateOne({ '_id': new ObjectId(expId), sharedUsers: { $type: 'array', $in: [userId] } }, { $pull: { 'sharedUsers': userId as any } });
 
     return Promise.resolve();
 }
 
 export async function getUsers() {
     'use server';
+    const currentUser = await getCurrentUser();
+    if (currentUser.role !== 'admin') {
+        return Promise.reject(`User is not an admin`);
+    }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const users = db.collection('users');
@@ -432,8 +410,15 @@ export async function getUsers() {
 
 export async function updateUserRole(userId: string, role: string) {
     'use server';
+    const currentUser = await getCurrentUser();
+    if (currentUser.role !== 'admin') {
+        return Promise.reject(`User is not an admin`);
+    }
     if (role !== 'admin' && role !== 'privileged' && role !== 'user') {
         return Promise.reject(`Invalid role: ${role}`);
+    }
+    if (!isObjectId(userId)) {
+        return Promise.reject(`Invalid user ID`);
     }
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -444,73 +429,25 @@ export async function updateUserRole(userId: string, role: string) {
     return Promise.resolve();
 }
 
-export async function fetchResultsFileCLI(expId: string, userId: string): Promise<| { contents: string; name: string }| { success: boolean; status: string }> {
-    'use server';
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
-
-    let objectId;
-
-    try {
-        objectId = new ObjectId(expId);
-    } catch (err) {
-        return { success: false, status: 'not_found'};
-    }
-
-    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: objectId });
-    if (!experiment) return { success: false, status: 'not_found'};
-
-    // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
-        return { success: false, status: 'not_found'};
-    }
-
-    if(experiment.status == 'FAILED') return { success: false, status: 'exp_failed'};
-
-    if(experiment.status != 'COMPLETED') return { success: false, status: 'not_done'};
-
-    if(experiment.fails > 0) return { success: false, status: 'exp_failed'};
-
-    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0)  return { success: false, status: 'not_done'};
-
-    const expName = experiment.name;
-    const expCreated = experiment.created;
-
-    const downloadStream = resultsBucket.openDownloadStream(results[0]._id);
-    const chunks: Buffer[] = [];
-
-    const contents = await new Promise<string>((resolve, reject) => {
-        downloadStream.on('data', (chunk) => chunks.push(chunk));
-        downloadStream.on('end', () => resolve(Buffer.concat(chunks as unknown as Uint8Array[]).toString('utf-8')));
-        downloadStream.on('error', reject);
-    });
-
-    return {
-        contents,
-        name: formatFilename(expName, expCreated, 'csv'),
-    };
-}
 
 export async function fetchResultsFile(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();
-    if (!session) return null;
+    if (!session?.user?.id || !isObjectId(expId)) return null;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
-
-    const results = await resultsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0) return null;
 
     const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
     if (!experiment) return null;
 
     // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== session?.user?.id && (!experiment.sharedUsers || !experiment.sharedUsers.includes(session.user?.id))) {
+    if (experiment.creator !== session.user.id && (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(session.user.id))) {
         return null;
     }
+
+    const results = await resultsBucket.find({ 'metadata.experimentId': experiment._id.toHexString() }).toArray();
+    if (results.length === 0) return null;
 
     const expName = experiment.name;
     const expCreated = experiment.created;
@@ -533,21 +470,21 @@ export async function fetchResultsFile(expId: string): Promise<{ contents: strin
 export async function fetchProjectZip(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();
-    if (!session) return null;
+    if (!session?.user?.id || !isObjectId(expId)) return null;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const zipsBucket = new GridFSBucket(db, { bucketName: 'zipsBucket' });
-
-    const results = await zipsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0) return null;
 
     const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
     if (!experiment) return null;
 
     // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== session?.user?.id && (!experiment.sharedUsers || !experiment.sharedUsers.includes(session.user?.id))) {
+    if (experiment.creator !== session.user.id && (!Array.isArray(experiment.sharedUsers) || !experiment.sharedUsers.includes(session.user.id))) {
         return null;
     }
+
+    const results = await zipsBucket.find({ 'metadata.experimentId': experiment._id.toHexString() }).toArray();
+    if (results.length === 0) return null;
 
     const expName = experiment.name;
     const expCreated = experiment.created;
@@ -567,56 +504,59 @@ export async function fetchProjectZip(expId: string): Promise<{ contents: string
     };
 }
 
-export async function fetchProjectZipCLI(expId: string, userId: string): Promise<{ contents: string; name: string } | null> {
-    'use server';
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    const zipsBucket = new GridFSBucket(db, { bucketName: 'zipsBucket' });
-
-    const results = await zipsBucket.find({ 'metadata.experimentId': expId }).toArray();
-    if (results.length === 0) return null;
-
-    const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({ _id: new ObjectId(expId) });
-    if (!experiment) return null;
-
-    // Make sure the user is the creator or in the sharedUsers array
-    if (experiment.creator !== userId && (!experiment.sharedUsers || !experiment.sharedUsers.includes(userId))) {
-        return null;
-    }
-
-    const expName = experiment.name;
-    const expCreated = experiment.created;
-
-    const downloadStream = zipsBucket.openDownloadStream(results[0]._id);
-    const chunks: Buffer[] = [];
-
-    const contents = await new Promise<string>((resolve, reject) => {
-        downloadStream.on('data', (chunk) => chunks.push(chunk));
-        downloadStream.on('end', () => resolve(Buffer.concat(chunks as unknown as Uint8Array[]).toString('base64')));
-        downloadStream.on('error', reject);
-    });
-
-    return {
-        contents,
-        name: formatFilename(expName, expCreated, 'zip'),
-    };
-}
 
 // Auxiliary functions, keep at the bottom of the file
-const formatFilename = (name: string, timestamp: string, extension: string) => {
-    const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
-    const formattedTimestamp = formatTimestamp(timestamp);
-    return `${formattedName}_${formattedTimestamp}.${extension}`;
-};
+async function getOwnedExperiment(expId: string) {
+    const user = await getCurrentUser();
+    if (!isObjectId(expId)) {
+        return Promise.reject(`Invalid experiment ID`);
+    }
+    const client = await clientPromise;
+    const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
+    const query = { _id: new ObjectId(expId), creator: user._id.toString() };
+    const document = await collection.findOne(query);
+    if (!document) {
+        return Promise.reject(`Experiment not found`);
+    }
+    return { collection, query, document };
+}
 
-const formatTimestamp = (timestamp: string) => {
-    const partiallyFormattedTimestamp = new Date(timestamp).toISOString().replace(/[:.]/g, '-');
-    let formatted = partiallyFormattedTimestamp.replace(/Z$/, '');
-    formatted = formatted.replace('T', '_');
-    const [date, time] = formatted.split('_');
-    const timeParts = time.split('-');
-    let hours = parseInt(timeParts[0], 10) - 5;
-    timeParts[0] = hours.toString();
-    const formattedTime = timeParts.join('-');
-    return `${date}_${formattedTime}`;
-};
+async function getReadableFile(fileId: string, userId: string) {
+    if (!isObjectId(fileId)) {
+        return Promise.reject(`Invalid file ID`);
+    }
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const bucket = new GridFSBucket(db, { bucketName: 'fileBucket' });
+    const files = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+    const file = files[0];
+    if (!file?.metadata?.userId) {
+        return Promise.reject(`File not found`);
+    }
+    if (file.metadata.userId !== userId) {
+        const experiment = await db.collection(COLLECTION_EXPERIMENTS).findOne({
+            file: new RegExp(`^${new ObjectId(fileId).toHexString()}$`, 'i'), creator: file.metadata.userId,
+            sharedUsers: { $type: 'array', $in: [userId] },
+        });
+        if (!experiment) {
+            return Promise.reject(`File not found`);
+        }
+    }
+    return file;
+}
+
+async function getCurrentUser() {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return Promise.reject(`User is not authenticated`);
+    }
+    const userId = session.user.id;
+    const client = await clientPromise;
+    const user = await client.db(DB_NAME)
+        .collection<{ _id: ObjectId | string; email?: string; role?: string }>('users')
+        .findOne({ _id: isObjectId(userId) ? new ObjectId(userId) : userId });
+    if (!user) {
+        return Promise.reject(`User is not authenticated`);
+    }
+    return user;
+}

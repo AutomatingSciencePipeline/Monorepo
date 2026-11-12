@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { tokenBasedAuth } from '../../../tokenAuth';
+import { isObjectId } from '../../../lib/serverUtils';
+
+export { isObjectId } from '../../../lib/serverUtils';
 
 type CliUser = { _id: string; [key: string]: any };
 
@@ -18,19 +21,15 @@ export function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value.trim().length > 0;
 }
 
-export function isObjectId(value: unknown): value is string {
-    return typeof value === 'string' && /^[a-fA-F0-9]{24}$/.test(value);
-}
-
 export function invalidArguments(): Response {
     return NextResponse.json({ error: 'Other' }, { status: 400 });
 }
 
-export async function authenticateCli(token: string): Promise<
+export async function authenticateCli(token: string, registerUser = true): Promise<
     { user: CliUser; response: null } | { user: null; response: Response }
 > {
     try {
-        const response = await tokenBasedAuth(token);
+        const response = await tokenBasedAuth(token, registerUser);
         if (response.ok) {
             const user: unknown = await response.json();
             if (user !== null && typeof user === 'object' && !Array.isArray(user)

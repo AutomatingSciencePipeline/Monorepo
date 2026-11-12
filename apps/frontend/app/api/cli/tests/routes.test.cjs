@@ -21,13 +21,16 @@ function experiment(overrides = {}) {
   return {
     _id: new mongodb.ObjectId(EID), creator: OWNER, sharedUsers: [SHARED],
     name: 'Private experiment', status: 'COMPLETED', passes: 7, fails: 2,
-    totalExperimentRuns: 12, startedAtEpochMillis: 123456,
+    totalExperimentRuns: 12, startedAtEpochMillis: 123456, created: 1700000000000,
     ...overrides,
   };
 }
 
 function sameValue(left, right) {
-  return left !== undefined && right !== undefined && String(left) === String(right);
+  if (left instanceof mongodb.ObjectId || right instanceof mongodb.ObjectId) {
+    return left instanceof mongodb.ObjectId && right instanceof mongodb.ObjectId && left.equals(right);
+  }
+  return left !== undefined && right !== undefined && left === right;
 }
 
 // Evaluate the route's real query so an accidentally omitted access predicate fails.
@@ -36,10 +39,12 @@ function matches(document, query) {
     if (key === '$and') return value.every((part) => matches(document, part));
     if (key === '$or') return value.some((part) => matches(document, part));
     if (value && typeof value === 'object' && '$in' in value) {
+      if (value.$type === 'array' && !Array.isArray(document[key])) return false;
       const values = Array.isArray(document[key]) ? document[key] : [document[key]];
       return value.$in.some((item) => values.some((entry) => sameValue(entry, item)));
     }
-    return sameValue(document[key], value);
+    const actual = key.split('.').reduce((entry, part) => entry?.[part], document);
+    return sameValue(actual, value);
   });
 }
 
@@ -69,9 +74,9 @@ function multipartRequest(options = {}) {
 
 function harness(route, options = {}) {
   const calls = {
-    auth: [], db: [], queries: [], files: [], reads: [], writes: [], helpers: [], errors: [],
+    auth: [], db: [], queries: [], files: [], reads: [], writes: [], helpers: [], errors: [], submissions: [],
   };
-  const documents = options.documents ?? [experiment()];
+  const documents = options.documents ?? [experiment(route === 'downloadResult' ? { fails: 0 } : {})];
   const identity = options.identity ?? OWNER;
   const authBody = Object.hasOwn(options, 'authBody')
     ? options.authBody : { _id: identity, email: 'owner@example.test', role: 'user' };
@@ -83,6 +88,11 @@ function harness(route, options = {}) {
     },
   };
   const collection = {
+    insertOne: async (document) => {
+      if (options.dataError) throw options.dataError;
+      calls.submissions.push(document);
+      return { acknowledged: true, insertedId: new mongodb.ObjectId(EID) };
+    },
     findOne: async (query) => {
       calls.queries.push(query);
       if (options.dataError) throw options.dataError;
@@ -94,7 +104,14 @@ function harness(route, options = {}) {
       return { toArray: async () => documents.filter((document) => matches(document, query)) };
     },
   };
-  const db = { collection: () => collection };
+  const db = { collection: (name) => name === 'fileBucket.files' ? {
+    findOne: async (query) => {
+      calls.queries.push(query);
+      if (options.dataError) throw options.dataError;
+      const files = options.submissionFiles ?? [{ _id: new mongodb.ObjectId(FILE_ID), metadata: { userId: identity } }];
+      return files.find((file) => matches(file, query)) ?? null;
+    },
+  } : collection };
   const client = {
     db: (name) => { calls.db.push(name); return db; },
   };
@@ -105,12 +122,16 @@ function harness(route, options = {}) {
       if (options.dataError) throw options.dataError;
       const files = this.name === 'fileBucket'
         ? (options.reusedFiles ?? [])
-        : [{ _id: new mongodb.ObjectId(FILE_ID) }];
+        : [
+          { _id: new mongodb.ObjectId(STRANGER), metadata: { experimentId: STRANGER } },
+          { _id: new mongodb.ObjectId(FILE_ID), metadata: { experimentId: EID } },
+        ].filter((file) => matches(file, query));
       return { toArray: async () => files };
     }
     openDownloadStream(id) {
       calls.reads.push(id);
-      return Readable.from([Buffer.from('private logs\n')]);
+      return Readable.from([Buffer.from(String(id) !== FILE_ID ? 'foreign artifact bytes' : this.name === 'resultsBucket'
+        ? 'trial,result\n1,pass\n' : this.name === 'zipsBucket' ? 'PK\u0003\u0004zip bytes' : 'private logs\n')]);
     }
     openUploadStream(filename, uploadOptions) {
       calls.writes.push({ filename, options: uploadOptions });
@@ -120,31 +141,6 @@ function harness(route, options = {}) {
       return stream;
     }
   }
-  const accessible = (eid, uid) => documents.find((document) => (
-    sameValue(document._id, eid)
-    && (sameValue(document.creator, uid) || document.sharedUsers?.some((user) => sameValue(user, uid)))
-  ));
-  const helpers = {
-    submitExperimentCLI: async (...args) => {
-      calls.helpers.push({ name: 'submitExperimentCLI', args });
-      if (options.dataError) throw options.dataError;
-      return EID;
-    },
-    fetchResultsFileCLI: async (eid, uid) => {
-      calls.helpers.push({ name: 'fetchResultsFileCLI', args: [eid, uid] });
-      if (options.dataError) throw options.dataError;
-      return accessible(eid, uid)
-        ? { contents: 'trial,result\n1,pass\n', name: 'experiment.csv' }
-        : { success: false, status: 'not_found' };
-    },
-    fetchProjectZipCLI: async (eid, uid) => {
-      calls.helpers.push({ name: 'fetchProjectZipCLI', args: [eid, uid] });
-      if (options.dataError) throw options.dataError;
-      return accessible(eid, uid)
-        ? { contents: Buffer.from('PK\u0003\u0004zip bytes').toString('base64'), name: 'experiment' }
-        : null;
-    },
-  };
   const formidable = () => ({
     parse: (_incoming, callback) => callback(
       options.parseError ?? null,
@@ -169,7 +165,7 @@ function harness(route, options = {}) {
       __esModule: true, default: Promise.resolve(client),
       DB_NAME: 'test-db', COLLECTION_EXPERIMENTS: 'experiments',
     },
-    '../../../../lib/mongodb_funcs': helpers,
+    'server-only': {},
     mongodb: { ...mongodb, GridFSBucket },
     formidable,
     stream: { Readable },
@@ -189,6 +185,7 @@ function assertNoDataAccess(calls) {
   assert.equal(calls.reads.length, 0, 'unauthenticated request read a file');
   assert.equal(calls.writes.length, 0, 'unauthenticated request wrote a file');
   assert.equal(calls.helpers.length, 0, 'unauthenticated request called a data helper');
+  assert.equal(calls.submissions.length, 0, 'unauthenticated request inserted an experiment');
 }
 
 for (const route of ROUTES) {
@@ -295,12 +292,12 @@ for (const route of ['status', 'queryExp', 'downloadResult', 'downloadLogs', 'do
     if (route === 'queryExp') assert.equal((await response.json()).matches[0].id, EID);
     if (route === 'downloadResult') {
       assert.equal(await response.text(), 'trial,result\n1,pass\n');
-      assert.deepEqual(calls.helpers[0].args, [EID, SHARED]);
+      assert.equal(String(calls.queries[0]._id), EID);
     }
     if (route === 'downloadLogs') assert.equal(await response.text(), 'private logs\n');
     if (route === 'downloadZip') {
       assert.deepEqual(Buffer.from(await response.arrayBuffer()), Buffer.from('PK\u0003\u0004zip bytes'));
-      assert.deepEqual(calls.helpers[0].args, [EID, SHARED]);
+      assert.equal(String(calls.queries[0]._id), EID);
     }
   });
 }
@@ -332,20 +329,50 @@ test('tokenAuth: a valid identity remains a JSON response', async () => {
 });
 
 for (const route of ['downloadResult', 'downloadLogs', 'downloadZip']) {
+  test(`${route}: an accessible decoy cannot authorize a foreign or missing requested experiment`, async () => {
+    const decoy = experiment({ _id: new mongodb.ObjectId(FILE_ID), fails: 0 });
+    for (const documents of [
+      [decoy, experiment({ creator: STRANGER, sharedUsers: [] })],
+      [decoy],
+    ]) {
+      const { post, calls } = harness(route, { documents });
+      const response = await post(jsonRequest(validBody(route)));
+      assert.equal(response.status, 404);
+      assert.equal(calls.files.length, 0, 'denied target reached artifact lookup');
+      assert.equal(calls.reads.length, 0, 'denied target opened an artifact stream');
+    }
+  });
+
+  for (const identity of [OWNER, SHARED]) {
+    test(`${route}: uppercase experiment IDs download the exact artifact for ${identity === OWNER ? 'owners' : 'shared users'}`, async () => {
+      const { post, calls } = harness(route, { identity });
+      const response = await post(jsonRequest({ ...validBody(route), expID: EID.toUpperCase() }));
+      assert.equal(response.status, 200);
+      if (route === 'downloadZip') {
+        assert.deepEqual(Buffer.from(await response.arrayBuffer()), Buffer.from('PK\u0003\u0004zip bytes'));
+      } else {
+        assert.equal(await response.text(), route === 'downloadResult' ? 'trial,result\n1,pass\n' : 'private logs\n');
+      }
+      assert.equal(calls.files.length, 1);
+      assert.equal(calls.files[0].query['metadata.experimentId'], EID);
+      assert.deepEqual(calls.reads.map(String), [FILE_ID]);
+    });
+  }
+
   test(`${route}: valid requests preserve raw download responses`, async () => {
     const { post } = harness(route);
     const response = await post(jsonRequest(validBody(route)));
     assert.equal(response.status, 200);
     if (route === 'downloadResult') {
       assert.match(response.headers.get('content-type'), /^text\/csv/);
-      assert.match(response.headers.get('content-disposition'), /experiment\.csv/);
+      assert.match(response.headers.get('content-disposition'), /Private_experiment_.*\.csv/);
       assert.equal(await response.text(), 'trial,result\n1,pass\n');
     } else if (route === 'downloadLogs') {
       assert.match(response.headers.get('content-type'), /^text\/plain/);
       assert.equal(await response.text(), 'private logs\n');
     } else {
       assert.equal(response.headers.get('content-type'), 'application/zip');
-      assert.match(response.headers.get('content-disposition'), /experiment\.zip/);
+      assert.match(response.headers.get('content-disposition'), /Private_experiment_.*\.zip/);
       assert.deepEqual(Buffer.from(await response.arrayBuffer()), Buffer.from('PK\u0003\u0004zip bytes'));
     }
   });
@@ -372,12 +399,13 @@ test('submitExp: valid YAML submission uses authenticated identity and returns e
   const response = await post(multipartRequest());
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { success: true, expId: EID });
-  const submission = calls.helpers[0];
-  assert.equal(submission.name, 'submitExperimentCLI');
-  assert.equal(submission.args[0].name, 'CLI experiment');
-  assert.equal(submission.args[0].file, FILE_ID);
-  assert.equal(submission.args[0].status, 'CREATED');
-  assert.deepEqual(submission.args.slice(1), [OWNER, 'owner@example.test', 'user', FILE_ID]);
+  const submission = calls.submissions[0];
+  assert.equal(submission.name, 'CLI experiment');
+  assert.equal(submission.file, FILE_ID);
+  assert.equal(submission.status, 'CREATED');
+  assert.equal(submission.creator, OWNER);
+  assert.equal(submission.creatorEmail, 'owner@example.test');
+  assert.equal(submission.creatorRole, 'user');
 });
 
 test('submitExp: invalid YAML returns HTTP 400 before submission', async () => {
@@ -385,6 +413,107 @@ test('submitExp: invalid YAML returns HTTP 400 before submission', async () => {
   const response = await post(multipartRequest({ yaml: 'name: [unterminated' }));
   assert.equal(response.status, 400);
   assertNoDataAccess(calls);
+});
+
+for (const files of [[], [{ _id: new mongodb.ObjectId(FILE_ID), metadata: { userId: STRANGER } }]]) {
+  test('submitExp: missing or foreign executable is rejected without insertion', async () => {
+    const { post, calls } = harness('submitExp', { submissionFiles: files });
+    assert.equal((await post(multipartRequest())).status, 404);
+    assert.equal(calls.submissions.length, 0);
+    assert.equal(calls.reads.length, 0);
+    assert.equal(calls.writes.length, 0);
+  });
+}
+
+for (const includeForeign of [false, true]) {
+  test('submitExp: an owned decoy never authorizes a different requested executable', async () => {
+    const files = [{ _id: new mongodb.ObjectId(EID), metadata: { userId: OWNER } }];
+    if (includeForeign) files.push({ _id: new mongodb.ObjectId(FILE_ID), metadata: { userId: STRANGER } });
+    const { post, calls } = harness('submitExp', { submissionFiles: files });
+    assert.equal((await post(multipartRequest())).status, 404);
+    assert.equal(calls.submissions.length, 0);
+  });
+}
+
+test('submitExp: YAML cannot override authenticated identity or role', async () => {
+  const { post, calls } = harness('submitExp');
+  const yaml = `name: Fixture\ncreator: ${STRANGER}\ncreatorEmail: forged@example.test\ncreatorRole: admin\n`;
+  assert.equal((await post(multipartRequest({ yaml }))).status, 200);
+  assert.equal(calls.submissions[0].creator, OWNER);
+  assert.equal(calls.submissions[0].creatorEmail, 'owner@example.test');
+  assert.equal(calls.submissions[0].creatorRole, 'user');
+});
+
+test('submitExp: YAML cannot supply identifiers, sharing, state, or counters', async () => {
+  const { post, calls } = harness('submitExp');
+  const yaml = `_id: caller-id\nname: Retained\nsharedUsers: [${SHARED}]\nstatus: COMPLETED\npasses: 99\nfails: 88\nexpToRun: 42\nfinishedAtEpochMillis: 3\ntrialResultLineNumber: 7\n`;
+  assert.equal((await post(multipartRequest({ yaml }))).status, 200);
+  const stored = calls.submissions[0];
+  assert.equal(Object.hasOwn(stored, '_id'), false);
+  assert.equal(Object.hasOwn(stored, 'expToRun'), false);
+  assert.equal(Object.hasOwn(stored, 'finishedAtEpochMillis'), false);
+  assert.deepEqual(Array.from(stored.sharedUsers), []);
+  assert.equal(stored.status, 'CREATED');
+  assert.equal(stored.passes, 0);
+  assert.equal(stored.fails, 0);
+  assert.equal(stored.name, 'Retained');
+  assert.equal(stored.trialResultLineNumber, 7);
+});
+
+test('submitExp: YAML cannot inject runner internals or unknown server fields', async () => {
+  const { post, calls } = harness('submitExp');
+  const yaml = 'name: Retained\nconfigs: {config0: {injected: true}}\nexperimentType: zip\npostProcess: true\nrunnerToken: forged\nfutureServerField: injected\n';
+  assert.equal((await post(multipartRequest({ yaml }))).status, 200);
+  const stored = calls.submissions[0];
+  for (const field of ['configs', 'experimentType', 'postProcess', 'runnerToken', 'futureServerField']) {
+    assert.equal(Object.hasOwn(stored, field), false, `Stored unexpected field ${field}`);
+  }
+  assert.equal(stored.name, 'Retained');
+});
+
+test('submitExp: shared submission preserves all supported user experiment settings', async () => {
+  const { post, calls } = harness('submitExp');
+  const settings = {
+    name: 'ZIP experiment', description: 'CLI settings', tags: ['fixture'], workers: 2,
+    trialExtraFile: 'extra.csv', trialResult: 'result.csv', trialResultLineNumber: -1,
+    timeout: 600, sendEmail: true, scatter: true, scatterIndVar: 'x', scatterDepVar: 'score',
+    dumbTextArea: 'constant = 3',
+    hyperparameters: [{ name: 'x', type: 'integer', default: 1, min: 1, max: 3, step: 1, useDefault: false }],
+    experimentExecutable: 'experiment.py', configFileFormat: 'yaml',
+  };
+  assert.equal((await post(multipartRequest({ yaml: JSON.stringify(settings) }))).status, 200);
+  for (const [field, value] of Object.entries(settings)) {
+    assert.deepEqual(JSON.parse(JSON.stringify(calls.submissions[0][field])), value, `Lost ${field}`);
+  }
+});
+
+test('submitExp: private emails and legacy roles normalize without losing trusted privileges', async () => {
+  for (const role of [undefined, null, 'other', 'user', 'admin', 'privileged']) {
+    const { post, calls } = harness('submitExp', { authBody: { _id: OWNER, email: null, role } });
+    assert.equal((await post(multipartRequest())).status, 200);
+    assert.equal(calls.submissions[0].creatorEmail, '');
+    assert.equal(calls.submissions[0].creatorRole, role === 'admin' || role === 'privileged' ? role : 'user');
+  }
+});
+
+for (const route of ['status', 'queryExp', 'downloadResult', 'downloadLogs', 'downloadZip']) {
+  test(`${route}: non-array sharing never authorizes another user`, async () => {
+    for (const sharedUsers of [SHARED, `prefix${SHARED}suffix`, 7, {}]) {
+      const { post, calls } = harness(route, { identity: SHARED, documents: [experiment({ sharedUsers, fails: 0 })] });
+      const response = await post(jsonRequest(validBody(route)));
+      if (route === 'status') assert.equal((await response.json()).success, false);
+      else if (route === 'queryExp') assert.deepEqual((await response.json()).matches, []);
+      else assert.equal(response.status, 404);
+      assert.equal(calls.files.length, 0);
+      assert.equal(calls.reads.length, 0);
+    }
+  });
+}
+
+test('submitExp: uppercase executable IDs are stored canonically for shared file access', async () => {
+  const { post, calls } = harness('submitExp');
+  assert.equal((await post(multipartRequest({ fileId: FILE_ID.toUpperCase() }))).status, 200);
+  assert.equal(calls.submissions[0].file, FILE_ID);
 });
 
 for (const missing of ['token', 'file']) {

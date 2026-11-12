@@ -4,6 +4,7 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/
 import { WithId, Document } from 'mongodb';
 import { NextRequest } from 'next/server';
 import { auth } from '../../../../auth';
+import { createAuthorizedExperimentStream } from '../../../../lib/authorizedExperimentStream';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
     const session = await auth();
 
-    if (!session) {
+    if (!session?.user?.id) {
         return new Response('Unauthorized', { status: 401 });
     }
 
@@ -30,58 +31,36 @@ export async function GET(req: NextRequest) {
     const db = client.db(DB_NAME);
     const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
-    const encoder = new TextEncoder();
-    const heartbeatIntervalMs = 2500;
-
-    const stream = new ReadableStream({
-        async start(controller) {
-            const pipeline = [
-                {
-                    $match: {
-                        $or: [
-                            { 'fullDocument.creator': uid },
-                            { operationType: 'delete', 'documentKey._id': { $exists: true } },
-                            { 'fullDocument.sharedUsers': { $in: [uid] } },
-                            { operationType: 'update', 'updateDescription.updatedFields.sharedUsers': { $nin: [uid] } },
-                        ],
-                    },
-                },
+    const pipeline = [
+        {
+            $match: {
+                $or: [
+                    { 'fullDocument.creator': uid },
+                    { operationType: 'delete', 'documentKey._id': { $exists: true } },
+                    { operationType: 'replace' },
+                    { 'fullDocument.sharedUsers': { $in: [uid] } },
+                    { operationType: 'update', 'updateDescription.updatedFields.sharedUsers': { $nin: [uid] } },
+                ],
+            },
+        },
+    ];
+    const stream = createAuthorizedExperimentStream({
+        signal: req.signal,
+        watch: experimentsCollection.watch(pipeline, { fullDocument: 'updateLookup' }),
+        isAuthorized: async () => (await auth())?.user?.id === uid,
+        query: async () => convertToExpsArray(await experimentsCollection
+            .find({ $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] })
+            .toArray()),
+        invalidatesSnapshot: (change) => {
+            if (change.operationType !== 'update') return change.operationType !== 'insert';
+            const fields = [
+                ...Object.keys(change.updateDescription.updatedFields ?? {}),
+                ...(change.updateDescription.removedFields ?? []),
+                ...(change.updateDescription.truncatedArrays ?? []).map((array) => array.field),
             ];
-
-            const options = { fullDocument: 'updateLookup' };
-            const changeStream = experimentsCollection.watch(pipeline, options);
-
-            const sendAllRelevantDocs = async () => {
-                const docs = await experimentsCollection
-                    .find({ $or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }] })
-                    .toArray();
-                const array = convertToExpsArray(docs);
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(array)}\n\n`));
-            };
-
-            // Send initial documents
-            await sendAllRelevantDocs();
-
-            // Heartbeat to keep the connection alive
-            const heartbeat = setInterval(() => {
-                controller.enqueue(encoder.encode(': heartbeat\n\n'));
-            }, heartbeatIntervalMs);
-
-            // Watch for database changes
-            changeStream.on('change', async () => {
-                await sendAllRelevantDocs();
-            });
-
-            // Close on client disconnect
-            const abort = req.signal;
-            abort.addEventListener('abort', () => {
-                changeStream.close();
-                clearInterval(heartbeat);
-                controller.close();
-            });
+            return fields.some((field) => field === 'creator' || field === 'sharedUsers' || field.startsWith('sharedUsers.'));
         },
     });
-
     return new Response(stream, {
         headers: {
             'Content-Type': 'text/event-stream',

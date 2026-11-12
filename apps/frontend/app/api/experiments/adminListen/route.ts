@@ -4,13 +4,14 @@ import clientPromise, { COLLECTION_EXPERIMENTS, DB_NAME } from '../../../../lib/
 import { WithId, Document } from 'mongodb';
 import { NextRequest } from 'next/server';
 import { auth } from '../../../../auth';
+import { createAuthorizedExperimentStream } from '../../../../lib/authorizedExperimentStream';
 
 export const runtime = 'nodejs'; // To ensure we are in a serverful Node.js environment
 export const dynamic = 'force-dynamic'; // Ensure it's not cached
 
 export async function GET(req: NextRequest) {
   const session = await auth();
-  if (!session) {
+  if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -18,43 +19,26 @@ export async function GET(req: NextRequest) {
   if (!session.user?.role || session.user.role !== 'admin') {
     return new Response('Unauthorized', { status: 403 });
   }
+  const userId = session.user.id;
 
   const client = await clientPromise;
   const db = client.db(DB_NAME);
   const experimentsCollection = db.collection(COLLECTION_EXPERIMENTS);
 
-  const encoder = new TextEncoder();
-  const heartbeatIntervalMs = 2500;
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const changeStream = experimentsCollection.watch([], { fullDocument: 'updateLookup' });
-
-      // Send initial unfinished experiments
-      const initDocs = await experimentsCollection.find({ finished: false }).toArray();
-      const initArray = convertToExpsArray(initDocs);
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify(initArray)}\n\n`));
-
-      // Heartbeat to keep connection alive
-      const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(': heartbeat\n\n'));
-      }, heartbeatIntervalMs);
-
-      changeStream.on('change', async () => {
-        const updatedDocs = await experimentsCollection.find({ finished: false }).toArray();
-        const updatedArray = convertToExpsArray(updatedDocs);
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(updatedArray)}\n\n`));
-      });
-
-      const abort = req.signal;
-      abort.addEventListener('abort', () => {
-        changeStream.close();
-        clearInterval(heartbeat);
-        controller.close();
-      });
+  const stream = createAuthorizedExperimentStream({
+    signal: req.signal,
+    watch: experimentsCollection.watch([], { fullDocument: 'updateLookup' }),
+    isAuthorized: async () => {
+      const current = await auth();
+      return current?.user?.id === userId && current?.user?.role === 'admin';
     },
+    query: async () => convertToExpsArray(await experimentsCollection.find({ finished: false }).toArray()),
+    invalidatesSnapshot: (change) => change.operationType !== 'insert' && (
+      change.operationType !== 'update'
+      || 'finished' in (change.updateDescription.updatedFields ?? {})
+      || (change.updateDescription.removedFields ?? []).includes('finished')
+    ),
   });
-
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
