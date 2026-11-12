@@ -1,0 +1,955 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for GLADOS - Automated Science Pipeline" name="description"/>
+<link href="https://automatingsciencepipeline.github.io/Monorepo/infrastructure/security/" rel="canonical"/>
+<link href="../kubernetes/" rel="prev"/>
+<link href="../vms/" rel="next"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
+<title>Security Boundaries - GLADOS</title>
+<link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#security-boundaries">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="GLADOS" class="md-header__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            GLADOS
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Security Boundaries
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="GLADOS" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="GLADOS">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    GLADOS
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/AutomatingSciencePipeline/Monorepo" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../about/">
+<span class="md-ellipsis">
+    
+  
+    About GLADOS
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/best_practices/">
+<span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/experiment_walkthrough/">
+<span class="md-ellipsis">
+    
+  
+    Your First Experiment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/usage/">
+<span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../tutorial/deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../documentation/guide/">
+<span class="md-ellipsis">
+    
+  
+    Updating Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../architecture/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Documentation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../kubernetes/">
+<span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Security Boundaries
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Security Boundaries
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#who-may-do-what">
+<span class="md-ellipsis">
+      
+        Who may do what
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#how-a-runner-is-contained">
+<span class="md-ellipsis">
+      
+        How a runner is contained
+      
+    </span>
+</a>
+<nav aria-label="How a runner is contained" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#admin-and-privileged-users">
+<span class="md-ellipsis">
+      
+        Admin and privileged users
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#how-the-backend-knows-who-is-calling">
+<span class="md-ellipsis">
+      
+        How the backend knows who is calling
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#limits">
+<span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#network">
+<span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mongodb">
+<span class="md-ellipsis">
+      
+        MongoDB
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#rolling-this-out-to-an-existing-cluster">
+<span class="md-ellipsis">
+      
+        Rolling this out to an existing cluster
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#checking-the-boundary">
+<span class="md-ellipsis">
+      
+        Checking the boundary
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#known-gaps">
+<span class="md-ellipsis">
+      
+        Known gaps
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../vms/">
+<span class="md-ellipsis">
+    
+  
+    VMs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../cluster_update/">
+<span class="md-ellipsis">
+    
+  
+    Cluster Upgrade
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../used_technologies/">
+<span class="md-ellipsis">
+    
+  
+    Used Technologies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../agentic_plan/">
+<span class="md-ellipsis">
+    
+  
+    Agentic Implementation Plan
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Developer Help
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Help
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/getting_started_from_zero/">
+<span class="md-ellipsis">
+    
+  
+    Getting Started From Zero
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/setup/">
+<span class="md-ellipsis">
+    
+  
+    Developer Setup
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../developerhelp/helpful_commands/">
+<span class="md-ellipsis">
+    
+  
+    Helpful Commands
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    BioAI User Guides
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    BioAI User Guides
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../bioai/hw8/">
+<span class="md-ellipsis">
+    
+  
+    HW8
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_8_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Design Decisions
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#">
+<span class="md-ellipsis">
+    
+  
+    Architecture and Design Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#who-may-do-what">
+<span class="md-ellipsis">
+      
+        Who may do what
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#how-a-runner-is-contained">
+<span class="md-ellipsis">
+      
+        How a runner is contained
+      
+    </span>
+</a>
+<nav aria-label="How a runner is contained" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#admin-and-privileged-users">
+<span class="md-ellipsis">
+      
+        Admin and privileged users
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#how-the-backend-knows-who-is-calling">
+<span class="md-ellipsis">
+      
+        How the backend knows who is calling
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#limits">
+<span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#network">
+<span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mongodb">
+<span class="md-ellipsis">
+      
+        MongoDB
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#rolling-this-out-to-an-existing-cluster">
+<span class="md-ellipsis">
+      
+        Rolling this out to an existing cluster
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#checking-the-boundary">
+<span class="md-ellipsis">
+      
+        Checking the boundary
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#known-gaps">
+<span class="md-ellipsis">
+      
+        Known gaps
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="security-boundaries">Security Boundaries</h1>
+<p>GLADOS runs code that users upload. That code must be treated as untrusted: it should be able to compute and report its own results, and nothing else. This page describes the boundary between user code and the rest of GLADOS, how it is enforced, and how to check it.</p>
+<h2 id="who-may-do-what">Who may do what</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Kubernetes identity</th>
+<th>Kubernetes permissions</th>
+<th>Secrets it receives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend</td>
+<td><code>glados-frontend</code></td>
+<td>List Pods and read Pod logs in <code>default</code> (live log viewer). Patch the <code>glados-frontend</code> and <code>glados-backend</code> Deployments, list nodes and patch node <code>glados-w0</code> (admin "redeploy" button).</td>
+<td>Database login, Auth.js and OAuth settings</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td><code>glados-backend</code></td>
+<td>Create and delete Jobs in <code>default</code>. Create TokenReviews (to check who is calling it).</td>
+<td>Database login, <code>GMAIL_CREDS</code></td>
+</tr>
+<tr>
+<td>Runner (user code)</td>
+<td><code>glados-runner</code></td>
+<td>None. No API token is mounted in the Pod.</td>
+<td><code>BACKEND_PORT</code> only, plus a token for its own experiment</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing is bound to the namespace's <code>default</code> ServiceAccount.</p>
+<p>The manifests live in <code>kubernetes_init/security/</code>. Both Tilt and <code>kubernetes_init/init.py</code> apply them.</p>
+<h2 id="how-a-runner-is-contained">How a runner is contained</h2>
+<p>The backend builds every runner Job from <code>apps/backend/job-runner.yaml</code> (see <code>apps/backend/modules/runner_job.py</code>).</p>
+<ul>
+<li><strong>No Kubernetes access.</strong> The Pod uses the <code>glados-runner</code> ServiceAccount, which has no permissions, and <code>automountServiceAccountToken: false</code>.</li>
+<li><strong>No shared credentials.</strong> The Pod gets no database login and no mail credentials. The backend sends the "experiment finished" email itself, to the address stored on the experiment.</li>
+<li><strong>Non-root, read-only.</strong> The container runs as user <code>10001</code> with all capabilities dropped, no privilege escalation, the default seccomp profile and a read-only root filesystem. It can write to four scratch volumes: <code>/app/ExperimentFiles</code>, <code>/app/logs</code>, <code>/home/runner</code> (pip installs go here) and <code>/tmp</code>.</li>
+<li><strong>Resource limits.</strong> See <a href="#limits">Limits</a>.</li>
+<li><strong>Checked archives.</strong> Uploaded zip files are rejected if an entry points outside the experiment folder or if the archive is unreasonably large (<code>apps/runner/modules/archive.py</code>).</li>
+</ul>
+<h3 id="admin-and-privileged-users">Admin and privileged users</h3>
+<p>Experiments whose creator has the role <code>admin</code> or <code>privileged</code> may install system packages (<code>packages.txt</code>) and run setup commands (<code>commandsToRun.txt</code>). <code>apt-get</code> needs root, so these runners start as root with a writable filesystem. Everything else above still applies: no API token, no credentials, no privilege escalation, the same limits.</p>
+<p>The backend reads the role from the database when it creates the Job. The frontend stores the role from the signed-in session, not from the request.</p>
+<h2 id="how-the-backend-knows-who-is-calling">How the backend knows who is calling</h2>
+<p>Every backend endpoint except the health checks (<code>/</code> and <code>/mongoPulse</code>) requires a token.</p>
+<table>
+<thead>
+<tr>
+<th>Endpoints</th>
+<th>Caller</th>
+<th>Proof</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/experiment</code>, <code>/cancelExperiment</code>, <code>/queue</code></td>
+<td>Frontend</td>
+<td>A Kubernetes ServiceAccount token with audience <code>glados-backend</code>. Kubernetes mounts it into the frontend Pod at <code>/var/run/secrets/glados/backend/token</code> and rotates it. The backend checks it with the TokenReview API and only accepts <code>system:serviceaccount:default:glados-frontend</code>.</td>
+</tr>
+<tr>
+<td><code>/getExperiment</code>, <code>/downloadExpFile</code>, <code>/updateExperiment</code>, <code>/uploadResults</code>, <code>/uploadZip</code>, <code>/uploadLog</code>, <code>/sendExperimentEmail</code>, <code>/runnerFinished</code></td>
+<td>Runner</td>
+<td>A random token the backend creates for that one Job.</td>
+</tr>
+</tbody>
+</table>
+<p>A runner token:</p>
+<ul>
+<li>only works for the experiment it was created for. A runner cannot read, change or upload results for any other experiment.</li>
+<li>can only change the progress fields <code>status</code>, <code>finished</code>, <code>passes</code>, <code>fails</code>, <code>totalExperimentRuns</code>, <code>startedAtEpochMillis</code> and <code>finishedAtEpochMilliseconds</code>.</li>
+<li>stops working when the runner finishes, when the experiment is cancelled, or one hour after the Job deadline, whichever comes first.</li>
+<li>is stored in MongoDB only as a hash (collection <code>runnerTokens</code>).</li>
+</ul>
+<p>User code runs in the same container as the runner, so it can read the runner's token. That is why the token is scoped this tightly: with it, user code can only affect the experiment it already controls.</p>
+<p>The backend settings <code>CONTROL_PLANE_ALLOWED_SUBJECTS</code> (comma separated) and <code>BACKEND_TOKEN_AUDIENCE</code> change who is accepted. The defaults match the manifests.</p>
+<h2 id="limits">Limits</h2>
+<table>
+<thead>
+<tr>
+<th>Safeguard</th>
+<th>Default</th>
+<th>Backend environment variable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU request / limit</td>
+<td>250m / 4</td>
+<td><code>RUNNER_CPU_REQUEST</code>, <code>RUNNER_CPU_LIMIT</code></td>
+</tr>
+<tr>
+<td>Memory request / limit</td>
+<td>256Mi / 8Gi</td>
+<td><code>RUNNER_MEMORY_REQUEST</code>, <code>RUNNER_MEMORY_LIMIT</code></td>
+</tr>
+<tr>
+<td>Disk (container and scratch volumes)</td>
+<td>20Gi</td>
+<td><code>RUNNER_EPHEMERAL_STORAGE_LIMIT</code></td>
+</tr>
+<tr>
+<td>Lifetime of a runner Job</td>
+<td>7 days</td>
+<td><code>RUNNER_ACTIVE_DEADLINE_SECONDS</code></td>
+</tr>
+<tr>
+<td>Time per trial</td>
+<td>Set per experiment (<code>timeout</code>)</td>
+<td></td>
+</tr>
+<tr>
+<td>Zip entries / unpacked size</td>
+<td>100000 / 8 GiB</td>
+<td><code>RUNNER_MAX_ARCHIVE_MEMBERS</code>, <code>RUNNER_MAX_ARCHIVE_BYTES</code> (runner image)</td>
+</tr>
+</tbody>
+</table>
+<p>A runner that exceeds its memory limit is killed, one that exceeds its disk limit is evicted, and one that outlives the deadline is stopped. Set the variables on the backend Deployment to change the values for a cluster.</p>
+<h2 id="network">Network</h2>
+<p><code>kubernetes_init/security/network-policies.yaml</code> describes the intended network boundary:</p>
+<ul>
+<li>Runner Pods accept no incoming connections. They may reach DNS, the backend and the public internet (for <code>pip install</code> and datasets), but no private address ranges. That keeps them away from MongoDB, the Kubernetes API, other Pods and the nodes.</li>
+<li>The backend only accepts connections from frontend and runner Pods.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>NetworkPolicies only work if the cluster's network plugin enforces them. <strong>Flannel, which the production cluster uses, does not, and neither does minikube's default network.</strong> Until an enforcing plugin (for example Calico or Cilium) is installed, these policies have no effect, and the token checks described above are the boundary that holds.</p>
+<p>If the nodes have addresses outside the private ranges listed in the policy, add the node network to the <code>except</code> list.</p>
+</div>
+<h2 id="mongodb">MongoDB</h2>
+<ul>
+<li>The production chart values (<code>helm_packages/mongodb-helm/values.yaml</code>) no longer contain a password. <code>deploy.sh</code> creates the Secret <code>glados-mongodb-auth</code> and asks for the password, which must match <code>MONGODB_PASSWORD</code> in <code>secret-env</code>.</li>
+<li><code>helm_packages/mongodb-helm/tilt/values.yaml</code> still has a fixed password. It is for minikube only.</li>
+</ul>
+<p>For a database that was installed with the old values, the password in use is the one that was published in this repository. Rotate it, then create <code>glados-mongodb-auth</code> with the new password and the existing replica set key before running <code>helm upgrade</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># The key the running replica set already uses</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>glados-mongodb<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.data.mongodb-replica-set-key}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d
+</code></pre></div>
+<h2 id="rolling-this-out-to-an-existing-cluster">Rolling this out to an existing cluster</h2>
+<p>The new backend and runner images need the new ServiceAccounts and Deployment settings, so restarting the Deployments alone (the admin "redeploy" button) is not enough the first time. From <code>kubernetes_init/</code> on a machine with cluster access:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>init.py<span class="w"> </span>--update
+</code></pre></div>
+<p>This applies the accounts, permissions and policies, recreates the frontend and backend Deployments, and removes the old permissions of the <code>default</code> ServiceAccount.</p>
+<h2 id="checking-the-boundary">Checking the boundary</h2>
+<p>Unit tests, run by the backend and runner CI jobs:</p>
+<ul>
+<li><code>apps/backend/tests/test_manifests.py</code> checks the manifests: permissions per identity, nothing bound to <code>default</code>, which Deployment gets which secrets.</li>
+<li><code>apps/backend/tests/test_runner_job.py</code> checks the Job a runner gets.</li>
+<li><code>apps/backend/tests/test_app.py</code> and <code>test_auth.py</code> check who may call which endpoint.</li>
+<li><code>apps/runner/tests/test_archive.py</code> checks zip extraction.</li>
+</ul>
+<p>Against a development cluster (minikube with <code>tilt up</code> running or finished):</p>
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>development_scripts/security/verify_isolation.sh
+</code></pre></div>
+<p>The script asks Kubernetes what each identity may do, then starts a Pod shaped like a runner and tries every backend endpoint without valid credentials. It also reports whether that Pod can reach MongoDB and the Kubernetes API over the network, as a warning, because that depends on the network plugin.</p>
+<h2 id="known-gaps">Known gaps</h2>
+<ul>
+<li><strong>Network isolation is not enforced</strong> until the cluster has a network plugin that supports NetworkPolicy.</li>
+<li><strong>User code and the runner share a container.</strong> User code can therefore tamper with its own experiment's results and status. Running trials in a separate Pod would remove this.</li>
+<li><strong>MongoDB is reachable on node ports 30000 and 30001</strong> (<code>externalAccess</code> in the chart values). Check whether production still needs this.</li>
+<li><strong>The frontend and backend use the MongoDB root user.</strong> A dedicated user limited to <code>gladosdb</code> would be safer.</li>
+<li><strong>The process count of a runner is not limited.</strong> Kubernetes can only do this per node (<code>podPidsLimit</code> in the kubelet configuration).</li>
+<li><strong>Base images are old.</strong> The backend uses Python 3.8 and the runner Python 3.9, which no longer receive security fixes, and the MongoDB chart uses an archived <code>bitnamilegacy</code> image.</li>
+<li><strong>Python dependencies have known vulnerabilities.</strong> A <code>pip-audit</code> scan of the images in November 2026 reported advisories for 17 backend packages and 24 runner packages (among them <code>pymongo</code>, <code>urllib3</code>, <code>werkzeug</code>, <code>flask-cors</code>, <code>pillow</code>, <code>cryptography</code> and <code>gunicorn</code>). Many fixes need a newer Python than the images use, so this goes together with the base image update.</li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>
