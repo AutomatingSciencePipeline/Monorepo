@@ -5,16 +5,20 @@ import { Readable } from 'stream';
 import { IncomingMessage } from 'http';
 import fs from "fs";
 import { NextResponse } from 'next/server';
+import { auth } from '../../../../auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const { fields, files } = await parseForm(req);
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return NextResponse.json({ response: 'User is not authenticated' }, { status: 401 });
+  }
+  const { files } = await parseForm(req);
 
-  const userId = Array.isArray(fields.userId) ? fields.userId[0] : fields.userId;
-
-  if (!files.file || !userId) {
+  if (!files.file) {
     return NextResponse.json({ response: 'Not enough arguments!' }, { status: 400 });
   }
 

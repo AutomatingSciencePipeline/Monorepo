@@ -21,8 +21,13 @@ function identity(value) {
 }
 
 function matches(document, query) {
-  return Object.entries(query).every(([key, value]) =>
-    identity(document[key]) === identity(value));
+  return Object.entries(query).every(([key, value]) => {
+    const actual = document[key];
+    if (actual instanceof ObjectId || value instanceof ObjectId) {
+      return actual instanceof ObjectId && value instanceof ObjectId && actual.equals(value);
+    }
+    return actual === value;
+  });
 }
 
 function existingIdentity() {
@@ -57,7 +62,9 @@ function makeHarness(options = {}) {
     collections[name] = {
       async findOne(query) {
         calls.reads.push({ collection: name, query });
-        if (options.failAt === `${name}.findOne`) {
+        const readNumber = calls.reads.filter((call) => call.collection === name).length;
+        if (options.failAt === `${name}.findOne`
+          || (name === 'users' && options.failUserReadAt === readNumber)) {
           throw new Error(`Database failed with ${TOKEN}`);
         }
         if (name === 'users' && Object.hasOwn(options, 'userReadResult')) {
@@ -220,6 +227,91 @@ test('serialized MongoDB user ids remain usable identities', async () => {
   assert.ok(ObjectId.isValid(result.body._id));
   assert.equal(harness.calls.writes.length, 0);
 });
+
+test('a serialized account reference resolves its BSON ObjectId user and preserves its role', async () => {
+  const fixture = existingIdentity();
+  fixture.accounts[0].userId = USER_ID;
+  fixture.users[0].role = 'admin';
+  const harness = makeHarness(fixture);
+  const result = await harness.authenticate();
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body._id, USER_ID);
+  assert.equal(result.body.role, 'admin');
+  assert.equal(harness.calls.writes.length, 0);
+  const userReads = harness.calls.reads.filter((call) => call.collection === 'users');
+  assert.equal(userReads.length, 2, 'Both BSON identity candidates must be checked');
+  assert.equal(userReads[0].query._id, USER_ID);
+  assert.ok(userReads[1].query._id instanceof ObjectId);
+  assert.equal(userReads[1].query._id.toHexString(), USER_ID);
+});
+
+test('an uppercase serialized reference resolves its canonical BSON ObjectId', async () => {
+  const fixture = existingIdentity();
+  fixture.accounts[0].userId = USER_ID.toUpperCase();
+  const harness = makeHarness(fixture);
+  const result = await harness.authenticate();
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body._id, USER_ID);
+  assert.equal(harness.calls.writes.length, 0);
+});
+
+test('a native ObjectId reference uses its exact typed user even when a string user exists', async () => {
+  const fixture = existingIdentity();
+  fixture.users.unshift({ _id: USER_ID, role: 'admin' });
+  const harness = makeHarness(fixture);
+  const result = await harness.authenticate();
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.role, 'user');
+  const userReads = harness.calls.reads.filter((call) => call.collection === 'users');
+  assert.equal(userReads.length, 1);
+  assert.ok(userReads[0].query._id instanceof ObjectId);
+  assert.equal(harness.calls.writes.length, 0);
+});
+
+test('a native ObjectId reference cannot match a string-only user', async () => {
+  const fixture = existingIdentity();
+  fixture.users[0]._id = USER_ID;
+  const harness = makeHarness(fixture);
+  assertUnauthorized(await harness.authenticate(), harness);
+  assert.equal(harness.calls.reads.filter((call) => call.collection === 'users').length, 1);
+});
+
+for (const stringFirst of [true, false]) {
+  test(`an ambiguous serialized reference fails closed with the ${stringFirst ? 'string' : 'ObjectId'} user first`, async () => {
+    const fixture = existingIdentity();
+    fixture.accounts[0].userId = USER_ID;
+    const stringUser = { _id: USER_ID, role: 'admin' };
+    if (stringFirst) fixture.users.unshift(stringUser);
+    else fixture.users.push(stringUser);
+    const harness = makeHarness(fixture);
+    assertUnauthorized(await harness.authenticate(), harness);
+    assert.equal(harness.calls.reads.filter((call) => call.collection === 'users').length, 2);
+  });
+}
+
+test('a serialized account reference with neither BSON candidate fails closed', async () => {
+  const fixture = existingIdentity();
+  fixture.accounts[0].userId = USER_ID;
+  const harness = makeHarness({ accounts: fixture.accounts });
+  assertUnauthorized(await harness.authenticate(), harness);
+  assert.equal(harness.calls.reads.filter((call) => call.collection === 'users').length, 2);
+});
+
+for (const storedId of [USER_ID, new ObjectId(USER_ID)]) {
+  for (const failUserReadAt of [1, 2]) {
+    test(`serialized-reference lookup ${failUserReadAt} failure cannot authenticate a ${typeof storedId === 'string' ? 'string' : 'ObjectId'} user`, async () => {
+      const fixture = existingIdentity();
+      fixture.accounts[0].userId = USER_ID;
+      fixture.users[0]._id = storedId;
+      const harness = makeHarness({ ...fixture, failUserReadAt });
+      const result = await harness.authenticate();
+      assert.equal(result.response.status, 500);
+      assertFailure(result);
+      assert.equal(harness.calls.writes.length, 0);
+      assert.equal(harness.calls.reads.filter((call) => call.collection === 'users').length, failUserReadAt);
+    });
+  }
+}
 
 test('an account for another provider cannot supply the GitHub user identity', async () => {
   const fixture = existingIdentity();

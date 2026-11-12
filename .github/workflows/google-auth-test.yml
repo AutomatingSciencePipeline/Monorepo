@@ -2,7 +2,7 @@ name: Google authentication regression tests
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, fix/708-exp-file-authz, cancel-exp-api]
     paths:
       - 'apps/frontend/**'
       - '.github/workflows/google-auth-test.yml'

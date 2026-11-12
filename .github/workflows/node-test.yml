@@ -10,7 +10,7 @@ on:
     paths:
       - 'apps/frontend/**'
       - '.github/workflows/node-test.yml'
-    branches: [ main ] 
+    branches: [ main, fix/708-exp-file-authz, cancel-exp-api ]
 
 jobs:
   Lint_And_Test:

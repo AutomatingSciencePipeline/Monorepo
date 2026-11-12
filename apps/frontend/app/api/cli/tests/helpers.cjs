@@ -21,7 +21,7 @@ function loadSource(relativePath, mocks = {}, globals = {}) {
     if (cache.has(filename)) return cache.get(filename).exports;
     const source = fs.readFileSync(filename, 'utf8');
     const compiled = ts.transpileModule(source, {
-      fileName: filename,
+      fileName: filename.replace(/\.mjs$/, '.ts'),
       compilerOptions: {
         target: ts.ScriptTarget.ES2020,
         module: ts.ModuleKind.CommonJS,

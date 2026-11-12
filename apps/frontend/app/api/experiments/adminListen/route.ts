@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'; // Ensure it's not cached
 
 export async function GET(req: NextRequest) {
   const session = await auth();
-  if (!session) {
+  if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
   if (!session.user?.role || session.user.role !== 'admin') {
     return new Response('Unauthorized', { status: 403 });
   }
+  const userId = session.user.id;
 
   const client = await clientPromise;
   const db = client.db(DB_NAME);
@@ -25,34 +26,69 @@ export async function GET(req: NextRequest) {
 
   const encoder = new TextEncoder();
   const heartbeatIntervalMs = 2500;
+  let cancelStream = () => {};
 
   const stream = new ReadableStream({
     async start(controller) {
       const changeStream = experimentsCollection.watch([], { fullDocument: 'updateLookup' });
+      let closed = false;
+      let latestQuerySequence = 0;
+      let heartbeat: ReturnType<typeof setInterval> | undefined;
+      const abort = () => close();
+      const close = (closeController = true) => {
+        if (closed) return;
+        closed = true;
+        clearInterval(heartbeat);
+        req.signal.removeEventListener('abort', abort);
+        void Promise.resolve(changeStream.close()).catch(() => undefined);
+        if (closeController) controller.close();
+      };
+      cancelStream = () => close(false);
+      const isAuthorized = async () => {
+        if (closed) return false;
+        const current = await auth();
+        if (closed) return false;
+        if (current?.user?.id !== userId || current?.user?.role !== 'admin') {
+          close();
+          return false;
+        }
+        return true;
+      };
+      const sendUnfinishedDocs = async () => {
+        try {
+          if (!await isAuthorized() || closed) return;
+          const querySequence = ++latestQuerySequence;
+          const docs = await experimentsCollection.find({ finished: false }).toArray();
+          if (!await isAuthorized() || closed || querySequence !== latestQuerySequence) return;
+          const array = convertToExpsArray(docs);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(array)}\n\n`));
+        } catch {
+          close();
+        }
+      };
+
+      req.signal.addEventListener('abort', abort, { once: true });
+      changeStream.on('error', () => close());
+      changeStream.on('change', sendUnfinishedDocs);
+      if (req.signal.aborted) {
+        close();
+        return;
+      }
 
       // Send initial unfinished experiments
-      const initDocs = await experimentsCollection.find({ finished: false }).toArray();
-      const initArray = convertToExpsArray(initDocs);
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify(initArray)}\n\n`));
+      await sendUnfinishedDocs();
+      if (closed) return;
 
       // Heartbeat to keep connection alive
-      const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(': heartbeat\n\n'));
+      heartbeat = setInterval(async () => {
+        try {
+          if (await isAuthorized() && !closed) controller.enqueue(encoder.encode(': heartbeat\n\n'));
+        } catch {
+          close();
+        }
       }, heartbeatIntervalMs);
-
-      changeStream.on('change', async () => {
-        const updatedDocs = await experimentsCollection.find({ finished: false }).toArray();
-        const updatedArray = convertToExpsArray(updatedDocs);
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(updatedArray)}\n\n`));
-      });
-
-      const abort = req.signal;
-      abort.addEventListener('abort', () => {
-        changeStream.close();
-        clearInterval(heartbeat);
-        controller.close();
-      });
     },
+    cancel() { cancelStream(); },
   });
 
   return new Response(stream, {

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
     const session = await auth();
 
-    if (!session) {
+    if (!session?.user?.id) {
         return new Response('Unauthorized', { status: 401 });
     }
 
@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
 
     const encoder = new TextEncoder();
     const heartbeatIntervalMs = 2500;
+    let cancelStream = () => {};
 
     const stream = new ReadableStream({
         async start(controller) {
@@ -50,36 +51,67 @@ export async function GET(req: NextRequest) {
 
             const options = { fullDocument: 'updateLookup' };
             const changeStream = experimentsCollection.watch(pipeline, options);
+            let closed = false;
+            let latestQuerySequence = 0;
+            let heartbeat: ReturnType<typeof setInterval> | undefined;
+            const abort = () => close();
+            const close = (closeController = true) => {
+                if (closed) return;
+                closed = true;
+                clearInterval(heartbeat);
+                req.signal.removeEventListener('abort', abort);
+                void Promise.resolve(changeStream.close()).catch(() => undefined);
+                if (closeController) controller.close();
+            };
+            cancelStream = () => close(false);
+            const isAuthorized = async () => {
+                if (closed) return false;
+                const current = await auth();
+                if (closed) return false;
+                if (current?.user?.id !== uid) {
+                    close();
+                    return false;
+                }
+                return true;
+            };
 
             const sendAllRelevantDocs = async () => {
-                const docs = await experimentsCollection
-                    .find({ $or: [{ creator: uid }, { sharedUsers: { $in: [uid] } }] })
-                    .toArray();
-                const array = convertToExpsArray(docs);
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(array)}\n\n`));
+                try {
+                    if (!await isAuthorized() || closed) return;
+                    const querySequence = ++latestQuerySequence;
+                    const docs = await experimentsCollection
+                        .find({ $or: [{ creator: uid }, { sharedUsers: { $type: 'array', $in: [uid] } }] })
+                        .toArray();
+                    if (!await isAuthorized() || closed || querySequence !== latestQuerySequence) return;
+                    const array = convertToExpsArray(docs);
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(array)}\n\n`));
+                } catch {
+                    close();
+                }
             };
+
+            req.signal.addEventListener('abort', abort, { once: true });
+            changeStream.on('error', () => close());
+            changeStream.on('change', sendAllRelevantDocs);
+            if (req.signal.aborted) {
+                close();
+                return;
+            }
 
             // Send initial documents
             await sendAllRelevantDocs();
+            if (closed) return;
 
             // Heartbeat to keep the connection alive
-            const heartbeat = setInterval(() => {
-                controller.enqueue(encoder.encode(': heartbeat\n\n'));
+            heartbeat = setInterval(async () => {
+                try {
+                    if (await isAuthorized() && !closed) controller.enqueue(encoder.encode(': heartbeat\n\n'));
+                } catch {
+                    close();
+                }
             }, heartbeatIntervalMs);
-
-            // Watch for database changes
-            changeStream.on('change', async () => {
-                await sendAllRelevantDocs();
-            });
-
-            // Close on client disconnect
-            const abort = req.signal;
-            abort.addEventListener('abort', () => {
-                changeStream.close();
-                clearInterval(heartbeat);
-                controller.close();
-            });
         },
+        cancel() { cancelStream(); },
     });
 
     return new Response(stream, {
