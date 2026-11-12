@@ -21,7 +21,7 @@ function loadSource(relativePath, mocks = {}, globals = {}) {
     if (cache.has(filename)) return cache.get(filename).exports;
     const source = fs.readFileSync(filename, 'utf8');
     const compiled = ts.transpileModule(source, {
-      fileName: filename,
+      fileName: filename.replace(/\.mjs$/, '.ts'),
       compilerOptions: {
         target: ts.ScriptTarget.ES2020,
         module: ts.ModuleKind.CommonJS,
@@ -32,12 +32,16 @@ function loadSource(relativePath, mocks = {}, globals = {}) {
     cache.set(filename, loadedModule);
     function requireMock(name) {
       if (Object.prototype.hasOwnProperty.call(mocks, name)) return mocks[name];
+      if (name === 'server-only') return {};
       if (allowedDependencies.has(name)) return frontendRequire(name);
       if (name.startsWith('.')) {
         const resolved = path.resolve(path.dirname(filename), name);
         if (resolvedMocks.has(canonical(resolved))) return resolvedMocks.get(canonical(resolved));
         const cliRoot = path.join(frontendRoot, 'app', 'api', 'cli') + path.sep;
-        if (resolved.startsWith(cliRoot)) {
+        const sharedHelpers = ['experimentSubmission', 'serverUtils'].map(
+          name => path.join(frontendRoot, 'lib', name),
+        );
+        if (resolved.startsWith(cliRoot) || sharedHelpers.includes(canonical(resolved))) {
           for (const candidate of [resolved, resolved + '.ts', resolved + '.js']) {
             if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return loadFile(candidate);
           }

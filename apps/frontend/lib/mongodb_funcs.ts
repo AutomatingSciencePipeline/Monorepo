@@ -3,6 +3,8 @@ import { GridFSBucket, ObjectId } from "mongodb";
 import clientPromise, { DB_NAME, COLLECTION_EXPERIMENTS, COLLECTION_SHARE_LINKS } from "./mongodb";
 import { auth } from "../auth";
 import { ExperimentData } from "./db_types";
+import { submitExperimentForUser } from "./experimentSubmission";
+import { formatFilename, isObjectId } from "./serverUtils";
 
 export async function submitExperiment(values: Partial<ExperimentData>, userId: string, userEmail: string, role: string, fileId: string) {
     'use server';
@@ -13,56 +15,15 @@ export async function submitExperiment(values: Partial<ExperimentData>, userId: 
     if (user._id.toString() !== userId) {
         return Promise.reject(`User is not who they say they are`);
     }
-    if (typeof fileId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(fileId)) {
-        return Promise.reject(`Invalid file ID`);
-    }
-
-    const client = await clientPromise;
-    const db = client.db(DB_NAME);
-    const file = await db.collection('fileBucket.files').findOne({
-        _id: new ObjectId(fileId), 'metadata.userId': userId,
-    });
-    if (!file) {
-        return Promise.reject(`File not found`);
-    }
-
-    const expData = {
-        ...values,
-        creator: user._id.toString(),
-        creatorEmail: typeof user.email === 'string' ? user.email : '',
-        creatorRole: user.role === 'admin' || user.role === 'privileged' ? user.role : 'user',
-        created: Date.now(),
-        finished: false,
-        estimatedTotalTimeMinutes: 0,
-        totalExperimentRuns: 0,
-        file: new ObjectId(fileId).toHexString(),
-        trialResultLineNumber: Number(values.trialResultLineNumber || 1),
-        sharedUsers: [],
-        status: 'CREATED',
-        passes: 0,
-        fails: 0,
-    };
-    delete (expData as typeof expData & { _id?: unknown })._id;
-    delete expData.expId;
-    delete expData.startedAtEpochMillis;
-    delete expData.finishedAtEpochMilliseconds;
-    delete expData.expToRun;
-    delete (expData as typeof expData & { finishedAtEpochMillis?: unknown }).finishedAtEpochMillis;
-
-    const result = await db.collection(COLLECTION_EXPERIMENTS).insertOne(expData);
-
-    if (result){
-        return Promise.resolve(result.insertedId.toString());
-    }
-    else {
-        return Promise.reject(`Failed to insert experiment data`);
-    }
+    const expId = await submitExperimentForUser(values, user, fileId);
+    if (expId === null) return Promise.reject(`File not found`);
+    return expId;
 }
 
 export async function getDocumentFromId(expId: string) {
     'use server';
     const session = await auth();
-    if (!session?.user?.id || typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) {
+    if (!session?.user?.id || !isObjectId(expId)) {
         return null;
     }
     const client = await clientPromise;
@@ -125,7 +86,7 @@ export async function deleteDocumentById(expId: string) {
 export async function cancelExperimentById(expId: string) {
     'use server';
     const user = await getCurrentUser();
-    if (typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) {
+    if (!isObjectId(expId)) {
         return Promise.reject(`Invalid experiment ID`);
     }
     const client = await clientPromise;
@@ -133,9 +94,10 @@ export async function cancelExperimentById(expId: string) {
     const query = user.role === 'admin'
         ? { _id: new ObjectId(expId) }
         : { _id: new ObjectId(expId), creator: user._id.toString() };
-    if (!await collection.findOne(query)) {
-        return Promise.reject(`Experiment not found`);
-    }
+    const experiment = await collection.findOne(query);
+    if (!experiment) return Promise.reject(`Experiment not found`);
+    if (experiment.status === 'CANCELLED') return true;
+    if (experiment.status !== 'RUNNING') return Promise.reject(`Experiment is not running`);
     //Call the backend at the endpoint to cancel the experiment
     const BACKEND_PORT = process.env.BACKEND_PORT || '5050';
     const url = `http://glados-service-backend:${BACKEND_PORT}/cancelExperiment`;
@@ -148,20 +110,13 @@ export async function cancelExperimentById(expId: string) {
         body: JSON.stringify({ jobName: 'runner-' + query._id.toHexString() }),
     });
 
-    //Mark the experiment as completed
-    await collection
-        .updateOne(query, { $set: { 'finished': true } });
-
-    await collection
-        .updateOne(query, { $set: { 'status': 'CANCELLED' } });
-
-    //If the backend returns a 200 status code, the experiment was successfully cancelled
-    if (backendResponse.status === 200) {
-        return Promise.resolve(true);
-    } else {
-        return Promise.resolve(false);
-    }
-
+    if (!backendResponse.ok) return Promise.reject(`Backend refused cancellation`);
+    const result = await collection.updateOne(
+        { ...query, status: 'RUNNING' },
+        { $set: { finished: true, status: 'CANCELLED' } },
+    );
+    if (result.matchedCount === 0) return Promise.reject(`Experiment state changed during cancellation`);
+    return true;
 }
 
 export async function updateExperimentNameById(expId: string, newExpName: string) {
@@ -192,21 +147,29 @@ export async function updateExperimentTagsById(expId: string, newTags: string[])
 
 export async function updateExperimentArchiveStatusById(expId: string, newStatus: string) {
     'use server';
-    const { collection, query } = await getOwnedExperiment(expId);
-
-    const experiment = await collection.updateOne(query, { $set: { 'status': newStatus } });
-
-    if (experiment.modifiedCount == 0) {
-        return Promise.reject(`Could not update document with id: ${expId}`);
+    if (newStatus !== 'ARCHIVED' && newStatus !== 'UNARCHIVED') {
+        return Promise.reject(`Invalid archive action`);
     }
-
-    return Promise.resolve();
+    const { collection, query, document } = await getOwnedExperiment(expId);
+    const terminalStatuses = ['COMPLETED', 'FAILED', 'CANCELLED'];
+    if (newStatus === 'ARCHIVED') {
+        if (!terminalStatuses.includes(document.status)) return Promise.reject(`Experiment is not finished`);
+    } else if (document.status !== 'ARCHIVED') {
+        return Promise.reject(`Experiment is not archived`);
+    }
+    const restoredStatus = terminalStatuses.includes(document.archivedFromStatus)
+        ? document.archivedFromStatus : (document.passes > 0 ? 'COMPLETED' : 'FAILED');
+    const update = newStatus === 'ARCHIVED'
+        ? { status: 'ARCHIVED', archivedFromStatus: document.status }
+        : { status: restoredStatus, archivedFromStatus: null };
+    const result = await collection.updateOne({ ...query, status: document.status }, { $set: update });
+    if (result.matchedCount === 0) return Promise.reject(`Experiment state changed during archive update`);
 }
 
 export async function refreshFileTimestamp(fileId: string) {
     'use server';
     const user = await getCurrentUser();
-    if (typeof fileId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(fileId)) {
+    if (!isObjectId(fileId)) {
         return Promise.reject(`Invalid file ID`);
     }
     const client = await clientPromise;
@@ -319,7 +282,7 @@ export async function copyFile(fileID: string, userId: string) {
 export async function updateLastUsedDateFile(fileId: string) {
     'use server';
     const user = await getCurrentUser();
-    if (typeof fileId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(fileId)) {
+    if (!isObjectId(fileId)) {
         return Promise.reject(`Invalid file ID`);
     }
     const client = await clientPromise;
@@ -402,7 +365,7 @@ export async function redeemShareLink(link: string, userId: string) {
 export async function unfollowExperiment(expId: string, userId: string) {
     'use server';
     const user = await getCurrentUser();
-    if (user._id.toString() !== userId || typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) {
+    if (user._id.toString() !== userId || !isObjectId(expId)) {
         return Promise.reject(`Invalid arguments`);
     }
     const client = await clientPromise;
@@ -454,7 +417,7 @@ export async function updateUserRole(userId: string, role: string) {
     if (role !== 'admin' && role !== 'privileged' && role !== 'user') {
         return Promise.reject(`Invalid role: ${role}`);
     }
-    if (typeof userId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(userId)) {
+    if (!isObjectId(userId)) {
         return Promise.reject(`Invalid user ID`);
     }
     const client = await clientPromise;
@@ -470,7 +433,7 @@ export async function updateUserRole(userId: string, role: string) {
 export async function fetchResultsFile(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();
-    if (!session?.user?.id || typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) return null;
+    if (!session?.user?.id || !isObjectId(expId)) return null;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const resultsBucket = new GridFSBucket(db, { bucketName: 'resultsBucket' });
@@ -507,7 +470,7 @@ export async function fetchResultsFile(expId: string): Promise<{ contents: strin
 export async function fetchProjectZip(expId: string): Promise<{ contents: string; name: string } | null> {
     'use server';
     const session = await auth();
-    if (!session?.user?.id || typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) return null;
+    if (!session?.user?.id || !isObjectId(expId)) return null;
     const client = await clientPromise;
     const db = client.db(DB_NAME);
     const zipsBucket = new GridFSBucket(db, { bucketName: 'zipsBucket' });
@@ -545,20 +508,21 @@ export async function fetchProjectZip(expId: string): Promise<{ contents: string
 // Auxiliary functions, keep at the bottom of the file
 async function getOwnedExperiment(expId: string) {
     const user = await getCurrentUser();
-    if (typeof expId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(expId)) {
+    if (!isObjectId(expId)) {
         return Promise.reject(`Invalid experiment ID`);
     }
     const client = await clientPromise;
     const collection = client.db(DB_NAME).collection(COLLECTION_EXPERIMENTS);
     const query = { _id: new ObjectId(expId), creator: user._id.toString() };
-    if (!await collection.findOne(query)) {
+    const document = await collection.findOne(query);
+    if (!document) {
         return Promise.reject(`Experiment not found`);
     }
-    return { collection, query };
+    return { collection, query, document };
 }
 
 async function getReadableFile(fileId: string, userId: string) {
-    if (typeof fileId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(fileId)) {
+    if (!isObjectId(fileId)) {
         return Promise.reject(`Invalid file ID`);
     }
     const client = await clientPromise;
@@ -590,27 +554,9 @@ async function getCurrentUser() {
     const client = await clientPromise;
     const user = await client.db(DB_NAME)
         .collection<{ _id: ObjectId | string; email?: string; role?: string }>('users')
-        .findOne({ _id: /^[a-fA-F0-9]{24}$/.test(userId) ? new ObjectId(userId) : userId });
+        .findOne({ _id: isObjectId(userId) ? new ObjectId(userId) : userId });
     if (!user) {
         return Promise.reject(`User is not authenticated`);
     }
     return user;
 }
-
-const formatFilename = (name: string, timestamp: string, extension: string) => {
-    const formattedName = name.replace(/[^a-zA-Z0-9-_]/g, '_');
-    const formattedTimestamp = formatTimestamp(timestamp);
-    return `${formattedName}_${formattedTimestamp}.${extension}`;
-};
-
-const formatTimestamp = (timestamp: string) => {
-    const partiallyFormattedTimestamp = new Date(timestamp).toISOString().replace(/[:.]/g, '-');
-    let formatted = partiallyFormattedTimestamp.replace(/Z$/, '');
-    formatted = formatted.replace('T', '_');
-    const [date, time] = formatted.split('_');
-    const timeParts = time.split('-');
-    let hours = parseInt(timeParts[0], 10) - 5;
-    timeParts[0] = hours.toString();
-    const formattedTime = timeParts.join('-');
-    return `${date}_${formattedTime}`;
-};

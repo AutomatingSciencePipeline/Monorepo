@@ -141,6 +141,7 @@ function setup(options = {}) {
     find: (query = {}) => { calls.queries.push({ name, query }); return cursor(name, query); },
     updateOne: async (query, update) => {
       calls.writes.push({ name, query, update });
+      if (options.beforeWrite) options.beforeWrite(documents);
       const document = documents[name]?.find((candidate) => matches(candidate, query));
       if (!document) return { matchedCount: 0, modifiedCount: 0 };
       for (const [operator, values] of Object.entries(update)) {
@@ -261,6 +262,9 @@ const mutations = [
 for (const [name, args] of mutations) {
   test(`${name} permits the owner and selects the requested experiment`, async () => {
     const h = setup();
+    if (name === 'updateExperimentArchiveStatusById') {
+      h.documents.experiments.find(document => String(document._id) === EOWN).status = 'COMPLETED';
+    }
     const result = await h.actions[name](EOWN, ...args);
     const owned = h.documents.experiments.find((document) => String(document._id) === EOWN);
     assert.equal(h.documents.experiments.find((document) => String(document._id) === EFOREIGN).name, 'Foreign');
@@ -312,10 +316,75 @@ test('cancel permits owner and current database admin while preserving backend m
   }
 });
 
-test('cancel preserves the false result and state update on backend refusal', async () => {
+test('cancel preserves the running state on backend refusal', async () => {
   const h = setup({ backendStatus: 503 });
-  assert.equal(await h.actions.cancelExperimentById(EOWN), false);
-  assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'CANCELLED');
+  await assert.rejects(h.actions.cancelExperimentById(EOWN));
+  assert.equal(h.calls.writes.length, 0);
+  assert.equal(h.documents.experiments.find((document) => String(document._id) === EOWN).status, 'RUNNING');
+});
+
+test('cancel refuses non-running experiments before contacting the backend', async () => {
+  for (const status of ['CREATED', 'COMPLETED', 'FAILED', 'ARCHIVED']) {
+    const h = setup();
+    h.documents.experiments.find(document => String(document._id) === EOWN).status = status;
+    await assert.rejects(h.actions.cancelExperimentById(EOWN));
+    assert.equal(h.calls.backend.length, 0);
+    assert.equal(h.calls.writes.length, 0);
+  }
+});
+
+test('archive accepts only archive intents and finished experiments', async () => {
+  for (const input of ['COMPLETED', 'FAILED', 'RUNNING', '', null]) {
+    const h = setup();
+    await assert.rejects(h.actions.updateExperimentArchiveStatusById(EOWN, input));
+    assert.equal(h.calls.writes.length, 0);
+  }
+  for (const status of ['RUNNING', 'CREATED', 'ARCHIVED']) {
+    const h = setup();
+    h.documents.experiments.find(document => String(document._id) === EOWN).status = status;
+    await assert.rejects(h.actions.updateExperimentArchiveStatusById(EOWN, 'ARCHIVED'));
+    assert.equal(h.calls.writes.length, 0);
+  }
+});
+
+test('unarchive restores the trusted prior terminal state', async () => {
+  for (const status of ['COMPLETED', 'FAILED', 'CANCELLED']) {
+    const h = setup();
+    const document = h.documents.experiments.find(item => String(item._id) === EOWN);
+    document.status = status;
+    document.passes = 1;
+    await h.actions.updateExperimentArchiveStatusById(EOWN, 'ARCHIVED');
+    assert.equal(document.status, 'ARCHIVED');
+    assert.equal(document.archivedFromStatus, status);
+    await h.actions.updateExperimentArchiveStatusById(EOWN, 'UNARCHIVED');
+    assert.equal(document.status, status);
+  }
+});
+
+test('legacy archived experiments restore from recorded trial results', async () => {
+  for (const passes of [0, 2]) {
+    const h = setup();
+    const document = h.documents.experiments.find(item => String(item._id) === EOWN);
+    document.status = 'ARCHIVED';
+    document.passes = passes;
+    await h.actions.updateExperimentArchiveStatusById(EOWN, 'UNARCHIVED');
+    assert.equal(document.status, passes > 0 ? 'COMPLETED' : 'FAILED');
+  }
+});
+
+test('archive and cancellation cannot overwrite a concurrent terminal state', async () => {
+  for (const action of ['archive', 'cancel']) {
+    const h = setup({ beforeWrite: documents => {
+      documents.experiments.find(item => String(item._id) === EOWN).status = 'FAILED';
+    } });
+    const document = h.documents.experiments.find(item => String(item._id) === EOWN);
+    document.status = action === 'archive' ? 'COMPLETED' : 'RUNNING';
+    const result = action === 'archive'
+      ? h.actions.updateExperimentArchiveStatusById(EOWN, 'ARCHIVED')
+      : h.actions.cancelExperimentById(EOWN);
+    await assert.rejects(result);
+    assert.equal(document.status, 'FAILED');
+  }
 });
 
 test('privileged users do not inherit admin cancellation rights', async () => {

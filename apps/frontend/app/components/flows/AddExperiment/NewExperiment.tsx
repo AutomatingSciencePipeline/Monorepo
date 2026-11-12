@@ -130,74 +130,54 @@ const NewExperiment = ({ formState, setFormState, copyID, setCopyId, isDefault, 
 
 	useEffect(() => {
 		if (copyID != null && copyID != "DefaultExp") {
-			getDocumentFromId(copyID).then((expInfo) => {
-				if (expInfo) {
-					const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
-					setFileId("");
+			let cancelled = false;
+			setFileId("");
+			getDocumentFromId(copyID).then(async (expInfo) => {
+				if (cancelled) return;
+				if (!expInfo) throw new Error('Experiment is no longer available');
+				const hyperparameters = Array.isArray(expInfo['hyperparameters']) ? expInfo['hyperparameters'] : [];
+				form.setValues({
+					hyperparameters: hyperparameters,
+					name: expInfo['name'],
+					description: expInfo['description'],
+					tags: Array.isArray(expInfo['tags']) ? expInfo['tags'] : [],
+					trialExtraFile: expInfo['trialExtraFile'],
+					trialResult: expInfo['trialResult'],
+					trialResultLineNumber: expInfo['trialResultLineNumber'],
+					workers: expInfo['workers'],
+					scatter: expInfo['scatter'],
+					dumbTextArea: expInfo['dumbTextArea'],
+					scatterIndVar: expInfo['scatterIndVar'],
+					scatterDepVar: expInfo['scatterDepVar'],
+					timeout: expInfo['timeout'] / 3600,
+					sendEmail: expInfo['sendEmail'],
+					file: '',
+					status: 'CREATED',
+					experimentExecutable: expInfo['experimentExecutable'],
+					configFileFormat: expInfo['configFileFormat']
+				});
+				setStatus(FormStates.Info);
+				try {
+					let newFileId = expInfo['file'];
 					if (expInfo['creator'] !== session?.user?.id) {
-						//We need to copy the file to the user's files and use the new ID
-						copyFile(expInfo['file'], session?.user?.id!).then((newFileId) => {
-							setFileId(newFileId);
-							form.setValues({
-								hyperparameters: hyperparameters,
-								name: expInfo['name'],
-								description: expInfo['description'],
-								tags: Array.isArray(expInfo['tags']) ? expInfo['tags'] : [],
-								trialExtraFile: expInfo['trialExtraFile'],
-								trialResult: expInfo['trialResult'],
-								trialResultLineNumber: expInfo['trialResultLineNumber'],
-								workers: expInfo['workers'],
-								scatter: expInfo['scatter'],
-								dumbTextArea: expInfo['dumbTextArea'],
-								scatterIndVar: expInfo['scatterIndVar'],
-								scatterDepVar: expInfo['scatterDepVar'],
-								timeout: expInfo['timeout'] / 3600,
-								sendEmail: expInfo['sendEmail'],
-								file: newFileId,
-								status: 'CREATED',
-								experimentExecutable: expInfo['experimentExecutable'],
-								configFileFormat: expInfo['configFileFormat']
-							});
-							setCopyId(null);
-							setStatus(FormStates.Info);
-						});
-
+						newFileId = await copyFile(expInfo['file'], session?.user?.id!);
+					} else {
+						await refreshFileTimestamp(expInfo['file']);
 					}
-					else {
-						refreshFileTimestamp(expInfo['file']).then(() => {
-							form.setValues({
-								hyperparameters: hyperparameters,
-								name: expInfo['name'],
-								description: expInfo['description'],
-								tags: Array.isArray(expInfo['tags']) ? expInfo['tags'] : [],
-								trialExtraFile: expInfo['trialExtraFile'],
-								trialResult: expInfo['trialResult'],
-								trialResultLineNumber: expInfo['trialResultLineNumber'],
-								workers: expInfo['workers'],
-								scatter: expInfo['scatter'],
-								dumbTextArea: expInfo['dumbTextArea'],
-								scatterIndVar: expInfo['scatterIndVar'],
-								scatterDepVar: expInfo['scatterDepVar'],
-								timeout: expInfo['timeout'] / 3600,
-								sendEmail: expInfo['sendEmail'],
-								file: expInfo['file'],
-								status: 'CREATED',
-								experimentExecutable: expInfo['experimentExecutable'],
-								configFileFormat: expInfo['configFileFormat']
-							});
-							setFileId(expInfo['file']);
-							setCopyId(null);
-							setStatus(FormStates.Info);
-						});
-					}
-
+					if (cancelled) return;
+					setFileId(newFileId);
+					form.setFieldValue('file', newFileId);
+				} catch {
+					if (!cancelled) toast.error('Settings copied. Select or upload an executable file you own to continue.');
 				}
-				else {
-					console.warn("Could not get expInfo!!!");
-				}
-			})
+			}).catch(() => {
+				if (!cancelled) toast.error('Could not load the experiment to copy. Please try again.');
+			}).finally(() => {
+				if (!cancelled) setCopyId(null);
+			});
+			return () => { cancelled = true; };
 		}
-		else if (isDefault) {
+		if (isDefault) {
 			handleDefaultExperiment(selectedExperiment);
 		}
 	}, [copyID]); // TODO adding form or setCopyId causes render loop?
