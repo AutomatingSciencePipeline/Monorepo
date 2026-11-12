@@ -126,8 +126,14 @@ def recv_experiment():
         creator_id = get_experiment(experiment_id, mongoClient).get('creator')
         creator = None
         if isinstance(creator_id, (str, ObjectId)) and creator_id:
-            user_id = ObjectId(creator_id) if ObjectId.is_valid(creator_id) else creator_id
-            creator = gladosDB.users.find_one({'_id': user_id}, {'role': 1})
+            creator = gladosDB.users.find_one({'_id': creator_id}, {'role': 1})
+            if isinstance(creator_id, str) and ObjectId.is_valid(creator_id):
+                object_id_creator = gladosDB.users.find_one({'_id': ObjectId(creator_id)}, {'role': 1})
+                # BSON string and ObjectId users can coexist. Never choose between two identities.
+                if creator is not None and object_id_creator is not None:
+                    return Response(status=403)
+                if creator is None:
+                    creator = object_id_creator
         # Historical experiment metadata cannot grant privileges after a role change.
         creator_role = creator.get('role') if creator else None
     except Exception:  # pylint: disable=broad-exception-caught

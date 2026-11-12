@@ -169,6 +169,36 @@ class TestControlPlaneEndpoints(BackendTestCase):
         job = self.batch_api.create_namespaced_job.call_args.kwargs['body']
         self.assertEqual(job['spec']['template']['spec']['securityContext']['runAsUser'], 0)
 
+    def test_legacy_hex_string_user_id_retains_its_current_role(self):
+        self.users[USER_A] = self.users.pop(ObjectId(USER_A))
+        self.users[USER_A]['role'] = 'privileged'
+
+        response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_A}}, "frontend-token")
+
+        self.assertEqual(response.status_code, 200)
+        job = self.batch_api.create_namespaced_job.call_args.kwargs['body']
+        self.assertEqual(job['spec']['template']['spec']['securityContext']['runAsUser'], 0)
+
+    def test_ambiguous_string_and_object_id_creators_cannot_start_a_runner(self):
+        self.users[USER_A] = {'role': 'user'}
+        self.users[ObjectId(USER_A)] = {'role': 'admin'}
+
+        response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_A}}, "frontend-token")
+
+        self.assertEqual(response.status_code, 403)
+        self.batch_api.create_namespaced_job.assert_not_called()
+
+    def test_bson_object_id_creator_uses_its_exact_identity(self):
+        self.experiments[EXPERIMENT_A]['creator'] = ObjectId(USER_A)
+        self.users[USER_A] = {'role': 'admin'}
+
+        response = self.call("post", "/experiment", {"experiment": {"id": EXPERIMENT_A}}, "frontend-token")
+
+        self.assertEqual(response.status_code, 200)
+        job = self.batch_api.create_namespaced_job.call_args.kwargs['body']
+        self.assertTrue(job['spec']['template']['spec']['securityContext']['runAsNonRoot'])
+        self.database.users.find_one.assert_called_once_with({'_id': ObjectId(USER_A)}, {'role': 1})
+
     def test_missing_or_invalid_creator_cannot_grant_privileges(self):
         for creator in (None, {}, {'$ne': None}, 'unknown-user'):
             self.experiments[EXPERIMENT_B]['creator'] = creator
