@@ -8,7 +8,7 @@ on:
   pull_request:
     paths:
       - 'apps/backend/**'
-    branches: [ main ]
+    branches: [ main, fix/708-exp-file-authz, cancel-exp-api ]
 
 permissions:
   contents: read

@@ -86,7 +86,7 @@ def download_experiment_file(file_id: str, mongoClient: pymongo.MongoClient):
         file_name = file.filename
     if file_name == "":
         raise Exception("No file found!")
-    file = bucket.open_download_stream_by_name(file_name)
+    file = bucket.open_download_stream(ObjectId(file_id))
     contents = file.read()
     return contents
 
@@ -101,5 +101,9 @@ def get_experiment(expId: str, mongoClient: pymongo.MongoClient):
 
 def update_exp_value(expId: str, field: str, newValue: str, mongoClient: pymongo.MongoClient):
     experimentsCollection = mongoClient["gladosdb"].experiments
-    experimentsCollection.update_one({"_id": ObjectId(expId)}, {"$set": {field: newValue}})
+    # A runner already shutting down must not overwrite an accepted cancellation.
+    experimentsCollection.update_one(
+        {"_id": ObjectId(expId), "status": {"$ne": "CANCELLED"}},
+        {"$set": {field: newValue}},
+    )
     return

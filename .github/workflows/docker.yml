@@ -7,7 +7,7 @@ on:
       - 'apps/frontend/**'
       - 'apps/runner/**'
       - 'docs/**'
-    branches: [ main ]
+    branches: [ main, fix/708-exp-file-authz, cancel-exp-api ]
 
 permissions:
   contents: read

@@ -45,7 +45,7 @@ function unauthorized(): Response {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
-export async function tokenBasedAuth(token: string): Promise<Response> {
+export async function tokenBasedAuth(token: string, registerUser = true): Promise<Response> {
     if (typeof token !== "string" || token.trim().length === 0) {
         return unauthorized();
     }
@@ -80,12 +80,24 @@ export async function tokenBasedAuth(token: string): Promise<Response> {
             if (!isUserId(account.userId)) {
                 return unauthorized();
             }
-            const user = await db.collection<{ _id: ObjectId | string }>("users")
-                .findOne({ _id: account.userId });
+            const users = db.collection<{ _id: ObjectId | string }>("users");
+            let user = await users.findOne({ _id: account.userId });
+            if (typeof account.userId === "string") {
+                const objectIdUser = await users.findOne({ _id: new ObjectId(account.userId) });
+                // BSON string and ObjectId ids may coexist; never choose between two identities.
+                if (user && objectIdUser) {
+                    return unauthorized();
+                }
+                user ??= objectIdUser;
+            }
             if (!user || !isUserId(user._id)) {
                 return unauthorized();
             }
             return NextResponse.json(user);
+        }
+
+        if (!registerUser) {
+            return unauthorized();
         }
 
         const user = {

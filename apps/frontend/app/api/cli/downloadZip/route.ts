@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchProjectZipCLI } from '../../../../lib/mongodb_funcs';
+import { fetchProjectZipCLI } from '../files';
 import { authenticateCli, invalidArguments, isNonEmptyString, isObjectId, readJsonObject } from '../request';
 
 export const runtime = 'nodejs';

@@ -18,7 +18,7 @@ async function requestJobDeletion(expId: string): Promise<JobDeletionResult> {
 	const response = await fetch(`http://glados-service-backend:${backendPort}/cancelExperiment`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ jobName: 'runner-' + expId }),
+		body: JSON.stringify({ jobName: 'runner-' + new ObjectId(expId).toHexString() }),
 		signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
 	});
 	if (response.ok) return 'deleted';

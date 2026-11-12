@@ -71,6 +71,8 @@ def spawn_job(experiment_data):
 def cancel_experiment():
     """The query to cancel an experiment"""
     data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return Response(status=400)
     job_name = data.get('jobName')
     if not isinstance(job_name, str) or not job_name.startswith('runner-'):
         return Response(status=400)
