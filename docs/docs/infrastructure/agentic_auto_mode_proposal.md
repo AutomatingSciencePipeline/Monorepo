@@ -86,7 +86,7 @@ This is the main change from the first draft of this proposal. Sensitivity no lo
 
 | The agent CAN | The agent CANNOT |
 |---|---|
-| Read the configuration of the session's template experiment (parameters, ranges, description) | See or act on any experiment outside its current session, including the user's other experiments and other users' |
+| Read the configuration of the session's template experiment (parameters, ranges, description), its code, and its `trialExtraFile` (as text, capped at 64 KB; client answer 3 in Section 9) | See or act on any experiment outside its current session, including the user's other experiments and other users' |
 | Create new experiments from the template, changing only hyperparameter values within the session's bounds | Upload, edit, or replace experiment code, or change which files an experiment reads or writes |
 | Start the experiments it created, within the session limits | Modify the template experiment itself |
 | Check the status of its session's experiments | Delete experiments or results, including its own |
@@ -266,3 +266,16 @@ Phase 1 is useful by itself. Even without a loop, a user can ask the agent to ru
 4. When a session ends, should running experiments finish or be cancelled?
 5. Should auto mode be open to all users, or only privileged/admin users at first?
 6. For non-sensitive experiments, is it acceptable that the LLM provider may retain the data under its own policies?
+
+### 9.1 Client answers (meeting in the week of 2026-11-02)
+
+The client did not discuss questions 4, 7, or 8. For those, the default proposed by the team stands. Questions 7 and 8 were added in the [Agentic Roadmap](agentic_roadmap.md). The roadmap's Section 9 shows how each answer is implemented.
+
+1. **Yes.** The owner's classification is enough, and no admin confirmation is needed. Sharing is slightly restricted: when the owner shares a link to a sensitive experiment, GLADOS first shows the sensitivity setting and warns that the experiment may be copied.
+2. **Yes, with admin override.** The defaults in 5.4 are used. Limits are editable: admins can override them per user, and nobody else can.
+3. **Yes.** By default the agent can read the template's code and `trialExtraFile`.
+4. *Not discussed; default kept.* Running experiments finish and queued ones are cancelled. `--stop-all` also cancels running experiments.
+5. **Privileged and admin users only** for now.
+6. **Yes.** When a user works with sensitive data through an agent, GLADOS warns them that their LLM provider can see the data and that GLADOS only provides the tool that connects to it.
+7. **Yes** (outbox directory). The client liked having a designated trusted folder but asked that it stay easy to use, so setup happens once.
+8. *Not discussed; default kept.* The consent gesture is the watched inbox, with copy/paste as the fallback.
